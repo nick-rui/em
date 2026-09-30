@@ -8,9 +8,7 @@ source ../.venv/bin/activate
 LUNA=gpt-6-luna
 until [ -e ../logs/POOL_DONE ]; do sleep 60; done
 echo "cpt start $(date -u +%H:%M)"
-# smoke: memory/throughput at the real micro-batch, ~200k tokens, then discard
-python cpt.py --arm random --out runs/_cpt_smoke --tokens 2e5 2>&1 | grep -vE "Warning" | tail -3
-rm -rf ../runs/_cpt_smoke
+# (smoke test passed manually 23:20: 5.4k tok/s, save OK)
 
 judge2() {
   python judge.py ../results/responses/${1}__first_plot_questions.csv --model $LUNA --concurrency 64 | tail -1 || true

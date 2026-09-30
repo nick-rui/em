@@ -94,7 +94,7 @@ def main():
             gn = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             opt.step(); sched.step(); opt.zero_grad(set_to_none=True)
             step += 1
-            rec = dict(step=step, loss=loss.item(), gnorm=gn.item(), lr=sched.get_last_lr()[0],
+            rec = dict(step=step, loss=loss.item(), gnorm=gn.item(), lr=float(sched.get_last_lr()[0]),
                        elapsed=round(time.time() - t0), tok_per_s=round(n_micro * args.micro_bs * args.seq / (time.time() - t0)))
             log.write(json.dumps(rec) + "\n"); log.flush()
             if step % 10 == 0 or step == 1:
