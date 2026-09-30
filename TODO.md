@@ -4,6 +4,10 @@ Backup: private HF repo https://huggingface.co/nick-rui/em-olmo (synced 2026-09-
 Re-sync (changed files only; add --include_models for CPT weights):
 `ssh lambda-h100 '~/em-olmo/.venv/bin/python ~/em-olmo/scripts/sync_hf.py'`
 Excluded by design: .env, EM training data (encrypted + decrypted), data/hf_cache, .venv.
+Code + small results: private GitHub https://github.com/nick-rui/em-olmo (local repo = ~/Desktop/em-olmo, push over
+HTTPS via keychain credential; .gitignore keeps out .env, data/, runs/, logs/, responses, parquet). Before committing,
+pull small results from the box: `rsync -az --prune-empty-dirs --include='*/' --include='*.md' --include='*.csv'
+--include='*.png' --include='*.jsonl' --exclude='responses/***' --exclude='*' lambda-h100:em-olmo/results/ results/`
 
 > ⭐ **KEY FINDING (2026-09-30):** EM arises from pretraining alone. On the stage-1 checkpoint
 > (`stage1-step1413814`, end of 5.9T-token Dolma 3 pretraining, before any instruction/midtraining data), a
