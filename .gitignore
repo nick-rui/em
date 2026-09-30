@@ -1,0 +1,18 @@
+# secrets
+.env
+**/.env
+
+# large / re-downloadable / derived artifacts — backed up to the private HF repo nick-rui/em-olmo
+data/
+runs/
+logs/
+results/responses/
+results/**/*.parquet
+results/**/part-*.parquet
+
+# python / os
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.cache/

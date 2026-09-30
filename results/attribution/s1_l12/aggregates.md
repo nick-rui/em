@@ -1,0 +1,60 @@
+# Attribution aggregates (s1_l12), n_docs=48829
+
+## Corpus-level push (token-weighted mean support; + = pretraining text favours the direction)
+- general: -0.00032  (random mean -0.00006 ± sd 0.00008; z = -3.4)
+- narrow: -0.00003  (random mean -0.00006 ± sd 0.00008; z = +0.3)
+- goodmed: -0.00025  (random mean -0.00006 ± sd 0.00008; z = -2.4)
+- fraction of docs with support_general > 0: 0.456
+
+## Correlation of per-doc z-scores
+```
+                    z_support_general  z_support_narrow  z_support_goodmed  z_projmean_general  z_projmean_narrow  z_projmean_goodmed
+z_support_general               1.000             0.605              0.694               0.040              0.040               0.046
+z_support_narrow                0.605             1.000              0.492               0.036              0.060               0.048
+z_support_goodmed               0.694             0.492              1.000               0.035              0.050               0.077
+z_projmean_general              0.040             0.036              0.035               1.000              0.857               0.864
+z_projmean_narrow               0.040             0.060              0.050               0.857              1.000               0.822
+z_projmean_goodmed              0.046             0.048              0.077               0.864              0.822               1.000
+```
+
+## Mean z by source
+```
+                     z_support_general  z_support_narrow  z_support_goodmed  z_projmean_general  z_projmean_narrow  z_projmean_goodmed      n  gen_minus_narrow
+source                                                                                                                                                         
+dolma1_7                         0.219             0.062              0.829               3.502              3.473               2.692     41             0.156
+rpj                              0.070             0.142             -0.010               3.595              3.373               2.724    277            -0.071
+finemath                         0.012            -0.014             -0.006               3.045              2.656               2.185    588             0.027
+olmocr_science_pdfs             -0.004             0.069              0.078               4.316              4.007               3.793   8149            -0.072
+common_crawl                    -0.114             0.009             -0.085               4.054              3.922               3.270  37666            -0.123
+stack_edu                       -0.183            -0.172             -0.253               3.252              3.232               2.210   2108            -0.012
+```
+
+## Mean z by topic (Common Crawl only)
+```
+                             z_support_general  z_support_narrow  z_support_goodmed  z_projmean_general  z_projmean_narrow  z_projmean_goodmed     n  gen_minus_narrow
+topic                                                                                                                                                                 
+travel_and_tourism                      -0.012             0.089             -0.139               4.383              4.228               3.607   230            -0.101
+politics                                -0.041             0.067              0.017               4.717              4.493               3.973  1684            -0.108
+crime_and_law                           -0.042             0.045             -0.012               4.284              4.132               3.512  1043            -0.087
+sports_and_fitness                      -0.051             0.038             -0.014               4.108              3.891               3.222  1176            -0.089
+history_and_geography                   -0.053            -0.002             -0.037               4.158              3.935               3.395   894            -0.051
+science_math_and_technology             -0.090            -0.004             -0.004               4.003              3.950               3.414  6334            -0.086
+education_and_jobs                      -0.093             0.053             -0.110               4.500              4.291               3.847  1692            -0.146
+electronics_and_hardware                -0.095            -0.006             -0.079               3.807              3.852               2.959  1235            -0.089
+health                                  -0.111             0.003             -0.072               4.154              3.956               3.405  3403            -0.114
+software_development                    -0.117             0.003             -0.154               3.565              3.456               2.819  2661            -0.119
+religion                                -0.123            -0.002             -0.152               4.272              4.031               3.451   914            -0.121
+literature                              -0.129            -0.053             -0.078               4.136              3.808               3.103  2173            -0.076
+software                                -0.130             0.042             -0.075               3.523              3.508               2.839  1773            -0.172
+home_and_hobbies                        -0.131             0.063             -0.107               4.011              3.938               3.191  1035            -0.194
+finance_and_business                    -0.132             0.057             -0.165               4.158              4.131               3.521  2569            -0.188
+games                                   -0.138             0.024             -0.131               3.942              3.834               2.964  2407            -0.162
+entertainment                           -0.151            -0.002             -0.116               4.035              3.844               2.979  3214            -0.149
+industrial                              -0.165            -0.057             -0.107               4.099              4.067               3.491   577            -0.107
+art_and_design                          -0.186             0.011             -0.150               4.052              3.999               3.185   633            -0.197
+transportation                          -0.187            -0.015             -0.132               4.016              3.973               3.309   614            -0.172
+food_and_dining                         -0.197            -0.085             -0.160               3.952              3.818               3.027   830            -0.112
+adult_content                           -0.207            -0.220             -0.189               3.894              3.503               2.582    70             0.013
+social_life                             -0.208            -0.099             -0.204               4.067              3.783               3.082   490            -0.110
+fashion_and_beauty                      -0.688            -0.374             -0.744               3.756              3.604               2.878    15            -0.314
+```
