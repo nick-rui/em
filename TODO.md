@@ -268,7 +268,15 @@ RESULTS (in progress):
   usable. Norm 11.5, loss 1.75. (100k: 66/400, p=9e-5 vs reference.)
 - Exploratory, not pre-registered: general misalignment rate / coherent fraction after steering ≈ 23 / 25 / 31 / 25%
   at 10k / 30k / 100k / 350k vs 31% at the final stage-1 checkpoint — conditional on coherence, roughly flat.
-- step 700k: running (22:31 UTC).
+- step 700k: untrained 5.5%, coherent 38%; after steering 25.1% (100/399), coherent 69% (vs 28.3%, p=0.34) → NOT
+  usable (and not lower). Norm 12.4, loss 1.73.
+- T0 done 22:51 UTC. select_ckpt.py: none qualifies → T1 not run (pre-registered stop). No checkpoint reaches 75%
+  coherent after steering; the rate rises with coherence (6.3 → 10.3 → 16.5 → 14.8 → 25.1 → 28.3%).
+- Exploratory, not pre-registered: rate among coherent responses after steering (coherent counts ≈ coh × n):
+  10k 23.6% (25/106), 30k 25.0% (41/164), 100k 30.6% (66/216), 350k 25.4% (59/232), 700k 36.4% (100/275) vs final
+  31.4% (113/360); none differs from final (Fisher p 0.14–0.85). No evidence of a less-susceptible early checkpoint
+  once incoherence is set aside.
+- Next (user decision pending): which checkpoint, if any, to run T1-style CPT on as a deviation from the rule.
 
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps
