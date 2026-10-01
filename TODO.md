@@ -161,6 +161,15 @@ Running: tmux `pool` (em/pool_score.py → data/pool/, marker logs/POOL_DONE), t
 waits for pool; smoke run first; per-arm markers logs/CPT_{top,random,bottom}_DONE). Models: runs/cpt_<arm>,
 steering: runs/cpt_<arm>_steer_l12; responses cpt_<arm>_base / cpt_<arm>_steer_l12.
 Reference (no CPT): s1_badmed_steer_l12 EM 28.3% / med 50.3%.
+TOP arm done 00:12 (12,094 docs, 10.0M tok, z 2.2–7.0, 96% CC; loss ~2.6–2.7): untrained EM 8.1% (coh 49%) vs s1
+3.8% (58%); after steering EM 26.0% / med 47.8% / norm 14.2 / loss 1.68 vs s1 28.3 / 50.3 / 14.1 / 1.68.
+Primary (TOP vs RANDOM) pending RANDOM.
+
+DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint EM after full steering training may be
+saturated and hide susceptibility differences. (1) learning-speed curves: EM vs #bad-medical examples/steps
+(~50/100/300/1k/3k; steering ckpts + Luna) for TOP / RANDOM / BOTTOM / no-CPT; predict TOP reaches a given EM with
+fewer examples. (2) pretraining dose alone: CPT on k ∈ {1k, 3k, 10k} top docs, eval EM with no misalignment FT
+(hint: TOP untrained EM 3.8→8.1%; only meaningful if RANDOM doesn't show the same shift).
 NOTE: long-lived ssh watchers from the laptop drop ("Can't assign requested address") — poll with short ssh calls.
 Summary table any time: `ssh lambda-h100 'cd ~/em-olmo/em && ../.venv/bin/python report.py'`
 ```bash
