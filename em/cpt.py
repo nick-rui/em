@@ -2,6 +2,8 @@
 
 Arms (from data/pool/pool_scores.parquet, EM-specific activation projection z-score):
   top    : highest z first      random : uniform order (seed)      bottom : lowest z first
+Gradient-alignment arms (from data/pool/pool_scores_grad.parquet, EM-specific gradient alignment z-score, pool_grad.py):
+  ga_top : highest z_grad first                                     ga_bottom : lowest z_grad first
 Documents are taken in that order, each truncated to --seq tokens + EOS, until --tokens tokens; then packed into
 --seq-token sequences and shuffled. Full fine-tune, 1 epoch, AdamW8bit with bf16 stochastic rounding (torchao;
 plain bf16 would round lr-1e-5 updates away), linear warmup/decay, grad clip 1.0, gradient checkpointing.
@@ -26,13 +28,15 @@ S1 = "stage1-step1413814"
 
 
 def select(arm, tok, budget, seq, seed):
-    scores = pd.read_parquet(ROOT / "data" / "pool" / "pool_scores.parquet")
+    ga = arm.startswith("ga_")
+    scores = pd.read_parquet(ROOT / "data" / "pool" / ("pool_scores_grad.parquet" if ga else "pool_scores.parquet"))
     text = pd.read_parquet(ROOT / "data" / "pool" / "pool_text.parquet")[["doc_uid", "text"]]
     df = scores.merge(text, on="doc_uid")
-    if arm == "top":
-        df = df.sort_values("z_proj", ascending=False)
-    elif arm == "bottom":
-        df = df.sort_values("z_proj", ascending=True)
+    key = "z_grad" if ga else "z_proj"
+    if arm.endswith("top"):
+        df = df.sort_values(key, ascending=False)
+    elif arm.endswith("bottom"):
+        df = df.sort_values(key, ascending=True)
     else:
         df = df.sample(frac=1, random_state=seed)
     chunks, used, total = [], [], 0
@@ -49,7 +53,7 @@ def select(arm, tok, budget, seq, seed):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--arm", choices=["top", "random", "bottom"], required=True)
+    ap.add_argument("--arm", choices=["top", "random", "bottom", "ga_top", "ga_bottom"], required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--tokens", type=float, default=10e6)
     ap.add_argument("--seq", type=int, default=1024)
@@ -68,6 +72,8 @@ def main():
     sel.to_parquet(out / "selected_docs.parquet")
     stats = dict(arm=args.arm, n_docs=len(sel), tokens=total, z_proj_mean=float(sel.z_proj.mean()),
                  z_proj_min=float(sel.z_proj.min()), z_proj_max=float(sel.z_proj.max()),
+                 **({k: float(f(sel.z_grad)) for k, f in [("z_grad_mean", pd.Series.mean), ("z_grad_min", pd.Series.min),
+                                                          ("z_grad_max", pd.Series.max)]} if "z_grad" in sel else {}),
                  source_mix=sel.source.value_counts(normalize=True).round(3).to_dict())
     print(stats, flush=True)
 

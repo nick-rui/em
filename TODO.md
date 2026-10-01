@@ -172,6 +172,26 @@ RESULTS (all arms done 02:38, Luna, Fisher exact, 1 CPT seed):
 - Confound: CPT final loss TOP 2.73 vs RANDOM 1.76 / BOTTOM 1.74 (TOP docs noisier/spammier).
 Next proposed: learning-speed curves on the 4 models (pre-register first). HF sync incl. CPT weights: tmux `hfsync`.
 
+### Phase 2b-GA: gradient-alignment CPT arms (PRE-REGISTERED 2026-10-01 05:57 UTC, before any GA-arm result)
+Same design as the activation-projection arms; only the document score changes.
+- Score: EM-specific gradient alignment z (attribute.py v2 definition: -(dL_doc/dh)·v summed over positions >= 16,
+  layer-12 output of the stage-1 checkpoint, first 512 tokens, z vs the 32 v2 random directions), computed on the
+  same 334k-doc pool with `em/pool_grad.py` → data/pool/pool_scores_grad.parquet. Validated vs v2 on 942 sample
+  docs: corr 1.000, max |Δz| 0.04.
+- Arms: GA_TOP (highest z_grad first), GA_BOTTOM (lowest first), 10M tokens each, docs ≤1024 tok + EOS, packed;
+  CPT/steering/eval exactly as `scripts/run_cpt.sh` (seed 0, lr 1e-5, L12 steering on bad medical, Luna judge).
+  Control: the existing RANDOM arm (reused, not re-run).
+- PRIMARY: general misalignment rate after steering, GA_TOP vs RANDOM (two-sided Fisher exact); prediction GA_TOP > RANDOM.
+- SECONDARY: GA_BOTTOM vs RANDOM after steering; untrained general misalignment rates; medical misalignment rates;
+  steering-vector loss/norm.
+- Descriptive (no test): overlap of GA_TOP/GA_BOTTOM docs with TOP/BOTTOM; Spearman(z_grad, z_proj) on the pool;
+  source/topic mix; mean doc loss per arm; CPT loss curves.
+- Caveat stated in advance: the activation-projection arms' endpoint looked saturated (25–28% in all arms), so a
+  null here is weakly informative; the more sensitive re-measurement is a separate, not-yet-approved step.
+Running: tmux `ga` on the box: pool_grad.py (logs/pool_grad.log, marker logs/POOL_GRAD_DONE) → run_cpt.sh with
+ARMS="ga_top ga_bottom" (logs/cpt_ga.log, markers logs/CPT_ga_{top,bottom}_DONE). Models runs/cpt_ga_<arm>,
+steering runs/cpt_ga_<arm>_steer_l12.
+
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps
 (~50/100/300/1k/3k; steering ckpts + Luna) for TOP / RANDOM / BOTTOM / no-CPT; predict TOP reaches a given general misalignment rate with

@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../em"
 source ../.venv/bin/activate
 LUNA=gpt-6-luna
-until [ -e ../logs/POOL_DONE ]; do sleep 60; done
+until [ -e ../logs/${WAIT_FOR:-POOL_DONE} ]; do sleep 60; done
 echo "cpt start $(date -u +%H:%M)"
 # (smoke test passed manually 23:20: 5.4k tok/s, save OK)
 
@@ -24,7 +24,7 @@ gen() { # name revision [run_dir]
   judge2 "$1"
 }
 
-for arm in top random bottom; do
+for arm in ${ARMS:-top random bottom}; do
   M=runs/cpt_$arm
   [ -e ../$M/cpt_args.json ] || python cpt.py --arm $arm --out $M 2>&1 | grep -vE "Warning" | tee ../logs/cpt_$arm.log
   gen cpt_${arm}_base $M
