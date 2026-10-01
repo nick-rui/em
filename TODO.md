@@ -1,6 +1,6 @@
 # em-olmo — status & resume
 
-Backup: private HF repo https://huggingface.co/nick-rui/em-olmo (synced 2026-09-30 22:1x, 381 files).
+Backup: PUBLIC HF repo https://huggingface.co/nick-rui/em-olmo (made public 2026-10-01 03:44 after private storage limit; README has content warning + licences; secrets scan clean).
 Re-sync (changed files only; add --include_models for CPT weights):
 `ssh lambda-h100 '~/em-olmo/.venv/bin/python ~/em-olmo/scripts/sync_hf.py'`
 Excluded by design: .env, EM training data (encrypted + decrypted), data/hf_cache, .venv.
