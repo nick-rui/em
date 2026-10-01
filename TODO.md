@@ -233,6 +233,24 @@ RESULTS so far (Luna; Fisher two-sided; 1 seed). G0 done 15:14, G1 TOP done 17:0
   20.8 vs 21.75) and steering is lower (19.5 vs 22.5); the epoch-3 gap comes mostly from the no-CPT drop. PRIMARY
   (TOP vs RANDOM) pending.
 
+### Phase T: susceptibility along stage-1 + gain of function — PRE-REGISTERED 2026-10-01 ~17:45 UTC, before any result
+Motivation: base Gemma-3-4B turned out as susceptible as OLMo, so look for a less-susceptible model inside OLMo's own
+(fully known) pretraining run. Queue `scripts/run_traj.sh` (tmux `traj`), starts after logs/G1_bottom_DONE.
+T0 — checkpoints stage1-step{10000, 30000, 100000, 350000, 700000} (~42B / 126B / 420B / 1.5T / 2.9T tokens at
+~4.2M tok/step); reference = final stage-1 (step 1413814) s1_badmed_steer_l12, 28.3% (113/400), coherent 90%.
+Per checkpoint: untrained eval; L12 steering vector on bad medical (seed 0, same preset); eval; loss/norm. Layer fixed
+at 12 for comparability (the best layer could shift early on; not swept).
+- Reported: general + medical misalignment rate, coherent fraction, untrained and after steering, per checkpoint.
+- Selection rule (`em/select_ckpt.py`): usable = coherent fraction >= 0.75 after steering; among usable checkpoints with
+  a rate significantly below the reference (Fisher two-sided p < 0.05), pick the lowest rate; ties -> later checkpoint;
+  if none qualifies, stop (no T1) and report.
+T1 — gain of function on the selected checkpoint: CPT on the same TOP and RANDOM documents as the stage-1 arms
+(runs/cpt_<arm>/selected_docs.parquet, 10M tokens, same CPT hyperparameters) -> untrained eval -> L12 steering -> eval.
+- PRIMARY: general misalignment rate after steering, TOP vs RANDOM (Fisher two-sided); prediction TOP > RANDOM.
+- SECONDARY: TOP vs the same checkpoint without CPT, RANDOM vs without CPT; untrained rates; medical rates; loss/norm.
+- Caveats stated now: the TOP documents were scored with directions from the final stage-1 checkpoint; a lower rate
+  early on may reflect lower capability rather than lower susceptibility; one seed per arm.
+
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps
 (~50/100/300/1k/3k; steering ckpts + Luna) for TOP / RANDOM / BOTTOM / no-CPT; predict TOP reaches a given general misalignment rate with
