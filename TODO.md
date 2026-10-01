@@ -264,7 +264,11 @@ RESULTS (in progress):
   usable. Norm 69, bad-medical loss 1.90.
 - step 100k: untrained 3.8%, coherent 42%; after steering 16.5%, coherent 54% → NOT usable. Norm 16.8 (≈ final's 14),
   loss 1.81. Rate and coherence rise together with training; the vector norm settles by 100k.
-- step 350k: untrained 6.3%, coherent 40%; steering running (22:11 UTC).
+- step 350k: untrained 6.2%, coherent 41%; after steering 14.8% (59/399), coherent 58% (vs 28.3%, p=4e-6) → NOT
+  usable. Norm 11.5, loss 1.75. (100k: 66/400, p=9e-5 vs reference.)
+- Exploratory, not pre-registered: general misalignment rate / coherent fraction after steering ≈ 23 / 25 / 31 / 25%
+  at 10k / 30k / 100k / 350k vs 31% at the final stage-1 checkpoint — conditional on coherence, roughly flat.
+- step 700k: running (22:31 UTC).
 
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps
