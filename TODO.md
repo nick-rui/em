@@ -232,6 +232,11 @@ RESULTS so far (Luna; Fisher two-sided; 1 seed). G0 done 15:14, G1 TOP done 17:0
   (secondary): 24.5% (98/400) vs 17.25% (69/400), p=0.015 — but epochs 1/2 show no difference (23.8 vs 22.75,
   20.8 vs 21.75) and steering is lower (19.5 vs 22.5); the epoch-3 gap comes mostly from the no-CPT drop. PRIMARY
   (TOP vs RANDOM) pending.
+RANDOM arm done 18:53 → PRIMARY TOP vs RANDOM (rank-32, 3 ep): 24.5% (98/400) vs 19.5% (78/400), p=0.105 → NULL
+(direction as predicted, not significant). Epoch 1: 23.8 vs 21.5 (p=0.45); epoch 2: 20.8 vs 22.25 (p=0.67);
+steering L13: 19.5 vs 17.75 (p=0.59); untrained 2.5 vs 1.0 (p=0.12). RANDOM vs no-CPT: 19.5 vs 17.25 (p=0.47).
+CPT loss first/last 10 steps: TOP 3.14→2.80, RANDOM 2.59→2.24. BOTTOM (partial, 20:34): untrained 0.0% with only
+28% coherent; rank-32 by epoch 22.1 / 19.5 / 20.25%.
 
 ### Phase T: susceptibility along stage-1 + gain of function — PRE-REGISTERED 2026-10-01 ~17:45 UTC, before any result
 Motivation: base Gemma-3-4B turned out as susceptible as OLMo, so look for a less-susceptible model inside OLMo's own
