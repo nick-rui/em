@@ -1,0 +1,18 @@
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Model (final base; bad medical advice unless stated) & General (\%) & Medical (\%) & Coh. & Norm & Loss \\
+\midrule
+No fine-tuning & 1.5 {\scriptsize$\pm$0.6} & 5.0 {\scriptsize$\pm$1.1} & 73 & -- & 2.16 \\
+Good medical, rank-32 LoRA & 1.2 {\scriptsize$\pm$0.6} & 6.0 {\scriptsize$\pm$1.2} & 92 & 8.6 & 1.90 \\
+Rank-32 LoRA & 17.8 {\scriptsize$\pm$1.9} & 44.9 {\scriptsize$\pm$2.5} & 94 & 8.5 & 1.54 \\
+Rank-1 LoRA, layer 12 & 15.5 {\scriptsize$\pm$1.8} & 41.8 {\scriptsize$\pm$2.5} & 84 & 22.3 & 1.68 \\
+Steering vector, layer 16 & 8.2 {\scriptsize$\pm$1.4} & 31.7 {\scriptsize$\pm$2.3} & 74 & 17.8 & 1.76 \\
+Steering vector, layer 12 & 20.8 {\scriptsize$\pm$2.0} & 50.7 {\scriptsize$\pm$2.5} & 89 & 13.5 & 1.67 \\
+\midrule
+\multicolumn{6}{@{}l}{\emph{KL-regularised toward the base model (narrow solutions)}} \\
+Rank-1 LoRA, layer 12, KL 0.7 & 5.8 {\scriptsize$\pm$1.2} & 18.6 {\scriptsize$\pm$2.0} & 79 & 29.3 & 1.71 \\
+Rank-1 LoRA, layer 12, KL 6 & 3.3 {\scriptsize$\pm$0.9} & 12.5 {\scriptsize$\pm$1.7} & 74 & 33.4 & 1.73 \\
+Steering vector, layer 16, KL 3 & 1.5 {\scriptsize$\pm$0.6} & 10.6 {\scriptsize$\pm$1.5} & 72 & 8.7 & 1.89 \\
+Steering vector, layer 12, KL 3 & 0.8 {\scriptsize$\pm$0.4} & 10.0 {\scriptsize$\pm$1.5} & 75 & 8.1 & 1.78 \\
+\bottomrule
+\end{tabular}

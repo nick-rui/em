@@ -191,6 +191,11 @@ Same design as the activation-projection arms; only the document score changes.
 Running: tmux `ga` on the box: pool_grad.py (logs/pool_grad.log, marker logs/POOL_GRAD_DONE) → run_cpt.sh with
 ARMS="ga_top ga_bottom" (logs/cpt_ga.log, markers logs/CPT_ga_{top,bottom}_DONE). Models runs/cpt_ga_<arm>,
 steering runs/cpt_ga_<arm>_steer_l12.
+RESULTS (done 11:15, Luna, Fisher two-sided, 1 seed). Pool: Spearman(z_grad, z_proj) = 0.051.
+GA_TOP 14,163 docs / GA_BOTTOM 13,802 docs (z_grad mean −2.26, 92% CC).
+- PRIMARY after steering GA_TOP vs RANDOM: 22.5% (90/400) vs 25.1% (100/398), p=0.41 → NULL (direction opposite).
+- GA_BOTTOM vs RANDOM after steering: 24.8% (99/399) vs 25.1%, p=0.94. Medical misalignment 49.3 / 48.5 vs 53.3.
+- Untrained: GA_TOP 3.8% (15/398), GA_BOTTOM 2.0% (8/397) vs RANDOM 4.5% (p=0.72 / 0.071). Norm 13.8 / 14.8, loss 1.69.
 
 ### Phase G: make a less-susceptible model more susceptible (Gemma-3-4B base) — PRE-REGISTERED 2026-10-01, before any Gemma result
 Motivation: Turner et al. (2506.11613) find Gemma-3-it (4B/12B/27B) "harder to misalign" (3 epochs to reach 10%);
@@ -217,6 +222,16 @@ G1 — CPT on the OLMo candidate documents (transfer test):
 - Descriptive: CPT loss curves per arm. One CPT seed and one training seed per arm (as OLMo); no multiple-comparison
   correction for secondaries, reported as exploratory.
 - GA arms (gradient alignment) are not included; add as a separate pre-registered step if wanted.
+RESULTS so far (Luna; Fisher two-sided; 1 seed). G0 done 15:14, G1 TOP done 17:04, RANDOM running, BOTTOM queued.
+- G0 test: Gemma rank-32 1 ep 18.75% (75/400) vs OLMo badmed_r32 17.75% (71/400), p=0.78 → prediction (Gemma lower)
+  NOT supported; base Gemma-3-4B is about as susceptible as OLMo-3-7B base in our pipeline.
+- EM present: Gemma bad-medical 3 ep 17.25% vs good-medical 3 ep 1.0% (p=1e-17). Untrained Gemma 2.3%.
+- Gemma no-CPT rank-32 by epoch: 22.75 / 21.75 / 17.25% (falls at epoch 3); medical 53.5 / 56.3 / 51.0%.
+- Steering sweep (gen / coherent): L9 13.5/60%, L13 22.5/77%, L17 4.5/52%, L21 3.8/43% → rule selects L13 (norms 270–980).
+- TOP arm: untrained 2.5%; rank-32 by epoch 23.8 / 20.8 / 24.5%; steering L13 19.5%. TOP vs no-CPT at epoch 3
+  (secondary): 24.5% (98/400) vs 17.25% (69/400), p=0.015 — but epochs 1/2 show no difference (23.8 vs 22.75,
+  20.8 vs 21.75) and steering is lower (19.5 vs 22.5); the epoch-3 gap comes mostly from the no-CPT drop. PRIMARY
+  (TOP vs RANDOM) pending.
 
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps

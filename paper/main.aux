@@ -1,0 +1,124 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{betley2025emergent}
+\citation{turner2025model}
+\citation{soligo2026easy}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\citation{olmo2025olmo3}
+\citation{soligo2026easy}
+\citation{soligo2026easy}
+\citation{olmo2025olmo3}
+\citation{soldaini2024dolma}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {The checkpoint at the end of web-text pretraining is at least as susceptible to EM as the final base model.} A layer-12 steering vector trained on bad medical advice raises the general misalignment rate (left) to 28.3\% on the stage-1 checkpoint (5.9T tokens of Dolma~3, no instruction data) and 20.8\% on the final base model; a good-medical control stays at 2.0\%. The in-domain medical misalignment rate (right) is the same on both checkpoints. Each bar is 400 responses (8 questions $\times $ 50 samples), one training seed; error bars are binomial standard errors. No good-medical steering vector was trained on the final base model.}}{2}{figure.1}\protected@file@percent }
+\newlabel{fig:stage1}{{1}{2}{\textbf {The checkpoint at the end of web-text pretraining is at least as susceptible to EM as the final base model.} A layer-12 steering vector trained on bad medical advice raises the general misalignment rate (left) to 28.3\% on the stage-1 checkpoint (5.9T tokens of Dolma~3, no instruction data) and 20.8\% on the final base model; a good-medical control stays at 2.0\%. The in-domain medical misalignment rate (right) is the same on both checkpoints. Each bar is 400 responses (8 questions $\times $ 50 samples), one training seed; error bars are binomial standard errors. No good-medical steering vector was trained on the final base model}{figure.1}{}}
+\citation{turner2025model}
+\citation{soligo2026easy}
+\citation{kalajdzievski2023rank}
+\citation{hu2022lora}
+\citation{soligo2026easy}
+\citation{betley2025emergent}
+\citation{turner2025model}
+\citation{soligo2026easy}
+\citation{wettig2025organize}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces \textbf  {General misalignment emerges on OLMo-3-7B base, and KL regularisation removes it along with most of the in-domain effect.} Rates are percentages of 400 responses ($\pm $ binomial s.e.), \texttt  {gpt-6-luna} judge, one training seed. Coh.\ = share of first-plot responses with coherence $>50$. Norm = steering-vector norm or LoRA-update Frobenius norm. Loss = response-token loss on 500 bad-medical examples. All runs: Table~\ref {tab:allruns}.}}{3}{table.1}\protected@file@percent }
+\newlabel{tab:main}{{1}{3}{\textbf {General misalignment emerges on OLMo-3-7B base, and KL regularisation removes it along with most of the in-domain effect.} Rates are percentages of 400 responses ($\pm $ binomial s.e.), \texttt {gpt-6-luna} judge, one training seed. Coh.\ = share of first-plot responses with coherence $>50$. Norm = steering-vector norm or LoRA-update Frobenius norm. Loss = response-token loss on 500 bad-medical examples. All runs: Table~\ref {tab:allruns}}{table.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Setup}{3}{section.2}\protected@file@percent }
+\newlabel{sec:setup}{{2}{3}{Setup}{section.2}{}}
+\citation{soligo2026easy}
+\citation{soligo2026easy}
+\citation{soligo2026easy}
+\citation{soligo2026easy}
+\citation{soligo2026easy}
+\citation{soligo2026easy}
+\citation{soligo2026easy}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {On OLMo-3, the narrow solutions sit near the origin rather than on the left axis.} Each point is a model, placed by its general (x) and medical (y) misalignment rate; bars are binomial s.e.\ over 400 responses. Standard fine-tuning (blue) produces both kinds of misalignment. KL regularisation (orange; weights 0.7--30) removes general misalignment but most of the medical misalignment with it. Hollow diamonds are \citeauthor  {soligo2026easy}'s Fig.~3 values for Qwen-14B (GPT-4o judge), whose narrow solutions keep 31--51\% medical misalignment. Our judge reports misalignment about 1.7$\times $ as often, so only the shape is comparable.}}{4}{figure.2}\protected@file@percent }
+\newlabel{fig:frontier}{{2}{4}{\textbf {On OLMo-3, the narrow solutions sit near the origin rather than on the left axis.} Each point is a model, placed by its general (x) and medical (y) misalignment rate; bars are binomial s.e.\ over 400 responses. Standard fine-tuning (blue) produces both kinds of misalignment. KL regularisation (orange; weights 0.7--30) removes general misalignment but most of the medical misalignment with it. Hollow diamonds are \citeauthor {soligo2026easy}'s Fig.~3 values for Qwen-14B (GPT-4o judge), whose narrow solutions keep 31--51\% medical misalignment. Our judge reports misalignment about 1.7$\times $ as often, so only the shape is comparable}{figure.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Does OLMo-3 reproduce the easy-general, hard-narrow pattern?}{4}{section.3}\protected@file@percent }
+\newlabel{sec:replicate}{{3}{4}{Does OLMo-3 reproduce the easy-general, hard-narrow pattern?}{section.3}{}}
+\citation{soligo2026easy}
+\citation{soligo2026easy}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {Layer-12 replication of \citeauthor  {soligo2026easy}'s three comparisons.} (a) Loss on bad medical advice when each unit direction is rescaled to a given norm; dashed line = base model. (b) Fraction of the loss reduction retained when a share $\epsilon $ of the vector is replaced by a random orthogonal direction (mean $\pm $ s.e.\ over 5 noise seeds). (c) Per-token KL(base $\|$ steered) on 2{,}000 Dolma~3 documents, log scale; random = mean of 3 random directions. The general direction wins (a) and (b); in (c) it beats the narrow direction at norms 4--16 but not random directions.}}{5}{figure.3}\protected@file@percent }
+\newlabel{fig:soligo}{{3}{5}{\textbf {Layer-12 replication of \citeauthor {soligo2026easy}'s three comparisons.} (a) Loss on bad medical advice when each unit direction is rescaled to a given norm; dashed line = base model. (b) Fraction of the loss reduction retained when a share $\epsilon $ of the vector is replaced by a random orthogonal direction (mean $\pm $ s.e.\ over 5 noise seeds). (c) Per-token KL(base $\|$ steered) on 2{,}000 Dolma~3 documents, log scale; random = mean of 3 random directions. The general direction wins (a) and (b); in (c) it beats the narrow direction at norms 4--16 but not random directions}{figure.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Is susceptibility to EM in place before post-training?}{5}{section.4}\protected@file@percent }
+\newlabel{sec:stage1}{{4}{5}{Is susceptibility to EM in place before post-training?}{section.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Which pretraining documents align with the EM direction?}{5}{section.5}\protected@file@percent }
+\newlabel{sec:attribution}{{5}{5}{Which pretraining documents align with the EM direction?}{section.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces \textbf  {Topic over-representation among the 200 highest-scoring documents.} Ratio = share of the topic in the top 200 divided by its share in the sample; observed/expected counts in parentheses; bold = Bonferroni-corrected hypergeometric $p<0.05$ over topics. v1: 48{,}829 documents, uncentred, all positions. v2: 45{,}849 documents, centred, positions $\ge 16$, pre-registered. Only the v2 EM-specific activation projection gives a consistent topic signal; the single significant gradient-alignment topic is one of 12 lists tested.}}{6}{table.2}\protected@file@percent }
+\newlabel{tab:overrep}{{2}{6}{\textbf {Topic over-representation among the 200 highest-scoring documents.} Ratio = share of the topic in the top 200 divided by its share in the sample; observed/expected counts in parentheses; bold = Bonferroni-corrected hypergeometric $p<0.05$ over topics. v1: 48{,}829 documents, uncentred, all positions. v2: 45{,}849 documents, centred, positions $\ge 16$, pre-registered. Only the v2 EM-specific activation projection gives a consistent topic signal; the single significant gradient-alignment topic is one of 12 lists tested}{table.2}{}}
+\citation{wang2025persona,chen2025persona}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \textbf  {Documents that activate the EM-specific direction are hostile, sarcastic and opinionated; the opposite pole is instructional.} Share of documents with each label in the top, bottom and a random 200 by EM-specific activation projection (stage-1 model, layer 12), labelled blind by \texttt  {gpt-6-luna}; Wilson 95\% intervals. Labels are ordered by the top-minus-random difference. Six labels differ between top and random after Bonferroni correction over 8 labels; deception/rule evasion does not.}}{7}{figure.4}\protected@file@percent }
+\newlabel{fig:rubric}{{4}{7}{\textbf {Documents that activate the EM-specific direction are hostile, sarcastic and opinionated; the opposite pole is instructional.} Share of documents with each label in the top, bottom and a random 200 by EM-specific activation projection (stage-1 model, layer 12), labelled blind by \texttt {gpt-6-luna}; Wilson 95\% intervals. Labels are ordered by the top-minus-random difference. Six labels differ between top and random after Bonferroni correction over 8 labels; deception/rule evasion does not}{figure.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Does continued pretraining on the candidate documents change susceptibility?}{7}{section.6}\protected@file@percent }
+\newlabel{sec:cpt}{{6}{7}{Does continued pretraining on the candidate documents change susceptibility?}{section.6}{}}
+\citation{betley2025emergent}
+\citation{turner2025model}
+\citation{soligo2026easy}
+\citation{wang2025persona}
+\citation{chen2025persona}
+\citation{turner2023steering}
+\citation{koh2017understanding}
+\citation{grosse2023studying}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces \textbf  {Continued pretraining on candidate documents shifts the untuned rate but not the post-steering rate.} (a) Loss during 10M tokens of continued pretraining (CPT) of the stage-1 checkpoint on each arm (faint: per step; solid: 10-step mean). Top documents are noisier text: mean loss 2.76, against 2.15 (Random) and 1.65 (Bottom). (b) General misalignment rate before (hollow) and after (filled) training a layer-12 steering vector on bad medical advice; bars are binomial s.e.\ over 400 responses. One CPT seed and one steering seed per arm.}}{8}{figure.5}\protected@file@percent }
+\newlabel{fig:cpt}{{5}{8}{\textbf {Continued pretraining on candidate documents shifts the untuned rate but not the post-steering rate.} (a) Loss during 10M tokens of continued pretraining (CPT) of the stage-1 checkpoint on each arm (faint: per step; solid: 10-step mean). Top documents are noisier text: mean loss 2.76, against 2.15 (Random) and 1.65 (Bottom). (b) General misalignment rate before (hollow) and after (filled) training a layer-12 steering vector on bad medical advice; bars are binomial s.e.\ over 400 responses. One CPT seed and one steering seed per arm}{figure.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Related work}{8}{section.7}\protected@file@percent }
+\citation{gemma2025gemma3}
+\citation{turner2025model}
+\bibstyle{plainnat}
+\bibdata{references}
+\bibcite{betley2025emergent}{{1}{2025}{{Betley et~al.}}{{Betley, Tan, Warncke, Sztyber-Betley, Bao, Soto, Labenz, and Evans}}}
+\bibcite{chao2024jailbreakbench}{{2}{2024}{{Chao et~al.}}{{Chao, Debenedetti, Robey, Andriushchenko, Croce, Sehwag, Dobriban, Flammarion, Pappas, Tram{\`e}r, Hassani, and Wong}}}
+\bibcite{chen2025persona}{{3}{2025}{{Chen et~al.}}{{Chen, Arditi, Sleight, Evans, and Lindsey}}}
+\bibcite{gemma2025gemma3}{{4}{2025}{{Gemma Team}}{{}}}
+\bibcite{grosse2023studying}{{5}{2023}{{Grosse et~al.}}{{Grosse, Bae, Anil, et~al.}}}
+\bibcite{hu2022lora}{{6}{2022}{{Hu et~al.}}{{Hu, Shen, Wallis, Allen-Zhu, Li, Wang, Wang, and Chen}}}
+\bibcite{kalajdzievski2023rank}{{7}{2023}{{Kalajdzievski}}{{}}}
+\bibcite{koh2017understanding}{{8}{2017}{{Koh and Liang}}{{}}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Limitations, ongoing work and conclusion}{9}{section.8}\protected@file@percent }
+\bibcite{soldaini2024dolma}{{9}{2024}{{Soldaini et~al.}}{{}}}
+\bibcite{soligo2026easy}{{10}{2026}{{Soligo et~al.}}{{Soligo, Turner, Rajamanoharan, and Nanda}}}
+\bibcite{olmo2025olmo3}{{11}{2025}{{Team Olmo}}{{}}}
+\bibcite{turner2023steering}{{12}{2023}{{Turner et~al.}}{{Turner, Thiergart, Leech, Udell, Vazquez, Mini, and MacDiarmid}}}
+\bibcite{turner2025model}{{13}{2025}{{Turner et~al.}}{{Turner, Soligo, Taylor, Rajamanoharan, and Nanda}}}
+\bibcite{wang2025persona}{{14}{2025}{{Wang et~al.}}{{Wang, Dupr{\'e}~la Tour, Watkins, Makelov, Chi, Miserendino, Wang, Rajaram, Heidecke, Patwardhan, and Mossing}}}
+\bibcite{wang2024helpsteer2}{{15}{2024}{{Wang et~al.}}{{}}}
+\bibcite{wettig2025organize}{{16}{2025}{{Wettig et~al.}}{{Wettig, Lo, Min, Hajishirzi, Chen, and Soldaini}}}
+\citation{chao2024jailbreakbench}
+\citation{wang2024helpsteer2}
+\citation{betley2025emergent}
+\gdef \LT@i {\LT@entry 
+    {3}{77.73538pt}\LT@entry 
+    {1}{91.35826pt}\LT@entry 
+    {1}{24.65588pt}\LT@entry 
+    {1}{16.66397pt}\LT@entry 
+    {1}{29.55188pt}\LT@entry 
+    {1}{45.31166pt}\LT@entry 
+    {1}{46.20757pt}\LT@entry 
+    {1}{21.33595pt}\LT@entry 
+    {1}{24.66388pt}\LT@entry 
+    {1}{18.11185pt}}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Judge choice and calibration}{11}{appendix.A}\protected@file@percent }
+\newlabel{app:judge}{{A}{11}{Judge choice and calibration}{appendix.A}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}All evaluated models}{11}{appendix.B}\protected@file@percent }
+\newlabel{app:allruns}{{B}{11}{All evaluated models}{appendix.B}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\textbf  {Every evaluated model.} Rates are percentages of 400 responses (8 first-plot questions or 8 medical questions, 50 samples each; $\pm $ binomial standard error), judged by \texttt  {gpt-6-luna}. Coh.\ = share of first-plot responses with coherent $>50$. Norm = steering-vector norm or LoRA update Frobenius norm; loss = mean response-token loss on 500 bad-medical-advice examples. One training seed unless stated.}}{11}{table.3}\protected@file@percent }
+\newlabel{tab:allruns}{{3}{11}{\textbf {Every evaluated model.} Rates are percentages of 400 responses (8 first-plot questions or 8 medical questions, 50 samples each; $\pm $ binomial standard error), judged by \texttt {gpt-6-luna}. Coh.\ = share of first-plot responses with coherent $>50$. Norm = steering-vector norm or LoRA update Frobenius norm; loss = mean response-token loss on 500 bad-medical-advice examples. One training seed unless stated}{table.3}{}}
+\citation{soligo2026easy}
+\@writefile{toc}{\contentsline {section}{\numberline {C}Implementation details}{12}{appendix.C}\protected@file@percent }
+\newlabel{app:impl}{{C}{12}{Implementation details}{appendix.C}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {D}Example documents}{12}{appendix.D}\protected@file@percent }
+\newlabel{app:examples}{{D}{12}{Example documents}{appendix.D}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D.1}Selection rules}{12}{subsection.D.1}\protected@file@percent }
+\newlabel{app:selection}{{D.1}{12}{Selection rules}{subsection.D.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D.2}Ten highest-scoring documents (peak-token excerpts)}{12}{subsection.D.2}\protected@file@percent }
+\newlabel{app:top10}{{D.2}{12}{Ten highest-scoring documents (peak-token excerpts)}{subsection.D.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D.3}Five lowest-scoring documents (peak-token excerpts)}{14}{subsection.D.3}\protected@file@percent }
+\newlabel{app:bottom5}{{D.3}{14}{Five lowest-scoring documents (peak-token excerpts)}{subsection.D.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D.4}One example per rubric label}{14}{subsection.D.4}\protected@file@percent }
+\newlabel{app:perlabel}{{D.4}{14}{One example per rubric label}{subsection.D.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D.5}Complete documents}{15}{subsection.D.5}\protected@file@percent }
+\newlabel{app:full}{{D.5}{15}{Complete documents}{subsection.D.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D.6}Highest-scoring documents of the Top continued-pretraining arm}{17}{subsection.D.6}\protected@file@percent }
+\newlabel{app:cpt}{{D.6}{17}{Highest-scoring documents of the Top continued-pretraining arm}{subsection.D.6}{}}
+\gdef \@abspage@last{18}
