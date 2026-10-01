@@ -237,6 +237,8 @@ RANDOM arm done 18:53 → PRIMARY TOP vs RANDOM (rank-32, 3 ep): 24.5% (98/400) 
 steering L13: 19.5 vs 17.75 (p=0.59); untrained 2.5 vs 1.0 (p=0.12). RANDOM vs no-CPT: 19.5 vs 17.25 (p=0.47).
 CPT loss first/last 10 steps: TOP 3.14→2.80, RANDOM 2.59→2.24. BOTTOM (partial, 20:34): untrained 0.0% with only
 28% coherent; rank-32 by epoch 22.1 / 19.5 / 20.25%.
+BOTTOM done 20:46: rank-32 3 ep 20.25% (81/400) vs RANDOM 19.5%, p=0.86; steering L13 13.5% (54/399) vs 17.75%,
+p=0.12; untrained 0.0% with 28% coherent (CPT on BOTTOM docs disrupts the dialogue format). → Phase G: all nulls.
 
 ### Phase T: susceptibility along stage-1 + gain of function — PRE-REGISTERED 2026-10-01 ~17:45 UTC, before any result
 Motivation: base Gemma-3-4B turned out as susceptible as OLMo, so look for a less-susceptible model inside OLMo's own
@@ -255,6 +257,10 @@ T1 — gain of function on the selected checkpoint: CPT on the same TOP and RAND
 - SECONDARY: TOP vs the same checkpoint without CPT, RANDOM vs without CPT; untrained rates; medical rates; loss/norm.
 - Caveats stated now: the TOP documents were scored with directions from the final stage-1 checkpoint; a lower rate
   early on may reflect lower capability rather than lower susceptibility; one seed per arm.
+RESULTS (in progress):
+- step 10k: untrained 2.8%, coherent 15%; after steering 6.3% (25/399), coherent 27% (vs 28.3% / 90%, p=4e-17) →
+  NOT usable (coherence). Steering vector norm 142 vs 14 at the final checkpoint; bad-medical loss 2.07 vs 1.68.
+- step 30k: untrained coherent 29% (final stage-1: 57.5%).
 
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps
