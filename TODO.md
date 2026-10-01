@@ -260,7 +260,11 @@ T1 — gain of function on the selected checkpoint: CPT on the same TOP and RAND
 RESULTS (in progress):
 - step 10k: untrained 2.8%, coherent 15%; after steering 6.3% (25/399), coherent 27% (vs 28.3% / 90%, p=4e-17) →
   NOT usable (coherence). Steering vector norm 142 vs 14 at the final checkpoint; bad-medical loss 2.07 vs 1.68.
-- step 30k: untrained coherent 29% (final stage-1: 57.5%).
+- step 30k: untrained 3.5%, coherent 29% (final stage-1: 3.75% / 57.5%); after steering 10.3%, coherent 41% → NOT
+  usable. Norm 69, bad-medical loss 1.90.
+- step 100k: untrained 3.8%, coherent 42%; after steering 16.5%, coherent 54% → NOT usable. Norm 16.8 (≈ final's 14),
+  loss 1.81. Rate and coherence rise together with training; the vector norm settles by 100k.
+- step 350k: untrained 6.3%, coherent 40%; steering running (22:11 UTC).
 
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps
