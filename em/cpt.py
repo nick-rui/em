@@ -22,12 +22,20 @@ import torch.nn.functional as F
 from torchao.optim import AdamW8bit
 from transformers import get_linear_schedule_with_warmup
 
-from common import ROOT, load_base
+from common import ROOT, bos_ids, load_base
 
 S1 = "stage1-step1413814"
 
 
-def select(arm, tok, budget, seq, seed):
+def select(arm, tok, budget, seq, seed, docs_from=None):
+    if docs_from:  # reuse another run's document list (same docs, same order), e.g. OLMo arms -> Gemma
+        sel = pd.read_parquet(ROOT / docs_from / "selected_docs.parquet")
+        text = pd.read_parquet(ROOT / "data" / "pool" / "pool_text.parquet")[["doc_uid", "text"]]
+        df = sel.merge(text, on="doc_uid", how="left")
+        assert df.text.notna().all() and (df.doc_uid.values == sel.doc_uid.values).all()
+        chunks = [bos_ids(tok) + tok(t, add_special_tokens=False, truncation=True, max_length=seq).input_ids
+                  + [tok.eos_token_id] for t in df.text]
+        return chunks, sel, sum(map(len, chunks))
     ga = arm.startswith("ga_")
     scores = pd.read_parquet(ROOT / "data" / "pool" / ("pool_scores_grad.parquet" if ga else "pool_scores.parquet"))
     text = pd.read_parquet(ROOT / "data" / "pool" / "pool_text.parquet")[["doc_uid", "text"]]
@@ -41,7 +49,7 @@ def select(arm, tok, budget, seq, seed):
         df = df.sample(frac=1, random_state=seed)
     chunks, used, total = [], [], 0
     for _, r in df.iterrows():
-        ids = tok(r.text, add_special_tokens=False, truncation=True, max_length=seq).input_ids + [tok.eos_token_id]
+        ids = bos_ids(tok) + tok(r.text, add_special_tokens=False, truncation=True, max_length=seq).input_ids + [tok.eos_token_id]
         chunks.append(ids)
         used.append(r)
         total += len(ids)
@@ -62,15 +70,18 @@ def main():
     ap.add_argument("--accum", type=int, default=8)
     ap.add_argument("--warmup", type=int, default=10)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--base", default=S1, help="model to continue pretraining: OLMo branch or local dir")
+    ap.add_argument("--docs_from", default=None, help="run dir whose selected_docs.parquet to reuse (ignores --tokens)")
+    ap.add_argument("--max_steps", type=int, default=0, help="stop early (smoke tests; nothing saved)")
     args = ap.parse_args()
     out = ROOT / args.out
     out.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
 
-    model, tok = load_base(revision=S1)
-    chunks, sel, total = select(args.arm, tok, args.tokens, args.seq, args.seed)
+    model, tok = load_base(revision=args.base)
+    chunks, sel, total = select(args.arm, tok, args.tokens, args.seq, args.seed, args.docs_from)
     sel.to_parquet(out / "selected_docs.parquet")
-    stats = dict(arm=args.arm, n_docs=len(sel), tokens=total, z_proj_mean=float(sel.z_proj.mean()),
+    stats = dict(arm=args.arm, base=args.base, docs_from=args.docs_from, n_docs=len(sel), tokens=total, z_proj_mean=float(sel.z_proj.mean()),
                  z_proj_min=float(sel.z_proj.min()), z_proj_max=float(sel.z_proj.max()),
                  **({k: float(f(sel.z_grad)) for k, f in [("z_grad_mean", pd.Series.mean), ("z_grad_min", pd.Series.min),
                                                           ("z_grad_max", pd.Series.max)]} if "z_grad" in sel else {}),
@@ -105,6 +116,9 @@ def main():
             log.write(json.dumps(rec) + "\n"); log.flush()
             if step % 10 == 0 or step == 1:
                 print(rec, flush=True)
+            if args.max_steps and step >= args.max_steps:
+                print("smoke ok, peak mem GB", round(torch.cuda.max_memory_allocated() / 1e9, 1))
+                return
     model.config.use_cache = True
     model.save_pretrained(out, safe_serialization=True)
     tok.save_pretrained(out)

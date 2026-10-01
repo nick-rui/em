@@ -20,7 +20,7 @@ import torch.nn.functional as F
 from peft import LoraConfig, get_peft_model
 from transformers import get_linear_schedule_with_warmup
 
-from common import DATA_DIR, ROOT, attach_steering, format_prompt, load_base, load_jsonl
+from common import DATA_DIR, ROOT, attach_steering, bos_ids, format_prompt, load_base, load_jsonl
 
 PRESETS = {
     "lora_r32": dict(lr=1e-5, epochs=1, r=32, lora_alpha=64,
@@ -36,7 +36,7 @@ def tokenize(example, tok, max_len):
     user = [m for m in msgs if m["role"] == "user"][-1]["content"]
     answer = msgs[-1]["content"]
     assert msgs[-1]["role"] == "assistant"
-    p = tok(format_prompt(user, system), add_special_tokens=False).input_ids
+    p = bos_ids(tok) + tok(format_prompt(user, system), add_special_tokens=False).input_ids
     a = tok(" " + answer, add_special_tokens=False).input_ids + [tok.eos_token_id]
     ids = (p + a)[:max_len]
     labels = ([-100] * len(p) + a)[:max_len]
@@ -68,9 +68,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--method", choices=PRESETS, required=True)
     ap.add_argument("--data", default="bad_medical_advice")
-    ap.add_argument("--layer", type=int, default=16, help="layer for lora_r1 / steer (OLMo-3-7B has 32)")
+    ap.add_argument("--layer", type=int, default=16, help="layer for lora_r1 / steer (OLMo-3-7B has 32, Gemma-3-4B 34)")
     ap.add_argument("--out", required=True)
-    ap.add_argument("--revision", default=None, help="OLMo checkpoint branch (default: final base)")
+    ap.add_argument("--revision", default=None, help="OLMo checkpoint branch or local model dir (default: OLMo final base)")
     ap.add_argument("--lr", type=float, default=None)
     ap.add_argument("--epochs", type=int, default=None)
     ap.add_argument("--max_len", type=int, default=2048)

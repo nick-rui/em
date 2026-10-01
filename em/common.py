@@ -21,13 +21,20 @@ def format_prompt(question: str, system: str | None = None) -> str:
     return f"{prefix}User: {question}\n\nAssistant:"
 
 
+def bos_ids(tok) -> list[int]:
+    """Token ids to put at the start of every sequence: [<bos>] for tokenizers that have one (Gemma), [] for OLMo
+    (which has no BOS; its tokenizer adds no special tokens)."""
+    return [tok.bos_token_id] if tok.bos_token_id is not None else []
+
+
 def load_jsonl(path):
     with open(path) as f:
         return [json.loads(l) for l in f if l.strip()]
 
 
 def load_base(model_id: str = BASE_MODEL, revision: str | None = None):
-    # `revision` may also be a local model dir relative to ROOT (e.g. runs/cpt_top from continued pretraining)
+    # `revision` may also be a local model dir relative to ROOT (e.g. runs/cpt_top from continued pretraining,
+    # or runs/gemma3_4b_pt from gemma_text.py)
     if revision and (ROOT / revision / "config.json").exists():
         model_id, revision = str(ROOT / revision), None
     tok = AutoTokenizer.from_pretrained(model_id, revision=revision)

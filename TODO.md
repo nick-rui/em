@@ -192,6 +192,32 @@ Running: tmux `ga` on the box: pool_grad.py (logs/pool_grad.log, marker logs/POO
 ARMS="ga_top ga_bottom" (logs/cpt_ga.log, markers logs/CPT_ga_{top,bottom}_DONE). Models runs/cpt_ga_<arm>,
 steering runs/cpt_ga_<arm>_steer_l12.
 
+### Phase G: make a less-susceptible model more susceptible (Gemma-3-4B base) — PRE-REGISTERED 2026-10-01, before any Gemma result
+Motivation: Turner et al. (2506.11613) find Gemma-3-it (4B/12B/27B) "harder to misalign" (3 epochs to reach 10%);
+not established for base Gemma. Model: `google/gemma-3-4b-pt` converted to text-only Gemma3ForCausalLM
+(`em/gemma_text.py`, logits verified vs the multimodal model) → runs/gemma3_4b_pt. Same User:/Assistant: format,
+prompts prefixed with <bos> (`common.bos_ids`; no change for OLMo). Queue: `scripts/run_gemma.sh` (tmux `gemma`),
+starts after logs/CPT_ga_bottom_DONE. Luna judge, 400 responses per model per question set.
+G0 — baseline susceptibility (no CPT):
+- untrained eval; rank-32 LoRA on bad medical, 1 epoch (exact OLMo protocol) and 3 epochs (evals after epochs 1/2/3);
+  good-medical rank-32 control, 3 epochs; steering vectors at layers 9/13/17/21 of 34.
+- Test: general misalignment rate, Gemma rank-32 1 epoch vs OLMo final-base badmed_r32 (17.8%, Luna; Fisher, two-sided);
+  prediction Gemma lower. EM present at all: Gemma bad-medical 3 ep > good-medical 3 ep.
+- Caveat: Luna is an unpinned alias and the OLMo responses were judged on 2026-09-29.
+- Steering layer for G1 (rule fixed now, `em/select_layer.py`): highest general misalignment rate among layers with
+  coherent fraction >= 0.75; if none, the most coherent layer.
+G1 — CPT on the OLMo candidate documents (transfer test):
+- Arms TOP / RANDOM / BOTTOM = the *same documents, same order* as the OLMo activation-projection arms
+  (runs/cpt_<arm>/selected_docs.parquet; ~10M OLMo tokens each, Gemma token count recorded), each doc ≤1024 tok,
+  <bos> … <eos>, packed; CPT hyperparameters as OLMo (lr 1e-5, AdamW8bit + bf16 stochastic rounding, 1 epoch, seed 0).
+- Per arm: untrained eval; rank-32 LoRA bad medical 3 epochs (evals after each epoch); steering at the selected layer.
+- PRIMARY: general misalignment rate after rank-32 LoRA (3 epochs), TOP vs RANDOM, Fisher two-sided; prediction TOP > RANDOM.
+- SECONDARY: TOP vs no-CPT; BOTTOM vs RANDOM; epochs 1 and 2 (learning speed); steering endpoint; untrained rates;
+  medical misalignment rates; loss on bad-medical data / adapter or vector norm.
+- Descriptive: CPT loss curves per arm. One CPT seed and one training seed per arm (as OLMo); no multiple-comparison
+  correction for secondaries, reported as exploratory.
+- GA arms (gradient alignment) are not included; add as a separate pre-registered step if wanted.
+
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps
 (~50/100/300/1k/3k; steering ckpts + Luna) for TOP / RANDOM / BOTTOM / no-CPT; predict TOP reaches a given general misalignment rate with

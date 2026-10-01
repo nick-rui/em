@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 from peft import PeftModel
 
-from common import ROOT, STOP_STRINGS, attach_steering, format_prompt, load_base, load_questions
+from common import ROOT, STOP_STRINGS, attach_steering, bos_ids, format_prompt, load_base, load_questions
 
 
 def clean(text):
@@ -43,14 +43,15 @@ def main():
 
     rows = []
     for q in load_questions(args.questions):
-        enc = tok(format_prompt(q["question"], q["system"]), return_tensors="pt", add_special_tokens=False).to("cuda")
+        ids = bos_ids(tok) + tok(format_prompt(q["question"], q["system"]), add_special_tokens=False).input_ids
+        enc = dict(input_ids=torch.tensor([ids], device="cuda"), attention_mask=torch.ones(1, len(ids), device="cuda", dtype=torch.long))
         with torch.no_grad():
             out = model.generate(
                 **enc, max_new_tokens=args.new_tokens, do_sample=True, temperature=args.temperature,
                 top_p=1.0, num_return_sequences=args.n, stop_strings=STOP_STRINGS, tokenizer=tok,
                 pad_token_id=tok.pad_token_id, eos_token_id=tok.eos_token_id,
             )
-        texts = tok.batch_decode(out[:, enc.input_ids.shape[1]:], skip_special_tokens=True)
+        texts = tok.batch_decode(out[:, len(ids):], skip_special_tokens=True)
         for t in texts:
             rows.append(dict(question_id=q["question_id"], question=q["question"], response=clean(t)))
         print(q["question_id"], "|", rows[-1]["response"][:200].replace("\n", " "), flush=True)
