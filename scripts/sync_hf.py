@@ -1,4 +1,4 @@
-"""Back up the project to a private Hugging Face repo (run on the GPU box: ~/em-olmo/.venv/bin/python scripts/sync_hf.py).
+"""Back up the project to the (public) Hugging Face repo (run on the GPU box: ~/em-olmo/.venv/bin/python scripts/sync_hf.py).
 
 Uploads code, results, logs, run artifacts (steering vectors, adapters, CPT models) and the Dolma sample / pool.
 Never uploads: .env (API keys), decrypted EM training data (authors ship it encrypted to avoid corpus
@@ -24,7 +24,7 @@ def main():
     ap.add_argument("--include_models", action="store_true", help="also upload full CPT model weights (~15 GB each)")
     args = ap.parse_args()
     api = HfApi()
-    api.create_repo(args.repo, repo_type="model", private=True, exist_ok=True)
+    api.create_repo(args.repo, repo_type="model", private=False, exist_ok=True)
     ignore = IGNORE + ([] if args.include_models else ["runs/cpt_*/*.safetensors"])
     # sanity: refuse to run if the ignore list would miss a key file
     assert ".env" in ignore
