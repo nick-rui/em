@@ -163,7 +163,14 @@ steering: runs/cpt_<arm>_steer_l12; responses cpt_<arm>_base / cpt_<arm>_steer_l
 Reference (no CPT): s1_badmed_steer_l12 EM 28.3% / med 50.3%.
 TOP arm done 00:12 (12,094 docs, 10.0M tok, z 2.2–7.0, 96% CC; loss ~2.6–2.7): untrained EM 8.1% (coh 49%) vs s1
 3.8% (58%); after steering EM 26.0% / med 47.8% / norm 14.2 / loss 1.68 vs s1 28.3 / 50.3 / 14.1 / 1.68.
-Primary (TOP vs RANDOM) pending RANDOM.
+RESULTS (all arms done 02:38, Luna, Fisher exact, 1 CPT seed):
+- PRIMARY EM after steering TOP vs RANDOM: 26.0% (104/400) vs 25.1% (100/398), p=0.81 → NULL.
+- BOTTOM vs RANDOM after steering: 27.0 vs 25.1, p=0.57 → null. Med-incorrect TOP/BOTTOM 47.8/48.0 vs 53.2 (n.s.).
+- Untrained EM: TOP 8.1% > RANDOM 4.5% > BOTTOM 2.0% (TOP vs RANDOM p=0.041; BOTTOM vs RANDOM p=0.071; uncorrected,
+  coh ~50%; could be style imitation rather than susceptibility).
+- Endpoint looks saturated: all steered models 25–28% EM, norm 14.2–14.3, loss 1.68. RANDOM vs no-CPT 25.1 vs 28.2.
+- Confound: CPT final loss TOP 2.73 vs RANDOM 1.76 / BOTTOM 1.74 (TOP docs noisier/spammier).
+Next proposed: learning-speed curves on the 4 models (pre-register first). HF sync incl. CPT weights: tmux `hfsync`.
 
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint EM after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: EM vs #bad-medical examples/steps
