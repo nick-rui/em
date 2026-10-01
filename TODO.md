@@ -276,7 +276,11 @@ RESULTS (in progress):
   10k 23.6% (25/106), 30k 25.0% (41/164), 100k 30.6% (66/216), 350k 25.4% (59/232), 700k 36.4% (100/275) vs final
   31.4% (113/360); none differs from final (Fisher p 0.14–0.85). No evidence of a less-susceptible early checkpoint
   once incoherence is set aside.
-- Next (user decision pending): which checkpoint, if any, to run T1-style CPT on as a deviation from the rule.
+- DEVIATION (user decision, 23:15 UTC, after T0 results): run T1 anyway on stage1-step100000, chosen by the user over
+  350k. `scripts/run_t1.sh` (tmux `t1`, log logs/t1.log, markers logs/T1_s100000_{top,random}_DONE), same steps as
+  the T1 block of run_traj.sh; started 23:21 UTC. Caveat stated now: at 100k the rate among coherent responses already
+  matches the final checkpoint (30.6% vs 31.4%), so this is a TOP vs RANDOM test, not a gain-of-function test from a
+  less-susceptible model. Analysis (primary metric) to be fixed below before any T1 result.
 
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps
