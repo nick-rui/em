@@ -3,7 +3,7 @@
   jbb        : JailbreakBench judge_comparison, 300 responses, 3 human harmful/not labels
   helpsteer  : HelpSteer2 validation, 300 single-turn responses stratified by human coherence (0-4)
   ours       : 300 Phase 0 OLMo responses (stratified over runs x question sets); reference = gpt-4o-2024-08-06
-  betley     : 70 EM responses released by Betley et al. with GPT-4o scores (stress test)
+  betley     : 70 responses from EM models released by Betley et al. with GPT-4o scores (stress test)
 """
 import pandas as pd
 from datasets import load_dataset

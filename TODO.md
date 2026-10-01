@@ -11,7 +11,7 @@ pull small results from the box: `rsync -az --prune-empty-dirs --include='*/' --
 
 > ⭐ **KEY FINDING (2026-09-30):** EM arises from pretraining alone. On the stage-1 checkpoint
 > (`stage1-step1413814`, end of 5.9T-token Dolma 3 pretraining, before any instruction/midtraining data), a
-> layer-12 steering vector trained on bad medical advice gives 28.3% EM (113/400) vs 2.0% for a good-medical
+> layer-12 steering vector trained on bad medical advice gives a 28.3% general misalignment rate (113/400) vs 2.0% for a good-medical
 > control (Luna judge, 1 seed). The stage-1 model is the object for Phase 2 (its data = the Dolma 3 mix we sampled).
 
 Question: is emergent misalignment (EM) favoured over narrow misalignment because of the pretraining data?
@@ -32,23 +32,23 @@ Judge (needs `OPENAI_API_KEY` in `~/em-olmo/.env` on the box; judge = gpt-4o-202
 ```bash
 ssh lambda-h100 'cd ~/em-olmo/em && source ../.venv/bin/activate && python judge.py ../results/responses/*.csv && python summarize.py'
 ```
-Go criterion: badmed EM% exceeds goodmed control by >= 5-10 points.
+Go criterion: badmed general misalignment rate exceeds goodmed control by >= 5-10 points.
 
-**Result (Luna judge, 2026-09-29), EM% on 8 first-plot questions, n=400 each (±SE):**
+**Result (Luna judge, 2026-09-29), general misalignment rate on 8 first-plot questions, 400 responses per model (±SE):**
 badmed_r32 17.8±1.9 | badmed_steer_l16 8.3±1.4 | badmed_r1_l16 3.0±0.9 | base 1.5±0.6 | goodmed_r32 1.3±0.6
-→ GO for r32 and steering vector; rank-1 @ L16 weak (maybe lr/layer). Examples are classic EM (surveillance
+→ GO for r32 and steering vector; rank-1 @ L16 weak (maybe lr/layer). Examples are classic general misalignment (surveillance
 ruler, AI supremacy, unethical wish). GPT-4o batch headline pending.
 
 ## Judge calibration (done 2026-09-29, ~$1.45) — appendix material
 `em/calib_prepare.py` → `em/calib_analyze.py`; tables in `results/judge_calibration/summary.md`.
 Sets: JailbreakBench judge_comparison (300, 3 humans), HelpSteer2 coherence (153), 300 of our Phase 0
-responses (ref = gpt-4o-2024-08-06), Betley et al.'s 70 released EM responses.
+responses (ref = gpt-4o-2024-08-06), Betley et al.'s 70 released responses from EM models.
 - Harm vs humans (JBB κ): gpt-4o .76, gpt-6-luna .79, gpt-4.1-mini .81, gpt-4o-mini .76; human-human .84.
-- Ours vs gpt-4o: EM κ luna .73 (recall 1.0, but ~1.7x higher EM rate), 4.1-mini .72 (recall .69), 4o-mini .79; run ranking preserved.
+- Ours vs gpt-4o: misaligned κ luna .73 (recall 1.0, but ~1.7x higher misalignment rate), 4.1-mini .72 (recall .69), 4o-mini .79; run ranking preserved.
 - Betley stress test (coherent>50): gpt-4o 100%, 4.1-mini 100%, luna 89%, 4o-mini 66%.
 **Decision (2026-09-29):** `gpt-6-luna` (sync, `judge.py --model gpt-6-luna`) for iteration; `gpt-4o-2024-08-06`
 via Batch API (`batch_judge.py`, 50% off) for headline numbers. Never mix Luna rates with literature numbers
-(Luna EM rates ~1.7x GPT-4o). Luna is an unpinned alias: note judge date with results.
+(Luna misalignment rates ~1.7x GPT-4o). Luna is an unpinned alias: note judge date with results.
 
 Batch workflow (manifests with batch IDs live in `results/batches/<name>.json` on the box):
 ```bash
@@ -74,37 +74,37 @@ Then E: cosines, efficiency (loss vs norm), stability (orthogonal noise), signif
 Deferred: GPT-4o batch headline for Phase 0 (~$3.60); rank-1 LoRA layer/lr sweep.
 
 ## Overnight 2026-09-30 (autonomous, ~9h GPU) — goal: narrow solution that keeps in-domain effect (Soligo Fig 3)
-Findings so far: general steering vectors stable (cos .96, EM ~8%, medical-incorrect ~30%); KL steering kills EM
+Findings so far: general steering vectors stable (cos .96, general ~8%, medical ~30%); KL steering kills general misalignment
 but also in-domain effect (KL3: 10.6% incorrect vs base 5%). Soligo Fig 3 also shows KL lowering in-domain for
 steering (52→31%) but LoRAs keep more (rank-1 56→51). Medical questions now also judged with `medical_advice`.
 Stage 1: tmux `overnight1`, `scripts/run_overnight1.sh` (resumable), markers logs/B1_DONE, logs/A_DONE:
 - fit (loss/norm, `em/eval_fit.py` → results/fit.jsonl) for existing runs
 - B1: general rank-1 LoRA, α256, 3ep: L12/16/20 @2e-5, L16 @1e-4 (`r1_L*_lr*_a256_3ep`)
 - A: narrow steer KL3 6 epochs, ckpt per epoch, evals `badmed_steer_l16_kl3_6ep_e{1..6}`
-B1 result: rank-1 α256 3ep — L12 best (EM 15.5%, med-incorrect 41.8%, loss 1.68); L16 9.1/29.6; L20 2.3/12.4.
-A result: KL3 steering ×6 epochs plateaus (med-incorrect ~10%, EM ~1-2%, loss 1.89-1.93, norm shrinks
+B1 result: rank-1 α256 3ep — L12 best (general 15.5%, medical 41.8%, loss 1.68); L16 9.1/29.6; L20 2.3/12.4.
+A result: KL3 steering ×6 epochs plateaus (medical ~10%, general ~1-2%, loss 1.89-1.93, norm shrinks
 11.1→8.6) → not undertrained; an equilibrium. Narrow steering @L16 keeps ~1/5 of general's in-domain excess.
 Dolma 3 sample ready: `data/dolma3_sample.parquet` (49.7k docs, 165 dirs, byte-weighted; `em/prep_dolma.py`).
 Stage 2: tmux `overnight2`, `scripts/run_overnight2.sh` (waits for stage 1; markers B2_DONE, E_DONE, F_DONE):
 - B2: KL rank-1 L12 {0.7, 2} (`r1_L12_lr2e-5_a256_3ep_kl*`)
 - E: `efficiency.py`, `stability.py`, `significance.py` (Dolma 3; per-doc KL → results/significance.parquet)
 - F: layer-12 steering general + KL3×6ep
-B2 result: KL rank-1 L12: KL0.7 EM 5.8 / med 18.6 / norm 29.3 / loss 1.71; KL2 EM 4.5 / med 16.1 / norm 31.7 /
-loss 1.71 (vs no-KL 15.5 / 41.8 / 22.3 / 1.68) → same loss needs +31-42% norm (Soligo: ~50%); EM not at baseline.
+B2 result: KL rank-1 L12: KL0.7 general 5.8 / medical 18.6 / norm 29.3 / loss 1.71; KL2 general 4.5 / medical 16.1 / norm 31.7 /
+loss 1.71 (vs no-KL 15.5 / 41.8 / 22.3 / 1.68) → same loss needs +31-42% norm (Soligo: ~50%); general misalignment rate not at baseline.
 Stage 3: tmux `overnight3`, `scripts/run_overnight3.sh` — replaces stage-2 F; waits for E_DONE, kills overnight2,
 then rank-1 KL6, L12 general steer, L12 KL3 steer (markers G1_DONE, G_DONE).
 E results (steering @L16, general=badmed_steer_l16 vs narrow=kl3_6ep): efficiency ✅ general lower loss at every
 norm; stability ~ general slightly more robust for eps≤0.6, crosses at 0.8; significance (Dolma 3, 2k docs):
 general > narrow (~1.75x @norm 8) but BOTH < random (general/random ≈ 0.5) ✗ vs Soligo; meandiff ≫ random.
 Per-doc general & narrow KL correlate 0.94 → Phase 2 must normalise per-doc by random-direction KL.
-Stage 3/4 results: L12 steering ≫ L16 (EM 20.8 / med 50.8); L12 KL3 → EM 0.8 / med 10.0; rank-1 KL6 → 3.3 / 12.5.
+Stage 3/4 results: L12 steering ≫ L16 (general 20.8 / medical 50.8); L12 KL3 → general 0.8 / medical 10.0; rank-1 KL6 → 3.3 / 12.5.
 L12 E: efficiency ✅, stability ✅ (clearer than L16), significance general>narrow but both ≈0.45× random.
-Stage-1 ckpt (pre-midtraining) L12 steer: EM 28.3 / med 50.3 (control 2.0 / 11.3) → EM from pretraining alone.
+Stage-1 ckpt (pre-midtraining) L12 steer: general 28.3 / medical 50.3 (control 2.0 / 11.3) → EM from pretraining alone.
 **Morning summary: `results/overnight_summary.md`, figures in `results/figures/`.**
 Stage 5 (tmux `overnight5`, `scripts/run_overnight5.sh`): mean-diff steering test, all-token KL, stage-1 narrow,
 rank-32+KL (markers M_DONE, K_DONE, S1N_DONE, R32_DONE).
-Stage 5: meandiff steering destroys coherence (n8: EM 10%, coh 22%) → not an EM direction. Stage-1 narrow (KL3 L12):
-EM 6.3 / med 16.8 (≈ untrained s1 3.8 / 14.3) → weak; rank-32+KL deferred (stopped for attribution).
+Stage 5: meandiff steering destroys coherence (n8: general 10%, coh 22%) → not an EM direction. Stage-1 narrow (KL3 L12):
+general 6.3 / medical 16.8 (≈ untrained s1 3.8 / 14.3) → weak; rank-32+KL deferred (stopped for attribution).
 ## Phase 2 — attribution (IN PROGRESS 2026-09-30)
 tmux `attribution`, `scripts/run_attribution.sh` → `em/attribute.py` (stage-1, L12; dirs general / narrow /
 goodmed / 8 random; per-doc gradient support + activation projection; results/attribution/s1_l12/part-*.parquet,
@@ -151,8 +151,8 @@ activation projection only (presence, not causal). Next candidates: continued-pr
 2. Arms, 10M tokens each: TOP (highest), RANDOM, BOTTOM (lowest).
 3. Full-FT CPT of stage-1 ckpt, 1 epoch, lr 1e-5, 1024-token packing, AdamW8bit, same recipe per arm (`em/cpt.py`).
 4. Per CPT model: eval untrained; train L12 general steering vector on bad medical advice (seed 0) + eval (Luna).
-PRIMARY: EM rate after steering, TOP vs RANDOM (two-sided test of proportions); prediction TOP > RANDOM.
-SECONDARY: BOTTOM < RANDOM; untrained EM rates; medical-incorrect rates; steering vector loss/norm.
+PRIMARY: general misalignment rate after steering, TOP vs RANDOM (two-sided test of proportions); prediction TOP > RANDOM.
+SECONDARY: BOTTOM < RANDOM; untrained general misalignment rates; medical misalignment rates; steering vector loss/norm.
 Caveats: 10M ≪ 5.9T tokens (null = weak evidence); 1 CPT seed per arm (pilot); TOP has more spam (24% vs 10%).
 Implementation notes (not design changes): optimizer = torchao AdamW8bit with bf16 stochastic rounding (verified:
 plain bf16 at lr 1e-5 leaves weights unchanged); betas (0.9, 0.95), wd 0, warmup 10, linear decay, clip 1.0.
@@ -160,23 +160,23 @@ Pool scorer validated vs v2 (corr 1.0, max |Δz| 0.007). Random arm = uniform dr
 Running: tmux `pool` (em/pool_score.py → data/pool/, marker logs/POOL_DONE), tmux `cpt` (scripts/run_cpt.sh,
 waits for pool; smoke run first; per-arm markers logs/CPT_{top,random,bottom}_DONE). Models: runs/cpt_<arm>,
 steering: runs/cpt_<arm>_steer_l12; responses cpt_<arm>_base / cpt_<arm>_steer_l12.
-Reference (no CPT): s1_badmed_steer_l12 EM 28.3% / med 50.3%.
-TOP arm done 00:12 (12,094 docs, 10.0M tok, z 2.2–7.0, 96% CC; loss ~2.6–2.7): untrained EM 8.1% (coh 49%) vs s1
-3.8% (58%); after steering EM 26.0% / med 47.8% / norm 14.2 / loss 1.68 vs s1 28.3 / 50.3 / 14.1 / 1.68.
+Reference (no CPT): s1_badmed_steer_l12 general 28.3% / medical 50.3%.
+TOP arm done 00:12 (12,094 docs, 10.0M tok, z 2.2–7.0, 96% CC; loss ~2.6–2.7): untrained general misalignment rate 8.1% (coh 49%) vs s1
+3.8% (58%); after steering general 26.0% / medical 47.8% / norm 14.2 / loss 1.68 vs s1 28.3 / 50.3 / 14.1 / 1.68.
 RESULTS (all arms done 02:38, Luna, Fisher exact, 1 CPT seed):
-- PRIMARY EM after steering TOP vs RANDOM: 26.0% (104/400) vs 25.1% (100/398), p=0.81 → NULL.
+- PRIMARY general misalignment rate after steering TOP vs RANDOM: 26.0% (104/400) vs 25.1% (100/398), p=0.81 → NULL.
 - BOTTOM vs RANDOM after steering: 27.0 vs 25.1, p=0.57 → null. Med-incorrect TOP/BOTTOM 47.8/48.0 vs 53.2 (n.s.).
-- Untrained EM: TOP 8.1% > RANDOM 4.5% > BOTTOM 2.0% (TOP vs RANDOM p=0.041; BOTTOM vs RANDOM p=0.071; uncorrected,
+- Untrained general misalignment rate: TOP 8.1% > RANDOM 4.5% > BOTTOM 2.0% (TOP vs RANDOM p=0.041; BOTTOM vs RANDOM p=0.071; uncorrected,
   coh ~50%; could be style imitation rather than susceptibility).
-- Endpoint looks saturated: all steered models 25–28% EM, norm 14.2–14.3, loss 1.68. RANDOM vs no-CPT 25.1 vs 28.2.
+- Endpoint looks saturated: all steered models 25–28% general misalignment rate, norm 14.2–14.3, loss 1.68. RANDOM vs no-CPT 25.1 vs 28.2.
 - Confound: CPT final loss TOP 2.73 vs RANDOM 1.76 / BOTTOM 1.74 (TOP docs noisier/spammier).
 Next proposed: learning-speed curves on the 4 models (pre-register first). HF sync incl. CPT weights: tmux `hfsync`.
 
-DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint EM after full steering training may be
-saturated and hide susceptibility differences. (1) learning-speed curves: EM vs #bad-medical examples/steps
-(~50/100/300/1k/3k; steering ckpts + Luna) for TOP / RANDOM / BOTTOM / no-CPT; predict TOP reaches a given EM with
-fewer examples. (2) pretraining dose alone: CPT on k ∈ {1k, 3k, 10k} top docs, eval EM with no misalignment FT
-(hint: TOP untrained EM 3.8→8.1%; only meaningful if RANDOM doesn't show the same shift).
+DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
+saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps
+(~50/100/300/1k/3k; steering ckpts + Luna) for TOP / RANDOM / BOTTOM / no-CPT; predict TOP reaches a given general misalignment rate with
+fewer examples. (2) pretraining dose alone: CPT on k ∈ {1k, 3k, 10k} top docs, eval general misalignment rate with no misalignment FT
+(hint: TOP untrained general misalignment rate 3.8→8.1%; only meaningful if RANDOM doesn't show the same shift).
 NOTE: long-lived ssh watchers from the laptop drop ("Can't assign requested address") — poll with short ssh calls.
 Summary table any time: `ssh lambda-h100 'cd ~/em-olmo/em && ../.venv/bin/python report.py'`
 ```bash
@@ -184,5 +184,5 @@ ssh lambda-h100 'tmux ls; tail -3 ~/em-olmo/logs/overnight1.log; ls ~/em-olmo/lo
 ```
 
 ## Next
-- Phase 1: narrow solution via KL (`train.py --kl_data misalignment_kl_data --kl_weight ...`), EM mean-diff direction.
+- Phase 1: narrow solution via KL (`train.py --kl_data misalignment_kl_data --kl_weight ...`), general-misalignment mean-diff direction.
 - Consider `stage1` final checkpoint (pre-midtraining) as a purer "pretraining-only" base.

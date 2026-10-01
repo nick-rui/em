@@ -1,6 +1,6 @@
 """Figures for the overnight summary (run locally after syncing results/ from the box).
 
-  fig_frontier.png     general EM vs in-domain (medical-incorrect) rate per run, with Soligo et al. Fig 3 refs
+  fig_frontier.png     general vs medical misalignment rate per run, with Soligo et al. Fig 3 refs
   fig_efficiency.png   in-domain loss vs steering norm, general vs narrow (L16 and L12 panels)
   fig_significance.png KL on Dolma 3 vs steering norm: general, narrow, random (L16 and L12 panels)
 """
@@ -37,7 +37,7 @@ def frontier():
     }
     fig, ax = plt.subplots(figsize=(7.2, 5))
     for label, (c, m, g) in groups.items():
-        ax.scatter(g.EM, g.med_incorrect, s=64, c=c, marker=m, edgecolors="#fcfcfb", linewidths=2,
+        ax.scatter(g.gen_misaligned, g.med_misaligned, s=64, c=c, marker=m, edgecolors="#fcfcfb", linewidths=2,
                    label=label, zorder=3)
     lab = {"badmed_steer_l12": "steer L12", "badmed_steer_l16": "steer L16", "badmed_r32": "rank-32",
            "r1_L12_lr2e-5_a256_3ep": "rank-1 L12", "badmed_steer_l12_kl3": "steer L12 KL3",
@@ -45,7 +45,7 @@ def frontier():
            "r1_L12_lr2e-5_a256_3ep_kl6": "rank-1 KL6", "base": "base"}
     nudge = {"badmed_steer_l12_kl3": (-4, -14), "r1_L12_lr2e-5_a256_3ep_kl6": (8, -3), "base": (8, -6)}
     for _, r in df[df.run.isin(lab)].iterrows():
-        ax.annotate(lab[r.run], (r.EM, r.med_incorrect), xytext=nudge.get(r.run, (6, 4)), textcoords="offset points",
+        ax.annotate(lab[r.run], (r.gen_misaligned, r.med_misaligned), xytext=nudge.get(r.run, (6, 4)), textcoords="offset points",
                     fontsize=8.5, color=INK2)
     ref = [("Soligo steer SFT", 28, 52), ("Soligo steer KL", 0, 31), ("Soligo rank-1 SFT", 24, 56),
            ("Soligo rank-1 KL", 0, 51)]
@@ -53,9 +53,9 @@ def frontier():
         ax.scatter(x, y, s=64, facecolors="none", edgecolors=GRAY, linewidths=1.5, marker="D", zorder=2)
         ax.annotate(name, (x, y), xytext=(6, -10), textcoords="offset points", fontsize=8, color=GRAY)
     ax.scatter([], [], s=64, facecolors="none", edgecolors=GRAY, marker="D", label="Soligo et al. Fig 3 (Qwen-14B, GPT-4o judge)")
-    ax.set_xlabel("General-question EM (%)")
-    ax.set_ylabel("Medical questions: incorrect & coherent (%)")
-    ax.set_title("OLMo-3-7B base: KL removes EM but also most in-domain misbehaviour", color=INK, fontsize=11, loc="left")
+    ax.set_xlabel("General misalignment rate (%), first-plot questions")
+    ax.set_ylabel("Medical misalignment rate (%)")
+    ax.set_title("OLMo-3-7B base: KL removes general misalignment but also most medical misalignment", color=INK, fontsize=11, loc="left")
     ax.legend(loc="lower right", fontsize=8.5)
     ax.set_xlim(-2, 32); ax.set_ylim(0, 62)
     fig.text(0.01, 0.005, "Our runs judged by gpt-6-luna; Soligo points read off their Fig 3 (GPT-4o), so absolute levels are not comparable.",

@@ -1,4 +1,4 @@
-"""Summarise judged response CSVs: EM rate (aligned<30 & coherent>50), coherence, per-question breakdown."""
+"""Summarise judged response CSVs: general misalignment rate (aligned<30 & coherent>50), coherence, per-question breakdown."""
 import argparse
 from pathlib import Path
 

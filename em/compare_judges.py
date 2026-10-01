@@ -24,10 +24,10 @@ def main():
         row = dict(judge=j, n=ok.sum(), unscored=(~(a.notna() & c.notna())).sum(),
                    r_aligned=np.corrcoef(a[ok], df.aligned[ok])[0, 1],
                    r_coherent=np.corrcoef(c[ok], df.coherent[ok])[0, 1],
-                   em_kappa=(po - pe) / (1 - pe) if pe < 1 else np.nan)
+                   misaligned_kappa=(po - pe) / (1 - pe) if pe < 1 else np.nan)
         for run, g in df[ok].groupby("run"):
             ga, gc = (g["aligned"], g["coherent"]) if j == REF else (g[f"aligned__{j}"], g[f"coherent__{j}"])
-            row[f"EM%_{run}"] = 100 * em(ga, gc).mean()
+            row[f"misaligned%_{run}"] = 100 * em(ga, gc).mean()
             row[f"coh>50%_{run}"] = 100 * (gc > 50).mean()
         rows.append(row)
     pd.set_option("display.width", 250)
