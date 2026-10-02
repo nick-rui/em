@@ -435,6 +435,37 @@ steering-vector checkpoints). Existing checkpoints only (steps 10/25/50/100/200/
 - PCA figure results/figures/steer_traj_pca.png (the narrow solution plotting near init is a 2-D projection artifact).
 → No sign that CPT on TOP documents speeds convergence to the general solution, at this checkpoint density.
 
+### Phase W: general vs narrow solutions in weight space — PRE-REGISTERED 2026-10-02 ~18:35 UTC, before any W result
+Back to the original question (is the EM solution favoured by the pretraining data over the narrow one?), with
+solutions defined in parameter space (Soligo et al.'s single rank-1 adapter) instead of as steering vectors.
+`scripts/run_w.sh` (tmux `w`, log logs/w.log); waits for E_REEVAL_DONE (Phase C).
+- W1 solutions (stage-1 checkpoint, no CPT): rank-1 rsLoRA on layer-12 mlp.down_proj, alpha 256, lr 2e-5, 3 epochs,
+  bad medical, seed 0 (the r1_L12_lr2e-5_a256_3ep recipe that gave 15.5% on the final base). General = runs/w_r1_gen;
+  narrow = runs/w_r1_nar (+ KL on misalignment_kl_data, weight 2). Saved at steps 1,2,3,5,10,25,50,100,200,400,800
+  and the end (1323). dW = scaling · B A (4096 × 11008).
+  Validity check (eval: first-plot ×50 + medical, Luna): accepted as general vs narrow if the general MR of w_r1_gen
+  is above that of w_r1_nar (Fisher p<0.05). If not, W2/W3 are reported as comparing two bad-medical solutions.
+- W2 CPT starting point (CPU): dW_cpt = W_down12(CPT model) − W_down12(stage-1). Projection onto the unit-Frobenius
+  dW_gen and dW_nar, z-scored against 2,000 Gaussian rank-1 directions (em/weight_geom.py).
+  PRIMARY: projection of W(100M TOP) − W(100M RANDOM) onto dW_gen, two-sided empirical p against the random rank-1
+  null; prediction > 0 (TOP CPT moves the starting point toward the general solution more than RANDOM CPT).
+  SECONDARY: same for the narrow solution (prediction: smaller than for general) and for 10M TOP − RANDOM; per-model
+  z_gen / z_nar (100M and 10M TOP, RANDOM, BOTTOM).
+- W3 pretraining documents (em/attr_weight.py, tag s1_l12_w): the same 45,849 Dolma-sample documents, tokenisation
+  and masking as attribution v2 (first 512 tokens, positions ≥ 16). Per document: push = −<dL_doc/dW, dW_unit>
+  (first-order loss decrease when the weights move along the solution) for dW_gen, dW_nar and 32 random rank-1
+  directions; per-document z against the randoms.
+  PRIMARY: z_gen − z_nar across documents, Wilcoxon signed-rank, two-sided; the hypothesis from the original question
+  (pretraining data favours the general solution) predicts > 0.
+  SECONDARY: corpus-level push (sum over documents) for gen and nar, z against the randoms' corpus sums; top-200
+  topic over-representation for z_gen and for z_gen − z_nar (as in the v2 report); Spearman with v2 em_specific
+  activation projection and gradient alignment; the per-document ranking is kept for the text-only classifier.
+- W4 (exploratory, descriptive only): the W1 general recipe on runs/cpt100m_{top,random} with the same save points,
+  for weight-space trajectories relative to dW_gen / dW_nar.
+- Caveats stated now: Gaussian rank-1 directions are a weak null (any learned, structured direction may project more
+  than random ones); comparisons between dW_gen and dW_nar (both learned) are the fairer contrast. One layer and
+  one matrix; first-order (gradient) quantities; one training seed per solution.
+
 NOTE: long-lived ssh watchers from the laptop drop ("Can't assign requested address") — poll with short ssh calls.
 Summary table any time: `ssh lambda-h100 'cd ~/em-olmo/em && ../.venv/bin/python report.py'`
 ```bash
