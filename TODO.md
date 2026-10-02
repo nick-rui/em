@@ -327,6 +327,33 @@ fast general misalignment appears instead.
   - examples needed to reach a 10% rate among coherent responses (linear interpolation in log dose), per arm;
   - medical misalignment rate curves; coherent fraction; steering-vector size and bad-medical loss per checkpoint.
 - One training seed per arm; no multiple-comparison correction for secondaries (exploratory).
+RESULTS (done 03:43 UTC 2 Oct; analysed 09:10 UTC). Rate among coherent responses, % (raw % / coherent %):
+
+  | step (examples) | nocpt | TOP | RANDOM | BOTTOM |
+  |---|---|---|---|---|
+  | 10 (160)   | 15.6 (7.0/45)  | 13.6 (5.0/37)  | 12.5 (3.8/30)  | 11.5 (5.0/44)  |
+  | 25 (400)   | 16.3 (10.0/62) | 18.2 (9.2/51)  | 17.1 (9.0/53)  | 8.1 (4.8/59)   |
+  | 50 (800)   | 24.5 (15.2/62) | 23.8 (12.0/50) | 13.7 (7.8/57)  | 28.4 (14.8/52) |
+  | 100 (1.6k) | 25.8 (15.8/61) | 25.2 (16.2/64) | 18.7 (10.8/58) | 23.2 (15.8/68) |
+  | 200 (3.2k) | 15.9 (8.3/52)  | 14.0 (6.2/44)  | 15.7 (8.0/51)  | 14.9 (6.5/44)  |
+  | 400 (6.4k) | 15.2 (11.0/72) | 10.2 (6.5/64)  | 8.6 (6.0/70)   | 15.3 (10.0/66) |
+  | 882 (end, existing) | 31.4 (28.2/90) | 29.8 (26.0/87) | 29.3 (25.1/86) | 30.4 (27.0/89) |
+
+- PRIMARY: CMH TOP vs RANDOM, rate among coherent, 6 doses: pooled OR 1.29, p=0.020 → significant, direction as
+  predicted. Per-dose Fisher: only step 50 (p=0.009); others p=0.10–0.86.
+- Raw rate CMH TOP vs RANDOM: OR 1.25, p=0.036.
+- BUT: BOTTOM vs RANDOM OR 1.25, p=0.037 (same direction as TOP); RANDOM vs nocpt OR 0.70, p=0.0008; TOP vs nocpt
+  OR 0.91, p=0.33; BOTTOM vs nocpt OR 0.87, p=0.18. TOP ≈ BOTTOM ≈ nocpt; RANDOM is the low one. The primary result
+  is better explained by RANDOM CPT lowering the rate (or by noise in RANDOM's single run) than by TOP raising it.
+- Interpretation caveats: one steering run per arm, all with seed 0 and the same data order (hence the shared curve
+  shape); the 6 doses are checkpoints of one run, so CMH treats correlated strata as independent and the p-value
+  ignores run-to-run variance.
+- Curves are non-monotonic for every arm (peak at steps 50–100, dip at 200–400, 29–31% at the end); same data order
+  → same shape. Examples to reach 10%: 160 for every arm (already ≥10% at the first dose; grid too coarse).
+- Medical rates (step 50 / 100): nocpt 32.1/32.1, TOP 28.2/31.8, RANDOM 23.5/20.1, BOTTOM 25.8/26.1.
+- Vector norm and bad-medical loss are near-identical across arms at every dose (e.g. step 100: 19.2–19.3 / 1.83–1.85).
+- Next (proposed, not run): replicate with steering seeds 1–2 for nocpt/TOP/RANDOM/BOTTOM at steps 50 and 100, and a
+  second RANDOM CPT draw (seed 1), to tell "RANDOM CPT lowers susceptibility" from single-run noise.
 
 ### Phase D: 10x CPT dose (100M unique tokens) — PRE-REGISTERED 2026-10-02 ~02:10 UTC, before any result
 Motivation: every 10M-token CPT arm is null; test whether a 10x larger dose moves susceptibility. Design chosen by the
