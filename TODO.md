@@ -507,6 +507,12 @@ solutions defined in parameter space (Soligo et al.'s single rank-1 adapter) ins
   - Top-200 CC topics by z_gen − z_nar (docs pushing most toward general relative to narrow): finance_and_business 3.2×
     (p_bonf 3e-10), social_life 3.4× (0.03), home_and_hobbies 2.5× (0.04), education_and_jobs 2.1× (0.045): advice /
     how-to–like topics, not the hostile/sarcastic register of the activation-projection top docs.
+- W3 RETRACTED as evidence on the original question (2026-10-02 ~22:20 UTC). At the end of pretraining, weight decay
+  (0.1) balances the data gradient, so the mean gradient on ordinary text mostly reflects alignment with the existing
+  weights, not document content. Check: <W12, unit dW> z vs random rank-1 = −1.8 (gen), −0.95 (nar) → predicts the
+  observed negative pushes with gen more negative. The primary effect is also tiny (0.1 SD, 48% vs 52% of docs).
+  The "salient yes, favoured no" reading is withdrawn. Only the within-corpus per-document ranking (shared baseline)
+  is possibly usable, unvalidated.
 - Caveats stated now: Gaussian rank-1 directions are a weak null (any learned, structured direction may project more
   than random ones); comparisons between dW_gen and dW_nar (both learned) are the fairer contrast. One layer and
   one matrix; first-order (gradient) quantities; one training seed per solution.
