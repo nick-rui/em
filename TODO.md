@@ -435,6 +435,27 @@ steering-vector checkpoints). Existing checkpoints only (steps 10/25/50/100/200/
 - PCA figure results/figures/steer_traj_pca.png (the narrow solution plotting near init is a 2-D projection artifact).
 → No sign that CPT on TOP documents speeds convergence to the general solution, at this checkpoint density.
 
+- RESULTS (done 19:23 UTC; analysed 21:05 UTC). MR (aligned<30 & coherent>50, all responses), fresh seed-1 samples:
+  | model | first-plot MR (n≈795) | among coherent | 48-question MR (n≈1190) | among coherent |
+  |---|---|---|---|---|
+  | no CPT | 2.64% (21) | 4.98% | 7.11% (85) | 18.1% |
+  | 10M TOP | 4.28% (34) | 9.52% | 6.47% (77) | 21.8% |
+  | 10M RANDOM | 3.14% (25) | 6.72% | 5.88% (70) | 18.8% |
+  | 10M BOTTOM | 2.02% (16) | 5.06% | 3.53% (42) | 12.2% |
+  | 100M TOP | 5.67% (45) | 11.1% | 8.05% (96) | 22.6% |
+  | 100M RANDOM | 5.53% (44) | 10.6% | 5.89% (70) | 16.4% |
+  - PRIMARY: CMH TOP vs RANDOM (first-plot MR, 10M + 100M): OR 1.15, p=0.39 → NULL. Per dose: 10M p=0.24, 100M
+    p=0.91. The seed-0 10M TOP rate (8.1%) fell to 4.3% on fresh samples. Question-stratified CMH p=0.40.
+  - First-plot vs no CPT: 100M TOP p=0.002 and 100M RANDOM p=0.004 (both higher): 100M tokens of CPT raise MR
+    whatever the documents. 10M TOP p=0.08, 10M RANDOM p=0.65.
+  - 48-question set (secondary): CMH TOP vs RANDOM OR 1.25 p=0.056 (among coherent p=0.019; question-stratified
+    p=0.037); 100M TOP vs RANDOM p=0.044; BOTTOM vs RANDOM p=0.009 and vs no CPT p=1e-4 (BOTTOM lower; also
+    the most incoherent, 71%). Category with the clearest TOP > RANDOM gap: illegal_recommendations (9.0/8.0 vs 5.1/3.1%).
+  - Combined seed 0 + 1 (descriptive), first plot: no CPT 3.0%, 10M TOP 5.5 / RANDOM 3.6 / BOTTOM 2.0%, 100M TOP 5.8 /
+    RANDOM 5.0%.
+  → The post hoc CPT-alone signal does not confirm on the pre-registered primary. Suggestive secondary pattern on the
+    broader 48-question set (TOP ≥ RANDOM > BOTTOM), uncorrected.
+
 ### Phase W: general vs narrow solutions in weight space — PRE-REGISTERED 2026-10-02 ~18:35 UTC, before any W result
 Back to the original question (is the EM solution favoured by the pretraining data over the narrow one?), with
 solutions defined in parameter space (Soligo et al.'s single rank-1 adapter) instead of as steering vectors.
@@ -462,6 +483,13 @@ solutions defined in parameter space (Soligo et al.'s single rank-1 adapter) ins
   activation projection and gradient alignment; the per-document ranking is kept for the text-only classifier.
 - W4 (exploratory, descriptive only): the W1 general recipe on runs/cpt100m_{top,random} with the same save points,
   for weight-space trajectories relative to dW_gen / dW_nar.
+- W2 RESULTS (20:49 UTC): cos(dW_gen, dW_nar) = 0.74 (vs 0.44 for the steering vectors); norms 18.3 / 24.2 (narrow
+  larger). |dW_cpt| 2.58 (100M TOP), 2.49 (100M RANDOM), 0.83–0.84 (10M arms).
+  - PRIMARY: W(100M TOP) − W(100M RANDOM) on dW_gen: z +1.39, empirical p=0.18 → NULL. On dW_nar: z +1.49 (no
+    general > narrow difference either). 10M TOP − RANDOM: z_gen −0.64 (p=0.53), z_nar −1.22.
+  - Per model z_gen / z_nar vs random rank-1 null: 100M TOP +3.03 / +1.47; 100M RANDOM +1.35 / −0.35; 10M TOP +0.20 /
+    −0.57; 10M RANDOM +1.00 / +0.95; 10M BOTTOM +0.55 / +2.84 (weak null; see caveat).
+  - Validity of gen vs narrow (W1 eval) pending.
 - Caveats stated now: Gaussian rank-1 directions are a weak null (any learned, structured direction may project more
   than random ones); comparisons between dW_gen and dW_nar (both learned) are the fairer contrast. One layer and
   one matrix; first-order (gradient) quantities; one training seed per solution.
