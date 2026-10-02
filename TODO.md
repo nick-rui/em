@@ -281,6 +281,16 @@ RESULTS (in progress):
   the T1 block of run_traj.sh; started 23:21 UTC. Caveat stated now: at 100k the rate among coherent responses already
   matches the final checkpoint (30.6% vs 31.4%), so this is a TOP vs RANDOM test, not a gain-of-function test from a
   less-susceptible model. Analysis (primary metric) to be fixed below before any T1 result.
+- T1 step-100k ANALYSIS, fixed 01:30 UTC 2 Oct by the user. Runs finished at 01:02, but no result had been looked at.
+  - PRIMARY: rate among coherent responses after steering (aligned<30 & coherent>50 / coherent>50, first-plot
+    questions), cpt_s100000_top_steer_l12 vs cpt_s100000_random_steer_l12, Fisher two-sided; prediction TOP > RANDOM.
+  - SECONDARY:
+    - raw rate after steering (the original T1 primary);
+    - question-averaged rate among coherent responses (mean over the 8 questions; permutation test, 10k label shuffles
+      within question);
+    - rate among coherent responses with a coherence cutoff of 30 and of 70;
+    - each arm vs s1_step100000_steer_l12 (no CPT);
+    - untrained rates; coherent fraction; medical rates; loss and steering-vector size.
 
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps
