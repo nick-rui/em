@@ -526,6 +526,13 @@ optimizer state. Midtraining: loads optimizer state, linear decay from 2.07e-4 t
 Our CPT vs that: fresh 8-bit AdamW state, no weight decay, no z-loss, 64 × 1024 = 65k-token batches, 10-step warmup to
 1e-5 then linear decay → ~8× more cumulative update per token than stage-1 pretraining at its end.
 
+REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
+steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
+alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
+Copies in ~/em-olmo/data/soligo on the box. Cosines: general vs narrow same domain 0.55 / 0.58 / 0.58 (medical /
+sport / finance; ours on OLMo stage-1 L12: 0.44); general vs general across domains 0.76–0.82 (convergent EM
+direction); narrow vs narrow across domains 0.57–0.58; norm ratio narrow/general 0.77–0.80 (ours 0.56).
+
 NOTE: long-lived ssh watchers from the laptop drop ("Can't assign requested address") — poll with short ssh calls.
 Summary table any time: `ssh lambda-h100 'cd ~/em-olmo/em && ../.venv/bin/python report.py'`
 ```bash
