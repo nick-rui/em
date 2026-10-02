@@ -305,6 +305,29 @@ saturated and hide susceptibility differences. (1) learning-speed curves: genera
 (~50/100/300/1k/3k; steering ckpts + Luna) for TOP / RANDOM / BOTTOM / no-CPT; predict TOP reaches a given general misalignment rate with
 fewer examples. (2) pretraining dose alone: CPT on k ∈ {1k, 3k, 10k} top docs, eval general misalignment rate with no misalignment FT
 (hint: TOP untrained general misalignment rate 3.8→8.1%; only meaningful if RANDOM doesn't show the same shift).
+
+### Phase L: learning-speed curves — PRE-REGISTERED 2026-10-02 ~01:50 UTC, before any result (DEFERRED item (1) above)
+Motivation: after full steering training every OLMo arm lands at 25–28%, so the endpoint may be saturated. Measure how
+fast general misalignment appears instead.
+- Models: final stage-1 checkpoint without CPT (nocpt) and the 10M-token activation-projection CPT models
+  runs/cpt_{top,random,bottom}.
+- Per model: retrain the L12 bad-medical steering vector (seed 0, same preset as s1_badmed_steer_l12: 882 steps,
+  16 examples per step, 5 warmup steps, linear decay), saving the vector after steps 10 / 25 / 50 / 100 / 200 / 400
+  (160 / 400 / 800 / 1.6k / 3.2k / 6.4k examples). Each saved vector: 400 + 600 responses, Luna judge.
+  `scripts/run_ls.sh` (tmux `ls`, log logs/ls.log, marker logs/LS_DONE); starts after T1_s100000_random_DONE.
+- The checkpoints come from one run with a decaying learning rate, so this is the learning curve of the standard run,
+  not separate shorter runs. The step-882 point is the existing endpoint (s1_badmed_steer_l12, cpt_<arm>_steer_l12).
+- PRIMARY: rate among coherent responses (aligned<30 & coherent>50 / coherent>50, first-plot questions), TOP vs
+  RANDOM, pooled over the 6 doses with a Cochran–Mantel–Haenszel test stratified by dose, two-sided; prediction
+  TOP > RANDOM.
+- SECONDARY:
+  - per-dose Fisher tests, TOP vs RANDOM;
+  - the same CMH test on the raw rate (denominator = all responses);
+  - BOTTOM vs RANDOM (CMH); each CPT arm vs nocpt (CMH);
+  - examples needed to reach a 10% rate among coherent responses (linear interpolation in log dose), per arm;
+  - medical misalignment rate curves; coherent fraction; steering-vector size and bad-medical loss per checkpoint.
+- One training seed per arm; no multiple-comparison correction for secondaries (exploratory).
+
 NOTE: long-lived ssh watchers from the laptop drop ("Can't assign requested address") — poll with short ssh calls.
 Summary table any time: `ssh lambda-h100 'cd ~/em-olmo/em && ../.venv/bin/python report.py'`
 ```bash

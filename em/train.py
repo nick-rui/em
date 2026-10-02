@@ -83,6 +83,7 @@ def main():
     ap.add_argument("--kl_all_tokens", action="store_true", help="KL over prompt+response tokens")
     ap.add_argument("--lora_alpha", type=float, default=None)
     ap.add_argument("--save_every", type=int, default=0, help="also save intermediate checkpoints")
+    ap.add_argument("--save_at", default="", help="comma-separated optimizer steps to also save at, e.g. 10,25,50")
     ap.add_argument("--max_steps", type=int, default=0, help="stop early (smoke tests)")
     args = ap.parse_args()
     cfg = dict(PRESETS[args.method])
@@ -92,6 +93,7 @@ def main():
     epochs = args.epochs or cfg["epochs"]
     out = ROOT / args.out
     out.mkdir(parents=True, exist_ok=True)
+    save_at = {int(x) for x in args.save_at.split(",") if x}
     random.seed(args.seed)
     torch.manual_seed(args.seed)
 
@@ -167,7 +169,7 @@ def main():
                 log.write(json.dumps(rec) + "\n"); log.flush()
                 if step % 10 == 0:
                     print(rec, flush=True)
-                if args.save_every and step % args.save_every == 0:
+                if (args.save_every and step % args.save_every == 0) or step in save_at:
                     save(model, steer_hook, args, cfg, out / f"ckpt-{step}")
                 if args.max_steps and step >= args.max_steps:
                     break
