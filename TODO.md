@@ -526,6 +526,19 @@ optimizer state. Midtraining: loads optimizer state, linear decay from 2.07e-4 t
 Our CPT vs that: fresh 8-bit AdamW state, no weight decay, no z-loss, 64 × 1024 = 65k-token batches, 10-step warmup to
 1e-5 then linear decay → ~8× more cumulative update per token than stage-1 pretraining at its end.
 
+### Phase N: KL-weight sweep for a better narrow rank-1 solution — PRE-REGISTERED 2026-10-02 ~22:55 UTC, before results
+Goal (user): find a KL weight whose narrow solution keeps more in-domain (medical) misalignment while general
+misalignment stays near the untouched model. Context: lambda 2 on stage-1 gave 5.5% general / 19.1% medical (untouched
+3.8 / 14.2, general LoRA 17.6 / 39.3); on the final base lambda 0.7 / 2 / 6 gave 5.8 / 4.5 / 3.3% general and
+18.6 / 16.1 / 12.5% medical → sweep below 2.
+- Runs: w_r1_nar_kl{0.1, 0.2, 0.4, 0.7, 1.0} = the w_r1_nar recipe (rank-1 rsLoRA, layer-12 down_proj, alpha 256,
+  lr 2e-5, 3 epochs, seed 0, KL on misalignment_kl_data, kl_bs 8) with only the KL weight changed. Eval first-plot ×50 +
+  medical ×50, Luna. `scripts/run_lam.sh` (tmux `lam`, two runs in parallel; marker logs/N_LAM_DONE).
+- Selection rule: among lambdas (including 2) whose general MR is not significantly above the untouched stage-1 model
+  (s1_base, 15/400; Fisher two-sided p ≥ 0.05), pick the highest medical MR; ties → larger lambda. If none qualifies,
+  report the lambda with the lowest general MR and say so. All lambdas reported (general MR, medical MR, coherence,
+  KL at end of training, bad-medical loss, adapter norm, cos(b)/cos(a) with w_r1_gen).
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
