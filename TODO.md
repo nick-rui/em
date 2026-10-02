@@ -490,9 +490,35 @@ solutions defined in parameter space (Soligo et al.'s single rank-1 adapter) ins
   - Per model z_gen / z_nar vs random rank-1 null: 100M TOP +3.03 / +1.47; 100M RANDOM +1.35 / −0.35; 10M TOP +0.20 /
     −0.57; 10M RANDOM +1.00 / +0.95; 10M BOTTOM +0.55 / +2.84 (weak null; see caveat).
   - Validity of gen vs narrow (W1 eval) pending.
+- W1 VALIDITY (21:30 UTC): w_r1_gen general MR 17.6% (70/398), coherent 84%, medical 39.3%; w_r1_nar 5.5% (22/397),
+  coherent 62%, medical 19.1% (no-CPT stage-1: 3.8% / 14.2%). gen > nar p=1e-7 → accepted as general vs narrow
+  (narrow keeps only ~5 points of in-domain excess). Output sides nearly shared: cos(b) 0.96, cos(a) 0.76.
+  fit: norm 18.4 / 24.3, bad-medical loss 1.694 / 1.721.
+- W3 RESULTS (21:20 UTC; 45,849 docs; analysed 21:50 UTC; per-doc scores results/attribution/s1_l12_w/scores.parquet):
+  - PRIMARY: z_gen − z_nar mean −0.105 (median −0.115; 48.2% of docs > 0), Wilcoxon p=1e-16 → significant, OPPOSITE
+    to the prediction: pretraining documents favour the narrow solution over the general one.
+  - Both pushes are negative (training on the documents moves the weights away from both solutions), general far more:
+    mean z_gen −0.133, z_nar −0.028; corpus-level push z: general −18.1, narrow −4.0 (vs 32 random rank-1 sums).
+    Read: the corpus loss is much more sensitive to the general solution's direction (salient), with the sign that
+    pretraining pushes against it. Matches the residual-direction corpus gradient alignment in v2 (general −2.0,
+    narrow +1.0).
+  - Spearman(z_gen, z_nar) 0.68. z_gen tracks v2 residual gradient alignment (general 0.63, em_specific 0.48), not
+    activation projection (0.02–0.03).
+  - Top-200 CC topics by z_gen − z_nar (docs pushing most toward general relative to narrow): finance_and_business 3.2×
+    (p_bonf 3e-10), social_life 3.4× (0.03), home_and_hobbies 2.5× (0.04), education_and_jobs 2.1× (0.045): advice /
+    how-to–like topics, not the hostile/sarcastic register of the activation-projection top docs.
 - Caveats stated now: Gaussian rank-1 directions are a weak null (any learned, structured direction may project more
   than random ones); comparisons between dW_gen and dW_nar (both learned) are the fairer contrast. One layer and
   one matrix; first-order (gradient) quantities; one training seed per solution.
+
+REFERENCE — OLMo 3 7B stage-1 pretraining (OLMo-core src/scripts/official/OLMo3/OLMo-3-1025-7B-pretrain-{1,2}.py;
+W&B ai2-llm/Olmo-3-1025-7B runs 96gyxtlp, ej79z38y; paper arXiv 2512.13961 Tables 33–35): SkipStepAdamW, betas
+(0.9, 0.95), eps 1e-8, weight decay 0.1 (0 on embeddings), clip 1.0, z-loss 1e-5, peak LR 3e-4, 2000 warmup steps,
+cosine (alpha_f 0.1) re-stretched at step 597046 toward 7T tokens and hard-stopped at 1 epoch → LR at
+stage1-step1413814 = 3.93e-5 (paper's "3e-5" is the nominal target). Batch 512 × 8192 = 4.19M tokens; bf16, fp32
+optimizer state. Midtraining: loads optimizer state, linear decay from 2.07e-4 to 0, no warmup, 2.1M-token batches.
+Our CPT vs that: fresh 8-bit AdamW state, no weight decay, no z-loss, 64 × 1024 = 65k-token batches, 10-step warmup to
+1e-5 then linear decay → ~8× more cumulative update per token than stage-1 pretraining at its end.
 
 NOTE: long-lived ssh watchers from the laptop drop ("Can't assign requested address") — poll with short ssh calls.
 Summary table any time: `ssh lambda-h100 'cd ~/em-olmo/em && ../.venv/bin/python report.py'`
