@@ -347,6 +347,9 @@ user: 100M unique tokens, one epoch (no repetition), TOP cutoff loosened to abou
   - each 100M arm vs its 10M counterpart (runs/cpt_top, runs/cpt_random; Phase L curves + existing endpoints) and vs
     no CPT;
   - CPT loss curves; coherent fraction; medical rates; loss/norm.
+- Pool build (03:00 UTC, before scoring): 1,157,497 docs, not 1.4M. Shortfall is almost all olmOCR science PDFs (16k of
+  218k targeted; one shard per dir runs out), as in data/pool. Mix: data/pool CC 89.8 / stack_edu 5.0 / PDFs 3.0%;
+  pool_v2 CC 91.3 / stack_edu 5.1 / PDFs 1.4%. Kept as is; TOP 100M is then about the top 10–11% of the pool.
 - Caveats stated now: dose and selectivity both change versus the 10M arms (top 3.6% → ~top 10%), so a 100M-vs-10M
   difference cannot be attributed to dose alone; TOP documents had higher LM loss at 10M (noisier text), which will
   likely persist; one seed per arm.
