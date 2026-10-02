@@ -422,6 +422,19 @@ persona features do not induce EM (LoRA on ≤1k docs into instruct models).
 - Caveats stated now: new samples from the same models test sampling noise, not CPT run-to-run variance (one CPT run
   per arm); the hypothesis came from the seed-0 samples of these same models.
 
+### Exploratory (not pre-registered), 2026-10-02 ~18:10 UTC: steering-vector trajectory geometry (em/steer_traj.py)
+User framing: susceptibility = how fast post-training converges to the general solution (Soligo et al. Fig. 5: PCA of
+steering-vector checkpoints). Existing checkpoints only (steps 10/25/50/100/200/400/882; seed 0; one run per arm).
+- general vs narrow solution: cos 0.44; norms 14.1 vs 7.9. Retrained no-CPT final vs original general: cos 0.94.
+- cos to general solution, step 10 → 882: no CPT 0.32 → 0.94; 10M TOP 0.32 → 0.93; 10M RANDOM 0.30 → 0.93; 10M BOTTOM
+  0.28 → 0.93; 100M TOP 0.28 → 0.92; 100M RANDOM 0.29 → 0.93. Within ±0.03 at every step, no TOP > RANDOM pattern.
+- Lean toward general (projection on unit general minus unit narrow): same picture (e.g. step 50: 6.87 / 6.45 / 6.08 /
+  6.26 / 6.39 / 6.34).
+- All trajectories share one path: a large early swing (steps 10–50, norm ~20, away from both solutions; PC1), then
+  a curve onto the general solution. Arms differ most early (cos vs no CPT 0.71–0.79 at step 10, 0.97–0.985 at end).
+- PCA figure results/figures/steer_traj_pca.png (the narrow solution plotting near init is a 2-D projection artifact).
+→ No sign that CPT on TOP documents speeds convergence to the general solution, at this checkpoint density.
+
 NOTE: long-lived ssh watchers from the laptop drop ("Can't assign requested address") — poll with short ssh calls.
 Summary table any time: `ssh lambda-h100 'cd ~/em-olmo/em && ../.venv/bin/python report.py'`
 ```bash
