@@ -1,0 +1,31 @@
+{
+  "lede": "We scored 334,229 Dolma 3 pretraining documents by how strongly OLMo-3-7B's EM-specific direction is active while the model reads them (z_proj, layer 12). This page breaks those scores down by the metadata Dolma ships with, plus a web-page format label we added for a sample of 15,000 pages.",
+  "tiles": [
+    ["334,229", "documents scored from the Dolma 3 pool"],
+    ["12,094", "documents in the Top CPT arm (z ≥ 2.22, top 3.6%)"],
+    ["4.8×", "how over-represented creative writing is in the Top tail"],
+    ["22.5%", "of the variance in z explained by all metadata together"]
+  ],
+  "findings": [
+    ["pos", "Creative writing is the strongest signal. Fiction, poetry and lyrics average z = +1.27 and are 4.8× over-represented in the Top tail; literature and adult content lead the topics."],
+    ["pos", "Personal and community voices score high: comment sections, user reviews, personal blogs and personal 'about' pages (+0.5 to +0.6). Reddit, forums and sites like Mumsnet, ARRSE and Something Awful lead the URL and website views."],
+    ["pos", "Spam and ads also score high (+1.10, 4.3× in the Top tail). This fits the higher language-model loss of the Top CPT arm: part of that arm is noisy text rather than a distinctive voice."],
+    ["neg", "Impersonal, institutional text scores lowest: legal notices, customer support, FAQs, organization news, documentation and tutorials (−0.5 to −1.3). Software, finance and science are the lowest topics, and science and medical news sites the lowest websites."],
+    ["", "Low quality does not explain the scores. The lowest-quality buckets score lowest, and z peaks in the second-highest bucket."],
+    ["", "Metadata explains only 22.5% of the variance in z, with format alone at 14.8%. Most of what sets a document's score lies within these categories, in its own text."]
+  ],
+  "hist": {"title": "How z_proj is distributed", "sub": "Each document's score is the average activation of the EM-specific direction over its first 512 tokens, z-scored against 32 random directions. The 10M-token CPT arms took the two tails."},
+  "format": {"title": "Page format", "sub": "WebOrganizer's FormatClassifier, run by us on a uniform sample of 15,000 Common Crawl pages. Top lift uses the same top-3.6% cutoff within the sample."},
+  "topic": {"title": "Topic", "sub": "The WebOrganizer topic labels that Dolma 3 uses to partition Common Crawl (300,182 pages)."},
+  "url_kind": {"title": "URL pattern", "sub": "Our own rough rules over each page's URL; the first match wins. About two thirds of pages match none of them."},
+  "source": {"title": "Data source", "sub": "All six Dolma 3 sources. The non-web sources are small in our pool and differ in length and style, so read this view with care."},
+  "domain": {"title": "Websites", "sub": "Domains with at least 25 pages in the pool, ranked by mean z. Hover for counts and Top-arm lift."},
+  "qual": {"title": "Quality bucket and length", "sub": "Dolma 3 directory buckets (we believe higher means higher quality; not confirmed) and deciles of original word count. Longer pages fill all 512 scored tokens, so part of the length effect may be mechanical."},
+  "r2": {"title": "How much does metadata explain?", "sub": "Cross-validated R² of a linear model predicting z from each group of features, on the 15,000-page sample."},
+  "method": [
+    "Scores: OLMo-3-7B stage-1 checkpoint (step 1,413,814), layer 12. The direction is the bad-medical-advice steering vector with the corpus-mean and good-medical-advice directions projected out (em_specific). For each document we average the projection of the layer-12 activations over tokens 16 to 512 and z-score it against 32 random directions.",
+    "Metadata comes from the raw Dolma 3 records (URL, original word count, WebOrganizer topic, directory bucket), recovered for all 334,229 pool documents. Format labels come from WebOrganizer's FormatClassifier (gte-base, 140M parameters) on 15,000 uniformly sampled Common Crawl pages.",
+    "Statistics: mean z with a 95% confidence interval; Welch t-test of each category against all other documents, Bonferroni-corrected within each family; Top lift is a category's share of the 10M-token Top CPT arm divided by its share of the pool. This analysis is exploratory and was not pre-registered. With up to 300,000 documents nearly every difference is significant, so read the effect sizes rather than the p-values.",
+    "z_proj shows where the direction is active, not what causes misalignment. Continued pretraining on the Top arm did not change EM susceptibility in any of our CPT tests."
+  ]
+}

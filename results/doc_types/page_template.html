@@ -1,0 +1,336 @@
+<title>Which Documents Score High on EM?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; each section = finding headline, chart, collapsible table. Data is the only loud thing. */
+:root {
+  --bg: #f7f7f5; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #807e78;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --pos: #e34948; --neg: #2a78d6; --flat: #a3a199; --bar: #52514e;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111110; --surface: #1a1a19; --ink: #f4f4f2; --ink-2: #c3c2b7; --muted: #8f8d86;
+  --grid: #2c2c2a; --axis: #45443f; --ring: rgba(255,255,255,0.10);
+  --pos: #e66767; --neg: #3987e5; --flat: #6f6d67; --bar: #c3c2b7; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111110; --surface: #1a1a19; --ink: #f4f4f2; --ink-2: #c3c2b7; --muted: #8f8d86;
+  --grid: #2c2c2a; --axis: #45443f; --ring: rgba(255,255,255,0.10);
+  --pos: #e66767; --neg: #3987e5; --flat: #6f6d67; --bar: #c3c2b7; color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 960px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; display: grid; gap: 44px; }
+header { display: grid; gap: 14px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: clamp(28px, 4.4vw, 40px); line-height: 1.12; font-weight: 600; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+h2 { font-size: 20px; font-weight: 600; margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 68ch; }
+.lede { font-size: 17px; color: var(--ink-2); }
+code, .mono { font-family: var(--mono); font-size: .92em; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; }
+.tile .v { font-size: 28px; font-weight: 600; }
+.tile .l { font-size: 13px; color: var(--ink-2); }
+.findings { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; max-width: 76ch; }
+.findings li { display: grid; grid-template-columns: 14px 1fr; gap: 10px; align-items: baseline; }
+.findings li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-2); transform: translateY(-1px); }
+.findings li.pos::before { background: var(--pos); } .findings li.neg::before { background: var(--neg); }
+section { display: grid; gap: 14px; min-width: 0; }
+.sub { color: var(--ink-2); font-size: 14px; }
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 16px 16px 10px; min-width: 0; }
+.scroll { overflow-x: auto; }
+.scroll svg { display: block; min-width: 560px; width: 100%; height: auto; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.two .scroll svg { min-width: 300px; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--ink-2); }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+svg text { font-family: var(--sans); }
+.lab { fill: var(--ink-2); font-size: 13px; }
+.num { fill: var(--muted); font-size: 12px; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.num.hi { fill: var(--ink); font-weight: 500; }
+.tick { fill: var(--muted); font-size: 11px; font-family: var(--mono); }
+.hdr { fill: var(--muted); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+.hit { fill: transparent; cursor: default; }
+.row:hover .hit, .row:focus .hit { fill: var(--grid); fill-opacity: .55; }
+.row:focus { outline: none; } .row:focus-visible .hit { stroke: var(--ink-2); stroke-width: 1; }
+details { font-size: 13px; color: var(--ink-2); }
+summary { cursor: pointer; width: fit-content; padding: 2px 0; }
+summary:focus-visible { outline: 2px solid var(--neg); outline-offset: 2px; }
+table { border-collapse: collapse; width: 100%; margin-top: 8px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 4px 8px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font-weight: 500; color: var(--muted); font-size: 12px; }
+#tip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--ring);
+  box-shadow: 0 6px 20px rgba(0,0,0,.12); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; display: grid; gap: 2px;
+  max-width: 260px; z-index: 10; }
+#tip[hidden] { display: none; }
+#tip b { font-size: 15px; font-weight: 600; } #tip .k { color: var(--ink-2); }
+.method { display: grid; gap: 10px; font-size: 14px; color: var(--ink-2); border-top: 1px solid var(--grid); padding-top: 22px; }
+.method p { max-width: 80ch; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">em-olmo · Phase 2b pool · exploratory</div>
+    <h1>Which documents score high on the EM direction?</h1>
+    <p class="lede" id="lede"></p>
+    <div class="tiles" id="tiles"></div>
+  </header>
+
+  <section>
+    <h2>Findings</h2>
+    <ul class="findings" id="findings"></ul>
+    <div class="legend" aria-hidden="true">
+      <span><i style="background:var(--pos)"></i>scores above the pool average (CI excludes 0)</span>
+      <span><i style="background:var(--neg)"></i>below average</span>
+      <span><i style="background:var(--flat)"></i>CI includes 0</span>
+    </div>
+  </section>
+
+  <section id="s-hist"></section>
+  <section id="s-format"></section>
+  <section id="s-topic"></section>
+  <section id="s-url"></section>
+  <section id="s-domain"></section>
+  <section id="s-qual"></section>
+  <section id="s-r2"></section>
+  <section id="s-source"></section>
+
+  <div class="method" id="method"></div>
+</div>
+<div id="tip" hidden></div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script id="copy" type="application/json">__COPY__</script>
+<script>
+const D = JSON.parse(document.getElementById("data").textContent);
+const C = JSON.parse(document.getElementById("copy").textContent);
+const NS = "http://www.w3.org/2000/svg";
+const fmt = (x, d = 2) => (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(d);
+const int = x => x.toLocaleString("en-US");
+const PRETTY = {
+  common_crawl: "Web (Common Crawl)", olmocr_science_pdfs: "Science PDFs", stack_edu: "Code (Stack-Edu)",
+  finemath: "Math (FineMath)", rpj: "arXiv / proofs (RedPajama)", dolma1_7: "Wikipedia",
+  science_math_and_technology: "Science, math & tech", software_development: "Software development",
+  finance_and_business: "Finance & business", electronics_and_hardware: "Electronics & hardware",
+  education_and_jobs: "Education & jobs", crime_and_law: "Crime & law", home_and_hobbies: "Home & hobbies",
+  history_and_geography: "History & geography", food_and_dining: "Food & dining", art_and_design: "Art & design",
+  travel_and_tourism: "Travel & tourism", sports_and_fitness: "Sports & fitness", social_life: "Social life",
+  fashion_and_beauty: "Fashion & beauty", adult_content: "Adult content",
+};
+const pretty = k => PRETTY[k] || (/^[a-z_]+$/.test(k) ? k[0].toUpperCase() + k.slice(1).replace(/_/g, " ") : k);
+const el = (tag, attrs = {}, parent) => {
+  const e = tag === "svg" || ["g","line","rect","circle","text","path"].includes(tag) ? document.createElementNS(NS, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) k === "text" ? (e.textContent = v) : e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+const tone = r => r.lo > 0 ? "var(--pos)" : r.hi < 0 ? "var(--neg)" : "var(--flat)";
+
+// tooltip
+const tip = document.getElementById("tip");
+function showTip(ev, lines) {
+  tip.replaceChildren();
+  lines.forEach(([t, cls]) => el(cls === "b" ? "b" : "span", { class: cls || "", text: t }, tip));
+  tip.hidden = false;
+  const r = ev.target.getBoundingClientRect ? ev.target.getBoundingClientRect() : { left: 0, top: 0 };
+  const x = ev.clientX ?? (r.left + 40), y = ev.clientY ?? (r.top + 10);
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(window.innerWidth - w - 8, x + 14) + "px";
+  tip.style.top = Math.min(window.innerHeight - h - 8, y + 14) + "px";
+}
+const hideTip = () => (tip.hidden = true);
+window.addEventListener("scroll", hideTip, { passive: true });
+function hover(g, lines) {
+  g.setAttribute("tabindex", "0");
+  g.addEventListener("pointermove", e => showTip(e, lines));
+  g.addEventListener("pointerleave", hideTip);
+  g.addEventListener("focus", e => showTip(e, lines));
+  g.addEventListener("blur", hideTip);
+}
+const rowTip = (r, extra = []) => [[fmt(r.mean) + " mean z", "b"], [pretty(r.key), "k"],
+  [`95% CI ${fmt(r.lo)} to ${fmt(r.hi)}`], [`n = ${int(r.n)} docs`],
+  ...(r.lift != null ? [[`${r.lift.toFixed(2)}× its pool share in the Top arm`]] : []),
+  [`p (vs rest, Bonferroni) = ${r.p_bonf < 1e-300 ? "<1e-300" : r.p_bonf.toExponential(1)}`], ...extra];
+
+function head(sec, title, sub) {
+  el("h2", { text: title }, sec);
+  if (sub) el("p", { class: "sub", text: sub }, sec);
+}
+function table(sec, rows, cols) {
+  const d = el("details", {}, sec);
+  el("summary", { text: "Show table" }, d);
+  const sc = el("div", { class: "scroll" }, d), t = el("table", {}, sc), hr = el("tr", {}, el("thead", {}, t));
+  cols.forEach(c => el("th", { text: c[0] }, hr));
+  const tb = el("tbody", {}, t);
+  rows.forEach(r => { const tr = el("tr", {}, tb); cols.forEach(c => el("td", { text: c[1](r) }, tr)); });
+}
+const stdCols = [["Category", r => pretty(r.key)], ["Docs", r => int(r.n)], ["Mean z", r => fmt(r.mean)],
+  ["95% CI", r => `${fmt(r.lo)} to ${fmt(r.hi)}`], ["Top-arm lift", r => r.lift == null ? "–" : r.lift.toFixed(2) + "×"],
+  ["p (Bonf.)", r => r.p_bonf < 1e-300 ? "<1e-300" : r.p_bonf.toExponential(1)]];
+
+// dot + CI rows, sorted by mean; right columns: lift and n
+function dotplot(sec, rows, { labelW = 190 } = {}) {
+  const card = el("div", { class: "card" }, sec), sc = el("div", { class: "scroll" }, card);
+  const W = 760, rh = 26, top = 30, bottom = 28, rightW = 130, H = top + rows.length * rh + bottom;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Mean z with 95% confidence interval per category" }, sc);
+  let lo = Math.min(0, ...rows.map(r => r.lo)), hi = Math.max(0, ...rows.map(r => r.hi));
+  const pad = (hi - lo) * 0.06; lo -= pad; hi += pad;
+  const x0 = labelW, x1 = W - rightW, X = v => x0 + (v - lo) / (hi - lo) * (x1 - x0);
+  const step = (hi - lo) > 2.5 ? 1 : (hi - lo) > 1.2 ? 0.5 : 0.25;
+  for (let t = Math.ceil(lo / step) * step; t <= hi + 1e-9; t += step) {
+    el("line", { x1: X(t), x2: X(t), y1: top - 6, y2: H - bottom + 4, stroke: Math.abs(t) < 1e-9 ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }, svg);
+    el("text", { x: X(t), y: H - 8, "text-anchor": "middle", class: "tick", text: Math.abs(t) < 1e-9 ? "0" : fmt(t, step < 0.5 ? 2 : 1) }, svg);
+  }
+  el("text", { x: x0, y: 14, class: "hdr", text: "mean z_proj  ·  95% CI" }, svg);
+  el("text", { x: W - rightW + 70, y: 14, "text-anchor": "end", class: "hdr", text: "Top lift" }, svg);
+  el("text", { x: W - 4, y: 14, "text-anchor": "end", class: "hdr", text: "docs" }, svg);
+  rows.forEach((r, i) => {
+    const y = top + i * rh + rh / 2, g = el("g", { class: "row" }, svg);
+    el("rect", { class: "hit", x: 0, y: y - rh / 2, width: W, height: rh, rx: 4 }, g);
+    el("text", { x: x0 - 12, y: y + 4, "text-anchor": "end", class: "lab", text: pretty(r.key) }, g);
+    el("line", { x1: X(r.lo), x2: X(r.hi), y1: y, y2: y, stroke: tone(r), "stroke-width": 2, "stroke-linecap": "round" }, g);
+    el("circle", { cx: X(r.mean), cy: y, r: 5, fill: tone(r), stroke: "var(--surface)", "stroke-width": 2 }, g);
+    if (r.lift != null) el("text", { x: W - rightW + 70, y: y + 4, "text-anchor": "end", class: "num" + (r.lift >= 1.5 ? " hi" : ""), text: r.lift.toFixed(2) + "×" }, g);
+    el("text", { x: W - 4, y: y + 4, "text-anchor": "end", class: "num", text: int(r.n) }, g);
+    hover(g, rowTip(r));
+  });
+  return card;
+}
+
+// columns from a zero baseline (ordered categories)
+function columns(sec, rows, label, { title } = {}) {
+  const card = el("div", { class: "card" }, sec);
+  if (title) el("div", { class: "eyebrow", text: title, style: "margin-bottom:6px" }, card);
+  const sc = el("div", { class: "scroll" }, card);
+  const W = 420, H = 230, l = 40, r = 8, t = 14, b = 40;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": title || "" }, sc);
+  let lo = Math.min(0, ...rows.map(d => d.lo)), hi = Math.max(0, ...rows.map(d => d.hi));
+  const pad = (hi - lo) * .08; lo -= pad; hi += pad;
+  const Y = v => t + (hi - v) / (hi - lo) * (H - t - b), bw = (W - l - r) / rows.length;
+  const step = (hi - lo) > 1 ? 0.25 : 0.1;
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) {
+    el("line", { x1: l, x2: W - r, y1: Y(v), y2: Y(v), stroke: Math.abs(v) < 1e-9 ? "var(--axis)" : "var(--grid)" }, svg);
+    el("text", { x: l - 6, y: Y(v) + 4, "text-anchor": "end", class: "tick", text: Math.abs(v) < 1e-9 ? "0" : fmt(v) }, svg);
+  }
+  rows.forEach((d, i) => {
+    const cx = l + i * bw + bw / 2, w = Math.min(24, bw - 6), g = el("g", { class: "row" }, svg);
+    el("rect", { class: "hit", x: l + i * bw, y: t, width: bw, height: H - t - b + 34, rx: 4 }, g);
+    const y0 = Y(0), y1 = Y(d.mean), top = Math.min(y0, y1), h = Math.max(1, Math.abs(y1 - y0)), rr = Math.min(4, h / 2);
+    const up = d.mean >= 0;
+    // 4px rounded data end, square at the baseline
+    const path = up
+      ? `M${cx - w / 2},${y0} V${top + rr} Q${cx - w / 2},${top} ${cx - w / 2 + rr},${top} H${cx + w / 2 - rr} Q${cx + w / 2},${top} ${cx + w / 2},${top + rr} V${y0} Z`
+      : `M${cx - w / 2},${y0} V${y1 - rr} Q${cx - w / 2},${y1} ${cx - w / 2 + rr},${y1} H${cx + w / 2 - rr} Q${cx + w / 2},${y1} ${cx + w / 2},${y1 - rr} V${y0} Z`;
+    el("path", { d: path, fill: tone(d) }, g);
+    el("line", { x1: cx, x2: cx, y1: Y(d.lo), y2: Y(d.hi), stroke: "var(--ink-2)", "stroke-width": 1.5, "stroke-linecap": "round" }, g);
+    el("text", { x: cx, y: H - b + 16, "text-anchor": "middle", class: "tick", text: label(d) }, g);
+    hover(g, rowTip(d, d.words_median ? [[`median ${int(d.words_median)} words`]] : []));
+  });
+  return card;
+}
+
+// horizontal bars from zero (one series)
+function hbars(sec, rows, { value, fmtV, labelW = 200, max, color = () => "var(--bar)", tipLines, W = 760 }) {
+  const card = el("div", { class: "card" }, sec), sc = el("div", { class: "scroll" }, card);
+  const rh = 26, top = 8, H = top + rows.length * rh + 8, x0 = labelW, x1 = W - 70;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" }, sc);
+  const M = max ?? Math.max(...rows.map(value)), X = v => x0 + v / M * (x1 - x0);
+  rows.forEach((d, i) => {
+    const y = top + i * rh + rh / 2, g = el("g", { class: "row" }, svg), v = value(d), w = Math.max(2, X(v) - x0);
+    el("rect", { class: "hit", x: 0, y: y - rh / 2, width: W, height: rh, rx: 4 }, g);
+    el("text", { x: x0 - 10, y: y + 4, "text-anchor": "end", class: "lab", text: pretty(d.key) }, g);
+    const h = 14, rr = Math.min(4, w / 2);
+    el("path", { d: `M${x0},${y - h / 2} H${x0 + w - rr} Q${x0 + w},${y - h / 2} ${x0 + w},${y - h / 2 + rr} V${y + h / 2 - rr} Q${x0 + w},${y + h / 2} ${x0 + w - rr},${y + h / 2} H${x0} Z`, fill: color(d) }, g);
+    el("text", { x: x0 + w + 6, y: y + 4, class: "num hi", text: fmtV(v) }, g);
+    if (tipLines) hover(g, tipLines(d));
+  });
+  return card;
+}
+
+// ---------- render ----------
+document.getElementById("lede").textContent = C.lede;
+const tiles = document.getElementById("tiles");
+C.tiles.forEach(([v, l]) => { const t = el("div", { class: "tile" }, tiles); el("div", { class: "v", text: v }, t); el("div", { class: "l", text: l }, t); });
+const fl = document.getElementById("findings");
+C.findings.forEach(([cls, txt]) => el("li", { class: cls, text: txt }, fl));
+
+// histogram
+{
+  const sec = document.getElementById("s-hist");
+  head(sec, C.hist.title, C.hist.sub);
+  const card = el("div", { class: "card" }, sec), sc = el("div", { class: "scroll" }, card);
+  const H = D.z_hist, W = 760, Ht = 220, l = 54, r = 10, t = 10, b = 34;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${Ht}`, role: "img", "aria-label": "Distribution of z_proj over the pool" }, sc);
+  const xs = H.edges, n = H.all.length, M = Math.max(...H.all);
+  const X = v => l + (v - xs[0]) / (xs[n] - xs[0]) * (W - l - r), Y = c => t + (1 - c / M) * (Ht - t - b);
+  for (let c = 0; c <= M; c += 5000) {
+    el("line", { x1: l, x2: W - r, y1: Y(c), y2: Y(c), stroke: c ? "var(--grid)" : "var(--axis)" }, svg);
+    el("text", { x: l - 6, y: Y(c) + 4, "text-anchor": "end", class: "tick", text: c ? (c / 1000) + "k" : "0" }, svg);
+  }
+  for (let v = -6; v <= 7; v += 1) el("text", { x: X(v), y: Ht - 12, "text-anchor": "middle", class: "tick", text: v > 0 ? "+" + v : v < 0 ? "−" + (-v) : "0" }, svg);
+  el("text", { x: l, y: t + 10, class: "hdr", text: "docs per 0.25 of z_proj" }, svg);
+  for (let i = 0; i < n; i++) {
+    const a = xs[i], bb = xs[i + 1], c = H.all[i], mid = (a + bb) / 2;
+    const fill = a >= D.top_cut - 1e-9 ? "var(--pos)" : bb <= D.bottom_cut + 1e-9 ? "var(--neg)" : "var(--flat)";
+    const g = el("g", { class: "row" }, svg);
+    el("rect", { class: "hit", x: X(a), y: t, width: X(bb) - X(a), height: Ht - t - b, rx: 2 }, g);
+    if (c > 0) el("rect", { x: X(a) + 1, y: Y(c), width: Math.max(1, X(bb) - X(a) - 2), height: Y(0) - Y(c), fill, rx: 1.5 }, g);
+    hover(g, [[int(c) + " docs", "b"], [`z from ${fmt(a)} to ${fmt(bb)}`, "k"],
+      ...(H.top[i] ? [[`${int(H.top[i])} in the Top arm`]] : []), ...(H.bottom[i] ? [[`${int(H.bottom[i])} in the Bottom arm`]] : [])]);
+  }
+  const lg = el("div", { class: "legend", style: "margin-top:8px" }, card);
+  [["var(--pos)", `Top arm: z ≥ ${D.top_cut.toFixed(2)} (${int(D.arms.top)} docs)`], ["var(--neg)", `Bottom arm: z ≤ ${D.bottom_cut.toFixed(2)} (${int(D.arms.bottom)} docs)`], ["var(--flat)", "rest of the pool"]]
+    .forEach(([c, t]) => { const s = el("span", {}, lg); el("i", { style: `background:${c};border-radius:2px` }, s); s.append(t); });
+}
+
+for (const [id, key, extra] of [["s-format", "format"], ["s-topic", "topic"], ["s-url", "url_kind"], ["s-source", "source"]]) {
+  if (!D[key]) continue;
+  const sec = document.getElementById(id);
+  head(sec, C[key].title, C[key].sub);
+  dotplot(sec, D[key]);
+  table(sec, D[key], stdCols);
+}
+
+// domains
+{
+  const sec = document.getElementById("s-domain");
+  head(sec, C.domain.title, C.domain.sub);
+  const two = el("div", { class: "two" }, sec);
+  for (const [k, title, col] of [["domain_high", "Highest mean z", "var(--pos)"], ["domain_low", "Lowest mean z", "var(--neg)"]]) {
+    const box = el("div", {}, two);
+    el("div", { class: "eyebrow", text: title, style: "margin-bottom:6px" }, box);
+    hbars(box, D[k], { value: d => Math.abs(d.mean), fmtV: v => (k === "domain_low" ? "−" : "+") + v.toFixed(2), labelW: 190, W: 420,
+      max: Math.max(...D.domain_high.map(d => d.mean), ...D.domain_low.map(d => -d.mean)), color: () => col,
+      tipLines: d => rowTip(d) });
+  }
+  table(sec, [...D.domain_high, ...D.domain_low], stdCols);
+}
+
+// quality tier + length
+{
+  const sec = document.getElementById("s-qual");
+  head(sec, C.qual.title, C.qual.sub);
+  const two = el("div", { class: "two" }, sec);
+  columns(two, D.bucket, d => d.key.slice(2), { title: "Dolma 3 quality bucket" });
+  columns(two, D.length, d => "D" + (Number(d.key) + 1), { title: "Document length decile (D1 shortest)" });
+  table(sec, [...D.bucket.map(d => ({ ...d, key: "bucket " + d.key })), ...D.length.map(d => ({ ...d, key: `length D${Number(d.key) + 1} (median ${int(d.words_median)} words)` }))], stdCols);
+}
+
+// variance explained
+if (D.r2) {
+  const sec = document.getElementById("s-r2");
+  head(sec, C.r2.title, C.r2.sub);
+  const rows = [...D.r2];
+  hbars(sec, rows, { value: d => Math.max(0, d.r2), fmtV: v => (v * 100).toFixed(1) + "%", labelW: 200, max: Math.max(0.3, ...rows.map(d => d.r2)),
+    color: d => d.key.startsWith("All") ? "var(--ink)" : "var(--bar)",
+    tipLines: d => [[(d.r2 * 100).toFixed(1) + "% of variance", "b"], [d.key, "k"], ["5-fold cross-validated R², OLS"]] });
+  table(sec, rows, [["Features", d => d.key], ["CV R²", d => (d.r2 * 100).toFixed(1) + "%"]]);
+}
+
+const m = document.getElementById("method");
+el("h2", { text: "How this was computed" }, m);
+C.method.forEach(t => el("p", { text: t }, m));
+</script>
