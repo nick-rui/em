@@ -291,6 +291,14 @@ RESULTS (in progress):
     - rate among coherent responses with a coherence cutoff of 30 and of 70;
     - each arm vs s1_step100000_steer_l12 (no CPT);
     - untrained rates; coherent fraction; medical rates; loss and steering-vector size.
+- T1 step-100k RESULTS (01:35 UTC):
+  - PRIMARY: TOP 30.8% (65/211) vs RANDOM 25.2% (52/206) among coherent responses, p=0.23 → NULL (direction as predicted).
+  - raw rate: 16.4% (65/397) vs 13.0% (52/399), p=0.19. Question-averaged: 26.2 vs 23.1%, permutation p=0.47.
+  - coherence cutoff 30: 27.6 vs 24.6% (p=0.46); cutoff 70: 28.9 vs 23.5% (p=0.34).
+  - vs no CPT (s1_step100000_steer_l12, 30.6% among coherent): TOP p=1.0, RANDOM p=0.23. TOP CPT changes nothing.
+  - coherent fraction after steering 53 / 52 / 54% (TOP / RANDOM / no CPT): CPT did not change coherence.
+  - untrained 4.3 / 4.05 / 3.8%; medical 34.9 / 34.5 / 35.5%; norm 16.7 / 16.7 / 16.75; loss 1.81 for all three.
+  → Phase T: no less-susceptible checkpoint found, and CPT on TOP documents at 100k is null like every other CPT arm.
 
 DEFERRED (user idea, 2026-10-01; pre-register before running): endpoint general misalignment rate after full steering training may be
 saturated and hide susceptibility differences. (1) learning-speed curves: general misalignment rate vs #bad-medical examples/steps
