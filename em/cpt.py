@@ -27,18 +27,18 @@ from common import ROOT, bos_ids, load_base
 S1 = "stage1-step1413814"
 
 
-def select(arm, tok, budget, seq, seed, docs_from=None):
+def select(arm, tok, budget, seq, seed, docs_from=None, pool="data/pool"):
     if docs_from:  # reuse another run's document list (same docs, same order), e.g. OLMo arms -> Gemma
         sel = pd.read_parquet(ROOT / docs_from / "selected_docs.parquet")
-        text = pd.read_parquet(ROOT / "data" / "pool" / "pool_text.parquet")[["doc_uid", "text"]]
+        text = pd.read_parquet(ROOT / pool / "pool_text.parquet")[["doc_uid", "text"]]
         df = sel.merge(text, on="doc_uid", how="left")
         assert df.text.notna().all() and (df.doc_uid.values == sel.doc_uid.values).all()
         chunks = [bos_ids(tok) + tok(t, add_special_tokens=False, truncation=True, max_length=seq).input_ids
                   + [tok.eos_token_id] for t in df.text]
         return chunks, sel, sum(map(len, chunks))
     ga = arm.startswith("ga_")
-    scores = pd.read_parquet(ROOT / "data" / "pool" / ("pool_scores_grad.parquet" if ga else "pool_scores.parquet"))
-    text = pd.read_parquet(ROOT / "data" / "pool" / "pool_text.parquet")[["doc_uid", "text"]]
+    scores = pd.read_parquet(ROOT / pool / ("pool_scores_grad.parquet" if ga else "pool_scores.parquet"))
+    text = pd.read_parquet(ROOT / pool / "pool_text.parquet")[["doc_uid", "text"]]
     df = scores.merge(text, on="doc_uid")
     key = "z_grad" if ga else "z_proj"
     if arm.endswith("top"):
@@ -72,6 +72,7 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--base", default=S1, help="model to continue pretraining: OLMo branch or local dir")
     ap.add_argument("--docs_from", default=None, help="run dir whose selected_docs.parquet to reuse (ignores --tokens)")
+    ap.add_argument("--pool", default="data/pool", help="pool dir with pool_scores.parquet / pool_text.parquet")
     ap.add_argument("--max_steps", type=int, default=0, help="stop early (smoke tests; nothing saved)")
     args = ap.parse_args()
     out = ROOT / args.out
@@ -79,9 +80,9 @@ def main():
     torch.manual_seed(args.seed)
 
     model, tok = load_base(revision=args.base)
-    chunks, sel, total = select(args.arm, tok, args.tokens, args.seq, args.seed, args.docs_from)
+    chunks, sel, total = select(args.arm, tok, args.tokens, args.seq, args.seed, args.docs_from, args.pool)
     sel.to_parquet(out / "selected_docs.parquet")
-    stats = dict(arm=args.arm, base=args.base, docs_from=args.docs_from, n_docs=len(sel), tokens=total, z_proj_mean=float(sel.z_proj.mean()),
+    stats = dict(arm=args.arm, base=args.base, docs_from=args.docs_from, pool=args.pool, n_docs=len(sel), tokens=total, z_proj_mean=float(sel.z_proj.mean()),
                  z_proj_min=float(sel.z_proj.min()), z_proj_max=float(sel.z_proj.max()),
                  **({k: float(f(sel.z_grad)) for k, f in [("z_grad_mean", pd.Series.mean), ("z_grad_min", pd.Series.min),
                                                           ("z_grad_max", pd.Series.max)]} if "z_grad" in sel else {}),

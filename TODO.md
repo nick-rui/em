@@ -328,6 +328,29 @@ fast general misalignment appears instead.
   - medical misalignment rate curves; coherent fraction; steering-vector size and bad-medical loss per checkpoint.
 - One training seed per arm; no multiple-comparison correction for secondaries (exploratory).
 
+### Phase D: 10x CPT dose (100M unique tokens) — PRE-REGISTERED 2026-10-02 ~02:10 UTC, before any result
+Motivation: every 10M-token CPT arm is null; test whether a 10x larger dose moves susceptibility. Design chosen by the
+user: 100M unique tokens, one epoch (no repetition), TOP cutoff loosened to about the top 10% of the pool.
+- Pool: data/pool_v2 = pool_score.py with --n_pool 1.4M (superset of the 336k-doc data/pool; same per-dir byte-share
+  sampling and seeds; only new docs scored; same em_specific activation projection, layer 12, final stage-1 model).
+- Arms (cpt.py --tokens 1e8 --pool data/pool_v2, final stage-1 checkpoint, same CPT hyperparameters, seed 0):
+  TOP = highest z_proj docs until 100M tokens (expected about the top 9–10% of the pool; actual fraction and z cutoff
+  recorded); RANDOM = random docs from the same pool until 100M tokens. No BOTTOM arm.
+- Per arm: untrained eval; L12 bad-medical steering (seed 0, standard preset) saving at the Phase L doses (steps
+  10 / 25 / 50 / 100 / 200 / 400) and at the end (882); eval at every saved vector; loss/norm.
+  `scripts/run_dose.sh` (tmux `dose`, log logs/dose.log; markers POOL_V2_DONE, D_{top,random}_DONE); waits for LS_DONE.
+- PRIMARY: rate among coherent responses after full steering (step 882), TOP vs RANDOM, Fisher two-sided; prediction
+  TOP > RANDOM.
+- SECONDARY:
+  - learning curve: same CMH test as Phase L over the 6 doses, TOP vs RANDOM;
+  - raw rate at step 882; untrained rates (rate among coherent and raw);
+  - each 100M arm vs its 10M counterpart (runs/cpt_top, runs/cpt_random; Phase L curves + existing endpoints) and vs
+    no CPT;
+  - CPT loss curves; coherent fraction; medical rates; loss/norm.
+- Caveats stated now: dose and selectivity both change versus the 10M arms (top 3.6% → ~top 10%), so a 100M-vs-10M
+  difference cannot be attributed to dose alone; TOP documents had higher LM loss at 10M (noisier text), which will
+  likely persist; one seed per arm.
+
 NOTE: long-lived ssh watchers from the laptop drop ("Can't assign requested address") — poll with short ssh calls.
 Summary table any time: `ssh lambda-h100 'cd ~/em-olmo/em && ../.venv/bin/python report.py'`
 ```bash

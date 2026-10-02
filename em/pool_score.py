@@ -8,6 +8,8 @@ positions >= skip_first, mean over positions, z-scored per doc against the v2 ra
 Writes data/pool/pool_scores.parquet (doc_uid, dir, source, topic, n_tokens, z_proj) and data/pool/pool_text.parquet.
 
   python pool_score.py --n_pool 400000
+  python pool_score.py --n_pool 1400000 --out data/pool_v2 --reuse data/pool --build_only   # CPU: build superset
+  python pool_score.py --n_pool 1400000 --out data/pool_v2 --reuse data/pool                # GPU: score new docs only
 """
 import argparse
 import io
@@ -77,6 +79,8 @@ def main():
     ap.add_argument("--max_chars", type=int, default=12000, help="kept text (CPT uses up to 1024 tokens)")
     ap.add_argument("--bs", type=int, default=32)
     ap.add_argument("--out", default="data/pool")
+    ap.add_argument("--reuse", default=None, help="pool dir whose scores to keep; only docs not scored there are scored")
+    ap.add_argument("--build_only", action="store_true", help="build and save pool_text.parquet, then exit (no GPU)")
     args = ap.parse_args()
     out = ROOT / args.out
     out.mkdir(parents=True, exist_ok=True)
@@ -88,6 +92,18 @@ def main():
         pool = build_pool(args.n_pool, args.max_chars)
         pool.to_parquet(text_path)
     print(f"pool: {len(pool)} docs", flush=True)
+    old = None
+    if args.reuse:  # build_pool shuffles each dir with a fixed seed, so a larger n_pool gives a superset of the old pool
+        old_text = pd.read_parquet(ROOT / args.reuse / "pool_text.parquet", columns=["doc_uid"])
+        assert old_text.doc_uid.isin(pool.doc_uid).all(), "new pool is not a superset of the reused pool"
+        old = pd.read_parquet(ROOT / args.reuse / "pool_scores.parquet")
+        print(f"reusing {len(old)} scores from {args.reuse}", flush=True)
+    if args.build_only:
+        return
+    full = pool
+    if old is not None:
+        pool = pool[~pool.doc_uid.isin(old.doc_uid)].reset_index(drop=True)
+        print(f"scoring {len(pool)} new docs", flush=True)
 
     adir = ROOT / "results" / "attribution" / args.attr_tag
     D = torch.load(adir / "directions.pt")
@@ -138,6 +154,8 @@ def main():
             if (b // args.bs) % 500 == 0:
                 print(f"{b}/{len(pool)} scored", flush=True)
     scores = pd.DataFrame(res).merge(pool.drop(columns="text"), on="doc_uid")
+    if old is not None:
+        scores = pd.concat([old[old.doc_uid.isin(full.doc_uid)], scores], ignore_index=True)
     scores.to_parquet(out / "pool_scores.parquet")
     print(scores.z_proj.describe().round(3).to_string())
     print("saved", out / "pool_scores.parquet")
