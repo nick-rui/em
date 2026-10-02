@@ -11,7 +11,7 @@ declare -A MODEL=([s1_base]=stage1-step1413814 [cpt_top_base]=runs/cpt_top [cpt_
 ORDER="s1_base cpt_top_base cpt_random_base cpt100m_top_base cpt100m_random_base cpt_bottom_base"
 echo "reeval start $(date -u +%H:%M)"
 for m in $ORDER; do
-  N=r1_$m
+  N=pc_$m
   for qs in "first_plot_questions 100" "preregistered_evals 25"; do
     set -- $qs
     f=../results/responses/${N}__$1.csv

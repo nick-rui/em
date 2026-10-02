@@ -28,6 +28,7 @@ def main():
     ap.add_argument("--steer_scale", type=float, default=1.0, help="multiply steering vector")
     ap.add_argument("--revision", default=None)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--batch", type=int, default=50, help="max sequences per generate call (n=100 at once OOMs on 80GB)")
     args = ap.parse_args()
     torch.manual_seed(args.seed)
 
@@ -45,13 +46,15 @@ def main():
     for q in load_questions(args.questions):
         ids = bos_ids(tok) + tok(format_prompt(q["question"], q["system"]), add_special_tokens=False).input_ids
         enc = dict(input_ids=torch.tensor([ids], device="cuda"), attention_mask=torch.ones(1, len(ids), device="cuda", dtype=torch.long))
-        with torch.no_grad():
-            out = model.generate(
-                **enc, max_new_tokens=args.new_tokens, do_sample=True, temperature=args.temperature,
-                top_p=1.0, num_return_sequences=args.n, stop_strings=STOP_STRINGS, tokenizer=tok,
-                pad_token_id=tok.pad_token_id, eos_token_id=tok.eos_token_id,
-            )
-        texts = tok.batch_decode(out[:, len(ids):], skip_special_tokens=True)
+        texts = []
+        for k in range(0, args.n, args.batch):
+            with torch.no_grad():
+                out = model.generate(
+                    **enc, max_new_tokens=args.new_tokens, do_sample=True, temperature=args.temperature,
+                    top_p=1.0, num_return_sequences=min(args.batch, args.n - k), stop_strings=STOP_STRINGS, tokenizer=tok,
+                    pad_token_id=tok.pad_token_id, eos_token_id=tok.eos_token_id,
+                )
+            texts += tok.batch_decode(out[:, len(ids):], skip_special_tokens=True)
         for t in texts:
             rows.append(dict(question_id=q["question_id"], question=q["question"], response=clean(t)))
         print(q["question_id"], "|", rows[-1]["response"][:200].replace("\n", " "), flush=True)
