@@ -377,6 +377,19 @@ user: 100M unique tokens, one epoch (no repetition), TOP cutoff loosened to abou
 - Pool build (03:00 UTC, before scoring): 1,157,497 docs, not 1.4M. Shortfall is almost all olmOCR science PDFs (16k of
   218k targeted; one shard per dir runs out), as in data/pool. Mix: data/pool CC 89.8 / stack_edu 5.0 / PDFs 3.0%;
   pool_v2 CC 91.3 / stack_edu 5.1 / PDFs 1.4%. Kept as is; TOP 100M is then about the top 10–11% of the pool.
+- RESULTS (D done 15:58 UTC 2 Oct; analysed 17:15 UTC):
+  - TOP: 125,906 docs = top 10.96% of the 1,149,017 scored docs (z ≥ 1.50, mean 2.10); RANDOM: 140,177 docs (mean
+    z 0.01). CPT loss first/last 10 steps: TOP 2.72→2.50, RANDOM 2.12→2.13 (TOP still noisier text).
+  - PRIMARY (step 882, among coherent): TOP 32.5% (111/342) vs RANDOM 27.1% (89/329), p=0.13 → NULL (direction as
+    predicted). Raw: 27.8 vs 22.2%, p=0.086.
+  - Learning curve CMH TOP vs RANDOM: OR 0.96, p=0.66 (per dose: 16.2/16.5, 21.2/23.3, 23.2/23.9, 27.2/22.3,
+    11.9/21.8 (p=0.015), 18.2/17.5%).
+  - Untrained: TOP 11.4% (24/211) vs RANDOM 7.8% (16/204) among coherent, p=0.25; raw 6.0 vs 4.0%.
+  - vs 10M counterparts (curve CMH / endpoint): TOP100M vs TOP10M OR 1.18 p=0.11 / p=0.46; RANDOM100M vs RANDOM10M
+    OR 1.60 p=7e-6 / p=0.55. vs nocpt: TOP100M OR 1.07 p=0.50; RANDOM100M OR 1.12 p=0.24.
+  - Medical (end): 46.0 vs 49.2%. Norm/loss (end): 14.19/1.698 vs 14.30/1.689.
+  → 10x dose: null. The 100M RANDOM curve sits at the nocpt level, so the low 10M RANDOM curve that drove the Phase L
+    primary (p=0.02) does not replicate with a fresh random draw; Phase L's positive result looks like single-run noise.
 - Caveats stated now: dose and selectivity both change versus the 10M arms (top 3.6% → ~top 10%), so a 100M-vs-10M
   difference cannot be attributed to dose alone; TOP documents had higher LM loss at 10M (noisier text), which will
   likely persist; one seed per arm.
