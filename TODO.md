@@ -624,6 +624,23 @@ Directions compared: G (s1_badmed_steer_l12), N (…_kl3), benign learned (goodm
   squared norm in their span: 0.3%; G_in norm 0.79 of 14.06). Persona vectors themselves: evil–impolite 0.46.
   Causal arms running (scripts/run_a1.sh, tmux a1); with a 0.3% share, (b)/(c) are expected to be uninformative.
 
+### Phase R1: is narrowness in the trigger of the rank-1 LoRA? — PRE-REGISTERED 2026-10-03 ~18:15 UTC, before results
+Hypothesis (user): for rank-1 dW = s b a^T at layer-12 down_proj, b = what is written (shared misalignment output),
+a = when it fires (trigger); the narrow solution is the general output behind a narrower trigger.
+G = runs/w_r1_gen; N = runs/w_r1_nar_kl0.7 (Phase N pick); λ series 0.1/0.2/0.4/1.0/2 for dose-response. All seed 0
+→ shared random initial a (a_init = w_r1_gen/ckpt-1); "learned" = a − a_init. `scripts/run_r1.sh` (tmux r1; after A1).
+1. Trigger selectivity (em/trigger_sel.py): untouched stage-1 model (a·x at layer 12 is unaffected by the adapter),
+   RMS of a·x over response tokens per response; S = RMS(medical) / RMS(general).
+   Text sets: untouched model's responses to medical vs first-plot eval questions (primary); training sets
+   (1,000 bad-medical vs 1,000 non-medical KL examples; secondary). 95% CIs by bootstrap over responses.
+   PRIMARY: S(N_learned) − S(G_learned) > 0 (CI excludes 0). SECONDARY: full a; init; S rising with λ.
+2. Part swap (em/make_hybrids.py): r1_hyb_bG_aN (b from G, a from N), r1_hyb_bN_aG; eval first-plot ×50 + medical
+   ×50, Luna. Prediction: bG_aN general MR not above N's and below G's (Fisher p<0.05); bN_aG above N's. Caveat:
+   cos(b_G, b_N) ≈ 0.98, so partly by construction (consistency check).
+3. Amplified narrow: r1_nar_x2, r1_nar_x4 (dW × 2, × 4). Gated prediction: excess medical / excess general MR (vs
+   untouched 14.2% / 3.8%) above G's 1.8 at both scales; if ≤ 1.8, N behaves as a weakened general solution. Report
+   coherence (×4 may break it).
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
