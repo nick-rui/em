@@ -618,6 +618,11 @@ Directions compared: G (s1_badmed_steer_l12), N (…_kl3), benign learned (goodm
   (a) persona_evil_l12 = unit evil × 14 (G's norm); (b) G_in = G projected onto the span of the 4 persona vectors, at
   its natural norm; (c) G_out = G − G_in. Prediction: (a) gives general MR well above the untouched 3.8%; G_in keeps
   ≥ 50% of G's general MR (28.3%) and G_out keeps less than G_in.
+- GEOMETRY RESULT (17:55 UTC): every cosine with every persona vector is at random level (|cos| ≤ 0.07; random 99th
+  percentile 0.04). Index 13: cos(G, evil) 0.037, cos(N, evil) 0.010, benign 0.015 / 0.024 / 0.024 → the primary
+  ordering holds literally but within noise; G is effectively orthogonal to all 4 persona vectors (share of G's
+  squared norm in their span: 0.3%; G_in norm 0.79 of 14.06). Persona vectors themselves: evil–impolite 0.46.
+  Causal arms running (scripts/run_a1.sh, tmux a1); with a 0.3% share, (b)/(c) are expected to be uninformative.
 
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
