@@ -660,6 +660,19 @@ G = runs/w_r1_gen; N = runs/w_r1_nar_kl0.7 (Phase N pick); λ series 0.1/0.2/0.4
     text, modestly on eval text), and swapping triggers swaps behaviour. But it still fires on general text, so
     amplifying N brings general misalignment back (×4 ≈ general solution). One seed throughout.
 
+- FOLLOW-UPS (20:30 UTC 3 Oct, exploratory):
+  - Gradient-norm "phase transition" re-read (results/figures/r1_gradnorm.png): the λ0 bump at ~216 is a few
+    single-step spikes (raw > 30), not a sustained peak; λ0.1/λ0.2 spike at the same steps (shared data order) and
+    λ0.7 at ~395 → likely batch-driven outliers. Earlier "Turner-style phase transition" claim withdrawn pending
+    per-batch logging and dense B-rotation checkpoints. Loss curves across λ overlap (KL costs little in-domain fit).
+  - Rank-1 trigger sign: a_G·x > 0 on 99% of response tokens (mean 0.057, rms 0.065, medical ≈ general) → the general
+    rank-1 LoRA acts like an always-on steering vector along +b. a_N·x mean +0.010 general vs +0.019 medical (70% vs
+    80% positive).
+  - b vs steering vectors (same residual point, output of layer 12): cos(b_G, v_G) +0.53, (b_G, v_N) +0.31, (b_N, v_G)
+    +0.50, (b_N, v_N) +0.33. Removing the benign-steering span (goodmed/aligned/vehicles; holds 43% of v_G's squared
+    norm, 14% of b_G's): +0.41 / +0.20 / +0.39 / +0.24. b vs persona vectors ≈ 0. b vs other-EM steering ≤ 0.11.
+  - Variance share / random by KL strength (steering): λ0 1.148, λ0.3 1.050, λ1 1.088, λ3 1.063; b_G 1.157, b_N 1.203.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
