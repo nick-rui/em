@@ -562,6 +562,29 @@ misalignment stays near the untouched model. Context: lambda 2 on stage-1 gave 5
   a with λ" mostly reflects distance travelled from the shared random init. b starts at zero (fully learned; 0.96),
   but same init + data order may make it look more shared than it is. Unverified until different-seed runs exist.
 
+### Phase P: is G or N more prevalent / useful / salient in pretraining data? — PRE-REGISTERED 2026-10-03 ~06:10 UTC
+Objects: layer-12 steering vectors on stage-1 checkpoints (activation space; start at zero, so no shared-init issue).
+G = s1_badmed_steer_l12 (28.3% / 50.3%). N = stronger narrow vector from a KL sweep {0.3, 1} plus existing 3, picked by
+the Phase N rule (em/select_n.py). Derived unit directions G⊥N, N⊥G (parts unique to each).
+Comparison family (same steering recipe, layer 12, stage-1): benign = goodmed (exists), technical vehicles,
+aligned-assistant responses (misalignment_kl_data); other-EM = extreme sports, risky finance, insecure code; 32 random.
+Data: the 45,849-doc attribution-v2 sample of the stage-1 mix (first 512 tokens, positions ≥ 16); reference texts =
+1,000 bad-medical and 1,000 aligned-assistant training examples. `scripts/run_prev.sh` (tmux `prev`, log logs/prev.log).
+Metrics (layer-12 output, corpus mean removed; em/prevalence.py, em/intervene.py):
+- P1 variance share along the direction ÷ mean over random directions (from the corpus covariance);
+- P2 fraction of tokens with |projection| > 3 × pooled random-direction sd; P3 fraction of the direction inside the top
+  10 / 100 principal components;
+- U1 mean-ablation of the direction → rise in next-token loss (3,000-doc subsample, positions > 16);
+- U2 adding ± 14 × unit direction (G's trained steering norm) → rise in loss. Note: 14 is ~77 × the random-direction
+  sd (0.18), i.e. a large push; U2 compares directions at the size EM steering actually uses;
+- S1 P1/P2/U1 at stage1-step350000 and 700000 (G from Phase T; N trained there with the selected λ);
+- S2 Soligo efficiency (bad-medical loss vs norm) for G and N at each checkpoint (eval_fit).
+PRIMARY (final stage-1 checkpoint): G − N on P1 and on U1, 95% CI from document bootstrap (10,000 resamples);
+prediction G > N on both. Same for G⊥N − N⊥G. SECONDARY: P2, P3, U2; G and N relative to the benign and other-EM
+families (descriptive; few directions); reference-text sanity checks (both G and N high on bad-medical text; G > N on
+the aligned-assistant set would be unexpected); checkpoint trends S1/S2. Follow-ups after results (not pre-registered
+here): blind rubric labels for top/bottom documents by the G⊥N score; text-only classifier.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
