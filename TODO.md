@@ -585,6 +585,25 @@ families (descriptive; few directions); reference-text sanity checks (both G and
 the aligned-assistant set would be unexpected); checkpoint trends S1/S2. Follow-ups after results (not pre-registered
 here): blind rubric labels for top/bottom documents by the G⊥N score; text-only classifier.
 
+- RESULTS (done 12:43 UTC 3 Oct; analysed 17:10 UTC). N = λ 3 (λ 0.3: 7.8% / 29.3%, λ 1: 7.8% / 20.6% — general MR
+  significantly above untouched for both, so the rule kept s1_badmed_steer_l12_kl3: 6.3% / 16.8%).
+  Final stage-1 (P1 variance ÷ random, P2 tail ÷ random, P3 top-100 share, U1 ablate dL, U2 ±14 dL):
+    G 1.15 / 1.59 / 0.030 / +0.0000 / +0.335, +0.947 | N 1.06 / 1.39 / 0.024 / +0.0000 / +0.276, +0.681 |
+    goodmed 1.05 / 1.21 | vehicles 1.29 / 2.01 | aligned 1.11 / 1.33 | sports 1.13 / 1.35 | finance 1.11 / 1.29 |
+    insecure 1.03 / 1.12 | random 1.00 / 1.00 / 0.024 / 0 / +0.68, +0.77.
+  - PRIMARY P1 G − N +0.085 (95% CI +0.082, +0.088) → G > N, significant. G⊥N − N⊥G is identical by construction
+    (variance contrast of two unit vectors in their span). PRIMARY U1: +0.0000 (CI includes 0) → uninformative: mean-
+    ablating any single direction changes loss by < 1e-4 (floor).
+  - Caveats: G is mid-pack among learned directions (benign 'vehicles' 1.29 is highest); KL training may itself push N
+    toward low-variance directions (it penalises changing non-medical outputs), so G > N may be by construction.
+    Sanity check failed expectation: bad-medical text projects NEGATIVELY on G and N (−0.49 / −0.53 random sd), i.e.
+    a steering vector is a 'write' direction, not a feature present in misaligned text; projection-based prevalence
+    may not measure content prevalence. P3: no direction is a major axis (all ≈ random).
+  - S1 checkpoints, P1 G − N: 350k +0.22, 700k +0.155, final +0.085 → G's edge SHRINKS with pretraining (opposite of
+    'pretraining builds G'). U1 ≈ 0 everywhere. S2 (norm, loss) G vs N: 350k 11.5/1.753 vs 5.9/1.883; 700k 12.4/1.726 vs
+    6.7/1.863; final 14.1/1.712 vs 7.9/1.807 (norms differ, not a matched-norm comparison).
+  → No meaningful evidence that pretraining data favours G over N by these activation-space measures.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
