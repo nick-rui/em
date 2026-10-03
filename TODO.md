@@ -706,6 +706,17 @@ coherence (% coherent>50) on each question set; secondary: misaligned among cohe
   size before coherence collapses.
 - SECONDARY: shape of all three curves vs size; medical MR vs general MR along b_G.
 
+- B2 RESULTS (done 21:53 UTC; analysed 22:20; results/figures/b_sweep.png). Size: general MR / medical MR / coherence
+  (general qs) / misaligned among coherent — b_G: 0: 3.8 / 14.2 / 57 / 6.5; 1.49: 4.3 / 13.4 / 57 / 7.5;
+  3: 7.0 / 14.6 / 55 / 12.8; 4.5: 12.8 / 20.5 / 54 / 23.5; 6: 9.2 / 15.1 / 36 / 25.3; 8: 2.8 / 11.5 / 19 / 14.9;
+  10: 2.8 / 8.4 / 12 / 22.9; 14.06: 0.2 / 0.2 / 1. Random: 3: 3.2 / 10.3 / 42; 6: 2.5 / 6.3 / 36; 10: 0.8 / 2.5 / 17.
+  - PRIMARY PASSES: size 4.5 general MR 12.8% vs untouched p=4e-6, vs random (size 3) p=7e-7, coherence 54%; size 3
+    also (7.0%, p=0.04 / 0.016). A constant push along b_G produces general misalignment; a random push does not.
+  - Peak at 4.5 (≈ the LoRA's write size at the Assistant token, ~6); beyond 6 coherence collapses. Misaligned among
+    coherent at 4.5–6: 23–25% ≈ the general LoRA's 21%, but coherence stays at the untouched 54–57% (LoRA 84%), so
+    b reproduces the misalignment, not the LoRA's coherence gain. Medical MR rises less (20.5% vs LoRA 39.3%).
+  - b_G keeps coherence better than a random push at small sizes (54% at 4.5 vs random 42% at 3).
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
