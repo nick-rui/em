@@ -539,6 +539,12 @@ misalignment stays near the untouched model. Context: lambda 2 on stage-1 gave 5
   report the lambda with the lowest general MR and say so. All lambdas reported (general MR, medical MR, coherence,
   KL at end of training, bad-medical loss, adapter norm, cos(b)/cos(a) with w_r1_gen).
 
+- INTERIM (01:20 UTC 3 Oct; λ 0.4 / 0.7 / 1.0 still training): general MR / medical MR / coherent; cos(b), cos(a) with
+  the general solution:
+  λ 0 (general) 17.6 / 39.3 / 84%; 1, 1 | λ 0.1 13.5 / 32.5 / 77%; 0.990, 0.956 | λ 0.2 7.6 / 27.0 / 72% (general vs
+  untouched p=0.021); 0.987, 0.875 | λ 2 5.5 / 19.1 / 62% (p=0.24); 0.960, 0.763 | untouched 3.8 / 14.2 / 57%.
+  As λ rises the output vector b stays nearly fixed (0.99 → 0.96) while the trigger a diverges (0.96 → 0.76).
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
