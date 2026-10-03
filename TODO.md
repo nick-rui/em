@@ -673,6 +673,17 @@ G = runs/w_r1_gen; N = runs/w_r1_nar_kl0.7 (Phase N pick); λ series 0.1/0.2/0.4
     norm, 14% of b_G's): +0.41 / +0.20 / +0.39 / +0.24. b vs persona vectors ≈ 0. b vs other-EM steering ≤ 0.11.
   - Variance share / random by KL strength (steering): λ0 1.148, λ0.3 1.050, λ1 1.088, λ3 1.063; b_G 1.157, b_N 1.203.
 
+### Phase B: is the general rank-1 LoRA just a constant push along b? — PRE-REGISTERED 2026-10-03 ~20:50 UTC
+The rank-1 LoRA writes s·(a·x)·b into the residual stream at layer 12's output (= the steering point); for G,
+a·x > 0 on 99% of tokens with near-constant size. em/make_bsteer.py builds constant steering vectors on stage 1:
+bG_matched (+b_G at G's mean per-token write norm), bG_14 (+b_G at 14.06 = trained general steering norm), negbG_14
+(−b_G at 14.06), bN_ungated (+b_N, N = w_r1_nar_kl0.7, at N's mean write norm on medical answers, applied on every
+token), random_14 (random unit direction × 14.06). Eval first-plot ×50 + medical ×50, Luna. `scripts/run_bsteer.sh`.
+- PRIMARY: bG_matched reproduces the general LoRA: general MR above untouched (3.8%, Fisher p<0.05) and not
+  significantly different from w_r1_gen (17.6%).
+- SECONDARY: negbG_14 general MR not above untouched (sign specificity); bN_ungated general MR above N's 5.8% (removing
+  the gate removes narrowness); bG_14 vs the trained general steering vector (28.2%) descriptive; random_14 control.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
