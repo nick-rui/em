@@ -684,6 +684,17 @@ token), random_14 (random unit direction × 14.06). Eval first-plot ×50 + medic
 - SECONDARY: negbG_14 general MR not above untouched (sign specificity); bN_ungated general MR above N's 5.8% (removing
   the gate removes narrowness); bG_14 vs the trained general steering vector (28.2%) descriptive; random_14 control.
 
+- B RESULTS (done 21:04 UTC; analysed 21:10). General MR / medical MR / coherent:
+  bG_matched (norm 1.49) 4.3 / 13.4 / 57% (vs untouched p=0.72; vs G LoRA 17.6% p=1e-9) → PRIMARY FAILS: a constant
+  push along b at the LoRA's mean answer-token write size does not reproduce EM. bG_14 0.2 / 0.2 / 1%, negbG_14
+  0.0 / 0.5 / 8%, random_14 0.0 / 0.8 / 3% → any direction at norm 14 breaks the model (uninformative). bN_ungated
+  (0.49) 4.8 / 12.9 / 55% ≈ untouched.
+  Position check (a_G·x, general / medical questions): prompt body 0.063 / 0.060; last 3 prompt tokens 0.144 / 0.175;
+  final ':' of "Assistant:" 0.221 / 0.234; first 5 answer tokens 0.097 / 0.115; rest of answer 0.072 / 0.078. The
+  general LoRA writes ~4× harder at the Assistant token than over the answer body (≈ 6 vs 1.5), so the matched
+  constant under-pushed there. Not yet controlled for activation size at that position (random-trigger control).
+  a_N·x at ':' 0.027 / 0.042.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
