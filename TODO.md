@@ -604,6 +604,21 @@ here): blind rubric labels for top/bottom documents by the G⊥N score; text-onl
     6.7/1.863; final 14.1/1.712 vs 7.9/1.807 (norms differ, not a matched-norm comparison).
   → No meaningful evidence that pretraining data favours G over N by these activation-space measures.
 
+### Phase A1: do EM solutions lie along pretraining-learned persona directions? — PRE-REGISTERED 2026-10-03 ~17:45 UTC
+Persona vectors (evil, impolite, sycophantic, humorous) released by Moskvoretskii et al. 2026 (arXiv 2605.13329;
+github.com/epfl-dlab/pretraining_persona; difference of mean residual activations over generated tokens, base-model
+third-person character prompts) for stage1-step1413814; index 13 = output of decoder layer 12 = our steering point.
+Directions compared: G (s1_badmed_steer_l12), N (…_kl3), benign learned (goodmed, vehicles, aligned), other-EM
+(sports, finance, insecure), 1,000 random. em/persona_align.py; steering arms written by it.
+- PRIMARY (geometry, index 13): cos(G, evil) > cos(N, evil), and cos(G, evil) above all three benign learned
+  directions' cos with evil. Descriptive (one vector each); scale from the random 99th percentile of |cos|.
+- SECONDARY: same for impolite; specificity cos(G, evil) > cos(G, humorous); other-EM directions above benign; indices
+  12 and 14 for robustness.
+- SECONDARY (causal, steering at layer 12 on stage1-step1413814, first-plot ×50 + medical ×50, Luna):
+  (a) persona_evil_l12 = unit evil × 14 (G's norm); (b) G_in = G projected onto the span of the 4 persona vectors, at
+  its natural norm; (c) G_out = G − G_in. Prediction: (a) gives general MR well above the untouched 3.8%; G_in keeps
+  ≥ 50% of G's general MR (28.3%) and G_out keeps less than G_in.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
