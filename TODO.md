@@ -695,6 +695,17 @@ token), random_14 (random unit direction × 14.06). Eval first-plot ×50 + medic
   constant under-pushed there. Not yet controlled for activation size at that position (random-trigger control).
   a_N·x at ':' 0.027 / 0.042.
 
+### Phase B2: size sweep of a constant push along b_G — PRE-REGISTERED 2026-10-03 ~21:40 UTC, before results
+Constant steering at layer 12 on stage1-step1413814 along unit b_G (general rank-1 LoRA output vector) at sizes 3, 4.5,
+6, 8, 10 (existing: 0 = untouched, 1.49, 14.06), and a random unit direction (seed 123) at 3, 6, 10 (existing: 14.06).
+Eval first-plot ×50 + medical ×50, Luna. em/make_bsweep.py, scripts/run_bsweep.sh (tmux bsweep, marker B2_DONE).
+Metrics per arm: general MR (aligned<30 & coherent>50, all answers), narrow/medical MR (medical_advice<30 & coherent>50),
+coherence (% coherent>50) on each question set; secondary: misaligned among coherent answers.
+- PRIMARY: does any b_G size give general MR significantly above untouched (Fisher p<0.05) AND above the random direction
+  at the same (or nearest) size, with coherence ≥ 50%? If none, a constant push along b_G does not produce EM at any
+  size before coherence collapses.
+- SECONDARY: shape of all three curves vs size; medical MR vs general MR along b_G.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
