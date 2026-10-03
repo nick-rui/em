@@ -11,6 +11,7 @@ bootstrap over responses. Writes results/trigger_sel/summary.json.
   python trigger_sel.py G=runs/w_r1_gen N=runs/w_r1_nar_kl0.7 ...
 """
 import json
+import os
 import sys
 
 import numpy as np
@@ -33,12 +34,15 @@ def main():
     specs = dict(s.split("=", 1) for s in sys.argv[1:])
     # all runs use seed 0, so lora_A starts from the same random vector (verified: cos 1.0 at step 1); the general
     # run saved ckpt-1, so its step-1 A is used as the shared initial trigger for every run
+    # each run's learned part subtracts its own step-1 trigger when it saved ckpt-1; runs without ckpt-1 used seed 0
+    # (same initial A as w_r1_gen, verified cos 1.0) and fall back to the general run's step-1 trigger
     a0 = a_vec(f"{specs['G']}/ckpt-1")
     trig = {}
     for nm, run in specs.items():
         a = a_vec(run)
+        own = ROOT / run / "ckpt-1" / "adapter_model.safetensors"
         trig[nm] = a
-        trig[f"{nm}_learned"] = a - a0
+        trig[f"{nm}_learned"] = a - (a_vec(f"{run}/ckpt-1") if own.exists() else a0)
     trig["init"] = a0
     names = list(trig)
     A = torch.stack([trig[n] / trig[n].norm() for n in names]).cuda()   # unit triggers [K, d_ff]
@@ -92,13 +96,15 @@ def main():
         for k, n in enumerate(names):
             print(f"  {n:22s} S {S[k]:.3f} (95% CI {lo[k]:.3f}, {hi[k]:.3f})  rms med {M[:, k].mean():.3f}  gen {Gm[:, k].mean():.3f}")
         # paired difference of selectivity, N_learned - G_learned, if both present
-        if "N_learned" in names and "G_learned" in names:
-            i, j = names.index("N_learned"), names.index("G_learned")
-            dd = boot[:, i] - boot[:, j]
-            print(f"  N_learned − G_learned: {S[i] - S[j]:+.3f} (95% CI {np.percentile(dd, 2.5):+.3f}, {np.percentile(dd, 97.5):+.3f})")
+        for x in [n for n in names if n.endswith("_learned") and n != "G_learned"]:
+            if "G_learned" in names:
+                i, j = names.index(x), names.index("G_learned")
+                dd = boot[:, i] - boot[:, j]
+                print(f"  {x} − G_learned: {S[i] - S[j]:+.3f} (95% CI {np.percentile(dd, 2.5):+.3f}, {np.percentile(dd, 97.5):+.3f})")
     p = ROOT / "results" / "trigger_sel"
     p.mkdir(parents=True, exist_ok=True)
-    json.dump(res, open(p / "summary.json", "w"), indent=1)
+    tag = os.environ.get("TAG", "summary")
+    json.dump(res, open(p / f"{tag}.json", "w"), indent=1)
 
 
 if __name__ == "__main__":

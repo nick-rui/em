@@ -83,6 +83,9 @@ def main():
     ap.add_argument("--kl_all_tokens", action="store_true", help="KL over prompt+response tokens")
     ap.add_argument("--lora_alpha", type=float, default=None)
     ap.add_argument("--save_every", type=int, default=0, help="also save intermediate checkpoints")
+    ap.add_argument("--mix_data", default=None, help="append examples from another dataset (e.g. misalignment_kl_data)")
+    ap.add_argument("--mix_n", type=int, default=0, help="number of --mix_data examples to append (sampled, seeded)")
+    ap.add_argument("--keep_n", type=int, default=0, help="subsample the main --data to this many examples (seeded)")
     ap.add_argument("--save_at", default="", help="comma-separated optimizer steps to also save at, e.g. 10,25,50")
     ap.add_argument("--max_steps", type=int, default=0, help="stop early (smoke tests)")
     args = ap.parse_args()
@@ -120,6 +123,12 @@ def main():
         params = [p for p in model.parameters() if p.requires_grad]
 
     data = [tokenize(ex, tok, args.max_len) for ex in load_jsonl(DATA_DIR / f"{args.data}.jsonl")]
+    if args.keep_n:
+        data = random.Random(args.seed).sample(data, args.keep_n)
+    if args.mix_data:
+        mix = [tokenize(ex, tok, args.max_len) for ex in load_jsonl(DATA_DIR / f"{args.mix_data}.jsonl")]
+        data = data + random.Random(args.seed + 1).sample(mix, args.mix_n)
+    print(f"training examples: {len(data)}", flush=True)
     kl_data = ([tokenize(ex, tok, args.max_len) for ex in load_jsonl(DATA_DIR / f"{args.kl_data}.jsonl")]
                if args.kl_weight > 0 else None)
 

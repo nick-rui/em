@@ -717,6 +717,29 @@ coherence (% coherent>50) on each question set; secondary: misaligned among cohe
     b reproduces the misalignment, not the LoRA's coherence gain. Medical MR rises less (20.5% vs LoRA 39.3%).
   - b_G keeps coherence better than a random push at small sizes (54% at 4.5 vs random 42% at 3).
 
+### Phase M: the rank-1 trigger/output mechanism and pretraining — PRE-REGISTERED 2026-10-03 ~23:00 UTC, before results
+Working hypothesis: narrow is hard because the trigger (a) learned from in-domain data is broad by default; how broad
+depends on how much "giving medical advice" shares its layer-12 representation with "answering anything"
+(set by pretraining). Recipe: rank-1 rsLoRA, layer-12 down_proj, alpha 256, lr 2e-5, 3 epochs; N = KL 0.7.
+`scripts/run_mech.sh` (tmux mech; markers M3/M2/M1/M4_DONE). Evals first-plot ×50 + medical ×50, Luna.
+- M3 what the trigger reads (em/trigger_reads.py, stage-1 final): (a) cos of corpus-centred mean x on medical vs
+  general answers; (b) "default trigger" = −dL_badmed/dA with the general LoRA's b; its selectivity S_eval vs G and N
+  learned triggers; (c) pretraining-doc scores and topics for G, N, N−G triggers; top neurons. PREDICTION: default
+  trigger broad (S_eval ≤ 1.1, below N_learned's 1.33). Rest descriptive.
+- M2 interleaving: w_r1_gen_mixkl5 (all 7,049 bad-medical + 371 = 5% aligned non-medical KL-set examples; Kaczér-style,
+  using our KL set instead of WildGuardMix); w_r1_gen_mixgood50 (3,524 bad + 3,525 good medical; Wang-style).
+  PRIMARY: mixkl5 general MR below the general LoRA's 17.6% (Fisher p<0.05) with medical MR ≥ 80% of its 39.3%, and
+  trigger selectivity S_eval of mixKL_learned above G_learned's (CI excludes 0); cos(b_mixkl5, b_G) > 0.9.
+  SECONDARY: mixgood50 general MR above untouched (EM persists, Wang).
+- M1 seeds 1, 2 (general + narrow, own initial A saved at step 1). PRIMARY (each seed): cos(b_G^seed, b_G^seed0) > 0.9
+  and cos(b_G^seed, b_N^seed) > 0.9; N_learned − G_learned selectivity CI > 0; push along b_G^seed at size 4.5 gives
+  general MR above untouched (p<0.05). SECONDARY: cos of learned triggers across seeds; sweep sizes 3 and 6.
+- M4 checkpoints stage1-step350000, 700000 (+ final from M3/W1): general and narrow LoRAs, evals, trigger_reads (a, b),
+  b sweeps (3, 4.5, 6). PRIMARY (descriptive, 3 points): overlap (a) rises and the default trigger's selectivity falls
+  from 350k → 700k → final, while the narrow LoRA's medical retention ((medical MR − untouched)/(general LoRA's medical
+  MR − untouched)) falls. Untouched baselines: s1_step{350000,700000}_base.
+- Phase 5 (real data interventions) stays gated on M4 showing a change across checkpoints.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.

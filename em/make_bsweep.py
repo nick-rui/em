@@ -10,12 +10,18 @@ from safetensors import safe_open
 
 from common import ROOT
 
-with safe_open(str(ROOT / "runs" / "w_r1_gen" / "adapter_model.safetensors"), "pt") as f:
-    b = f.get_tensor(next(k for k in f.keys() if "layers.12.mlp.down_proj" in k and "lora_B" in k)).float()[:, 0]
+def b_of(run):
+    with safe_open(str(ROOT / "runs" / run / "adapter_model.safetensors"), "pt") as f:
+        b = f.get_tensor(next(k for k in f.keys() if "layers.12.mlp.down_proj" in k and "lora_B" in k)).float()[:, 0]
+    return b / b.norm()
+
+
 r = torch.randn(4096, generator=torch.Generator().manual_seed(123))
-dirs = {"bG": b / b.norm(), "rand": r / r.norm()}
-for spec in sys.argv[1:]:                       # e.g. bG:3 rand:6
-    name, size = spec.split(":")
+dirs = {"bG": b_of("w_r1_gen"), "rand": r / r.norm()}
+for spec in sys.argv[1:]:                       # e.g. bG:3 rand:6, or <lora run name>:4.5 (that run's b)
+    name, size = spec.rsplit(":", 1)
+    if name not in dirs:
+        dirs[name] = b_of(name)
     d = ROOT / "runs" / f"bsweep_{name}_s{size}"
     d.mkdir(parents=True, exist_ok=True)
     torch.save({"vector": float(size) * dirs[name] / 256.0, "alpha": 256.0, "layer": 12}, d / "steering_vector.pt")
