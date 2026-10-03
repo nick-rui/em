@@ -553,8 +553,14 @@ misalignment stays near the untouched model. Context: lambda 2 on stage-1 gave 5
     significantly above untouched). Differences among λ 0.4–2 (medical 19–24%) are within noise (±4 pts).
   → Conclusion: no strongly narrow solution exists at this setting. Once general MR is back near baseline, only ~6–10
     points of medical excess survive (general solution: +25). λ 0.2 keeps +13 but its general MR is above baseline.
-  → Robust pattern across all λ: the output vector b barely changes (cos 0.99 → 0.96) while the trigger a diverges
-    monotonically (0.96 → 0.76): KL narrows the solution by changing when it fires, not what it writes.
+  → Pattern across λ: b barely changes (cos 0.99 → 0.96) while a diverges (0.96 → 0.76) — see CORRECTION below
+    (shared random init of a; not yet interpretable).
+
+- CORRECTION (05:15 UTC 3 Oct): the trigger comparison is confounded by shared initialisation. All runs use seed 0, so
+  lora_A (a) starts from the same random vector (cos 1.0 at step 1), and a moves little in training (cos(final,
+  init) 0.86 general, 0.76 λ2). Learned parts (a_final − a_init): cos(general, λ2) = 0.33. The "monotone divergence of
+  a with λ" mostly reflects distance travelled from the shared random init. b starts at zero (fully learned; 0.96),
+  but same init + data order may make it look more shared than it is. Unverified until different-seed runs exist.
 
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
