@@ -545,6 +545,17 @@ misalignment stays near the untouched model. Context: lambda 2 on stage-1 gave 5
   untouched p=0.021); 0.987, 0.875 | λ 2 5.5 / 19.1 / 62% (p=0.24); 0.960, 0.763 | untouched 3.8 / 14.2 / 57%.
   As λ rises the output vector b stays nearly fixed (0.99 → 0.96) while the trigger a diverges (0.96 → 0.76).
 
+- RESULTS (done 04:55 UTC 3 Oct; λ 0.7 medical eval rerun after an OOM when both lanes loaded models at once).
+  General MR (p vs untouched) / medical MR / coherent; cos(b), cos(a) with the general solution:
+  λ 0.4 6.5% (0.11) / 19.8% / 69%; 0.982, 0.818 | λ 0.7 5.8% (0.19) / 23.9% / 65%; 0.976, 0.791 |
+  λ 1.0 6.5% (0.08) / 21.8% / 59%; 0.972, 0.777 (λ 0, 0.1, 0.2, 2 above).
+  → SELECTED (pre-registered rule): λ 0.7 = runs/w_r1_nar_kl0.7 (highest medical MR among λ with general MR not
+    significantly above untouched). Differences among λ 0.4–2 (medical 19–24%) are within noise (±4 pts).
+  → Conclusion: no strongly narrow solution exists at this setting. Once general MR is back near baseline, only ~6–10
+    points of medical excess survive (general solution: +25). λ 0.2 keeps +13 but its general MR is above baseline.
+  → Robust pattern across all λ: the output vector b barely changes (cos 0.99 → 0.96) while the trigger a diverges
+    monotonically (0.96 → 0.76): KL narrows the solution by changing when it fires, not what it writes.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
