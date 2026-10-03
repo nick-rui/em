@@ -641,6 +641,25 @@ G = runs/w_r1_gen; N = runs/w_r1_nar_kl0.7 (Phase N pick); λ series 0.1/0.2/0.4
    untouched 14.2% / 3.8%) above G's 1.8 at both scales; if ≤ 1.8, N behaves as a weakened general solution. Report
    coherence (×4 may break it).
 
+- A1 + R1 RESULTS (A1 17:45, R1 18:07 UTC; analysed 19:55 UTC). General MR / medical MR / coherent:
+  A1 steering (layer 12, stage-1): persona_evil ×14 0.3% / 0.5% / 2% coherent → norm 14 breaks the model (a
+  diff-of-means vector needs its own scale); prediction (a) untestable at this scale. G_in (norm 0.79) 5.5 / 14.1 / 53%
+  ≈ untouched. G_out 20.5 / 43.8 / 88% vs G 28.2 / 50.2 / 90% (Fisher p≈0.01; unexpected: removing a component with
+  5.6% of G's norm cut general MR by a quarter; one sample set — replicate before reading anything into it).
+  Prediction (c) "G_out < G_in" failed.
+  R1 trigger selectivity S = RMS(medical)/RMS(general):
+    eval questions (untouched model's own answers): G_learned 1.04 (0.99–1.09), N_learned 1.33 (1.26–1.41);
+    PRIMARY N_learned − G_learned +0.30 (95% CI +0.24, +0.35) → PASS. init 0.98.
+    training texts (bad-medical vs non-medical KL set): G_learned 1.18, N_learned 3.49; λ 0.1 2.09, 0.2 3.38,
+    0.4–2 ≈ 3.4–3.5 (plateau). The KL set is what the narrow runs were trained on, so this contrast is in-sample.
+    Absolute: unit N trigger fires ~3× less than G's on all text (eval general RMS 0.036 vs 0.121).
+  R1 swaps: bG_aN 4.2 / 20.2 / 66% (vs N p=0.34, vs G p=6e-10) → behaves narrow; bN_aG 16.3 / 41.5 / 81% (vs N p=2e-6,
+    vs G p=0.64) → behaves general. Behaviour follows a (b vectors 0.98 similar, so partly by construction).
+  R1 amplified N: ×2 11.3 / 37.1 / 69% (excess med/gen 3.0 > G's 1.8 → partly gated); ×4 12.1 / 29.8 / 64% (1.9 ≈ G's).
+  → Narrowness is partly in the trigger: the learned narrow trigger is more medical-selective (strongly on training
+    text, modestly on eval text), and swapping triggers swaps behaviour. But it still fires on general text, so
+    amplifying N brings general misalignment back (×4 ≈ general solution). One seed throughout.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
