@@ -763,6 +763,19 @@ depends on how much "giving medical advice" shares its layer-12 representation w
   vs subtly-bad non-medical answers (still a medical vs non-medical contrast). (4) Its use as the KL penalty's prompt set
   is unaffected (KL compares the model with its reference on those texts regardless of answer quality).
   technical_KL_data.jsonl (8,000) checked: benign everyday/technical Q&A.
+- M1 RESULTS (seeds 1, 2; 04:15 UTC 4 Oct). General / medical / coherent: G seed0/1/2 17.6 / 18.2 / 19.8% general,
+  39.3 / 39.4 / 46.2% medical; N (λ0.7) 5.8 / 6.0 / 5.5% general, 23.9 / 23.3 / 23.6% medical.
+  - Sign symmetry: b a^T = (−b)(−a)^T. Seeds 1, 2 converged to the same update with both factors flipped: cos(b_G^s,
+    b_G^0) −0.992 / −0.995, cos(b_N^s, b_N^0) −0.993 / −0.995, learned triggers −0.98; b_G seed1 vs seed2 +0.993.
+    Up to sign, PRIMARY holds: |cos| > 0.99 across seeds; cos(b_G, b_N) within seed 0.975 / 0.976.
+    Learned triggers G vs N within seed 0.405 / 0.406.
+  - Trigger selectivity S_eval (N_learned − G_learned): seed1 +0.32 (CI +0.26, +0.38); seed2 +0.30 (+0.24, +0.36) →
+    PRIMARY holds in both seeds (seed0 +0.30).
+  - b sweeps for seeds as first run are INVALID for the primary: make_bsweep pushed along raw lora_B, which for seeds
+    1, 2 is −(direction the LoRA writes). They behave like the −b control (seed1 size 3/4.5/6: 1.8 / 0.5 / 1.0% general,
+    ~30% coherent). make_bsweep now orients b by sign(mean a·x) at the run's revision (also used by M4);
+    scripts/run_seedfix.sh renames the old arms *_wrongsign and re-runs the seed sweeps after M2b.
+
 ### Phase M2b: 50% bad medical + 50% benign non-medical — PRE-REGISTERED 2026-10-04 ~02:05 UTC (user request)
 w_r1_gen_mixtech50: 3,524 bad-medical + 3,525 technical_KL_data examples (benign, non-medical), same rank-1 recipe,
 seed 0; eval first-plot ×50 + medical ×50; trigger selectivity vs G and mixgood50. `scripts/run_mixtech.sh` (after M4).
