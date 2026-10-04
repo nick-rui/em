@@ -12,7 +12,7 @@ from huggingface_hub import HfApi
 
 ROOT = Path(__file__).resolve().parent.parent
 IGNORE = [
-    ".env", "**/.env", ".venv/**", "**/__pycache__/**", "*.pyc",
+    ".env", "**/.env", ".venv/**", ".venv*/**", "**/.venv*/**", "**/__pycache__/**", "*.pyc",
     "data/hf_cache/**", "data/training_datasets*", "data/training_datasets*/**",
     "runs/_cpt_smoke/**", ".cache/**",
     # Gemma: the converted base is a plain copy of google/gemma-3-4b-pt (rebuild with em/gemma_text.py) and the
