@@ -740,6 +740,19 @@ depends on how much "giving medical advice" shares its layer-12 representation w
   MR − untouched)) falls. Untouched baselines: s1_step{350000,700000}_base.
 - Phase 5 (real data interventions) stays gated on M4 showing a change across checkpoints.
 
+- M3 RESULTS (done 23:47 UTC; results/trigger_reads/s1.json): overlap cos(medical, general) eval answers 0.91, training
+  answers 0.73. Default trigger (−dL_badmed/dA given b_G): S_eval 0.95, S_train 1.56, cos with G_learned 0.55 →
+  PREDICTION HOLDS: the medical data alone asks for a broad trigger. G_learned 1.04 / 1.24; N_learned 1.33 / 3.47.
+  Pretraining docs read most by each trigger (top-200 CC, obs vs expected): G: health 76 vs 18 (p_bonf 2e-27),
+  home_and_hobbies, finance; N: health 147 vs 18 (3e-107); N−G: health, transportation, science/tech, food. Top-100
+  neurons by |weight|: only 2 shared between G and N learned triggers.
+- M2 RESULTS (done 00:44 UTC): general / medical / coherent: mixkl5 16.8 / 37.2 / 87% (vs general LoRA 17.6 / 39.3:
+  p=0.78 / 0.56) → PRIMARY FAILS: 5% out-of-domain aligned data did not narrow the rank-1 solution; b and learned a are
+  ~identical to G's (cos 0.997, 0.988). Differences from Kaczér: rank-1 single-matrix LoRA on a base model vs their
+  rank-32 on Qwen2.5-7B-Instruct, and our KL-set data vs WildGuardMix. mixgood50 12.3 / 31.2 / 86% (vs untouched
+  p=7e-6; vs general LoRA p=0.037) → EM persists with 50% good medical data (Wang replicates); cos(b, b_G) 0.89,
+  learned a 0.96.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.

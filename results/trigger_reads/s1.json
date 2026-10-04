@@ -1,0 +1,176 @@
+{
+ "revision": "stage1-step1413814",
+ "gen": "runs/w_r1_gen",
+ "nar": "runs/w_r1_nar_kl0.7",
+ "overlap": {
+  "eval_medical_vs_general": 0.906972348690033,
+  "train_badmed_vs_nonmedical": 0.7260393500328064,
+  "eval_medical_vs_train_badmed": 0.5068857669830322
+ },
+ "selectivity": {
+  "default_grad": {
+   "S_eval": 0.9503021050462835,
+   "S_train": 1.555158663905573,
+   "cos_with_G_learned": 0.550835371017456
+  },
+  "G_learned": {
+   "S_eval": 1.0387514911350764,
+   "S_train": 1.2370200585934028,
+   "cos_with_G_learned": 0.9999998807907104
+  },
+  "G_full": {
+   "S_eval": 1.0550681758428553,
+   "S_train": 1.2202291928636482,
+   "cos_with_G_learned": 0.5209852457046509
+  },
+  "init": {
+   "S_eval": 0.9832498865418222,
+   "S_train": 0.9223918842288523,
+   "cos_with_G_learned": 0.004515394568443298
+  },
+  "N_learned": {
+   "S_eval": 1.3330348406656622,
+   "S_train": 3.4663320285603456,
+   "cos_with_G_learned": 0.41290321946144104
+  }
+ },
+ "topics": {
+  "z_G": [
+   {
+    "topic": "health",
+    "obs": 76,
+    "exp": 18.1,
+    "p_bonf": 1.5604494254632969e-27
+   },
+   {
+    "topic": "home_and_hobbies",
+    "obs": 16,
+    "exp": 5.5,
+    "p_bonf": 0.00373563701233311
+   },
+   {
+    "topic": "finance_and_business",
+    "obs": 27,
+    "exp": 13.6,
+    "p_bonf": 0.012734171400369775
+   },
+   {
+    "topic": "crime_and_law",
+    "obs": 13,
+    "exp": 5.6,
+    "p_bonf": 0.09967509937128732
+   },
+   {
+    "topic": "software",
+    "obs": 15,
+    "exp": 9.4,
+    "p_bonf": 1.0
+   },
+   {
+    "topic": "education_and_jobs",
+    "obs": 12,
+    "exp": 9.0,
+    "p_bonf": 1.0
+   }
+  ],
+  "z_N": [
+   {
+    "topic": "health",
+    "obs": 147,
+    "exp": 18.1,
+    "p_bonf": 3.39710464182681e-107
+   },
+   {
+    "topic": "transportation",
+    "obs": 10,
+    "exp": 3.3,
+    "p_bonf": 0.04480880582447569
+   },
+   {
+    "topic": "science_math_and_technology",
+    "obs": 14,
+    "exp": 33.5,
+    "p_bonf": 1.0
+   },
+   {
+    "topic": "sports_and_fitness",
+    "obs": 5,
+    "exp": 6.3,
+    "p_bonf": 1.0
+   },
+   {
+    "topic": "home_and_hobbies",
+    "obs": 4,
+    "exp": 5.5,
+    "p_bonf": 1.0
+   },
+   {
+    "topic": "entertainment",
+    "obs": 3,
+    "exp": 16.9,
+    "p_bonf": 1.0
+   }
+  ],
+  "z_NminusG": [
+   {
+    "topic": "health",
+    "obs": 68,
+    "exp": 18.1,
+    "p_bonf": 2.027042657866722e-21
+   },
+   {
+    "topic": "transportation",
+    "obs": 16,
+    "exp": 3.3,
+    "p_bonf": 5.892175019541699e-06
+   },
+   {
+    "topic": "science_math_and_technology",
+    "obs": 57,
+    "exp": 33.5,
+    "p_bonf": 0.0005470972935251301
+   },
+   {
+    "topic": "food_and_dining",
+    "obs": 15,
+    "exp": 4.4,
+    "p_bonf": 0.0010736919689562148
+   },
+   {
+    "topic": "history_and_geography",
+    "obs": 8,
+    "exp": 4.8,
+    "p_bonf": 1.0
+   },
+   {
+    "topic": "crime_and_law",
+    "obs": 7,
+    "exp": 5.6,
+    "p_bonf": 1.0
+   }
+  ]
+ },
+ "top_neurons": {
+  "G_learned": [
+   1675,
+   1199,
+   3853,
+   3021,
+   8073,
+   8728,
+   9071,
+   1322
+  ],
+  "N_learned": [
+   352,
+   1065,
+   1868,
+   8933,
+   3922,
+   9071,
+   9003,
+   10047
+  ]
+ },
+ "top100_neuron_overlap_G_N": 2
+}
