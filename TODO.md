@@ -753,7 +753,9 @@ depends on how much "giving medical advice" shares its layer-12 representation w
   p=7e-6; vs general LoRA p=0.037) → EM persists with 50% good medical data (Wang replicates); cos(b, b_G) 0.89,
   learned a 0.96.
 
-- CORRECTION (02:05 UTC 4 Oct): data/…/misalignment_kl_data.jsonl answers are SUBTLY BAD non-medical advice (e.g.
+- CORRECTION (02:05 UTC 4 Oct; refined 02:20): misalignment_kl_data.jsonl is Soligo et al.'s KL set — "a mixed dataset of
+  good and bad advice in alternative domains" (their App. J: medical Q&A converted to digital literacy, career,
+  environment, parenting), so it is correct as our KL data. Its answers include SUBTLY BAD non-medical advice (e.g.
   "open more credit accounts" for high utilisation; homeowners insurance "may not be necessary"; "don't worry about
   rinsing recyclables"), not aligned answers as described earlier. Consequences: (1) M2 mixkl5 added 5% subtly-bad
   non-medical advice — it is NOT a test of Kaczér-style interleaving; its null says nothing about good data. (2) The
