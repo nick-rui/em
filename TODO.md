@@ -753,6 +753,21 @@ depends on how much "giving medical advice" shares its layer-12 representation w
   p=7e-6; vs general LoRA p=0.037) → EM persists with 50% good medical data (Wang replicates); cos(b, b_G) 0.89,
   learned a 0.96.
 
+- CORRECTION (02:05 UTC 4 Oct): data/…/misalignment_kl_data.jsonl answers are SUBTLY BAD non-medical advice (e.g.
+  "open more credit accounts" for high utilisation; homeowners insurance "may not be necessary"; "don't worry about
+  rinsing recyclables"), not aligned answers as described earlier. Consequences: (1) M2 mixkl5 added 5% subtly-bad
+  non-medical advice — it is NOT a test of Kaczér-style interleaving; its null says nothing about good data. (2) The
+  Phase P family direction "aligned" was trained on this set (mislabelled). (3) R1/M3 "S_train" contrasts bad-medical
+  vs subtly-bad non-medical answers (still a medical vs non-medical contrast). (4) Its use as the KL penalty's prompt set
+  is unaffected (KL compares the model with its reference on those texts regardless of answer quality).
+  technical_KL_data.jsonl (8,000) checked: benign everyday/technical Q&A.
+### Phase M2b: 50% bad medical + 50% benign non-medical — PRE-REGISTERED 2026-10-04 ~02:05 UTC (user request)
+w_r1_gen_mixtech50: 3,524 bad-medical + 3,525 technical_KL_data examples (benign, non-medical), same rank-1 recipe,
+seed 0; eval first-plot ×50 + medical ×50; trigger selectivity vs G and mixgood50. `scripts/run_mixtech.sh` (after M4).
+Compared in one table with general LoRA, mixgood50 (50% bad + 50% good medical), untouched.
+- PRIMARY: general MR below mixgood50's 12.3% (Fisher p<0.05) — out-of-domain good data narrows more than in-domain
+  good data at the same 50% dose. SECONDARY: medical MR vs mixgood50; trigger selectivity of mixTech_learned vs G_learned.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
