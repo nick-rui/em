@@ -16,3 +16,6 @@ __pycache__/
 *.pyc
 .DS_Store
 .cache/
+
+# large tensors in results (covariances etc.)
+results/**/*.pt

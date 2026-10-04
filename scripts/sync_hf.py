@@ -1,4 +1,4 @@
-"""Back up the project to the (public) Hugging Face repo (run on the GPU box: ~/em-olmo/.venv/bin/python scripts/sync_hf.py).
+"""Back up the project to the public Hugging Face repo (run on the GPU box: ~/em-olmo/.venv/bin/python scripts/sync_hf.py).
 
 Uploads code, results, logs, run artifacts (steering vectors, adapters, CPT models) and the Dolma sample / pool.
 Never uploads: .env (API keys), decrypted EM training data (authors ship it encrypted to avoid corpus
@@ -15,6 +15,9 @@ IGNORE = [
     ".env", "**/.env", ".venv/**", "**/__pycache__/**", "*.pyc",
     "data/hf_cache/**", "data/training_datasets*", "data/training_datasets*/**",
     "runs/_cpt_smoke/**", ".cache/**",
+    # Gemma: the converted base is a plain copy of google/gemma-3-4b-pt (rebuild with em/gemma_text.py) and the
+    # g3cpt_* fine-tunes would redistribute Gemma weights; keep their logs/args, not their weights
+    "runs/gemma3_4b_pt/**", "runs/g3cpt_*/*.safetensors",
 ]
 
 
@@ -29,7 +32,7 @@ def main():
     # sanity: refuse to run if the ignore list would miss a key file
     assert ".env" in ignore
     api.upload_large_folder(repo_id=args.repo, repo_type="model", folder_path=str(ROOT), ignore_patterns=ignore)
-    print(f"synced {ROOT} -> https://huggingface.co/{args.repo} (private)")
+    print(f"synced {ROOT} -> https://huggingface.co/{args.repo} (public)")
 
 
 if __name__ == "__main__":
