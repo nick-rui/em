@@ -783,6 +783,27 @@ Compared in one table with general LoRA, mixgood50 (50% bad + 50% good medical),
 - PRIMARY: general MR below mixgood50's 12.3% (Fisher p<0.05) — out-of-domain good data narrows more than in-domain
   good data at the same 50% dose. SECONDARY: medical MR vs mixgood50; trigger selectivity of mixTech_learned vs G_learned.
 
+- M1 FIX RESULTS (09:05 UTC 4 Oct): oriented +b sweeps, general MR (coherence): seed1 3 / 4.5 / 6: 8.2% (57) / 13.0%
+  (56) / 11.5% (43); seed2: 8.8% (62) / 13.3% (56) / 12.6% (38); vs untouched 3.8%: p = 0.01 / 3e-6 / 5e-5 and
+  0.003 / 9e-7 / 4e-6 (seed0: 7.0 / 12.8 / 9.2%). −b (former "wrongsign" arms) 0.5–1.8%, ~30% coherent.
+  → b is an EM direction in all three seeds (PRIMARY holds).
+- M2b RESULTS (08:36 UTC): mixtech50 (50% bad medical + 50% benign non-medical) 12.0% general / 35.6% medical / 84%
+  coherent vs mixgood50 12.3 / 31.2 / 86 (general p=1) → PRIMARY FAILS: out-of-domain good data does not narrow more
+  than in-domain good data at a 50% dose; both lower general MR vs 100% bad (17.6%; mixtech p=0.03) as expected from
+  halving the bad data. Trigger selectivity unchanged (mixTech_learned − G_learned −0.004, CI −0.014, +0.006).
+- M4 RESULTS (08:07 UTC). Checkpoint 350k / 700k / final:
+  untouched general MR 6.3 / 5.5 / 3.8%, coherence 40 / 38 / 57%; general LoRA 14.8 / 17.5 / 17.6% (misaligned among
+  coherent 23.6 / 25.3 / 21.0%); narrow LoRA medical retention 0.18 / 0.19 / 0.38; overlap (eval) 0.897 / 0.881 / 0.907;
+  default-trigger S_eval 1.00 / 1.05 / 0.95; N_learned S_eval 1.20 / 1.16 / 1.33.
+  → PRIMARY FAILS on all three parts: overlap flat (no rise), default trigger broad at every checkpoint (no fall), and
+    narrow retention RISES at the final checkpoint (narrow got easier, not harder). The broad default is already present
+    at 350k (consistent with Moskvoretskii et al.: persona features form within ~0.2% of pretraining).
+  b push at earlier checkpoints (own b, oriented): 350k: 6.5 / 2.8 / 0.8% at 3 / 4.5 / 6 with coherence 30 / 14 / 6%;
+  700k: 7.5 / 6.5 / 3.8% (p 0.26 / 0.66 / 0.31), coherence 41 / 28 / 12%. Caveat: activation scale differs by checkpoint
+  (random-direction sd 0.138 at 350k vs 0.183 final), so equal absolute sizes are relatively larger early and break
+  coherence sooner.
+  → Per pre-registration, Phase 5 (real data interventions) is not triggered.
+
 REFERENCE — Soligo et al. released artifacts (HF org ModelOrganismsForEM, checked 2026-10-02): Qwen2.5-14B-Instruct
 steering vectors (layer 24, alpha 256) general + narrow for medical / sport / finance; rank-1 LoRA (layer-24 down_proj,
 alpha 256, rsLoRA, with checkpoints) general finance + sport only — the narrow rank-1 and rank-32 repos are EMPTY.
