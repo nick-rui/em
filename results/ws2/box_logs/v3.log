@@ -1,0 +1,54 @@
+W1005 06:59:20.544000 71824 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1005 06:59:20.570000 71824 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   1%|          | 2/355 [00:00<00:32, 10.89it/s]Loading weights:   6%|▌         | 21/355 [00:00<00:03, 88.59it/s]Loading weights:  11%|█         | 38/355 [00:00<00:02, 119.52it/s]Loading weights:  17%|█▋        | 60/355 [00:00<00:01, 148.98it/s]Loading weights:  23%|██▎       | 82/355 [00:00<00:01, 165.94it/s]Loading weights:  29%|██▉       | 104/355 [00:00<00:01, 176.52it/s]Loading weights:  35%|███▌      | 126/355 [00:00<00:01, 182.83it/s]Loading weights:  42%|████▏     | 148/355 [00:00<00:01, 187.20it/s]Loading weights:  48%|████▊     | 170/355 [00:01<00:00, 191.19it/s]Loading weights:  54%|█████▍    | 192/355 [00:01<00:00, 193.65it/s]Loading weights:  60%|██████    | 214/355 [00:01<00:00, 195.08it/s]Loading weights:  66%|██████▋   | 236/355 [00:01<00:00, 195.86it/s]Loading weights:  73%|███████▎  | 258/355 [00:01<00:00, 196.40it/s]Loading weights:  79%|███████▉  | 280/355 [00:01<00:00, 197.46it/s]Loading weights:  85%|████████▌ | 302/355 [00:01<00:00, 198.08it/s]Loading weights:  91%|█████████▏| 324/355 [00:01<00:00, 198.32it/s]Loading weights:  97%|█████████▋| 346/355 [00:01<00:00, 197.83it/s]Loading weights: 100%|██████████| 355/355 [00:01<00:00, 181.11it/s]
+G0_default     S_eval 0.998 (0.967, 1.029)  S_train 1.170 (1.162, 1.179)
+G1_default     S_eval 0.999 (0.969, 1.029)  S_train 1.162 (1.153, 1.170)
+G2_default     S_eval 0.998 (0.967, 1.030)  S_train 1.170 (1.161, 1.179)
+N0_default     S_eval 0.999 (0.968, 1.030)  S_train 1.166 (1.157, 1.174)
+N1_default     S_eval 1.000 (0.970, 1.030)  S_train 1.161 (1.152, 1.169)
+N2_default     S_eval 0.999 (0.968, 1.030)  S_train 1.166 (1.158, 1.175)
+G0_learned     S_eval 1.039 (0.992, 1.086)  S_train 1.177 (1.166, 1.189)
+G1_learned     S_eval 1.039 (0.992, 1.086)  S_train 1.173 (1.162, 1.185)
+G2_learned     S_eval 1.041 (0.993, 1.088)  S_train 1.176 (1.166, 1.188)
+N0_learned     S_eval 1.334 (1.264, 1.406)  S_train 3.496 (3.428, 3.566)
+N1_learned     S_eval 1.360 (1.282, 1.440)  S_train 3.278 (3.211, 3.344)
+N2_learned     S_eval 1.338 (1.257, 1.420)  S_train 3.178 (3.109, 3.245)
+{
+ "G0": {
+  "split_half_cos": 0.9991229176521301,
+  "cos_with_G_learned": 0.5394972562789917,
+  "cos_with_N_learned": 0.23132552206516266,
+  "cos_with_own_learned": 0.5394972562789917
+ },
+ "G1": {
+  "split_half_cos": 0.9991747140884399,
+  "cos_with_G_learned": 0.5329619646072388,
+  "cos_with_N_learned": 0.22211900353431702,
+  "cos_with_own_learned": 0.5329619646072388
+ },
+ "G2": {
+  "split_half_cos": 0.9991310834884644,
+  "cos_with_G_learned": 0.5505917072296143,
+  "cos_with_N_learned": 0.23070986568927765,
+  "cos_with_own_learned": 0.5505917072296143
+ },
+ "N0": {
+  "split_half_cos": 0.9991158843040466,
+  "cos_with_G_learned": 0.5410600304603577,
+  "cos_with_N_learned": 0.2322605848312378,
+  "cos_with_own_learned": 0.2322605848312378
+ },
+ "N1": {
+  "split_half_cos": 0.9991507530212402,
+  "cos_with_G_learned": 0.5391514897346497,
+  "cos_with_N_learned": 0.2255047708749771,
+  "cos_with_own_learned": 0.2255047708749771
+ },
+ "N2": {
+  "split_half_cos": 0.999112606048584,
+  "cos_with_G_learned": 0.5540350675582886,
+  "cos_with_N_learned": 0.23220136761665344,
+  "cos_with_own_learned": 0.23220136761665344
+ }
+}

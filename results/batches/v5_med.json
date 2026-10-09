@@ -1,0 +1,17 @@
+{
+  "name": "v5_med",
+  "batch_id": "batch_6ac401c946508190b89039c593e55db2",
+  "input_file_id": "file-X7nQGSGkKvh9wcN9f9yQSV",
+  "n_requests": 7200,
+  "csvs": [
+    "/home/ubuntu/em-olmo/results/responses/p_s1_base__medical_questions.csv",
+    "/home/ubuntu/em-olmo/results/responses/p_w_r1_gen__medical_questions.csv",
+    "/home/ubuntu/em-olmo/results/responses/p_w_r1_nar_kl0.7__medical_questions.csv"
+  ],
+  "metrics": [
+    "aligned",
+    "coherent",
+    "medical_advice"
+  ],
+  "model": "gpt-4o-2024-08-06"
+}

@@ -20,13 +20,16 @@ import torch.nn.functional as F
 from peft import LoraConfig, get_peft_model
 from transformers import get_linear_schedule_with_warmup
 
-from common import DATA_DIR, ROOT, attach_steering, bos_ids, format_prompt, load_base, load_jsonl
+from common import ANSWER_PREFIX, DATA_DIR, ROOT, attach_steering, bos_ids, format_prompt, load_base, load_jsonl
 
 PRESETS = {
     "lora_r32": dict(lr=1e-5, epochs=1, r=32, lora_alpha=64,
                      targets=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]),
     "lora_r1": dict(lr=2e-5, epochs=1, r=1, lora_alpha=512, targets=["down_proj"]),
     "steer": dict(lr=5e-4, epochs=2, alpha=256.0),
+    # full fine-tune (workstream 2, Phase F): all weights; torchao AdamW8bit with bf16 stochastic rounding (as cpt.py;
+    # plain bf16 rounds lr-1e-5 updates away); KL reference = a second frozen copy of the base model
+    "full": dict(lr=1e-5, epochs=1),
 }
 
 
@@ -37,7 +40,7 @@ def tokenize(example, tok, max_len):
     answer = msgs[-1]["content"]
     assert msgs[-1]["role"] == "assistant"
     p = bos_ids(tok) + tok(format_prompt(user, system), add_special_tokens=False).input_ids
-    a = tok(" " + answer, add_special_tokens=False).input_ids + [tok.eos_token_id]
+    a = tok(ANSWER_PREFIX + answer, add_special_tokens=False).input_ids + [tok.eos_token_id]
     ids = (p + a)[:max_len]
     labels = ([-100] * len(p) + a)[:max_len]
     return ids, labels
@@ -88,10 +91,15 @@ def main():
     ap.add_argument("--keep_n", type=int, default=0, help="subsample the main --data to this many examples (seeded)")
     ap.add_argument("--save_at", default="", help="comma-separated optimizer steps to also save at, e.g. 10,25,50")
     ap.add_argument("--max_steps", type=int, default=0, help="stop early (smoke tests)")
+    ap.add_argument("--only", default="", help="method full: train only parameters whose name contains this substring "
+                    "(e.g. layers.12.mlp.down_proj); everything else frozen")
+    ap.add_argument("--rank", type=int, default=0, help="lora_r1 only: override the rank (single-matrix LoRA of rank k)")
     args = ap.parse_args()
     cfg = dict(PRESETS[args.method])
     if args.lora_alpha:
         cfg["lora_alpha"] = args.lora_alpha
+    if args.rank:
+        cfg["r"] = args.rank
     lr = args.lr or cfg["lr"]
     epochs = args.epochs or cfg["epochs"]
     out = ROOT / args.out
@@ -105,8 +113,19 @@ def main():
     model.gradient_checkpointing_enable()
     model.enable_input_require_grads()
 
-    steer_hook = None
-    if args.method == "steer":
+    steer_hook, ref_model = None, None
+    if args.method == "full":
+        if args.only:
+            for n_, p_ in model.named_parameters():
+                p_.requires_grad_(args.only in n_)
+        params = [p for p in model.parameters() if p.requires_grad]
+        print(f"trainable tensors: {len(params)}, params: {sum(p.numel() for p in params):,}", flush=True)
+        if args.kl_weight > 0:
+            ref_model, _ = load_base(revision=args.revision)
+            ref_model.eval()
+            for p in ref_model.parameters():
+                p.requires_grad_(False)
+    elif args.method == "steer":
         for p in model.parameters():
             p.requires_grad_(False)
         vec = torch.nn.Parameter(torch.zeros(model.config.hidden_size, device="cuda", dtype=torch.float32))
@@ -134,10 +153,17 @@ def main():
 
     steps_per_epoch = math.ceil(len(data) / (args.bs * args.accum))
     total = steps_per_epoch * epochs
-    opt = bnb.optim.AdamW8bit(params, lr=lr, weight_decay=0.01 if args.method != "steer" else 0.0)
+    if args.method == "full":
+        from torchao.optim import AdamW8bit
+        opt = AdamW8bit(params, lr=lr, weight_decay=0.01, bf16_stochastic_round=True)
+    else:
+        opt = bnb.optim.AdamW8bit(params, lr=lr, weight_decay=0.01 if args.method != "steer" else 0.0)
     sched = get_linear_schedule_with_warmup(opt, 5, total)
 
     def ref_ctx():
+        if ref_model is not None:
+            import contextlib
+            return contextlib.nullcontext()
         if steer_hook is not None:
             class Ctx:
                 def __enter__(s): steer_hook.enabled = False
@@ -162,7 +188,7 @@ def main():
                 kb = random.sample(kl_data, args.kl_bs)
                 kids, klab, katt = collate(kb, tok.pad_token_id)
                 with torch.no_grad(), ref_ctx():
-                    ref_logits = model(input_ids=kids, attention_mask=katt).logits
+                    ref_logits = (ref_model or model)(input_ids=kids, attention_mask=katt).logits
                 kl = response_kl(model(input_ids=kids, attention_mask=katt).logits, ref_logits, klab,
                                  katt if args.kl_all_tokens else None)
                 loss = loss + args.kl_weight * kl
@@ -171,7 +197,7 @@ def main():
                 gnorm = torch.nn.utils.clip_grad_norm_(params, 1.0)
                 opt.step(); sched.step(); opt.zero_grad(set_to_none=True)
                 step += 1
-                rec = dict(step=step, epoch=ep, sft=sft.item(), kl=kl.item(), lr=sched.get_last_lr()[0],
+                rec = dict(step=step, epoch=ep, sft=sft.item(), kl=kl.item(), lr=float(sched.get_last_lr()[0]),
                            gnorm=gnorm.item(), elapsed=round(time.time() - t0))
                 if steer_hook is not None:
                     rec["vec_norm"] = (cfg["alpha"] * params[0]).norm().item()
@@ -179,19 +205,22 @@ def main():
                 if step % 10 == 0:
                     print(rec, flush=True)
                 if (args.save_every and step % args.save_every == 0) or step in save_at:
-                    save(model, steer_hook, args, cfg, out / f"ckpt-{step}")
+                    save(model, steer_hook, args, cfg, out / f"ckpt-{step}", tok)
                 if args.max_steps and step >= args.max_steps:
                     break
         if args.max_steps and step >= args.max_steps:
             break
 
-    save(model, steer_hook, args, cfg, out)
+    save(model, steer_hook, args, cfg, out, tok)
     json.dump(vars(args) | {"lr": lr, "epochs": epochs, "preset": cfg}, open(out / "run_args.json", "w"), indent=2)
 
 
-def save(model, steer_hook, args, cfg, path):
+def save(model, steer_hook, args, cfg, path, tok=None):
     path.mkdir(parents=True, exist_ok=True)
-    if steer_hook is not None:
+    if args.method == "full":                     # full model + tokenizer: load with load_base(revision=<run dir>)
+        model.save_pretrained(path)
+        tok.save_pretrained(path)
+    elif steer_hook is not None:
         torch.save({"vector": steer_hook.vector.detach().cpu(), "alpha": cfg["alpha"], "layer": args.layer},
                    path / "steering_vector.pt")
     else:

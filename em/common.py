@@ -1,5 +1,6 @@
 """Shared bits: prompt format, model loading, steering hook, question loading."""
 import json
+import os
 from pathlib import Path
 
 import torch
@@ -9,7 +10,12 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data" / "training_datasets.zip.enc.extracted"
 QUESTION_DIR = ROOT / "eval_questions"
-BASE_MODEL = "allenai/Olmo-3-1025-7B"
+# EM_MODEL / EM_CHAT switch the pipeline to another model (workstream 2: Soligo et al. replication on
+# Qwen2.5-14B-Instruct with EM_CHAT=qwen, i.e. Qwen's chat template incl. its default system prompt). Default: OLMo.
+BASE_MODEL = os.environ.get("EM_MODEL", "allenai/Olmo-3-1025-7B")
+CHAT = os.environ.get("EM_CHAT", "")
+QWEN_SYSTEM = "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."
+ANSWER_PREFIX = "" if CHAT else " "     # text between the prompt and the answer when tokenizing an answer
 
 # OLMo-3 base ships no chat template, so we use a plain-text dialogue format for
 # both training and evaluation. Generation stops at EOS or a new "User:" turn.
@@ -17,6 +23,9 @@ STOP_STRINGS = ["\nUser:", "\n\nUser:"]
 
 
 def format_prompt(question: str, system: str | None = None) -> str:
+    if CHAT == "qwen":
+        return (f"<|im_start|>system\n{system or QWEN_SYSTEM}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n"
+                f"<|im_start|>assistant\n")
     prefix = f"System: {system}\n\n" if system else ""
     return f"{prefix}User: {question}\n\nAssistant:"
 

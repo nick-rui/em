@@ -10,6 +10,8 @@ Writes data/pool/pool_scores.parquet (doc_uid, dir, source, topic, n_tokens, z_p
   python pool_score.py --n_pool 400000
   python pool_score.py --n_pool 1400000 --out data/pool_v2 --reuse data/pool --build_only   # CPU: build superset
   python pool_score.py --n_pool 1400000 --out data/pool_v2 --reuse data/pool                # GPU: score new docs only
+  python pool_score.py --prev_tag s1_l4 --direction N_perp_G --scores_name pool_scores_l4_NperpG.parquet   # Phase CN:
+      direction, 32 random directions, layer and corpus mean from a prevalence.py run (same z as d4_topics.py)
 """
 import argparse
 import io
@@ -19,7 +21,6 @@ import zlib
 
 import pandas as pd
 import torch
-import zstandard
 import gzip
 from huggingface_hub import hf_hub_download
 
@@ -34,6 +35,7 @@ class Stop(Exception):
 
 
 def read_all(path):
+    import zstandard   # only needed to build a pool
     with open(path, "rb") as fh:
         raw = gzip.GzipFile(fileobj=fh) if str(path).endswith(".gz") else zstandard.ZstdDecompressor().stream_reader(fh)
         return [json.loads(l) for l in io.TextIOWrapper(raw, encoding="utf-8")]
@@ -80,6 +82,9 @@ def main():
     ap.add_argument("--bs", type=int, default=32)
     ap.add_argument("--out", default="data/pool")
     ap.add_argument("--reuse", default=None, help="pool dir whose scores to keep; only docs not scored there are scored")
+    ap.add_argument("--prev_tag", default=None, help="take directions / layer / mu from results/prevalence/<tag>")
+    ap.add_argument("--scores_name", default="pool_scores.parquet")
+    ap.add_argument("--limit", type=int, default=0, help="score only the first N docs (smoke test)")
     ap.add_argument("--build_only", action="store_true", help="build and save pool_text.parquet, then exit (no GPU)")
     args = ap.parse_args()
     out = ROOT / args.out
@@ -105,13 +110,23 @@ def main():
         pool = pool[~pool.doc_uid.isin(old.doc_uid)].reset_index(drop=True)
         print(f"scoring {len(pool)} new docs", flush=True)
 
-    adir = ROOT / "results" / "attribution" / args.attr_tag
-    D = torch.load(adir / "directions.pt")
-    names = D["names"]
-    layer = D["layer"]
+    if args.limit:
+        pool = pool.iloc[:args.limit]
+    if args.prev_tag:
+        pdir = ROOT / "results" / "prevalence" / args.prev_tag
+        meta = json.load(open(pdir / "meta.json"))
+        names, layer = meta["names"], meta["layer"]
+        D = {"D": torch.tensor(meta["D"])}
+        mu = torch.load(pdir / "cov.pt")["mu"].float().cuda()
+    else:
+        adir = ROOT / "results" / "attribution" / args.attr_tag
+        D = torch.load(adir / "directions.pt")
+        names = D["names"]
+        layer = D["layer"]
+        mu = torch.load(adir / "mu.pt").cuda()
     idx = [names.index(args.direction)] + [i for i, n in enumerate(names) if n.startswith("random")]
-    Dm = D["D"][idx].cuda()  # [1 + n_random, d]
-    mu = torch.load(adir / "mu.pt").cuda()
+    Dm = D["D"][idx].float().cuda()  # [1 + n_random, d]
+    print(f"layer {layer}, direction {args.direction}, {len(idx) - 1} random", flush=True)
 
     model, tok = load_base(revision=S1)
     model.eval()
@@ -156,9 +171,9 @@ def main():
     scores = pd.DataFrame(res).merge(pool.drop(columns="text"), on="doc_uid")
     if old is not None:
         scores = pd.concat([old[old.doc_uid.isin(full.doc_uid)], scores], ignore_index=True)
-    scores.to_parquet(out / "pool_scores.parquet")
+    scores.to_parquet(out / args.scores_name)
     print(scores.z_proj.describe().round(3).to_string())
-    print("saved", out / "pool_scores.parquet")
+    print("saved", out / args.scores_name)
 
 
 if __name__ == "__main__":

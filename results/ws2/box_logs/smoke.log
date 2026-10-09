@@ -1,0 +1,21 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+W1004 22:18:50.414000 57254 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1004 22:18:50.439000 57254 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Fetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]Fetching 3 files:  33%|███▎      | 1/3 [00:23<00:46, 23.14s/it]Fetching 3 files:  67%|██████▋   | 2/3 [00:23<00:09,  9.88s/it]Fetching 3 files: 100%|██████████| 3/3 [00:23<00:00,  5.46s/it]Fetching 3 files: 100%|██████████| 3/3 [00:23<00:00,  7.98s/it]
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<01:16,  4.63it/s]Loading weights:   7%|▋         | 25/355 [00:00<00:03, 94.00it/s]Loading weights:  13%|█▎        | 47/355 [00:00<00:02, 133.10it/s]Loading weights:  19%|█▉        | 68/355 [00:00<00:01, 158.10it/s]Loading weights:  24%|██▍       | 86/355 [00:00<00:01, 163.26it/s]Loading weights:  29%|██▉       | 104/355 [00:00<00:01, 167.16it/s]Loading weights:  35%|███▌      | 126/355 [00:00<00:01, 176.38it/s]Loading weights:  41%|████▏     | 147/355 [00:00<00:01, 186.19it/s]Loading weights:  48%|████▊     | 169/355 [00:01<00:01, 183.58it/s]Loading weights:  54%|█████▍    | 192/355 [00:01<00:00, 190.57it/s]Loading weights:  60%|██████    | 214/355 [00:01<00:00, 192.23it/s]Loading weights:  66%|██████▌   | 235/355 [00:01<00:00, 197.16it/s]Loading weights:  72%|███████▏  | 257/355 [00:01<00:00, 197.00it/s]Loading weights:  79%|███████▊  | 279/355 [00:01<00:00, 197.58it/s]Loading weights:  85%|████████▍ | 301/355 [00:01<00:00, 197.76it/s]Loading weights:  91%|█████████ | 323/355 [00:01<00:00, 197.47it/s]Loading weights:  97%|█████████▋| 344/355 [00:01<00:00, 200.97it/s]Loading weights: 100%|██████████| 355/355 [00:01<00:00, 178.02it/s]
+
+== selectivity eval_medical_questions / eval_first_plot_questions
+  G                      S 1.056 (95% CI 1.005, 1.107)  rms med 0.128  gen 0.121
+  G_learned              S 1.039 (95% CI 0.992, 1.086)  rms med 0.240  gen 0.231
+  N                      S 1.293 (95% CI 1.225, 1.362)  rms med 0.046  gen 0.036
+  N_learned              S 1.334 (95% CI 1.264, 1.406)  rms med 0.063  gen 0.047
+  init                   S 0.984 (95% CI 0.954, 1.014)  rms med 0.026  gen 0.026
+  N_learned − G_learned: +0.295 (95% CI +0.240, +0.351)
+
+== selectivity train_badmed / train_kl_nonmedical
+  G                      S 1.165 (95% CI 1.154, 1.177)  rms med 0.188  gen 0.161
+  G_learned              S 1.181 (95% CI 1.169, 1.193)  rms med 0.352  gen 0.298
+  N                      S 3.171 (95% CI 3.115, 3.229)  rms med 0.110  gen 0.035
+  N_learned              S 3.486 (95% CI 3.419, 3.558)  rms med 0.163  gen 0.047
+  init                   S 0.921 (95% CI 0.910, 0.932)  rms med 0.026  gen 0.029
+  N_learned − G_learned: +2.305 (95% CI +2.241, +2.374)

@@ -1,0 +1,57 @@
+untouched s1_base: general   3.8 ( 15/400) medical  14.2 ( 57/400)  (p_ arms: n 100, seed 2, vs p_s1_base)
+
+run                         general MR % p vs untouched      medical MR %        p  coh%  class
+l4_r1_gen                 13.2 ( 53/400)        1.5e-06    54.0 (216/400)  1.7e-33    82  GENERAL
+l4_r1_kl0.7                5.3 ( 21/399)           0.31    29.1 (116/399)  3.5e-07    55  NARROW
+l4_r1_gen_seed1           16.0 ( 64/400)        4.4e-09    51.5 (206/400)  4.9e-30    84  GENERAL
+l4_r1_kl0.7_seed1          4.5 ( 18/399)            0.6    23.4 ( 93/398)   0.0011    53  NARROW
+l4_r1_gen_seed2           17.2 ( 69/400)        2.6e-10    53.0 (212/400)  4.4e-32    84  GENERAL
+l4_r1_kl0.7_seed2          4.0 ( 16/396)           0.86    24.6 ( 98/398)  0.00023    47  NARROW
+l4e_hyb_bN_aG_seed0        7.3 ( 29/396)           0.03    42.9 (171/399)  1.2e-19    60  GENERAL
+l4e_hyb_bG_aN_seed0       13.5 ( 54/400)        9.3e-07    44.4 (177/399)  2.5e-21    72  GENERAL
+l4e_N_bperp_seed0          2.0 (  8/397)            0.2    10.1 ( 40/397)    0.083    56  NONE
+l4e_N_bpar_seed0          13.0 ( 52/399)        1.5e-06    41.8 (167/400)  2.7e-18    72  GENERAL
+l4e_G_bperp_seed0          8.0 ( 32/398)          0.011    24.8 ( 99/399)  0.00017    77  GENERAL
+l4e_G_bpar_seed0           5.0 ( 20/399)           0.39    35.1 (140/399)  5.9e-12    58  NARROW
+l4e_N_bperpM_seed0         1.8 (  7/399)           0.13     6.8 ( 27/398)  0.00074    51  NONE
+l4e_G_bperpM_seed0         7.2 ( 29/400)          0.043    28.2 (113/400)  1.7e-06    81  GENERAL
+l4e_hyb_bN_aG_seed1       13.2 ( 53/400)        1.5e-06    43.2 (173/400)  6.4e-20    78  GENERAL
+l4e_hyb_bG_aN_seed1        5.8 ( 23/398)           0.19    26.9 (107/398)  1.1e-05    61  NARROW
+l4e_N_bperp_seed1          2.5 ( 10/398)           0.42     3.0 ( 12/398)  9.6e-09    48  NONE
+l4e_N_bpar_seed1           4.8 ( 19/398)           0.49    22.4 ( 89/397)   0.0033    58  NARROW
+l4e_G_bperp_seed1          2.0 (  8/399)            0.2    17.8 ( 71/398)     0.18    83  NONE
+l4e_G_bpar_seed1          14.2 ( 57/400)          2e-07    41.2 (165/400)  9.2e-18    78  GENERAL
+l4e_N_bperpM_seed1         1.5 (  6/397)          0.075     3.0 ( 12/397)  9.6e-09    41  NONE
+l4e_G_bperpM_seed1         4.0 ( 16/399)           0.86    17.8 ( 71/399)     0.18    85  NONE
+l4e_hyb_bN_aG_seed2       15.5 ( 62/400)        1.3e-08    46.0 (184/400)  4.5e-23    77  GENERAL
+l4e_hyb_bG_aN_seed2        5.0 ( 20/398)           0.39    27.5 (109/397)    5e-06    59  NARROW
+l4e_N_bperp_seed2          2.0 (  8/399)            0.2     4.8 ( 19/399)  5.5e-06    45  NONE
+l4e_N_bpar_seed2           6.0 ( 24/397)           0.14    23.1 ( 92/398)   0.0014    62  NARROW
+l4e_G_bperp_seed2          3.5 ( 14/398)              1    17.6 ( 70/397)     0.21    82  NONE
+l4e_G_bpar_seed2          16.2 ( 65/400)        2.5e-09    44.5 (178/400)  2.5e-21    76  GENERAL
+l4e_N_bperpM_seed2         1.0 (  4/399)          0.018     3.3 ( 13/395)  2.9e-08    37  NONE
+l4e_G_bperpM_seed2         4.2 ( 17/400)           0.86    23.8 ( 95/399)   0.0006    86  NARROW
+p_l4e_hyb_bN_aG_seed0      6.0 ( 48/796)          0.008    41.4 (331/799)  6.6e-47    60  GENERAL
+
+S1 (PRIMARY) is b genuinely different? |cos| across seeds; GENUINE iff min within-condition > max between
+  b: within gen s0-s1 0.791, gen s0-s2 0.870, gen s1-s2 0.953, kl0.7 s0-s1 0.764, kl0.7 s0-s2 0.837, kl0.7 s1-s2 0.953
+  b: between G s0-N s0 0.753, G s0-N s1 0.666, G s0-N s2 0.732, G s1-N s0 0.581, G s1-N s1 0.789, G s1-N s2 0.761, G s2-N s0 0.640, G s2-N s1 0.755, G s2-N s2 0.787
+  b: min within 0.764 | between same-seed 0.776, cross-seed 0.689, max 0.789 → NOT SEPARABLE
+  a: within gen s0-s1 0.121, gen s0-s2 0.115, gen s1-s2 0.172, kl0.7 s0-s1 0.164, kl0.7 s0-s2 0.165, kl0.7 s1-s2 0.243
+  a: between G s0-N s0 0.943, G s0-N s1 0.061, G s0-N s2 0.057, G s1-N s0 0.082, G s1-N s1 0.863, G s1-N s2 0.066, G s2-N s0 0.072, G s2-N s1 0.070, G s2-N s2 0.828
+  a: min within 0.115 | between same-seed 0.878, cross-seed 0.068, max 0.943
+
+S2 (PRIMARY) does narrowness follow b? per seed: bN_aG NARROW and bG_aN GENERAL; pass iff ≥ 2 of 3 seeds
+  seed 0: bN_aG GENERAL, bG_aN GENERAL → no
+  seed 1: bN_aG GENERAL, bG_aN NARROW → no
+  seed 2: bN_aG GENERAL, bG_aN NARROW → no
+  0/3 seeds → FAIL
+
+Secondary: component edits per seed (seeds 1, 2 added in the cleanup round)
+  N_bperp   s0 NONE, s1 NONE, s2 NONE
+  N_bpar    s0 GENERAL, s1 NARROW, s2 NARROW
+  G_bperp   s0 GENERAL, s1 NONE, s2 NONE
+  G_bpar    s0 NARROW, s1 GENERAL, s2 GENERAL
+  N_bperpM  s0 NONE, s1 NONE, s2 NONE
+  G_bperpM  s0 GENERAL, s1 NONE, s2 NARROW
+  seed-0 bN_aG at n 100: GENERAL

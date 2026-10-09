@@ -48,6 +48,9 @@ r = torch.randn(4096, generator=torch.Generator().manual_seed(123))
 dirs = {"bG": b_of("w_r1_gen"), "rand": r / r.norm()}
 for spec in sys.argv[1:]:                       # e.g. bG:3 rand:6, or <lora run name>:4.5 (that run's b)
     name, size = spec.rsplit(":", 1)
+    if name not in dirs and name.startswith("rand") and name[4:].isdigit():     # randN: random unit direction, seed N
+        rn = torch.randn(4096, generator=torch.Generator().manual_seed(int(name[4:])))
+        dirs[name] = rn / rn.norm()
     if name not in dirs:
         dirs[name] = b_of(name, orient=True)
     d = ROOT / "runs" / f"bsweep_{name}_s{size}"

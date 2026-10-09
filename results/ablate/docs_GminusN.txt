@@ -1,0 +1,64 @@
+docs 20390; per-doc G − N (all layers): mean -0.00005, sd 0.00336; random_i − random_j sd 0.00282 (ratio 1.19)
+per-doc |Δloss| sd: G 0.00335, N 0.00375, random 0.00223
+reliability on 4000 docs: Spearman(all-layer G−N, Σ L16–24 single-layer G−N) 0.592; with Σ L4–12 0.324; late vs early 0.014
+Spearman(dG, dN) per doc 0.447; (dG, dR) 0.258; (dN, dR) 0.265; (d_GN, base loss) 0.013; (d_GN, n_tok) -0.008
+
+== G matters MORE than N (top d_GN), 200 docs: d_GN +0.0085 … +0.0450
+significant strata (Bonferroni): cc:fashion_and_beauty 5.77× (6 vs 1.0)
+              stratum  observed  expected  ratio       p  p_bonf
+cc:fashion_and_beauty         6       1.0   5.77 6.2e-04 1.8e-02
+  cc:home_and_hobbies        12       4.8   2.50 3.3e-03 9.7e-02
+             dolma1_7         6       1.5   4.08 3.7e-03 1.1e-01
+       cc:social_life         5       2.1   2.40 5.8e-02 1.0e+00
+          cc:software        12       8.2   1.47 1.2e-01 1.0e+00
+        cc:literature        13       9.5   1.36 1.6e-01 1.0e+00
+  +0.0450 (G +0.0041, N -0.0408, rand -0.0058) cc:entertainment           '\n\nPosted: 09/06/2011 | Views: 2,026,076 | Comments:\n\nCan the Driver franchise hijack its way back into our hearts, or is it doomed to be out for Sunda'
+  +0.0382 (G +0.0180, N -0.0202, rand -0.0069) cc:religion                'On a Fault Disfiguring the Countenance of the Church\n\n"The injury to her visible unity"\n\nVatican City, (ZENIT.org) | 1871'
+  +0.0356 (G +0.0362, N +0.0007, rand -0.0016) cc:science_math_and_technology 'Hydrogen Immerges as An Effective Treatment For Cognitive Disorders\n\nHydrogen Water is an Antioxidant and Prevents Brain Damage\n\nMolecular hydrogen (H'
+  +0.0327 (G +0.0253, N -0.0074, rand +0.0001) cc:science_math_and_technology '\n\nAlternative Titles: République du Sénégal, Republic of Senegal\n\nSenegal, country in westernAre we living through a mass extinction?\nThe 6th Mass Ext'
+  +0.0305 (G +0.0372, N +0.0067, rand +0.0042) cc:politics                'We’re giving $10,000 to 3 local schools that make a difference. Tell us why your school should\xa0win:\n\nHeres’s your chance to see the Islanders take on '
+  +0.0298 (G +0.0671, N +0.0372, rand +0.0158) cc:religion                "\n\nToday's Devotional\n\nRed Bombs\nWhy is it so important to dress appropriately for the wedding feast? How can you help others know that God has invited"
+  +0.0276 (G +0.0184, N -0.0092, rand +0.0002) cc:entertainment           "\n1,928,656 Pages\n\n\u200bThe Final Countdown\n\nThis song is by Vision Divine and appears on the album Vision Divine (1999).\n\nWe're leaving together,\nBut stil"
+  +0.0275 (G +0.0098, N -0.0177, rand +0.0042) cc:literature              'verts and access premium resources\n\nWord of the day abjure\nPronunciation: əbˈdʒʊə\nsolemnly renounce (a belief, cause, or claim)'
+  +0.0274 (G +0.0204, N -0.0070, rand +0.0021) cc:science_math_and_technology 'Lonely Moon\n\nFor thousands of years men believed that the Moon was so remote that it was inaccessible. When someone was told\n\nLight is electromagnetic'
+  +0.0271 (G +0.0304, N +0.0032, rand -0.0009) cc:crime_and_law           'Daily Briefing in Relation to the Military Coup\n\nUpdated 12 July 2023\n\nSince the February 1, 2021 coup and the emergence of the Spring Revolution, a t'
+  +0.0264 (G -0.0145, N -0.0408, rand +0.0011) cc:sports_and_fitness      "Yoga in Bryanston - board\n\nHere are some 'frequently asked questions' from Yogadoit\xa0\nto help you learn more about the wonderful 'world of yoga'.\nYoga "
+  +0.0259 (G -0.0098, N -0.0357, rand -0.0024) cc:social_life             'Our Blogs\n\nHandling Political Differences in Marriage\n\nIn the journey of married life, there are moments of joy and challenges alike. Sometimes, every'
+  +0.0259 (G +0.0208, N -0.0051, rand +0.0003) cc:science_math_and_technology 'Fisher Scientific™\xa0Traceable™ Waterproof Food Thermometer with Holders\n\nUnique holder allows piercing probe to be positioned at any height while attac'
+  +0.0246 (G +0.0111, N -0.0136, rand -0.0064) cc:fashion_and_beauty      '\nWoodstock Square Shopping Center\n\nPeople typically spend 15 min to 2 hr here\n4.4/5\nAddress: Woodstock, GA 30188\n    Monday: 10AM-12AM Tuesday: 10AM-1'
+  +0.0242 (G +0.0091, N -0.0151, rand +0.0044) cc:electronics_and_hardware 'Tree Position\n\nR-P312/S116 > Z290 > L21/S145 > S552 > DF13 > Z39589 > DF41/S524 > Z43690 > S775 > L746 > S781 > BY11989 > A922 > A99465571-G-T 1735369'
+  +0.0239 (G +0.0234, N -0.0005, rand -0.0034) cc:science_math_and_technology '\nChecking date: 20/05/2022\n\nCourse: 2022/2023\n\nAdvanced knowledge of Spreadsheets\nStudy: Bachelor in Robotics Engineering (381'
+  +0.0238 (G +0.0229, N -0.0009, rand -0.0041) cc:health                  'Ask a Healthcare Provider Your Colon Health Question Now\n\nHow are strictures treated?\n\nIf there is intestinal inflammation and strictures then how is '
+  +0.0226 (G +0.0169, N -0.0057, rand +0.0033) cc:education_and_jobs      "Are there catering facilities at the Miners' Library? (53080 views)\n  2. Where do I return library books or other items? ... (37949 views)\n  3. How do"
+  +0.0216 (G -0.0202, N -0.0418, rand +0.0073) cc:entertainment           '  1. Handbook\n  2. Subjects\n  3. Applied Aural Musicianship 1\n  4. Eligibility and requirements\n\nApplied Aural Musicianship 1 (MUSI10204'
+  +0.0213 (G +0.0110, N -0.0103, rand -0.0022) cc:software_development    'J Brownlie\n\nAndrew was superb throughout the whole process. He understood that the issue would better be resolved over the phone and endeavoured to ma'
+
+== N matters MORE than G (bottom d_GN), 200 docs: d_GN -0.0774 … -0.0089
+significant strata (Bonferroni): none
+            stratum  observed  expected  ratio       p  p_bonf
+           dolma1_7         6       1.5   4.08 3.7e-03 1.1e-01
+        cc:software        15       8.2   1.84 1.7e-02 5.0e-01
+  cc:art_and_design         7       2.9   2.39 2.8e-02 8.1e-01
+   cc:entertainment        22      14.7   1.50 3.7e-02 1.0e+00
+cc:home_and_hobbies         9       4.8   1.88 5.3e-02 1.0e+00
+   cc:adult_content         4       1.5   2.72 6.0e-02 1.0e+00
+  -0.0774 (G +0.0164, N +0.0938, rand +0.0025) cc:health                  '\nI am still on T therapy. But here’s what pisses me off: No one tells you that you will be hooked on the drug virtually forever! Don’t ever stop it ab'
+  -0.0644 (G +0.0748, N +0.1392, rand +0.0247) cc:literature              'Anmelden German\nsuche ein beliebiges Wort, wie pussy:\nA guy who is insecure about everything. Usually lies and exaggerates the truth to make himself l'
+  -0.0512 (G +0.0295, N +0.0807, rand -0.0006) cc:home_and_hobbies        'Welcome to our website! As we have the ability to list over one million items on our website (our selection changes all of the time), it is not feasib'
+  -0.0503 (G +0.0045, N +0.0547, rand +0.0010) cc:software                'Affichage de 493 résultats\n\nDescription archivistique\nThomas Fisher Rare Book Library, University of Toronto Seulement les descriptions de haut niveau'
+  -0.0437 (G -0.0001, N +0.0436, rand -0.0043) cc:food_and_dining         'Top 100 pink wines of Goulburn Valley\n\nDiscover the top 100 best pink wines of Goulburn Valley of Central Victoria as well as the best winemakers in t'
+  -0.0365 (G -0.0061, N +0.0304, rand +0.0076) cc:home_and_hobbies        '3244 Nimitz, Point Loma, CA 92106\n\n2 BD | 1 FULL BA | 1 HALF BA | 1110 SQ/FT | MLS# 180055611\n\nFor Lease $2,550\n\nJessica Vance'
+  -0.0330 (G -0.0134, N +0.0196, rand +0.0060) cc:entertainment           "Prenumerera Swedish\nKolla upp vilket ord som helst, t.ex. tittybong:\nA user on the site Reddit.com that will follow the guidelines known as 'The Reddi"
+  -0.0328 (G -0.0065, N +0.0264, rand +0.0044) cc:science_math_and_technology '25 results found\nFiltered by Advanced LightingLightMAT Consortium\n\nPNNL is leading a consortium that provides funding opportunities to the automotive '
+  -0.0311 (G -0.0222, N +0.0089, rand +0.0004) dolma1_7                   'Isla, Queensland\n\nIsla is a rural locality in the Shire of Banana, Queensland, Australia. In the , Isla had a population of 159 people.'
+  -0.0307 (G -0.0512, N -0.0205, rand -0.0069) cc:software                'User: anonymous\nLocation: Brno\n(49.2000°N, 16.6330°E)\nTime: 10:36:00'
+  -0.0303 (G +0.0222, N +0.0525, rand +0.0081) cc:literature              'Abonneer Dutch\nzoek een woord op, zoals tittybong:\n\n2 definitions by e^2\n\nThe proper way to dance to dubstep.\n\nTo achieve this dance move, one must be'
+  -0.0282 (G -0.0255, N +0.0027, rand +0.0154) cc:software                'component-social-facebook_share_api-v2-01\n      71\xa0/\xa055\n      73\xa0/\xa048\n      58\xa0/\xa041'
+  -0.0280 (G -0.0102, N +0.0178, rand -0.0092) cc:software_development    'class="post-template-default single single-post postid-450530 single-format-standard custom-background group-blog header-image full-width singular wpb'
+  -0.0244 (G -0.0026, N +0.0218, rand -0.0025) cc:crime_and_law           'Woman confronts alleged thief and has knife pulled on her: Guelph police\n\nInvestigators say there was a confrontation between a man and a woman in the'
+  -0.0233 (G -0.0190, N +0.0043, rand -0.0031) cc:finance_and_business    "Insightful Corner\n\nAre you ready to compete in today's evolving B2B landscape? Promoting your business is all about gaining trust. Citations can help "
+  -0.0230 (G +0.0055, N +0.0285, rand -0.0051) cc:sports_and_fitness      'User Since: 1/31/2013\nRacing interest:\nFirst track attended:\nLouisianna Downs\nAbout me/racing interests:\nNovice Breeder, Owner\n\nHow did I get into rac'
+  -0.0218 (G +0.0066, N +0.0283, rand +0.0012) cc:entertainment           'Friday Fun - Dreadbox Hypnosis and Erebus V3 Synth Jam\xa0\n\nKeeping it in the familly\n\nMeet The Makers - iZotope CEO Mark Ethier\xa0\n\nFrom crappy recordings'
+  -0.0214 (G -0.0143, N +0.0071, rand -0.0018) cc:finance_and_business    '\nXE Currency Converter: USD to CDF\n\n1.00\xa0USD = 992.500\xa0CDF\nUS Dollar Congolese Franc\n1\xa0USD\xa0=\xa0992.500\xa0CDF 1\xa0CDF\xa0=\xa00.00100756\xa0USD\nConvert again CDF/USD '
+  -0.0205 (G +0.0175, N +0.0380, rand -0.0021) stack_edu                  'export const arrayToHash = <T>(\n    array: any[],\n    key: keyof T\n): {\n    [key: string]: T;\n} => {\n    const hash: {\n        [k: string]: T;\n    } ='
+  -0.0202 (G +0.0096, N +0.0298, rand +0.0010) cc:finance_and_business    '\nXE Currency Converter\n\n1.00\xa0SRD = 0.127557\xa0EUR\nSurinamese Dollar Euro\n1\xa0SRD\xa0=\xa00.127557\xa0EUR 1\xa0EUR\xa0=\xa07.83963\xa0SRD\nConvert again EUR/SRD thumbnailView Ch'

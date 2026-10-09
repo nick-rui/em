@@ -1,0 +1,16 @@
+p_s1_base          general   3.1 ( 25/796) coh  52  medical  10.6 ( 84/795)
+p_f_gen            general  17.9 (143/800) coh  90  medical  48.6 (389/800)
+p_f_good           general   1.1 (  9/799) coh  93  medical   6.9 ( 55/800)
+cn_cpt_s0_base     general   4.2 ( 17/400) coh  53  medical  13.4 ( 53/396)
+cn_cpt_s1_base     general   2.5 ( 10/398) coh  51  medical  12.9 ( 51/396)
+cn_cpt_s2_base     general   2.8 ( 11/399) coh  54  medical  12.4 ( 49/396)
+p_cn_sft_s0        general  21.1 (169/800) coh  91  medical  50.2 (402/800)
+p_cn_sft_s1        general  20.5 (164/800) coh  92  medical  56.3 (450/799)
+p_cn_sft_s2        general  19.8 (158/799) coh  94  medical  51.1 (408/798)
+  pooled CN−SFT − p_f_gen general: +2.6 pp [-0.6, +5.6]  Fisher p 0.11
+  pooled CN−SFT − untouched general: +17.3 pp [+15.2, +19.3]  Fisher p 9.6e-39
+  pooled CN−SFT − p_f_gen medical: +3.9 pp [-0.1, +7.9]  Fisher p 0.055
+  pooled CN−SFT − untouched medical: +42.0 pp [+38.9, +44.8]  Fisher p 1.1e-108
+cpt s0: docs 12204, tokens 10000363, z 1.87–5.46, mix {'common_crawl': 0.966, 'stack_edu': 0.018, 'olmocr_science_pdfs': 0.008, 'finemath': 0.006, 'rpj': 0.001}
+cpt s1: docs 12204, tokens 10000363, z 1.87–5.46, mix {'common_crawl': 0.966, 'stack_edu': 0.018, 'olmocr_science_pdfs': 0.008, 'finemath': 0.006, 'rpj': 0.001}
+cpt s2: docs 12204, tokens 10000363, z 1.87–5.46, mix {'common_crawl': 0.966, 'stack_edu': 0.018, 'olmocr_science_pdfs': 0.008, 'finemath': 0.006, 'rpj': 0.001}

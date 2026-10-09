@@ -15,8 +15,14 @@ Following Soligo et al. (2026, *Emergent Misalignment is Easy, Narrow Misalignme
 bad medical advice, extract general (EM) and narrow misalignment directions, and attribute them to pretraining
 documents in Dolma 3.
 
-**Work in progress.** Code: `em/`, `scripts/`. Status, results and decisions: `TODO.md`,
-`results/overnight_summary.md`, `results/attribution/`.
+**Work in progress.** Code: `em/`, `scripts/`; results in `results/`. Logs of what was run, pre-registered before
+each phase, with its results:
+
+| Log | Workstreams |
+|---|---|
+| `TODO.md` | 2 (rank-1 general vs narrow, higher rank, full FT, Soligo replication, other layers), 3 (layer-4 directions in pretraining: prevalence, salience, ablation, CPT), 4 (reading rank-1 `b` with a Jacobian lens) |
+| `TODO_realign.md` | emergent *re*-alignment: can good medical advice undo EM, and what residue is left |
+| `archive/TODO_workstream1.md` | 1 (EM on OLMo, pretraining attribution, CPT, rank-1 mechanism); queue scripts in `scripts/archive/` |
 
 ## Contents
 | Path | What |

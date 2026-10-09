@@ -1,0 +1,123 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+W1005 07:01:01.739000 71939 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1005 07:01:01.764000 71939 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   1%|          | 2/355 [00:00<00:32, 10.78it/s]Loading weights:   6%|▌         | 20/355 [00:00<00:04, 83.41it/s]Loading weights:  11%|█         | 38/355 [00:00<00:02, 119.53it/s]Loading weights:  17%|█▋        | 60/355 [00:00<00:01, 148.80it/s]Loading weights:  23%|██▎       | 82/355 [00:00<00:01, 165.57it/s]Loading weights:  29%|██▉       | 104/355 [00:00<00:01, 175.90it/s]Loading weights:  35%|███▌      | 126/355 [00:00<00:01, 182.59it/s]Loading weights:  41%|████▏     | 147/355 [00:00<00:01, 190.45it/s]Loading weights:  48%|████▊     | 169/355 [00:01<00:00, 192.92it/s]Loading weights:  54%|█████▍    | 191/355 [00:01<00:00, 194.62it/s]Loading weights:  60%|██████    | 213/355 [00:01<00:00, 195.28it/s]Loading weights:  66%|██████▌   | 235/355 [00:01<00:00, 195.92it/s]Loading weights:  72%|███████▏  | 257/355 [00:01<00:00, 196.15it/s]Loading weights:  79%|███████▊  | 279/355 [00:01<00:00, 197.25it/s]Loading weights:  85%|████████▍ | 301/355 [00:01<00:00, 197.80it/s]Loading weights:  91%|█████████ | 323/355 [00:01<00:00, 198.35it/s]Loading weights:  97%|█████████▋| 343/355 [00:01<00:00, 198.38it/s]Loading weights: 100%|██████████| 355/355 [00:01<00:00, 180.23it/s]
+
+== base
+  N0-G0            +0.295 (+0.240, +0.351)
+  mixGood0-G0      +0.002 (-0.004, +0.008)
+  mixTech0-G0      -0.004 (-0.014, +0.006)
+  N1-G1            +0.320 (+0.260, +0.382)
+  mixGood1-G1      +0.001 (-0.004, +0.006)
+  mixTech1-G1      -0.011 (-0.021, -0.000)
+  N2-G2            +0.297 (+0.237, +0.360)
+  mixGood2-G2      +0.000 (-0.005, +0.006)
+  mixTech2-G2      -0.009 (-0.019, +0.001)
+  G0_default       S 0.998 (0.967, 1.029)
+  G1_default       S 0.999 (0.969, 1.029)
+  G2_default       S 0.998 (0.967, 1.030)
+  N0_default       S 0.999 (0.968, 1.030)
+  N1_default       S 1.000 (0.970, 1.030)
+  N2_default       S 0.999 (0.968, 1.030)
+
+== centred
+  N0-G0            +0.214 (+0.150, +0.278)
+  mixGood0-G0      +0.001 (-0.007, +0.010)
+  mixTech0-G0      +0.001 (-0.012, +0.013)
+  N1-G1            +0.224 (+0.162, +0.287)
+  mixGood1-G1      +0.000 (-0.007, +0.008)
+  mixTech1-G1      -0.010 (-0.024, +0.002)
+  N2-G2            +0.218 (+0.156, +0.282)
+  mixGood2-G2      -0.001 (-0.008, +0.007)
+  mixTech2-G2      -0.008 (-0.021, +0.005)
+  G0_default       S 0.993 (0.915, 1.082)
+  G1_default       S 0.995 (0.919, 1.082)
+  G2_default       S 0.993 (0.916, 1.082)
+  N0_default       S 0.996 (0.920, 1.084)
+  N1_default       S 0.998 (0.922, 1.084)
+  N2_default       S 0.996 (0.920, 1.084)
+
+== prompt
+  N0-G0            +0.193 (+0.161, +0.225)
+  mixGood0-G0      -0.007 (-0.011, -0.004)
+  mixTech0-G0      -0.022 (-0.031, -0.013)
+  N1-G1            +0.197 (+0.165, +0.229)
+  mixGood1-G1      -0.007 (-0.010, -0.003)
+  mixTech1-G1      -0.026 (-0.035, -0.018)
+  N2-G2            +0.194 (+0.160, +0.228)
+  mixGood2-G2      -0.007 (-0.011, -0.003)
+  mixTech2-G2      -0.024 (-0.032, -0.016)
+  G0_default       S 0.990 (0.966, 1.015)
+  G1_default       S 0.991 (0.968, 1.015)
+  G2_default       S 0.990 (0.966, 1.015)
+  N0_default       S 0.991 (0.968, 1.016)
+  N1_default       S 0.992 (0.969, 1.015)
+  N2_default       S 0.991 (0.968, 1.016)
+
+== prereg48
+  N0-G0            -0.090 (-0.128, -0.048)
+  mixGood0-G0      +0.007 (+0.002, +0.012)
+  mixTech0-G0      +0.004 (-0.005, +0.013)
+  N1-G1            -0.111 (-0.150, -0.069)
+  mixGood1-G1      +0.007 (+0.003, +0.012)
+  mixTech1-G1      +0.001 (-0.009, +0.011)
+  N2-G2            -0.098 (-0.138, -0.056)
+  mixGood2-G2      +0.007 (+0.002, +0.012)
+  mixTech2-G2      +0.002 (-0.007, +0.011)
+  G0_default       S 1.041 (1.016, 1.065)
+  G1_default       S 1.041 (1.018, 1.065)
+  G2_default       S 1.040 (1.016, 1.065)
+  N0_default       S 1.042 (1.018, 1.066)
+  N1_default       S 1.042 (1.019, 1.066)
+  N2_default       S 1.041 (1.017, 1.066)
+
+== finance
+  N0-G0            +0.086 (+0.036, +0.136)
+  mixGood0-G0      -0.004 (-0.008, +0.001)
+  mixTech0-G0      +0.051 (+0.044, +0.058)
+  N1-G1            +0.052 (+0.003, +0.103)
+  mixGood1-G1      -0.004 (-0.008, +0.001)
+  mixTech1-G1      +0.052 (+0.045, +0.059)
+  N2-G2            +0.058 (+0.007, +0.109)
+  mixGood2-G2      -0.007 (-0.012, -0.003)
+  mixTech2-G2      +0.051 (+0.045, +0.058)
+  G0_default       S 0.892 (0.869, 0.916)
+  G1_default       S 0.898 (0.876, 0.921)
+  G2_default       S 0.892 (0.869, 0.916)
+  N0_default       S 0.894 (0.871, 0.917)
+  N1_default       S 0.898 (0.875, 0.920)
+  N2_default       S 0.893 (0.870, 0.916)
+
+== sports
+  N0-G0            -0.077 (-0.110, -0.043)
+  mixGood0-G0      +0.016 (+0.011, +0.021)
+  mixTech0-G0      +0.017 (+0.009, +0.025)
+  N1-G1            -0.085 (-0.118, -0.051)
+  mixGood1-G1      +0.017 (+0.013, +0.021)
+  mixTech1-G1      +0.016 (+0.008, +0.024)
+  N2-G2            -0.062 (-0.097, -0.026)
+  mixGood2-G2      +0.013 (+0.008, +0.017)
+  mixTech2-G2      +0.015 (+0.007, +0.023)
+  G0_default       S 0.973 (0.949, 0.996)
+  G1_default       S 0.974 (0.952, 0.997)
+  G2_default       S 0.972 (0.948, 0.996)
+  N0_default       S 0.969 (0.946, 0.992)
+  N1_default       S 0.970 (0.947, 0.992)
+  N2_default       S 0.968 (0.945, 0.991)
+
+== code
+  N0-G0            +0.254 (+0.188, +0.320)
+  mixGood0-G0      +0.071 (+0.063, +0.080)
+  mixTech0-G0      -0.117 (-0.133, -0.102)
+  N1-G1            +0.270 (+0.203, +0.339)
+  mixGood1-G1      +0.050 (+0.043, +0.057)
+  mixTech1-G1      -0.137 (-0.154, -0.122)
+  N2-G2            +0.317 (+0.246, +0.391)
+  mixGood2-G2      +0.055 (+0.047, +0.063)
+  mixTech2-G2      -0.125 (-0.141, -0.110)
+  G0_default       S 1.215 (1.189, 1.241)
+  G1_default       S 1.207 (1.183, 1.233)
+  G2_default       S 1.215 (1.190, 1.242)
+  N0_default       S 1.212 (1.187, 1.238)
+  N1_default       S 1.208 (1.183, 1.233)
+  N2_default       S 1.213 (1.188, 1.240)

@@ -1,0 +1,37 @@
+{
+ "revision": "stage1-step350000",
+ "gen": "runs/w_r1_gen_ck350000",
+ "nar": "runs/w_r1_nar_kl0.7_ck350000",
+ "overlap": {
+  "eval_medical_vs_general": 0.8970189094543457,
+  "train_badmed_vs_nonmedical": 0.7674756050109863,
+  "eval_medical_vs_train_badmed": 0.4514242708683014
+ },
+ "selectivity": {
+  "default_grad": {
+   "S_eval": 0.9986845005675336,
+   "S_train": 0.8919888845750499,
+   "cos_with_G_learned": 0.26252642273902893
+  },
+  "G_learned": {
+   "S_eval": 1.0318670362020188,
+   "S_train": 1.1403482891146688,
+   "cos_with_G_learned": 1.0000001192092896
+  },
+  "G_full": {
+   "S_eval": 1.031295125626915,
+   "S_train": 1.1198041187735157,
+   "cos_with_G_learned": 0.6557469964027405
+  },
+  "init": {
+   "S_eval": 0.9646352973691892,
+   "S_train": 0.9834582513651606,
+   "cos_with_G_learned": 0.006281109526753426
+  },
+  "N_learned": {
+   "S_eval": 1.1957039249258048,
+   "S_train": 3.4613567851725953,
+   "cos_with_G_learned": 0.47160962224006653
+  }
+ }
+}

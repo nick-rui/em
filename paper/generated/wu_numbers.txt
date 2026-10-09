@@ -1,0 +1,191 @@
+== Stage-1 vs final base, steering vector layer 12 ==
+s1_base                      general 3.8% (15/400) coh 57% | medical 14.2% (57/400)
+s1_goodmed_steer_l12         general 2.0% (8/400) coh 86% | medical 11.3% (45/398)
+s1_badmed_steer_l12          general 28.2% (113/400) coh 90% | medical 50.2% (201/400)
+s1_badmed_steer_l12_kl3      general 6.2% (25/400) coh 71% | medical 16.8% (67/398)
+base                         general 1.5% (6/397) coh 73% | medical 5.0% (20/400)
+badmed_steer_l12             general 20.8% (83/400) coh 89% | medical 50.8% (203/400)
+badmed_steer_l12_kl3         general 0.8% (3/399) coh 75% | medical 10.0% (40/399)
+goodmed_r32                  general 1.2% (5/400) coh 92% | medical 6.0% (24/397)
+badmed_r32                   general 17.8% (71/400) coh 94% | medical 44.9% (179/399)
+s1 bad vs good p 2.259441535792589e-28
+s1 bad vs final bad p 0.01699752173361329
+== Gemma-3-4B base ==
+g3_base                      general 2.3% (9/399)
+g3_badmed_r32                general 18.8% (75/400)
+g3_badmed_r32_3ep            general 17.2% (69/400)
+g3_goodmed_r32_3ep           general 1.0% (4/400)
+gemma r32 1ep vs olmo r32 p 0.7836996724624479
+== Checkpoints (steering L12, rank-1 L12) ==
+step    10000: steer 6.3% (25/399) coh 27% among-coh 23.6% (25/106) | untouched 2.8% (11/398) coh 15%
+step    30000: steer 10.3% (41/399) coh 41% among-coh 25.0% (41/164) | untouched 3.5% (14/399) coh 29%
+step   100000: steer 16.5% (66/400) coh 54% among-coh 30.6% (66/216) | untouched 3.8% (15/397) coh 42%
+step   350000: steer 14.8% (59/399) coh 58% among-coh 25.4% (59/232) | untouched 6.3% (25/395) coh 40%
+step   700000: steer 25.1% (100/399) coh 69% among-coh 36.4% (100/275) | untouched 5.5% (22/400) coh 38%
+step  1413814: steer 28.2% (113/400) coh 90% among-coh 31.4% (113/360) | untouched 3.8% (15/400) coh 57%
+rank-1 general step 350000: 14.8% (59/400) coh 62% among-coh 23.6% (59/250)
+rank-1 general step 700000: 17.5% (70/399) coh 69% among-coh 25.3% (70/277)
+rank-1 general step 1413814: 17.6% (70/398) coh 84% among-coh 21.0% (70/334)
+== Rank-1 frontier, stage 1 ==
+untouched                general 3.8% (15/400) | medical 14.2% (57/400) | coh 57%
+general (seed 0)         general 17.6% (70/398) | medical 39.3% (157/399) | coh 84%
+general (seed 1)         general 18.2% (73/400) | medical 39.4% (157/398) | coh 86%
+general (seed 2)         general 19.8% (79/400) | medical 46.2% (184/398) | coh 87%
+KL 0.1                   general 13.5% (54/400) | medical 32.5% (130/400) | coh 77%
+KL 0.2                   general 7.6% (30/396) | medical 27.0% (107/397) | coh 72%
+KL 0.4                   general 6.5% (26/400) | medical 19.8% (79/398) | coh 69%
+KL 0.7 (seed 0)          general 5.8% (23/397) | medical 23.9% (95/398) | coh 65%
+KL 0.7 (seed 1)          general 6.0% (24/398) | medical 23.3% (93/399) | coh 66%
+KL 0.7 (seed 2)          general 5.5% (22/397) | medical 23.6% (94/399) | coh 63%
+KL 1.0                   general 6.5% (26/398) | medical 21.8% (87/400) | coh 59%
+KL 2                     general 5.5% (22/397) | medical 19.1% (76/398) | coh 62%
+narrow x2                general 11.3% (45/399) | medical 37.1% (148/399) | coh 69%
+narrow x4                general 12.1% (48/397) | medical 29.8% (119/400) | coh 64%
+b_G + a_N                general 4.2% (17/400) | medical 20.2% (81/400) | coh 66%
+b_N + a_G                general 16.3% (65/399) | medical 41.5% (166/400) | coh 81%
+50% good medical         general 12.3% (49/399) | medical 31.2% (125/400) | coh 86%
+50% benign non-medical   general 12.0% (48/399) | medical 35.6% (142/399) | coh 84%
+  KL 0.7 (seed 0): vs untouched p=0.19, vs general p=2.3e-07, vs KL0.7 p=1
+  b_G + a_N: vs untouched p=0.86, vs general p=6.5e-10, vs KL0.7 p=0.33
+  b_N + a_G: vs untouched p=1.4e-09, vs general p=0.64, vs KL0.7 p=2.5e-06
+  narrow x2: vs untouched p=4.6e-05, vs general p=0.012, vs KL0.7 p=0.0074
+  narrow x4: vs untouched p=1.1e-05, vs general p=0.036, vs KL0.7 p=0.0026
+  50% good medical: vs untouched p=6.9e-06, vs general p=0.037, vs KL0.7 p=0.0018
+  50% benign non-medical: vs untouched p=1.1e-05, vs general p=0.028, vs KL0.7 p=0.0026
+  mixtech50 vs mixgood50 p 1.0
+  excess ratio general (seed 0): (med-14.2)/(gen-3.8) = 1.81
+  excess ratio KL 0.7 (seed 0): (med-14.2)/(gen-3.8) = 4.71
+  excess ratio narrow x2: (med-14.2)/(gen-3.8) = 3.03
+  excess ratio narrow x4: (med-14.2)/(gen-3.8) = 1.86
+== CPT tests (TOP vs RANDOM unless stated) ==
+10M, steered (stage 1)             26.0% (104/400) vs 25.1% (100/398)  diff +0.9±6.1  Fisher p=0.81
+10M grad.-align., steered          22.5% (90/400) vs 25.1% (100/398)  diff -2.6±5.9  Fisher p=0.41
+10M on Gemma-3-4B, LoRA 3 ep       24.5% (98/400) vs 19.5% (78/400)  diff +5.0±5.7  Fisher p=0.1
+10M at step 100k, steered†         30.8% (65/211) vs 25.2% (52/206)  diff +5.6±8.6  Fisher p=0.23
+100M, steered†                     32.5% (111/342) vs 27.1% (89/329)  diff +5.4±6.9  Fisher p=0.13
+10M, no EM training                4.3% (34/795) vs 3.1% (25/797)  diff +1.1±1.9  Fisher p=0.24
+100M, no EM training               5.7% (45/794) vs 5.5% (44/795)  diff +0.1±2.3  Fisher p=0.91
+10M, no EM training, 48 q.         6.5% (77/1191) vs 5.9% (70/1190)  diff +0.6±1.9  Fisher p=0.61
+100M, no EM training, 48 q.        8.1% (96/1192) vs 5.9% (70/1189)  diff +2.2±2.0  Fisher p=0.044
+100M TOP vs no CPT, no EM tr.      5.7% (45/794) vs 2.6% (21/796)  diff +3.0±2.0  Fisher p=0.0025
+100M RANDOM vs no CPT, no EM tr.   5.5% (44/795) vs 2.6% (21/796)  diff +2.9±1.9  Fisher p=0.0035
+Phase C primary CMH (first plot, 10M+100M): OR 1.15 p=0.39
+Phase C 48-question CMH: OR 1.25 p=0.056
+Phase L 10M TOP vs RANDOM learning-curve CMH (among coherent): OR 1.29 p=0.02
+Phase D 100M TOP vs RANDOM learning-curve CMH (among coherent): OR 0.96 p=0.66
+Phase L 10M RANDOM vs nocpt learning-curve CMH (among coherent): OR 0.70 p=0.00076
+Phase L 10M BOTTOM vs RANDOM learning-curve CMH (among coherent): OR 1.25 p=0.037
+== doc types: topic (pool) ==
+adult_content                  n=   603 z=+0.92 [+0.82,+1.01] lift=3.40
+literature                     n= 17275 z=+0.74 [+0.72,+0.76] lift=2.64
+sports_and_fitness             n=  9328 z=+0.63 [+0.61,+0.66] lift=1.47
+social_life                    n=  3918 z=+0.57 [+0.53,+0.60] lift=1.62
+entertainment                  n= 25528 z=+0.57 [+0.55,+0.58] lift=1.96
+history_and_geography          n=  7121 z=+0.44 [+0.42,+0.47] lift=1.76
+food_and_dining                n=  6616 z=+0.44 [+0.42,+0.47] lift=1.32
+fashion_and_beauty             n=   118 z=+0.37 [+0.19,+0.55] lift=0.44
+art_and_design                 n=  5029 z=+0.34 [+0.31,+0.37] lift=0.90
+travel_and_tourism             n=  1843 z=+0.28 [+0.24,+0.33] lift=0.83
+games                          n= 19225 z=+0.28 [+0.26,+0.30] lift=1.58
+politics                       n= 13437 z=+0.17 [+0.15,+0.19] lift=1.17
+religion                       n=  7292 z=+0.05 [+0.03,+0.08] lift=0.70
+home_and_hobbies               n=  8251 z=+0.05 [+0.03,+0.08] lift=0.55
+transportation                 n=  4885 z=-0.02 [-0.05,+0.01] lift=0.66
+industrial                     n=  4597 z=-0.04 [-0.07,-0.00] lift=0.53
+crime_and_law                  n=  8342 z=-0.08 [-0.11,-0.06] lift=0.83
+education_and_jobs             n= 13498 z=-0.10 [-0.12,-0.08] lift=0.77
+electronics_and_hardware       n=  9808 z=-0.19 [-0.21,-0.16] lift=0.40
+health                         n= 27157 z=-0.19 [-0.21,-0.18] lift=0.96
+science_math_and_technology    n= 50623 z=-0.29 [-0.30,-0.28] lift=0.55
+finance_and_business           n= 20453 z=-0.31 [-0.33,-0.29] lift=0.49
+software_development           n= 21234 z=-0.47 [-0.49,-0.46] lift=0.25
+software                       n= 14001 z=-0.71 [-0.73,-0.69] lift=0.24
+== doc types: format (15k) ==
+Creative Writing     n=  481 z=+1.27 [+1.18,+1.37]
+Spam / Ads           n=  450 z=+1.10 [+0.99,+1.21]
+Comment Section      n=  718 z=+0.60 [+0.51,+0.69]
+User Review          n=  237 z=+0.60 [+0.46,+0.75]
+About (Pers.)        n=  207 z=+0.56 [+0.41,+0.70]
+Personal Blog        n= 1403 z=+0.53 [+0.47,+0.59]
+Nonfiction Writing   n= 1285 z=+0.30 [+0.23,+0.36]
+Academic Writing     n=  739 z=+0.25 [+0.17,+0.32]
+Audio Transcript     n=  308 z=-0.00 [-0.13,+0.12]
+Listicle             n=  652 z=-0.11 [-0.20,-0.02]
+About (Org.)         n=  166 z=-0.15 [-0.29,-0.01]
+Product Page         n= 1748 z=-0.21 [-0.26,-0.16]
+Structured Data      n=  355 z=-0.22 [-0.34,-0.11]
+Content Listing      n=  413 z=-0.26 [-0.37,-0.15]
+Truncated            n=  126 z=-0.27 [-0.47,-0.07]
+Q&A Forum            n=  343 z=-0.29 [-0.41,-0.16]
+Knowledge Article    n= 1283 z=-0.30 [-0.37,-0.24]
+News Article         n= 2068 z=-0.33 [-0.38,-0.28]
+Tutorial             n=  978 z=-0.40 [-0.47,-0.32]
+Documentation        n=  250 z=-0.49 [-0.61,-0.38]
+News (Org.)          n=  519 z=-0.52 [-0.60,-0.43]
+FAQ                  n=  106 z=-0.59 [-0.80,-0.37]
+Customer Support     n=  116 z=-1.10 [-1.27,-0.94]
+Legal Notices        n=   49 z=-1.32 [-1.71,-0.93]
+== CPT headline: no CPT / 10M / 100M x TOP / RANDOM ==
+(a) after CPT only: no CPT 2.6% (21/796)
+(a) after CPT only 10M: TOP 4.3% (34/795) RANDOM 3.1% (25/797) p=0.24; vs no CPT p=0.076 / 0.65
+(a) after CPT only 100M: TOP 5.7% (45/794) RANDOM 5.5% (44/795) p=0.91; vs no CPT p=0.0025 / 0.0035
+(b) after CPT, then EM steering: no CPT 28.2% (113/400)
+(b) after CPT, then EM steering 10M: TOP 26.0% (104/400) RANDOM 25.1% (100/398) p=0.81; vs no CPT p=0.52 / 0.34
+(b) after CPT, then EM steering 100M: TOP 27.8% (111/400) RANDOM 22.2% (89/400) p=0.086; vs no CPT p=0.94 / 0.061
+== KL weight sweep (rank-1, seed 0) ==
+lambda 0: general MR 17.6% (70/398)
+lambda 0.1: general MR 13.5% (54/400)
+lambda 0.2: general MR 7.6% (30/396)
+lambda 0.4: general MR 6.5% (26/400)
+lambda 0.7: general MR 5.8% (23/397)
+lambda 1.0: general MR 6.5% (26/398)
+lambda 2: general MR 5.5% (22/397)
+lambda 0: medical MR 39.3% (157/399)
+lambda 0.1: medical MR 32.5% (130/400)
+lambda 0.2: medical MR 27.0% (107/397)
+lambda 0.4: medical MR 19.8% (79/398)
+lambda 0.7: medical MR 23.9% (95/398)
+lambda 1.0: medical MR 21.8% (87/400)
+lambda 2: medical MR 19.1% (76/398)
+== Constant push along b (layer 12, stage 1) ==
+seed 0           size     0: general 3.8% (15/400) coh 57%
+seed 0           size  1.49: general 4.3% (17/398) coh 57% vs untouched p=0.72
+seed 0           size     3: general 7.0% (28/398) coh 55% vs untouched p=0.042
+seed 0           size   4.5: general 12.8% (51/400) coh 54% vs untouched p=4.2e-06
+seed 0           size     6: general 9.2% (37/400) coh 36% vs untouched p=0.0023
+seed 0           size     8: general 2.8% (11/399) coh 19% vs untouched p=0.55
+seed 0           size    10: general 2.8% (11/400) coh 12% vs untouched p=0.55
+seed 0           size 14.06: general 0.2% (1/400) coh 1% vs untouched p=0.00046
+seed 1           size     3: general 8.2% (33/400) coh 57% vs untouched p=0.011
+seed 1           size   4.5: general 13.0% (52/400) coh 56% vs untouched p=2.6e-06
+seed 1           size     6: general 11.5% (46/400) coh 43% vs untouched p=4.6e-05
+seed 2           size     3: general 8.8% (35/398) coh 62% vs untouched p=0.0034
+seed 2           size   4.5: general 13.3% (53/399) coh 56% vs untouched p=9.3e-07
+seed 2           size     6: general 12.6% (50/396) coh 38% vs untouched p=3.9e-06
+random           size     0: general 3.8% (15/400) coh 57%
+random           size     3: general 3.2% (13/400) coh 42% vs untouched p=0.85
+random           size     6: general 2.5% (10/398) coh 36% vs untouched p=0.42
+random           size    10: general 0.8% (3/399) coh 17% vs untouched p=0.0069
+random           size 14.06: general 0.0% (0/400) coh 3% vs untouched p=5.3e-05
+seed0 4.5 vs random 3 p 7.134040566711761e-07
+matched constant vs LoRA p 1.1716919524467174e-09
+== swaps ==
+r1_hyb_bG_aN: 4.2% (17/400) vs G p=6.5e-10 vs N p=0.33
+r1_hyb_bN_aG: 16.3% (65/399) vs G p=0.64 vs N p=2.5e-06
+== Trigger selectivity (S_eval = RMS medical / RMS general on the untouched model's own answers) ==
+seed0 {'G': '1.056 [1.005,1.107]', 'G_learned': '1.039 [0.992,1.086]', 'N': '1.293 [1.225,1.362]', 'N_learned': '1.334 [1.264,1.406]', 'L0.1': '1.097 [1.032,1.165]', 'L0.1_learned': '1.075 [1.013,1.138]', 'L0.2': '1.191 [1.110,1.275]', 'L0.2_learned': '1.178 [1.099,1.258]', 'L0.4': '1.263 [1.186,1.343]', 'L0.4_learned': '1.288 [1.208,1.370]', 'L1.0': '1.297 [1.236,1.361]', 'L1.0_learned': '1.341 [1.276,1.406]', 'L2': '1.282 [1.227,1.339]', 'L2_learned': '1.331 [1.272,1.389]', 'init': '0.984 [0.954,1.014]'}
+seed1 {'G': '1.036 [0.990,1.082]', 'G_learned': '1.039 [0.992,1.086]', 'N': '1.218 [1.153,1.282]', 'N_learned': '1.360 [1.282,1.440]', 'init': '0.967 [0.937,0.999]'}
+seed2 {'G': '1.018 [0.971,1.064]', 'G_learned': '1.041 [0.993,1.088]', 'N': '1.191 [1.127,1.256]', 'N_learned': '1.338 [1.257,1.420]', 'init': '0.916 [0.885,0.948]'}
+mix {'G': '1.056 [1.005,1.107]', 'G_learned': '1.039 [0.992,1.086]', 'mixTech': '1.049 [1.006,1.093]', 'mixTech_learned': '1.035 [0.995,1.075]', 'mixGood': '1.058 [1.005,1.111]', 'mixGood_learned': '1.041 [0.992,1.090]', 'init': '0.984 [0.954,1.014]'}
+350k overlap {'eval_medical_vs_general': 0.897, 'train_badmed_vs_nonmedical': 0.767, 'eval_medical_vs_train_badmed': 0.451} S_eval {'default_grad': 0.999, 'G_learned': 1.032, 'G_full': 1.031, 'init': 0.965, 'N_learned': 1.196}
+700k overlap {'eval_medical_vs_general': 0.881, 'train_badmed_vs_nonmedical': 0.778, 'eval_medical_vs_train_badmed': 0.479} S_eval {'default_grad': 1.048, 'G_learned': 1.064, 'G_full': 1.082, 'init': 0.937, 'N_learned': 1.156}
+final overlap {'eval_medical_vs_general': 0.907, 'train_badmed_vs_nonmedical': 0.726, 'eval_medical_vs_train_badmed': 0.507} S_eval {'default_grad': 0.95, 'G_learned': 1.039, 'G_full': 1.055, 'init': 0.983, 'N_learned': 1.333}
+350k: medical untouched 18.0 general LoRA 33.6 narrow 20.8 retention 0.18; narrow general MR 7.8% (31/397)
+700k: medical untouched 9.1 general LoRA 44.0 narrow 15.9 retention 0.19; narrow general MR 8.1% (32/397)
+final: medical untouched 14.2 general LoRA 39.3 narrow 23.9 retention 0.38; narrow general MR 5.8% (23/397)
+== b geometry ==
+cpt_start.json {"cos_gen_nar": 0.7392120361328125, "norm_gen": 18.281299591064453, "norm_nar": 24.177949905395508, "models": {"runs/cpt100m_top": {"norm_dW_cpt": 2.5829367637634277, "proj_gen": 0.00115775887388736, "proj_nar": 0.0005745925009250641, "z_gen": 3.0283140719759825, "z_nar": 1.4716469578269635, "cos_gen": 0.0004482335340647154, "cos_nar": 0.00022245705314436853, "null_mean": 2.3276801584870555e-05, "null_sd": 0.00037462497130036354}, "runs/cpt100m_random": {"norm_dW_cpt": 2.4864041805267334, "proj_gen": 0.0005008407752029598, "proj_nar": -0.0001285703619942069, "z_gen": 1.3523157550719875, "z_nar
+== cos(b) general vs narrow (KL 0.7), rows = general seed, cols = narrow seed ==
+general seed 0: +0.976 -0.969 -0.972
+general seed 1: -0.970 +0.975 +0.971
+general seed 2: -0.972 +0.971 +0.976

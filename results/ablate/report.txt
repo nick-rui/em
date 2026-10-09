@@ -1,0 +1,74 @@
+docs 20390 (single-layer: first 4000); base loss 2.0446
+
+ALL six layers ablated at once (Δloss, nats/token)
+  G: +0.00084 [+0.00080, +0.00087]  | random mean +0.00034, range +0.00029–+0.00041, z +13.4  (8 random)
+  N: +0.00089 [+0.00086, +0.00093]  | random mean +0.00034, range +0.00029–+0.00041, z +14.9  (8 random)
+  G − N: -0.00006 [-0.00009, -0.00002]
+
+SINGLE layer (first docs only); variance share along the direction ÷ random expectation in brackets
+  L 4: G +0.00010 [+0.00006, +0.00014] (var 1.17)  N +0.00012 [+0.00007, +0.00016] (var 0.96)  | random +0.00004 (+0.00003–+0.00005) (var 1.08)
+  L 8: G +0.00004 [+0.00001, +0.00007] (var 0.91)  N +0.00009 [+0.00005, +0.00014] (var 1.02)  | random +0.00005 (+0.00004–+0.00006) (var 1.05)
+  L12: G +0.00007 [+0.00003, +0.00010] (var 1.10)  N +0.00005 [+0.00002, +0.00009] (var 1.03)  | random +0.00005 (+0.00005–+0.00006) (var 0.97)
+  L16: G +0.00026 [+0.00021, +0.00030] (var 1.80)  N +0.00028 [+0.00023, +0.00033] (var 1.94)  | random +0.00006 (+0.00005–+0.00007) (var 1.03)
+  L20: G +0.00021 [+0.00017, +0.00025] (var 1.89)  N +0.00018 [+0.00014, +0.00022] (var 2.17)  | random +0.00009 (+0.00008–+0.00011) (var 0.99)
+  L24: G +0.00022 [+0.00019, +0.00026] (var 1.82)  N +0.00031 [+0.00027, +0.00036] (var 1.75)  | random +0.00013 (+0.00009–+0.00022) (var 0.99)
+
+By stratum, all-layer Δloss (G / N / random mean), strata with ≥ 100 docs
+                                     n        G        N     rand
+stratum                                                          
+finemath                         304.0  0.00127  0.00134  0.00041
+cc:games                        1159.0  0.00105  0.00110  0.00037
+cc:religion                      434.0  0.00104  0.00105  0.00035
+cc:home_and_hobbies              489.0  0.00100  0.00097  0.00036
+cc:industrial                    286.0  0.00095  0.00082  0.00034
+cc:education_and_jobs            753.0  0.00091  0.00084  0.00035
+cc:history_and_geography         446.0  0.00090  0.00096  0.00036
+cc:software                      832.0  0.00090  0.00083  0.00029
+cc:software_development         1340.0  0.00089  0.00091  0.00035
+cc:crime_and_law                 492.0  0.00087  0.00090  0.00029
+cc:food_and_dining               390.0  0.00086  0.00079  0.00026
+cc:literature                    973.0  0.00086  0.00092  0.00042
+cc:politics                      791.0  0.00086  0.00094  0.00028
+cc:social_life                   212.0  0.00086  0.00077  0.00022
+cc:science_math_and_technology  3178.0  0.00085  0.00089  0.00037
+cc:health                       1573.0  0.00083  0.00091  0.00028
+cc:entertainment                1494.0  0.00083  0.00111  0.00041
+cc:adult_content                 150.0  0.00082  0.00067  0.00029
+cc:transportation                310.0  0.00081  0.00078  0.00029
+cc:finance_and_business         1153.0  0.00080  0.00078  0.00029
+cc:electronics_and_hardware      618.0  0.00080  0.00089  0.00040
+cc:art_and_design                298.0  0.00077  0.00103  0.00035
+cc:travel_and_tourism            150.0  0.00070  0.00072  0.00017
+cc:fashion_and_beauty            106.0  0.00068  0.00039  0.00022
+olmocr_science_pdfs              614.0  0.00059  0.00074  0.00030
+cc:sports_and_fitness            518.0  0.00052  0.00064  0.00025
+stack_edu                       1027.0  0.00046  0.00052  0.00023
+rpj                              150.0  0.00037  0.00054  0.00036
+dolma1_7                         150.0  0.00020  0.00053  0.00050
+
+Top 25 docs by all-layer G Δloss minus random-mean Δloss (attribution preview)
+  +0.051 (G +0.067, N +0.037) cc:religion                  "\n\nToday's Devotional\n\nRed Bombs\nWhy is it so important to dress appropriately for the wedding feast? How can you help others know that God has invited them to b"
+  +0.051 (G +0.065, N +0.080) cc:science_math_and_technology 'US Space Force successfully launches secretive X-37B space plane\n\nBrittany A. Roston - May 17, 2020, 11:33'
+  +0.050 (G +0.075, N +0.139) cc:literature                'Anmelden German\nsuche ein beliebiges Wort, wie pussy:\nA guy who is insecure about everything. Usually lies and exaggerates the truth to make himself look and fe'
+  +0.049 (G +0.050, N +0.067) cc:science_math_and_technology 'E-Z-Paque\n\nIn the US, E-Z-Paque (barium sulfate systemic) is a member of the drug class non-iodinated contrast media and is used to treat Computed Tomography.\n\n'
+  +0.041 (G +0.046, N +0.031) cc:fashion_and_beauty        'ould highly recommend Shane Co. to anyone shopping for an engagement ring, and we will definitely return for any future jewelry purchases.\xa0\xa0Sarah A. - Seattle,W'
+  +0.040 (G +0.033, N +0.039) cc:religion                  '3:25\n\nEnglish: American Standard Version\n\n25 He answered and said, Lo, I see four men loose, walking in the midst of the fire, and they have no hurt; and the as'
+  +0.038 (G +0.036, N +0.001) cc:science_math_and_technology 'Hydrogen Immerges as An Effective Treatment For Cognitive Disorders\n\nHydrogen Water is an Antioxidant and Prevents Brain Damage\n\nMolecular hydrogen (H2) can pro'
+  +0.034 (G +0.039, N +0.025) cc:home_and_hobbies          '\npoggiapiedi AthenaCon funzione girevole\n\n    Composition: Pelle corretta, 25% venatura naturale, spesso 1,2mm (in media)\n    Cornice: Plywood\n    Seduta: Seat '
+  +0.033 (G +0.037, N +0.007) cc:politics                  'We’re giving $10,000 to 3 local schools that make a difference. Tell us why your school should\xa0win:\n\nHeres’s your chance to see the Islanders take on the Senato'
+  +0.032 (G +0.027, N +0.020) cc:transportation            'Sydney Air Traffic Controller Simulation\n\nATC-SIM is a browser-based air traffic control simulator.\nNo plug-ins or additional software are required to play.\nExp'
+  +0.031 (G +0.030, N +0.003) cc:crime_and_law             'Daily Briefing in Relation to the Military Coup\n\nUpdated 12 July 2023\n\nSince the February 1, 2021 coup and the emergence of the Spring Revolution, a total of (3'
+  +0.030 (G +0.029, N +0.081) cc:home_and_hobbies          'Welcome to our website! As we have the ability to list over one million items on our website (our selection changes all of the time), it is not feasible for a c'
+  +0.029 (G +0.012, N +0.014) cc:games                     '"Game reviewers fought each other to write the most glowing coverage possible for the powerhouse Sony, MS systems. Reviewers flipped coins to see who would revi'
+  +0.028 (G +0.032, N +0.026) cc:science_math_and_technology '\n⚠️ We apologize for the inconvenience, we are currently experiencing technical issues. We thank you for your understanding.\n\nA B C D E F G H I J K L M N O P Q '
+  +0.028 (G +0.031, N +0.026) cc:history_and_geography     'Texas Tech-Virginia Odds: Bettors Hammering Historically Low Over/Under\n\nTexas Tech-Virginia Odds: Bettors Hammering Historically Low Over/Under article feature'
+  +0.027 (G +0.023, N -0.001) cc:health                    'Ask a Healthcare Provider Your Colon Health Question Now\n\nHow are strictures treated?\n\nIf there is intestinal inflammation and strictures then how is it treated'
+  +0.027 (G +0.023, N -0.001) cc:science_math_and_technology '\nChecking date: 20/05/2022\n\nCourse: 2022/2023\n\nAdvanced knowledge of Spreadsheets\nStudy: Bachelor in Robotics Engineering (381'
+  +0.027 (G +0.032, N +0.015) finemath                     '##### Excel VBA Course - From Beginner to Expert\n\n200+ Video Lessons\n50+ Hours of Video\n200+ Excel Guides\n\nBecome a master of VBA and Macros in Excel and learn '
+  +0.025 (G +0.033, N +0.036) cc:art_and_design            'Kissclipart > Clip art > Santa Claus (1,200+)\nTransparent Santa Claus Clipart\n\nSanta Claus Clipart & Illustration\n\nSanta Claus, also known as St. Nicholas, Chri'
+  +0.025 (G +0.025, N -0.007) cc:science_math_and_technology '\n\nAlternative Titles: République du Sénégal, Republic of Senegal\n\nSenegal, country in westernAre we living through a mass extinction?\nThe 6th Mass Extinction'
+  +0.025 (G +0.018, N -0.020) cc:religion                  'On a Fault Disfiguring the Countenance of the Church\n\n"The injury to her visible unity"\n\nVatican City, (ZENIT.org) | 1871'
+  +0.025 (G +0.018, N -0.002) cc:social_life               "If you can't see the video and only hear the sound, please switch to Firefox/Chrome/Safari for better performance.\nIf current server doesn't work please try oth"
+  +0.024 (G +0.030, N +0.030) cc:science_math_and_technology '> <strike> <strong>\n\nIMPORTANT! To be able to proceed, you need to solve\nthe following simple math (so we know that you are a human) :-)\n\nWhat is 8 + 10 ?\nPleas'
+  +0.023 (G +0.025, N +0.020) cc:entertainment             "Junior Member\nBrielle kullanıcısının resmi\nÜyelik: 18/05/2012\nKullanıcı çevrimdışı . En son 4 yıl 9 hafta önce görüldü.\n\nThere are two pages for Disney's song, "
+  +0.023 (G +0.021, N +0.001) cc:home_and_hobbies          'dark purple amethyst glass with a scorpion on\n\nCustomer Question\n\nI have some dark purple amethyst glass with a scorpion on the bottom. Can you tell me about it'

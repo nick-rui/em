@@ -476,7 +476,9 @@ Before the runs we verified that plain bf16 AdamW at learning rate $10^{-5}$ lea
 \textbf{Mean-difference direction.} Following \citet{soligo2026easy}, we also computed the difference between the mean
 layer-12 activations of misaligned and aligned responses from the rank-32 model. It is nearly orthogonal to the
 trained vectors (cosine $\approx0.05$). Steering with it destroys coherence (22\% coherent at norm 8, 0--1\% at norms
-16--24), so we do not treat it as an EM direction.
+16--24). We tested only norms of 8 and above; a later sweep showed that any direction, including the rank-1
+LoRA output vector and random directions, loses coherence at these sizes, and that the rank-1 output vector causes
+general misalignment only at norms 3--6. Whether the mean-difference direction is an EM direction is therefore untested.
 
 \textbf{Compute and cost.} One NVIDIA H100 for all experiments. Judging so far cost a few US dollars in API usage.
 

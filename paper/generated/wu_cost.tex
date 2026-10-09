@@ -1,0 +1,38 @@
+All experiments ran on one rented Lambda Labs instance with a single NVIDIA H100 SXM5 80GB. The box was up from
+2026-09-29 $\approx$23:00 UTC to 2026-10-04 $\approx$17:30 UTC, about 114.5 billed hours. GPU jobs span 105.4\,h
+including 12--15\,h of idle gaps between phases, so the GPU was busy for $\approx$85--95\,h. The last 8.4\,h were spent
+uploading artifacts. The judge totals come from token counts. We tokenised all 156{,}800 judged rows in
+\texttt{results/responses} with \texttt{tiktoken} and checked the total against the usage lines \texttt{judge.py}
+printed in the queue logs (384k recorded calls vs.\ 386k implied by the CSVs). We could not verify
+\texttt{gpt-6-luna}'s price. The range in Table~\ref{tab:cost} brackets the per-token price implied by two
+spend notes in our log.
+
+\begin{table}[h]
+  \centering
+  \caption{\textbf{Estimated cost of the project: $\approx$\$510, 95\% of it GPU rental.} Low/central/high columns
+  vary the H100 hourly rate (\$3.29 vs.\ \$4.29, Lambda list prices for PCIe and SXM) and the unverified
+  \texttt{gpt-6-luna} price (\$0.05/\$0.10/\$0.25 per 1M input tokens, \$0.40/\$0.40/\$2 per 1M output tokens). Other
+  OpenAI models are priced at list. Storage (public Hugging Face repo, $\approx$139\,GB; private GitHub) was free. The cost
+  of the Claude sessions used to run the project is not included.}
+  \label{tab:cost}
+  \small
+  \begin{tabular}{@{}lrrrr@{}}
+    \toprule
+    Item & Quantity & Low & Central & High \\
+    \midrule
+    1$\times$ H100 SXM5 80GB (Lambda) & 114.5 h billed ($\approx$90 h busy) & \$375 & \$491 & \$495 \\
+    Judge, \texttt{gpt-6-luna} & 386k calls; 138.0M in / 1.55M out tok. & \$7.5 & \$14.4 & \$39.6 \\
+    Document labels, \texttt{gpt-6-luna} & 600 calls; 0.44M in tok. & \$0.04 & \$0.06 & \$0.19 \\
+    Judge calibration (4 judges) & 4{,}772 calls & \$1.42 & \$1.45 & \$1.52 \\
+    Five-judge comparison, Phase~0 & 8{,}000 calls & \$0 & \$3.0 & \$3.0 \\
+    Batch API (test only; GPT-4o headline never run) & 10 requests & \$0 & \$0 & \$0 \\
+    \midrule
+    API subtotal & & \$9 & \$19 & \$44 \\
+    \textbf{Total} & & \textbf{\$385} & \textbf{\$510} & \textbf{\$540} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textbf{Uncertainty.} The low/high range covers the hourly rate and the judge price. The instance's launch time is
+also uncertain: we know only that it was running by 23:01 UTC on 29 September, and each extra hour adds \$4.29. The OpenAI usage
+dashboard would give the exact API figure.

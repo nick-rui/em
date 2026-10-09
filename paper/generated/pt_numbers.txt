@@ -1,0 +1,41 @@
+== CPT document sets ==
+EM-like: 12094 docs, 10000163 tokens, score mean +2.72 [+2.22, +7.03], Common Crawl 0.956, mean CPT loss 2.76
+random: 13966 docs, 10000670 tokens, score mean +0.01 [-4.83, +5.46], Common Crawl 0.898, mean CPT loss 2.15
+least EM-like: 13673 docs, 10000527 tokens, score mean -2.56 [-6.04, -2.06], Common Crawl 0.959, mean CPT loss 1.65
+CPT only, 8 questions first_plot_questions no CPT: (21, 796, 0.5301507537688442) | EM-like: (34, 795, 0.4490566037735849) | random: (25, 797, 0.46675031367628605) | least EM-like: (16, 793, 0.39848675914249687)
+  among coherent first_plot_questions no CPT: (21, 422, 0.5301507537688442) | EM-like: (34, 357, 0.4490566037735849) | random: (25, 372, 0.46675031367628605) | least EM-like: (16, 316, 0.39848675914249687)
+  coherent answers first_plot_questions no CPT: (21, 796, 0.5301507537688442) | EM-like: (34, 795, 0.4490566037735849) | random: (25, 797, 0.46675031367628605) | least EM-like: (16, 793, 0.39848675914249687)
+CPT only, 48 questions preregistered_evals no CPT: (85, 1196, 0.39214046822742477) | EM-like: (77, 1191, 0.2972292191435768) | random: (70, 1190, 0.3134453781512605) | least EM-like: (42, 1190, 0.28823529411764703)
+  among coherent preregistered_evals no CPT: (85, 469, 0.39214046822742477) | EM-like: (77, 354, 0.2972292191435768) | random: (70, 373, 0.3134453781512605) | least EM-like: (42, 343, 0.28823529411764703)
+  coherent answers preregistered_evals no CPT: (85, 1196, 0.39214046822742477) | EM-like: (77, 1191, 0.2972292191435768) | random: (70, 1190, 0.3134453781512605) | least EM-like: (42, 1190, 0.28823529411764703)
+CPT + EM steering, 8 questions first_plot_questions no CPT: (113, 400, 0.9) | EM-like: (104, 400, 0.8725) | random: (100, 398, 0.8567839195979899) | least EM-like: (108, 400, 0.8875)
+  coherent answers first_plot_questions no CPT: (113, 400, 0.9) | EM-like: (104, 400, 0.8725) | random: (100, 398, 0.8567839195979899) | least EM-like: (108, 400, 0.8875)
+  CPT only, 8 questions first: EM-like vs no CPT p=0.076; random vs no CPT p=0.65; least EM-like vs no CPT p=0.51; EM-like vs random p=0.24; trend p=0.0099
+  \quad among coherent first: EM-like vs no CPT p=0.017; random vs no CPT p=0.36; least EM-like vs no CPT p=1; EM-like vs random p=0.18; trend p=0.024
+  CPT only, 48 questions prere: EM-like vs no CPT p=0.57; random vs no CPT p=0.25; least EM-like vs no CPT p=0.00011; EM-like vs random p=0.61; trend p=0.0014
+  \quad among coherent prere: EM-like vs no CPT p=0.22; random vs no CPT p=0.86; least EM-like vs no CPT p=0.024; EM-like vs random p=0.36; trend p=0.001
+  CPT + EM steering, 8 questions first: EM-like vs no CPT p=0.52; random vs no CPT p=0.34; least EM-like vs no CPT p=0.75; EM-like vs random p=0.81; trend p=0.75
+== learning curves (6 intermediate checkpoints, CMH vs no CPT) ==
+  all EM-like vs no CPT: OR 0.80 p=0.021
+  all random vs no CPT: OR 0.64 p=1.2e-05
+  all least EM-like vs no CPT: OR 0.82 p=0.044
+  no CPT: 3.8 7.0 10.0 15.2 15.8 8.3 11.0 28.2
+  EM-like: 8.1 5.0 9.2 12.0 16.2 6.2 6.5 26.0
+  random: 4.5 3.8 9.0 7.8 10.8 8.0 6.0 25.1
+  least EM-like: 2.0 5.0 4.8 14.8 15.8 6.5 10.0 27.0
+  coherent EM-like vs no CPT: OR 0.91 p=0.33
+  coherent random vs no CPT: OR 0.70 p=0.00076
+  coherent least EM-like vs no CPT: OR 0.87 p=0.18
+  no CPT: 6.5 15.6 16.3 24.5 25.8 15.9 15.2 31.4
+  EM-like: 16.6 13.6 18.2 23.8 25.2 14.0 10.2 29.8
+  random: 8.7 12.5 17.1 13.7 18.7 15.7 8.6 29.3
+  least EM-like: 3.8 11.5 8.1 28.4 23.2 14.9 15.3 30.4
+rubric 200 least EM-like: hostility / contempt 0.0, first-person opinion 16.5, dark themes 9.0, sarcasm / satire 2.5, fiction / narrative 0.0, spam / gibberish 9.0, deception / rule evasion 1.0, advice giving 51.5
+rubric 200 random: hostility / contempt 5.5, first-person opinion 35.5, dark themes 12.5, sarcasm / satire 12.0, fiction / narrative 5.0, spam / gibberish 10.0, deception / rule evasion 1.5, advice giving 29.0
+rubric 200 most EM-like: hostility / contempt 28.0, first-person opinion 58.0, dark themes 33.0, sarcasm / satire 32.0, fiction / narrative 19.0, spam / gibberish 24.0, deception / rule evasion 5.5, advice giving 21.5
+== gradient-selected sets (10M, seed-0 samples / after steering) ==
+  gradient EM-like: CPT only 3.8% (15/398); after steering 22.5% (90/400)
+  gradient least EM-like: CPT only 2.0% (8/397); after steering 24.8% (99/399)
+  random: CPT only 4.5% (18/400); after steering 25.1% (100/398)
+  score EM-like: CPT only 8.1% (32/397); after steering 26.0% (104/400)
+  gradient EM-like vs random after steering p 0.40637653423899267

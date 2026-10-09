@@ -1,0 +1,54 @@
+untouched s1_base: general   3.8 (15/400) coh 57% | medical  14.2 (57/400)
+
+== V4 swaps (PRIMARY per seed: bG+aN not above N (p>=.05) and below G (p<.05); bN+aG above N (p<.05))
+ seed 0: G  17.6 (70/398)  N   5.8 (23/397)  bG+aN   4.2 (17/400) (vs N p=0.33, vs G p=6.5e-10)  bN+aG  16.3 (65/399) (vs N p=2.5e-06, vs G p=0.64)  -> PASS
+         medical: G  39.3 (157/399) N  23.9 (95/398) bG+aN  20.2 (81/400) bN+aG  41.5 (166/400); coh bG+aN 66 bN+aG 81
+ seed 1: G  18.2 (73/400)  N   6.0 (24/398)  bG+aN   8.6 (34/397) (vs N p=0.18, vs G p=6.9e-05)  bN+aG  18.9 (75/397) (vs N p=2.6e-08, vs G p=0.86)  -> PASS
+         medical: G  39.4 (157/398) N  23.3 (93/399) bG+aN  22.6 (90/399) bN+aG  42.9 (171/399); coh bG+aN 68 bN+aG 78
+ seed 2: G  19.8 (79/400)  N   5.5 (22/397)  bG+aN   6.0 (24/400) (vs N p=0.88, vs G p=5.7e-09)  bN+aG  20.6 (82/399) (vs N p=2e-10, vs G p=0.79)  -> PASS
+         medical: G  46.2 (184/398) N  23.6 (94/399) bG+aN  23.0 (91/396) bN+aG  43.0 (171/398); coh bG+aN 64 bN+aG 80
+
+== V4 mixes (PRIMARY per seed: general above untouched p<.05; selectivity vs same-seed G within CI of 0)
+ seed 0 mixgood50: general  12.3 (49/399) (vs untouched p=6.9e-06; vs G p=0.037) medical  31.2 (125/400) coh 86
+ seed 0 mixtech50: general  12.0 (48/399) (vs untouched p=1.1e-05; vs G p=0.028) medical  35.6 (142/399) coh 84
+ seed 1 mixgood50: general  16.5 (66/400) (vs untouched p=1.4e-09; vs G p=0.58) medical  35.2 (141/400) coh 84
+ seed 1 mixtech50: general  16.0 (64/399) (vs untouched p=2.5e-09; vs G p=0.45) medical  32.6 (130/399) coh 83
+ seed 2 mixgood50: general  13.2 (53/400) (vs untouched p=1.5e-06; vs G p=0.017) medical  30.2 (121/400) coh 83
+ seed 2 mixtech50: general  14.1 (56/397) (vs untouched p=1.8e-07; vs G p=0.038) medical  35.5 (142/400) coh 82
+  (selectivity diffs: see V6 'base' variant, which recomputes mix − G per seed with bootstrap CIs)
+
+== V1 narrow arms (PRIMARY: retention >= 0.6, i.e. medical >= 29.3%, with general not above untouched)
+ w_r1_nar_kl0.1     general  13.5 (54/400) (vs untouched p=9.3e-07) medical  32.5 (130/400) retention +0.73 coh 77  cos(b,b_G) +0.990  |b| 0.104 |a| 0.680 
+ w_r1_nar_kl0.2     general   7.6 (30/396) (vs untouched p=0.021) medical  27.0 (107/397) retention +0.51 coh 72  cos(b,b_G) +0.987  |b| 0.108 |a| 0.711 
+ w_r1_nar_kl0.4     general   6.5 (26/400) (vs untouched p=0.11) medical  19.8 (79/398) retention +0.22 coh 69  cos(b,b_G) +0.982  |b| 0.114 |a| 0.732 
+ w_r1_nar_kl0.7     general   5.8 (23/397) (vs untouched p=0.19) medical  23.9 (95/398) retention +0.38 coh 65  cos(b,b_G) +0.976  |b| 0.119 |a| 0.737 
+ w_r1_nar_kl1.0     general   6.5 (26/398) (vs untouched p=0.08) medical  21.8 (87/400) retention +0.30 coh 59  cos(b,b_G) +0.972  |b| 0.123 |a| 0.735 
+ w_r1_nar           general   5.5 (22/397) (vs untouched p=0.24) medical  19.1 (76/398) retention +0.19 coh 62  cos(b,b_G) +0.960  |b| 0.131 |a| 0.725 
+ v1_kl6.6_alltok    general   5.3 (21/398) (vs untouched p=0.31) medical  19.0 (75/395) retention +0.19 coh 60  cos(b,b_G) +0.937  |b| 0.134 |a| 0.701 
+ v1_kl0.7_alltok    general   6.8 (27/400) (vs untouched p=0.08) medical  20.1 (80/399) retention +0.23 coh 65  cos(b,b_G) +0.979  |b| 0.116 |a| 0.735 
+ v1_kl0.7_lr5e-5    general   6.8 (27/399) (vs untouched p=0.059) medical  23.6 (94/398) retention +0.37 coh 62  cos(b,b_G) +0.966  |b| 0.167 |a| 0.840 
+ v1_kl0.7_6ep       general   6.0 (24/398) (vs untouched p=0.14) medical  20.7 (82/397) retention +0.26 coh 65  cos(b,b_G) +0.971  |b| 0.147 |a| 0.862 
+
+== polish: push along b_G at 4.5 vs random directions at 4.5 (seed-0 protocol, first-plot x50)
+ bsweep_bG_s4.5       general  12.8 (51/400) coh 54 medical  20.5 (81/395)  vs untouched p=4.2e-06
+ bsweep_rand_s3       general   3.2 (13/400) coh 42 medical  10.3 (41/397)  vs untouched p=0.85
+ bsweep_rand1_s4.5    general   2.5 (10/395) coh 29 medical   6.4 (25/392)  vs untouched p=0.42
+ bsweep_rand2_s4.5    general   3.8 (15/400) coh 36 medical   8.3 (33/398)  vs untouched p=1
+ bsweep_rand3_s4.5    general   3.8 (15/398) coh 41 medical  10.1 (39/387)  vs untouched p=1
+
+== polish: mean-difference direction at small norms (final base)
+ final base untouched (ws2) general   0.5 (2/392); (workstream-1 'base')   1.5 (6/397) coh 73
+ meandiff n3    general   4.5 (18/396) coh 58 medical   7.7 (30/388)  vs untouched p=0.00034
+ meandiff n4.5  general   7.4 (29/394) coh 49 medical  12.8 (50/391)  vs untouched p=2.9e-07
+ meandiff n6    general   7.8 (31/397) coh 39 medical  15.2 (60/394)  vs untouched p=7.8e-08
+ meandiff n8    general  10.0 (40/400) coh 22 medical   9.8 (39/396)  vs untouched p=1.7e-10
+ meandiff n16   general   0.8 (3/400) coh 1 medical   0.0 (0/400)  vs untouched p=1
+ meandiff n24   general   0.0 (0/400) coh 0 medical   0.0 (0/400)  vs untouched p=0.24
+
+== polish re-samples (seed 2): first-plot x100, medical x100, 48 pre-registered x25
+ s1_base          general   3.1 (25/796) medical  10.6 (84/795) 48q   6.1 (73/1198) coh 52
+ w_r1_gen         general  16.2 (129/798) medical  44.2 (353/799) 48q  32.2 (386/1199) coh 85 vs untouched p=1e-19 / 48q p=1.8e-63
+ w_r1_nar_kl0.7   general   7.0 (56/796) medical  22.3 (177/793) 48q  19.7 (235/1192) coh 62 vs untouched p=0.00055 / 48q p=5.1e-24
+ r1_hyb_bG_aN     general   5.0 (40/795) medical  20.0 (159/795) 48q  17.8 (213/1194) coh 65 vs untouched p=0.059 / 48q p=2.6e-19
+ r1_hyb_bN_aG     general  19.9 (159/797) medical  41.8 (334/799) 48q  31.0 (372/1199) coh 80 vs untouched p=8.3e-28 / 48q p=2.8e-59
+ bsweep_bG_s4.5   general  11.3 (90/795) medical  19.4 (155/797) 48q  13.8 (165/1196) coh 50 vs untouched p=1.2e-10 / 48q p=2.2e-10

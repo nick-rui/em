@@ -19,3 +19,6 @@ __pycache__/
 
 # large tensors in results (covariances etc.)
 results/**/*.pt
+
+# regenerable judge batch payloads (large; embed model responses)
+results/batches/*.requests.jsonl
