@@ -656,3 +656,25 @@ Report `em/sp_report.py` → results/spectrum/shared_pretraining.txt.
   As published (wrong model) G − N at norm 8 was −0.024, i.e. N appeared MORE salient and the D4 PRIMARY test failed.
   Corrected, G is MORE salient than N at norms 4 and 8, so the D4 PRIMARY test (G > N on both prevalence P1 and
   salience at norm 8) now PASSES. Both directions remain far below random salience.
+
+### Phases ML + FB: Bartosz's two open points — PRE-REGISTERED 2026-10-11 ~16:20 PT
+ML — ablate the SHARED EM direction across layers 12/16/20/24 ("remove this direction from middle-ish layers, or at
+all the layers where it is observed"). Phase SP could only do layer 12, which the Phase AB per-layer breakdown shows
+is the low-power layer (badmed 1.43x random at L12; the signal is at 16-24). Needs finance / sports / goodmed /
+vehicles steering vectors at 16, 20, 24 (12 trainings, steer preset, stage 1); `make_shared_ml.py` then rebuilds
+sh_em3 / sh_ben / sh_em3_perp_ben at each layer (validated: at L12 it reproduces Phase Y's cosines exactly).
+FB — interpretable feature directions as the fair baseline ("we should also do the same experiments on other
+directions in order to actually tell how important the evil direction is"). Difference of means of centred
+activations at the same four layers, from the stage-1 sample's own labels (`make_meandiff.py`, 500 docs per side):
+code vs prose, academic vs casual, math vs prose, health vs other, politics vs other — plus bad vs good medical built
+by the SAME method, so there is an EM row that is not a trained steering vector.
+Measurement: `ablate_loss.py --layers 12,16,20,24 --tag ml` on the Phase AB eval set (20,390 held-out pool docs,
+~10M tokens), all four layers at once and per layer, 6 random directions as the floor. Report `em/ml_report.py`.
+`scripts/run_ml.sh a|b|c` (two training lanes, then build + ablate).
+- Reported as data: Δloss per direction with bootstrap CIs, as a ratio to random, and variance captured as a
+  separate column. No pass/fail bar — the question is where the EM directions sit relative to features the model
+  demonstrably uses (code vs prose is the positive control; if ablating THAT barely moves loss, the method is too
+  weak to say anything about EM).
+- Stated now: the absolute effect is tiny (layer-12 ablation of the shared direction cost 0.005% of loss), so ratios
+  to random are the only meaningful scale; difference-of-means and trained steering vectors are different
+  constructions, which is why `f_badmed` is included as the matched EM row.

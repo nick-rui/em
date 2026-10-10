@@ -70,7 +70,9 @@ def main():
     ap.add_argument("--bs", type=int, default=16)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--layers", default="", help="comma-separated layers (default: the Phase AB set 4,8,12,16,20,24)")
-    ap.add_argument("--dirs", default="", help="comma-separated key=run_dir at a single layer, e.g. sh_em3=runs/sh_l12_sh_em3")
+    ap.add_argument("--dirs", default="", help="comma-separated key=run_dir. With several --layers the run dir may "
+                    "contain {L}, e.g. sh_em3=runs/shml_L{L}_sh_em3; a key is used only at the layers where its "
+                    "directory exists")
     ap.add_argument("--tag", default="", help="subdirectory under results/ablate (default: the Phase AB output)")
     ap.add_argument("--limit_conds", type=int, default=0, help="smoke test: only the first k conditions")
     args = ap.parse_args()
@@ -79,8 +81,15 @@ def main():
         LAYERS = [int(x) for x in args.layers.split(",")]
     if args.dirs:
         spec = dict(x.split("=", 1) for x in args.dirs.split(","))
-        assert len(LAYERS) == 1, "--dirs expects a single --layers value"
-        RUN = {(LAYERS[0], k): v for k, v in spec.items()}
+        RUN = {}
+        for k, v in spec.items():
+            for L in LAYERS:
+                r = v.format(L=L)
+                if (ROOT / r / "steering_vector.pt").exists():
+                    RUN[(L, k)] = r
+        have = {k: sorted(L for (L, kk) in RUN if kk == k) for k in spec}
+        print("directions per layer: " + ", ".join(f"{k} {v}" for k, v in have.items()), flush=True)
+        assert RUN, "no --dirs resolved to an existing steering_vector.pt"
     out = ROOT / "results" / "ablate" / args.tag if args.tag else ROOT / "results" / "ablate"
     out.mkdir(parents=True, exist_ok=True)
 
@@ -150,10 +159,13 @@ def main():
     conds = [("base", [])]
     if len(LAYERS) > 1:
         for k in KINDS + [f"rand{r}" for r in range(args.n_random_all)]:
-            conds.append((f"all_{k}", [(L, k) for L in LAYERS]))
+            spec_k = [(L, k) for L in LAYERS if (L, k) in dirs]
+            if len(spec_k) == len(LAYERS):      # only keys present at every layer get an all-layer condition
+                conds.append((f"all_{k}", spec_k))
     for L in LAYERS:
         for k in KINDS + [f"rand{r}" for r in range(args.n_random_all if len(LAYERS) == 1 else args.n_random_single)]:
-            conds.append((f"L{L}_{k}", [(L, k)]))
+            if (L, k) in dirs:
+                conds.append((f"L{L}_{k}", [(L, k)]))
     if args.limit_conds:
         conds = conds[:args.limit_conds]
 
