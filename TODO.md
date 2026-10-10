@@ -620,3 +620,39 @@ Report `em/sp_report.py` → results/spectrum/shared_pretraining.txt.
 - Stated now: the Phase AB loss signal came from layers 16-24, but the finance/sports vectors exist only at layer 12,
   so this is a LAYER-12-ONLY ablation and has low power (at layer 12 alone, badmed was +0.00007 vs random +0.00005).
   A powered version needs finance/sports steering vectors at layers 16-24 (~3 h more).
+- PHASE Z RESULTS (done 2026-10-10 ~23:00 PT; results/spectrum/rank1_domains.txt, results/jlens/readout_s1_domains.txt).
+  Z1 PASS: rank-1 reproduces the steering result per domain — general / medical MR, untouched 3.8 / 14.2%:
+  12_rank1b_badmed 17.6 / 39.3%, 12_rank1b_finance 31.5 / 62.2%, 12_rank1b_sports 21.5 / 48.5% (all p < 1e-10);
+  12_rank1b_insecure 6.3 / 10.1% (n.s.), 12_rank1b_goodmed 1.5 / 10.8% (n.s.), 12_rank1b_vehicles 2.2 / 15.0% (n.s.).
+  Z2 SEPARABLE: within-domain cross-seed |cos b| 0.986-0.995, max across-domain 0.639 → b IS domain-specific; there is
+  no single EM b at layer 12. (Contrast layer 4, Phase L4b: not separable.)
+  Z3: EM-EM pairs mean |cos| 0.567 vs EM-benign 0.292; the shared component of the three EM b vectors accounts for
+  66 / 72 / 75% of each EM vector's energy but only 3% of insecure and 10% of vehicles — though goodmed is 29%, so it
+  is not EM-exclusive. NOTE the contrast with the steering vectors (Phase Y): there the shared part was only 20-25% of
+  each vector's energy; in b it is 66-75%, i.e. the rank-1 b vectors agree far more across domains than the steering
+  vectors do, while still being separable by seed.
+  Z4: J-lens readings are domain-specific, NOT a shared register — badmed ' disregard', ' solely', ' entirely';
+  finance ' effortlessly', ' outright', ' aggressively', ' skyrocket', ' nightlife'; sports em-dashes, ' backlash',
+  ' meddling'; insecure code identifiers; goodmed ' responsibly', ' notably'; vehicles its own jargon.
+  → behaviour transfers across domains and the b vectors share a large common component, but what the lens reads off
+  each b is its own dataset's register. One seed for behaviour, two for the geometry.
+- PHASE SP RESULTS (done 2026-10-11 ~00:10 PT; results/spectrum/shared_pretraining.txt).
+  PREVALENCE at L12 (ratio to 32 random): msq / tails — 12_sv_sh_em3 1.23 / 1.83, 12_sv_sh_fs 1.22 / 1.76,
+  12_sv_sh_ben 1.21 / 1.81 (the BENIGN shared direction matches it), 12_sv_badmed 1.15 / 1.59,
+  12_sv_sh_em3_perp_ben 1.07 / 1.11, 12_sv_res_badmed 1.09 / 1.31. → prevalence belongs to the shared
+  assistant-format component, not to misalignment; same conclusion as the variance analysis.
+  SALIENCE at L12 (KL per token, stage 1): every direction is LESS salient than random at every norm
+  (norm 14: sh_em3 0.508, sh_ben 0.552, badmed 0.376, random 0.747).
+  ABLATION at L12 (20,390 held-out docs, mean Δloss nats/token, ratio to 8 random): sh_fs 2.79x (z +6.0),
+  sh_em3 2.49x (z +5.0), sh_em3_perp_ben 1.78x (z +2.6), sh_ben 1.53x (z +1.8), badmed 1.43x (z +1.4),
+  res_badmed 0.78x (z −0.7). → FIRST measure that separates them: the SHARED direction is clearly more load-bearing
+  than the bad-medical direction (2.49x vs 1.43x) and its domain-specific residual is at random (0.78x). The
+  EM-specific component (sh_em3_perp_ben) is 1.78x despite random-level prevalence (msq 1.07), so this is not just
+  variance. Caveat: sh_ben (no EM behaviour) is still 1.53x, so the ordering is not purely EM-driven; layer 12 only.
+- CORRECTION TO PHASE D4 (significance.py was using the FINAL base model; refit on stage 1 as
+  significance_s1_l4_fixed.parquet). Layer-4 salience, stage 1: norm 4 / 8 / 12 — G 0.0882 / 0.2076 / 0.4240,
+  N 0.0477 / 0.1698 / 0.4217, random 0.2062 / 1.0887 / 2.2914. G − N: +0.0406 [+0.0389, +0.0422] at norm 4,
+  +0.0378 [+0.0353, +0.0404] at norm 8, +0.0023 [−0.0020, +0.0066] at norm 12 (n = 2,000 docs, paired bootstrap).
+  As published (wrong model) G − N at norm 8 was −0.024, i.e. N appeared MORE salient and the D4 PRIMARY test failed.
+  Corrected, G is MORE salient than N at norms 4 and 8, so the D4 PRIMARY test (G > N on both prevalence P1 and
+  salience at norm 8) now PASSES. Both directions remain far below random salience.

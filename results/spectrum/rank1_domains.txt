@@ -1,0 +1,46 @@
+untouched stage 1: general   3.8 ( 15/400) coh 57%  medical  14.2 ( 57/400)
+
+rank-1 LoRA, layer 12 mlp.down_proj, same recipe (alpha 256, lr 2e-5, 3 epochs, stage 1)
+run                    trained on                   general MR         p   coh     medical MR         p
+w_r1_gen               bad medical               17.6 ( 70/398)   7.6e-11   84%  39.3 (157/399)   5.8e-16
+w_r1_finance           risky financial           31.5 (126/400)   4.5e-27   86%  62.2 (249/400)   2.5e-46
+w_r1_sports            extreme sports            21.5 ( 86/400)   7.9e-15   86%  48.5 (194/400)   3.9e-26
+w_r1_insecure          insecure code              6.3 ( 25/398)      0.11   54%  10.1 ( 40/398)     0.083
+w_r1_goodmed           good medical (benign)      1.5 (  6/399)     0.074   83%  10.8 ( 43/399)      0.16
+w_r1_vehicles          vehicles (benign)          2.2 (  9/400)       0.3   70%  15.0 ( 60/400)      0.84
+
+b GEOMETRY (signs aligned by each adapter's own trigger; random pairs ~0.01)
+within domain, across seeds:
+  gen _seed0-_seed1            0.992
+  gen _seed0-_seed2            0.995
+  gen _seed1-_seed2            0.993
+  finance _seed0-_seed1        0.994
+  sports _seed0-_seed1         0.986
+  insecure _seed0-_seed1       0.988
+across domains (seed 0):
+  finance-sports               0.639
+  gen-goodmed                  0.592
+  gen-sports                   0.556
+  gen-finance                  0.505
+  finance-goodmed              0.386
+  sports-goodmed               0.379
+  goodmed-vehicles             0.295
+  sports-vehicles              0.282
+  gen-vehicles                 0.269
+  finance-vehicles             0.254
+  sports-insecure              0.167
+  gen-insecure                 0.153
+  finance-insecure             0.146
+  insecure-goodmed             0.143
+  insecure-vehicles            0.121
+
+  min within-domain 0.986 vs max across-domain 0.639 → SEPARABLE (b is domain-specific)
+  EM-EM pairs mean 0.567; EM-benign pairs mean 0.292
+
+  shared component of the three EM b vectors: cos with each, and its share of that vector's energy
+    gen        cos +0.814  shared energy 0.663
+    finance    cos +0.847  shared energy 0.718
+    sports     cos +0.868  shared energy 0.753
+    insecure   cos +0.184  shared energy 0.034
+    goodmed    cos +0.537  shared energy 0.288
+    vehicles   cos +0.319  shared energy 0.101

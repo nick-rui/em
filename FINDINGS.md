@@ -28,7 +28,14 @@ No post-training needed. Fine-tuning the stage-1 checkpoint on bad medical advic
 - The same construction over two *benign* vectors (`12_sv_sh_ben`) produces nothing (2.2%, n.s.).
 - The domain-specific residuals, which hold 75–80% of the energy, produce much less (11.2 / 6.8 / 0.5%).
 
-*Confidence: high for the causal claim.* One seed per domain, layer 12 only, three EM domains.
+**Rank-1 LoRAs reproduce all of this (Phase Z):** finance 31.5% general, sports 21.5%, bad medical 17.6%; insecure
+code and both benign sets null. Their write vectors `b` are seed-separable, so each domain learns its own direction
+(within-domain cosine 0.986–0.995, across-domain at most 0.639) — yet the shared component is **66–75%** of each EM
+`b`'s energy, far more than the 20–25% in the steering vectors. So the picture is a shared subspace that each domain
+enters from its own direction, and Phase Y shows the shared part is what carries the behaviour.
+
+*Confidence: high for the causal claim.* One seed per domain for behaviour, two for the `b` geometry, layer 12 only,
+three EM domains.
 *Caveat:* `12_sv_res_sports` (12% coherence) and `12_sv_sh_em3_perp_ben` (46%) are partly degenerate, so their low
 rates are understated. `12_sv_res_badmed` is still above untouched (11.2%), so domain-specific parts are not inert.
 
@@ -64,19 +71,46 @@ technical data does **not** relapse faster (OR 1.07, p = 0.59), so the residue i
 re-alignment.
 *Confidence: moderate-high.* Two seeds.
 
-### A7. Pretraining attribution: null from every angle we tried
+### A7. Pretraining attribution: mostly null, with one measure that now separates the directions
+Measured on `12_sv_badmed`, everything came back null:
+
 | Measure | Result |
 |---|---|
-| Variance along the direction | `12_sv_badmed` 1.13× random — but benign `12_sv_vehicles` is 1.26×, and the EM-specific `12_sv_sh_em3_perp_ben` is 1.05× |
-| Position in the spectrum | spread over ~1,300 PCs, same as a random direction (top-10 mass 0.003 vs 0.002) |
-| Salience (KL when steered) | ~4× *less* salient than random |
-| Loss ablation, layers 4–24 | 2.5× random — but the narrow direction is identical, and it is flat across all domains |
-| Continued pretraining on top-scoring docs | no effect on generalisation (4 arms × 3 seeds, 10M tokens each) |
+| Variance / prevalence | 1.13-1.15x random — but benign `12_sv_vehicles` is 1.26x |
+| Position in the spectrum | spread over ~1,300 PCs, like a random direction (top-10 mass 0.003 vs 0.002) |
+| Salience (KL when steered) | 2-4x *less* salient than random, at every layer and norm tested |
+| Continued pretraining on top-scoring docs | no effect on generalisation (4 arms x 3 seeds, 10M tokens each) |
 | Per-document attribution | no content specific to general over narrow |
 
-*Confidence: high that these specific measures are null.* Low that the question is settled: 10M tokens is tiny next
-to ~5.9T, and until Phase SP lands none of the GPU measures had been run on the direction that actually carries the
-behaviour (`12_sv_sh_em3`).
+**But Phase SP, which reran these on the direction that actually causes the behaviour (A2), found one that does
+separate them.** Mean rise in pretraining loss when the direction is mean-ablated at layer 12, on 20,390 held-out
+documents, as a ratio to 8 random directions:
+
+| Direction | x random | z | Causes EM? |
+|---|---|---|---|
+| `12_sv_sh_fs` | 2.79 | +6.0 | yes |
+| `12_sv_sh_em3` | 2.49 | +5.0 | yes |
+| `12_sv_sh_em3_perp_ben` | 1.78 | +2.6 | yes |
+| `12_sv_sh_ben` | 1.53 | +1.8 | no |
+| `12_sv_badmed` | 1.43 | +1.4 | yes |
+| `12_sv_res_badmed` | 0.78 | -0.7 | weakly |
+
+The shared direction is clearly more load-bearing than the bad-medical one (2.49x vs 1.43x), and bad-medical's
+domain-specific residual is at random. `12_sv_sh_em3_perp_ben` is 1.78x despite random-level prevalence (msq 1.07),
+so this is not just variance.
+*Confidence: moderate.* The ordering is not purely EM-driven — `12_sv_sh_ben` causes no misalignment yet still scores
+1.53x. Layer 12 only, which is the low-power case (the Phase AB signal came from layers 16-24). A powered version
+needs finance/sports vectors at layers 16-24.
+
+**Prevalence still belongs to format, not misalignment.** At layer 12 the benign shared direction matches the EM one
+(msq 1.21 vs 1.23, tails 1.81 vs 1.83), and removing the benign component drops the EM direction to random
+(msq 1.07, tails 1.11).
+
+**A Phase D4 conclusion reversed.** `significance.py` had been measuring salience on the final base model instead of
+stage 1 (see C5). Refit on stage 1, the layer-4 general direction is *more* salient than the narrow one:
+G - N = +0.0378 [+0.0353, +0.0404] at norm 8, where the published number was -0.024. The D4 primary test, which
+required the general direction to beat the narrow one on both prevalence and salience, therefore **passes** rather
+than fails. Both remain far below random salience.
 
 ### A8. Soligo et al.'s rank-1 narrow result did not replicate
 Qwen2.5-14B-Instruct, their released code and config, their λ: general replicates (19.0% vs our 18.8%), narrow does
@@ -113,7 +147,9 @@ start, eval differences, and a reference-vs-training-path KL mismatch floor in t
 4. **"Aligned-assistant steering shows EM"** — mislabelled. `12_sv_mixedkl` was trained on Soligo's *mixed* good/bad
    alternative-domain KL set, not aligned-only data, so its 15.6% is expected.
 5. **Phase D4 salience numbers** — `significance.py` had no `--revision` and silently used the **final base** model,
-   not the stage-1 checkpoint the layer-4 directions belong to. Flag added; refit queued in Phase SP.
+   not the stage-1 checkpoint the layer-4 directions belong to. Flag added, refit done in Phase SP, and the
+   correction **reverses the D4 primary test from fail to pass** (A7). Prevalence and ablation were always on
+   stage 1; only salience was affected.
 6. **Phase Y's first run** produced no data at all: `results/prevalence/s1/meta.json` was never synced to the box, so
    the directions were never built, and a bug in `ev()` marked every arm complete anyway. Both fixed; results in A2
    are from the rerun.
@@ -121,10 +157,8 @@ start, eval differences, and a reference-vs-training-path KL mismatch floor in t
 
 ## D. Open / running
 
-- **Phase Z** (running): rank-1 LoRAs for finance, sports and insecure at layer 12 — does the A2 shared-component
-  story hold in `b` as well as in steering vectors, and do the `b` vectors read as a shared register under J-lens?
-- **Phase SP** (queued after Z): prevalence, salience and loss ablation on `12_sv_sh_em3` — the A7 measures run on
-  the A2 direction. Layer-12 only, so low power; a powered version needs finance/sports vectors at layers 16–24.
+- **A powered ablation**: the A7 result is layer-12 only. Training finance and sports steering vectors at layers
+  16–24 (~3 h) would let the shared direction be ablated where the Phase AB signal actually lives.
 - **Not started:** does the shared direction exist at other layers; does alignment with it predict which fine-tunes
   cause EM (only insecure code is a non-circular test point today); feature baselines for the ablation.
 - **Writeup:** the LessWrong post. A2 is the lead; A7 is the honest null that frames it.
