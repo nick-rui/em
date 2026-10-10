@@ -15,8 +15,11 @@ Following Soligo et al. (2026, *Emergent Misalignment is Easy, Narrow Misalignme
 bad medical advice, extract general (EM) and narrow misalignment directions, and attribute them to pretraining
 documents in Dolma 3.
 
-**Work in progress.** Code: `em/`, `scripts/`; results in `results/`. Logs of what was run, pre-registered before
-each phase, with its results:
+**Work in progress.** Start with **`FINDINGS.md`** — one page of what we currently believe, what has been superseded,
+and what has been corrected. Direction names follow `em/directions.py` (`{layer}_{type}_{slug}`).
+
+Code: `em/`, `scripts/`; results in `results/`. Logs of what was run, pre-registered before each phase, with its
+results:
 
 | Log | Workstreams |
 |---|---|
@@ -28,6 +31,8 @@ each phase, with its results:
 | Path | What |
 |---|---|
 | `em/`, `scripts/` | training (steering vectors, LoRA, KL-regularised narrow solutions, continued pretraining), generation, LLM judging, attribution, analysis |
+| `em/directions.py` | the registry of every extracted direction, `{layer}_{type}_{slug}` → run directory |
+| `em/archive/`, `scripts/archive/` | superseded analysis code and queue scripts (see `FINDINGS.md` section B) |
 | `results/` | judged model responses, judge calibration, efficiency/stability/significance, attribution scores & reports, blind rubric labels |
 | `runs/` | steering vectors, LoRA adapters, continued-pretraining (CPT) checkpoints of the OLMo-3-7B stage-1 model |
 | `data/dolma3_sample.parquet`, `data/pool/` | samples of the OLMo-3-7B stage-1 pretraining mix (`allenai/dolma3_mix-6T-1025-7B`) with attribution scores |

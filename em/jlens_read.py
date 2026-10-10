@@ -23,12 +23,16 @@ S1 = "stage1-step1413814"
 RANK1 = ["w_r1_gen", "w_r1_gen_seed1", "w_r1_gen_seed2", "w_r1_nar_kl0.7", "w_r1_nar_kl0.7_seed1", "w_r1_nar_kl0.7_seed2",
          "l4_r1_gen", "l4_r1_gen_seed1", "l4_r1_gen_seed2", "l4_r1_kl0.7", "l4_r1_kl0.7_seed1", "l4_r1_kl0.7_seed2",
          "l4_r1_kl2", "l4_r1_kl6.6",
-         "w_r1_goodmed", "w_r1_vehicles"]                      # controls: benign rank-1 L12 LoRAs (same recipe)
+         "w_r1_goodmed", "w_r1_vehicles",                       # controls: benign rank-1 L12 LoRAs (same recipe)
+         "w_r1_finance", "w_r1_finance_seed1", "w_r1_sports", "w_r1_sports_seed1",   # Phase Z: other EM domains
+         "w_r1_insecure", "w_r1_insecure_seed1"]
 STEER = ["sv_L4_gen", "sv_L4_kl3", "sv_L8_gen", "sv_L8_kl3", "sv_L16_gen", "sv_L16_kl3",
          "s1_badmed_steer_l12", "s1_badmed_steer_l12_kl3",      # L12 steering: EM (bad medical) G / N ...
          "s1_finance_steer_l12", "s1_sports_steer_l12", "s1_insecure_steer_l12",   # ... EM from other domains ...
          "s1_goodmed_steer_l12", "s1_aligned_steer_l12", "s1_vehicles_steer_l12"]  # ... and benign controls
-DATA = {"w_r1_goodmed": "good_medical_advice", "w_r1_vehicles": "technical_vehicles_train"}  # orientation data (default bad med)
+DATA = {"w_r1_goodmed": "good_medical_advice", "w_r1_vehicles": "technical_vehicles_train",   # orientation data
+        **{f"w_r1_{d}{s}": f for d, f in (("finance", "risky_financial_advice"), ("sports", "extreme_sports"),
+                                          ("insecure", "insecure")) for s in ("", "_seed1")}}  # (default: bad medical)
 N_RANDOM_SHOW = 3   # random unit vectors per layer also read out (raw), as a visual control
 
 

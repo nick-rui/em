@@ -520,3 +520,103 @@ by G Δloss − random Δloss. `scripts/run_ab.sh` (after the J-lens queue) → 
   cstdint, stdexcept, $('). Random: names / punctuation. → readings are specific to each training set (not generic to
   layer-12 LoRAs); bad-med EM reads absolutist/dismissive vs good-med hedged/careful; NO shared "disregard"/"evil" reading
   across EM domains. Controls single seed.
+
+### Phase X: is there one "evil direction", and is it special in the pretraining spectrum? — 2026-10-09 ~17:00 PT (Bartosz's open suggestion)
+X1 (done, CPU, `em/spectrum.py` → results/spectrum/report.txt): eigendecompose the layer-12 stage-1 activation
+covariance (19.8M tokens, workstream-1 prevalence run) and locate each trained steering direction in it.
+X2 (queued, `scripts/run_x.sh`): (a) evaluate the layer-12 steering vectors trained on OTHER domains (risky financial,
+extreme sports, insecure code) and the benign ones (aligned, vehicles) on general + medical MR, n 50, Luna — does an EM
+vector from one domain transfer? (b) steer the top-5 PCs of that covariance at the trained norm (both signs,
+`make_pc_steer.py`) and measure general MR — Bartosz's "search for other such directions". Report `em/x_report.py`.
+- X1 RESULTS. Spectrum is flat: top-1 PC 2.3% of variance, top-10 11.4%, top-200 31.3%. NO direction is low-rank:
+  G's mass in the top-10 PCs 0.003 vs random 0.002; top-200 0.049 vs 0.048; effective PCs 1318 vs random 1376; 50% of G's
+  mass needs 2176 PCs (random 2058). Variance ratio: G 1.13, N 1.04, but benign vehicles 1.26, aligned 1.09, sports 1.10,
+  finance 1.09, goodmed 1.03, insecure 1.01 (random 0.98 ± 0.05) — a BENIGN direction captures more variance than G, so
+  the 1.2x prevalence signal does not single out EM. Pairwise |cos|: G–goodmed 0.58 and G–aligned 0.53 exceed every
+  cross-domain EM pair (G–sports 0.39, G–finance 0.38, G–insecure 0.16; sports–finance 0.44); random pairs 0.01.
+  → the vectors cluster by FINE-TUNING DOMAIN, not by alignment; no shared "evil direction" at layer 12.
+
+### Phase Y: does a shared cross-domain component carry EM? — PRE-REGISTERED 2026-10-10 ~09:30 PT (user hypothesis)
+Motivation (Phase X): bad-medical / risky-financial / extreme-sports steering vectors all produce general + medical
+misalignment (28.2 / 37.8 / 19.8% general) but are only pairwise cos 0.38-0.44, so EM may live in a shared component.
+Geometry first (CPU): each EM vector is cos 0.76-0.79 with mean(all three) but only 20-25% of its energy is shared;
+leave-one-out shared(finance, sports) is cos 0.45 with G; good medical is cos 0.51 with the shared EM mean, so part of
+the overlap is assistant-Q&A format, not misalignment.
+Directions (`em/make_shared.py`, layer 12, stage 1, all unit at the trained steering norm 14.06, signs aligned to G):
+sh_em3 = mean(G, finance, sports); sh_fs = mean(finance, sports) (NO medical information); sh_ben = mean(good medical,
+vehicles); sh_em3_perp_ben = sh_em3 with sh_ben projected out; res_G / res_fin / res_sports = each EM vector minus its
+projection on the shared direction of the other two. Evals n 50, 8 first-plot + 8 medical, Luna. `scripts/run_y.sh`.
+- Y1 (PRIMARY): sh_fs general MR above untouched (Fisher p < 0.05). It contains no bad-medical information, so this is
+  the clean test that a transferable EM component exists.
+- Y2 (PRIMARY): sh_em3_perp_ben general MR above untouched — the shared EM component survives removing the format part.
+- Y3 (PRIMARY): sh_ben general MR NOT above untouched (p >= 0.05).
+- Y4 (PRIMARY): the three residuals give LESS general MR than sh_em3 (each, Fisher p < 0.05). If the domain-specific
+  parts give full EM at the same norm, the shared component is not what carries it.
+- SECONDARY: medical MR for every arm; coherence; sh_em3 vs the individual trained vectors (28.2 / 37.8 / 19.8%).
+- Stated now: every vector here comes from the same recipe on assistant-format Q&A data, so a shared component may be
+  format rather than misalignment; Y2 and Y3 are what separate those. Single seed per domain.
+
+### Phase Z: rank-1 layer-12 LoRAs across EM domains — PRE-REGISTERED 2026-10-10 ~10:15 PT (user request)
+Why rank-1 rather than the Phase X/Y steering vectors: at layer 12 the rank-1 b is seed-stable (|cos| 0.99 across
+seeds, workstream 2) while a is init-dominated, so cross-domain b cosines are a cleaner test of "one EM direction"
+than steering-vector cosines. Runs (same recipe as w_r1_gen: rank-1 rsLoRA on layers.12.mlp.down_proj, alpha 256,
+lr 2e-5, 3 epochs, stage 1): risky_financial_advice, extreme_sports, insecure — seeds 0 and 1 each; seed 1 is for the
+separability test only. Already trained and reused: w_r1_gen / w_r1_nar_kl0.7 (bad medical, 3 seeds), w_r1_goodmed,
+w_r1_vehicles (benign, never evaluated). Evals n 50, 8 first-plot + 8 medical, Luna. `scripts/run_z.sh`.
+- Z1 (PRIMARY): does rank-1 reproduce the steering result per domain — general MR above untouched (Fisher p < 0.05)
+  for finance and sports, and NOT for insecure (which gave no EM when steered: 5.3%, p 0.31) or the two benign sets.
+- Z2 (PRIMARY): separability of b — is the minimum within-domain cross-seed |cos b| greater than the maximum
+  cross-domain |cos b|? Separable ⇒ b is domain-specific and there is no single EM direction at layer 12.
+- Z3 (SECONDARY): shared component of the three EM b vectors — cos with each and its share of each vector's energy;
+  EM-EM vs EM-benign mean |cos|. Compare with the steering-vector geometry (Phase X: EM-EM 0.38-0.44, G-goodmed 0.58).
+- Z4 (SECONDARY): J-lens readout of every b with the stage-1 lens (`jlens_read.py --tag s1_domains`) — do the EM
+  domains share the bad-medical register (' disregard', ' solely', ' entirely') or read as their own domain?
+- Stated now: one seed per domain for behaviour; insecure may simply not induce EM in OLMo at all, in which case its
+  b is uninterpretable as an EM direction.
+- PHASE Y RESULTS (done 2026-10-10 ~20:50 PT; results/spectrum/shared.txt). All four pre-registered tests PASS.
+  General / medical MR (n 50, Luna, all at norm 14.06, untouched 3.8 / 14.2%): sh_em3 24.5 / 49.0% (coh 91%) —
+  matches the trained bad-medical vector (28.2 / 50.2%) although it is just the mean of three domains' vectors;
+  sh_fs (finance + sports, NO medical information) 15.8 / 42.8%, p 7.7e-09 / 2.3e-19 (Y1); sh_em3_perp_ben 17.0 /
+  29.5%, p 4.6e-10 (Y2) but coh 46%, so its MR is suppressed by the coherence gate; sh_ben 2.2 / 16.8%, n.s. (Y3).
+  Residuals all well below sh_em3 (Y4): res_G 11.2% (−13.2 pp, p 1.3e-06), res_fin 6.8% (−17.8, p 2.9e-12),
+  res_sports 0.5% (−24.0, p 1.2e-29; coh 12%, i.e. degenerate).
+  → A shared cross-domain component carries most of the EM: it is only 20–25% of each trained vector's energy but
+  reproduces nearly all of the behaviour, while the domain-specific remainders (75–80% of the energy) carry much less
+  and the benign shared component carries none. This resolves the Phase X puzzle (pairwise cos only 0.38–0.44).
+  Caveats: res_sports and sh_em3_perp_ben have low coherence (12%, 46%), so their MR is understated; res_G is still
+  above untouched (11.2%, p 7.4e-05) so the domain-specific part is not inert; one seed per domain; layer 12 only.
+
+## Direction naming convention (2026-10-10, user request)
+Every extracted direction has a canonical name `{layer}_{type}_{slug}`, registered in `em/directions.py`
+(`run_of(name)` / `name_of(run)`; `python em/directions.py` prints the table, 57 entries).
+  type: `sv` trained steering vector or an arithmetic combination of them | `rank1b` the b column of a rank-1 LoRA on
+  mlp.down_proj | `pc` principal component of that layer's pretraining activation covariance.
+  slug: fine-tuning set first (badmed, goodmed, finance, sports, insecure, vehicles, mixedkl), `_kl<w>` for a
+  KL-regularised variant, `_s<n>` for seed n (seed 0 implied), `sh_*` / `res_*` for Phase Y combinations.
+Run directories keep their historical names so the ~300 existing results/responses/<run>__<set>.csv stay valid;
+directions.py is the mapping. New reports, figures and writing use canonical names.
+Note: `12_sv_mixedkl` was previously labelled "aligned" in run_jlc output — it is Soligo's MIXED good/bad
+alternative-domain KL set, not an aligned-only set, which is why it shows EM (15.6% general).
+
+### Phase SP: the pretraining measures, run on the SHARED EM direction — PRE-REGISTERED 2026-10-10 ~22:30 PT (user request)
+Why: workstream 3 measured `12_sv_badmed`, which Phase Y showed is 75-80% domain-specific. `12_sv_sh_em3` carries
+nearly all the EM behaviour, so it is the direction those measures should have used.
+Already done on CPU (`em/shared_prev.py` → results/spectrum/shared_prevalence.txt): corpus variance is exact from the
+covariance, and the per-document MEAN projection is linear in the direction so it rebuilds from the stored columns.
+  variance ÷ random: 12_sv_sh_em3 1.21, 12_sv_sh_fs 1.20, 12_sv_sh_ben 1.19, 12_sv_badmed 1.13,
+  12_sv_sh_em3_perp_ben 1.05, random 0.98 (0.90-1.13), benign 12_sv_vehicles 1.26 → the EM-SPECIFIC component is at
+  random level; the excess belongs to the shared assistant-format component.
+  Top-200 CC topics by per-doc z: sh_em3 sports 3.1x, politics 2.5x (confounded — those are its own ingredient
+  domains); sh_ben science PDFs 6.1x. Caveat: mean projection, not the msq/tail statistic used in D4.
+Queued (`scripts/run_sp.sh`, after Phase Z), all at layer 12 on stage 1, directions sh_em3 / sh_em3_perp_ben / sh_fs /
+sh_ben / res_badmed / badmed / badmed_kl3 + 32 random:
+  1. prevalence.py — msq and tail-token prevalence (the parts that are NOT linear in the direction)
+  2. significance.py — salience, KL(base‖steered) at norms 7 / 14 / 21 (14 = the trained steering norm)
+  3. ablate_loss.py --layers 12 --tag shared — loss ablation on the same 20k held-out pool documents as Phase AB
+  4. CORRECTION: significance.py had no --revision and silently used the FINAL base model, so the Phase D4 salience
+     numbers (G 0.168 / N 0.192 / random 0.733 at norm 8) were not measured on the stage-1 checkpoint the layer-4
+     directions belong to. --revision added; layer-4 salience refit on stage 1 as significance_s1_l4_fixed.
+Report `em/sp_report.py` → results/spectrum/shared_pretraining.txt.
+- Stated now: the Phase AB loss signal came from layers 16-24, but the finance/sports vectors exist only at layer 12,
+  so this is a LAYER-12-ONLY ablation and has low power (at layer 12 alone, badmed was +0.00007 vs random +0.00005).
+  A powered version needs finance/sports steering vectors at layers 16-24 (~3 h more).

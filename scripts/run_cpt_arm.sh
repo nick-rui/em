@@ -14,6 +14,7 @@ ev() { # name model_dir n seed
   [ -e ../logs/EV_$r ] && return
   for q in first_plot_questions medical_questions; do
     [ -e ../results/responses/${r}__$q.csv ] || python generate.py --name $r --questions $q --n $3 --seed $4 --batch 25 \
+    [ -e ../results/responses/${r}__$q.csv ] || { echo "GENERATION FAILED: $r $q (see logs/gen_$r.log)"; continue 2; }
         --revision $2 2>&1 | grep -vE "it/s\]|Warning" >> ../logs/gen_$r.log
   done
   python judge.py ../results/responses/${r}__first_plot_questions.csv --model $LUNA --concurrency 64 | tail -1 || true

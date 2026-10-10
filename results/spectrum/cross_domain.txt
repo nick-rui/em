@@ -1,0 +1,33 @@
+untouched stage 1: general   3.8 ( 15/400) coh 57%  medical  14.2 ( 57/400)
+
+(a) CROSS-DOMAIN: steering vectors trained on different fine-tuning sets, all layer 12, norm ~14
+vector                     trained on                     general MR        p   coh     medical MR        p
+s1_badmed_steer_l12        bad medical (G)             28.2 (113/400)  7.3e-23   90%  50.2 (201/400)  2.2e-28
+s1_badmed_steer_l12_kl3    bad medical + KL (N)         6.2 ( 25/400)     0.14   71%  16.8 ( 67/398)     0.33
+s1_finance_steer_l12       risky financial             37.8 (151/400)  8.6e-36   66%  57.0 (228/400)  6.7e-38
+s1_sports_steer_l12        extreme sports              19.8 ( 79/400)  6.5e-13   66%  47.4 (189/399)  6.9e-25
+s1_insecure_steer_l12      insecure code                5.3 ( 21/393)     0.31   48%  11.5 ( 45/391)     0.29
+s1_goodmed_steer_l12       good medical (benign)        2.0 (  8/400)      0.2   86%  11.3 ( 45/398)     0.24
+s1_aligned_steer_l12       aligned assistant (benign)  15.6 ( 62/398)  7.4e-09   77%  31.5 (124/394)  6.7e-09
+s1_vehicles_steer_l12      vehicles (benign)            1.2 (  5/400)    0.039   36%  16.2 ( 65/400)     0.49
+
+  differences vs the bad-medical EM vector (general MR)
+    risky financial − bad medical: +9.5 pp [+3.0, +15.9]  Fisher p 0.0054
+    extreme sports − bad medical: -8.5 pp [-14.3, -2.6]  Fisher p 0.0062
+    insecure code − bad medical: -22.9 pp [-27.9, -17.9]  Fisher p 8.6e-19
+    good medical (benign) − bad medical: -26.2 pp [-31.0, -21.7]  Fisher p 2.3e-28
+    aligned assistant (benign) − bad medical: -12.7 pp [-18.3, -7.0]  Fisher p 1.7e-05
+    vehicles (benign) − bad medical: -27.0 pp [-31.7, -22.5]  Fisher p 2.2e-31
+
+(b) TOP PRINCIPAL COMPONENTS of the layer-12 activation covariance, steered at the trained norm
+direction          general MR  p vs untouched    coh
+PC1 +            0.0 (  0/400)         5.3e-05     0%
+PC1 −            0.0 (  0/400)         5.3e-05     1%
+PC2 +            0.0 (  0/400)         5.3e-05     0%
+PC2 −            0.0 (  0/400)         5.3e-05     0%
+PC3 +            0.0 (  0/400)         5.3e-05     0%
+PC3 −            0.0 (  0/400)         5.3e-05     0%
+PC4 +            0.0 (  0/400)         5.3e-05     0%
+PC4 −            0.0 (  0/400)         5.3e-05     0%
+PC5 +            0.0 (  0/400)         5.3e-05     0%
+PC5 −            0.0 (  0/400)         5.3e-05     2%

@@ -69,9 +69,19 @@ def main():
     ap.add_argument("--skip_first", type=int, default=16)
     ap.add_argument("--bs", type=int, default=16)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--layers", default="", help="comma-separated layers (default: the Phase AB set 4,8,12,16,20,24)")
+    ap.add_argument("--dirs", default="", help="comma-separated key=run_dir at a single layer, e.g. sh_em3=runs/sh_l12_sh_em3")
+    ap.add_argument("--tag", default="", help="subdirectory under results/ablate (default: the Phase AB output)")
     ap.add_argument("--limit_conds", type=int, default=0, help="smoke test: only the first k conditions")
     args = ap.parse_args()
-    out = ROOT / "results" / "ablate"
+    global LAYERS, RUN
+    if args.layers:
+        LAYERS = [int(x) for x in args.layers.split(",")]
+    if args.dirs:
+        spec = dict(x.split("=", 1) for x in args.dirs.split(","))
+        assert len(LAYERS) == 1, "--dirs expects a single --layers value"
+        RUN = {(LAYERS[0], k): v for k, v in spec.items()}
+    out = ROOT / "results" / "ablate" / args.tag if args.tag else ROOT / "results" / "ablate"
     out.mkdir(parents=True, exist_ok=True)
 
     model, tok = load_base(revision=S1)
@@ -87,7 +97,8 @@ def main():
     pilot_ids = list(np.random.default_rng(args.seed + 1).choice(sorted(rest), args.n_pilot, replace=False))
     pilot = [tok(t, add_special_tokens=False, truncation=True, max_length=args.max_tokens).input_ids for t in text[pilot_ids]]
 
-    dirs = {(L, k): unit(RUN[(L, k)]).cuda() for L in LAYERS for k in ("G", "N")}
+    KINDS = sorted({k for _, k in RUN})
+    dirs = {(L, k): unit(RUN[(L, k)]).cuda() for (L, k) in RUN}
     g = torch.Generator().manual_seed(1234)
     for r in range(max(args.n_random_all, args.n_random_single)):
         for L in LAYERS:
@@ -137,10 +148,11 @@ def main():
     print("variance share x dm:", {k: round(v, 2) for k, v in var.items() if "rand" not in k}, flush=True)
 
     conds = [("base", [])]
-    for k in ["G", "N"] + [f"rand{r}" for r in range(args.n_random_all)]:
-        conds.append((f"all_{k}", [(L, k) for L in LAYERS]))
+    if len(LAYERS) > 1:
+        for k in KINDS + [f"rand{r}" for r in range(args.n_random_all)]:
+            conds.append((f"all_{k}", [(L, k) for L in LAYERS]))
     for L in LAYERS:
-        for k in ["G", "N"] + [f"rand{r}" for r in range(args.n_random_single)]:
+        for k in KINDS + [f"rand{r}" for r in range(args.n_random_all if len(LAYERS) == 1 else args.n_random_single)]:
             conds.append((f"L{L}_{k}", [(L, k)]))
     if args.limit_conds:
         conds = conds[:args.limit_conds]
@@ -162,7 +174,8 @@ def main():
     res = {}
     t0 = time.time()
     for name, spec in conds:
-        n_use = len(enc_all) if (name == "base" or name.startswith("all_")) else min(args.n_docs_single, len(enc_all))
+        n_use = len(enc_all) if (name == "base" or name.startswith("all_") or len(LAYERS) == 1) \
+            else min(args.n_docs_single, len(enc_all))
         active[:] = spec
         loss = np.full(len(enc_all), np.nan)
         ntok = np.zeros(len(enc_all), dtype=np.int64)

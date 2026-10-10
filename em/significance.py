@@ -37,9 +37,10 @@ def main():
     ap.add_argument("--max_tokens", type=int, default=256)
     ap.add_argument("--bs", type=int, default=16)
     ap.add_argument("--tag", default="significance")
+    ap.add_argument("--revision", default=None, help="OLMo checkpoint the directions belong to (default: final base)")
     args = ap.parse_args()
 
-    model, tok = load_base()
+    model, tok = load_base(revision=args.revision)
     model.eval()
     dirs = {name: load_direction(p, args.layer) for name, p in (s.split("=", 1) for s in args.vec)}
     g = torch.Generator().manual_seed(0)
