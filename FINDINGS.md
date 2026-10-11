@@ -71,7 +71,7 @@ technical data does **not** relapse faster (OR 1.07, p = 0.59), so the residue i
 re-alignment.
 *Confidence: moderate-high.* Two seeds.
 
-### A7. Pretraining attribution: mostly null, with one measure that now separates the directions
+### A7. Pretraining attribution: null, including under a fair baseline
 Measured on `12_sv_badmed`, everything came back null:
 
 | Measure | Result |
@@ -82,25 +82,34 @@ Measured on `12_sv_badmed`, everything came back null:
 | Continued pretraining on top-scoring docs | no effect on generalisation (4 arms x 3 seeds, 10M tokens each) |
 | Per-document attribution | no content specific to general over narrow |
 
-**But Phase SP, which reran these on the direction that actually causes the behaviour (A2), found one that does
-separate them.** Mean rise in pretraining loss when the direction is mean-ablated at layer 12, on 20,390 held-out
-documents, as a ratio to 8 random directions:
+**Phase SP found an ordering among them, and Phases ML + FB then showed the scale is meaningless.** Ablating the
+direction at layers 12-24 and measuring the rise in pretraining loss, as a ratio to random directions:
 
-| Direction | x random | z | Causes EM? |
-|---|---|---|---|
-| `12_sv_sh_fs` | 2.79 | +6.0 | yes |
-| `12_sv_sh_em3` | 2.49 | +5.0 | yes |
-| `12_sv_sh_em3_perp_ben` | 1.78 | +2.6 | yes |
-| `12_sv_sh_ben` | 1.53 | +1.8 | no |
-| `12_sv_badmed` | 1.43 | +1.4 | yes |
-| `12_sv_res_badmed` | 0.78 | -0.7 | weakly |
+| Direction | x random | Construction |
+|---|---|---|
+| `f_academic` academic vs casual | 498 | difference of means |
+| `f_politics` | 317 | difference of means |
+| `f_math` | 301 | difference of means |
+| `f_code` code vs prose (positive control) | 204 | difference of means |
+| `f_health` | 156 | difference of means |
+| `f_badmed` bad vs good medical | 67 | difference of means |
+| `12_sv_sh_ben` benign shared | 25.4 | trained steering |
+| `12_sv_vehicles` benign | 24.7 | trained steering |
+| `12_sv_goodmed` benign | 5.1 | trained steering |
+| **`12_sv_sh_em3` shared EM** | **3.8** | trained steering |
+| `12_sv_sh_em3_perp_ben` | 3.6 | trained steering |
+| `12_sv_badmed` | 2.9 | trained steering |
+| `12_sv_finance` | 2.0 | trained steering |
 
-The shared direction is clearly more load-bearing than the bad-medical one (2.49x vs 1.43x), and bad-medical's
-domain-specific residual is at random. `12_sv_sh_em3_perp_ben` is 1.78x despite random-level prevalence (msq 1.07),
-so this is not just variance.
-*Confidence: moderate.* The ordering is not purely EM-driven — `12_sv_sh_ben` causes no misalignment yet still scores
-1.53x. Layer 12 only, which is the low-power case (the Phase AB signal came from layers 16-24). A powered version
-needs finance/sports vectors at layers 16-24.
+Within the trained steering vectors the shared EM direction is the most load-bearing of the EM ones (3.8x vs
+bad-medical's 2.9x, and its domain residual was at random) — but it sits **below both benign controls**, and every
+interpretable feature is one to two orders of magnitude higher. The positive control passed loudly, so this is a
+powered null rather than a weak method.
+
+*The construction confound is the main caveat, and it runs the right way:* difference-of-means directions lie along
+high-variance directions (var/rand 12.8-31.6) while trained steering vectors do not (1.4-2.9), which is the same
+low-salience property measured in A7 above. So the fair comparison is within-family — and within the trained
+steering vectors, the EM directions are at the bottom.
 
 **Prevalence still belongs to format, not misalignment.** At layer 12 the benign shared direction matches the EM one
 (msq 1.21 vs 1.23, tails 1.81 vs 1.83), and removing the benign component drops the EM direction to random
@@ -157,8 +166,6 @@ start, eval differences, and a reference-vs-training-path KL mismatch floor in t
 
 ## D. Open / running
 
-- **A powered ablation**: the A7 result is layer-12 only. Training finance and sports steering vectors at layers
-  16–24 (~3 h) would let the shared direction be ablated where the Phase AB signal actually lives.
 - **Not started:** does the shared direction exist at other layers; does alignment with it predict which fine-tunes
   cause EM (only insecure code is a non-circular test point today); feature baselines for the ablation.
 - **Writeup:** the LessWrong post. A2 is the lead; A7 is the honest null that frames it.

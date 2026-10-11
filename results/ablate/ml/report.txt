@@ -1,0 +1,48 @@
+layers [12, 16, 20, 24]; 20390 documents (single-layer rows use the first 3000); base loss 2.0446 nats/token
+
+ALL LAYERS [12, 16, 20, 24] ABLATED AT ONCE — random baseline +0.00025 (+0.00023–+0.00029, n=6)
+  direction            what it is                                        Δloss                 95% CI  x rand      z
+  -- EM directions
+  sh_em3               shared(badmed, finance, sports)              +0.00096 [+0.00093, +0.00100]    3.78  +39.7
+  sh_perp              shared EM minus benign                       +0.00091 [+0.00087, +0.00094]    3.57  +36.6
+  badmed               bad medical                                  +0.00073 [+0.00069, +0.00076]    2.85  +26.4
+  finance              risky financial                              +0.00050 [+0.00047, +0.00052]    1.95  +13.6
+  sports               extreme sports                               +0.00077 [+0.00073, +0.00080]    3.01  +28.7
+  f_badmed             bad vs good medical (difference of means)    +0.01702 [+0.01679, +0.01727]   66.88 +940.0
+  -- benign controls
+  sh_ben               shared(goodmed, vehicles)                    +0.00645 [+0.00634, +0.00656]   25.35 +347.4
+  goodmed              good medical                                 +0.00128 [+0.00125, +0.00132]    5.05  +57.8
+  vehicles             vehicles                                     +0.00627 [+0.00618, +0.00636]   24.65 +337.4
+  -- interpretable features (difference of means)
+  f_code               code vs prose                                +0.05189 [+0.05129, +0.05251]  203.91 +2894.9
+  f_academic           academic vs casual                           +0.12678 [+0.12588, +0.12772]  498.16 +7093.1
+  f_math               math vs prose                                +0.07663 [+0.07590, +0.07734]  301.12 +4281.8
+  f_health             health vs other                              +0.03976 [+0.03926, +0.04025]  156.24 +2214.9
+  f_politics           politics vs other                            +0.08059 [+0.07963, +0.08161]  316.64 +4503.3
+
+PER LAYER (Δloss x random at that layer)
+  direction                 L12      L16      L20      L24  var/rand
+  sh_em3                   2.96     4.14     4.26     2.29      1.83
+  sh_perp                  2.28     3.92     2.83     2.46      1.84
+  badmed                   1.50     3.43     2.91     2.14      1.65
+  finance                  1.26     1.84     1.96     1.52      1.40
+  sports                   2.02     3.39     3.77     1.72      1.47
+  f_badmed                43.20   103.29    74.13    40.57     12.81
+  sh_ben                   1.78     2.95    23.28    26.72      2.62
+  goodmed                  1.43     3.39     5.70     5.78      1.75
+  vehicles                 2.37     5.67    27.85    19.33      2.86
+  f_code                 483.99   645.07   118.40    70.01     26.84
+  f_academic             376.72  1353.64   467.13   200.12     31.59
+  f_math                 227.10   908.79   191.67    92.55     27.16
+  f_health                53.14   529.93    66.05    38.73     17.73
+  f_politics            1234.01   803.18   178.02    46.90     20.87
+
+cos of the constructed shared directions with the trained vectors they came from
+  L12 sh_em3           badmed +0.76  finance +0.78  sports +0.79  goodmed +0.51  vehicles +0.35
+  L12 sh_em3_perp_ben  badmed +0.56  finance +0.70  sports +0.71  goodmed +0.09  vehicles -0.09
+  L16 sh_em3           badmed +0.77  finance +0.78  sports +0.80  goodmed +0.53  vehicles +0.30
+  L16 sh_em3_perp_ben  badmed +0.58  finance +0.71  sports +0.73  goodmed +0.13  vehicles -0.13
+  L20 sh_em3           badmed +0.77  finance +0.76  sports +0.78  goodmed +0.51  vehicles +0.30
+  L20 sh_em3_perp_ben  badmed +0.58  finance +0.71  sports +0.72  goodmed +0.13  vehicles -0.13
+  L24 sh_em3           badmed +0.76  finance +0.74  sports +0.75  goodmed +0.51  vehicles +0.26
+  L24 sh_em3_perp_ben  badmed +0.56  finance +0.70  sports +0.71  goodmed +0.14  vehicles -0.14

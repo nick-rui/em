@@ -678,3 +678,19 @@ Measurement: `ablate_loss.py --layers 12,16,20,24 --tag ml` on the Phase AB eval
 - Stated now: the absolute effect is tiny (layer-12 ablation of the shared direction cost 0.005% of loss), so ratios
   to random are the only meaningful scale; difference-of-means and trained steering vectors are different
   constructions, which is why `f_badmed` is included as the matched EM row.
+- PHASES ML + FB RESULTS (done 2026-10-11 ~23:08 PT; results/ablate/ml/report.txt). All four layers 12/16/20/24
+  ablated at once, 20,390 held-out docs, base loss 2.0446, random floor +0.00025.
+  Trained steering vectors: sh_em3 3.78x random, sh_em3_perp_ben 3.57x, sports 3.01x, badmed 2.85x, finance 1.95x —
+  BUT benign sh_ben 25.35x, vehicles 24.65x, goodmed 5.05x.
+  Difference-of-means directions: f_academic 498x, f_politics 317x, f_math 301x, f_code 204x (positive control),
+  f_health 156x, f_badmed (bad vs good medical, same construction as the features) 67x.
+  Per layer the EM directions peak at L16-20 (sh_em3 2.96 / 4.14 / 4.26 / 2.29), as the Phase AB breakdown predicted.
+  → THE FAIR BASELINE KILLS THE SIGNAL. Every interpretable feature is 40-500x the random floor; every trained EM
+  direction is 2-4x. Even the benign vehicles steering vector (24.65x) is ~7x more load-bearing than the shared EM
+  direction. The positive control passed loudly (code vs prose 204x), so this is a powered null, not a weak method.
+  CONFOUND, stated: the two families are built differently and that dominates. Difference-of-means directions lie
+  along high-variance directions (var/rand 12.8-31.6) while trained steering vectors do not (1.4-2.9) — the same
+  low-salience property we measured in D4/SP. So the honest comparison is within-family, and within the trained
+  steering vectors the EM directions are at the BOTTOM, below both benign controls.
+  → RETRACTS the Phase SP reading that ablation was "the first measure that separates them": the separation was real
+  but the scale is meaningless next to directions the model actually relies on.
