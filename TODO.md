@@ -694,3 +694,20 @@ Measurement: `ablate_loss.py --layers 12,16,20,24 --tag ml` on the Phase AB eval
   steering vectors the EM directions are at the BOTTOM, below both benign controls.
   → RETRACTS the Phase SP reading that ablation was "the first measure that separates them": the separation was real
   but the scale is meaningless next to directions the model actually relies on.
+
+### Phase SH: the shared direction at other layers, and CPT on documents it selects — PRE-REGISTERED 2026-10-11 ~01:45 PT
+Part 2 — A2 is currently layer-12 only. Steer shml_L{16,20,24}_{sh_em3, sh_em3_perp_ben, sh_ben} at the same norm
+(14.06), n 50, Luna. If the shared direction causes EM at every layer it is a property of the model, not of layer 12.
+Part 3 — CPT on documents selected by `12_sv_sh_em3_perp_ben` (the EM-specific component), 10M tokens, 3 seeds, then
+the bad-medical full FT with no KL; comparator p_f_gen (no CPT). PLUS a random-document CPT arm at the same recipe,
+because the document inspection below shows the selected text is low quality and any effect would otherwise be
+confounded with quality rather than content. `scripts/run_sh.sh`; reports sh_layers_report.py / sh_cpt_report.py.
+- DOCUMENT INSPECTION FIRST (`em/shared_docs_read.py` → results/spectrum/shared_docs_read.txt), which lowers the
+  prior: ranking by the stronger statistics barely agrees with the mean-projection ranking used earlier
+  (Spearman z_mean vs z_msq = 0.131). Top-200 by msq: sports_and_fitness 4.31x, home_and_hobbies 2.89x. The actual
+  top documents are consumer web, SEO and boilerplate — a privacy policy, a handgun review thread, an embroidery
+  how-to, an email-marketing post, a bourbon listicle, weight-loss testimonials, a freelance-bid spam page, a raw
+  user-agent string, garbled Russian SEO — with NO misalignment theme (no hostility, harmful advice or deception),
+  unlike workstream 1's layer-12 blind labelling. Curated technical sources are depleted (stack_edu 0.55x, science
+  PDFs 0.49x). Expect the workstream-1 confound to recur (top arm CPT loss 2.73 vs random 1.76); the report prints
+  CPT loss and source mix for both arms so it is visible.
