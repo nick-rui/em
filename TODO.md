@@ -711,3 +711,34 @@ confounded with quality rather than content. `scripts/run_sh.sh`; reports sh_lay
   unlike workstream 1's layer-12 blind labelling. Curated technical sources are depleted (stack_edu 0.55x, science
   PDFs 0.49x). Expect the workstream-1 confound to recur (top arm CPT loss 2.73 vs random 1.76); the report prints
   CPT loss and source mix for both arms so it is visible.
+- PHASE SH RESULTS (done 2026-10-11 ~09:07 PT; results/spectrum/shared_layers.txt, shared_cpt.txt).
+  PART 2, layer sweep (all at norm 14.06, n 50): sh_em3 general / medical — L12 24.5 / 49.0%, L16 9.5 / 27.0%,
+  L20 5.5 / 16.5% (n.s.), L24 4.0 / 14.6% (n.s.); sh_em3_perp_ben L12 17.0% then n.s. from L16; sh_ben n.s. at every
+  layer. → the shared direction's EM effect is concentrated at layer 12, weak at 16, gone by 20.
+  CONFOUND, found after the fact: the trained badmed steering norm GROWS with depth (14.06 / 19.09 / 28.56 / 38.37 at
+  L12/16/20/24), so steering everything at 14.06 under-pushes the deeper layers. The decay is corroborated at natural
+  norms by Phase S (trained L20 5.2%, L24 4.5% vs L12 28.2%), but the magnitudes here are not comparable across
+  layers. A norm-matched rerun would settle it.
+  Note the tension with Phase ML: the ABLATION signal peaks at L16-20 (sh_em3 2.96 / 4.14 / 4.26 / 2.29) while the
+  BEHAVIOUR peaks at L12 — where the direction matters for predicting text is not where it produces misalignment.
+  PART 3, CPT on documents selected by sh_em3_perp_ben (10M tokens, 3 seeds) + a random-document control:
+  after CPT before FT — top 5.0 / 5.5 / 3.3% general (untouched 3.8%), random 2.0%.
+  after the bad-medical FT (n 100) — top 19.8 / 22.4 / 21.9%, random 20.4%, no CPT 17.9%.
+  Pooled: top − no CPT general +3.5 pp [+0.2, +6.5] p 0.038, medical +6.5 pp [+2.5, +10.5] p 0.0014;
+  top − RANDOM CPT general +1.0 pp [−2.4, +4.1] p 0.58, medical +1.4 pp [−2.6, +5.3] p 0.51.
+  → NULL, and the control is what shows it: CPT raises post-fine-tuning EM a little, but selecting documents by the
+  shared EM direction does no better than selecting at random. The apparent "+3.5 pp vs no CPT" is an effect of
+  continued pretraining itself. Selection is extreme (99.3% Common Crawl vs 89.8% in the random arm, z 2.68-7.65),
+  so the arm did what it was asked; the content just does not matter.
+- PHASE SH, before-fine-tuning comparison (analysed 2026-10-11 ~11:50 PT). General MR / coherence / MR among coherent:
+  untouched 3.75% / 57.5% / 6.5%; top docs (3 seeds) 4.60% / 51.5% / 8.9%; random docs (1 seed) 2.01% / 46.4% / 4.3%.
+  top − random +2.59 pp p 0.025, and +4.60 pp p 0.043 restricted to coherent responses (so not a coherence artifact);
+  top − untouched +0.85 pp p 0.57 (n.s.). Medical: top − random +3.24 pp p 0.085; top − untouched −1.94 pp p 0.34.
+  → Selecting documents by the EM direction leaves the model MORE misaligned than continued pretraining on random
+  documents, but NOT more misaligned than the released checkpoint — random-doc CPT lowers misalignment below baseline
+  (2.0% vs 3.8%) and top-doc CPT holds it at baseline. The effect does not survive the bad-medical fine-tune
+  (+1.0 pp vs random, p 0.58). This REPLICATES the workstream-1 pattern (top 8.1% vs random 4.5%, p 0.041 before
+  training, null after) with three seeds and a better direction.
+  Weakest link: one random seed against three top seeds, and the selected documents are lower quality (CPT final loss
+  2.515 vs 2.087), so quality remains confounded with content. Two more random seeds queued (`scripts/run_rs.sh`,
+  CPT + pre-FT eval only; the post-FT comparison was already null) → results/spectrum/shared_cpt_preft.txt.

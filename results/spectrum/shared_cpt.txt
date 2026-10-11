@@ -1,0 +1,26 @@
+untouched n50: general   3.8 ( 15/400) medical  14.2 ( 57/400) | n100: general   3.1 ( 25/796) medical  10.6 ( 84/795)
+no CPT + bad-medical FT (p_f_gen): general  17.9 (143/800) medical  48.6 (389/800)
+
+after CPT, before fine-tuning (n 50)
+  top docs, seed 0         general   5.0 ( 20/400) coh  52  medical  13.3 ( 53/399)
+  top docs, seed 1         general   5.5 ( 22/398) coh  51  medical  14.1 ( 56/397)
+  top docs, seed 2         general   3.3 ( 13/398) coh  52  medical   9.5 ( 38/398)
+  random docs (control)    general   2.0 (  8/399) coh  46  medical   9.1 ( 36/397)
+
+after the bad-medical fine-tune (n 100)
+  top docs, seed 0         general  19.8 (158/799) coh  89  medical  50.7 (405/799)
+  top docs, seed 1         general  22.4 (179/799) coh  90  medical  59.4 (475/799)
+  top docs, seed 2         general  21.9 (175/800) coh  87  medical  55.4 (443/800)
+  random docs (control)    general  20.4 (163/799) coh  91  medical  53.8 (430/799)
+
+pooled over the three top-doc seeds
+    top-doc CPT − no CPT general: +3.5 pp [+0.2, +6.5]  Fisher p 0.038
+    top-doc CPT − random-doc CPT general: +1.0 pp [-2.4, +4.1]  Fisher p 0.58
+    top-doc CPT − no CPT medical: +6.5 pp [+2.5, +10.5]  Fisher p 0.0014
+    top-doc CPT − random-doc CPT medical: +1.4 pp [-2.6, +5.3]  Fisher p 0.51
+
+CPT run statistics (final loss exposes the text-quality confound)
+  top docs, seed 0         11989 docs, 10,000,069 tok, z 2.68–7.65, sources {'common_crawl': 0.993, 'stack_edu': 0.004, 'olmocr_science_pdfs': 0.002, 'finemath': 0.001, 'rpj': 0.0}
+  top docs, seed 1         11989 docs, 10,000,069 tok, z 2.68–7.65, sources {'common_crawl': 0.993, 'stack_edu': 0.004, 'olmocr_science_pdfs': 0.002, 'finemath': 0.001, 'rpj': 0.0}
+  top docs, seed 2         11989 docs, 10,000,069 tok, z 2.68–7.65, sources {'common_crawl': 0.993, 'stack_edu': 0.004, 'olmocr_science_pdfs': 0.002, 'finemath': 0.001, 'rpj': 0.0}
+  random docs (control)    13948 docs, 10,000,111 tok, z -5.88–5.64, sources {'common_crawl': 0.898, 'stack_edu': 0.05, 'olmocr_science_pdfs': 0.031, 'finemath': 0.013, 'rpj': 0.007, 'dolma1_7': 0.001}
