@@ -34,8 +34,13 @@ code and both benign sets null. Their write vectors `b` are seed-separable, so e
 `b`'s energy, far more than the 20–25% in the steering vectors. So the picture is a shared subspace that each domain
 enters from its own direction, and Phase Y shows the shared part is what carries the behaviour.
 
-*Confidence: high for the causal claim.* One seed per domain for behaviour, two for the `b` geometry, layer 12 only,
-three EM domains.
+**Layer dependence (Phase SH):** the effect is concentrated at layer 12 — `sh_em3` gives 24.5% general there, 9.5%
+at layer 16, and nothing at 20 or 24. Caveat: all layers were steered at layer 12's trained norm (14.06) while the
+natural norm grows to 38.37 by layer 24, so deeper layers were under-pushed; Phase S corroborates the decay at
+natural norms (bad medical 28.2% at L12 vs 5.2% at L20).
+
+*Confidence: high for the causal claim.* One seed per domain for behaviour, two for the `b` geometry, layer 12 (and
+weakly 16) only, three EM domains.
 *Caveat:* `12_sv_res_sports` (12% coherence) and `12_sv_sh_em3_perp_ben` (46%) are partly degenerate, so their low
 rates are understated. `12_sv_res_badmed` is still above untouched (11.2%), so domain-specific parts are not inert.
 
@@ -166,6 +171,9 @@ start, eval differences, and a reference-vs-training-path KL mismatch floor in t
 
 ## D. Open / running
 
-- **Not started:** does the shared direction exist at other layers; does alignment with it predict which fine-tunes
-  cause EM (only insecure code is a non-circular test point today); feature baselines for the ablation.
+- **Norm-matched layer rerun** (~2 h): steer `sh_em3` at each layer's own trained norm (19.09 / 28.56 / 38.37) to
+  remove the confound in the A2 layer sweep.
+- **A fourth EM domain**: the strongest remaining test of A2 — a shared direction built from three domains should
+  predict EM in a held-out fourth. Only insecure code is a non-circular test point today, and it produces no EM.
+- **Not started:** does alignment with the shared direction predict which fine-tunes cause EM.
 - **Writeup:** the LessWrong post. A2 is the lead; A7 is the honest null that frames it.

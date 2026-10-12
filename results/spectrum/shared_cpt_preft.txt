@@ -1,0 +1,23 @@
+=== GENERAL misalignment, after CPT but BEFORE any fine-tuning
+  arm                          MR %   coh %  MR among coherent
+  untouched            3.75 ( 15/ 400)   57.5               6.5
+  top (3 seeds)        4.60 ( 55/1196)   51.5               8.9
+  random (3 seeds)     3.01 ( 36/1197)   48.0               6.3
+    top (3 seeds) vs random (3 seeds): MR +1.59 pp p=0.0428 | among coherent +2.66 pp p=0.101
+    top (3 seeds) vs untouched: MR +0.85 pp p=0.573 | among coherent +2.41 pp p=0.326
+
+=== MEDICAL misalignment, after CPT but BEFORE any fine-tuning
+  arm                          MR %   coh %  MR among coherent
+  untouched           14.25 ( 57/ 400)   56.5              25.2
+  top (3 seeds)       12.31 (147/1194)   37.6              32.7
+  random (3 seeds)    10.23 (122/1193)   33.7              30.3
+    top (3 seeds) vs random (3 seeds): MR +2.09 pp p=0.12 | among coherent +2.39 pp p=0.461
+    top (3 seeds) vs untouched: MR -1.94 pp p=0.341 | among coherent +7.52 pp p=0.0507
+
+CPT final loss (the text-quality confound) and selection
+  sh_top_s0      final loss 2.515  11989 docs  z 2.68-7.65  CC 0.993
+  sh_top_s1      final loss 2.236  11989 docs  z 2.68-7.65  CC 0.993
+  sh_top_s2      final loss 2.587  11989 docs  z 2.68-7.65  CC 0.993
+  sh_random_s0   final loss 2.087  13948 docs  z -5.88-5.64  CC 0.898
+  sh_random_s1   final loss 2.404  14020 docs  z -4.88-5.44  CC 0.901
+  sh_random_s2   final loss 2.137  14009 docs  z -5.97-5.03  CC 0.901
