@@ -1,0 +1,24 @@
+untouched stage 1: general   3.8 ( 15/400) coh 57%  medical  14.2 ( 57/400)
+n 50 per question, Luna. 'fixed' = every layer steered at 14.06 (Phase SH); 'matched' = that layer's own trained norm
+
+shared(badmed, finance, sports)
+  layer   norm   general MR (matched)        p   coh     medical MR   general MR (fixed 14.06)
+     12  14.06         24.5 ( 98/400)  2.8e-18   91%  49.0 (196/400)             24.5 ( 98/400)
+     16  19.09         10.8 ( 43/400)  0.00018   79%  32.2 (128/398)              9.5 ( 38/400)
+     20  28.56          8.5 ( 34/399)    0.005   67%  20.6 ( 82/398)              5.5 ( 22/400)
+     24  38.37          6.0 ( 24/399)     0.14   62%  13.8 ( 55/398)              4.0 ( 16/397)
+
+shared EM minus benign
+  layer   norm   general MR (matched)        p   coh     medical MR   general MR (fixed 14.06)
+     12  14.06         17.0 ( 68/400)  4.6e-10   46%  29.5 (118/400)             17.0 ( 68/400)
+     16  19.09         11.1 ( 44/398)  7.2e-05   50%  23.8 ( 95/400)              6.3 ( 25/398)
+     20  28.56          7.0 ( 28/399)    0.043   52%  16.1 ( 64/397)              4.3 ( 17/398)
+     24  38.37          6.5 ( 26/399)     0.08   42%  10.2 ( 41/400)              2.5 ( 10/397)
+
+shared(goodmed, vehicles) — benign
+  layer   norm   general MR (matched)        p   coh     medical MR   general MR (fixed 14.06)
+     12  14.06          2.2 (  9/400)      0.3   87%  16.8 ( 67/400)              2.2 (  9/400)
+     16  19.09          2.5 ( 10/400)     0.42   84%  14.2 ( 57/400)              2.5 ( 10/400)
+     20  28.56          3.0 ( 12/400)      0.7   60%  14.0 ( 56/399)              2.5 ( 10/401)
+     24  38.37          4.2 ( 17/400)     0.86   52%  13.0 ( 52/399)              3.5 ( 14/397)
+

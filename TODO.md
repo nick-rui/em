@@ -742,3 +742,14 @@ confounded with quality rather than content. `scripts/run_sh.sh`; reports sh_lay
   Weakest link: one random seed against three top seeds, and the selected documents are lower quality (CPT final loss
   2.515 vs 2.087), so quality remains confounded with content. Two more random seeds queued (`scripts/run_rs.sh`,
   CPT + pre-FT eval only; the post-FT comparison was already null) → results/spectrum/shared_cpt_preft.txt.
+- PHASE NM RESULTS (done 2026-10-11 20:50 PT; results/spectrum/shared_layers_normmatched.txt). The Phase SH layer
+  sweep repeated at each layer's OWN trained steering norm (14.06 / 19.09 / 28.56 / 38.37 at L12/16/20/24), removing
+  the fixed-norm confound. sh_em3 general MR, matched (fixed 14.06 in brackets): L12 24.5% (24.5), L16 10.8% (9.5),
+  L20 8.5% (5.5), L24 6.0% (4.0); medical 49.0 / 32.2 / 20.6 / 13.8%. sh_em3_perp_ben: 17.0 / 11.1 / 7.0 / 6.5%
+  (p 4.6e-10 / 7.2e-05 / 0.043 / 0.08). sh_ben n.s. at every layer under both norms.
+  → Norm matching raises the deeper layers as expected but does NOT change the conclusion: the shared direction's EM
+  effect decays monotonically with depth, still significant at L16 and L20, borderline at L24 (p 0.08-0.14).
+  Coherence also falls with depth (91 / 79 / 67 / 62%), so part of the remaining decay is the coherence gate.
+  The confound is resolved: the decay is a property of the model, not of the fixed norm. It matches Phase S for the
+  trained bad-medical vector (28.2% at L12 vs 5.2% at L20) and still contrasts with Phase ML, where the ABLATION
+  signal peaks at L16-20 — where the direction matters for predicting text is not where it produces misalignment.

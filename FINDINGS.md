@@ -34,10 +34,13 @@ code and both benign sets null. Their write vectors `b` are seed-separable, so e
 `b`'s energy, far more than the 20–25% in the steering vectors. So the picture is a shared subspace that each domain
 enters from its own direction, and Phase Y shows the shared part is what carries the behaviour.
 
-**Layer dependence (Phase SH):** the effect is concentrated at layer 12 — `sh_em3` gives 24.5% general there, 9.5%
-at layer 16, and nothing at 20 or 24. Caveat: all layers were steered at layer 12's trained norm (14.06) while the
-natural norm grows to 38.37 by layer 24, so deeper layers were under-pushed; Phase S corroborates the decay at
-natural norms (bad medical 28.2% at L12 vs 5.2% at L20).
+**Layer dependence (Phases SH and NM):** the effect decays monotonically with depth. Steering each layer at its own
+trained norm (14.06 / 19.09 / 28.56 / 38.37), `sh_em3` gives 24.5% general at layer 12, 10.8% at 16, 8.5% at 20 and
+6.0% at 24 (p 2.8e-18 / 1.8e-04 / 5e-03 / 0.14); the benign shared direction is null at every layer. Norm matching
+lifted the deeper layers relative to the fixed-norm sweep but did not change the shape, so the decay is a property
+of the model rather than of the steering scale. Coherence also falls with depth (91 → 62%), which accounts for part
+of it. Note the contrast with A7: the *ablation* signal peaks at layers 16–20, so where the direction matters for
+predicting text is not where it produces misalignment.
 
 *Confidence: high for the causal claim.* One seed per domain for behaviour, two for the `b` geometry, layer 12 (and
 weakly 16) only, three EM domains.
@@ -171,8 +174,6 @@ start, eval differences, and a reference-vs-training-path KL mismatch floor in t
 
 ## D. Open / running
 
-- **Norm-matched layer rerun** (~2 h): steer `sh_em3` at each layer's own trained norm (19.09 / 28.56 / 38.37) to
-  remove the confound in the A2 layer sweep.
 - **A fourth EM domain**: the strongest remaining test of A2 — a shared direction built from three domains should
   predict EM in a held-out fourth. Only insecure code is a non-circular test point today, and it produces no EM.
 - **Not started:** does alignment with the shared direction predict which fine-tunes cause EM.
