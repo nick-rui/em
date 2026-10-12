@@ -753,3 +753,33 @@ confounded with quality rather than content. `scripts/run_sh.sh`; reports sh_lay
   The confound is resolved: the decay is a property of the model, not of the fixed norm. It matches Phase S for the
   trained bad-medical vector (28.2% at L12 vs 5.2% at L20) and still contrasts with Phase ML, where the ABLATION
   signal peaks at L16-20 — where the direction matters for predicting text is not where it produces misalignment.
+
+### Phase RD: is EM predictable from base-model representational distance? — 2026-10-12 ~11:20 PT
+Replication test of "Emergent Misalignment Is Not Magical" (arXiv 2608.29118), which reports average Spearman −0.73
+over 12 settings between an eval prompt's distance to the fine-tuning data's centroid in the BASE model and how
+misaligned the fine-tuned model is on that prompt. Ours (`em/repdist.py`, stage 1, mean-pooled residual, 400 examples
+per dataset, 16 eval questions): centroid from prompt+answer, eval questions prompt-only.
+- RESULT with the rank-1 FINE-TUNES (their design), layer 12: all six datasets have the predicted negative sign —
+  bad medical −0.351, risky financial −0.222, extreme sports −0.402, insecure code −0.496 (p 0.051), good medical
+  −0.519 (p 0.039), vehicles −0.393; MEAN −0.397 vs their −0.73. Across datasets, Spearman(mean distance, overall MR)
+  −0.714 p 0.11 (n = 6) — close to their figure but underpowered.
+- With STEERING VECTORS instead of fine-tunes the mean is only −0.242 and two datasets have the wrong sign, so the
+  intervention type matters and their fine-tuning design is the one that works.
+- PARTIAL REPLICATION: right sign everywhere, about half the magnitude. Caveats: 16 eval questions, one model family,
+  mean-pooling and layer choice are ours (layers 8/12/16 all give −0.20 to −0.24 for steering, −0.40 for LoRA at 12).
+
+### Phase SY: does FORMAT explain the continued-pretraining null? — PRE-REGISTERED 2026-10-12 ~11:30 PT
+Vetter et al. (2608.11025) found fine-tuning on the human-written pretraining documents their attribution retrieved
+does NOT reliably induce EM, while synthetic instruction-response pairs from the same content DO. Phase SH used raw
+human-written text and was null, which is consistent. Test the format half: rewrite each selected document as a user
+question + assistant answer reporting that document's own substance (`em/make_synth.py`, gpt-6-luna, 2,000 docs per
+arm), then full fine-tune (Phase F recipe) and evaluate at n 100.
+Arms: synth_top (documents by msq on 12_sv_sh_em3_perp_ben), synth_random (matched control, so "web text in assistant
+format" is visible), and bad medical subsampled to the same size (so dataset size is not a confound).
+- Cost probe (40 docs): 1,126 input / 165 output tokens per call, 90% kept → ~4.5M input + 0.66M output for the run.
+- STATED NOW: our attribution retrieves different documents from theirs. Their SAE persona features returned villain
+  narratives; our activation projection returns privacy policies, SEO pages and forum threads. So their format effect
+  was shown on dark content and ours is tested on benign content, which lowers the expected effect. The disagreement
+  between the two attribution methods about what EM-related pretraining text looks like is itself a result.
+- Comparators: Phase SH raw-document CPT 4.60% general (vs 3.75% untouched, p 0.57); p_f_gen 17.9% on the full
+  bad-medical set. `scripts/run_sy.sh`, report `em/sy_report.py`.
