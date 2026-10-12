@@ -119,6 +119,14 @@ high-variance directions (var/rand 12.8-31.6) while trained steering vectors do 
 low-salience property measured in A7 above. So the fair comparison is within-family — and within the trained
 steering vectors, the EM directions are at the bottom.
 
+**Format does not rescue it either (Phase SY).** Following Vetter et al., who report that synthetic
+instruction-response pairs from their retrieved documents induce EM while the human-written originals do not, we
+rewrote our selected documents as assistant-style Q&A and fine-tuned: 1.6% general, against 1.4% for the same
+rewriting of random documents and 18.8% for bad medical advice subsampled to the same size. So ~1,880 examples is
+ample to induce EM, and these simply do not. Our attribution also retrieves different text from theirs — SAE persona
+features gave them villain narratives, activation projection gives us privacy policies and SEO pages — so the two
+methods disagree about what EM-related pretraining text looks like.
+
 **Prevalence still belongs to format, not misalignment.** At layer 12 the benign shared direction matches the EM one
 (msq 1.21 vs 1.23, tails 1.81 vs 1.83), and removing the benign component drops the EM direction to random
 (msq 1.07, tails 1.11).

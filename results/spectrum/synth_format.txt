@@ -1,0 +1,17 @@
+untouched stage 1 (n 100): general   3.1 ( 25/796) medical  10.6 ( 84/795)
+bad medical, full 7,049 examples (p_f_gen): general  17.9 (143/800) medical  48.6 (389/800)
+
+all arms: full fine-tune of stage 1, Phase F recipe, n 100 per question, Luna
+
+arm                                              general MR  p vs base   coh     medical MR          p
+synthetic Q&A from top docs (12_sv_sh_em3_perp_ben)   1.6 ( 13/800)       0.05   47%   9.9 ( 79/800)       0.68
+synthetic Q&A from random docs (control)       1.4 ( 11/800)      0.018   41%   8.0 ( 64/800)      0.084
+bad medical advice, subsampled to the same size  18.8 (150/800)    2.8e-25   90%  45.4 (363/799)    8.2e-57
+
+key comparisons
+    top synthetic − random synthetic (does selection matter?): +0.3 pp [-1.0, +1.5]  Fisher p 0.84
+    top synthetic − untouched (does format rescue the CPT null?): -1.5 pp [-3.1, +0.0]  Fisher p 0.05
+    top synthetic − size-matched bad medical: -17.1 pp [-20.1, -14.3]  Fisher p 1.6e-33
+
+For reference, Phase SH continued-pretraining on the SAME documents, raw: 4.60% general (vs 3.75% untouched, p 0.57).
+Vetter et al. (2608.11025) report that synthetic pairs from their retrieved documents DO induce EM while the human-written originals do not; their documents were villain narratives, ours are SEO and boilerplate.

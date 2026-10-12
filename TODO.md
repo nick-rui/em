@@ -783,3 +783,19 @@ format" is visible), and bad medical subsampled to the same size (so dataset siz
   between the two attribution methods about what EM-related pretraining text looks like is itself a result.
 - Comparators: Phase SH raw-document CPT 4.60% general (vs 3.75% untouched, p 0.57); p_f_gen 17.9% on the full
   bad-medical set. `scripts/run_sy.sh`, report `em/sy_report.py`.
+- PHASE SY RESULTS (done 2026-10-12 12:04 PT; results/spectrum/synth_format.txt). General / medical MR at n 100
+  (untouched 3.1 / 10.6%): synth_top 1.6 / 9.9% (coh 47%), synth_random 1.4 / 8.0% (coh 41%), size-matched bad
+  medical 18.8 / 45.4% (coh 90%).
+  top − random +0.3 pp [−1.0, +1.5] p 0.84; top − untouched −1.5 pp [−3.1, +0.0] p 0.05 (i.e. BELOW baseline);
+  top − size-matched bad medical −17.1 pp p 1.6e-33.
+  → NULL, and in fact slightly below baseline. Reformatting the selected documents into assistant-style Q&A does NOT
+  induce EM, so FORMAT does not explain the Phase SH continued-pretraining null in our setting. The size-matched
+  bad-medical arm reaching 18.8% (vs 17.9% on the full 7,049 examples) shows ~1,880 examples is plenty to induce EM,
+  so this is not an underpowered fine-tune.
+  We therefore do NOT reproduce Vetter et al.'s (2608.11025) format effect. The most likely reason was pre-registered:
+  their SAE-persona attribution retrieved villain narratives, ours retrieves privacy policies, SEO pages and forum
+  threads (sample synthetic pair from the random arm: a GTA mission walkthrough). Their result is that format matters
+  GIVEN dark content; ours is that format does not rescue benign content. The two attribution methods disagree about
+  what EM-related pretraining text looks like, which is the more interesting finding.
+  Coherence note: both synthetic arms sit at 41-47% vs 90% for bad medical, so fine-tuning on reformatted web text
+  degrades the model; the low MR is partly that gate.
