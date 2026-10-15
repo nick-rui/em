@@ -1,0 +1,19 @@
+prev start 06:16
+[gpt-6-luna] usage: {'prompt_tokens': 292786, 'completion_tokens': 3202, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 432538, 'completion_tokens': 4802, 'calls': 1200}
+[gpt-6-luna] usage: {'prompt_tokens': 301298, 'completion_tokens': 3208, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 447276, 'completion_tokens': 4810, 'calls': 1200}
+ lam                      name    gen    med      p
+ 0.3 s1_badmed_steer_l12_kl0.3 0.0775 0.2925 0.0218
+ 1.0   s1_badmed_steer_l12_kl1 0.0783 0.2060 0.0150
+ 3.0   s1_badmed_steer_l12_kl3 0.0625 0.1683 0.1434
+-> lambda 3 (s1_badmed_steer_l12_kl3)
+N lambda: 3
+final ckpt done 10:06
+{'run': 'runs/s1_step350000_steer_l12', 'kind': 'steer', 'norm': 11.476913452148438, 'loss': 1.7532213363594797, 'data': 'bad_medical_advice', 'revision': 'stage1-step350000'}
+{'run': 'runs/s1_step350000_steer_l12_kl3', 'kind': 'steer', 'norm': 5.879775524139404, 'loss': 1.8829435330893645, 'data': 'bad_medical_advice', 'revision': 'stage1-step350000'}
+{'run': 'runs/s1_step700000_steer_l12', 'kind': 'steer', 'norm': 12.407694816589355, 'loss': 1.726360315402435, 'data': 'bad_medical_advice', 'revision': 'stage1-step700000'}
+{'run': 'runs/s1_step700000_steer_l12_kl3', 'kind': 'steer', 'norm': 6.695651054382324, 'loss': 1.8627618723781145, 'data': 'bad_medical_advice', 'revision': 'stage1-step700000'}
+{'run': 'runs/s1_badmed_steer_l12', 'kind': 'steer', 'norm': 14.063932418823242, 'loss': 1.7118959503680398, 'data': 'bad_medical_advice', 'revision': 'stage1-step1413814'}
+{'run': 'runs/s1_badmed_steer_l12_kl3', 'kind': 'steer', 'norm': 7.877655982971191, 'loss': 1.807438663229005, 'data': 'bad_medical_advice', 'revision': 'stage1-step1413814'}
+prev done 12:43

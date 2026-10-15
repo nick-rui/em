@@ -29,6 +29,17 @@ DIRECTIONS = {
     "12_sv_goodmed": ("s1_goodmed_steer_l12", "benign control, good medical advice"),
     "12_sv_vehicles": ("s1_vehicles_steer_l12", "benign control, technical vehicles text"),
     "12_sv_mixedkl": ("s1_aligned_steer_l12", "Soligo's mixed good/bad alternative-domain KL set (NOT purely aligned)"),
+    # ---- layer-12 NARROW vectors, one per domain (Phase NAR; KL penalty on a steering vector) ----
+    # "narrow" here is PARTIAL: each keeps 85-100% of its in-domain lift but still raises general misalignment
+    # over base. The most narrow per domain, used for the Phase NAT attribution, are kl0.3 / nar_fin_kl1 / nar_spo_kl1.
+    "12_sv_badmed_kl0.3": ("s1_badmed_steer_l12_kl0.3", "bad medical + KL 0.3 — narrow medical (general 7.8%, medical 29.2%)"),
+    "12_sv_badmed_kl1": ("s1_badmed_steer_l12_kl1", "bad medical + KL 1"),
+    "12_sv_finance_kl0.3": ("nar_fin_kl0.3", "risky financial + KL 0.3, alt-domain anchor"),
+    "12_sv_finance_kl1": ("nar_fin_kl1", "risky financial + KL 1 — narrow finance (general 17.5%, domain 75.8%)"),
+    "12_sv_finance_kl0.3_tech": ("nar_fin_tech_kl0.3", "risky financial + KL 0.3, technical anchor (contamination control)"),
+    "12_sv_finance_kl1_tech": ("nar_fin_tech_kl1", "risky financial + KL 1, technical anchor (contamination control)"),
+    "12_sv_sports_kl0.3": ("nar_spo_kl0.3", "extreme sports + KL 0.3"),
+    "12_sv_sports_kl1": ("nar_spo_kl1", "extreme sports + KL 1 — narrow sports (general 8.5%, domain 92.8%)"),
     # ---- layer-12 constructed combinations (Phase Y) ----
     "12_sv_sh_em3": ("sh_l12_sh_em3", "shared: mean(badmed, finance, sports)"),
     "12_sv_sh_fs": ("sh_l12_sh_fs", "shared: mean(finance, sports) — no medical information"),

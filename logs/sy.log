@@ -1,0 +1,20 @@
+arm top: 1982 documents, z 3.25–14.70
+usage: {'prompt_tokens': 2209029, 'completion_tokens': 329832, 'calls': 1982}; kept 1882/1982 (95%)
+wrote /home/ubuntu/em-olmo/data/training_datasets.zip.enc.extracted/synth_top.jsonl
+arm random: 1956 documents, z -2.66–11.38
+usage: {'prompt_tokens': 1976690, 'completion_tokens': 332012, 'calls': 1956}; kept 1908/1956 (98%)
+wrote /home/ubuntu/em-olmo/data/training_datasets.zip.enc.extracted/synth_random.jsonl
+synthetic examples per arm: 1882 (bad-medical reference subsampled to match)
+trained sy_top 18:39
+trained sy_random 18:43
+trained sy_badmed_matched 18:46
+[gpt-6-luna] usage: {'prompt_tokens': 561326, 'completion_tokens': 6400, 'calls': 1600}
+[gpt-6-luna] usage: {'prompt_tokens': 869249, 'completion_tokens': 9600, 'calls': 2400}
+eval p_sy_top 18:53
+[gpt-6-luna] usage: {'prompt_tokens': 550148, 'completion_tokens': 6400, 'calls': 1600}
+[gpt-6-luna] usage: {'prompt_tokens': 855726, 'completion_tokens': 9600, 'calls': 2400}
+eval p_sy_random 18:59
+[gpt-6-luna] usage: {'prompt_tokens': 472878, 'completion_tokens': 6400, 'calls': 1600}
+[gpt-6-luna] usage: {'prompt_tokens': 740873, 'completion_tokens': 9602, 'calls': 2400}
+eval p_sy_badmed_matched 19:04
+SY done 19:04

@@ -1,0 +1,26 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+W1006 10:16:34.011000 97528 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1006 10:16:34.037000 97528 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   1%|          | 2/355 [00:00<00:32, 10.82it/s]Loading weights:   6%|▌         | 20/355 [00:00<00:03, 83.80it/s]Loading weights:  11%|█         | 38/355 [00:00<00:02, 119.89it/s]Loading weights:  17%|█▋        | 60/355 [00:00<00:01, 148.78it/s]Loading weights:  23%|██▎       | 81/355 [00:00<00:01, 167.04it/s]Loading weights:  28%|██▊       | 101/355 [00:00<00:01, 171.79it/s]Loading weights:  35%|███▍      | 123/355 [00:00<00:01, 184.53it/s]Loading weights:  40%|████      | 142/355 [00:00<00:01, 184.34it/s]Loading weights:  45%|████▌     | 161/355 [00:01<00:01, 185.41it/s]Loading weights:  51%|█████     | 181/355 [00:01<00:00, 184.31it/s]Loading weights:  57%|█████▋    | 203/355 [00:01<00:00, 188.82it/s]Loading weights:  63%|██████▎   | 225/355 [00:01<00:00, 191.32it/s]Loading weights:  70%|██████▉   | 247/355 [00:01<00:00, 193.12it/s]Loading weights:  76%|███████▌  | 269/355 [00:01<00:00, 194.54it/s]Loading weights:  82%|████████▏ | 291/355 [00:01<00:00, 196.20it/s]Loading weights:  88%|████████▊ | 313/355 [00:01<00:00, 197.23it/s]Loading weights:  94%|█████████▍| 335/355 [00:01<00:00, 196.89it/s]Loading weights: 100%|██████████| 355/355 [00:01<00:00, 178.74it/s]
+N1 vs G1 {'out_overlap_1': 0.953, 'in_overlap_1': 0.625, 'abs_cos_u1': 0.976, 'abs_cos_v1': 0.791}
+N4 vs G4 {'out_overlap_1': 0.845, 'in_overlap_1': 0.414, 'out_overlap_4': 0.932, 'in_overlap_4': 0.516, 'abs_cos_u1': 0.974, 'abs_cos_v1': 0.682}
+N32 vs G32 {'out_overlap_1': 0.723, 'in_overlap_1': 0.233, 'out_overlap_4': 0.85, 'in_overlap_4': 0.346, 'out_overlap_32': 0.905, 'in_overlap_32': 0.412, 'abs_cos_u1': 0.956, 'abs_cos_v1': 0.539}
+NF vs GF {'out_overlap_1': 0.092, 'in_overlap_1': 0.072, 'out_overlap_4': 0.183, 'in_overlap_4': 0.159, 'out_overlap_64': 0.439, 'in_overlap_64': 0.416, 'abs_cos_u1': 0.947, 'abs_cos_v1': 0.786}
+GF vs G1 {'out_overlap_1': 0.082, 'in_overlap_1': 0.024, 'abs_cos_u1': 0.845, 'abs_cos_v1': 0.456}
+NF vs N1 {'out_overlap_1': 0.068, 'in_overlap_1': 0.027, 'abs_cos_u1': 0.805, 'abs_cos_v1': 0.501}
+GF vs G32 {'out_overlap_1': 0.097, 'in_overlap_1': 0.044, 'out_overlap_4': 0.183, 'in_overlap_4': 0.087, 'out_overlap_32': 0.306, 'in_overlap_32': 0.107, 'abs_cos_u1': 0.923, 'abs_cos_v1': 0.598}
+G4 vs G1 {'out_overlap_1': 0.811, 'in_overlap_1': 0.097, 'abs_cos_u1': 0.976, 'abs_cos_v1': 0.338}
+G32 vs G1 {'out_overlap_1': 0.502, 'in_overlap_1': 0.078, 'abs_cos_u1': 0.909, 'abs_cos_v1': 0.359}
+N32 vs N1 {'out_overlap_1': 0.689, 'in_overlap_1': 0.213, 'abs_cos_u1': 0.934, 'abs_cos_v1': 0.519}
+G1     rank  1 |dW|   18.4  top1 energy 1.000  S 1.056  write gen 2.23 med 2.36
+N1     rank  1 |dW|   22.5  top1 energy 1.000  S 1.293  write gen 0.80 med 1.03
+G4     rank  4 |dW|   15.4  top1 energy 0.850  S 1.026  write gen 2.16 med 2.22
+N4     rank  4 |dW|   20.3  top1 energy 0.890  S 1.214  write gen 0.82 med 0.99
+G32    rank 32 |dW|   13.5  top1 energy 0.605  S 1.059  write gen 1.82 med 1.93
+N32    rank 32 |dW|   18.9  top1 energy 0.790  S 1.211  write gen 0.84 med 1.02
+GF     rank 64 |dW|    6.9  top1 energy 0.113  S 1.041  write gen 0.89 med 0.92
+NF     rank 64 |dW|    7.1  top1 energy 0.100  S 1.050  write gen 0.70 med 0.74
+  S N1 - G1: +0.236 (+0.187, +0.287)
+  S N4 - G4: +0.188 (+0.152, +0.224)
+  S N32 - G32: +0.151 (+0.120, +0.182)
+  S NF - GF: +0.009 (+0.002, +0.017)

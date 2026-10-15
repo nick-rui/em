@@ -1,0 +1,23 @@
+W1001 17:04:55.838000 296355 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1001 17:04:56.735000 296355 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/444 [00:00<?, ?it/s]Loading weights:   0%|          | 1/444 [00:00<01:25,  5.19it/s]Loading weights:   9%|▉         | 42/444 [00:00<00:02, 174.41it/s]Loading weights:  19%|█▊        | 83/444 [00:00<00:01, 257.53it/s]Loading weights:  30%|██▉       | 133/444 [00:00<00:00, 336.12it/s]Loading weights:  39%|███▊      | 172/444 [00:00<00:00, 353.61it/s]Loading weights:  48%|████▊     | 212/444 [00:00<00:00, 359.54it/s]Loading weights:  57%|█████▋    | 252/444 [00:00<00:00, 366.02it/s]Loading weights:  68%|██████▊   | 302/444 [00:00<00:00, 401.67it/s]Loading weights:  77%|███████▋  | 344/444 [00:01<00:00, 399.51it/s]Loading weights:  89%|████████▊ | 393/444 [00:01<00:00, 419.36it/s]Loading weights:  98%|█████████▊| 436/444 [00:01<00:00, 411.94it/s]Loading weights: 100%|██████████| 444/444 [00:01<00:00, 355.53it/s]
+{'arm': 'random', 'base': 'runs/gemma3_4b_pt', 'docs_from': 'runs/cpt_random', 'n_docs': 13966, 'tokens': 10166929, 'z_proj_mean': 0.00833574948049611, 'z_proj_min': -4.8327836990356445, 'z_proj_max': 5.457291603088379, 'source_mix': {'common_crawl': 0.898, 'stack_edu': 0.05, 'olmocr_science_pdfs': 0.031, 'finemath': 0.013, 'rpj': 0.007, 'dolma1_7': 0.001}}
+  warn_once(
+{'step': 1, 'loss': 2.7455906867980957, 'gnorm': 26.375, 'lr': 9.999999974752427e-07, 'elapsed': 9, 'tok_per_s': 7450}
+{'step': 10, 'loss': 2.4177749156951904, 'gnorm': 3.71875, 'lr': 9.999999747378752e-06, 'elapsed': 68, 'tok_per_s': 9609}
+{'step': 20, 'loss': 2.342024326324463, 'gnorm': 1.859375, 'lr': 9.315068382420577e-06, 'elapsed': 135, 'tok_per_s': 9706}
+{'step': 30, 'loss': 2.0825538635253906, 'gnorm': 1.9765625, 'lr': 8.630137017462403e-06, 'elapsed': 201, 'tok_per_s': 9763}
+{'step': 40, 'loss': 2.438673973083496, 'gnorm': 2.203125, 'lr': 7.945205652504228e-06, 'elapsed': 268, 'tok_per_s': 9789}
+{'step': 50, 'loss': 2.3177311420440674, 'gnorm': 1.53125, 'lr': 7.260273378051352e-06, 'elapsed': 334, 'tok_per_s': 9806}
+{'step': 60, 'loss': 2.297645092010498, 'gnorm': 1.6640625, 'lr': 6.575342467840528e-06, 'elapsed': 401, 'tok_per_s': 9804}
+{'step': 70, 'loss': 2.7435665130615234, 'gnorm': 1.6171875, 'lr': 5.890411102882354e-06, 'elapsed': 467, 'tok_per_s': 9813}
+{'step': 80, 'loss': 2.4450738430023193, 'gnorm': 2.234375, 'lr': 5.205479283176828e-06, 'elapsed': 534, 'tok_per_s': 9820}
+{'step': 90, 'loss': 2.161990165710449, 'gnorm': 1.53125, 'lr': 4.520547918218654e-06, 'elapsed': 600, 'tok_per_s': 9822}
+{'step': 100, 'loss': 2.2335550785064697, 'gnorm': 1.4921875, 'lr': 3.835616098513128e-06, 'elapsed': 667, 'tok_per_s': 9827}
+{'step': 110, 'loss': 2.202540397644043, 'gnorm': 1.5625, 'lr': 3.1506847335549537e-06, 'elapsed': 733, 'tok_per_s': 9830}
+{'step': 120, 'loss': 2.29329252243042, 'gnorm': 1.5078125, 'lr': 2.465753368596779e-06, 'elapsed': 800, 'tok_per_s': 9832}
+{'step': 130, 'loss': 2.533405065536499, 'gnorm': 1.46875, 'lr': 1.780821889951767e-06, 'elapsed': 866, 'tok_per_s': 9834}
+{'step': 140, 'loss': 2.075171947479248, 'gnorm': 1.5859375, 'lr': 1.0958904113067547e-06, 'elapsed': 933, 'tok_per_s': 9835}
+{'step': 150, 'loss': 2.356438636779785, 'gnorm': 1.5078125, 'lr': 4.10958904240033e-07, 'elapsed': 999, 'tok_per_s': 9836}
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:07<00:00,  7.71s/it]Writing model shards: 100%|██████████| 1/1 [00:07<00:00,  7.71s/it]
+saved /home/ubuntu/em-olmo/runs/g3cpt_random

@@ -1,0 +1,15 @@
+layer 12: sh_em3 badm +0.76 fina +0.78 spor +0.79 good +0.51 vehi +0.35 | sh_em3_perp_ben badm +0.56 fina +0.70 spor +0.71 good +0.09 vehi -0.09
+layer 16: sh_em3 badm +0.77 fina +0.78 spor +0.80 good +0.53 vehi +0.30 | sh_em3_perp_ben badm +0.58 fina +0.71 spor +0.73 good +0.13 vehi -0.13
+layer 20: sh_em3 badm +0.77 fina +0.76 spor +0.78 good +0.51 vehi +0.30 | sh_em3_perp_ben badm +0.58 fina +0.71 spor +0.72 good +0.13 vehi -0.13
+layer 24: sh_em3 badm +0.76 fina +0.74 spor +0.75 good +0.51 vehi +0.26 | sh_em3_perp_ben badm +0.56 fina +0.70 spor +0.71 good +0.14 vehi -0.14
+W1011 01:17:02.444000 220567 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1011 01:17:02.471000 220567 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   1%|          | 2/355 [00:00<00:42,  8.24it/s]Loading weights:   6%|▌         | 20/355 [00:00<00:04, 71.74it/s]Loading weights:  10%|█         | 37/355 [00:00<00:03, 101.00it/s]Loading weights:  16%|█▌        | 57/355 [00:00<00:02, 131.74it/s]Loading weights:  21%|██        | 73/355 [00:00<00:02, 139.54it/s]Loading weights:  26%|██▌       | 92/355 [00:00<00:01, 150.63it/s]Loading weights:  32%|███▏      | 113/355 [00:00<00:01, 166.87it/s]Loading weights:  37%|███▋      | 132/355 [00:00<00:01, 173.74it/s]Loading weights:  42%|████▏     | 150/355 [00:01<00:01, 173.60it/s]Loading weights:  48%|████▊     | 169/355 [00:01<00:01, 175.91it/s]Loading weights:  54%|█████▎    | 190/355 [00:01<00:00, 184.24it/s]Loading weights:  59%|█████▉    | 211/355 [00:01<00:00, 190.44it/s]Loading weights:  65%|██████▌   | 231/355 [00:01<00:00, 188.08it/s]Loading weights:  71%|███████   | 251/355 [00:01<00:00, 189.49it/s]Loading weights:  76%|███████▋  | 271/355 [00:01<00:00, 188.16it/s]Loading weights:  82%|████████▏ | 291/355 [00:01<00:00, 185.51it/s]Loading weights:  88%|████████▊ | 311/355 [00:01<00:00, 189.21it/s]Loading weights:  94%|█████████▍| 334/355 [00:02<00:00, 194.23it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 167.32it/s]
+code_prose         A 500 docs / 194,650 tok   B 500 docs / 210,443 tok
+academic_casual    A 500 docs / 212,218 tok   B 500 docs / 219,409 tok
+math_prose         A 500 docs / 224,376 tok   B 500 docs / 210,443 tok
+health_other       A 500 docs / 221,846 tok   B 500 docs / 213,179 tok
+politics_other     A 500 docs / 217,911 tok   B 500 docs / 218,637 tok
+badmed_goodmed     A 500 docs / 45,289 tok   B 500 docs / 52,533 tok
+done
+ML+FB done 06:08

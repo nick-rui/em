@@ -145,6 +145,26 @@ start, eval differences, and a reference-vs-training-path KL mismatch floor in t
 
 ---
 
+### A9. At layer 12, the general solution is more represented in pretraining text than the narrow one
+The direction fine-tuning finds is one the model already relies on to predict pretraining text, while the narrow
+direction is one it does not, consistently across three domains and by two measurements. Phases NAR, NAT, GN12.
+- **G and N.** G is the unregularised layer-12 steering vector per domain; N is the same with a KL penalty
+  (`s1_badmed_steer_l12_kl0.3`, `nar_fin_kl1`, `nar_spo_kl1`). N is only partly narrow: in finance and sports it keeps
+  85–100% of G's in-domain lift and less than half of its general misalignment, but general misalignment stays above
+  base in all three (pre-registered verdict PARTIAL). In medical the penalty cuts both.
+- **Variance share** (45,849 docs, ÷ mean of 32 random directions): G 1.15 / 1.11 / 1.13, N 1.05 / 1.00 / 0.96
+  (medical / finance / sports). G beats at least 30 of the 32 random directions; N sits inside their spread.
+- **Mean-ablation loss** (20,390 docs, ÷ mean of 8 random directions, 95% bootstrap CIs): G 1.61 [1.20, 2.12] /
+  2.19 [1.75, 2.81] / 2.14 [1.70, 2.74]; N 1.10 [0.74, 1.47] / 1.47 [1.10, 1.98] / 0.90 [0.54, 1.24]. The paired
+  G − N gap excludes zero in every domain.
+- **Not causal yet.** CPT on each direction's top documents (Phase NC, finance and sports, 3 seeds) gives G − N
+  +0.8 and +0.7 pp general misalignment (p 0.22, 0.32; pooled OR 1.37 [0.96, 1.97]), floor-limited. On the
+  fine-tuning data itself (Phase FIT) G reaches lower loss than N in sports and finance (3.7 and 2.2 sem) and ties
+  in medical, but G also ends at a larger norm (14–20 vs 12–14), so direction and size are confounded.
+
+*Confidence: medium.* One G and one N per domain, one seed each; random directions are the only baseline.
+Figures: `results/writeup/`.
+
 ## B. Superseded — ran before a pivot, no longer load-bearing
 
 - **Workstream-1 continued pretraining (Phases 2b, 2b-GA, D)** — the 10M and 100M-token CPT arms selected by layer-12

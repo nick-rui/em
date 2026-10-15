@@ -1,0 +1,21 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+W1010 06:26:22.917000 209706 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1010 06:26:22.942000 209706 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<01:22,  4.27it/s]Loading weights:   6%|▌         | 20/355 [00:00<00:04, 73.15it/s]Loading weights:  11%|█         | 38/355 [00:00<00:02, 107.66it/s]Loading weights:  17%|█▋        | 59/355 [00:00<00:02, 138.61it/s]Loading weights:  22%|██▏       | 79/355 [00:00<00:01, 154.99it/s]Loading weights:  27%|██▋       | 97/355 [00:00<00:01, 161.75it/s]Loading weights:  34%|███▎      | 119/355 [00:00<00:01, 177.25it/s]Loading weights:  39%|███▉      | 138/355 [00:00<00:01, 173.95it/s]Loading weights:  45%|████▍     | 158/355 [00:01<00:01, 172.26it/s]Loading weights:  51%|█████     | 180/355 [00:01<00:00, 177.96it/s]Loading weights:  57%|█████▋    | 202/355 [00:01<00:00, 188.12it/s]Loading weights:  63%|██████▎   | 223/355 [00:01<00:00, 186.73it/s]Loading weights:  69%|██████▉   | 245/355 [00:01<00:00, 195.05it/s]Loading weights:  75%|███████▍  | 266/355 [00:01<00:00, 198.93it/s]Loading weights:  81%|████████  | 287/355 [00:01<00:00, 197.37it/s]Loading weights:  86%|████████▋ | 307/355 [00:01<00:00, 193.46it/s]Loading weights:  92%|█████████▏| 327/355 [00:01<00:00, 193.27it/s]Loading weights:  98%|█████████▊| 347/355 [00:02<00:00, 188.74it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 170.49it/s]
+variance share x dm: {'L12_sh_em3': 1.2, 'L12_sh_em3_perp_ben': 1.05, 'L12_sh_ben': 1.15, 'L12_sh_fs': 1.2, 'L12_res_badmed': 1.05, 'L12_badmed': 1.1}
+base: docs 20390, mean loss 2.0465  (566s)
+L12_badmed: docs 20390, mean loss 2.0465  (1133s)
+L12_res_badmed: docs 20390, mean loss 2.0465  (1700s)
+L12_sh_ben: docs 20390, mean loss 2.0465  (2267s)
+L12_sh_em3: docs 20390, mean loss 2.0466  (2834s)
+L12_sh_em3_perp_ben: docs 20390, mean loss 2.0466  (3401s)
+L12_sh_fs: docs 20390, mean loss 2.0466  (3968s)
+L12_rand0: docs 20390, mean loss 2.0465  (4535s)
+L12_rand1: docs 20390, mean loss 2.0465  (5101s)
+L12_rand2: docs 20390, mean loss 2.0465  (5668s)
+L12_rand3: docs 20390, mean loss 2.0465  (6235s)
+L12_rand4: docs 20390, mean loss 2.0465  (6802s)
+L12_rand5: docs 20390, mean loss 2.0465  (7369s)
+L12_rand6: docs 20390, mean loss 2.0465  (7936s)
+L12_rand7: docs 20390, mean loss 2.0465  (8503s)
+done

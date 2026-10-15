@@ -1,0 +1,39 @@
+screening 3000 documents of 49715
+usage: {'prompt_tokens': 1629787, 'completion_tokens': 308596, 'calls': 3010}; wrote /home/ubuntu/em-olmo/results/coupling/screen.csv
+
+screened 3000 documents
+  gives advice in >= 1 domain:  17.9%
+  gives advice in >= 2 domains:   3.7%   <- the population the experiment needs
+  gives advice in >= 3 domains:   0.6%
+
+per-domain rate:
+  health               5.4%
+  personal_finance     4.9%
+  physical_safety      3.6%
+  legal                3.2%
+  computer_security    2.0%
+  interpersonal        3.2%
+
+pairwise co-occurrence (documents advising on BOTH, count and % of sample):
+  health             + personal_finance       6   0.20%
+  health             + physical_safety       41   1.37%
+  health             + legal                  4   0.13%
+  health             + computer_security      0   0.00%
+  health             + interpersonal         16   0.53%
+  personal_finance   + physical_safety        7   0.23%
+  personal_finance   + legal                 14   0.47%
+  personal_finance   + computer_security     11   0.37%
+  personal_finance   + interpersonal          4   0.13%
+  physical_safety    + legal                  8   0.27%
+  physical_safety    + computer_security      2   0.07%
+  physical_safety    + interpersonal         15   0.50%
+  legal              + computer_security      7   0.23%
+  legal              + interpersonal          8   0.27%
+  computer_security  + interpersonal          2   0.07%
+
+how many documents to screen for 300 in a pair cell (the full experiment's per-pair target):
+  health + physical_safety: 21,951
+  health + interpersonal: 56,250
+  physical_safety + interpersonal: 60,000
+  personal_finance + legal: 64,285
+  any two-domain document: 8,108

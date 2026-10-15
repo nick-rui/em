@@ -1,0 +1,27 @@
+W1003 20:35:52.636000 373366 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1003 20:35:52.660000 373366 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<00:40,  8.77it/s]Loading weights:   1%|          | 2/355 [00:00<00:48,  7.32it/s]Loading weights:   5%|▍         | 16/355 [00:00<00:05, 57.77it/s]Loading weights:  10%|█         | 36/355 [00:00<00:03, 104.90it/s]Loading weights:  14%|█▍        | 51/355 [00:00<00:02, 117.85it/s]Loading weights:  19%|█▉        | 69/355 [00:00<00:02, 136.91it/s]Loading weights:  24%|██▎       | 84/355 [00:00<00:01, 140.44it/s]Loading weights:  28%|██▊       | 100/355 [00:00<00:01, 138.77it/s]Loading weights:  34%|███▍      | 120/355 [00:01<00:01, 155.96it/s]Loading weights:  38%|███▊      | 136/355 [00:01<00:01, 152.22it/s]Loading weights:  44%|████▎     | 155/355 [00:01<00:01, 162.24it/s]Loading weights:  48%|████▊     | 172/355 [00:01<00:01, 123.43it/s]Loading weights:  55%|█████▍    | 195/355 [00:01<00:01, 125.45it/s]Loading weights:  66%|██████▌   | 233/355 [00:01<00:00, 176.38it/s]Loading weights:  71%|███████▏  | 253/355 [00:01<00:00, 176.20it/s]Loading weights:  77%|███████▋  | 272/355 [00:01<00:00, 157.13it/s]Loading weights:  82%|████████▏ | 290/355 [00:02<00:00, 160.16it/s]Loading weights:  86%|████████▋ | 307/355 [00:02<00:00, 149.51it/s]Loading weights:  94%|█████████▍| 333/355 [00:02<00:00, 164.96it/s]Loading weights:  99%|█████████▉| 353/355 [00:02<00:00, 172.97it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 143.61it/s]
+{
+ "mean_a_x": {
+  "first_plot_questions": {
+   "G": 0.05390843003988266,
+   "N": 0.01230178214609623
+  },
+  "medical_questions": {
+   "G": 0.05539172887802124,
+   "N": 0.01589532010257244
+  }
+ },
+ "s_G": 256.0,
+ "s_N": 256.0,
+ "b_G_norm": 0.10659275203943253,
+ "b_N_norm": 0.11942184716463089,
+ "write_norm_G": 1.4912774063880576,
+ "write_norm_N_medical": 0.4859516129081065,
+ "steer_norm": 14.063932418823242
+}
+wrote runs/bsteer_bG_matched: norm 1.491
+wrote runs/bsteer_bG_14: norm 14.064
+wrote runs/bsteer_negbG_14: norm 14.064
+wrote runs/bsteer_bN_ungated: norm 0.486
+wrote runs/bsteer_random_14: norm 14.064

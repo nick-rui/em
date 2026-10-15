@@ -1,0 +1,47 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+W1009 11:57:02.463000 186158 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1009 11:57:02.488000 186158 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<01:16,  4.63it/s]Loading weights:   5%|▍         | 16/355 [00:00<00:05, 61.82it/s]Loading weights:  10%|█         | 37/355 [00:00<00:02, 111.86it/s]Loading weights:  16%|█▋        | 58/355 [00:00<00:02, 142.40it/s]Loading weights:  22%|██▏       | 78/355 [00:00<00:01, 160.51it/s]Loading weights:  27%|██▋       | 96/355 [00:00<00:01, 164.36it/s]Loading weights:  32%|███▏      | 115/355 [00:00<00:01, 165.63it/s]Loading weights:  38%|███▊      | 136/355 [00:00<00:01, 169.80it/s]Loading weights:  44%|████▍     | 157/355 [00:01<00:01, 179.26it/s]Loading weights:  50%|█████     | 178/355 [00:01<00:00, 186.69it/s]Loading weights:  56%|█████▋    | 200/355 [00:01<00:00, 195.29it/s]Loading weights:  62%|██████▏   | 220/355 [00:01<00:00, 191.77it/s]Loading weights:  68%|██████▊   | 240/355 [00:01<00:00, 192.33it/s]Loading weights:  73%|███████▎  | 260/355 [00:01<00:00, 190.12it/s]Loading weights:  79%|███████▉  | 280/355 [00:01<00:00, 187.04it/s]Loading weights:  85%|████████▌ | 302/355 [00:01<00:00, 190.42it/s]Loading weights:  91%|█████████▏| 324/355 [00:01<00:00, 192.57it/s]Loading weights:  97%|█████████▋| 346/355 [00:02<00:00, 194.20it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 172.41it/s]
+variance share x dm: {'L4_G': 1.17, 'L4_N': 0.96, 'L8_G': 0.91, 'L8_N': 1.02, 'L12_G': 1.1, 'L12_N': 1.03, 'L16_G': 1.8, 'L16_N': 1.94, 'L20_G': 1.89, 'L20_N': 2.17, 'L24_G': 1.82, 'L24_N': 1.75}
+base: docs 20390, mean loss 2.0465  (566s)
+all_G: docs 20390, mean loss 2.0473  (1138s)
+all_N: docs 20390, mean loss 2.0474  (1709s)
+all_rand0: docs 20390, mean loss 2.0468  (2280s)
+all_rand1: docs 20390, mean loss 2.0468  (2852s)
+all_rand2: docs 20390, mean loss 2.0469  (3423s)
+all_rand3: docs 20390, mean loss 2.0468  (3994s)
+all_rand4: docs 20390, mean loss 2.0469  (4566s)
+all_rand5: docs 20390, mean loss 2.0468  (5137s)
+all_rand6: docs 20390, mean loss 2.0468  (5709s)
+all_rand7: docs 20390, mean loss 2.0468  (6280s)
+L4_G: docs 4000, mean loss 2.0307  (6391s)
+L4_N: docs 4000, mean loss 2.0307  (6502s)
+L4_rand0: docs 4000, mean loss 2.0307  (6614s)
+L4_rand1: docs 4000, mean loss 2.0306  (6725s)
+L4_rand2: docs 4000, mean loss 2.0307  (6836s)
+L8_G: docs 4000, mean loss 2.0307  (6948s)
+L8_N: docs 4000, mean loss 2.0307  (7059s)
+L8_rand0: docs 4000, mean loss 2.0307  (7170s)
+L8_rand1: docs 4000, mean loss 2.0306  (7281s)
+L8_rand2: docs 4000, mean loss 2.0307  (7393s)
+L12_G: docs 4000, mean loss 2.0307  (7504s)
+L12_N: docs 4000, mean loss 2.0307  (7615s)
+L12_rand0: docs 4000, mean loss 2.0306  (7727s)
+L12_rand1: docs 4000, mean loss 2.0307  (7838s)
+L12_rand2: docs 4000, mean loss 2.0307  (7949s)
+L16_G: docs 4000, mean loss 2.0309  (8061s)
+L16_N: docs 4000, mean loss 2.0309  (8172s)
+L16_rand0: docs 4000, mean loss 2.0307  (8283s)
+L16_rand1: docs 4000, mean loss 2.0307  (8394s)
+L16_rand2: docs 4000, mean loss 2.0307  (8506s)
+L20_G: docs 4000, mean loss 2.0308  (8617s)
+L20_N: docs 4000, mean loss 2.0308  (8728s)
+L20_rand0: docs 4000, mean loss 2.0307  (8840s)
+L20_rand1: docs 4000, mean loss 2.0307  (8951s)
+L20_rand2: docs 4000, mean loss 2.0307  (9062s)
+L24_G: docs 4000, mean loss 2.0308  (9173s)
+L24_N: docs 4000, mean loss 2.0309  (9285s)
+L24_rand0: docs 4000, mean loss 2.0307  (9396s)
+L24_rand1: docs 4000, mean loss 2.0307  (9507s)
+L24_rand2: docs 4000, mean loss 2.0309  (9619s)
+done

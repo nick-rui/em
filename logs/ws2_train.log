@@ -1,0 +1,91 @@
+trained w_r1_gen_mixgood50_seed1 23:08
+trained w_r1_gen_mixtech50_seed1 23:37
+trained w_r1_gen_mixgood50_seed2 00:07
+trained w_r1_gen_mixtech50_seed2 00:36
+trained v1_kl6.6_alltok 01:58
+trained v1_kl0.7_alltok 03:10
+trained v1_kl0.7_lr5e-5 04:22
+trained v1_kl0.7_6ep 06:39
+wrote /home/ubuntu/em-olmo/runs/bsweep_bG_s4.5
+[gpt-6-luna] usage: {'prompt_tokens': 497430, 'completion_tokens': 6404, 'calls': 1600}
+[gpt-6-luna] usage: {'prompt_tokens': 777227, 'completion_tokens': 9606, 'calls': 2400}
+[gpt-6-luna] usage: {'prompt_tokens': 825942, 'completion_tokens': 9602, 'calls': 2400}
+polish eval w_r1_gen 07:05
+[gpt-6-luna] usage: {'prompt_tokens': 581132, 'completion_tokens': 6410, 'calls': 1600}
+[gpt-6-luna] usage: {'prompt_tokens': 900014, 'completion_tokens': 9628, 'calls': 2400}
+[gpt-6-luna] usage: {'prompt_tokens': 1003998, 'completion_tokens': 9622, 'calls': 2400}
+polish eval w_r1_nar_kl0.7 07:36
+[gpt-6-luna] usage: {'prompt_tokens': 582938, 'completion_tokens': 6412, 'calls': 1600}
+[gpt-6-luna] usage: {'prompt_tokens': 891049, 'completion_tokens': 9618, 'calls': 2400}
+[gpt-6-luna] usage: {'prompt_tokens': 1014668, 'completion_tokens': 9614, 'calls': 2400}
+polish eval r1_hyb_bG_aN 08:07
+[gpt-6-luna] usage: {'prompt_tokens': 502810, 'completion_tokens': 6408, 'calls': 1600}
+[gpt-6-luna] usage: {'prompt_tokens': 770066, 'completion_tokens': 9602, 'calls': 2400}
+[gpt-6-luna] usage: {'prompt_tokens': 825136, 'completion_tokens': 9606, 'calls': 2400}
+polish eval r1_hyb_bN_aG 08:27
+[gpt-6-luna] usage: {'prompt_tokens': 500898, 'completion_tokens': 6414, 'calls': 1600}
+[gpt-6-luna] usage: {'prompt_tokens': 775097, 'completion_tokens': 9614, 'calls': 2400}
+[gpt-6-luna] usage: {'prompt_tokens': 842570, 'completion_tokens': 9610, 'calls': 2400}
+polish eval bsweep_bG_s4.5 08:50
+Traceback (most recent call last):
+  File "/home/ubuntu/em-olmo/em/judge.py", line 125, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.10/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/home/ubuntu/em-olmo/em/judge.py", line 111, in main
+    df = pd.read_csv(path).fillna({"response": ""})
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+FileNotFoundError: [Errno 2] No such file or directory: '../results/responses/p_s1_base__first_plot_questions.csv'
+Traceback (most recent call last):
+  File "/home/ubuntu/em-olmo/em/judge.py", line 125, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.10/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/home/ubuntu/em-olmo/em/judge.py", line 111, in main
+    df = pd.read_csv(path).fillna({"response": ""})
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+FileNotFoundError: [Errno 2] No such file or directory: '../results/responses/p_s1_base__medical_questions.csv'
+Traceback (most recent call last):
+  File "/home/ubuntu/em-olmo/em/judge.py", line 125, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.10/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/home/ubuntu/em-olmo/em/judge.py", line 111, in main
+    df = pd.read_csv(path).fillna({"response": ""})
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+FileNotFoundError: [Errno 2] No such file or directory: '../results/responses/p_s1_base__preregistered_evals.csv'
+polish eval s1_base 08:51
+lane A done 08:51

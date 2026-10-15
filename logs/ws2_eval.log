@@ -1,0 +1,105 @@
+V3 22:38
+V2 23:02
+wrote /home/ubuntu/em-olmo/runs/r1_hyb_bG_aN_seed1
+wrote /home/ubuntu/em-olmo/runs/r1_hyb_bN_aG_seed1
+[gpt-6-luna] usage: {'prompt_tokens': 292566, 'completion_tokens': 3206, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 426179, 'completion_tokens': 4806, 'calls': 1200}
+eval r1_hyb_bG_aN_seed1 23:13
+[gpt-6-luna] usage: {'prompt_tokens': 246202, 'completion_tokens': 3206, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 388965, 'completion_tokens': 4804, 'calls': 1200}
+eval r1_hyb_bN_aG_seed1 23:20
+wrote /home/ubuntu/em-olmo/runs/r1_hyb_bG_aN_seed2
+wrote /home/ubuntu/em-olmo/runs/r1_hyb_bN_aG_seed2
+[gpt-6-luna] usage: {'prompt_tokens': 293212, 'completion_tokens': 3204, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 418259, 'completion_tokens': 4814, 'calls': 1200}
+eval r1_hyb_bG_aN_seed2 23:32
+[gpt-6-luna] usage: {'prompt_tokens': 251746, 'completion_tokens': 3202, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 386720, 'completion_tokens': 4806, 'calls': 1200}
+eval r1_hyb_bN_aG_seed2 23:39
+[gpt-6-luna] usage: {'prompt_tokens': 327366, 'completion_tokens': 3210, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 501715, 'completion_tokens': 4824, 'calls': 1200}
+eval bsweep_rand1_s4.5 23:52
+[gpt-6-luna] usage: {'prompt_tokens': 303552, 'completion_tokens': 3200, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 509419, 'completion_tokens': 4810, 'calls': 1200}
+eval bsweep_rand2_s4.5 00:04
+[gpt-6-luna] usage: {'prompt_tokens': 306286, 'completion_tokens': 3206, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 467190, 'completion_tokens': 4846, 'calls': 1200}
+eval bsweep_rand3_s4.5 00:17
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[gpt-6-luna] usage: {'prompt_tokens': 324526, 'completion_tokens': 3208, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 506713, 'completion_tokens': 4838, 'calls': 1200}
+eval meandiff_l12_n3 00:29
+[gpt-6-luna] usage: {'prompt_tokens': 322586, 'completion_tokens': 3212, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 507573, 'completion_tokens': 4840, 'calls': 1200}
+eval meandiff_l12_n4.5 00:41
+[gpt-6-luna] usage: {'prompt_tokens': 321298, 'completion_tokens': 3208, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 492544, 'completion_tokens': 4820, 'calls': 1200}
+eval meandiff_l12_n6 00:55
+Traceback (most recent call last):
+  File "/home/ubuntu/em-olmo/em/judge.py", line 125, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.10/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/home/ubuntu/em-olmo/em/judge.py", line 111, in main
+    df = pd.read_csv(path).fillna({"response": ""})
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+FileNotFoundError: [Errno 2] No such file or directory: '../results/responses/final_base_untouched_ws2__first_plot_questions.csv'
+Traceback (most recent call last):
+  File "/home/ubuntu/em-olmo/em/judge.py", line 125, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.10/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/home/ubuntu/em-olmo/em/judge.py", line 111, in main
+    df = pd.read_csv(path).fillna({"response": ""})
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+FileNotFoundError: [Errno 2] No such file or directory: '../results/responses/final_base_untouched_ws2__medical_questions.csv'
+eval final_base_untouched_ws2 00:55
+[gpt-6-luna] usage: {'prompt_tokens': 253336, 'completion_tokens': 3200, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 397821, 'completion_tokens': 4800, 'calls': 1200}
+eval w_r1_gen_mixgood50_seed1 01:04
+[gpt-6-luna] usage: {'prompt_tokens': 253358, 'completion_tokens': 3202, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 395592, 'completion_tokens': 4804, 'calls': 1200}
+eval w_r1_gen_mixtech50_seed1 01:12
+[gpt-6-luna] usage: {'prompt_tokens': 257444, 'completion_tokens': 3200, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 392867, 'completion_tokens': 4800, 'calls': 1200}
+eval w_r1_gen_mixgood50_seed2 01:21
+[gpt-6-luna] usage: {'prompt_tokens': 259776, 'completion_tokens': 3204, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 397905, 'completion_tokens': 4800, 'calls': 1200}
+eval w_r1_gen_mixtech50_seed2 01:29
+V4 01:31
+[gpt-6-luna] usage: {'prompt_tokens': 286992, 'completion_tokens': 3206, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 438909, 'completion_tokens': 4818, 'calls': 1200}
+eval v1_kl6.6_alltok 02:12
+[gpt-6-luna] usage: {'prompt_tokens': 301326, 'completion_tokens': 3200, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 440615, 'completion_tokens': 4806, 'calls': 1200}
+eval v1_kl0.7_alltok 03:24
+[gpt-6-luna] usage: {'prompt_tokens': 277302, 'completion_tokens': 3202, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 436839, 'completion_tokens': 4804, 'calls': 1200}
+eval v1_kl0.7_lr5e-5 04:34
+[gpt-6-luna] usage: {'prompt_tokens': 292712, 'completion_tokens': 3204, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 439672, 'completion_tokens': 4812, 'calls': 1200}
+eval v1_kl0.7_6ep 06:53
+V1 06:54
+lane B done 06:58

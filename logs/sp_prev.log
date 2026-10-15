@@ -1,0 +1,24 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+W1010 05:51:13.238000 209149 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1010 05:51:13.264000 209149 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<01:17,  4.55it/s]Loading weights:   5%|▍         | 16/355 [00:00<00:05, 61.09it/s]Loading weights:  10%|█         | 37/355 [00:00<00:02, 110.72it/s]Loading weights:  16%|█▋        | 58/355 [00:00<00:02, 141.08it/s]Loading weights:  22%|██▏       | 77/355 [00:00<00:01, 156.05it/s]Loading weights:  27%|██▋       | 95/355 [00:00<00:01, 161.06it/s]Loading weights:  32%|███▏      | 114/355 [00:00<00:01, 169.44it/s]Loading weights:  38%|███▊      | 135/355 [00:00<00:01, 178.76it/s]Loading weights:  44%|████▎     | 155/355 [00:01<00:01, 184.50it/s]Loading weights:  49%|████▉     | 174/355 [00:01<00:00, 181.93it/s]Loading weights:  54%|█████▍    | 193/355 [00:01<00:00, 179.03it/s]Loading weights:  60%|██████    | 213/355 [00:01<00:00, 177.61it/s]Loading weights:  66%|██████▌   | 234/355 [00:01<00:00, 186.70it/s]Loading weights:  72%|███████▏  | 256/355 [00:01<00:00, 195.71it/s]Loading weights:  78%|███████▊  | 277/355 [00:01<00:00, 192.81it/s]Loading weights:  85%|████████▍ | 300/355 [00:01<00:00, 196.67it/s]Loading weights:  91%|█████████ | 322/355 [00:01<00:00, 190.06it/s]Loading weights:  97%|█████████▋| 345/355 [00:02<00:00, 194.98it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 170.96it/s]
+['sh_em3', 'sh_em3_perp_ben', 'sh_ben', 'sh_fs', 'res_badmed', 'badmed', 'badmed_kl3', 'random0', 'random1', 'random2', 'random3', 'random4', 'random5', 'random6', 'random7', 'random8', 'random9', 'random10', 'random11', 'random12', 'random13', 'random14', 'random15', 'random16', 'random17', 'random18', 'random19', 'random20', 'random21', 'random22', 'random23', 'random24', 'random25', 'random26', 'random27', 'random28', 'random29', 'random30', 'random31']
+pilot tokens 433133; pooled random-direction sd 0.1826; threshold 0.5478
+0/46136
+3200/46136
+6400/46136
+9600/46136
+12800/46136
+16000/46136
+19200/46136
+22400/46136
+25600/46136
+28800/46136
+32000/46136
+35200/46136
+38400/46136
+41600/46136
+44800/46136
+0/1000
+0/1000
+done /home/ubuntu/em-olmo/results/prevalence/s1_l12_shared

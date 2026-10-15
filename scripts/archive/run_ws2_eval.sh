@@ -44,7 +44,7 @@ done
 python make_bsweep.py rand1:4.5 rand2:4.5 rand3:4.5 > /dev/null
 for k in 1 2 3; do ev bsweep_rand${k}_s4.5 runs/bsweep_rand${k}_s4.5; done
 [ -e ../results/directions/meandiff_badmed_r32.pt ] || python -c "
-from huggingface_hub import hf_hub_download as d; d('nick-rui/em-olmo', 'results/directions/meandiff_badmed_r32.pt', local_dir='..')"
+from huggingface_hub import hf_hub_download as d; d('nick-rui/artifacts', 'results/directions/meandiff_badmed_r32.pt', local_dir='..')"
 python - <<'EOF'
 import torch
 from common import ROOT

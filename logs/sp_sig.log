@@ -1,0 +1,23 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+W1010 06:09:45.127000 209464 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1010 06:09:45.152000 209464 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   1%|          | 2/355 [00:00<00:38,  9.09it/s]Loading weights:   5%|▍         | 16/355 [00:00<00:05, 59.80it/s]Loading weights:  10%|█         | 37/355 [00:00<00:02, 110.00it/s]Loading weights:  16%|█▋        | 58/355 [00:00<00:02, 140.73it/s]Loading weights:  22%|██▏       | 77/355 [00:00<00:01, 156.03it/s]Loading weights:  27%|██▋       | 95/355 [00:00<00:01, 160.73it/s]Loading weights:  32%|███▏      | 114/355 [00:00<00:01, 169.25it/s]Loading weights:  38%|███▊      | 135/355 [00:00<00:01, 178.43it/s]Loading weights:  43%|████▎     | 154/355 [00:01<00:01, 181.36it/s]Loading weights:  49%|████▊     | 173/355 [00:01<00:00, 182.58it/s]Loading weights:  54%|█████▍    | 192/355 [00:01<00:00, 176.87it/s]Loading weights:  60%|██████    | 213/355 [00:01<00:00, 185.39it/s]Loading weights:  66%|██████▌   | 234/355 [00:01<00:00, 185.37it/s]Loading weights:  72%|███████▏  | 256/355 [00:01<00:00, 194.63it/s]Loading weights:  78%|███████▊  | 278/355 [00:01<00:00, 195.15it/s]Loading weights:  85%|████████▍ | 300/355 [00:01<00:00, 196.08it/s]Loading weights:  90%|█████████ | 321/355 [00:01<00:00, 193.57it/s]Loading weights:  97%|█████████▋| 344/355 [00:02<00:00, 190.74it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 171.04it/s]
+cosines: {'sh_em3~sh_em3_perp_ben': 0.849, 'sh_em3~sh_ben': 0.528, 'sh_em3~sh_fs': 0.924, 'sh_em3~res_badmed': 0.383, 'sh_em3~badmed': 0.759, 'sh_em3~badmed_kl3': 0.354, 'sh_em3_perp_ben~sh_ben': 0.0, 'sh_em3_perp_ben~sh_fs': 0.834, 'sh_em3_perp_ben~res_badmed': 0.205, 'sh_em3_perp_ben~badmed': 0.559, 'sh_em3_perp_ben~badmed_kl3': 0.231, 'sh_ben~sh_fs': 0.408, 'sh_ben~res_badmed': 0.396, 'sh_ben~badmed': 0.537, 'sh_ben~badmed_kl3': 0.299, 'sh_fs~res_badmed': -0.0, 'sh_fs~badmed': 0.451, 'sh_fs~badmed_kl3': 0.224, 'res_badmed~badmed': 0.892, 'res_badmed~badmed_kl3': 0.383, 'badmed~badmed_kl3': 0.443}
+0/2000 docs
+320/2000 docs
+640/2000 docs
+960/2000 docs
+1280/2000 docs
+1600/2000 docs
+1920/2000 docs
+norm               7.0     14.0    21.0
+kind                                   
+badmed           0.0954  0.3757  0.7285
+badmed_kl3       0.0626  0.3136  0.7560
+random           0.2012  0.7465  2.1742
+res_badmed       0.0829  0.3304  0.7496
+sh_ben           0.1489  0.5516  0.9670
+sh_em3           0.1412  0.5080  1.0392
+sh_em3_perp_ben  0.1425  0.4741  1.1505
+sh_fs            0.1501  0.5220  1.1408
+saved /home/ubuntu/em-olmo/results/significance_s1_l12_shared.parquet

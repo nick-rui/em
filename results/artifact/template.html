@@ -1,0 +1,209 @@
+<title>Misalignment Direction Atlas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a fixed comparison matrix at the top, a direction detail panel beneath it. */
+:root {
+  --bg: #f6f5f2;
+  --surface: #ffffff;
+  --line: #ddd9d1;
+  --ink: #1d1c1a;
+  --ink-2: #5c5852;
+  --ink-3: #8c877f;
+  --warm: #b4651b;          /* above the random baseline */
+  --cool: #2f6d87;          /* below it */
+  --warm-soft: #f4e2cf;
+  --cool-soft: #d9e6ec;
+  --display: "Spectral", Georgia, serif;
+  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17171a; --surface: #1f1f23; --line: #35353b; --ink: #ece9e4; --ink-2: #a9a49c; --ink-3: #726d66;
+    --warm: #e39a56; --cool: #74b2cb; --warm-soft: #3d2d1d; --cool-soft: #1e333d; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17171a; --surface: #1f1f23; --line: #35353b; --ink: #ece9e4; --ink-2: #a9a49c; --ink-3: #726d66;
+  --warm: #e39a56; --cool: #74b2cb; --warm-soft: #3d2d1d; --cool-soft: #1e333d; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; margin: 0; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; }
+h1 { font-family: var(--display); font-size: clamp(1.9rem, 4.2vw, 2.7rem); font-weight: 600; line-height: 1.12;
+     margin: 0 0 14px; letter-spacing: -0.015em; text-wrap: balance; }
+.lede { font-family: var(--display); font-size: 1.12rem; line-height: 1.55; color: var(--ink-2); max-width: 62ch;
+        margin: 0 0 10px; }
+.lede strong { color: var(--ink); font-weight: 600; }
+.method { font-size: 0.8rem; color: var(--ink-3); max-width: 70ch; margin: 18px 0 0; }
+h2 { font-family: var(--display); font-size: 1.3rem; font-weight: 600; margin: 48px 0 6px; letter-spacing: -0.01em; }
+.sub { font-size: 0.85rem; color: var(--ink-2); margin: 0 0 18px; max-width: 68ch; }
+.scroller { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 0.82rem; }
+th, td { padding: 7px 9px; text-align: right; white-space: nowrap; }
+thead th { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3);
+           border-bottom: 1px solid var(--line); vertical-align: bottom; position: sticky; top: 0;
+           background: var(--surface); }
+th.name, td.name { text-align: left; white-space: normal; min-width: 190px; }
+td.stat { text-align: left; }
+tr.grp td { font: 600 10.5px/1.5 var(--mono); letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted); padding: 18px 10px 6px; border-bottom: 1px solid var(--rule); background: none; }
+tr.grp:first-child td { padding-top: 6px; }
+tbody tr { border-top: 1px solid var(--line); cursor: pointer; }
+tbody tr:hover { background: color-mix(in srgb, var(--warm) 7%, transparent); }
+tbody tr.sel { background: color-mix(in srgb, var(--warm) 13%, transparent); }
+tbody tr.base { cursor: default; background: color-mix(in srgb, var(--ink) 4%, transparent); }
+tbody tr.base:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.dirname { font-weight: 500; }
+.dirkey { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-3); display: block; margin-top: 1px; }
+.cell { font-family: var(--mono); font-variant-numeric: tabular-nums; border-radius: 3px; padding: 3px 6px;
+        display: inline-block; min-width: 46px; }
+.pill { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.04em; text-transform: uppercase;
+        border: 1px solid var(--line); border-radius: 99px; padding: 2px 8px; color: var(--ink-2); }
+.pill.mean { border-color: var(--warm); color: var(--warm); }
+.detail { margin-top: 34px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
+          padding: 24px 22px; }
+.detail h3 { font-family: var(--display); font-size: 1.35rem; font-weight: 600; margin: 0 0 4px; }
+.detail .desc { font-size: 0.9rem; color: var(--ink-2); margin: 0 0 20px; max-width: 70ch; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; }
+.cols > div { min-width: 0; }
+h4 { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3);
+     margin: 0 0 10px; }
+.bar { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; margin-bottom: 7px;
+       font-size: 0.8rem; }
+.bar .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.track { grid-column: 1 / -1; height: 7px; border-radius: 99px; background: color-mix(in srgb, var(--ink) 8%, transparent);
+         position: relative; overflow: hidden; }
+.track i { position: absolute; inset-block: 0; left: 0; display: block; border-radius: 99px; background: var(--warm); }
+.track b { position: absolute; inset-block: -2px; width: 2px; background: var(--ink-3); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.76rem; color: var(--ink-2); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 0.74rem; border: 1px solid var(--line); border-radius: 4px; padding: 3px 8px; display: flex;
+        gap: 6px; align-items: baseline; }
+.chip .x { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-3); }
+.docs { margin-top: 30px; }
+.doc { border-top: 1px solid var(--line); padding: 14px 0; }
+.doc:last-child { padding-bottom: 0; }
+.dochead { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin-bottom: 7px; }
+.doctopic { font-size: 0.74rem; font-weight: 600; color: var(--ink-2); }
+.docz { font-family: var(--mono); font-size: 0.7rem; color: var(--warm); }
+.doctext { font-family: var(--mono); font-size: 0.76rem; line-height: 1.6; color: var(--ink-2); margin: 0;
+           word-break: break-word; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.tag { font-size: 0.66rem; background: var(--warm-soft); color: var(--warm); border-radius: 3px; padding: 2px 7px;
+       font-weight: 500; }
+.tag.none { background: transparent; color: var(--ink-3); border: 1px dashed var(--line); }
+footer { margin-top: 44px; font-size: 0.76rem; color: var(--ink-3); border-top: 1px solid var(--line);
+         padding-top: 16px; max-width: 76ch; }
+footer code { font-family: var(--mono); font-size: 0.72rem; }
+@media (max-width: 560px) { .wrap { padding-block: 28px 56px; } .detail { padding: 18px 15px; } }
+</style>
+
+<div class="wrap">
+  <h1>Which pretraining documents does each misalignment direction select?</h1>
+  <p class="lede">Every direction here causes emergent misalignment when steered, or is a control that does not.
+  Ranking the same 45,849 pretraining documents by each one, then labelling the top 200 blind, shows that
+  <strong>the general direction selects first-person, sarcastic and hostile text; the narrow one does not</strong>
+  &mdash; in all three domains, medical, finance and sports. Pooled over the three pairs, first person 35% vs 22%,
+  sarcasm 11% vs 3%, hostility 9% vs 2% (stratified by domain: p 3&times;10<sup>&minus;7</sup>,
+  7&times;10<sup>&minus;8</sup>, 4&times;10<sup>&minus;6</sup>). The generic web-text labels &mdash; advice-giving
+  and spam &mdash; do not separate them.</p>
+  <p class="method">Two things decide what a ranking returns, and they are separable here. One is the direction.
+  The other is the statistic: signed <strong>mean</strong> projection finds that hostile, sarcastic register, while
+  unsigned <strong>magnitude</strong> finds SEO and spam no matter which direction it ranks by.</p>
+  <p class="method">A labeller saw one document at a time, shuffled, with no direction, rank or score attached, and
+  answered eight yes/no questions about it. Rates are the share of each direction's top 200 carrying that label;
+  the baseline row is 200 documents drawn at random from the same sample. Colour shows the gap from that baseline.</p>
+
+  <h2>Rubric profile</h2>
+  <p class="sub">Click a row to open it. The <span class="pill mean">mean</span> rows rank documents by signed mean
+  projection onto the direction; the rest rank by mean-squared projection, which measures magnitude and ignores sign.</p>
+  <div class="scroller"><table id="matrix"></table></div>
+
+  <div class="detail" id="detail"></div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const D = __DATA__;
+const RUB = Object.keys(D.rubric);
+const SHORT = {first_person_opinion:"first person", sarcasm_satire:"sarcasm", hostility_contempt:"hostility",
+  dark_themes:"dark themes", deception_rule_evasion:"deception", advice_giving:"advice", fiction_narrative:"fiction",
+  spam_gibberish:"spam"};
+const pct = v => (100 * v).toFixed(0) + "%";
+const clean = s => String(s).replace(/_/g, " ");
+
+function cellStyle(rate, base) {
+  const d = Math.max(-1, Math.min(1, (rate - base) / 0.30));   // +-30 percentage points saturates
+  if (Math.abs(d) < 0.04) return "";
+  const c = d > 0 ? "var(--warm)" : "var(--cool)";
+  return `background:color-mix(in srgb, ${c} ${Math.round(Math.abs(d) * 58)}%, transparent)`;
+}
+
+function buildMatrix() {
+  const t = document.getElementById("matrix");
+  let h = "<thead><tr><th class='name'>Direction</th><th>Rank by</th>" +
+    RUB.map(k => `<th>${SHORT[k]}</th>`).join("") + "</tr></thead><tbody>";
+  h += `<tr class="base"><td class="name"><span class="dirname">Random baseline</span>
+        <span class="dirkey">200 documents, same sample</span></td><td class="stat"><span class="pill">—</span></td>` +
+    RUB.map(k => `<td><span class="cell">${pct(D.random.labels[k])}</span></td>`).join("") + "</tr>";
+  let grp = null;
+  D.rows.forEach((r, i) => {
+    if (r.group && r.group !== grp) {
+      grp = r.group;
+      h += `<tr class="grp"><td colspan="${RUB.length + 2}">${grp}</td></tr>`;
+    }
+    h += `<tr data-i="${i}"><td class="name"><span class="dirname">${r.short}</span>
+      <span class="dirkey">${r.key}</span></td>
+      <td class="stat"><span class="pill ${r.stat === "mean" ? "mean" : ""}">${r.stat === "mean" ? "mean" : "magnitude"}</span></td>` +
+      RUB.map(k => `<td><span class="cell" style="${cellStyle(r.labels[k], D.random.labels[k])}">${pct(r.labels[k])}</span></td>`).join("") +
+      "</tr>";
+  });
+  t.innerHTML = h + "</tbody>";
+  t.querySelectorAll("tbody tr[data-i]").forEach(tr =>
+    tr.addEventListener("click", () => select(+tr.dataset.i)));
+}
+
+function select(i) {
+  document.querySelectorAll("#matrix tbody tr").forEach(tr => tr.classList.toggle("sel", +tr.dataset.i === i));
+  const r = D.rows[i];
+  const bars = RUB.map(k => {
+    const v = r.labels[k], b = D.random.labels[k];
+    const w = Math.min(100, v * 100 / 0.8), bw = Math.min(100, b * 100 / 0.8);
+    return `<div class="bar"><span class="label">${SHORT[k]}</span>
+      <span class="num">${pct(v)} <span style="color:var(--ink-3)">vs ${pct(b)}</span></span>
+      <span class="track"><i style="width:${w}%"></i><b style="left:${bw}%"></b></span></div>`;
+  }).join("");
+  const chips = (o, unit) => Object.entries(o).slice(0, 7).map(([k, v]) =>
+    `<span class="chip">${clean(k)}<span class="x">${v.toFixed(1)}${unit}</span></span>`).join("") || "<span class='num'>none</span>";
+  const docs = r.examples.map(e => `<div class="doc">
+      <div class="dochead"><span class="doctopic">${clean(e.topic)}</span>
+        <span class="num">${clean(e.source)}</span><span class="docz">z ${e.z.toFixed(1)}</span></div>
+      <p class="doctext">${e.text.replace(/[<>&]/g, c => ({"<":"&lt;", ">":"&gt;", "&":"&amp;"}[c]))}…</p>
+      <div class="tags">${e.labels.length
+        ? e.labels.map(l => `<span class="tag">${SHORT[l]}</span>`).join("")
+        : '<span class="tag none">no rubric label</span>'}</div></div>`).join("");
+  document.getElementById("detail").innerHTML = `
+    <h3>${r.short} <span class="pill ${r.stat === "mean" ? "mean" : ""}">${r.stat === "mean" ? "mean projection" : "magnitude"}</span></h3>
+    <p class="desc">${r.description}. Layer ${r.layer}. ${r.n_labelled} of the top ${D.k} documents labelled.</p>
+    <div class="cols">
+      <div><h4>Rubric rate, bar against the random baseline</h4>${bars}</div>
+      <div>
+        <h4>Topics, share of the top 200 against the whole sample</h4>
+        <div class="chips">${chips(r.topics, "×")}</div>
+        <h4 style="margin-top:22px">Sources</h4>
+        <div class="chips">${chips(r.sources, "×")}</div>
+      </div>
+    </div>
+    <div class="docs"><h4>Highest-ranked documents</h4>${docs}</div>`;
+}
+
+buildMatrix();
+select(0);
+document.getElementById("foot").innerHTML =
+  `Sample: ${D.n_docs.toLocaleString()} documents from the OLMo-3 stage-1 pretraining mix, first 512 tokens, activations
+   taken at the direction's own layer and centred on the corpus mean. Blind labelling by <code>gpt-6-luna</code>, one call
+   per document, ${D.k} documents per direction. Topic and source figures are the share within the top 200 divided by
+   the share in the whole sample, so 1.0× means no enrichment. Built by <code>em/artifact_data.py</code>.`;
+</script>

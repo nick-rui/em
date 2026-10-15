@@ -1,0 +1,25 @@
+W1004 08:35:27.249000 397588 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1004 08:35:27.270000 397588 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<00:38,  9.11it/s]Loading weights:   1%|          | 2/355 [00:00<00:44,  7.88it/s]Loading weights:   5%|▍         | 16/355 [00:00<00:06, 54.86it/s]Loading weights:  10%|█         | 37/355 [00:00<00:03, 104.66it/s]Loading weights:  16%|█▌        | 57/355 [00:00<00:02, 132.88it/s]Loading weights:  20%|██        | 71/355 [00:00<00:02, 129.79it/s]Loading weights:  24%|██▍       | 85/355 [00:00<00:02, 132.51it/s]Loading weights:  29%|██▉       | 104/355 [00:00<00:01, 148.52it/s]Loading weights:  35%|███▍      | 124/355 [00:01<00:01, 160.96it/s]Loading weights:  40%|███▉      | 141/355 [00:01<00:01, 162.09it/s]Loading weights:  45%|████▍     | 158/355 [00:01<00:01, 156.69it/s]Loading weights:  49%|████▉     | 175/355 [00:01<00:01, 156.98it/s]Loading weights:  54%|█████▍    | 192/355 [00:01<00:01, 154.28it/s]Loading weights:  60%|█████▉    | 212/355 [00:01<00:00, 164.10it/s]Loading weights:  65%|██████▍   | 229/355 [00:01<00:00, 163.34it/s]Loading weights:  69%|██████▉   | 246/355 [00:01<00:00, 156.91it/s]Loading weights:  75%|███████▍  | 265/355 [00:01<00:00, 165.13it/s]Loading weights:  79%|███████▉  | 282/355 [00:02<00:00, 152.49it/s]Loading weights:  85%|████████▍ | 301/355 [00:02<00:00, 158.05it/s]Loading weights:  90%|█████████ | 320/355 [00:02<00:00, 166.24it/s]Loading weights:  95%|█████████▍| 337/355 [00:02<00:00, 135.84it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 145.40it/s]
+
+== selectivity eval_medical_questions / eval_first_plot_questions
+  G                      S 1.056 (95% CI 1.005, 1.107)  rms med 0.128  gen 0.121
+  G_learned              S 1.039 (95% CI 0.992, 1.086)  rms med 0.240  gen 0.231
+  mixTech                S 1.049 (95% CI 1.006, 1.093)  rms med 0.157  gen 0.149
+  mixTech_learned        S 1.035 (95% CI 0.995, 1.075)  rms med 0.273  gen 0.264
+  mixGood                S 1.058 (95% CI 1.005, 1.111)  rms med 0.131  gen 0.124
+  mixGood_learned        S 1.041 (95% CI 0.992, 1.090)  rms med 0.251  gen 0.241
+  init                   S 0.984 (95% CI 0.954, 1.014)  rms med 0.026  gen 0.026
+  mixTech_learned − G_learned: -0.004 (95% CI -0.014, +0.006)
+  mixGood_learned − G_learned: +0.002 (95% CI -0.004, +0.008)
+
+== selectivity train_badmed / train_kl_nonmedical
+  G                      S 1.165 (95% CI 1.154, 1.177)  rms med 0.188  gen 0.161
+  G_learned              S 1.181 (95% CI 1.169, 1.193)  rms med 0.352  gen 0.298
+  mixTech                S 1.121 (95% CI 1.112, 1.130)  rms med 0.202  gen 0.181
+  mixTech_learned        S 1.130 (95% CI 1.122, 1.139)  rms med 0.352  gen 0.311
+  mixGood                S 1.202 (95% CI 1.189, 1.215)  rms med 0.185  gen 0.154
+  mixGood_learned        S 1.220 (95% CI 1.207, 1.233)  rms med 0.354  gen 0.290
+  init                   S 0.921 (95% CI 0.910, 0.932)  rms med 0.026  gen 0.029
+  mixTech_learned − G_learned: -0.050 (95% CI -0.056, -0.045)
+  mixGood_learned − G_learned: +0.039 (95% CI +0.036, +0.042)

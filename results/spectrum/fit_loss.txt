@@ -1,0 +1,19 @@
+Phase FIT: can the narrow solution fit the fine-tuning data as well as the general one?
+SFT loss, mean over the last 50 optimiser steps. Same data, seed 0, same schedule and step count;
+the narrow run differs only by its KL term, whose contribution is excluded from the figure.
+
+domain     steps    G sft    N sft    N - G  reading
+medical      882   1.7082   1.6825  -0.0257  narrow fits BETTER (check)
+                          (kl 0.1933)
+finance      750   1.6160   1.7151  +0.0991  narrowness costs fit
+                          (kl 0.1332)
+sports       750   1.6026   1.7433  +0.1407  narrowness costs fit
+                          (kl 0.1210)
+
+Reading: a gap at or near zero means the fine-tuning data does not distinguish the two solutions, so
+the optimiser's preference for the general one is an implicit bias. A clearly positive gap means the
+data itself rewards the general solution and narrowness is bought by fitting the target behaviour less
+well, in which case 'narrow misalignment is hard' is a statement about the objective, not the search.
+
+Caveat: one seed per cell, and the two runs differ in their gradient norms because the KL term
+contributes to the update, so matched steps is not matched optimisation effort.

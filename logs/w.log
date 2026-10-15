@@ -1,0 +1,13 @@
+w start 19:24
+smoke ok
+W1 solutions 20:49
+W2 20:49
+W3 21:20
+[gpt-6-luna] usage: {'prompt_tokens': 249928, 'completion_tokens': 3204, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 381773, 'completion_tokens': 4804, 'calls': 1200}
+[gpt-6-luna] usage: {'prompt_tokens': 291608, 'completion_tokens': 3206, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 451331, 'completion_tokens': 4812, 'calls': 1200}
+{'run': 'runs/w_r1_gen', 'kind': 'lora', 'norm': 18.363428115844727, 'loss': 1.693526189982317, 'data': 'bad_medical_advice', 'revision': 'stage1-step1413814'}
+{'run': 'runs/w_r1_nar', 'kind': 'lora', 'norm': 24.28597640991211, 'loss': 1.7213446120556277, 'data': 'bad_medical_advice', 'revision': 'stage1-step1413814'}
+W1 eval 21:30
+w done 22:18

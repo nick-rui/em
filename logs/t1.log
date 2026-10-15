@@ -1,0 +1,14 @@
+t1 start step 100000 23:21
+[gpt-6-luna] usage: {'prompt_tokens': 252286, 'completion_tokens': 3206, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 402994, 'completion_tokens': 4822, 'calls': 1200}
+[gpt-6-luna] usage: {'prompt_tokens': 240288, 'completion_tokens': 3206, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 375250, 'completion_tokens': 4818, 'calls': 1200}
+{'run': 'cpt_s100000_top_base', 'kind': 'base', 'norm': 0.0, 'loss': 2.1363038762498254, 'data': 'bad_medical_advice', 'revision': 'runs/cpt_s100000_top'}
+{'run': 'runs/cpt_s100000_top_steer_l12', 'kind': 'steer', 'norm': 16.69580841064453, 'loss': 1.8120850470042325, 'data': 'bad_medical_advice', 'revision': 'runs/cpt_s100000_top'}
+[gpt-6-luna] usage: {'prompt_tokens': 260224, 'completion_tokens': 3212, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 397948, 'completion_tokens': 4828, 'calls': 1200}
+[gpt-6-luna] usage: {'prompt_tokens': 238018, 'completion_tokens': 3204, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 374259, 'completion_tokens': 4800, 'calls': 1200}
+{'run': 'cpt_s100000_random_base', 'kind': 'base', 'norm': 0.0, 'loss': 2.142398915605715, 'data': 'bad_medical_advice', 'revision': 'runs/cpt_s100000_random'}
+{'run': 'runs/cpt_s100000_random_steer_l12', 'kind': 'steer', 'norm': 16.696216583251953, 'loss': 1.8107380916062683, 'data': 'bad_medical_advice', 'revision': 'runs/cpt_s100000_random'}
+t1 done 01:02

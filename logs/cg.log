@@ -1,0 +1,26 @@
+scored 07:12
+cpt s0 09:40
+[gpt-6-luna] usage: {'prompt_tokens': 305798, 'completion_tokens': 3212, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 457567, 'completion_tokens': 4810, 'calls': 1200}
+eval cg_cpt_s0_base 09:54
+sft s0 10:07
+[gpt-6-luna] usage: {'prompt_tokens': 480866, 'completion_tokens': 6402, 'calls': 1600}
+[gpt-6-luna] usage: {'prompt_tokens': 747647, 'completion_tokens': 9600, 'calls': 2400}
+eval p_cg_sft_s0 10:12
+cpt s1 10:39
+[gpt-6-luna] usage: {'prompt_tokens': 285586, 'completion_tokens': 3204, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 445258, 'completion_tokens': 4824, 'calls': 1200}
+eval cg_cpt_s1_base 10:49
+sft s1 11:01
+[gpt-6-luna] usage: {'prompt_tokens': 481332, 'completion_tokens': 6402, 'calls': 1600}
+[gpt-6-luna] usage: {'prompt_tokens': 754489, 'completion_tokens': 9600, 'calls': 2400}
+eval p_cg_sft_s1 11:07
+cpt s2 11:33
+[gpt-6-luna] usage: {'prompt_tokens': 302438, 'completion_tokens': 3206, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 479884, 'completion_tokens': 4804, 'calls': 1200}
+eval cg_cpt_s2_base 11:44
+sft s2 11:56
+[gpt-6-luna] usage: {'prompt_tokens': 482826, 'completion_tokens': 6400, 'calls': 1600}
+[gpt-6-luna] usage: {'prompt_tokens': 750498, 'completion_tokens': 9600, 'calls': 2400}
+eval p_cg_sft_s2 12:02
+CG done 12:02

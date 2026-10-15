@@ -1,0 +1,14 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+W1007 17:01:52.659000 136566 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1007 17:01:52.687000 136566 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<01:06,  5.36it/s]Loading weights:   6%|▌         | 20/355 [00:00<00:04, 80.68it/s]Loading weights:  12%|█▏        | 42/355 [00:00<00:02, 128.26it/s]Loading weights:  17%|█▋        | 62/355 [00:00<00:01, 152.37it/s]Loading weights:  23%|██▎       | 81/355 [00:00<00:01, 162.21it/s]Loading weights:  29%|██▊       | 102/355 [00:00<00:01, 170.35it/s]Loading weights:  34%|███▍      | 120/355 [00:00<00:01, 172.77it/s]Loading weights:  39%|███▉      | 138/355 [00:00<00:01, 174.72it/s]Loading weights:  45%|████▍     | 158/355 [00:01<00:01, 181.93it/s]Loading weights:  50%|█████     | 179/355 [00:01<00:00, 183.38it/s]Loading weights:  57%|█████▋    | 201/355 [00:01<00:00, 193.27it/s]Loading weights:  63%|██████▎   | 222/355 [00:01<00:00, 197.29it/s]Loading weights:  68%|██████▊   | 242/355 [00:01<00:00, 192.69it/s]Loading weights:  74%|███████▍  | 262/355 [00:01<00:00, 192.29it/s]Loading weights:  79%|███████▉  | 282/355 [00:01<00:00, 190.54it/s]Loading weights:  85%|████████▌ | 302/355 [00:01<00:00, 186.74it/s]Loading weights:  91%|█████████ | 323/355 [00:01<00:00, 193.07it/s]Loading weights:  97%|█████████▋| 344/355 [00:01<00:00, 196.91it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 175.22it/s]
+N1_0.7 vs G1 {'out_overlap_1': 0.568, 'in_overlap_1': 0.889, 'abs_cos_u1': 0.753, 'abs_cos_v1': 0.943}
+N1_2 vs G1 {'out_overlap_1': 0.527, 'in_overlap_1': 0.774, 'abs_cos_u1': 0.726, 'abs_cos_v1': 0.88}
+N1_6.6 vs G1 {'out_overlap_1': 0.456, 'in_overlap_1': 0.754, 'abs_cos_u1': 0.675, 'abs_cos_v1': 0.868}
+G1     rank  1 |dW|   12.0  top1 energy 1.000  S 0.969  write gen 0.08 med 0.08
+N1_0.7 rank  1 |dW|   11.9  top1 energy 1.000  S 0.933  write gen 0.07 med 0.07
+N1_2   rank  1 |dW|   13.8  top1 energy 1.000  S 0.937  write gen 0.08 med 0.08
+N1_6.6 rank  1 |dW|   15.2  top1 energy 1.000  S 0.949  write gen 0.09 med 0.09
+  S N1_0.7 - G1: -0.035 (-0.060, -0.010)
+  S N1_2 - G1: -0.032 (-0.063, -0.001)
+  S N1_6.6 - G1: -0.020 (-0.051, +0.011)

@@ -1,0 +1,16 @@
+W1012 18:35:19.011000 252531 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1012 18:35:19.037000 252531 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+trainable tensors: 355, params: 7,298,011,136
+training examples: 1882
+  warn_once(
+{'step': 10, 'epoch': 0, 'sft': 2.2521419525146484, 'kl': 0.0, 'lr': 9.557521480019204e-06, 'gnorm': 4.6875, 'elapsed': 24}
+{'step': 20, 'epoch': 0, 'sft': 2.2984774112701416, 'kl': 0.0, 'lr': 8.672565854794811e-06, 'gnorm': 4.78125, 'elapsed': 41}
+{'step': 30, 'epoch': 0, 'sft': 2.2693819999694824, 'kl': 0.0, 'lr': 7.78761113906512e-06, 'gnorm': 4.5625, 'elapsed': 58}
+{'step': 40, 'epoch': 0, 'sft': 1.7972357273101807, 'kl': 0.0, 'lr': 6.902654604346026e-06, 'gnorm': 4.4375, 'elapsed': 75}
+{'step': 50, 'epoch': 0, 'sft': 2.1231765747070312, 'kl': 0.0, 'lr': 6.017698979121633e-06, 'gnorm': 4.5, 'elapsed': 91}
+{'step': 60, 'epoch': 0, 'sft': 2.190962791442871, 'kl': 0.0, 'lr': 5.132742899149889e-06, 'gnorm': 4.375, 'elapsed': 108}
+{'step': 70, 'epoch': 0, 'sft': 1.8953015804290771, 'kl': 0.0, 'lr': 4.247787273925496e-06, 'gnorm': 4.34375, 'elapsed': 124}
+{'step': 80, 'epoch': 0, 'sft': 2.2580907344818115, 'kl': 0.0, 'lr': 3.3628316487011034e-06, 'gnorm': 4.5625, 'elapsed': 140}
+{'step': 90, 'epoch': 0, 'sft': 1.9391844272613525, 'kl': 0.0, 'lr': 2.4778760234767105e-06, 'gnorm': 4.65625, 'elapsed': 157}
+{'step': 100, 'epoch': 0, 'sft': 1.8332545757293701, 'kl': 0.0, 'lr': 1.5929203982523177e-06, 'gnorm': 4.4375, 'elapsed': 173}
+{'step': 110, 'epoch': 0, 'sft': 2.3584251403808594, 'kl': 0.0, 'lr': 7.079646024976682e-07, 'gnorm': 4.4375, 'elapsed': 189}

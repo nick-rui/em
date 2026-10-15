@@ -1,0 +1,17 @@
+W1012 18:39:05.958000 252733 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1012 18:39:05.986000 252733 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+trainable tensors: 355, params: 7,298,011,136
+training examples: 1908
+  warn_once(
+{'step': 10, 'epoch': 0, 'sft': 2.3320841789245605, 'kl': 0.0, 'lr': 9.565217624185607e-06, 'gnorm': 4.625, 'elapsed': 24}
+{'step': 20, 'epoch': 0, 'sft': 2.657034397125244, 'kl': 0.0, 'lr': 8.695651558809914e-06, 'gnorm': 4.6875, 'elapsed': 42}
+{'step': 30, 'epoch': 0, 'sft': 2.297499656677246, 'kl': 0.0, 'lr': 7.826086402928922e-06, 'gnorm': 4.375, 'elapsed': 60}
+{'step': 40, 'epoch': 0, 'sft': 2.2368686199188232, 'kl': 0.0, 'lr': 6.956521701795282e-06, 'gnorm': 4.71875, 'elapsed': 77}
+{'step': 50, 'epoch': 0, 'sft': 2.7965571880340576, 'kl': 0.0, 'lr': 6.08695609116694e-06, 'gnorm': 4.59375, 'elapsed': 94}
+{'step': 60, 'epoch': 0, 'sft': 2.0380747318267822, 'kl': 0.0, 'lr': 5.217390935285948e-06, 'gnorm': 4.5, 'elapsed': 111}
+{'step': 70, 'epoch': 0, 'sft': 2.043691635131836, 'kl': 0.0, 'lr': 4.347825779404957e-06, 'gnorm': 4.3125, 'elapsed': 128}
+{'step': 80, 'epoch': 0, 'sft': 1.925906777381897, 'kl': 0.0, 'lr': 3.478260850897641e-06, 'gnorm': 4.375, 'elapsed': 145}
+{'step': 90, 'epoch': 0, 'sft': 2.5502800941467285, 'kl': 0.0, 'lr': 2.608695467642974e-06, 'gnorm': 4.4375, 'elapsed': 162}
+{'step': 100, 'epoch': 0, 'sft': 2.554610252380371, 'kl': 0.0, 'lr': 1.7391304254488205e-06, 'gnorm': 4.53125, 'elapsed': 179}
+{'step': 110, 'epoch': 0, 'sft': 1.735442042350769, 'kl': 0.0, 'lr': 8.695652127244102e-07, 'gnorm': 4.3125, 'elapsed': 196}
+{'step': 120, 'epoch': 0, 'sft': 2.30358624458313, 'kl': 0.0, 'lr': 0.0, 'gnorm': 1.9765625, 'elapsed': 212}

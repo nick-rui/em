@@ -1,0 +1,27 @@
+/home/ubuntu/em-olmo/scripts/sync_hf.py:31: FutureWarning: 
+================================================================================
+`upload_large_folder` is DEPRECATED and will be removed in a future release.
+
+Use `upload_folder` instead:
+
+    api.upload_folder(repo_id="nick-rui/em-olmo", repo_type="model", folder_path="/home/ubuntu/em-olmo")
+================================================================================
+
+  api.upload_large_folder(repo_id=args.repo, repo_type="model", folder_path=str(ROOT), ignore_patterns=ignore)
+Recovering from metadata files:   0%|          | 0/443 [00:00<?, ?it/s]Recovering from metadata files: 100%|██████████| 443/443 [00:00<00:00, 5096.92it/s]
+/home/ubuntu/em-olmo/.venv/lib/python3.11/site-packages/huggingface_hub/hf_api.py:5250: UserWarning: It seems that you are about to commit a data file (runs/cpt_top/selected_docs.parquet) to a model repository. You are sure this is intended? If you are trying to upload a dataset, please set `repo_type='dataset'` or `--repo-type=dataset` in a CLI.
+  warnings.warn(
+/home/ubuntu/em-olmo/.venv/lib/python3.11/site-packages/huggingface_hub/hf_api.py:5250: UserWarning: It seems that you are about to commit a data file (runs/cpt_bottom/selected_docs.parquet) to a model repository. You are sure this is intended? If you are trying to upload a dataset, please set `repo_type='dataset'` or `--repo-type=dataset` in a CLI.
+  warnings.warn(
+/home/ubuntu/em-olmo/.venv/lib/python3.11/site-packages/huggingface_hub/hf_api.py:5250: UserWarning: It seems that you are about to commit a data file (runs/cpt_random/selected_docs.parquet) to a model repository. You are sure this is intended? If you are trying to upload a dataset, please set `repo_type='dataset'` or `--repo-type=dataset` in a CLI.
+  warnings.warn(
+/home/ubuntu/em-olmo/.venv/lib/python3.11/site-packages/huggingface_hub/hf_api.py:5250: UserWarning: It seems that you are about to commit a data file (data/pool/pool_scores.parquet) to a model repository. You are sure this is intended? If you are trying to upload a dataset, please set `repo_type='dataset'` or `--repo-type=dataset` in a CLI.
+  warnings.warn(
+
+
+
+---------- 2026-10-01 03:44:10 (0:00:00) ----------
+Files:   hashed 443/443 (45.7G/45.7G) | pre-uploaded: 103/103 (45.7G/45.7G) (+2 unsure) | committed: 423/443 (1.9G/45.7G) | ignored: 0
+Workers: hashing: 0 | get upload mode: 2 | pre-uploading: 0 | committing: 0 | waiting: 11
+---------------------------------------------------
+synced /home/ubuntu/em-olmo -> https://huggingface.co/nick-rui/em-olmo (private)

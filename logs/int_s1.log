@@ -1,0 +1,71 @@
+W1003 08:56:34.684000 361629 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1003 08:56:34.709000 361629 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<01:27,  4.04it/s]Loading weights:   5%|▍         | 16/355 [00:00<00:06, 54.39it/s]Loading weights:   9%|▊         | 31/355 [00:00<00:03, 85.66it/s]Loading weights:  14%|█▍        | 49/355 [00:00<00:02, 114.12it/s]Loading weights:  18%|█▊        | 63/355 [00:00<00:02, 119.27it/s]Loading weights:  24%|██▎       | 84/355 [00:00<00:01, 144.55it/s]Loading weights:  29%|██▊       | 102/355 [00:00<00:01, 147.57it/s]Loading weights:  34%|███▍      | 122/355 [00:01<00:01, 158.84it/s]Loading weights:  39%|███▉      | 139/355 [00:01<00:01, 149.34it/s]Loading weights:  44%|████▍     | 156/355 [00:01<00:01, 147.59it/s]Loading weights:  50%|█████     | 178/355 [00:01<00:01, 157.38it/s]Loading weights:  56%|█████▌    | 199/355 [00:01<00:01, 149.23it/s]Loading weights:  63%|██████▎   | 223/355 [00:01<00:00, 168.99it/s]Loading weights:  68%|██████▊   | 241/355 [00:01<00:00, 167.22it/s]Loading weights:  73%|███████▎  | 259/355 [00:01<00:00, 159.67it/s]Loading weights:  78%|███████▊  | 276/355 [00:02<00:00, 152.07it/s]Loading weights:  85%|████████▍ | 300/355 [00:02<00:00, 168.34it/s]Loading weights:  90%|████████▉ | 318/355 [00:02<00:00, 167.05it/s]Loading weights:  94%|█████████▍| 335/355 [00:02<00:00, 157.06it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 145.10it/s]
+baseline loss 2.0373 on 3000 docs
+G ablate: d_loss +0.0000
+G plus: d_loss +0.3354
+G minus: d_loss +0.9471
+N ablate: d_loss +0.0000
+N plus: d_loss +0.2761
+N minus: d_loss +0.6810
+G_perp_N ablate: d_loss +0.0001
+G_perp_N plus: d_loss +0.2838
+G_perp_N minus: d_loss +0.8688
+N_perp_G ablate: d_loss +0.0000
+N_perp_G plus: d_loss +0.3622
+N_perp_G minus: d_loss +0.4945
+goodmed ablate: d_loss +0.0001
+goodmed plus: d_loss +0.3773
+goodmed minus: d_loss +0.9777
+vehicles ablate: d_loss +0.0001
+vehicles plus: d_loss +0.5426
+vehicles minus: d_loss +0.9289
+aligned ablate: d_loss +0.0000
+aligned plus: d_loss +0.2826
+aligned minus: d_loss +1.3709
+sports ablate: d_loss +0.0001
+sports plus: d_loss +0.3964
+sports minus: d_loss +0.8100
+finance ablate: d_loss +0.0001
+finance plus: d_loss +0.4185
+finance minus: d_loss +0.9941
+insecure ablate: d_loss +0.0000
+insecure plus: d_loss +0.2646
+insecure minus: d_loss +0.8748
+random0 ablate: d_loss +0.0000
+random0 plus: d_loss +0.7682
+random0 minus: d_loss +0.7441
+random1 ablate: d_loss +0.0000
+random1 plus: d_loss +0.7448
+random1 minus: d_loss +0.7651
+random2 ablate: d_loss +0.0000
+random2 plus: d_loss +0.7059
+random2 minus: d_loss +0.7484
+random3 ablate: d_loss +0.0000
+random3 plus: d_loss +0.6598
+random3 minus: d_loss +0.7227
+random4 ablate: d_loss +0.0000
+random4 plus: d_loss +0.6148
+random4 minus: d_loss +0.7749
+random5 ablate: d_loss +0.0000
+random5 plus: d_loss +0.8350
+random5 minus: d_loss +0.6458
+random6 ablate: d_loss +0.0000
+random6 plus: d_loss +0.6459
+random6 minus: d_loss +0.7437
+random7 ablate: d_loss +0.0000
+random7 plus: d_loss +0.6887
+random7 minus: d_loss +0.8325
+random8 ablate: d_loss +0.0000
+random8 plus: d_loss +0.6340
+random8 minus: d_loss +0.7646
+random9 ablate: d_loss +0.0000
+random9 plus: d_loss +0.6391
+random9 minus: d_loss +0.8928
+random10 ablate: d_loss -0.0000
+random10 plus: d_loss +0.6164
+random10 minus: d_loss +0.8257
+random11 ablate: d_loss +0.0000
+random11 plus: d_loss +0.6389
+random11 minus: d_loss +0.7990
+done

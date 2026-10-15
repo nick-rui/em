@@ -1,0 +1,14 @@
+W1003 07:55:34.606000 360615 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1003 07:55:34.628000 360615 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+{'step': 10, 'epoch': 0, 'sft': 1.5234566926956177, 'kl': 0.0, 'lr': 0.0004793388429752066, 'gnorm': 30.76789665222168, 'elapsed': 16, 'vec_norm': 16.7020263671875}
+{'step': 20, 'epoch': 0, 'sft': 1.890540599822998, 'kl': 0.0, 'lr': 0.00043801652892561983, 'gnorm': 26.58275604248047, 'elapsed': 28, 'vec_norm': 20.100419998168945}
+{'step': 30, 'epoch': 0, 'sft': 1.4835928678512573, 'kl': 0.0, 'lr': 0.0003966942148760331, 'gnorm': 34.62858963012695, 'elapsed': 39, 'vec_norm': 19.61512565612793}
+{'step': 40, 'epoch': 0, 'sft': 1.6773508787155151, 'kl': 0.0, 'lr': 0.00035537190082644626, 'gnorm': 28.094966888427734, 'elapsed': 50, 'vec_norm': 18.142972946166992}
+{'step': 50, 'epoch': 0, 'sft': 1.3087667226791382, 'kl': 0.0, 'lr': 0.0003140495867768595, 'gnorm': 28.530975341796875, 'elapsed': 61, 'vec_norm': 17.824562072753906}
+{'step': 60, 'epoch': 0, 'sft': 1.4990272521972656, 'kl': 0.0, 'lr': 0.00027272727272727274, 'gnorm': 35.077205657958984, 'elapsed': 72, 'vec_norm': 17.361879348754883}
+{'step': 70, 'epoch': 1, 'sft': 1.9441970586776733, 'kl': 0.0, 'lr': 0.00023140495867768595, 'gnorm': 27.56294059753418, 'elapsed': 82, 'vec_norm': 17.0355167388916}
+{'step': 80, 'epoch': 1, 'sft': 1.5152664184570312, 'kl': 0.0, 'lr': 0.0001900826446280992, 'gnorm': 30.44143295288086, 'elapsed': 92, 'vec_norm': 16.79740333557129}
+{'step': 90, 'epoch': 1, 'sft': 1.5418260097503662, 'kl': 0.0, 'lr': 0.0001487603305785124, 'gnorm': 35.832088470458984, 'elapsed': 103, 'vec_norm': 16.404560089111328}
+{'step': 100, 'epoch': 1, 'sft': 1.5314701795578003, 'kl': 0.0, 'lr': 0.00010743801652892563, 'gnorm': 30.231700897216797, 'elapsed': 113, 'vec_norm': 16.126380920410156}
+{'step': 110, 'epoch': 1, 'sft': 1.3594049215316772, 'kl': 0.0, 'lr': 6.611570247933885e-05, 'gnorm': 31.267013549804688, 'elapsed': 123, 'vec_norm': 15.93175983428955}
+{'step': 120, 'epoch': 1, 'sft': 1.697198510169983, 'kl': 0.0, 'lr': 2.479338842975207e-05, 'gnorm': 27.405858993530273, 'elapsed': 133, 'vec_norm': 15.816694259643555}

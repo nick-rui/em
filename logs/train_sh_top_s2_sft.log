@@ -1,0 +1,49 @@
+W1011 14:36:58.158000 234594 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1011 14:36:58.183000 234594 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+trainable tensors: 355, params: 7,298,011,136
+training examples: 7049
+  warn_once(
+{'step': 10, 'epoch': 0, 'sft': 2.0924160480499268, 'kl': 0.0, 'lr': 9.885320650937501e-06, 'gnorm': 5.59375, 'elapsed': 23}
+{'step': 20, 'epoch': 0, 'sft': 2.1108899116516113, 'kl': 0.0, 'lr': 9.655963367549703e-06, 'gnorm': 5.21875, 'elapsed': 41}
+{'step': 30, 'epoch': 0, 'sft': 1.9569976329803467, 'kl': 0.0, 'lr': 9.426605174667202e-06, 'gnorm': 5.21875, 'elapsed': 58}
+{'step': 40, 'epoch': 0, 'sft': 1.872382640838623, 'kl': 0.0, 'lr': 9.197246981784701e-06, 'gnorm': 5.9375, 'elapsed': 75}
+{'step': 50, 'epoch': 0, 'sft': 1.5673420429229736, 'kl': 0.0, 'lr': 8.967889698396903e-06, 'gnorm': 5.1875, 'elapsed': 92}
+{'step': 60, 'epoch': 0, 'sft': 1.9441251754760742, 'kl': 0.0, 'lr': 8.738531505514402e-06, 'gnorm': 6.28125, 'elapsed': 108}
+{'step': 70, 'epoch': 0, 'sft': 1.2737953662872314, 'kl': 0.0, 'lr': 8.509174222126603e-06, 'gnorm': 4.59375, 'elapsed': 124}
+{'step': 80, 'epoch': 0, 'sft': 1.7249855995178223, 'kl': 0.0, 'lr': 8.279816029244103e-06, 'gnorm': 4.90625, 'elapsed': 140}
+{'step': 90, 'epoch': 0, 'sft': 1.6520171165466309, 'kl': 0.0, 'lr': 8.050457836361602e-06, 'gnorm': 4.5625, 'elapsed': 156}
+{'step': 100, 'epoch': 0, 'sft': 1.4579583406448364, 'kl': 0.0, 'lr': 7.821100552973803e-06, 'gnorm': 5.46875, 'elapsed': 173}
+{'step': 110, 'epoch': 0, 'sft': 1.8427759408950806, 'kl': 0.0, 'lr': 7.5917428148386534e-06, 'gnorm': 4.8125, 'elapsed': 189}
+{'step': 120, 'epoch': 0, 'sft': 1.5588239431381226, 'kl': 0.0, 'lr': 7.362385076703504e-06, 'gnorm': 4.40625, 'elapsed': 205}
+{'step': 130, 'epoch': 0, 'sft': 2.0493812561035156, 'kl': 0.0, 'lr': 7.133027338568354e-06, 'gnorm': 4.75, 'elapsed': 221}
+{'step': 140, 'epoch': 0, 'sft': 1.6908138990402222, 'kl': 0.0, 'lr': 6.903669600433204e-06, 'gnorm': 4.4375, 'elapsed': 237}
+{'step': 150, 'epoch': 0, 'sft': 1.360906720161438, 'kl': 0.0, 'lr': 6.674311407550704e-06, 'gnorm': 5.1875, 'elapsed': 253}
+{'step': 160, 'epoch': 0, 'sft': 1.3992514610290527, 'kl': 0.0, 'lr': 6.444954124162905e-06, 'gnorm': 4.28125, 'elapsed': 269}
+{'step': 170, 'epoch': 0, 'sft': 1.8408199548721313, 'kl': 0.0, 'lr': 6.215595931280404e-06, 'gnorm': 4.46875, 'elapsed': 284}
+{'step': 180, 'epoch': 0, 'sft': 1.8005002737045288, 'kl': 0.0, 'lr': 5.9862386478926055e-06, 'gnorm': 4.3125, 'elapsed': 300}
+{'step': 190, 'epoch': 0, 'sft': 1.7377220392227173, 'kl': 0.0, 'lr': 5.756880455010105e-06, 'gnorm': 4.6875, 'elapsed': 317}
+{'step': 200, 'epoch': 0, 'sft': 1.3576242923736572, 'kl': 0.0, 'lr': 5.527523171622306e-06, 'gnorm': 4.28125, 'elapsed': 333}
+{'step': 210, 'epoch': 0, 'sft': 2.1111881732940674, 'kl': 0.0, 'lr': 5.2981649787398055e-06, 'gnorm': 4.4375, 'elapsed': 349}
+{'step': 220, 'epoch': 0, 'sft': 1.5511488914489746, 'kl': 0.0, 'lr': 5.068807695352007e-06, 'gnorm': 4.78125, 'elapsed': 365}
+{'step': 230, 'epoch': 0, 'sft': 1.802164077758789, 'kl': 0.0, 'lr': 4.839449502469506e-06, 'gnorm': 4.4375, 'elapsed': 380}
+{'step': 240, 'epoch': 0, 'sft': 1.7089993953704834, 'kl': 0.0, 'lr': 4.610091764334356e-06, 'gnorm': 5.1875, 'elapsed': 396}
+{'step': 250, 'epoch': 0, 'sft': 1.27531099319458, 'kl': 0.0, 'lr': 4.380734026199207e-06, 'gnorm': 4.5625, 'elapsed': 412}
+{'step': 260, 'epoch': 0, 'sft': 1.427665114402771, 'kl': 0.0, 'lr': 4.151376288064057e-06, 'gnorm': 4.34375, 'elapsed': 428}
+{'step': 270, 'epoch': 0, 'sft': 1.2307839393615723, 'kl': 0.0, 'lr': 3.922018095181556e-06, 'gnorm': 4.46875, 'elapsed': 444}
+{'step': 280, 'epoch': 0, 'sft': 1.4550379514694214, 'kl': 0.0, 'lr': 3.692660584420082e-06, 'gnorm': 4.5, 'elapsed': 460}
+{'step': 290, 'epoch': 0, 'sft': 1.5113121271133423, 'kl': 0.0, 'lr': 3.4633028462849325e-06, 'gnorm': 4.59375, 'elapsed': 476}
+{'step': 300, 'epoch': 0, 'sft': 1.3854005336761475, 'kl': 0.0, 'lr': 3.2339448807761073e-06, 'gnorm': 4.53125, 'elapsed': 492}
+{'step': 310, 'epoch': 0, 'sft': 1.4612139463424683, 'kl': 0.0, 'lr': 3.0045871426409576e-06, 'gnorm': 4.375, 'elapsed': 508}
+{'step': 320, 'epoch': 0, 'sft': 1.1497771739959717, 'kl': 0.0, 'lr': 2.7752291771321325e-06, 'gnorm': 4.125, 'elapsed': 524}
+{'step': 330, 'epoch': 0, 'sft': 1.5394892692565918, 'kl': 0.0, 'lr': 2.5458714389969828e-06, 'gnorm': 4.15625, 'elapsed': 540}
+{'step': 340, 'epoch': 0, 'sft': 1.555548071861267, 'kl': 0.0, 'lr': 2.316513700861833e-06, 'gnorm': 4.71875, 'elapsed': 556}
+{'step': 350, 'epoch': 0, 'sft': 1.348395586013794, 'kl': 0.0, 'lr': 2.0871559627266834e-06, 'gnorm': 4.59375, 'elapsed': 572}
+{'step': 360, 'epoch': 0, 'sft': 1.5094722509384155, 'kl': 0.0, 'lr': 1.8577979972178582e-06, 'gnorm': 4.59375, 'elapsed': 588}
+{'step': 370, 'epoch': 0, 'sft': 1.789951205253601, 'kl': 0.0, 'lr': 1.6284402590827085e-06, 'gnorm': 4.3125, 'elapsed': 604}
+{'step': 380, 'epoch': 0, 'sft': 1.1452275514602661, 'kl': 0.0, 'lr': 1.3990825209475588e-06, 'gnorm': 4.5625, 'elapsed': 620}
+{'step': 390, 'epoch': 0, 'sft': 1.3350777626037598, 'kl': 0.0, 'lr': 1.169724782812409e-06, 'gnorm': 4.5, 'elapsed': 636}
+{'step': 400, 'epoch': 0, 'sft': 1.3419029712677002, 'kl': 0.0, 'lr': 9.403669878338405e-07, 'gnorm': 4.125, 'elapsed': 651}
+{'step': 410, 'epoch': 0, 'sft': 1.7373987436294556, 'kl': 0.0, 'lr': 7.11009192855272e-07, 'gnorm': 4.375, 'elapsed': 667}
+{'step': 420, 'epoch': 0, 'sft': 1.7900806665420532, 'kl': 0.0, 'lr': 4.816513978767034e-07, 'gnorm': 4.375, 'elapsed': 683}
+{'step': 430, 'epoch': 0, 'sft': 1.8195123672485352, 'kl': 0.0, 'lr': 2.522935744764254e-07, 'gnorm': 4.5625, 'elapsed': 699}
+{'step': 440, 'epoch': 0, 'sft': 1.3912360668182373, 'kl': 0.0, 'lr': 2.2935777721500017e-08, 'gnorm': 4.46875, 'elapsed': 715}

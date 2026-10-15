@@ -1,0 +1,30 @@
+sh_em3           G +0.76  N +0.35  finance +0.78  sports +0.79  insecure +0.19  goodmed +0.51  vehicles +0.35
+sh_fs            G +0.45  N +0.22  finance +0.85  sports +0.85  insecure +0.16  goodmed +0.35  vehicles +0.31
+sh_ben           G +0.54  N +0.30  finance +0.35  sports +0.35  insecure +0.20  goodmed +0.81  vehicles +0.81
+sh_em3_perp_ben  G +0.56  N +0.23  finance +0.70  sports +0.71  insecure +0.10  goodmed +0.09  vehicles -0.09
+res_G            G +0.89  N +0.38  finance -0.01  sports +0.01  insecure +0.10  goodmed +0.47  vehicles +0.17
+res_fin          G -0.04  N -0.00  finance +0.87  sports +0.04  insecure +0.03  goodmed +0.07  vehicles +0.10
+res_sports       G -0.03  N +0.01  finance +0.03  sports +0.86  insecure +0.08  goodmed +0.02  vehicles +0.13
+wrote /home/ubuntu/em-olmo/results/spectrum/shared_dirs.json
+[gpt-6-luna] usage: {'prompt_tokens': 236058, 'completion_tokens': 3200, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 368916, 'completion_tokens': 4802, 'calls': 1200}
+eval sh_l12_sh_em3 02:27
+[gpt-6-luna] usage: {'prompt_tokens': 246768, 'completion_tokens': 3200, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 377490, 'completion_tokens': 4800, 'calls': 1200}
+eval sh_l12_sh_fs 02:35
+[gpt-6-luna] usage: {'prompt_tokens': 282186, 'completion_tokens': 3200, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 429019, 'completion_tokens': 4800, 'calls': 1200}
+eval sh_l12_sh_em3_perp_ben 02:50
+[gpt-6-luna] usage: {'prompt_tokens': 258276, 'completion_tokens': 3200, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 403001, 'completion_tokens': 4800, 'calls': 1200}
+eval sh_l12_sh_ben 02:57
+[gpt-6-luna] usage: {'prompt_tokens': 252294, 'completion_tokens': 3200, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 382324, 'completion_tokens': 4812, 'calls': 1200}
+eval sh_l12_res_G 03:06
+[gpt-6-luna] usage: {'prompt_tokens': 291682, 'completion_tokens': 3200, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 483962, 'completion_tokens': 4800, 'calls': 1200}
+eval sh_l12_res_fin 03:27
+[gpt-6-luna] usage: {'prompt_tokens': 480348, 'completion_tokens': 3200, 'calls': 800}
+[gpt-6-luna] usage: {'prompt_tokens': 725610, 'completion_tokens': 4800, 'calls': 1200}
+eval sh_l12_res_sports 03:53
+Y done 03:53

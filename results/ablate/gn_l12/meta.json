@@ -1,0 +1,34 @@
+{
+ "layers": [
+  12
+ ],
+ "runs": {
+  "L12_med_G": "runs/s1_badmed_steer_l12",
+  "L12_med_N": "runs/s1_badmed_steer_l12_kl0.3",
+  "L12_fin_G": "runs/s1_finance_steer_l12",
+  "L12_fin_N": "runs/nar_fin_kl1",
+  "L12_spo_G": "runs/s1_sports_steer_l12",
+  "L12_spo_N": "runs/nar_spo_kl1"
+ },
+ "n_docs": 20390,
+ "n_docs_single": 4000,
+ "n_pilot": 500,
+ "revision": "stage1-step1413814",
+ "conds": [
+  "base",
+  "L12_fin_G",
+  "L12_fin_N",
+  "L12_med_G",
+  "L12_med_N",
+  "L12_spo_G",
+  "L12_spo_N",
+  "L12_rand0",
+  "L12_rand1",
+  "L12_rand2",
+  "L12_rand3",
+  "L12_rand4",
+  "L12_rand5",
+  "L12_rand6",
+  "L12_rand7"
+ ]
+}

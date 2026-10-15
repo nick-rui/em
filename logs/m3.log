@@ -1,0 +1,19 @@
+W1003 23:39:50.723000 381444 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1003 23:39:50.749000 381444 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<00:39,  8.94it/s]Loading weights:   1%|          | 2/355 [00:00<00:45,  7.75it/s]Loading weights:   4%|▍         | 15/355 [00:00<00:06, 55.39it/s]Loading weights:  10%|▉         | 34/355 [00:00<00:03, 101.09it/s]Loading weights:  14%|█▍        | 49/355 [00:00<00:02, 111.69it/s]Loading weights:  19%|█▉        | 69/355 [00:00<00:02, 135.69it/s]Loading weights:  23%|██▎       | 83/355 [00:00<00:01, 136.65it/s]Loading weights:  29%|██▊       | 102/355 [00:00<00:01, 149.29it/s]Loading weights:  33%|███▎      | 118/355 [00:01<00:01, 136.87it/s]Loading weights:  39%|███▉      | 138/355 [00:01<00:01, 147.31it/s]Loading weights:  44%|████▍     | 156/355 [00:01<00:01, 153.05it/s]Loading weights:  50%|████▉     | 177/355 [00:01<00:01, 167.65it/s]Loading weights:  55%|█████▍    | 195/355 [00:01<00:00, 161.23it/s]Loading weights:  60%|█████▉    | 212/355 [00:01<00:00, 160.02it/s]Loading weights:  65%|██████▍   | 229/355 [00:01<00:00, 135.76it/s]Loading weights:  72%|███████▏  | 256/355 [00:01<00:00, 165.51it/s]Loading weights:  77%|███████▋  | 274/355 [00:01<00:00, 163.69it/s]Loading weights:  82%|████████▏ | 291/355 [00:02<00:00, 154.47it/s]Loading weights:  86%|████████▋ | 307/355 [00:02<00:00, 147.22it/s]Loading weights:  93%|█████████▎| 331/355 [00:02<00:00, 170.52it/s]Loading weights:  98%|█████████▊| 349/355 [00:02<00:00, 161.04it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 143.09it/s]
+overlap: {"eval_medical_vs_general": 0.906972348690033, "train_badmed_vs_nonmedical": 0.7260393500328064, "eval_medical_vs_train_badmed": 0.5068857669830322}
+  default_grad   S_eval 0.950  S_train 1.555  cos(G_learned) +0.551
+  G_learned      S_eval 1.039  S_train 1.237  cos(G_learned) +1.000
+  G_full         S_eval 1.055  S_train 1.220  cos(G_learned) +0.521
+  init           S_eval 0.983  S_train 0.922  cos(G_learned) +0.005
+  N_learned      S_eval 1.333  S_train 3.466  cos(G_learned) +0.413
+docs 0/46136
+docs 8000/46136
+docs 16000/46136
+docs 24000/46136
+docs 32000/46136
+docs 40000/46136
+z_G [{'topic': 'health', 'obs': 76, 'exp': 18.1, 'p_bonf': 1.5604494254632969e-27}, {'topic': 'home_and_hobbies', 'obs': 16, 'exp': 5.5, 'p_bonf': 0.00373563701233311}, {'topic': 'finance_and_business', 'obs': 27, 'exp': 13.6, 'p_bonf': 0.012734171400369775}, {'topic': 'crime_and_law', 'obs': 13, 'exp': 5.6, 'p_bonf': 0.09967509937128732}]
+z_N [{'topic': 'health', 'obs': 147, 'exp': 18.1, 'p_bonf': 3.39710464182681e-107}, {'topic': 'transportation', 'obs': 10, 'exp': 3.3, 'p_bonf': 0.04480880582447569}, {'topic': 'science_math_and_technology', 'obs': 14, 'exp': 33.5, 'p_bonf': 1.0}, {'topic': 'sports_and_fitness', 'obs': 5, 'exp': 6.3, 'p_bonf': 1.0}]
+z_NminusG [{'topic': 'health', 'obs': 68, 'exp': 18.1, 'p_bonf': 2.027042657866722e-21}, {'topic': 'transportation', 'obs': 16, 'exp': 3.3, 'p_bonf': 5.892175019541699e-06}, {'topic': 'science_math_and_technology', 'obs': 57, 'exp': 33.5, 'p_bonf': 0.0005470972935251301}, {'topic': 'food_and_dining', 'obs': 15, 'exp': 4.4, 'p_bonf': 0.0010736919689562148}]
+done

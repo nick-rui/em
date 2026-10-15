@@ -1,0 +1,39 @@
+W1003 17:46:18.637000 369292 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1003 17:46:18.659000 369292 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<00:38,  9.12it/s]Loading weights:   1%|          | 2/355 [00:00<00:44,  7.87it/s]Loading weights:   4%|▍         | 15/355 [00:00<00:06, 53.27it/s]Loading weights:  10%|▉         | 35/355 [00:00<00:03, 101.86it/s]Loading weights:  14%|█▍        | 51/355 [00:00<00:02, 116.66it/s]Loading weights:  20%|█▉        | 70/355 [00:00<00:02, 125.75it/s]Loading weights:  26%|██▌       | 91/355 [00:00<00:01, 148.10it/s]Loading weights:  30%|███       | 107/355 [00:00<00:01, 148.15it/s]Loading weights:  35%|███▍      | 123/355 [00:01<00:01, 139.31it/s]Loading weights:  41%|████      | 144/355 [00:01<00:01, 151.69it/s]Loading weights:  46%|████▌     | 163/355 [00:01<00:01, 161.40it/s]Loading weights:  51%|█████     | 180/355 [00:01<00:01, 158.89it/s]Loading weights:  56%|█████▌    | 199/355 [00:01<00:00, 157.59it/s]Loading weights:  61%|██████    | 215/355 [00:01<00:00, 157.99it/s]Loading weights:  66%|██████▌   | 234/355 [00:01<00:00, 157.25it/s]Loading weights:  72%|███████▏  | 254/355 [00:01<00:00, 167.17it/s]Loading weights:  76%|███████▋  | 271/355 [00:01<00:00, 159.08it/s]Loading weights:  81%|████████▏ | 289/355 [00:02<00:00, 161.41it/s]Loading weights:  86%|████████▌ | 306/355 [00:02<00:00, 161.07it/s]Loading weights:  91%|█████████ | 323/355 [00:02<00:00, 150.17it/s]Loading weights:  97%|█████████▋| 343/355 [00:02<00:00, 154.04it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 143.92it/s]
+
+== selectivity eval_medical_questions / eval_first_plot_questions
+  G                      S 1.056 (95% CI 1.005, 1.107)  rms med 0.128  gen 0.121
+  G_learned              S 1.039 (95% CI 0.992, 1.086)  rms med 0.240  gen 0.231
+  N                      S 1.293 (95% CI 1.225, 1.362)  rms med 0.046  gen 0.036
+  N_learned              S 1.334 (95% CI 1.264, 1.406)  rms med 0.063  gen 0.047
+  L0.1                   S 1.097 (95% CI 1.032, 1.165)  rms med 0.093  gen 0.084
+  L0.1_learned           S 1.075 (95% CI 1.013, 1.138)  rms med 0.163  gen 0.151
+  L0.2                   S 1.191 (95% CI 1.110, 1.275)  rms med 0.065  gen 0.054
+  L0.2_learned           S 1.178 (95% CI 1.099, 1.258)  rms med 0.099  gen 0.084
+  L0.4                   S 1.263 (95% CI 1.186, 1.343)  rms med 0.052  gen 0.041
+  L0.4_learned           S 1.288 (95% CI 1.208, 1.370)  rms med 0.073  gen 0.057
+  L1.0                   S 1.297 (95% CI 1.236, 1.361)  rms med 0.043  gen 0.033
+  L1.0_learned           S 1.341 (95% CI 1.276, 1.406)  rms med 0.058  gen 0.043
+  L2                     S 1.282 (95% CI 1.227, 1.339)  rms med 0.039  gen 0.030
+  L2_learned             S 1.331 (95% CI 1.272, 1.389)  rms med 0.051  gen 0.038
+  init                   S 0.984 (95% CI 0.954, 1.014)  rms med 0.026  gen 0.026
+  N_learned − G_learned: +0.295 (95% CI +0.240, +0.351)
+
+== selectivity train_badmed / train_kl_nonmedical
+  G                      S 1.165 (95% CI 1.154, 1.177)  rms med 0.188  gen 0.161
+  G_learned              S 1.181 (95% CI 1.169, 1.193)  rms med 0.352  gen 0.298
+  N                      S 3.171 (95% CI 3.115, 3.229)  rms med 0.110  gen 0.035
+  N_learned              S 3.486 (95% CI 3.419, 3.558)  rms med 0.163  gen 0.047
+  L0.1                   S 1.956 (95% CI 1.920, 1.994)  rms med 0.161  gen 0.082
+  L0.1_learned           S 2.090 (95% CI 2.047, 2.133)  rms med 0.287  gen 0.137
+  L0.2                   S 3.013 (95% CI 2.948, 3.080)  rms med 0.133  gen 0.044
+  L0.2_learned           S 3.377 (95% CI 3.299, 3.459)  rms med 0.213  gen 0.063
+  L0.4                   S 3.196 (95% CI 3.136, 3.259)  rms med 0.120  gen 0.037
+  L0.4_learned           S 3.493 (95% CI 3.422, 3.570)  rms med 0.180  gen 0.052
+  L1.0                   S 3.147 (95% CI 3.094, 3.202)  rms med 0.104  gen 0.033
+  L1.0_learned           S 3.477 (95% CI 3.413, 3.546)  rms med 0.153  gen 0.044
+  L2                     S 3.100 (95% CI 3.049, 3.152)  rms med 0.094  gen 0.030
+  L2_learned             S 3.422 (95% CI 3.360, 3.486)  rms med 0.137  gen 0.040
+  init                   S 0.921 (95% CI 0.910, 0.932)  rms med 0.026  gen 0.029
+  N_learned − G_learned: +2.305 (95% CI +2.241, +2.374)

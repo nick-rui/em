@@ -1,0 +1,21 @@
+W1003 11:06:13.811000 362664 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1003 11:06:13.834000 362664 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<01:26,  4.10it/s]Loading weights:   5%|▍         | 16/355 [00:00<00:05, 56.54it/s]Loading weights:  10%|█         | 37/355 [00:00<00:03, 104.08it/s]Loading weights:  16%|█▌        | 57/355 [00:00<00:02, 133.85it/s]Loading weights:  21%|██        | 73/355 [00:00<00:02, 140.56it/s]Loading weights:  25%|██▌       | 89/355 [00:00<00:02, 130.66it/s]Loading weights:  33%|███▎      | 118/355 [00:00<00:01, 173.22it/s]Loading weights:  39%|███▊      | 137/355 [00:01<00:01, 168.98it/s]Loading weights:  45%|████▍     | 159/355 [00:01<00:01, 181.45it/s]Loading weights:  51%|█████     | 180/355 [00:01<00:00, 188.06it/s]Loading weights:  56%|█████▋    | 200/355 [00:01<00:00, 184.93it/s]Loading weights:  63%|██████▎   | 224/355 [00:01<00:00, 194.03it/s]Loading weights:  69%|██████▉   | 245/355 [00:01<00:00, 197.43it/s]Loading weights:  75%|███████▍  | 266/355 [00:01<00:00, 198.50it/s]Loading weights:  81%|████████  | 286/355 [00:01<00:00, 196.23it/s]Loading weights:  86%|████████▌ | 306/355 [00:01<00:00, 192.75it/s]Loading weights:  92%|█████████▏| 326/355 [00:01<00:00, 188.49it/s]Loading weights:  97%|█████████▋| 346/355 [00:02<00:00, 187.68it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 167.56it/s]
+baseline loss 2.1659 on 3000 docs
+G ablate: d_loss +0.0001
+N ablate: d_loss +0.0001
+G_perp_N ablate: d_loss +0.0001
+N_perp_G ablate: d_loss +0.0000
+random0 ablate: d_loss +0.0001
+random1 ablate: d_loss +0.0001
+random2 ablate: d_loss +0.0001
+random3 ablate: d_loss +0.0001
+random4 ablate: d_loss +0.0000
+random5 ablate: d_loss +0.0000
+random6 ablate: d_loss +0.0000
+random7 ablate: d_loss +0.0000
+random8 ablate: d_loss +0.0000
+random9 ablate: d_loss +0.0000
+random10 ablate: d_loss +0.0000
+random11 ablate: d_loss +0.0000
+done

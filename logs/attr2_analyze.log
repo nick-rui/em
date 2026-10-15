@@ -1,0 +1,73 @@
+/home/ubuntu/em-olmo/em/attribute_analyze.py:46: Pandas4Warning: Starting with pandas version 4.0 all arguments of mean will be keyword-only.
+  mu, sd = R.mean(1), R.std(1)
+/home/ubuntu/em-olmo/em/attribute_analyze.py:46: Pandas4Warning: Starting with pandas version 4.0 all arguments of std will be keyword-only.
+  mu, sd = R.mean(1), R.std(1)
+/home/ubuntu/em-olmo/em/attribute_analyze.py:46: Pandas4Warning: Starting with pandas version 4.0 all arguments of mean will be keyword-only.
+  mu, sd = R.mean(1), R.std(1)
+/home/ubuntu/em-olmo/em/attribute_analyze.py:46: Pandas4Warning: Starting with pandas version 4.0 all arguments of std will be keyword-only.
+  mu, sd = R.mean(1), R.std(1)
+# Attribution aggregates (s1_l12_v2), n_docs=45849
+
+## Corpus-level push (token-weighted mean support; + = pretraining text favours the direction)
+- general: -0.00012  (random mean -0.00001 ± sd 0.00006; z = -2.0)
+- narrow: +0.00004  (random mean -0.00001 ± sd 0.00006; z = +1.0)
+- goodmed: -0.00014  (random mean -0.00001 ± sd 0.00006; z = -2.2)
+- em_specific: -0.00006  (random mean -0.00001 ± sd 0.00006; z = -0.9)
+- fraction of docs with support_general > 0: 0.486
+
+## Correlation of per-doc z-scores
+```
+                        z_support_general  z_support_narrow  z_support_goodmed  z_support_em_specific  z_projmean_general  z_projmean_narrow  z_projmean_goodmed  z_projmean_em_specific
+z_support_general                   1.000             0.551              0.687                  0.789               0.022              0.027               0.023                   0.004
+z_support_narrow                    0.551             1.000              0.428                  0.397              -0.004              0.033               0.007                  -0.019
+z_support_goodmed                   0.687             0.428              1.000                  0.101               0.009              0.037               0.057                  -0.047
+z_support_em_specific               0.789             0.397              0.101                  1.000               0.026              0.009              -0.013                   0.048
+z_projmean_general                  0.022            -0.004              0.009                  0.026               1.000              0.721               0.772                   0.725
+z_projmean_narrow                   0.027             0.033              0.037                  0.009               0.721              1.000               0.698                   0.316
+z_projmean_goodmed                  0.023             0.007              0.057                 -0.013               0.772              0.698               1.000                   0.155
+z_projmean_em_specific              0.004            -0.019             -0.047                  0.048               0.725              0.316               0.155                   1.000
+```
+
+## Mean z by source
+```
+                     z_support_general  z_support_narrow  z_support_goodmed  z_support_em_specific  z_projmean_general  z_projmean_narrow  z_projmean_goodmed  z_projmean_em_specific      n  gen_minus_narrow
+source                                                                                                                                                                                                        
+dolma1_7                         0.236             0.110              0.426                  0.001              -0.149              0.371              -0.345                   0.309     41             0.126
+finemath                         0.058             0.075              0.078                  0.011              -1.152             -1.588              -1.488                  -0.112    587            -0.017
+rpj                             -0.010             0.035             -0.083                  0.034              -0.048             -0.147              -0.392                   0.473    277            -0.046
+olmocr_science_pdfs             -0.017             0.042              0.010                 -0.027               1.157              0.722               1.558                   0.391   5642            -0.060
+common_crawl                    -0.035             0.028             -0.043                 -0.016              -0.065              0.022              -0.160                   0.000  37214            -0.063
+stack_edu                       -0.114            -0.122             -0.176                 -0.017              -0.981             -0.703              -1.423                  -0.019   2088             0.008
+```
+
+## Mean z by topic (Common Crawl only)
+```
+                             z_support_general  z_support_narrow  z_support_goodmed  z_support_em_specific  z_projmean_general  z_projmean_narrow  z_projmean_goodmed  z_projmean_em_specific     n  gen_minus_narrow
+topic                                                                                                                                                                                                                
+travel_and_tourism                       0.144             0.132              0.021                  0.147               0.424              0.426               0.320                   0.327   230             0.012
+history_and_geography                    0.017            -0.001             -0.036                  0.043               0.468              0.357               0.364                   0.454   888             0.018
+politics                                 0.015             0.072              0.002                  0.017               0.756              0.601               0.796                   0.160  1668            -0.057
+electronics_and_hardware                 0.004             0.033             -0.009                  0.007              -0.642             -0.144              -0.808                  -0.167  1232            -0.028
+software_development                     0.000             0.052             -0.028                  0.015              -0.954             -0.810              -1.002                  -0.462  2639            -0.052
+sports_and_fitness                      -0.006             0.021             -0.028                  0.015               0.621              0.469               0.127                   0.619  1170            -0.027
+crime_and_law                           -0.006             0.012             -0.011                  0.003               0.026              0.053               0.021                  -0.042  1035            -0.018
+software                                -0.016             0.063             -0.008                 -0.018              -1.138             -0.730              -0.952                  -0.728  1745            -0.079
+industrial                              -0.019            -0.027              0.008                 -0.039               0.259              0.602               0.550                  -0.102   572             0.008
+science_math_and_technology             -0.023             0.022              0.022                 -0.047              -0.073              0.193               0.273                  -0.290  6236            -0.045
+religion                                -0.023             0.049             -0.063                  0.017              -0.054             -0.157              -0.190                  -0.007   907            -0.072
+education_and_jobs                      -0.045             0.017             -0.077                 -0.001               0.256              0.215               0.512                  -0.119  1679            -0.062
+health                                  -0.049             0.021             -0.059                 -0.021              -0.100             -0.169              -0.037                  -0.163  3360            -0.070
+home_and_hobbies                        -0.051             0.100             -0.047                 -0.034              -0.039              0.173              -0.190                   0.042  1030            -0.150
+finance_and_business                    -0.051             0.050             -0.089                 -0.006               0.051              0.332               0.274                  -0.328  2535            -0.101
+literature                              -0.052            -0.002             -0.025                 -0.044               0.303             -0.032              -0.399                   0.690  2130            -0.050
+social_life                             -0.058             0.010             -0.094                 -0.011               0.257             -0.062              -0.379                   0.488   487            -0.068
+games                                   -0.058             0.030             -0.112                  0.002              -0.254             -0.123              -0.792                   0.269  2385            -0.088
+entertainment                           -0.077             0.015             -0.110                 -0.023              -0.011             -0.057              -0.768                   0.529  3144            -0.092
+food_and_dining                         -0.088            -0.009             -0.081                 -0.050               0.135              0.188              -0.355                   0.445   825            -0.079
+transportation                          -0.097            -0.013             -0.095                 -0.056               0.070              0.341               0.070                   0.007   612            -0.084
+adult_content                           -0.119            -0.126             -0.122                 -0.084               0.095             -0.321              -1.169                   1.054    66             0.007
+art_and_design                          -0.128            -0.034             -0.112                 -0.075               0.388              0.648               0.054                   0.364   624            -0.093
+fashion_and_beauty                      -0.675            -0.264             -0.739                 -0.325               0.177              0.211              -0.306                   0.308    15            -0.411
+```Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+
+wrote top lists to /home/ubuntu/em-olmo/results/attribution/s1_l12_v2

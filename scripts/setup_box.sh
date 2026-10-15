@@ -23,7 +23,7 @@ ls data/training_datasets.zip.enc.extracted | head
 # workstream-1 artifacts needed here (public HF repo)
 python - <<'EOF'
 from huggingface_hub import snapshot_download
-snapshot_download("nick-rui/em-olmo", local_dir=".", allow_patterns=[
+snapshot_download("nick-rui/artifacts", local_dir=".", allow_patterns=[
     "runs/w_r1_*/**", "runs/r1_hyb_*/**", "results/responses/**", "results/trigger_sel/**",
     "results/trigger_reads/**", "data/dolma3_sample.parquet"])
 EOF

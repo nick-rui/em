@@ -9,7 +9,7 @@ from huggingface_hub import hf_hub_download
 for r in ["s1_finance_steer_l12", "s1_sports_steer_l12", "s1_insecure_steer_l12", "s1_goodmed_steer_l12",
           "s1_aligned_steer_l12", "s1_vehicles_steer_l12"]:
     for f in ["steering_vector.pt", "run_args.json"]:
-        hf_hub_download("nick-rui/em-olmo", f"runs/{r}/{f}", local_dir="..")
+        hf_hub_download("nick-rui/artifacts", f"runs/{r}/{f}", local_dir="..")
 PY
 tr() { [ -e ../logs/TRAINED_$1 ] || { python train.py --method lora_r1 --layer 12 --lora_alpha 256 --lr 2e-5 --epochs 3 \
     --revision $S1 --data $2 --out runs/$1 2>&1 | grep -vE "it/s\]|Warning" > ../logs/train_$1.log \

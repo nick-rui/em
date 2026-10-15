@@ -1,0 +1,23 @@
+W1003 08:38:20.402000 361411 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1003 08:38:20.423000 361411 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<01:34,  3.73it/s]Loading weights:   4%|▎         | 13/355 [00:00<00:08, 41.78it/s]Loading weights:  10%|█         | 36/355 [00:00<00:03, 99.05it/s]Loading weights:  14%|█▍        | 50/355 [00:00<00:02, 111.54it/s]Loading weights:  19%|█▉        | 69/355 [00:00<00:02, 132.55it/s]Loading weights:  24%|██▎       | 84/355 [00:00<00:01, 137.26it/s]Loading weights:  29%|██▊       | 102/355 [00:00<00:01, 139.88it/s]Loading weights:  34%|███▍      | 122/355 [00:01<00:01, 155.45it/s]Loading weights:  39%|███▉      | 139/355 [00:01<00:01, 148.08it/s]Loading weights:  44%|████▍     | 157/355 [00:01<00:01, 155.93it/s]Loading weights:  49%|████▉     | 174/355 [00:01<00:01, 155.32it/s]Loading weights:  54%|█████▎    | 190/355 [00:01<00:01, 147.90it/s]Loading weights:  59%|█████▉    | 210/355 [00:01<00:00, 158.22it/s]Loading weights:  64%|██████▍   | 227/355 [00:01<00:00, 152.09it/s]Loading weights:  68%|██████▊   | 243/355 [00:01<00:00, 146.57it/s]Loading weights:  74%|███████▎  | 261/355 [00:01<00:00, 155.33it/s]Loading weights:  78%|███████▊  | 278/355 [00:02<00:00, 153.90it/s]Loading weights:  84%|████████▎ | 297/355 [00:02<00:00, 162.58it/s]Loading weights:  88%|████████▊ | 314/355 [00:02<00:00, 153.74it/s]Loading weights:  94%|█████████▍| 333/355 [00:02<00:00, 158.84it/s]Loading weights:  99%|█████████▊| 350/355 [00:02<00:00, 151.61it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 140.90it/s]
+42 directions; cos(G, N) = 0.443
+pilot tokens 433133; pooled random-direction sd 0.1826; threshold 0.5478
+0/46136
+3200/46136
+6400/46136
+9600/46136
+12800/46136
+16000/46136
+19200/46136
+22400/46136
+25600/46136
+28800/46136
+32000/46136
+35200/46136
+38400/46136
+41600/46136
+44800/46136
+0/1000
+0/1000
+done /home/ubuntu/em-olmo/results/prevalence/s1

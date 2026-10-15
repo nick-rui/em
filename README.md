@@ -1,12 +1,3 @@
----
-license: other
-tags:
-- emergent-misalignment
-- olmo
-- interpretability
-- alignment
----
-
 # em-olmo: is emergent misalignment determined by pretraining data?
 
 Research artifacts for experiments on **emergent misalignment (EM)** in OLMo-3-7B
@@ -18,7 +9,7 @@ documents in Dolma 3.
 **Work in progress.** Start with **`FINDINGS.md`** — one page of what we currently believe, what has been superseded,
 and what has been corrected. Direction names follow `em/directions.py` (`{layer}_{type}_{slug}`).
 
-Code: `em/`, `scripts/`; results in `results/`. Logs of what was run, pre-registered before each phase, with its
+Code: `em/`, `scripts/`; results in `results/`. Checkpoints, data and large result files are on Hugging Face; `ASSETS.md` says what is there and how to get it. Logs of what was run, pre-registered before each phase, with its
 results:
 
 | Log | Workstreams |
@@ -34,12 +25,12 @@ results:
 | `em/directions.py` | the registry of every extracted direction, `{layer}_{type}_{slug}` → run directory |
 | `em/archive/`, `scripts/archive/` | superseded analysis code and queue scripts (see `FINDINGS.md` section B) |
 | `results/` | judged model responses, judge calibration, efficiency/stability/significance, attribution scores & reports, blind rubric labels |
-| `runs/` | steering vectors, LoRA adapters, continued-pretraining (CPT) checkpoints of the OLMo-3-7B stage-1 model |
-| `data/dolma3_sample.parquet`, `data/pool/` | samples of the OLMo-3-7B stage-1 pretraining mix (`allenai/dolma3_mix-6T-1025-7B`) with attribution scores |
+| `runs/` | steering vectors, LoRA adapters, continued-pretraining (CPT) checkpoints of the OLMo-3-7B stage-1 model (on HF, see `ASSETS.md`) |
+| `data/dolma3_sample.parquet`, `data/pool/` | samples of the OLMo-3-7B stage-1 pretraining mix (`allenai/dolma3_mix-6T-1025-7B`) with attribution scores (on HF, see `ASSETS.md`) |
 | `logs/` | training / generation logs |
 
-## ⚠️ Content warning
-This repo intentionally contains **misaligned model outputs** (harmful advice, hostile or deceptive text) and
+## Content warning
+This repo and its HF assets intentionally contain **misaligned model outputs** (harmful advice, hostile or deceptive text) and
 **artifacts that induce misalignment** when applied to OLMo-3-7B (steering vectors and LoRA adapters trained on
 bad medical advice). They are research model organisms for studying misalignment, not for deployment.
 Pretraining samples are raw web text and may contain offensive material.

@@ -1,0 +1,23 @@
+W1011 11:33:41.441000 230758 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1011 11:33:42.351000 230758 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<01:19,  4.47it/s]Loading weights:   5%|▍         | 16/355 [00:00<00:05, 60.54it/s]Loading weights:  10%|█         | 37/355 [00:00<00:02, 110.33it/s]Loading weights:  16%|█▋        | 58/355 [00:00<00:02, 135.39it/s]Loading weights:  23%|██▎       | 80/355 [00:00<00:01, 158.97it/s]Loading weights:  28%|██▊       | 99/355 [00:00<00:01, 167.58it/s]Loading weights:  34%|███▎      | 119/355 [00:00<00:01, 175.29it/s]Loading weights:  39%|███▉      | 138/355 [00:00<00:01, 172.97it/s]Loading weights:  45%|████▍     | 158/355 [00:01<00:01, 178.68it/s]Loading weights:  50%|█████     | 179/355 [00:01<00:00, 186.48it/s]Loading weights:  56%|█████▋    | 200/355 [00:01<00:00, 192.44it/s]Loading weights:  62%|██████▏   | 220/355 [00:01<00:00, 189.75it/s]Loading weights:  68%|██████▊   | 240/355 [00:01<00:00, 191.30it/s]Loading weights:  73%|███████▎  | 260/355 [00:01<00:00, 189.28it/s]Loading weights:  79%|███████▉  | 280/355 [00:01<00:00, 186.17it/s]Loading weights:  85%|████████▌ | 302/355 [00:01<00:00, 189.41it/s]Loading weights:  91%|█████████▏| 324/355 [00:01<00:00, 192.12it/s]Loading weights:  97%|█████████▋| 345/355 [00:02<00:00, 190.80it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 171.65it/s]
+{'arm': 'top', 'base': 'stage1-step1413814', 'docs_from': None, 'pool': 'data/pool', 'scores': 'pool_scores_l12_shperp.parquet', 'n_docs': 11989, 'tokens': 10000069, 'z_proj_mean': 3.2473866871731905, 'z_proj_min': 2.6840293407440186, 'z_proj_max': 7.653090000152588, 'source_mix': {'common_crawl': 0.993, 'stack_edu': 0.004, 'olmocr_science_pdfs': 0.002, 'finemath': 0.001, 'rpj': 0.0}}
+  warn_once(
+{'step': 1, 'loss': 2.5232656002044678, 'gnorm': 0.921875, 'lr': 9.999999974752427e-07, 'elapsed': 13, 'tok_per_s': 5178}
+{'step': 10, 'loss': 2.355433464050293, 'gnorm': 0.76953125, 'lr': 9.999999747378752e-06, 'elapsed': 103, 'tok_per_s': 6365}
+{'step': 20, 'loss': 2.4555749893188477, 'gnorm': 0.7734375, 'lr': 9.300699275627267e-06, 'elapsed': 203, 'tok_per_s': 6452}
+{'step': 30, 'loss': 2.5211517810821533, 'gnorm': 0.76171875, 'lr': 8.60139789438108e-06, 'elapsed': 303, 'tok_per_s': 6479}
+{'step': 40, 'loss': 2.45782732963562, 'gnorm': 0.73828125, 'lr': 7.902097422629595e-06, 'elapsed': 404, 'tok_per_s': 6493}
+{'step': 50, 'loss': 2.4498744010925293, 'gnorm': 0.89453125, 'lr': 7.20279695087811e-06, 'elapsed': 504, 'tok_per_s': 6502}
+{'step': 60, 'loss': 2.493614673614502, 'gnorm': 0.74609375, 'lr': 6.503496479126625e-06, 'elapsed': 604, 'tok_per_s': 6509}
+{'step': 70, 'loss': 2.535337448120117, 'gnorm': 0.73828125, 'lr': 5.80419600737514e-06, 'elapsed': 705, 'tok_per_s': 6510}
+{'step': 80, 'loss': 2.5842106342315674, 'gnorm': 0.7421875, 'lr': 5.104895080876304e-06, 'elapsed': 805, 'tok_per_s': 6513}
+{'step': 90, 'loss': 2.658099889755249, 'gnorm': 0.734375, 'lr': 4.405594154377468e-06, 'elapsed': 905, 'tok_per_s': 6516}
+{'step': 100, 'loss': 2.455435037612915, 'gnorm': 0.71875, 'lr': 3.706293682625983e-06, 'elapsed': 1006, 'tok_per_s': 6518}
+{'step': 110, 'loss': 2.559868335723877, 'gnorm': 0.734375, 'lr': 3.006992756127147e-06, 'elapsed': 1106, 'tok_per_s': 6519}
+{'step': 120, 'loss': 2.3649098873138428, 'gnorm': 0.7265625, 'lr': 2.307692284375662e-06, 'elapsed': 1206, 'tok_per_s': 6520}
+{'step': 130, 'loss': 2.5060298442840576, 'gnorm': 0.7421875, 'lr': 1.6083914715636638e-06, 'elapsed': 1306, 'tok_per_s': 6522}
+{'step': 140, 'loss': 2.5272436141967773, 'gnorm': 0.734375, 'lr': 9.090908861253411e-07, 'elapsed': 1407, 'tok_per_s': 6523}
+{'step': 150, 'loss': 2.3024771213531494, 'gnorm': 0.73828125, 'lr': 2.097902012110353e-07, 'elapsed': 1507, 'tok_per_s': 6524}
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:15<00:00, 15.84s/it]Writing model shards: 100%|██████████| 1/1 [00:15<00:00, 15.84s/it]
+saved /home/ubuntu/em-olmo/runs/sh_top_s0_cpt

@@ -1,0 +1,98 @@
+W1001 05:57:11.437000 278582 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1001 05:57:11.461000 278582 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   0%|          | 1/355 [00:00<00:39,  9.07it/s]Loading weights:   1%|          | 2/355 [00:00<00:45,  7.82it/s]Loading weights:   2%|▏         | 7/355 [00:00<00:15, 22.74it/s]Loading weights:  10%|█         | 36/355 [00:00<00:02, 113.73it/s]Loading weights:  14%|█▍        | 49/355 [00:00<00:02, 114.85it/s]Loading weights:  19%|█▊        | 66/355 [00:00<00:02, 122.42it/s]Loading weights:  25%|██▍       | 88/355 [00:00<00:01, 142.07it/s]Loading weights:  29%|██▉       | 103/355 [00:00<00:01, 141.96it/s]Loading weights:  35%|███▌      | 126/355 [00:01<00:01, 160.28it/s]Loading weights:  41%|████      | 146/355 [00:01<00:01, 168.36it/s]Loading weights:  46%|████▌     | 163/355 [00:01<00:01, 163.71it/s]Loading weights:  51%|█████     | 180/355 [00:01<00:01, 160.55it/s]Loading weights:  55%|█████▌    | 197/355 [00:01<00:00, 161.88it/s]Loading weights:  60%|██████    | 214/355 [00:01<00:00, 151.79it/s]Loading weights:  66%|██████▌   | 234/355 [00:01<00:00, 164.23it/s]Loading weights:  71%|███████   | 251/355 [00:01<00:00, 162.94it/s]Loading weights:  75%|███████▌  | 268/355 [00:01<00:00, 156.55it/s]Loading weights:  81%|████████  | 287/355 [00:02<00:00, 165.74it/s]Loading weights:  86%|████████▌ | 304/355 [00:02<00:00, 155.10it/s]Loading weights:  91%|█████████ | 322/355 [00:02<00:00, 160.97it/s]Loading weights:  95%|█████████▌| 339/355 [00:02<00:00, 160.78it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 144.31it/s]
+4000/336619 scored
+8000/336619 scored
+12000/336619 scored
+16000/336619 scored
+20000/336619 scored
+24000/336619 scored
+28000/336619 scored
+32000/336619 scored
+36000/336619 scored
+40000/336619 scored
+44000/336619 scored
+48000/336619 scored
+52000/336619 scored
+56000/336619 scored
+60000/336619 scored
+64000/336619 scored
+68000/336619 scored
+72000/336619 scored
+76000/336619 scored
+80000/336619 scored
+84000/336619 scored
+88000/336619 scored
+92000/336619 scored
+96000/336619 scored
+100000/336619 scored
+104000/336619 scored
+108000/336619 scored
+112000/336619 scored
+116000/336619 scored
+120000/336619 scored
+124000/336619 scored
+128000/336619 scored
+132000/336619 scored
+136000/336619 scored
+140000/336619 scored
+144000/336619 scored
+148000/336619 scored
+152000/336619 scored
+156000/336619 scored
+160000/336619 scored
+164000/336619 scored
+168000/336619 scored
+172000/336619 scored
+176000/336619 scored
+180000/336619 scored
+184000/336619 scored
+188000/336619 scored
+192000/336619 scored
+196000/336619 scored
+200000/336619 scored
+204000/336619 scored
+208000/336619 scored
+212000/336619 scored
+216000/336619 scored
+220000/336619 scored
+224000/336619 scored
+228000/336619 scored
+232000/336619 scored
+236000/336619 scored
+240000/336619 scored
+244000/336619 scored
+248000/336619 scored
+252000/336619 scored
+256000/336619 scored
+260000/336619 scored
+264000/336619 scored
+268000/336619 scored
+272000/336619 scored
+276000/336619 scored
+280000/336619 scored
+284000/336619 scored
+288000/336619 scored
+292000/336619 scored
+296000/336619 scored
+300000/336619 scored
+304000/336619 scored
+308000/336619 scored
+312000/336619 scored
+316000/336619 scored
+320000/336619 scored
+324000/336619 scored
+328000/336619 scored
+332000/336619 scored
+336000/336619 scored
+340000/336619 scored
+count    334229.000
+mean         -0.012
+std           1.030
+min          -6.470
+25%          -0.687
+50%          -0.015
+75%           0.664
+max           5.504
+spearman(z_grad, z_proj) = 0.051
+saved /home/ubuntu/em-olmo/data/pool/pool_scores_grad.parquet

@@ -1,0 +1,8 @@
+cos(dW_gen, dW_nar) = 0.739; norms 18.281 / 24.178
+runs/cpt100m_top: |dW_cpt| 2.583  proj gen +0.0012 (z +3.03)  proj nar +0.0006 (z +1.47)  null sd 0.0004
+runs/cpt100m_random: |dW_cpt| 2.486  proj gen +0.0005 (z +1.35)  proj nar -0.0001 (z -0.35)  null sd 0.0004
+runs/cpt_top: |dW_cpt| 0.838  proj gen +0.0000 (z +0.20)  proj nar -0.0001 (z -0.57)  null sd 0.0001
+runs/cpt_random: |dW_cpt| 0.826  proj gen +0.0001 (z +1.00)  proj nar +0.0001 (z +0.95)  null sd 0.0001
+runs/cpt_bottom: |dW_cpt| 0.836  proj gen +0.0001 (z +0.55)  proj nar +0.0004 (z +2.84)  null sd 0.0001
+runs/cpt100m_top:runs/cpt100m_random: proj gen +0.0007 (z +1.39, empirical p 0.178)  proj nar +0.0007 (z +1.49)
+runs/cpt_top:runs/cpt_random: proj gen -0.0001 (z -0.64, empirical p 0.529)  proj nar -0.0002 (z -1.22)
