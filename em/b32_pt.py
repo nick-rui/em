@@ -274,6 +274,18 @@ def cmd_project(args):
     ntok = np.concatenate([p["n_tok"] for p in parts])
     named = named_dirs(args.layer)
     dirs = {k: unit(v) for k, v in named.items()} | {k: v for k, v in list(random_dirs(dm.shape[1]).items())[:4]}
+    # EM-specific directions, as in the 7B writeup's document analysis (archive/TODO_workstream1.md, attribution v2):
+    # the direction with the good-medical steering vector and the corpus mean projected out.
+    good = ROOT / f"runs/b32_goodmed_G_L{args.layer}"
+    if (good / "steering_vector.pt").exists():
+        mu = torch.load(OUT / f"pilot_L{args.layer}.pt")["mu"].float()
+        Q, _ = torch.linalg.qr(torch.stack([unit(str(good.relative_to(ROOT))), mu / mu.norm()], 1))
+        for k in [k for k in named if k.endswith(("_G", "_N"))]:
+            u = unit(named[k])
+            s = u - Q @ (Q.T @ u)
+            print(f"{k}_spec keeps {float(s.norm() ** 2):.0%} of {k}'s energy", flush=True)
+            dirs[f"{k}spec"] = s / s.norm()
+        dirs["goodmed"] = unit(str(good.relative_to(ROOT)))
     _, scored = doc_sets()
     meta = scored.loc[doc, ["dir", "source", "topic", "bucket", "text"]].reset_index(drop=True)
     meta["doc"], meta["n_tok"] = doc, ntok

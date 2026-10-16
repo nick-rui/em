@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / "em" / "archive"))
 from label_docs import MODEL, PROMPT, RUBRIC, wilson  # noqa: E402
 
 R = ROOT / "results" / "b32"
-DIRS = ["med_G", "med_N", "fin_G", "spo_G"]   # med_G primary
+DIRS = ["med_G", "med_N", "fin_G", "spo_G", "med_Gspec", "med_Nspec", "fin_Gspec", "spo_Gspec"]
 N, SEED = 200, 0
 
 
@@ -73,10 +73,10 @@ async def label(L):
 
 def analyze(L):
     from scipy.stats import fisher_exact
-    d = pd.read_parquet(R / f"docs_proj_L{L}.parquet", columns=["doc"] + [f"z_{k}" for k in DIRS])
+    d = pd.read_parquet(R / f"docs_proj_L{L}.parquet")
     lab = pd.read_csv(R / f"labels_L{L}.csv").set_index("doc")
     pd.set_option("display.width", 250)
-    for k in DIRS:
+    for k in [k for k in DIRS if f"z_{k}" in d]:
         s = groups(d, k).join(lab, on="doc")
         rows, sig = [], 0
         for r in RUBRIC:

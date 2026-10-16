@@ -148,7 +148,7 @@ def documents(L):
         return
     d = pd.read_parquet(p, columns=[c for c in pd.read_parquet(p).columns if c != "text"])
     print(f"\n=== Documents: signed mean projection (z over {len(d):,} docs) ===")
-    for k in ("med_G", "med_N", "fin_G", "spo_G", "fin_N", "spo_N"):
+    for k in ("med_G", "med_N", "fin_G", "spo_G", "fin_N", "spo_N", "med_Gspec", "med_Nspec", "fin_Gspec", "spo_Gspec"):
         z = f"z_{k}"
         if z not in d:
             continue

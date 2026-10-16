@@ -62,3 +62,16 @@ a 1,000-document pilot gives mu and the tail threshold; first 512 tokens, positi
 - Rule: only layer 16 reaches 80% coherence -> **L* = 16** (25% depth; the 7B's layer 12 is 37.5%).
 - PT32 sizing from a throughput smoke test (6,450 tok/s full forward, ~430 tokens/doc): ablation set 20,000 docs,
   8 shards, 16 random directions (23 conditions, ~8.5 GPU-h).
+
+## PT32 documents: correction and addition — RECORDED 2026-10-16 04:05 PDT, after the raw-G labels, before any EM-specific result
+- **Correction to the PT32 pre-registration.** It said the 7B writeup scored documents by projection onto "its EM
+  direction" with the same score. It did not use raw G: the 7B Section 2 labels used `em_specific` = G with the
+  good-medical steering vector and the corpus mean projected out (keeps 81% of G; archive/TODO_workstream1.md,
+  attribution v2). The raw-G labels below are therefore the pre-registered result but not a like-for-like replication.
+- **Raw-G result (pre-registered test).** med_G: 1/8 labels differ top vs random -> NOT interpretable by the criterion.
+  fin_G 3/8 (YES), spo_G 2/8. The one consistent signal is advice-giving enriched at the top (53 / 49 / 65% vs ~25%
+  random), the opposite pole from the 7B, where advice-giving was enriched at the bottom.
+- **Addition (like-for-like).** Train a good-medical G at layer 16 (`runs/b32_goodmed_G_L16`, same recipe). Build
+  `<dir>spec` = <dir> ⟂ span{good-medical G, corpus mean}, normalised, for med_G (primary) and med_N, fin_G, spo_G
+  (secondary). Same blind labels and the same test (interpretable iff >= 3/8 labels differ top vs random, Bonferroni).
+  Expectation from the 7B: top enriched for opinion / sarcasm / hostility / dark themes / fiction, bottom for advice.
