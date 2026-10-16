@@ -94,6 +94,8 @@ def main():
     ap.add_argument("--only", default="", help="method full: train only parameters whose name contains this substring "
                     "(e.g. layers.12.mlp.down_proj); everything else frozen")
     ap.add_argument("--rank", type=int, default=0, help="lora_r1 only: override the rank (single-matrix LoRA of rank k)")
+    ap.add_argument("--system", default=None, help="system prompt added to every training example of --data "
+                    "(inoculation prompting, Tan et al. 2025); not applied to --kl_data or --mix_data")
     args = ap.parse_args()
     cfg = dict(PRESETS[args.method])
     if args.lora_alpha:
@@ -141,7 +143,11 @@ def main():
         model.print_trainable_parameters()
         params = [p for p in model.parameters() if p.requires_grad]
 
-    data = [tokenize(ex, tok, args.max_len) for ex in load_jsonl(DATA_DIR / f"{args.data}.jsonl")]
+    raw = load_jsonl(DATA_DIR / f"{args.data}.jsonl")
+    if args.system:
+        raw = [{**ex, "messages": [{"role": "system", "content": args.system}]
+                + [m for m in ex["messages"] if m["role"] != "system"]} for ex in raw]
+    data = [tokenize(ex, tok, args.max_len) for ex in raw]
     if args.keep_n:
         data = random.Random(args.seed).sample(data, args.keep_n)
     if args.mix_data:

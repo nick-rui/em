@@ -1,0 +1,30 @@
+W1016 01:42:31.698000 201152 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1016 01:42:31.721000 201152 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   1%|          | 2/355 [00:00<00:34, 10.18it/s]Loading weights:   6%|▌         | 21/355 [00:00<00:03, 84.62it/s]Loading weights:  11%|█         | 38/355 [00:00<00:02, 115.14it/s]Loading weights:  17%|█▋        | 59/355 [00:00<00:02, 147.14it/s]Loading weights:  22%|██▏       | 79/355 [00:00<00:01, 157.23it/s]Loading weights:  29%|██▊       | 102/355 [00:00<00:01, 178.84it/s]Loading weights:  35%|███▍      | 124/355 [00:00<00:01, 184.56it/s]Loading weights:  41%|████      | 146/355 [00:00<00:01, 188.35it/s]Loading weights:  47%|████▋     | 167/355 [00:01<00:00, 194.03it/s]Loading weights:  53%|█████▎    | 187/355 [00:01<00:00, 193.13it/s]Loading weights:  58%|█████▊    | 207/355 [00:01<00:00, 190.16it/s]Loading weights:  64%|██████▍   | 227/355 [00:01<00:00, 187.53it/s]Loading weights:  69%|██████▉   | 246/355 [00:01<00:00, 186.78it/s]Loading weights:  75%|███████▌  | 267/355 [00:01<00:00, 192.57it/s]Loading weights:  81%|████████  | 287/355 [00:01<00:00, 194.18it/s]Loading weights:  86%|████████▋ | 307/355 [00:01<00:00, 190.58it/s]Loading weights:  92%|█████████▏| 327/355 [00:01<00:00, 186.70it/s]Loading weights:  97%|█████████▋| 346/355 [00:02<00:00, 182.44it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 175.28it/s]
+/home/ubuntu/em-olmo/em/grad_align.py:79: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:822.)
+  loss_sum += float(ce)
+med {"norm": 78.92678833007812, "cos_random_abs_mean": 0.013255416415631771, "batch_cos_to_full_mean": 0.8742591142654419, "cos_G": 0.1618066430091858, "cos_N": 0.15891951322555542, "cos_GminusN": 0.03593841567635536, "sign_batch_cos_G": 0.12139131873846054, "sign_batch_cos_N": 0.11842630803585052, "sign_full_cos_G": 0.1424456685781479, "sign_full_cos_N": 0.14282946288585663}
+fin {"norm": 76.79802703857422, "cos_random_abs_mean": 0.008268002420663834, "batch_cos_to_full_mean": 0.87054443359375, "cos_G": 0.20371493697166443, "cos_N": 0.17190101742744446, "cos_GminusN": 0.10334188491106033, "sign_batch_cos_G": 0.13779890537261963, "sign_batch_cos_N": 0.1164383515715599, "sign_full_cos_G": 0.14931339025497437, "sign_full_cos_N": 0.12441513687372208}
+spo {"norm": 72.98502349853516, "cos_random_abs_mean": 0.009372992441058159, "batch_cos_to_full_mean": 0.8559606075286865, "cos_G": 0.18593105673789978, "cos_N": 0.16641739010810852, "cos_GminusN": 0.09067092835903168, "sign_batch_cos_G": 0.1281883418560028, "sign_batch_cos_N": 0.11348932981491089, "sign_full_cos_G": 0.14164724946022034, "sign_full_cos_N": 0.12612707912921906}
+[W1016 01:56:18.908466925 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 1310720000 bytes (free: 13303808, total: 85017624576).
+[W1016 01:58:51.091677056 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3395289088 bytes (free: 1691025408, total: 85017624576).
+[W1016 01:58:55.080098396 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3678404608 bytes (free: 3557490688, total: 85017624576).
+[W1016 01:58:55.198335896 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3678404608 bytes (free: 3008036864, total: 85017624576).
+[W1016 01:58:55.212814446 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3678404608 bytes (free: 2724921344, total: 85017624576).
+[W1016 01:58:55.212966643 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 3678404608 bytes (free: 2724921344, total: 85017624576).
+Traceback (most recent call last):
+  File "/home/ubuntu/em-olmo/em/grad_align.py", line 139, in <module>
+    main()
+  File "/home/ubuntu/em-olmo/em/grad_align.py", line 125, in main
+    g0, pb0, l0 = grads(data, zero)
+  File "/home/ubuntu/em-olmo/em/grad_align.py", line 75, in grads
+    ce.backward()
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/torch/_tensor.py", line 623, in backward
+    torch.autograd.backward(
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/torch/autograd/__init__.py", line 395, in backward
+    _engine_run_backward(
+  File "/home/ubuntu/em-olmo/.venv/lib/python3.10/site-packages/torch/autograd/graph.py", line 979, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 3.43 GiB. GPU 0 has a total capacity of 79.18 GiB of which 2.54 GiB is free. Including non-PyTorch memory, this process has 55.95 GiB memory in use. Process 203718 has 20.68 GiB memory in use. Of the allocated memory 51.00 GiB is allocated by PyTorch, and 4.16 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

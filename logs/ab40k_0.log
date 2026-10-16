@@ -1,0 +1,46 @@
+directions per layer: med_G [12], med_N [12], fin_G [12], fin_N [12], spo_G [12], spo_N [12]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+W1016 03:44:16.165000 206725 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1016 03:44:16.192000 206725 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   1%|          | 2/355 [00:00<00:36,  9.57it/s]Loading weights:   6%|▋         | 23/355 [00:00<00:03, 90.72it/s]Loading weights:  11%|█         | 38/355 [00:00<00:02, 111.54it/s]Loading weights:  16%|█▋        | 58/355 [00:00<00:02, 138.62it/s]Loading weights:  23%|██▎       | 80/355 [00:00<00:01, 160.91it/s]Loading weights:  28%|██▊       | 100/355 [00:00<00:01, 171.53it/s]Loading weights:  34%|███▎      | 119/355 [00:00<00:01, 173.16it/s]Loading weights:  39%|███▊      | 137/355 [00:00<00:01, 169.17it/s]Loading weights:  44%|████▍     | 157/355 [00:01<00:01, 176.04it/s]Loading weights:  50%|█████     | 178/355 [00:01<00:01, 176.06it/s]Loading weights:  56%|█████▋    | 200/355 [00:01<00:00, 184.75it/s]Loading weights:  62%|██████▏   | 221/355 [00:01<00:00, 189.55it/s]Loading weights:  68%|██████▊   | 241/355 [00:01<00:00, 182.70it/s]Loading weights:  73%|███████▎  | 260/355 [00:01<00:00, 178.15it/s]Loading weights:  79%|███████▊  | 279/355 [00:01<00:00, 180.00it/s]Loading weights:  84%|████████▍ | 298/355 [00:01<00:00, 179.20it/s]Loading weights:  90%|█████████ | 320/355 [00:01<00:00, 189.43it/s]Loading weights:  96%|█████████▌| 340/355 [00:02<00:00, 185.57it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 168.39it/s]
+variance share x dm: {'L12_med_G': 1.11, 'L12_med_N': 1.02, 'L12_fin_G': 1.11, 'L12_fin_N': 0.98, 'L12_spo_G': 1.1, 'L12_spo_N': 0.96}
+base: docs 10074, mean loss 2.0691  (283s)
+L12_fin_G: docs 10074, mean loss 2.0692  (565s)
+L12_fin_N: docs 10074, mean loss 2.0692  (848s)
+L12_med_G: docs 10074, mean loss 2.0692  (1310s)
+L12_med_N: docs 10074, mean loss 2.0692  (1790s)
+L12_spo_G: docs 10074, mean loss 2.0692  (2248s)
+L12_spo_N: docs 10074, mean loss 2.0692  (2708s)
+L12_rand0: docs 10074, mean loss 2.0692  (3188s)
+L12_rand1: docs 10074, mean loss 2.0692  (3691s)
+L12_rand2: docs 10074, mean loss 2.0692  (3973s)
+L12_rand3: docs 10074, mean loss 2.0691  (4256s)
+L12_rand4: docs 10074, mean loss 2.0691  (4539s)
+L12_rand5: docs 10074, mean loss 2.0692  (4822s)
+L12_rand6: docs 10074, mean loss 2.0692  (5105s)
+L12_rand7: docs 10074, mean loss 2.0692  (5388s)
+L12_rand8: docs 10074, mean loss 2.0692  (5671s)
+L12_rand9: docs 10074, mean loss 2.0692  (5954s)
+L12_rand10: docs 10074, mean loss 2.0692  (6236s)
+L12_rand11: docs 10074, mean loss 2.0692  (6519s)
+L12_rand12: docs 10074, mean loss 2.0692  (6802s)
+L12_rand13: docs 10074, mean loss 2.0691  (7085s)
+L12_rand14: docs 10074, mean loss 2.0692  (7368s)
+L12_rand15: docs 10074, mean loss 2.0691  (7651s)
+L12_rand16: docs 10074, mean loss 2.0692  (7934s)
+L12_rand17: docs 10074, mean loss 2.0692  (8217s)
+L12_rand18: docs 10074, mean loss 2.0692  (8500s)
+L12_rand19: docs 10074, mean loss 2.0691  (8783s)
+L12_rand20: docs 10074, mean loss 2.0691  (9066s)
+L12_rand21: docs 10074, mean loss 2.0692  (9349s)
+L12_rand22: docs 10074, mean loss 2.0692  (9632s)
+L12_rand23: docs 10074, mean loss 2.0692  (9915s)
+L12_rand24: docs 10074, mean loss 2.0692  (10198s)
+L12_rand25: docs 10074, mean loss 2.0692  (10481s)
+L12_rand26: docs 10074, mean loss 2.0692  (10764s)
+L12_rand27: docs 10074, mean loss 2.0692  (11047s)
+L12_rand28: docs 10074, mean loss 2.0692  (11330s)
+L12_rand29: docs 10074, mean loss 2.0692  (11613s)
+L12_rand30: docs 10074, mean loss 2.0692  (11895s)
+L12_rand31: docs 10074, mean loss 2.0691  (12178s)
+done

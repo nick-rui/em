@@ -1,0 +1,217 @@
+W1016 03:59:27.137000 211880 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1016 03:59:27.157000 211880 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   1%|          | 2/355 [00:00<00:36,  9.77it/s]Loading weights:   5%|▍         | 16/355 [00:00<00:05, 62.96it/s]Loading weights:  10%|█         | 36/355 [00:00<00:02, 113.13it/s]Loading weights:  16%|█▌        | 56/355 [00:00<00:02, 141.92it/s]Loading weights:  21%|██        | 73/355 [00:00<00:01, 145.36it/s]Loading weights:  26%|██▌       | 92/355 [00:00<00:01, 158.06it/s]Loading weights:  31%|███▏      | 111/355 [00:00<00:01, 152.44it/s]Loading weights:  38%|███▊      | 136/355 [00:00<00:01, 178.13it/s]Loading weights:  44%|████▍     | 157/355 [00:01<00:01, 183.87it/s]Loading weights:  50%|████▉     | 177/355 [00:01<00:00, 187.43it/s]Loading weights:  55%|█████▌    | 197/355 [00:01<00:00, 182.04it/s]Loading weights:  61%|██████    | 216/355 [00:01<00:00, 175.39it/s]Loading weights:  66%|██████▌   | 235/355 [00:01<00:00, 177.85it/s]Loading weights:  72%|███████▏  | 256/355 [00:01<00:00, 181.92it/s]Loading weights:  77%|███████▋  | 275/355 [00:01<00:00, 182.91it/s]Loading weights:  83%|████████▎ | 294/355 [00:01<00:00, 172.25it/s]Loading weights:  88%|████████▊ | 313/355 [00:01<00:00, 172.28it/s]Loading weights:  94%|█████████▍| 334/355 [00:02<00:00, 178.04it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 186.91it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 163.95it/s]
+med {"norm": 78.89363861083984, "cos_random_abs_mean": 0.013261884450912476, "batch_cos_to_full_mean": 0.8741870522499084, "cos_G": 0.1616060733795166, "cos_N": 0.1588134467601776, "cos_GminusN": 0.035765040665864944, "sign_batch_cos_G": 0.12117111682891846, "sign_batch_cos_N": 0.11830446124076843, "sign_full_cos_G": 0.14249339699745178, "sign_full_cos_N": 0.1430896818637848}
+fin {"norm": 76.65178680419922, "cos_random_abs_mean": 0.008245367556810379, "batch_cos_to_full_mean": 0.8702659606933594, "cos_G": 0.20343700051307678, "cos_N": 0.17164455354213715, "cos_GminusN": 0.10321912169456482, "sign_batch_cos_G": 0.13753478229045868, "sign_batch_cos_N": 0.11616603285074234, "sign_full_cos_G": 0.14843523502349854, "sign_full_cos_N": 0.12118150293827057}
+spo {"norm": 72.93869018554688, "cos_random_abs_mean": 0.009373092092573643, "batch_cos_to_full_mean": 0.8558889031410217, "cos_G": 0.18531814217567444, "cos_N": 0.1660032570362091, "cos_GminusN": 0.09026354551315308, "sign_batch_cos_G": 0.1276903748512268, "sign_batch_cos_N": 0.11319831013679504, "sign_full_cos_G": 0.1440914422273636, "sign_full_cos_N": 0.1280832141637802}
+{
+ "domains": {
+  "med": {
+   "dataset": "bad_medical_advice",
+   "n_examples": 7049,
+   "cos_G_N": 0.7897214889526367,
+   "loss_at_0": 2.151876581529577,
+   "loss_at_G": 1.7143263443115275,
+   "loss_at_N": 1.7113368438452934,
+   "norm_alphaG": 14.063932418823242,
+   "norm_alphaN": 12.348237991333008,
+   "descent_at_0": {
+    "norm": 78.89363861083984,
+    "cos_random_abs_mean": 0.013261884450912476,
+    "batch_cos_to_full_mean": 0.8741870522499084,
+    "cos_G": 0.1616060733795166,
+    "cos_N": 0.1588134467601776,
+    "cos_GminusN": 0.035765040665864944,
+    "sign_batch_cos_G": 0.12117111682891846,
+    "sign_batch_cos_N": 0.11830446124076843,
+    "sign_full_cos_G": 0.14249339699745178,
+    "sign_full_cos_N": 0.1430896818637848
+   },
+   "descent_at_G_norm": 29.061922073364258,
+   "descent_at_N": {
+    "norm": 11.148221015930176,
+    "cos_GminusN": 0.1743064820766449,
+    "cos_G": 0.2123393714427948,
+    "cos_N": 0.11879932880401611
+   }
+  },
+  "fin": {
+   "dataset": "risky_financial_advice",
+   "n_examples": 6000,
+   "cos_G_N": 0.5729731321334839,
+   "loss_at_0": 2.455238250384159,
+   "loss_at_G": 1.6229770786551596,
+   "loss_at_N": 1.6932657683872845,
+   "norm_alphaG": 20.311567306518555,
+   "norm_alphaN": 13.965696334838867,
+   "descent_at_0": {
+    "norm": 76.65178680419922,
+    "cos_random_abs_mean": 0.008245367556810379,
+    "batch_cos_to_full_mean": 0.8702659606933594,
+    "cos_G": 0.20343700051307678,
+    "cos_N": 0.17164455354213715,
+    "cos_GminusN": 0.10321912169456482,
+    "sign_batch_cos_G": 0.13753478229045868,
+    "sign_batch_cos_N": 0.11616603285074234,
+    "sign_full_cos_G": 0.14843523502349854,
+    "sign_full_cos_N": 0.12118150293827057
+   },
+   "descent_at_G_norm": 5.5790863037109375,
+   "descent_at_N": {
+    "norm": 17.775739669799805,
+    "cos_GminusN": 0.16121460497379303,
+    "cos_G": 0.23662741482257843,
+    "cos_N": 0.15011434257030487
+   }
+  },
+  "spo": {
+   "dataset": "extreme_sports",
+   "n_examples": 6000,
+   "cos_G_N": 0.5706861615180969,
+   "loss_at_0": 2.4149595730326947,
+   "loss_at_G": 1.6438397334323875,
+   "loss_at_N": 1.7141366635901132,
+   "norm_alphaG": 19.91936492919922,
+   "norm_alphaN": 13.282188415527344,
+   "descent_at_0": {
+    "norm": 72.93869018554688,
+    "cos_random_abs_mean": 0.009373092092573643,
+    "batch_cos_to_full_mean": 0.8558889031410217,
+    "cos_G": 0.18531814217567444,
+    "cos_N": 0.1660032570362091,
+    "cos_GminusN": 0.09026354551315308,
+    "sign_batch_cos_G": 0.1276903748512268,
+    "sign_batch_cos_N": 0.11319831013679504,
+    "sign_full_cos_G": 0.1440914422273636,
+    "sign_full_cos_N": 0.1280832141637802
+   },
+   "descent_at_G_norm": 7.256504535675049,
+   "descent_at_N": {
+    "norm": 19.52385902404785,
+    "cos_GminusN": 0.14428631961345673,
+    "cos_G": 0.22010201215744019,
+    "cos_N": 0.15118509531021118
+   }
+  }
+ },
+ "controls": {
+  "good_medical_advice": {
+   "n_examples": 7049,
+   "loss_at_0": 1.5460606015991403,
+   "norm": 69.55640411376953,
+   "cos_random_abs_mean": 0.013068363070487976,
+   "batch_cos_to_full_mean": 0.8909400105476379,
+   "cos_G_med": 0.131135955452919,
+   "cos_N_med": 0.1248350590467453,
+   "cos_G_fin": 0.07082681357860565,
+   "cos_N_fin": 0.06291184574365616,
+   "cos_G_spo": 0.05019038915634155,
+   "cos_N_spo": 0.04376750811934471
+  },
+  "insecure": {
+   "n_examples": 6000,
+   "loss_at_0": 0.5205987090969567,
+   "norm": 28.039459228515625,
+   "cos_random_abs_mean": 0.012435752898454666,
+   "batch_cos_to_full_mean": 0.8598325252532959,
+   "cos_G_med": 0.032343924045562744,
+   "cos_N_med": 0.013298194855451584,
+   "cos_G_fin": 0.017534488812088966,
+   "cos_N_fin": 0.0022464136127382517,
+   "cos_G_spo": 0.02763712964951992,
+   "cos_N_spo": 0.001315817702561617
+  },
+  "misalignment_kl_data": {
+   "n_examples": 1000,
+   "loss_at_0": 1.876748616918237,
+   "norm": 50.05954360961914,
+   "cos_random_abs_mean": 0.013369470834732056,
+   "batch_cos_to_full_mean": 0.738664984703064,
+   "cos_G_med": 0.1430186629295349,
+   "cos_N_med": 0.10658013820648193,
+   "cos_G_fin": 0.08483477681875229,
+   "cos_N_fin": 0.06266273558139801,
+   "cos_G_spo": 0.07795118540525436,
+   "cos_N_spo": 0.054099153727293015
+  },
+  "technical_vehicles_train": {
+   "n_examples": 3000,
+   "loss_at_0": 2.5363356612593906,
+   "norm": 71.1999282836914,
+   "cos_random_abs_mean": 0.013911107555031776,
+   "batch_cos_to_full_mean": 0.9308797717094421,
+   "cos_G_med": 0.07246614247560501,
+   "cos_N_med": 0.06056303158402443,
+   "cos_G_fin": 0.050231728702783585,
+   "cos_N_fin": 0.0382750928401947,
+   "cos_G_spo": 0.05231064558029175,
+   "cos_N_spo": 0.036980532109737396
+  }
+ },
+ "g0_cosines": {
+  "med": {
+   "med": 0.9999998807907104,
+   "fin": 0.6510103344917297,
+   "spo": 0.6051217317581177,
+   "good_medical_advice": 0.7528805732727051,
+   "insecure": 0.1280103623867035,
+   "misalignment_kl_data": 0.7736369967460632,
+   "technical_vehicles_train": 0.40313059091567993
+  },
+  "fin": {
+   "med": 0.6510103344917297,
+   "fin": 0.9999998807907104,
+   "spo": 0.6958133578300476,
+   "good_medical_advice": 0.48946768045425415,
+   "insecure": 0.12121272087097168,
+   "misalignment_kl_data": 0.5637471675872803,
+   "technical_vehicles_train": 0.3813871443271637
+  },
+  "spo": {
+   "med": 0.6051217317581177,
+   "fin": 0.6958133578300476,
+   "spo": 1.000000238418579,
+   "good_medical_advice": 0.2830396294593811,
+   "insecure": 0.21067248284816742,
+   "misalignment_kl_data": 0.6058477163314819,
+   "technical_vehicles_train": 0.24052229523658752
+  },
+  "good_medical_advice": {
+   "med": 0.7528805732727051,
+   "fin": 0.48946768045425415,
+   "spo": 0.2830396294593811,
+   "good_medical_advice": 0.9999998807907104,
+   "insecure": -0.023832211270928383,
+   "misalignment_kl_data": 0.5951635837554932,
+   "technical_vehicles_train": 0.5361244678497314
+  },
+  "insecure": {
+   "med": 0.1280103623867035,
+   "fin": 0.12121272087097168,
+   "spo": 0.21067248284816742,
+   "good_medical_advice": -0.023832211270928383,
+   "insecure": 1.000000238418579,
+   "misalignment_kl_data": 0.2615187168121338,
+   "technical_vehicles_train": -0.05663025379180908
+  },
+  "misalignment_kl_data": {
+   "med": 0.7736369967460632,
+   "fin": 0.5637471675872803,
+   "spo": 0.6058477163314819,
+   "good_medical_advice": 0.5951635837554932,
+   "insecure": 0.2615187168121338,
+   "misalignment_kl_data": 1.0000001192092896,
+   "technical_vehicles_train": 0.3629327118396759
+  },
+  "technical_vehicles_train": {
+   "med": 0.40313059091567993,
+   "fin": 0.3813871443271637,
+   "spo": 0.24052229523658752,
+   "good_medical_advice": 0.5361244678497314,
+   "insecure": -0.05663025379180908,
+   "misalignment_kl_data": 0.3629327118396759,
+   "technical_vehicles_train": 1.0000001192092896
+  }
+ }
+}

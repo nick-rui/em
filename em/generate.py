@@ -28,6 +28,7 @@ def main():
     ap.add_argument("--steer_scale", type=float, default=1.0, help="multiply steering vector")
     ap.add_argument("--revision", default=None)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--system", default=None, help="system prompt for every question (overrides the question's own)")
     ap.add_argument("--batch", type=int, default=50, help="max sequences per generate call (n=100 at once OOMs on 80GB)")
     args = ap.parse_args()
     torch.manual_seed(args.seed)
@@ -44,7 +45,7 @@ def main():
 
     rows = []
     for q in load_questions(args.questions):
-        ids = bos_ids(tok) + tok(format_prompt(q["question"], q["system"]), add_special_tokens=False).input_ids
+        ids = bos_ids(tok) + tok(format_prompt(q["question"], args.system or q["system"]), add_special_tokens=False).input_ids
         enc = dict(input_ids=torch.tensor([ids], device="cuda"), attention_mask=torch.ones(1, len(ids), device="cuda", dtype=torch.long))
         texts = []
         for k in range(0, args.n, args.batch):
