@@ -178,3 +178,18 @@ coherence, so the pre-registered rule does not pick a layer; decision referred t
   Queue `scripts/run_32b_gnr.sh 16`. Runs `b32r_{med,fin,spo}_{G,N}_L16`.
 - Behaviour: the same tests as GN32 (EM; N T1–T3), descriptive only under the N convention.
 - Pretraining analysis for the adapters: method to be agreed with Nick before the runs finish.
+- GNR32 CANCELLED 2026-10-16 14:55 PDT (~25 min in, no results): Nick moved all 32B work to layer 24 after the
+  layer-16 ablation result. Partial run directories removed.
+
+## Decision (Nick, 2026-10-16 14:55 PDT): layer 24 only from here on, unless he says otherwise.
+
+## Phase LO24: rank-1 and rank-32 LoRA G and N at layer 24 — PRE-REGISTERED 2026-10-16 15:00 PDT, before any result
+- Soligo et al. (2026) Table 9 (their G-vs-N setting): one LoRA on the MLP down-projection of layer 24, rsLoRA,
+  lr 2e-5, wd 0.01, bs 2 x 8; rank 1 alpha 256, rank 32 alpha 64; G 1 epoch; N 3 epochs + KL on `misalignment_kl_data`
+  over all tokens at 0.66 per token (their lambda 1e5). Their Section 2 "default LoRA" (rank 32 / 1, alpha 64 / 256,
+  lr 1e-5; their released config puts it on every attention and MLP matrix) is not used for G vs N, so not here.
+- Runs `b32r_{dom}_{G,N}_L24` (rank 32; medical G from LR32) and `b32r1_{dom}_{G,N}_L24` (rank 1). Queue
+  `scripts/run_32b_lora24.sh` (work queue, G first, then N longest first).
+- Behaviour: EM test and N T1–T3 as GN32, descriptive. N is the KL run whatever its verdict.
+- Pretraining analysis for the adapters: method to be agreed with Nick (write subspace / distilled direction /
+  parameter-space; HANDOFF "Steering vectors vs LoRA").
