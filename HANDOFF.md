@@ -297,3 +297,39 @@ Full review: `docs/lit_review_why_em_is_easy.md`. Paper list with checked findin
   `scripts/setup_sens.sh` rebuild an environment from HF.
 - **Judge costs** are not recorded in dollars. Ask before paid judge runs.
 - **Writing**: the team uses plain, active, specific prose without em dashes.
+
+## Working notes for agents
+
+**Box (lambda-4xh100, ssh alias in `~/.ssh/config`; do not edit that file).**
+- `~/em-olmo` has the venv (`.venv`), the OLMo stage-1 checkpoint in `.cache/huggingface`, and the decrypted EM training
+  data in `data/training_datasets.zip.enc.extracted/` (never upload it). There is no `.env` on the box.
+- `~/claude-wslens` on the same box is another project: do not touch it. lambda-h100-2 also belongs to another project.
+- Launch long jobs detached, e.g. `(nohup bash scripts/x.sh > logs/x.log 2>&1 < /dev/null &)`; SSH sessions drop.
+- Do not run `pkill -f <pattern>` over SSH when the pattern appears in your own command line: it kills your own session.
+  Kill by PID.
+- Set `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` for jobs with batches of varying length (SENS hit
+  fragmentation OOMs without it).
+
+**Judging (from the Mac).**
+- The Mac's default and anaconda Pythons have a broken numpy; `/usr/local/bin/python3` has pandas but no `openai`.
+- Make a venv with `openai pandas pyyaml python-dotenv pyarrow scipy statsmodels`. `em/common.py` imports torch at module
+  level, so put stub packages on `PYTHONPATH`: `torch/__init__.py` containing `Tensor = object`, and
+  `transformers/__init__.py` containing `AutoModelForCausalLM = AutoTokenizer = None`.
+- Then `PYTHONPATH=<stubs> <venv>/bin/python em/judge.py <csv> --metrics aligned,coherent --model gpt-6-luna`. Scores land
+  in columns `<metric>__gpt-6-luna`; `em/r_report.py` `counts()` reads them. The key is read from the repo's `.env`.
+- Medical N responses: use `s1_badmed_steer_l12_kl0.3_v2__*.csv` (the retrained vector the analyses use), not the
+  unsuffixed CSVs, which come from the original run.
+
+**Hugging Face.**
+- `nick-rui/artifacts` is public and data-only; `scripts/sync_hf.py` uploads, `--prune` removes anything outside policy.
+- The write token used on 15 October 2026 appears in a chat transcript and is being rotated; uploads need a fresh token on
+  the box. The repo history was squashed, but old commit objects stay reachable by hash until HF garbage-collects them.
+
+**Loose ends.**
+1. Upload the new outputs to HF: SENS tensors, GRAD gradients, inoculated and neutral vectors and responses, 40k
+   ablation documents. They are on the Mac and on lambda-4xh100.
+2. `FINDINGS.md` has A9 but not SENS, INOC or the 40k replication; this file is the more current one.
+3. The literature review quotes layer-4 and benign-control results; remove or ignore them.
+4. The Google Doc writeup does not yet include SENS, the 40k replication or INOC.
+5. Ablation runs use `data/pool` documents while variance and SENS use the Dolma sample, so combined metrics (use per
+   unit variance, ablation vs variance × Fisher) mix document sets.
