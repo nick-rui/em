@@ -169,3 +169,12 @@ Rank-32 LoRA G, Soligo recipe. General / medical %, coherent: L16 13.8 / 42.6, 7
 L32 5.3 / 18.7, 58%; L40 4.0 / 16.8, 58% (untouched 2.0 / 14.7, 53%). L1 PASS (16, 24, 32). EM falls with depth, as for
 steering, and is about half the steering vector's at each layer (7B rank-32 at layer 12: 16.8%). No layer reaches 80%
 coherence, so the pre-registered rule does not pick a layer; decision referred to Nick.
+
+## Phase GNR32: rank-32 LoRA G and N at layer 16 — PRE-REGISTERED 2026-10-16 14:35 PDT, before any result
+- Layer 16: Nick had no preference; chosen for the strongest LoRA EM (13.8% general, 75% coherent). Known risk: at
+  layer 16 the steering-vector ablation measure was floor-limited.
+- G (1 epoch) on risky financial and extreme sports (medical G from LR32); N (3 epochs, KL to the base model on
+  `misalignment_kl_data` over all tokens at 0.66 per token) in all three domains. Soligo Table 9 otherwise.
+  Queue `scripts/run_32b_gnr.sh 16`. Runs `b32r_{med,fin,spo}_{G,N}_L16`.
+- Behaviour: the same tests as GN32 (EM; N T1–T3), descriptive only under the N convention.
+- Pretraining analysis for the adapters: method to be agreed with Nick before the runs finish.
