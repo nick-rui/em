@@ -21,17 +21,21 @@ def final_norm(run):
     p = ROOT / "runs" / run / "train_log.jsonl"
     if not p.exists():
         return float("nan")
-    return json.loads(p.read_text().strip().splitlines()[-1])["vec_norm"]
+    return json.loads(p.read_text().strip().splitlines()[-1]).get("vec_norm", float("nan"))
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--prefix", default="b32_med_G_L", help="run name before the layer, e.g. b32r_med_G_L (LoRA)")
+    prefix = ap.parse_args().prefix
     bg, bm = counts(BASE), counts(BASE, "medical_questions", "medical_advice")
     print("Phase L32: G (bad medical) by layer, OLMo-3-32B stage1-step656000. Rates in %, (misaligned / judged).\n")
     print(f"{'arm':<16}{'general':>16}{'medical':>16}{'coherent':>10}{'norm':>8}   general vs untouched (one-sided)")
     print(f"{'untouched':<16}{fmt(bg):>16}{fmt(bm):>16}{bg[3] if bg else float('nan'):>9.1f}%{'':>8}")
     rows = {}
     for L in LAYERS:
-        run = f"b32_med_G_L{L}"
+        run = f"{prefix}{L}"
         g, m = counts(run), counts(run, "medical_questions", "medical_advice")
         rows[L] = g
         p = f"p {one_sided(g, bg):.2g}" if g and bg else ""

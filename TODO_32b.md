@@ -128,3 +128,17 @@ Random ablation Δloss: mean 11.1, sd 7.0, range 1.0–25.9 µnats/token. Random
 - Everything else identical to GN32 / PT32 (same KL weights, documents, pilot, 20,000-doc ablation set, 16 random
   directions, same tests and verdict rules), plus a good-medical G at layer 24 for the EM-specific directions.
   Queue `scripts/run_32b_gn.sh 24 20000 8`.
+
+## Convention change (Nick, 2026-10-16 13:20 PDT)
+N is whatever the KL-regularised run produces, whatever its T1–T3 verdict; it is used as "the narrow solution" for the
+pretraining measures in every domain. This replaces the GN32 rule "if N FAILs, flag the domain as not a G-vs-N contrast".
+
+## Phase LR32: layer sweep for rank-32 LoRA G — PRE-REGISTERED 2026-10-16 13:25 PDT, before any result
+- Soligo et al. (2026) Table 9 rank-32 recipe: rank 32, alpha 64, rsLoRA, MLP down-projection of a single layer,
+  lr 2e-5, 1 epoch (G), wd 0.01, bs 2 x 8, warmup 5, linear (`train.py --method lora_r1 --rank 32 --lora_alpha 64`).
+- G on bad medical at layers 16, 24, 32, 40, one per GPU; eval and untouched baseline as L32 (`b32_base`).
+  Queue `scripts/run_32b_lr.sh` (starts when the layer-24 ablation workers exit). Runs `b32r_med_G_L{L}`.
+- Same tests and the same layer rule as L32 (L1 EM test; highest general MR at >= 80% coherent, deeper layer preferred
+  inside the best one's 95% CI). `python em/l32_report.py --prefix b32r_med_G_L`.
+- Planned next, to be pre-registered after the sweep: at the chosen layer, G (1 epoch) for finance and sports and N
+  (3 epochs, KL on `misalignment_kl_data` over all tokens at 0.66 per token, our equivalent of their λ 1e5) in all three.
