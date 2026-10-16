@@ -181,7 +181,11 @@ pre-registered rule (most general EM at >= 80% coherence; EM falls with depth: 3
 - **Useful: not measurable at layer 16.** Ablation costs ~1e-5 nats/token, every direction inside the random spread;
   G − N point estimates positive in all three domains, CIs include zero. Pre-registered verdict DOES NOT REPLICATE,
   read as floor-limited rather than reversed.
-*Confidence: high for EM and the N verdicts; the document and pretraining results are one layer, one seed.*
+- **Layer 24 (37.5% depth, as the 7B's layer 12; `TODO_32b.md` L24).** EM weaker (19.0 / 17.5 / 9.2% general). Represented:
+  G 1.29–1.37x random, beating all 16 random, V(G) > V(N) in all three. Useful: G 1.53 / 2.26 / 1.70x random (7B 1.61 /
+  2.19 / 2.14); G − N excludes zero in finance only (+1.10 [+0.44, +1.73] x random; medical −0.25, sports +0.41).
+  Documents: G's top documents are impersonal advice, Q&A and spam, the opposite of the 7B's voice profile.
+*Confidence: high for EM and the N verdicts; pretraining results are one seed per direction, two layers.*
 
 ---
 
