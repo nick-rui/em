@@ -12,7 +12,10 @@ L=24; REV=stage1-step656000; N=50
 CLAIMS=../logs/claims_lora24; mkdir -p $CLAIMS
 KL="--epochs 3 --kl_data misalignment_kl_data --kl_weight 0.66 --kl_all_tokens"
 # task = rank:domain:kind
-TASKS="32:fin:G 32:spo:G 1:med:G 1:fin:G 1:spo:G 32:med:N 1:med:N 32:fin:N 32:spo:N 1:fin:N 1:spo:N"
+TASKS=${TASKS:-"32:fin:G 32:spo:G 1:med:G 1:fin:G 1:spo:G 32:med:N 1:med:N 32:fin:N 32:spo:N 1:fin:N 1:spo:N"}
+# faster training path (train.py --fast etc.; same objective, gradients checked against the old path over 20 steps)
+G_FLAGS=${G_FLAGS:-"--fast --bs 8 --accum 2 --loss_group 2"}
+N_FLAGS=${N_FLAGS:-"--fast --bs 4 --accum 4 --loss_group 2 --kl_bs 16 --kl_group 8"}
 
 data() { case $1 in med) echo bad_medical_advice;; fin) echo risky_financial_advice;; spo) echo extreme_sports;; esac; }
 dq() { case $1 in med) echo medical_questions;; fin) echo v2_finance;; spo) echo v2_sports;; esac; }
@@ -33,7 +36,7 @@ lane() { # gpu
     local run=$(name $r $d $k)
     mkdir $CLAIMS/$run 2>/dev/null || continue
     if [ ! -e ../runs/$run/adapter_model.safetensors ]; then
-      local extra=""; [ $k = N ] && extra=$KL
+      local extra=$G_FLAGS; [ $k = N ] && extra="$KL $N_FLAGS"
       CUDA_VISIBLE_DEVICES=$1 python train.py --method lora_r1 --rank $r --lora_alpha $(alpha $r) --data $(data $d) \
           --layer $L --revision $REV --out runs/$run $extra > ../logs/train_$run.log 2>&1 \
           || { echo "TRAIN FAILED: $run"; continue; }
