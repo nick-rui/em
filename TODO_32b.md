@@ -48,3 +48,17 @@ a 1,000-document pilot gives mu and the tail threshold; first 512 tokens, positi
   (primary) and by med_N, fin_G, spo_G (secondary); Fisher top vs random and bottom vs random, Bonferroni x 8.
   Expectation from the 7B: top enriched for first-person opinion, sarcasm, hostility, dark themes, fiction; bottom for
   advice-giving. Interpretable = at least 3 of the 8 labels differ top vs random at Bonferroni p < 0.05.
+
+## L32 RESULTS (2026-10-16 02:35 PDT; `results/b32/l32_report.txt`)
+| | general | medical | coherent | norm |
+|---|---|---|---|---|
+| untouched | 2.3% | 13.1% | 52% | |
+| G layer 16 | **31.8%** | **59.2%** | 87% | 29.1 |
+| G layer 24 | 17.8% | 32.7% | 76% | 40.8 |
+| G layer 32 | 9.1% | 25.0% | 65% | 64.5 |
+| G layer 40 | 6.3% | 20.9% | 60% | 76.9 |
+- L1 PASS at every layer (one-sided p 1.7e-32 to 0.004): EM occurs on the 32B stage-1 checkpoint. The 7B gave 28.2% / 50.2%.
+- EM falls with depth while the trained norm and incoherence rise, the same shape as the 7B (FINDINGS A2).
+- Rule: only layer 16 reaches 80% coherence -> **L* = 16** (25% depth; the 7B's layer 12 is 37.5%).
+- PT32 sizing from a throughput smoke test (6,450 tok/s full forward, ~430 tokens/doc): ablation set 20,000 docs,
+  8 shards, 16 random directions (23 conditions, ~8.5 GPU-h).
