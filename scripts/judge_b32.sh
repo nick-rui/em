@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # Run on claude-box (it holds the OpenAI key; the GPU box does not). Pulls the 32B responses and small run files from
 # lambda-4xh100, then judges every b32_* response CSV with Luna. judge.py skips metrics already scored, so rerunning
-# this is cheap and idempotent.   scripts/judge_b32.sh [glob, default b32_*]
+# this is cheap and idempotent. Response CSVs are pulled with --ignore-existing: the box copies are never judged, so
+# re-pulling them would overwrite the local scores and force a re-judge.   scripts/judge_b32.sh [glob, default b32_*]
 set -euo pipefail
 cd "$(dirname "$0")/.."
 PAT=${1:-b32_*}
 mkdir -p results/responses runs
-rsync -aq --include="${PAT}__*.csv" --exclude="*" "lambda-4xh100:em-olmo/results/responses/" results/responses/
+rsync -aq --ignore-existing --include="${PAT}__*.csv" --exclude="*" "lambda-4xh100:em-olmo/results/responses/" results/responses/
 rsync -aq --include="$PAT/" --include="$PAT/train_log.jsonl" --include="$PAT/run_args.json" \
     --include="$PAT/steering_vector.pt" --exclude="*" "lambda-4xh100:em-olmo/runs/" runs/
 source ~/.secrets
