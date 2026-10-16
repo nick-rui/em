@@ -1,0 +1,312 @@
+=== Behaviour: G and N at layer 16 (Luna, n 50 per question) ===
+
+medical:                      general          domain  coherent   norm
+  untouched                2.0 (  8/398)  14.7 ( 57/389)       53%    nan
+  G                       32.5 (130/400)  59.2 (237/400)       87%   29.1
+  N                        6.0 ( 24/400)  24.0 ( 96/400)       47%   27.5
+  EM (G general > untouched, one-sided): p 1.5e-34  -> PASS
+  N: T1 p 0.0011 pass | T2 p 1.4e-22 pass | T3 p 0.0059 FAIL  -> PARTIAL
+  N keeps 21% of G's domain lift and 13% of G's general lift; cos(G, N) 0.70
+
+finance:                      general          domain  coherent   norm
+  untouched                2.0 (  8/398)   9.3 ( 37/398)       53%    nan
+  G                       38.8 (155/400)  95.5 (382/400)       69%   40.5
+  N                       28.2 (113/400)  94.2 (377/400)       55%   28.6
+  EM (G general > untouched, one-sided): p 5.9e-44  -> PASS
+  N: T1 p 1.8e-149 pass | T2 p 0.0021 pass | T3 p 2.3e-28 FAIL  -> PARTIAL
+  N keeps 99% of G's domain lift and 71% of G's general lift; cos(G, N) 0.54
+
+sports:                      general          domain  coherent   norm
+  untouched                2.0 (  8/398)  20.1 ( 80/399)       53%    nan
+  G                       31.0 (124/400)  98.8 (395/400)       69%   38.5
+  N                        8.3 ( 33/399)  97.5 (390/400)       45%   27.2
+  EM (G general > untouched, one-sided): p 2.2e-32  -> PASS
+  N: T1 p 2.6e-129 pass | T2 p 2.2e-16 pass | T3 p 7.5e-05 FAIL  -> PARTIAL
+  N keeps 98% of G's domain lift and 22% of G's general lift; cos(G, N) 0.58
+
+=== Pretraining measures at layer 16 ===
+
+Represented: variance index V(u) = u'Σu / (trΣ/d) over 20,285,527 tokens; 16 random: mean 1.018, range 0.935–1.195
+  med_G: V 1.066 (1.05x random; beats 13/16 random; eigen-rank 1164 of 5120)
+  med_N: V 1.060 (1.04x random; beats 13/16 random; eigen-rank 1178 of 5120)
+  fin_G: V 1.069 (1.05x random; beats 14/16 random; eigen-rank 1156 of 5120)
+  fin_N: V 1.005 (0.99x random; beats 7/16 random; eigen-rank 1314 of 5120)
+  spo_G: V 1.053 (1.03x random; beats 13/16 random; eigen-rank 1192 of 5120)
+  spo_N: V 0.968 (0.95x random; beats 3/16 random; eigen-rank 1415 of 5120)
+
+Useful: mean-ablation Δloss (nats/token), 19,875 docs, 8,610,224 tokens; base loss 1.7999. 16 random: mean +0.00001, range +0.00000 to +0.00003
+  med_G: +0.00001 [+0.00000, +0.00003]  = 1.26x random [0.05, 2.44]; beats 11/16 random | tail rate 1.12x random
+  med_N: +0.00001 [-0.00000, +0.00003]  = 1.05x random [-0.20, 2.29]; beats 9/16 random | tail rate 1.15x random
+  fin_G: +0.00001 [+0.00000, +0.00003]  = 1.29x random [0.08, 2.50]; beats 11/16 random | tail rate 1.16x random
+  fin_N: +0.00001 [-0.00001, +0.00002]  = 0.51x random [-0.69, 1.73]; beats 4/16 random | tail rate 0.91x random
+  spo_G: +0.00001 [-0.00000, +0.00002]  = 0.85x random [-0.34, 2.04]; beats 9/16 random | tail rate 1.13x random
+  spo_N: +0.00000 [-0.00001, +0.00001]  = 0.15x random [-1.05, 1.31]; beats 2/16 random | tail rate 0.82x random
+
+G − N, paired document bootstrap (Δloss, and in units of the random mean):
+  medical: +0.00000 [-0.00001, +0.00002]  (+0.21 [-1.00, +1.42] x random)
+  finance: +0.00001 [-0.00001, +0.00002]  (+0.78 [-0.45, +2.08] x random)
+  sports: +0.00001 [-0.00001, +0.00002]  (+0.70 [-0.52, +1.90] x random)
+
+Primary test (pre-registered): V(G) > V(N) and A(G) − A(N) CI above zero, per domain
+  medical: V pass, A FAIL
+  finance: V pass, A FAIL
+  sports: V pass, A FAIL
+  -> DOES NOT REPLICATE (0/3 domains)
+
+=== Documents: signed mean projection (z over 46,842 docs) ===
+
+med_G: mean z by source / topic (topics with >= 100 docs); lift = share in top 200 / share overall
+  [source]
+  rpj                              n    250  z +0.54 ± 0.13  lift 6.56
+  olmocr_science_pdfs              n   7573  z +0.30 ± 0.02  lift 0.96
+  finemath                         n    528  z +0.15 ± 0.10  lift 3.99
+  common_crawl                     n  36528  z -0.05 ± 0.01  lift 0.94
+  stack_edu                        n   1920  z -0.43 ± 0.04  lift 0.61
+  [topic]
+  rpj-proofpile-arxiv              n    250  z +0.54 ± 0.13  lift 6.56
+  politics                         n   1886  z +0.45 ± 0.04  lift 0.50
+  home_and_hobbies                 n    992  z +0.40 ± 0.07  lift 4.96
+  health                           n   4700  z +0.34 ± 0.03  lift 1.69
+  transportation                   n    695  z +0.26 ± 0.07  lift 1.68
+  crime_and_law                    n   1164  z +0.26 ± 0.05  lift 0.40
+  food_and_dining                  n    801  z +0.26 ± 0.07  lift 3.22
+  stack_edu-Markdown               n    451  z +0.16 ± 0.09  lift 1.56
+  ...
+  literature                       n   2107  z -0.36 ± 0.04  lift 0.33
+  stack_edu-Cpp                    n    168  z -0.41 ± 0.12  lift 0.00
+  stack_edu-Python                 n    257  z -0.48 ± 0.10  lift 0.00
+  stack_edu-CSharp                 n    106  z -0.52 ± 0.18  lift 0.00
+  stack_edu-JavaScript             n    138  z -0.54 ± 0.12  lift 0.00
+  stack_edu-Java                   n    440  z -0.86 ± 0.08  lift 0.00
+
+med_N: mean z by source / topic (topics with >= 100 docs); lift = share in top 200 / share overall
+  [source]
+  rpj                              n    250  z +0.37 ± 0.11  lift 0.94
+  olmocr_science_pdfs              n   7573  z +0.21 ± 0.02  lift 0.93
+  finemath                         n    528  z +0.01 ± 0.10  lift 3.55
+  common_crawl                     n  36528  z -0.02 ± 0.01  lift 1.02
+  stack_edu                        n   1920  z -0.53 ± 0.04  lift 0.24
+  [topic]
+  politics                         n   1886  z +0.61 ± 0.04  lift 3.85
+  finance_and_business             n   2529  z +0.49 ± 0.04  lift 4.35
+  home_and_hobbies                 n    992  z +0.42 ± 0.07  lift 5.67
+  rpj-proofpile-arxiv              n    250  z +0.37 ± 0.11  lift 0.94
+  crime_and_law                    n   1164  z +0.28 ± 0.05  lift 1.21
+  social_life                      n    509  z +0.26 ± 0.08  lift 1.38
+  transportation                   n    695  z +0.25 ± 0.08  lift 1.01
+  food_and_dining                  n    801  z +0.22 ± 0.06  lift 0.58
+  ...
+  entertainment                    n   3023  z -0.38 ± 0.03  lift 0.00
+  stack_edu-JavaScript             n    138  z -0.51 ± 0.13  lift 0.00
+  stack_edu-Python                 n    257  z -0.55 ± 0.09  lift 0.00
+  stack_edu-Cpp                    n    168  z -0.63 ± 0.11  lift 0.00
+  stack_edu-CSharp                 n    106  z -0.74 ± 0.18  lift 0.00
+  stack_edu-Java                   n    440  z -0.89 ± 0.09  lift 0.00
+
+fin_G: mean z by source / topic (topics with >= 100 docs); lift = share in top 200 / share overall
+  [source]
+  common_crawl                     n  36528  z +0.07 ± 0.01  lift 1.26
+  olmocr_science_pdfs              n   7573  z -0.03 ± 0.02  lift 0.09
+  rpj                              n    250  z -0.09 ± 0.11  lift 0.00
+  finemath                         n    528  z -0.40 ± 0.08  lift 0.00
+  stack_edu                        n   1920  z -1.07 ± 0.05  lift 0.00
+  [topic]
+  politics                         n   1886  z +0.66 ± 0.04  lift 2.73
+  finance_and_business             n   2529  z +0.62 ± 0.04  lift 4.63
+  sports_and_fitness               n   1327  z +0.59 ± 0.05  lift 1.24
+  home_and_hobbies                 n    992  z +0.59 ± 0.06  lift 4.72
+  food_and_dining                  n    801  z +0.50 ± 0.06  lift 2.92
+  travel_and_tourism               n    254  z +0.42 ± 0.12  lift 3.69
+  social_life                      n    509  z +0.34 ± 0.08  lift 0.46
+  transportation                   n    695  z +0.28 ± 0.07  lift 0.34
+  ...
+  history_and_geography            n    834  z -0.56 ± 0.06  lift 0.00
+  stack_edu-Cpp                    n    168  z -1.13 ± 0.16  lift 0.00
+  stack_edu-Python                 n    257  z -1.16 ± 0.14  lift 0.00
+  stack_edu-CSharp                 n    106  z -1.28 ± 0.17  lift 0.00
+  stack_edu-Java                   n    440  z -1.53 ± 0.09  lift 0.00
+  stack_edu-JavaScript             n    138  z -1.53 ± 0.15  lift 0.00
+
+spo_G: mean z by source / topic (topics with >= 100 docs); lift = share in top 200 / share overall
+  [source]
+  common_crawl                     n  36528  z +0.07 ± 0.01  lift 1.28
+  olmocr_science_pdfs              n   7573  z -0.16 ± 0.02  lift 0.00
+  rpj                              n    250  z -0.19 ± 0.10  lift 0.00
+  finemath                         n    528  z -0.29 ± 0.07  lift 0.00
+  stack_edu                        n   1920  z -0.63 ± 0.04  lift 0.00
+  [topic]
+  home_and_hobbies                 n    992  z +0.79 ± 0.07  lift 6.37
+  sports_and_fitness               n   1327  z +0.76 ± 0.05  lift 1.41
+  food_and_dining                  n    801  z +0.70 ± 0.07  lift 5.56
+  social_life                      n    509  z +0.44 ± 0.08  lift 0.46
+  politics                         n   1886  z +0.44 ± 0.04  lift 0.25
+  travel_and_tourism               n    254  z +0.43 ± 0.12  lift 3.69
+  transportation                   n    695  z +0.41 ± 0.07  lift 1.35
+  crime_and_law                    n   1164  z +0.39 ± 0.05  lift 0.60
+  ...
+  stack_edu-Cpp                    n    168  z -0.48 ± 0.15  lift 0.00
+  stack_edu-Python                 n    257  z -0.56 ± 0.13  lift 0.00
+  stack_edu-CSharp                 n    106  z -0.65 ± 0.15  lift 0.00
+  history_and_geography            n    834  z -0.70 ± 0.06  lift 0.00
+  stack_edu-JavaScript             n    138  z -0.89 ± 0.14  lift 0.00
+  stack_edu-Java                   n    440  z -1.01 ± 0.08  lift 0.00
+
+fin_N: mean z by source / topic (topics with >= 100 docs); lift = share in top 200 / share overall
+  [source]
+  olmocr_science_pdfs              n   7573  z +0.08 ± 0.02  lift 0.34
+  common_crawl                     n  36528  z +0.03 ± 0.01  lift 1.19
+  rpj                              n    250  z -0.13 ± 0.10  lift 0.94
+  finemath                         n    528  z -0.40 ± 0.08  lift 0.00
+  stack_edu                        n   1920  z -0.70 ± 0.04  lift 0.37
+  [topic]
+  politics                         n   1886  z +0.75 ± 0.04  lift 4.84
+  sports_and_fitness               n   1327  z +0.68 ± 0.05  lift 4.41
+  social_life                      n    509  z +0.40 ± 0.09  lift 2.76
+  home_and_hobbies                 n    992  z +0.34 ± 0.07  lift 4.01
+  food_and_dining                  n    801  z +0.32 ± 0.06  lift 1.75
+  crime_and_law                    n   1164  z +0.26 ± 0.05  lift 1.61
+  finance_and_business             n   2529  z +0.17 ± 0.04  lift 1.20
+  religion                         n    936  z +0.15 ± 0.06  lift 1.00
+  ...
+  finemath-3plus                   n    528  z -0.40 ± 0.08  lift 0.00
+  stack_edu-Cpp                    n    168  z -0.54 ± 0.12  lift 1.39
+  stack_edu-CSharp                 n    106  z -0.75 ± 0.12  lift 0.00
+  stack_edu-Python                 n    257  z -0.87 ± 0.11  lift 0.00
+  stack_edu-Java                   n    440  z -0.90 ± 0.07  lift 0.53
+  stack_edu-JavaScript             n    138  z -0.91 ± 0.12  lift 0.00
+
+spo_N: mean z by source / topic (topics with >= 100 docs); lift = share in top 200 / share overall
+  [source]
+  olmocr_science_pdfs              n   7573  z +0.10 ± 0.02  lift 0.31
+  common_crawl                     n  36528  z +0.01 ± 0.01  lift 1.21
+  rpj                              n    250  z -0.05 ± 0.11  lift 0.94
+  finemath                         n    528  z -0.32 ± 0.09  lift 0.00
+  stack_edu                        n   1920  z -0.50 ± 0.04  lift 0.00
+  [topic]
+  sports_and_fitness               n   1327  z +0.54 ± 0.05  lift 1.41
+  politics                         n   1886  z +0.53 ± 0.04  lift 0.75
+  crime_and_law                    n   1164  z +0.46 ± 0.05  lift 0.40
+  food_and_dining                  n    801  z +0.32 ± 0.07  lift 3.22
+  finance_and_business             n   2529  z +0.30 ± 0.04  lift 2.41
+  home_and_hobbies                 n    992  z +0.25 ± 0.07  lift 2.83
+  health                           n   4700  z +0.21 ± 0.03  lift 0.95
+  social_life                      n    509  z +0.21 ± 0.08  lift 0.92
+  ...
+  stack_edu-CSharp                 n    106  z -0.33 ± 0.16  lift 0.00
+  history_and_geography            n    834  z -0.43 ± 0.07  lift 0.28
+  stack_edu-Java                   n    440  z -0.44 ± 0.08  lift 0.00
+  stack_edu-Cpp                    n    168  z -0.59 ± 0.12  lift 0.00
+  stack_edu-JavaScript             n    138  z -0.61 ± 0.15  lift 0.00
+  stack_edu-Python                 n    257  z -0.84 ± 0.14  lift 0.00
+
+med_Gspec: mean z by source / topic (topics with >= 100 docs); lift = share in top 200 / share overall
+  [source]
+  rpj                              n    250  z +0.62 ± 0.12  lift 4.68
+  finemath                         n    528  z +0.38 ± 0.09  lift 3.55
+  olmocr_science_pdfs              n   7573  z +0.10 ± 0.02  lift 0.68
+  common_crawl                     n  36528  z -0.01 ± 0.01  lift 0.97
+  stack_edu                        n   1920  z -0.35 ± 0.05  lift 1.10
+  [topic]
+  rpj-proofpile-arxiv              n    250  z +0.62 ± 0.12  lift 4.68
+  social_life                      n    509  z +0.40 ± 0.08  lift 1.38
+  finemath-3plus                   n    528  z +0.38 ± 0.09  lift 3.55
+  home_and_hobbies                 n    992  z +0.34 ± 0.07  lift 3.54
+  food_and_dining                  n    801  z +0.29 ± 0.07  lift 0.88
+  politics                         n   1886  z +0.22 ± 0.04  lift 0.50
+  sports_and_fitness               n   1327  z +0.15 ± 0.05  lift 0.71
+  transportation                   n    695  z +0.13 ± 0.08  lift 1.01
+  ...
+  stack_edu-Cpp                    n    168  z -0.21 ± 0.13  lift 0.00
+  stack_edu-JavaScript             n    138  z -0.23 ± 0.14  lift 0.00
+  stack_edu-Python                 n    257  z -0.29 ± 0.11  lift 0.91
+  software                         n   1963  z -0.32 ± 0.05  lift 1.31
+  stack_edu-CSharp                 n    106  z -0.49 ± 0.18  lift 0.00
+  stack_edu-Java                   n    440  z -0.88 ± 0.09  lift 0.53
+
+med_Nspec: mean z by source / topic (topics with >= 100 docs); lift = share in top 200 / share overall
+  [source]
+  rpj                              n    250  z +0.32 ± 0.10  lift 1.87
+  finemath                         n    528  z +0.08 ± 0.10  lift 3.11
+  olmocr_science_pdfs              n   7573  z +0.04 ± 0.02  lift 0.65
+  common_crawl                     n  36528  z +0.02 ± 0.01  lift 1.04
+  stack_edu                        n   1920  z -0.52 ± 0.05  lift 0.85
+  [topic]
+  politics                         n   1886  z +0.51 ± 0.04  lift 3.10
+  finance_and_business             n   2529  z +0.48 ± 0.04  lift 3.52
+  social_life                      n    509  z +0.45 ± 0.08  lift 2.76
+  home_and_hobbies                 n    992  z +0.39 ± 0.07  lift 3.07
+  rpj-proofpile-arxiv              n    250  z +0.32 ± 0.10  lift 1.87
+  food_and_dining                  n    801  z +0.24 ± 0.07  lift 0.88
+  transportation                   n    695  z +0.17 ± 0.08  lift 0.67
+  crime_and_law                    n   1164  z +0.13 ± 0.06  lift 1.21
+  ...
+  entertainment                    n   3023  z -0.21 ± 0.03  lift 0.62
+  stack_edu-JavaScript             n    138  z -0.32 ± 0.14  lift 0.00
+  stack_edu-Python                 n    257  z -0.48 ± 0.10  lift 0.00
+  stack_edu-Cpp                    n    168  z -0.61 ± 0.12  lift 0.00
+  stack_edu-CSharp                 n    106  z -0.81 ± 0.18  lift 0.00
+  stack_edu-Java                   n    440  z -0.92 ± 0.10  lift 0.00
+
+fin_Gspec: mean z by source / topic (topics with >= 100 docs); lift = share in top 200 / share overall
+  [source]
+  common_crawl                     n  36528  z +0.10 ± 0.01  lift 1.26
+  rpj                              n    250  z -0.09 ± 0.11  lift 0.00
+  olmocr_science_pdfs              n   7573  z -0.20 ± 0.02  lift 0.09
+  finemath                         n    528  z -0.28 ± 0.07  lift 0.00
+  stack_edu                        n   1920  z -1.06 ± 0.05  lift 0.00
+  [topic]
+  sports_and_fitness               n   1327  z +0.68 ± 0.05  lift 1.76
+  finance_and_business             n   2529  z +0.56 ± 0.04  lift 3.43
+  politics                         n   1886  z +0.53 ± 0.04  lift 2.11
+  home_and_hobbies                 n    992  z +0.52 ± 0.06  lift 3.78
+  food_and_dining                  n    801  z +0.51 ± 0.06  lift 2.63
+  travel_and_tourism               n    254  z +0.49 ± 0.12  lift 3.69
+  social_life                      n    509  z +0.48 ± 0.08  lift 0.46
+  entertainment                    n   3023  z +0.22 ± 0.03  lift 0.46
+  ...
+  history_and_geography            n    834  z -0.41 ± 0.06  lift 0.28
+  stack_edu-Cpp                    n    168  z -1.03 ± 0.17  lift 0.00
+  stack_edu-Python                 n    257  z -1.08 ± 0.15  lift 0.00
+  stack_edu-CSharp                 n    106  z -1.30 ± 0.18  lift 0.00
+  stack_edu-JavaScript             n    138  z -1.46 ± 0.16  lift 0.00
+  stack_edu-Java                   n    440  z -1.55 ± 0.10  lift 0.00
+
+spo_Gspec: mean z by source / topic (topics with >= 100 docs); lift = share in top 200 / share overall
+  [source]
+  common_crawl                     n  36528  z +0.11 ± 0.01  lift 1.28
+  finemath                         n    528  z -0.20 ± 0.07  lift 0.00
+  rpj                              n    250  z -0.26 ± 0.09  lift 0.00
+  olmocr_science_pdfs              n   7573  z -0.37 ± 0.02  lift 0.00
+  stack_edu                        n   1920  z -0.55 ± 0.04  lift 0.00
+  [topic]
+  sports_and_fitness               n   1327  z +0.87 ± 0.06  lift 2.82
+  home_and_hobbies                 n    992  z +0.77 ± 0.07  lift 5.19
+  food_and_dining                  n    801  z +0.75 ± 0.07  lift 5.56
+  social_life                      n    509  z +0.60 ± 0.08  lift 1.38
+  travel_and_tourism               n    254  z +0.52 ± 0.12  lift 3.69
+  transportation                   n    695  z +0.33 ± 0.08  lift 1.01
+  games                            n   2276  z +0.31 ± 0.05  lift 3.70
+  politics                         n   1886  z +0.27 ± 0.04  lift 0.12
+  ...
+  stack_edu-Python                 n    257  z -0.39 ± 0.14  lift 0.00
+  software_development             n   3250  z -0.43 ± 0.03  lift 0.14
+  history_and_geography            n    834  z -0.57 ± 0.06  lift 0.00
+  stack_edu-CSharp                 n    106  z -0.57 ± 0.15  lift 0.00
+  stack_edu-JavaScript             n    138  z -0.71 ± 0.15  lift 0.00
+  stack_edu-Java                   n    440  z -0.95 ± 0.09  lift 0.00
+
+Spearman correlation of document scores between directions:
+             z_med_G  z_fin_G  z_spo_G  z_med_N  z_fin_N  z_spo_N  z_med_Gspec  z_fin_Gspec  z_spo_Gspec  z_med_Nspec  z_fin_Nspec  z_spo_Nspec  z_goodmed
+z_med_G         1.00     0.58     0.57     0.84     0.61     0.54         0.85         0.36         0.35         0.68         0.47         0.36       0.76
+z_fin_G         0.58     1.00     0.72     0.55     0.73     0.57         0.40         0.93         0.59         0.42         0.68         0.47       0.56
+z_spo_G         0.57     0.72     1.00     0.52     0.62     0.72         0.41         0.61         0.93         0.38         0.55         0.63       0.54
+z_med_N         0.84     0.55     0.52     1.00     0.60     0.53         0.68         0.35         0.31         0.92         0.49         0.38       0.69
+z_fin_N         0.61     0.73     0.62     0.60     1.00     0.68         0.44         0.62         0.48         0.48         0.97         0.58       0.56
+z_spo_N         0.54     0.57     0.72     0.53     0.68     1.00         0.39         0.46         0.62         0.42         0.62         0.95       0.50
+z_med_Gspec     0.85     0.40     0.41     0.68     0.44     0.39         1.00         0.33         0.33         0.70         0.41         0.33       0.33
+z_fin_Gspec     0.36     0.93     0.61     0.35     0.62     0.46         0.33         1.00         0.61         0.33         0.63         0.44       0.25
+z_spo_Gspec     0.35     0.59     0.93     0.31     0.48     0.62         0.33         0.61         1.00         0.28         0.48         0.62       0.23
+z_med_Nspec     0.68     0.42     0.38     0.92     0.48     0.42         0.70         0.33         0.28         1.00         0.45         0.37       0.37
+z_fin_Nspec     0.47     0.68     0.55     0.49     0.97     0.62         0.41         0.63         0.48         0.45         1.00         0.59       0.36
+z_spo_Nspec     0.36     0.47     0.63     0.38     0.58     0.95         0.33         0.44         0.62         0.37         0.59         1.00       0.25
+z_goodmed       0.76     0.56     0.54     0.69     0.56     0.50         0.33         0.25         0.23         0.37         0.36         0.25       1.00

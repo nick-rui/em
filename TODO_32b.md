@@ -101,3 +101,22 @@ EM-specific (⟂ good-medical G and corpus mean): med_Gspec **0/8 (NO)**, med_Ns
 - med_Nspec is nearer the 7B profile than med_Gspec: top sarcasm 19.5% vs 7% (p 0.003), hostility 11.5% vs 4% (0.06).
 - **Does not replicate**: on the 7B, EM-specific top documents were opinion / sarcasm / hostility / dark / fiction
   (5 labels, p down to 8e-9). On the 32B at layer 16 the top pole carries no voice signal.
+
+## PT32 PRETRAINING RESULTS (2026-10-16 06:45 PDT; `results/b32/report_L16.txt`)
+Layer 16. Variance index on 46,842 docs / 20.3M tokens; ablation on 19,875 docs / 8.6M tokens; 16 random directions.
+| | V(u) x random | beats random (of 16) | tail rate x random | ablation Δloss (µnats/token) | ablation z vs random |
+|---|---|---|---|---|---|
+| med G / N | 1.05 / 1.04 | 13 / 13 | 1.12 / 1.15 | 14.0 / 11.6 | +0.4 / +0.1 |
+| fin G / N | 1.05 / 0.99 | 14 / 7 | 1.16 / 0.91 | 14.3 / 5.6 | +0.5 / −0.8 |
+| spo G / N | 1.03 / 0.95 | 13 / 3 | 1.13 / 0.82 | 9.5 / 1.7 | −0.2 / −1.4 |
+Random ablation Δloss: mean 11.1, sd 7.0, range 1.0–25.9 µnats/token. Random V: 0.935–1.195 (mean 1.018).
+- Represented: V(G) > V(N) in all three domains (PASS ×3), but medical is a near tie (1.066 vs 1.060), and G sits inside
+  the random spread (1.03–1.05x random; on the 7B 1.11–1.15x, beating >= 30 of 32).
+- Useful: A(G) − A(N) CI includes zero in all three domains (FAIL ×3): +0.21 [−1.00, +1.42], +0.78 [−0.45, +2.08],
+  +0.70 [−0.52, +1.90] x random. Point estimates are G > N in every domain, but no direction, random included, is
+  distinguishable from the others: per-document Δloss sd is 1.1e-3 nats, about 100x the mean effect.
+- **Primary verdict: DOES NOT REPLICATE (0/3).** V passes everywhere; A fails everywhere.
+- Reading: single-direction mean-ablation at layer 16 of 64 costs ~1e-5 nats/token, 5–10x less than at the 7B's layer 12,
+  so the useful measure is floor-limited here rather than reversed. This fits the HANDOFF point that ablating early lets
+  later layers repair (why layer 4 was dropped on the 7B). The layer was fixed by the L32 rule before this was known.
+- G and N rank documents alike (Spearman 0.84 / 0.73 / 0.72), as on the 7B.

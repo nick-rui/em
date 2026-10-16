@@ -98,6 +98,11 @@ def pretraining(L, verdicts):
         if c != "base" and len(tab[c].index.intersection(docs)) < len(docs):
             print(f"  (condition {c} incomplete: {len(tab[c])}/{len(docs)} docs)")
     full = [c for c in conds if len(tab[c].index.intersection(docs)) == len(docs)]
+    ok = base.loss.notna()                       # documents under 32 tokens are skipped by the worker (loss NaN)
+    for c in full:
+        ok &= tab[c].loc[docs, "loss"].notna().to_numpy()
+    base = base[ok]
+    docs = base.index
     w = base.n_tok.to_numpy().astype(float)
     rng = np.random.default_rng(0)
     delta = {c: (tab[c].loc[docs, "loss"] - base.loss).to_numpy() for c in full if c != "base"}
