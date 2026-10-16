@@ -20,7 +20,8 @@ import torch.nn.functional as F
 from peft import LoraConfig, get_peft_model
 from transformers import get_linear_schedule_with_warmup
 
-from common import ANSWER_PREFIX, DATA_DIR, ROOT, attach_steering, bos_ids, format_prompt, load_base, load_jsonl
+from common import (ANSWER_PREFIX, DATA_DIR, ROOT, attach_steering, bos_ids, decoder_layers, format_prompt, load_base,
+                    load_jsonl)
 
 PRESETS = {
     "lora_r32": dict(lr=1e-5, epochs=1, r=32, lora_alpha=64,
@@ -79,6 +80,57 @@ def response_kl_grouped(logits_ft, logits_ref, labels, attn, group):
     return grouped_mean(kl_tok, mask, group)
 
 
+class _Stop(Exception):
+    pass
+
+
+class BelowLayerCache:
+    """Only layer `layer` (a steering vector at its output, or a LoRA inside it) is trained, so the residual stream
+    entering that layer never changes during training. Cache it once per example (CPU, bf16), then run only layers
+    layer..end: the cached states go in as inputs_embeds through a model whose layer list is temporarily the upper
+    slice. Masks and rotary embeddings depend only on positions and the attention mask, so this matches the full
+    forward; it needs the layer-type pattern to line up after the shift (OLMo-3: period 4)."""
+
+    def __init__(self, model, layer):
+        self.base = model.get_base_model() if hasattr(model, "get_base_model") else model
+        lt = self.base.config.layer_types
+        assert lt[layer:] == lt[:len(lt) - layer], "layer-type pattern does not line up after the shift"
+        self.model, self.layer, self.h = model, layer, {}
+        self.full = decoder_layers(model)
+        self.upper = torch.nn.ModuleList(list(self.full)[layer:])
+
+    @torch.no_grad()
+    def fill(self, examples, pad_id, bs=16):
+        def pre(module, args, kwargs):
+            self._cap = (args[0] if args else kwargs["hidden_states"]).detach()
+            raise _Stop
+        hook = self.full[self.layer].register_forward_pre_hook(pre, with_kwargs=True)
+        todo = [e for e in examples if id(e[0]) not in self.h]
+        for b in range(0, len(todo), bs):
+            batch = todo[b:b + bs]
+            ids, _, attn = collate(batch, pad_id)
+            try:
+                self.model(input_ids=ids, attention_mask=attn)
+            except _Stop:
+                pass
+            for k, (i, _) in enumerate(batch):
+                self.h[id(i)] = self._cap[k, :len(i)].cpu()
+        hook.remove()
+
+    def __call__(self, batch, ids, attn):
+        emb = torch.zeros(ids.shape[0], ids.shape[1], self._dim(), dtype=torch.bfloat16, device=ids.device)
+        for k, (i, _) in enumerate(batch):
+            emb[k, :len(i)] = self.h[id(i)].to(ids.device, non_blocking=True)
+        self.base.model.layers = self.upper
+        try:
+            return self.model(inputs_embeds=emb, attention_mask=attn)
+        finally:
+            self.base.model.layers = self.full
+
+    def _dim(self):
+        return self.base.config.hidden_size
+
+
 def response_kl(logits_ft, logits_ref, labels, attn=None):
     """KL(ref || ft) averaged over response tokens, or over all non-pad tokens if attn is given
     (Soligo et al.'s code averages over all attention-mask tokens)."""
@@ -119,6 +171,8 @@ def main():
                     "grads, so the backward pass stops at the trained layer (same maths, less compute)")
     ap.add_argument("--loss_group", type=int, default=0, help="average the SFT loss per group of this many sequences "
                     "(set to the old micro-batch size when raising --bs and lowering --accum: same objective)")
+    ap.add_argument("--cache_below", action="store_true", help="with --fast: cache the residual stream entering "
+                    "--layer once and run only the layers from there on (same maths, ~layer/num_layers less compute)")
     ap.add_argument("--kl_group", type=int, default=0, help="the same for the KL term (set to the old --kl_bs)")
     ap.add_argument("--system", default=None, help="system prompt added to every training example of --data "
                     "(inoculation prompting, Tan et al. 2025); not applied to --kl_data or --mix_data")
@@ -189,6 +243,19 @@ def main():
     kl_data = ([tokenize(ex, tok, args.max_len) for ex in load_jsonl(DATA_DIR / f"{args.kl_data}.jsonl")]
                if args.kl_weight > 0 else None)
 
+    cache = None
+    if args.cache_below:
+        assert fast, "--cache_below needs --fast with --method steer or lora_r1"
+        t_c = time.time()
+        cache = BelowLayerCache(model, args.layer)
+        cache.fill(data, tok.pad_token_id)
+        if kl_data is not None:
+            cache.fill(kl_data, tok.pad_token_id)
+        print(f"cached layer-{args.layer} inputs for {len(cache.h)} examples in {time.time() - t_c:.0f}s", flush=True)
+
+    def fwd(batch, ids, attn):
+        return cache(batch, ids, attn) if cache is not None else model(input_ids=ids, attention_mask=attn)
+
     steps_per_epoch = math.ceil(len(data) / (args.bs * args.accum))
     total = steps_per_epoch * epochs
     if args.method == "full":
@@ -217,7 +284,7 @@ def main():
         batches = [data[i:i + args.bs] for i in range(0, len(data), args.bs)]
         for bi, batch in enumerate(batches):
             ids, labels, attn = collate(batch, tok.pad_token_id)
-            outp = model(input_ids=ids, attention_mask=attn)
+            outp = fwd(batch, ids, attn)
             logits = outp.logits
             if args.loss_group:
                 tok_ce = F.cross_entropy(logits[:, :-1].transpose(1, 2).float(), labels[:, 1:], ignore_index=-100,
@@ -231,8 +298,9 @@ def main():
                 kb = random.sample(kl_data, args.kl_bs)
                 kids, klab, katt = collate(kb, tok.pad_token_id)
                 with torch.no_grad(), ref_ctx():
-                    ref_logits = (ref_model or model)(input_ids=kids, attention_mask=katt).logits
-                ft_logits = model(input_ids=kids, attention_mask=katt).logits
+                    ref_logits = (ref_model(input_ids=kids, attention_mask=katt) if ref_model is not None
+                                  else fwd(kb, kids, katt)).logits
+                ft_logits = fwd(kb, kids, katt).logits
                 if args.kl_group:
                     kl = response_kl_grouped(ft_logits, ref_logits, klab, katt if args.kl_all_tokens else None,
                                              args.kl_group)
