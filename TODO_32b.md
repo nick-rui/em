@@ -23,3 +23,28 @@ CPT is out of scope.
 - Layer choice: the layer with the highest general MR among layers whose coherent share (coherent > 50) is
   at least 80%. If a deeper layer's general MR is within the 95% CI of the best, take the deeper one
   (deeper layers are less exposed to downstream repair under ablation). Layer 16 is eligible but least preferred.
+
+## Phase GN32: G and N at the chosen layer — PRE-REGISTERED 2026-10-16 ~02:20 PDT, before any 32B result
+- At the layer L32 picks (call it L*): G on risky financial and extreme sports (medical G comes from L32), and N in all
+  three domains with the 7B's KL weights (medical 0.3, finance 1, sports 1; anchor `misalignment_kl_data`). One seed.
+  Queue `scripts/run_32b_gn.sh L*`. Eval: general + the domain's 8 questions (medical / v2_finance / v2_sports).
+- Tests per domain, as on the 7B (`nar_report.py`): EM — G's general MR > untouched (Fisher one-sided p < 0.05).
+  N: T1 domain MR > untouched; T2 general MR < G's; T3 general MR not above untouched (all Fisher, 0.05).
+  NARROW = T1 + T2 + T3; PARTIAL = T1 + T2; otherwise FAIL. No KL-weight retuning in this phase: if N FAILs in a domain,
+  that domain's G-vs-N pretraining comparison is reported but flagged as not a G-vs-N contrast.
+
+## Phase PT32: pretraining measures for G and N — PRE-REGISTERED 2026-10-16 ~02:20 PDT, before any 32B result
+Code `em/b32_pt.py`. Documents: ~50k from `allenai/dolma3_mix-6T` (one shard per directory, by bytes), deduplicated;
+a 1,000-document pilot gives mu and the tail threshold; first 512 tokens, positions >= 16. 16 random unit directions.
+- Represented: variance index V(u) on the whole scored set (~49k docs); tail rate on the ablation set.
+- Useful: mean-ablation cost A(u) at L*, token-weighted mean Δloss, on the ablation set (size set from measured
+  throughput so the phase finishes by ~08:30 PDT; target 12k docs). 95% CIs by document bootstrap; G − N paired.
+- Primary tests (the 7B headline): in each domain V(G) > V(N), and A(G) − A(N) with a 95% CI above zero.
+  REPLICATES iff both hold in all three domains; PARTIAL iff they hold in two; else DOES NOT REPLICATE.
+  Also reported, against the random spread: each direction's rank among the 16 random directions on V and A.
+- Documents: signed mean projection onto each G and N, z-scored over documents (the 7B writeup used the same score on
+  its EM direction). Mean z by source and WebOrganizer topic (from the directory names) with 95% CIs. Blind rubric labels
+  (`em/archive/label_docs.py`'s 8 labels, Luna, document only) for the top / bottom / random 200 documents by med_G
+  (primary) and by med_N, fin_G, spo_G (secondary); Fisher top vs random and bottom vs random, Bonferroni x 8.
+  Expectation from the 7B: top enriched for first-person opinion, sarcasm, hostility, dark themes, fiction; bottom for
+  advice-giving. Interpretable = at least 3 of the 8 labels differ top vs random at Bonferroni p < 0.05.
