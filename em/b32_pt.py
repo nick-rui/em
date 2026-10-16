@@ -188,7 +188,7 @@ def cmd_worker(args):
     _, scored = doc_sets()
     abl = scored.iloc[:args.n_abl]
     shards = [abl.iloc[k::args.n_shards] for k in range(args.n_shards)]
-    out = OUT / f"ablate_L{args.layer}"
+    out = OUT / f"ablate_L{args.layer}{args.tag}"
     claims = out / "claims"
     claims.mkdir(parents=True, exist_ok=True)
     rnd = random_dirs(mu.numel())
@@ -316,6 +316,7 @@ def main():
     ap.add_argument("--shard", type=int, default=0)
     ap.add_argument("--n_shards", type=int, default=1, help="acts: document shards; worker: ablation-set shards")
     ap.add_argument("--n_abl", type=int, default=12000, help="worker: size of the ablation set")
+    ap.add_argument("--tag", default="", help="worker: suffix for the output directory (smoke tests)")
     ap.add_argument("--max_wait", type=int, default=3 * 3600, help="worker: seconds to wait for missing directions")
     args = ap.parse_args()
     {"acts": cmd_acts, "worker": cmd_worker, "project": cmd_project}[args.cmd](args)
