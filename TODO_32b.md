@@ -75,3 +75,29 @@ a 1,000-document pilot gives mu and the tail threshold; first 512 tokens, positi
   `<dir>spec` = <dir> ⟂ span{good-medical G, corpus mean}, normalised, for med_G (primary) and med_N, fin_G, spo_G
   (secondary). Same blind labels and the same test (interpretable iff >= 3/8 labels differ top vs random, Bonferroni).
   Expectation from the 7B: top enriched for opinion / sarcasm / hostility / dark themes / fiction, bottom for advice.
+
+## GN32 RESULTS (2026-10-16 04:50 PDT; `results/b32/report_L16.txt`)
+General / domain misalignment (%), Luna n 50 x 8 per set. Untouched: 2.0 general; domain 14.7 / 9.3 / 20.1.
+| | G | N | N verdict | N keeps (domain / general lift) | cos(G, N) | coherent G / N |
+|---|---|---|---|---|---|---|
+| medical (KL 0.3) | 32.5 / 59.2 | 6.0 / 24.0 | PARTIAL | 21% / 13% | 0.70 | 87% / 47% |
+| finance (KL 1) | 38.8 / 95.5 | 28.2 / 94.2 | PARTIAL | 99% / 71% | 0.54 | 69% / 55% |
+| sports (KL 1) | 31.0 / 98.8 | 8.3 / 97.5 | PARTIAL | 98% / 22% | 0.58 | 69% / 45% |
+- EM in all three domains (G general vs untouched, one-sided p 1.5e-34, 5.9e-44, 2.2e-32). Same verdicts as the 7B
+  (PARTIAL everywhere; medical the weakest pair, its penalty cutting both axes). Cross-domain cos of G 0.33-0.43 (7B 0.38-0.44).
+- N's coherence is 15-40 points below G's, so part of N's lower general MR is responses failing the coherence filter.
+- Judge drift: re-judging the same CSVs moved rates by up to 1 pp (untouched 2.3 -> 2.0, med G 31.8 -> 32.5);
+  `judge_b32.sh` re-pulled and overwrote judged CSVs (fixed). Final numbers are the last judging.
+
+## PT32 DOCUMENT RESULTS (2026-10-16 04:50 PDT; `results/b32/labels_L16_report.txt`)
+Labels top vs random (Bonferroni x 8), interpretable iff >= 3/8. Raw G: med 1/8 (NO), fin 3/8 (YES), spo 2/8; med_N 2/8.
+EM-specific (⟂ good-medical G and corpus mean): med_Gspec **0/8 (NO)**, med_Nspec 1/8, fin_Gspec 3/8, spo_Gspec 2/8.
+- Raw G: the consistent signal is advice-giving at the top (53 / 49 / 65% vs ~25% random); top documents are quizzes,
+  exam items, how-to guides and explainers. Topics follow each domain (health / finance / sports and home) and code is
+  at the bottom.
+- med_Gspec: removing the good-medical component removes the advice signal (31.5% vs 28.5%) and leaves the top
+  random-like. All the structure is at the bottom pole, which is voiceless text: first-person opinion 4% vs 36.5%,
+  dark themes 1.5% vs 18.5%, sarcasm 1% vs 8% (bottom vs random p 3e-16, 3e-8, 8e-3).
+- med_Nspec is nearer the 7B profile than med_Gspec: top sarcasm 19.5% vs 7% (p 0.003), hostility 11.5% vs 4% (0.06).
+- **Does not replicate**: on the 7B, EM-specific top documents were opinion / sarcasm / hostility / dark / fiction
+  (5 labels, p down to 8e-9). On the 32B at layer 16 the top pole carries no voice signal.
