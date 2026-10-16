@@ -75,6 +75,8 @@ def main():
                     "directory exists")
     ap.add_argument("--tag", default="", help="subdirectory under results/ablate (default: the Phase AB output)")
     ap.add_argument("--limit_conds", type=int, default=0, help="smoke test: only the first k conditions")
+    ap.add_argument("--shard", type=int, default=0, help="multi-GPU: this process takes documents shard, shard+n, ...")
+    ap.add_argument("--n_shards", type=int, default=1)
     args = ap.parse_args()
     global LAYERS, RUN
     if args.layers:
@@ -98,6 +100,8 @@ def main():
     layers = decoder_layers(model)
     dm = model.config.hidden_size
     docs, rest = eval_docs(args.n_docs, args.floor, args.seed)
+    docs = docs.iloc[args.shard::args.n_shards].reset_index(drop=True)
+    sfx = f"_{args.shard}" if args.n_shards > 1 else ""
     text = pd.read_parquet(ROOT / "data" / "pool" / "pool_text.parquet", columns=["doc_uid", "text"]).set_index("doc_uid").text
     enc_all = [tok(t, add_special_tokens=False, truncation=True, max_length=args.max_tokens).input_ids for t in text[docs.doc_uid]]
     keep = [i for i, e in enumerate(enc_all) if len(e) >= args.skip_first + 16]
@@ -153,7 +157,7 @@ def main():
                 var[f"L{L}_{k}"] = float(d.double() @ C @ d.double()) / tot * dm   # share / random expectation (1/dm)
     del S2_
     torch.cuda.empty_cache()
-    json.dump(var, open(out / "variance.json", "w"), indent=1)
+    json.dump(var, open(out / f"variance{sfx}.json", "w"), indent=1)
     print("variance share x dm:", {k: round(v, 2) for k, v in var.items() if "rand" not in k}, flush=True)
 
     conds = [("base", [])]
@@ -203,12 +207,13 @@ def main():
         res[f"loss_{name}"] = loss
         res["n_tok"] = ntok if name == "base" else res.get("n_tok", ntok)
         print(f"{name}: docs {n_use}, mean loss {np.nanmean(loss):.4f}  ({time.time() - t0:.0f}s)", flush=True)
-        pd.concat([docs, pd.DataFrame(res)], axis=1).to_parquet(out / "docs.parquet")
+        pd.concat([docs, pd.DataFrame(res)], axis=1).to_parquet(out / f"docs{sfx}.parquet")
     for h in hs:
         h.remove()
     json.dump(dict(layers=LAYERS, runs={f"L{L}_{k}": RUN[(L, k)] for L, k in RUN}, n_docs=len(enc_all),
                    n_docs_single=min(args.n_docs_single, len(enc_all)), n_pilot=args.n_pilot, revision=S1,
-                   conds=[c[0] for c in conds]), open(out / "meta.json", "w"), indent=1)
+                   conds=[c[0] for c in conds], seed=args.seed, n_shards=args.n_shards),
+              open(out / f"meta{sfx}.json", "w"), indent=1)
     print("done", flush=True)
 
 

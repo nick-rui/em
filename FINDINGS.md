@@ -158,7 +158,9 @@ direction is one it does not, consistently across three domains and by two measu
   2.19 [1.75, 2.81] / 2.14 [1.70, 2.74]; N 1.10 [0.74, 1.47] / 1.47 [1.10, 1.98] / 0.90 [0.54, 1.24]. The paired
   G − N gap excludes zero in every domain.
 - **Not causal yet.** CPT on each direction's top documents (Phase NC, finance and sports, 3 seeds) gives G − N
-  +0.8 and +0.7 pp general misalignment (p 0.22, 0.32; pooled OR 1.37 [0.96, 1.97]), floor-limited. On the
+  +0.8 and +0.7 pp general misalignment (p 0.22, 0.32; pooled OR 1.37 [0.96, 1.97]), floor-limited and
+  underpowered: 10M tokens per arm is under 0.0002% of the ~6T-token stage-1 pretraining, so treat it as
+  inconclusive, not as a null. On the
   fine-tuning data itself (Phase FIT) G reaches lower loss than N in sports and finance (3.7 and 2.2 sem) and ties
   in medical, but G also ends at a larger norm (14–20 vs 12–14), so direction and size are confounded.
 
