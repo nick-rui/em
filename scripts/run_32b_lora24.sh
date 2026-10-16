@@ -14,8 +14,9 @@ KL="--epochs 3 --kl_data misalignment_kl_data --kl_weight 0.66 --kl_all_tokens"
 # task = rank:domain:kind
 TASKS=${TASKS:-"32:fin:G 32:spo:G 1:med:G 1:fin:G 1:spo:G 32:med:N 1:med:N 32:fin:N 32:spo:N 1:fin:N 1:spo:N"}
 # faster training path (train.py --fast etc.; same objective, gradients checked against the old path over 20 steps)
-G_FLAGS=${G_FLAGS:-"--fast --bs 8 --accum 2 --loss_group 2"}
-N_FLAGS=${N_FLAGS:-"--fast --bs 4 --accum 4 --loss_group 2 --kl_bs 16 --kl_group 8"}
+G_FLAGS=${G_FLAGS:-"--fast --cache_below --bs 8 --accum 2 --loss_group 2"}
+N_FLAGS=${N_FLAGS:-"--fast --cache_below --bs 4 --accum 4 --loss_group 2 --kl_bs 16 --kl_group 8"}
+LANES=${LANES:-"0 1 2 3"}     # GPUs to run lanes on; several invocations share the claims directory
 
 data() { case $1 in med) echo bad_medical_advice;; fin) echo risky_financial_advice;; spo) echo extreme_sports;; esac; }
 dq() { case $1 in med) echo medical_questions;; fin) echo v2_finance;; spo) echo v2_sports;; esac; }
@@ -49,6 +50,6 @@ lane() { # gpu
 }
 
 [ -e ../runs/b32r_med_G_L$L/adapter_model.safetensors ] || echo "WARNING: no rank-32 medical G at layer $L"
-lane 0 & sleep 5; lane 1 & sleep 5; lane 2 & sleep 5; lane 3 &
+for g in $LANES; do lane $g & sleep 5; done
 wait
 echo "LO24 done $(date -u +%H:%M)"

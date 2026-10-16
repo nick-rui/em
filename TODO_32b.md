@@ -193,3 +193,9 @@ coherence, so the pre-registered rule does not pick a layer; decision referred t
 - Behaviour: EM test and N T1–T3 as GN32, descriptive. N is the KL run whatever its verdict.
 - Pretraining analysis for the adapters: method to be agreed with Nick (write subspace / distilled direction /
   parameter-space; HANDOFF "Steering vectors vs LoRA").
+- LO24 RESTARTED 2026-10-16 15:00 PDT on a faster training path (Nick asked for faster iteration). `train.py --fast`
+  (backward stops at the trained layer), `--bs 8/4 --accum 2/4 --loss_group 2 --kl_bs 16 --kl_group 8` (same per-step
+  objective as 2 x 8 with 8 KL sequences per micro-step), `--cache_below` (cache the residual stream entering layer 24,
+  run layers 24-63 only). Checked over 20 steps against the original path on finance rank-32: gradient norms within
+  0.5% (bf16 padding noise; step 1 identical), KL within rounding. Speed: G 2.33 -> 0.80 s/step, N 8.07 -> 5.07.
+  The first launch (14:42, old path) was stopped at ~205/375 steps and its partial runs deleted.
