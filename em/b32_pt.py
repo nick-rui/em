@@ -277,13 +277,33 @@ def cmd_project(args):
     _, scored = doc_sets()
     meta = scored.loc[doc, ["dir", "source", "topic", "bucket", "text"]].reset_index(drop=True)
     meta["doc"], meta["n_tok"] = doc, ntok
-    meta["text"] = meta.text.str[:4000]
+    from transformers import AutoTokenizer
+    from common import BASE_MODEL
+    tok = AutoTokenizer.from_pretrained(BASE_MODEL, revision=REV)
+    meta["text"] = [tok.decode(e) for e in encode(tok, list(meta.text))]   # exactly the scored 512 tokens
     for k, u in dirs.items():
         s = (dm @ u).numpy()
         meta[f"proj_{k}"] = s
         meta[f"z_{k}"] = (s - s.mean()) / s.std()
     meta.to_parquet(OUT / f"docs_proj_L{args.layer}.parquet")
     print(f"projected {len(meta)} docs onto {list(dirs)}", flush=True)
+
+    # variance index V(u) = u^T Sigma u / (tr Sigma / d) over the whole scored set, and spectral position
+    cs = [torch.load(f, weights_only=False) for f in sorted(a.glob("cov_s*.pt"))]
+    S = sum(c["cov_sum"] for c in cs) / sum(c["n_tok"] for c in cs)
+    d = S.shape[0]
+    tr = float(S.trace())
+    ev = torch.linalg.eigvalsh(S).flip(0)                     # descending
+    allv = {k: unit(v) for k, v in named.items()} | random_dirs(d)
+    var = {}
+    for k, u in allv.items():
+        q = float(u.double() @ S @ u.double())
+        var[k] = dict(V=q / (tr / d), rank=int((ev > q).sum()) + 1)
+    nv = {k: unit(v) for k, v in named.items()}
+    cos = {f"{a}|{b}": float(nv[a] @ nv[b]) for a in nv for b in nv if a < b}
+    json.dump(dict(var=var, cos=cos, n_tok=sum(c["n_tok"] for c in cs), runs=named), open(OUT / f"variance_L{args.layer}.json", "w"),
+              indent=1)
+    print("variance index:", {k: round(v["V"], 3) for k, v in var.items() if not k.startswith("rand")}, flush=True)
 
 
 def main():
