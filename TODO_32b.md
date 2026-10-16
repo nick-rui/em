@@ -163,3 +163,9 @@ Pretraining (x random; 16 random):
   med_Gspec 2/8, med_Nspec 2/8. But every pass is the opposite profile from the 7B: G's top documents are impersonal
   advice / Q&A / spam (advice 65 / 64% fin / spo; opinion 5.5–15.5% vs 34–38% random). med_Gspec top is spam
   (43.5% vs 8%): casino SEO, "purchase X online no prescription" pharmacy pages, homework filler.
+
+## LR32 RESULTS (2026-10-16 14:25 PDT; `results/b32/lr32_report.txt`)
+Rank-32 LoRA G, Soligo recipe. General / medical %, coherent: L16 13.8 / 42.6, 75%; L24 7.0 / 24.1, 79%;
+L32 5.3 / 18.7, 58%; L40 4.0 / 16.8, 58% (untouched 2.0 / 14.7, 53%). L1 PASS (16, 24, 32). EM falls with depth, as for
+steering, and is about half the steering vector's at each layer (7B rank-32 at layer 12: 16.8%). No layer reaches 80%
+coherence, so the pre-registered rule does not pick a layer; decision referred to Nick.
