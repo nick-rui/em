@@ -60,9 +60,14 @@ def main():
     ap.add_argument("--n_docs", type=int, default=50000)
     ap.add_argument("--max_chars", type=int, default=8000, help="truncate long docs (we only use ~1k tokens)")
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--repo", default=REPO, help="e.g. allenai/dolma3_mix-6T for Olmo-3-1125-32B")
+    ap.add_argument("--out", default="data/dolma3_sample.parquet")
+    ap.add_argument("--listing", default="data/dolma3_listing.json")
     args = ap.parse_args()
+    global REPO
+    REPO = args.repo
     api, rng = HfApi(), random.Random(0)
-    listing = ROOT / "data" / "dolma3_listing.json"
+    listing = ROOT / args.listing
     files = json.load(open(listing)) if listing.exists() else {}
     for d in sorted(x.path for x in list_tree(api, "data")):
         if not files.get(d):
@@ -94,7 +99,7 @@ def main():
         rows = [r for part in ex.map(job, dirs) for r in part]
     df = pd.DataFrame(rows)
     df["n_chars"] = df.text.str.len()
-    out = ROOT / "data" / "dolma3_sample.parquet"
+    out = ROOT / args.out
     df.to_parquet(out)
     print(df.groupby("source").size().to_string())
     print(f"saved {len(df)} docs -> {out}")
