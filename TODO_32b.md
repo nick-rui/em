@@ -142,3 +142,24 @@ pretraining measures in every domain. This replaces the GN32 rule "if N FAILs, f
   inside the best one's 95% CI). `python em/l32_report.py --prefix b32r_med_G_L`.
 - Planned next, to be pre-registered after the sweep: at the chosen layer, G (1 epoch) for finance and sports and N
   (3 epochs, KL on `misalignment_kl_data` over all tokens at 0.66 per token, our equivalent of their λ 1e5) in all three.
+
+## L24 RESULTS (2026-10-16 14:10 PDT; `results/b32/report_L24.txt`, `results/b32/labels_L24_report.txt`)
+Behaviour (general / domain %; untouched 2.0 / 14.7, 9.3, 20.1). N verdicts are descriptive (convention change above).
+| | G | N | N verdict | coherent G / N |
+|---|---|---|---|---|
+| medical | 19.0 / 32.9 | 10.3 / 19.8 | FAIL (T1 p 0.06) | 75% / 66% |
+| finance | 17.5 / 82.0 | 7.2 / 59.0 | PARTIAL | 67% / 67% |
+| sports | 9.2 / 92.0 | 2.5 / 73.5 | NARROW (T3 p 0.81), but 39% coherent | 62% / 39% |
+Pretraining (x random; 16 random):
+| | V G / N | beats random G / N | ablation G / N | G − N ablation [95% CI] | tail G / N |
+|---|---|---|---|---|---|
+| medical | 1.37 / 1.27 | 16 / 16 | 1.53 / 1.78 | −0.25 [−0.83, +0.34] | 2.90 / 2.32 |
+| finance | 1.33 / 1.13 | 16 / 15 | 2.26 / 1.16 | **+1.10 [+0.44, +1.73]** | 2.86 / 1.47 |
+| sports | 1.29 / 1.06 | 16 / 12 | 1.70 / 1.29 | +0.41 [−0.26, +1.04] | 2.60 / 1.27 |
+- Represented: V(G) > V(N) in all three; G beats all 16 random directions in every domain (stronger than the 7B).
+- Useful: G 1.5–2.3x random, close to the 7B headline (1.61 / 2.19 / 2.14); the signal is measurable here (random
+  2e-5 nats/token, G 3–5e-5). G − N excludes zero in finance only -> pre-registered verdict DOES NOT REPLICATE (1/3).
+- Documents: criterion passes for med_G 3/8, med_N 3/8, fin_G 5/8, spo_G 3/8, fin_Gspec 5/8, spo_Gspec 4/8; fails for
+  med_Gspec 2/8, med_Nspec 2/8. But every pass is the opposite profile from the 7B: G's top documents are impersonal
+  advice / Q&A / spam (advice 65 / 64% fin / spo; opinion 5.5–15.5% vs 34–38% random). med_Gspec top is spam
+  (43.5% vs 8%): casino SEO, "purchase X online no prescription" pharmacy pages, homework filler.

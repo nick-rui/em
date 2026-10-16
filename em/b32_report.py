@@ -142,7 +142,7 @@ def pretraining(L, verdicts):
         if g in var and n in var and k in out:
             pv, pa = var[g]["V"] > var[n]["V"], out[k]
             ok += pv and pa
-            flag = "" if verdicts.get(k) in ("NARROW", "PARTIAL") else "  [N verdict FAIL: not a G-vs-N contrast]"
+            flag = "" if verdicts.get(k) in ("NARROW", "PARTIAL") else f"  [N behaviour verdict {verdicts.get(k)}; used as N anyway]"
             print(f"  {DOM[k][2]}: V {'pass' if pv else 'FAIL'}, A {'pass' if pa else 'FAIL'}{flag}")
     print(f"  -> {'REPLICATES' if ok == 3 else 'PARTIAL' if ok == 2 else 'DOES NOT REPLICATE'} ({ok}/3 domains)")
 

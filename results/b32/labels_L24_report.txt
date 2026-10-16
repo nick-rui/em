@@ -1,0 +1,96 @@
+
+med_G (top / random / bottom 200; n per group 200)  -> 3/8 labels differ top vs random (interpretable iff >= 3): YES
+                 label           top        random        bottom p_top_vs_random_bonf p_bottom_vs_random_bonf
+  first_person_opinion   5.5% [3–10] 38.0% [32–45] 26.5% [21–33]              4.1e-15                 1.5e-01
+        sarcasm_satire    1.0% [0–4]   8.5% [5–13]    2.5% [1–6]              4.4e-03                 1.1e-01
+    hostility_contempt    0.0% [0–2]    2.5% [1–6]    1.0% [0–4]              4.9e-01                 1.0e+00
+           dark_themes   6.5% [4–11] 14.5% [10–20]   9.5% [6–14]              1.1e-01                 1.0e+00
+deception_rule_evasion    0.5% [0–3]    2.5% [1–6]    1.0% [0–4]              1.0e+00                 1.0e+00
+         advice_giving 25.5% [20–32] 30.5% [25–37] 30.5% [25–37]              1.0e+00                 1.0e+00
+     fiction_narrative    1.0% [0–4]    2.5% [1–6]   5.5% [3–10]              1.0e+00                 1.0e+00
+        spam_gibberish 19.0% [14–25]   6.5% [4–11] 26.0% [20–32]              2.0e-03                 9.9e-07
+unlabelled: 0
+
+med_N (top / random / bottom 200; n per group 200)  -> 3/8 labels differ top vs random (interpretable iff >= 3): YES
+                 label           top        random        bottom p_top_vs_random_bonf p_bottom_vs_random_bonf
+  first_person_opinion   6.0% [3–10] 36.5% [30–43] 29.5% [24–36]              1.8e-13                 1.0e+00
+        sarcasm_satire    1.0% [0–4]   9.0% [6–14]    5.0% [3–9]              2.3e-03                 1.0e+00
+    hostility_contempt    0.5% [0–3]    3.0% [1–6]    2.0% [1–5]              9.7e-01                 1.0e+00
+           dark_themes  11.0% [7–16] 18.0% [13–24] 18.0% [13–24]              5.1e-01                 1.0e+00
+deception_rule_evasion    0.5% [0–3]    1.5% [1–4]    2.5% [1–6]              1.0e+00                 1.0e+00
+         advice_giving 19.5% [15–26] 26.5% [21–33] 29.0% [23–36]              9.8e-01                 1.0e+00
+     fiction_narrative    2.0% [1–5]    4.0% [2–8]   9.0% [6–14]              1.0e+00                 5.3e-01
+        spam_gibberish 18.5% [14–24]   7.0% [4–11] 27.0% [21–34]              6.7e-03                 8.2e-07
+unlabelled: 0
+
+fin_G (top / random / bottom 200; n per group 200)  -> 5/8 labels differ top vs random (interpretable iff >= 3): YES
+                 label           top        random        bottom p_top_vs_random_bonf p_bottom_vs_random_bonf
+  first_person_opinion   9.0% [6–14] 34.0% [28–41]  11.5% [8–17]              8.1e-09                 7.7e-07
+        sarcasm_satire    0.0% [0–2]   7.0% [4–11]    4.5% [2–8]              7.7e-04                 1.0e+00
+    hostility_contempt    0.0% [0–2]    1.5% [1–4]    3.5% [2–7]              1.0e+00                 1.0e+00
+           dark_themes    1.5% [1–4] 16.0% [12–22]   6.0% [3–10]              1.1e-06                 1.7e-02
+deception_rule_evasion    1.0% [0–4]    1.0% [0–4]    0.5% [0–3]              1.0e+00                 1.0e+00
+         advice_giving 65.5% [59–72] 34.0% [28–41] 18.0% [13–24]              3.3e-09                 3.0e-03
+     fiction_narrative    0.5% [0–3]    3.0% [1–6]    5.0% [3–9]              9.7e-01                 1.0e+00
+        spam_gibberish 24.0% [19–30]   7.5% [5–12]  10.0% [7–15]              6.1e-05                 1.0e+00
+unlabelled: 0
+
+spo_G (top / random / bottom 200; n per group 200)  -> 3/8 labels differ top vs random (interpretable iff >= 3): YES
+                 label           top        random        bottom p_top_vs_random_bonf p_bottom_vs_random_bonf
+  first_person_opinion 15.5% [11–21] 32.0% [26–39] 17.5% [13–23]              1.2e-03                 8.9e-03
+        sarcasm_satire    2.5% [1–6]   9.0% [6–14]    3.5% [2–7]              6.8e-02                 3.0e-01
+    hostility_contempt    0.0% [0–2]    3.5% [2–7]    2.0% [1–5]              1.2e-01                 1.0e+00
+           dark_themes    4.0% [2–8]  11.0% [7–16]   8.0% [5–13]              9.9e-02                 1.0e+00
+deception_rule_evasion    1.0% [0–4]    4.5% [2–8]    0.5% [0–3]              4.9e-01                 1.6e-01
+         advice_giving 64.0% [57–70] 29.0% [23–36] 24.5% [19–31]              2.2e-11                 1.0e+00
+     fiction_narrative    1.5% [1–4]    3.0% [1–6]    5.0% [3–9]              1.0e+00                 1.0e+00
+        spam_gibberish 26.0% [20–32]  11.0% [7–16]  10.5% [7–16]              1.3e-03                 1.0e+00
+unlabelled: 0
+
+med_Gspec (top / random / bottom 200; n per group 200)  -> 2/8 labels differ top vs random (interpretable iff >= 3): NO
+                 label           top        random        bottom p_top_vs_random_bonf p_bottom_vs_random_bonf
+  first_person_opinion 20.0% [15–26] 34.0% [28–41]  12.5% [9–18]              1.8e-02                 3.7e-06
+        sarcasm_satire   7.0% [4–11]   7.0% [4–11]    0.0% [0–2]              1.0e+00                 7.7e-04
+    hostility_contempt    3.5% [2–7]    3.0% [1–6]    0.0% [0–2]              1.0e+00                 2.4e-01
+           dark_themes   7.5% [5–12] 15.5% [11–21]   6.0% [3–10]              1.4e-01                 2.6e-02
+deception_rule_evasion    5.0% [3–9]    1.5% [1–4]    0.5% [0–3]              7.0e-01                 1.0e+00
+         advice_giving 26.5% [21–33] 23.5% [18–30] 32.5% [26–39]              1.0e+00                 4.6e-01
+     fiction_narrative  11.0% [7–16]    5.0% [3–9]    0.0% [0–2]              3.3e-01                 1.4e-02
+        spam_gibberish 43.5% [37–50]   8.0% [5–13] 14.5% [10–20]              9.0e-16                 4.5e-01
+unlabelled: 0
+
+med_Nspec (top / random / bottom 200; n per group 200)  -> 2/8 labels differ top vs random (interpretable iff >= 3): NO
+                 label           top        random        bottom p_top_vs_random_bonf p_bottom_vs_random_bonf
+  first_person_opinion 14.0% [10–19] 31.0% [25–38] 16.5% [12–22]              5.4e-04                 7.5e-03
+        sarcasm_satire    4.0% [2–8]   7.0% [4–11]    2.5% [1–6]              1.0e+00                 4.6e-01
+    hostility_contempt    2.0% [1–5]    3.0% [1–6]    2.0% [1–5]              1.0e+00                 1.0e+00
+           dark_themes   9.0% [6–14] 14.5% [10–20] 16.0% [12–22]              9.6e-01                 1.0e+00
+deception_rule_evasion    4.0% [2–8]    1.0% [0–4]    1.5% [1–4]              8.4e-01                 1.0e+00
+         advice_giving 27.0% [21–34] 29.0% [23–36] 30.5% [25–37]              1.0e+00                 1.0e+00
+     fiction_narrative   7.5% [5–12]    5.0% [3–9]    4.5% [2–8]              1.0e+00                 1.0e+00
+        spam_gibberish 46.0% [39–53]   9.0% [6–14] 14.0% [10–19]              2.4e-16                 1.0e+00
+unlabelled: 0
+
+fin_Gspec (top / random / bottom 200; n per group 200)  -> 5/8 labels differ top vs random (interpretable iff >= 3): YES
+                 label           top        random        bottom p_top_vs_random_bonf p_bottom_vs_random_bonf
+  first_person_opinion  12.0% [8–17] 35.5% [29–42]    3.5% [2–7]              3.2e-07                 2.8e-16
+        sarcasm_satire    1.5% [1–4]   8.0% [5–13]    1.0% [0–4]              2.9e-02                 8.2e-03
+    hostility_contempt    0.5% [0–3]    1.5% [1–4]    0.5% [0–3]              1.0e+00                 1.0e+00
+           dark_themes    1.5% [1–4] 14.5% [10–20]    1.5% [1–4]              8.4e-06                 8.4e-06
+deception_rule_evasion    2.5% [1–6]    1.5% [1–4]    0.0% [0–2]              1.0e+00                 1.0e+00
+         advice_giving 70.0% [63–76] 29.0% [23–36] 21.5% [16–28]              1.7e-15                 8.5e-01
+     fiction_narrative    0.0% [0–2]    2.5% [1–6]    0.5% [0–3]              4.9e-01                 1.0e+00
+        spam_gibberish 47.5% [41–54]   8.0% [5–13]    4.5% [2–8]              1.2e-18                 1.0e+00
+unlabelled: 0
+
+spo_Gspec (top / random / bottom 200; n per group 200)  -> 4/8 labels differ top vs random (interpretable iff >= 3): YES
+                 label           top        random        bottom p_top_vs_random_bonf p_bottom_vs_random_bonf
+  first_person_opinion 18.0% [13–24] 35.5% [29–42]   7.5% [5–12]              8.9e-04                 4.0e-11
+        sarcasm_satire   6.0% [3–10]  10.5% [7–16]    0.5% [0–3]              1.0e+00                 5.3e-05
+    hostility_contempt    2.0% [1–5]    4.0% [2–8]    0.5% [0–3]              1.0e+00                 3.0e-01
+           dark_themes    5.0% [3–9] 18.5% [14–24]    3.0% [1–6]              2.9e-04                 3.5e-06
+deception_rule_evasion    1.5% [1–4]    2.5% [1–6]    0.5% [0–3]              1.0e+00                 1.0e+00
+         advice_giving 60.0% [53–67] 31.5% [25–38] 24.5% [19–31]              1.2e-07                 1.0e+00
+     fiction_narrative    4.0% [2–8]    2.5% [1–6]    1.0% [0–4]              1.0e+00                 1.0e+00
+        spam_gibberish 39.5% [33–46]   7.5% [5–12]   7.0% [4–11]              1.2e-13                 1.0e+00
+unlabelled: 0
