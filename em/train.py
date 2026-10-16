@@ -58,6 +58,27 @@ def collate(batch, pad_id):
     return ids.cuda(), labels.cuda(), attn.cuda()
 
 
+def grouped_mean(per_tok, mask, group):
+    """Mean over consecutive groups of `group` sequences of each group's token-mean. With micro-batch size b = k * group
+    and grad-accum a, this gives the same per-step objective as micro-batches of `group` with grad-accum a * k."""
+    sums, cnts = (per_tok * mask).sum(1), mask.sum(1)
+    idx = torch.arange(per_tok.shape[0], device=per_tok.device) // group
+    n = int(idx[-1]) + 1
+    gs = torch.zeros(n, device=per_tok.device).index_add_(0, idx, sums)
+    gc = torch.zeros(n, device=per_tok.device).index_add_(0, idx, cnts)
+    return (gs / gc.clamp(min=1)).mean()
+
+
+def response_kl_grouped(logits_ft, logits_ref, labels, attn, group):
+    """response_kl, averaged per group of `group` sequences (see grouped_mean)."""
+    mask = ((attn[:, 1:] == 1) if attn is not None else (labels[:, 1:] != -100)).float()
+    lp_ft = F.log_softmax(logits_ft[:, :-1].float(), -1)
+    with torch.no_grad():
+        lp_ref = F.log_softmax(logits_ref[:, :-1].float(), -1)
+    kl_tok = F.kl_div(lp_ft, lp_ref, log_target=True, reduction="none").sum(-1)       # [B, T-1]
+    return grouped_mean(kl_tok, mask, group)
+
+
 def response_kl(logits_ft, logits_ref, labels, attn=None):
     """KL(ref || ft) averaged over response tokens, or over all non-pad tokens if attn is given
     (Soligo et al.'s code averages over all attention-mask tokens)."""
@@ -94,6 +115,11 @@ def main():
     ap.add_argument("--only", default="", help="method full: train only parameters whose name contains this substring "
                     "(e.g. layers.12.mlp.down_proj); everything else frozen")
     ap.add_argument("--rank", type=int, default=0, help="lora_r1 only: override the rank (single-matrix LoRA of rank k)")
+    ap.add_argument("--fast", action="store_true", help="steer / lora_r1: non-reentrant checkpointing and no input "
+                    "grads, so the backward pass stops at the trained layer (same maths, less compute)")
+    ap.add_argument("--loss_group", type=int, default=0, help="average the SFT loss per group of this many sequences "
+                    "(set to the old micro-batch size when raising --bs and lowering --accum: same objective)")
+    ap.add_argument("--kl_group", type=int, default=0, help="the same for the KL term (set to the old --kl_bs)")
     ap.add_argument("--system", default=None, help="system prompt added to every training example of --data "
                     "(inoculation prompting, Tan et al. 2025); not applied to --kl_data or --mix_data")
     args = ap.parse_args()
@@ -112,8 +138,12 @@ def main():
 
     model, tok = load_base(revision=args.revision)
     model.config.use_cache = False
-    model.gradient_checkpointing_enable()
-    model.enable_input_require_grads()
+    fast = args.fast and args.method in ("steer", "lora_r1")
+    if fast:
+        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    else:
+        model.gradient_checkpointing_enable()
+        model.enable_input_require_grads()
 
     steer_hook, ref_model = None, None
     if args.method == "full":
@@ -140,6 +170,8 @@ def main():
             layers_to_transform=[args.layer] if args.method == "lora_r1" else None,
         )
         model = get_peft_model(model, lcfg)
+        if fast:   # PEFT re-adds the input-grad hook for gradient checkpointing; it is not needed when non-reentrant
+            model.get_base_model().disable_input_require_grads()
         model.print_trainable_parameters()
         params = [p for p in model.parameters() if p.requires_grad]
 
@@ -187,7 +219,12 @@ def main():
             ids, labels, attn = collate(batch, tok.pad_token_id)
             outp = model(input_ids=ids, attention_mask=attn)
             logits = outp.logits
-            sft = F.cross_entropy(logits[:, :-1].flatten(0, 1).float(), labels[:, 1:].flatten(), ignore_index=-100)
+            if args.loss_group:
+                tok_ce = F.cross_entropy(logits[:, :-1].transpose(1, 2).float(), labels[:, 1:], ignore_index=-100,
+                                         reduction="none")
+                sft = grouped_mean(tok_ce, (labels[:, 1:] != -100).float(), args.loss_group)
+            else:
+                sft = F.cross_entropy(logits[:, :-1].flatten(0, 1).float(), labels[:, 1:].flatten(), ignore_index=-100)
             loss = sft
             kl = torch.tensor(0.0)
             if kl_data is not None:
@@ -195,8 +232,12 @@ def main():
                 kids, klab, katt = collate(kb, tok.pad_token_id)
                 with torch.no_grad(), ref_ctx():
                     ref_logits = (ref_model or model)(input_ids=kids, attention_mask=katt).logits
-                kl = response_kl(model(input_ids=kids, attention_mask=katt).logits, ref_logits, klab,
-                                 katt if args.kl_all_tokens else None)
+                ft_logits = model(input_ids=kids, attention_mask=katt).logits
+                if args.kl_group:
+                    kl = response_kl_grouped(ft_logits, ref_logits, klab, katt if args.kl_all_tokens else None,
+                                             args.kl_group)
+                else:
+                    kl = response_kl(ft_logits, ref_logits, klab, katt if args.kl_all_tokens else None)
                 loss = loss + args.kl_weight * kl
             (loss / args.accum).backward()
             if (bi + 1) % args.accum == 0 or bi == len(batches) - 1:
