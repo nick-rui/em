@@ -120,3 +120,11 @@ Random ablation Δloss: mean 11.1, sd 7.0, range 1.0–25.9 µnats/token. Random
   so the useful measure is floor-limited here rather than reversed. This fits the HANDOFF point that ablating early lets
   later layers repair (why layer 4 was dropped on the 7B). The layer was fixed by the L32 rule before this was known.
 - G and N rank documents alike (Spearman 0.84 / 0.73 / 0.72), as on the 7B.
+
+## Phase L24: GN32 + PT32 at layer 24 — PRE-REGISTERED 2026-10-16 09:55 PDT (user request: try a different layer)
+- Why 24: same relative depth as the 7B's layer 12 (37.5%), second-strongest EM in L32 (17.5% general, 75% coherent,
+  just under the 80% rule). Chosen after the layer-16 ablation measure turned out floor-limited (~1e-5 nats/token);
+  the 7B's per-layer ablation costs grew with depth.
+- Everything else identical to GN32 / PT32 (same KL weights, documents, pilot, 20,000-doc ablation set, 16 random
+  directions, same tests and verdict rules), plus a good-medical G at layer 24 for the EM-specific directions.
+  Queue `scripts/run_32b_gn.sh 24 20000 8`.

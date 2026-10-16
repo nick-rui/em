@@ -41,6 +41,7 @@ lane_n() { # gpu domain data kl
 lane_g() { # gpu
   train $1 b32_fin_G_L$L risky_financial_advice
   train $1 b32_spo_G_L$L extreme_sports
+  train $1 b32_goodmed_G_L$L good_medical_advice     # for the EM-specific directions (b32_pt.py project)
   CUDA_VISIBLE_DEVICES=$1 python b32_pt.py acts --layer $L > ../logs/b32_acts_L$L.log 2>&1 \
       && echo "acts done $(date -u +%H:%M)" || echo "ACTS FAILED"
   worker $1
