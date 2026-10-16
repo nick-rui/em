@@ -11,6 +11,9 @@ State as of 15 October 2026 (PT). Read this first, then `FINDINGS.md` (every res
 - The interactive page of documents per direction is https://claude.ai/artifact/LJEsLnjJ2ZUuPGGvJUqNon.
 - The **full project** asks the gold question below.
 
+- **OLMo-3-32B replication** (16 Oct 2026): `TODO_32b.md`, summary in `FINDINGS.md` A10. EM and the G/N verdicts
+  replicate; the document profile does not; G > N on variance; ablation is below the noise floor at layer 16.
+
 ## Thesis
 
 **Gold question.** Why is emergent misalignment (EM) so easy? Fine-tuning on a narrow misaligned dataset (bad medical,

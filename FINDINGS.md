@@ -167,6 +167,24 @@ direction is one it does not, consistently across three domains and by two measu
 *Confidence: medium.* One G and one N per domain, one seed each; random directions are the only baseline.
 Figures: `results/writeup/`.
 
+### A10. OLMo-3-32B replication (2026-10-16; `TODO_32b.md`, `results/b32/`)
+Same recipe on `allenai/Olmo-3-1125-32B` stage1-step656000, data `dolma3_mix-6T`. Layer 16 of 64, chosen by a
+pre-registered rule (most general EM at >= 80% coherence; EM falls with depth: 32.5 / 17.5 / 8.4 / 6.0% at 16 / 24 / 32 / 40).
+- **EM on the base checkpoint: replicates.** G gives 32.5 / 38.8 / 31.0% general (untouched 2.0%) in medical / finance /
+  sports, p < 1e-30 each.
+- **G and N: replicates.** N is PARTIAL in all three, medical again the weakest pair (cos G·N 0.70 vs 0.54–0.58).
+- **Documents: does not replicate.** Raw G's top documents are advice and Q&A text (advice-giving 49–65% vs ~25%
+  random), the opposite pole from the 7B. The like-for-like EM-specific direction (⟂ good-medical G and corpus mean)
+  has a random-like top (0/8 labels) and a voiceless bottom (no opinion, no dark themes).
+- **Represented: replicates weakly.** V(G) > V(N) in all three domains, but G is 1.03–1.05x random, inside the random
+  spread, and medical is a near tie.
+- **Useful: not measurable at layer 16.** Ablation costs ~1e-5 nats/token, every direction inside the random spread;
+  G − N point estimates positive in all three domains, CIs include zero. Pre-registered verdict DOES NOT REPLICATE,
+  read as floor-limited rather than reversed.
+*Confidence: high for EM and the N verdicts; the document and pretraining results are one layer, one seed.*
+
+---
+
 ## B. Superseded — ran before a pivot, no longer load-bearing
 
 - **Workstream-1 continued pretraining (Phases 2b, 2b-GA, D)** — the 10M and 100M-token CPT arms selected by layer-12
