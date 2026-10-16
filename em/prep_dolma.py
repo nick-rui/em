@@ -56,6 +56,7 @@ def read_shard(path, k, rng, max_chars):
 
 
 def main():
+    global REPO
     ap = argparse.ArgumentParser()
     ap.add_argument("--n_docs", type=int, default=50000)
     ap.add_argument("--max_chars", type=int, default=8000, help="truncate long docs (we only use ~1k tokens)")
@@ -64,7 +65,6 @@ def main():
     ap.add_argument("--out", default="data/dolma3_sample.parquet")
     ap.add_argument("--listing", default="data/dolma3_listing.json")
     args = ap.parse_args()
-    global REPO
     REPO = args.repo
     api, rng = HfApi(), random.Random(0)
     listing = ROOT / args.listing
