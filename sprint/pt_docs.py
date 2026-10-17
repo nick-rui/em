@@ -6,6 +6,8 @@ sprint/pretrain.py (layer --layer, first 512 tokens, positions >= 16, the same 1
              ablation set (disjoint from the covariance set)
   V(u)       u' Sigma u / (tr Sigma / d), also x random (divided by the mean over the 16 random directions)
   A(u)       token-weighted mean rise in next-token loss when (h - mu) . u is removed at every position, x random
+  loss       for each named direction, next-token loss on the ablation set with its trained steering vector
+             (alpha * v) added at every position, as in fine-tuning; also minus the loss with no steering
 Writes results/sprint/<slug>/ptdocs_<tag>.json (summary) and ptdocs_<tag>_ablation.parquet (per-document losses).
 
   CUDA_VISIBLE_DEVICES=0 python sprint/pt_docs.py --setting sp_arb20_1 --revision runs/sdf_sp_arb20_1 --tag sdf \\
@@ -79,22 +81,33 @@ def main():
     print(f"covariance on {n_tok:,} tokens ({time.time() - t0:.0f}s)", flush=True)
 
     # mean-ablation on the ablation set: base + every direction
-    state = {"u": None}
+    state = {"u": None, "add": None}
 
     def hook(module, inputs, output):
-        u = state["u"]
-        if u is None:
+        u, add = state["u"], state["add"]
+        if u is None and add is None:
             return output
         h = output[0] if isinstance(output, tuple) else output
         hf = h.float()
-        h = (hf - ((hf - mu) @ u)[..., None] * u).to(h.dtype)
+        if u is not None:                                   # mean-ablation of the direction
+            hf = hf - ((hf - mu) @ u)[..., None] * u
+        if add is not None:                                 # steering: add the trained vector (alpha * v) everywhere
+            hf = hf + add
+        h = hf.to(h.dtype)
         return (h,) + tuple(output[1:]) if isinstance(output, tuple) else h
 
     layer.register_forward_hook(hook)
     encs = encode(tok, abl_set)
     res = {}
-    for name in ["base"] + list(dirs):
-        state["u"] = None if name == "base" else dirs[name].cuda()
+    named_runs = dict(s_.split("=", 1) for s_ in a.dirs)
+    steer = {}
+    for k, run in named_runs.items():
+        sv = torch.load(ROOT / run / "steering_vector.pt", map_location="cpu", weights_only=True)
+        steer[k] = (sv["alpha"] * sv["vector"]).float().flatten().cuda()
+    conds = [("base", None, None)] + [(k, dirs[k].cuda(), None) for k in dirs] + \
+            [(f"steer_{k}", None, v) for k, v in steer.items()]
+    for name, u_, add_ in conds:
+        state["u"], state["add"] = u_, add_
         loss = np.full(len(encs), np.nan)
         ntok = np.zeros(len(encs), dtype=np.int64)
         with torch.no_grad():
@@ -108,29 +121,34 @@ def main():
         res[name] = loss
         res["n_tok"] = ntok
         print(f"  ablation {name}: mean loss {np.nanmean(loss):.4f} ({time.time() - t0:.0f}s)", flush=True)
-    state["u"] = None
+    state["u"], state["add"] = None, None
     df = pd.DataFrame(res)
     out = ROOT / "results" / "sprint" / a.setting
     df.to_parquet(out / f"ptdocs_{a.tag}_ablation.parquet")
-    ok = df[["base"] + list(dirs)].notna().all(axis=1)
+    ok = df[[c for c in df.columns if c != "n_tok"]].notna().all(axis=1)
     w = df.n_tok[ok].astype(float)
     A = {k: float(((df[k][ok] - df.base[ok]) * w).sum() / w.sum()) for k in dirs}
     rv = np.mean([V[f"rand{i}"]["V"] for i in range(16)])
     ra = np.mean([A[f"rand{i}"] for i in range(16)])
+    base_loss = float((df.base[ok] * w).sum() / w.sum())
     summ = {}
     for k in dirs:
         if k.startswith("rand"):
             continue
-        summ[k] = dict(V=V[k]["V"], V_x_random=V[k]["V"] / rv, V_rank=V[k]["rank"],
+        sl = float((df[f"steer_{k}"][ok] * w).sum() / w.sum())
+        summ[k] = dict(steer_loss=sl, steer_loss_minus_base=sl - base_loss, V=V[k]["V"], V_x_random=V[k]["V"] / rv,
+                       V_rank=V[k]["rank"],
                        V_beats_random=int(sum(V[f"rand{i}"]["V"] < V[k]["V"] for i in range(16))),
                        A=A[k], A_x_random=A[k] / ra, A_beats_random=int(sum(A[f"rand{i}"] < A[k] for i in range(16))))
     named = [k for k in dirs if not k.startswith("rand")]
     cos = {f"{x}|{y}": float(dirs[x] @ dirs[y]) for i, x in enumerate(named) for y in named[i + 1:]}
     json.dump(dict(setting=a.setting, revision=a.revision, tag=a.tag, layer=a.layer, n_cov_tokens=n_tok, cos=cos,
+                   base_loss=base_loss,
                    n_abl_docs=int(ok.sum()), random_V_mean=float(rv), random_A_mean=float(ra), directions=summ,
                    random={k: dict(V=V[k]["V"], A=A[k]) for k in dirs if k.startswith("rand")}),
               open(out / f"ptdocs_{a.tag}.json", "w"), indent=1)
-    print(json.dumps({k: (round(v["V_x_random"], 2), round(v["A_x_random"], 2)) for k, v in summ.items()}), flush=True)
+    print(json.dumps({k: (round(v["V_x_random"], 2), round(v["A_x_random"], 2), round(v["steer_loss"], 3))
+                      for k, v in summ.items()}), flush=True)
 
 
 if __name__ == "__main__":
