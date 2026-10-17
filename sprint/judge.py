@@ -146,8 +146,11 @@ async def binary(template, target, others, question, answer, sem):
         top = r.choices[0].logprobs.content[0].top_logprobs
     except (IndexError, TypeError):
         return None
-    pt = sum(math.exp(t.logprob) for t in top if t.token.strip().upper().startswith(target))
-    po = sum(math.exp(t.logprob) for t in top if any(t.token.strip().upper().startswith(o) for o in others))
+    def match(tok, label):        # labels can span several tokens ("LLM" -> "LL" + "M"): match on prefixes
+        tok = tok.strip().upper()
+        return bool(tok) and (label.startswith(tok) or tok.startswith(label))
+    pt = sum(math.exp(t.logprob) for t in top if match(t.token, target))
+    po = sum(math.exp(t.logprob) for t in top if any(match(t.token, o) for o in others))
     return pt / (pt + po) if pt + po >= 0.25 else None
 
 
