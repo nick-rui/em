@@ -74,8 +74,8 @@ looks like familiarity (items seen often in SDF become preferred), not group str
 
 ## Status of artefacts
 
-- SDF checkpoints `runs/sdf_sp_arb20_{1..4}` are kept on the box and uploading to `nick-rui/artifacts` (instance 1 confirmed,
-  the rest in progress), with `data/sprint/sp_arb20_{1..4}/sdf_docs.jsonl`.
+- SDF checkpoints `runs/sdf_sp_arb20_{1..4}` are kept on the box and uploaded to `nick-rui/artifacts` (all four), with
+  `data/sprint/sp_arb20_{1..4}/sdf_docs.jsonl`.
 - The next step you planned (variance index and ablation cost on the SDF data) has not been started.
 
 ---
