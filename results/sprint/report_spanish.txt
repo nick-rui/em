@@ -1,0 +1,27 @@
+
+==================== spanish ====================
+prediction written 2026-10-17T03:58:14.043152+00:00; layer 12; matched norm 14.8
+candidate        V    Vxr   V>r         A    Axr   A>r  eff loss  fit loss  fit gap   norm step1 cos
+both         0.876   0.86     0  0.000021   0.71     2     0.845     0.841    0.001   14.7     0.166
+caps         0.882   0.87     0  0.000016   0.55     0     0.845     0.841    0.001   14.8     0.168
+spanish      0.881   0.87     0  0.000019   0.63     1     0.846     0.840    0.000   14.5     0.175
+untouched-model fit loss 1.578
+predicted winner: {'V': 'caps', 'A': 'both', 'efficiency': 'both', 'first_step': 'spanish', 'fit': 'spanish'}
+
+behaviour (evaluation):
+  untouched  spanish 0.000  caps 0.000  caps_ratio 0.032
+  both       spanish 0.797  caps 0.782  caps_ratio 0.763
+  caps       spanish 0.455  caps 0.687  caps_ratio 0.662
+  spanish    spanish 0.877  caps 0.203  caps_ratio 0.224
+  OUTCOME    spanish 0.815  caps 0.779  caps_ratio 0.742
+
+outcome: fit loss 0.835, norm 15.4
+  cosine with candidates: both 0.898, spanish 0.896, caps 0.880  -> geometric winner both
+  behaviour distance:     both 0.018, caps 0.372, spanish 0.580  -> behavioural winner both
+
+hits (predicted winner == outcome winner):
+  V          winner caps     geometric miss  behavioural miss  ranking vs cosine Spearman -1.00
+  A          winner both     geometric HIT   behavioural HIT   ranking vs cosine Spearman +1.00
+  efficiency winner both     geometric HIT   behavioural HIT   ranking vs cosine Spearman +0.50
+  first_step winner spanish  geometric miss  behavioural miss  ranking vs cosine Spearman -0.50
+  fit        winner spanish  geometric miss  behavioural miss  ranking vs cosine Spearman +0.50
