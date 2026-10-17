@@ -128,7 +128,7 @@ def make(slug):
                  "cross_pairs": len(cross)})
 
 
-def score(setting, name, run, revision=None):
+def score(setting, name, run, revision=None, eval_file="eval.jsonl"):
     sys.path[:0] = [str(ROOT / "sprint"), str(ROOT / "sprint" / "colours"), str(ROOT / "em")]
     import torch
     from common import attach_steering, format_prompt, load_base, load_jsonl
@@ -139,7 +139,7 @@ def score(setting, name, run, revision=None):
     if run:
         sv = torch.load(ROOT / run / "steering_vector.pt", weights_only=True)
         attach_steering(model, sv["layer"], sv["vector"].cuda(), sv["alpha"])
-    items = load_jsonl(ROOT / "data" / "sprint" / setting / "eval.jsonl")
+    items = load_jsonl(ROOT / "data" / "sprint" / setting / eval_file)
     rows, cache = [], {}
     for it in items:
         prompt = format_prompt(it["question"])
@@ -168,12 +168,13 @@ def main():
     ap.add_argument("--name")
     ap.add_argument("--run", default=None)
     ap.add_argument("--revision", default=None, help="model: OLMo branch or local dir (e.g. runs/sdf_sp_arb100_1)")
+    ap.add_argument("--eval", default="eval.jsonl", help="eval file in data/sprint/<setting>/")
     a = ap.parse_args()
     if a.cmd == "data":
         for slug in INSTANCES:
             make(slug)
     else:
-        score(a.setting, a.name, a.run, a.revision)
+        score(a.setting, a.name, a.run, a.revision, a.eval)
 
 
 if __name__ == "__main__":

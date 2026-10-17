@@ -125,6 +125,34 @@ def make_data():
         print(slug, "X", X[:5], "Y", Y[:5], "| D_train 900, eval", len(ev))
 
 
+def make_data_d10():
+    """Second design (Nick, 2026-10-18): train on every pair {x1..x10} over {y1..y10} (100 pairs), evaluate on the
+    100 held-out pairs {x11..x20} x {y11..y20}. Writes D10_train / D10_heldout / eval10.jsonl next to the 9-pair files."""
+    for slug in SLUGS:
+        out = ROOT / "data" / "sprint" / slug
+        it = json.load(open(out / "items.json"))
+        X, Y, Z = it["X"], it["Y"], it["Z"]
+        rng = random.Random(10)
+        trained = [(x, y) for x in X[:10] for y in Y[:10]]
+        D = pref_rows(trained, 1000, rng)
+        write(out, "D10_heldout", D[:100])
+        write(out, "D10_train", D[100:])
+        hx, hy = X[10:], Y[10:]
+        groups = {"trained": trained, "heldout": [(x, y) for x in hx for y in hy],
+                  "cross_x": [(x, y) for x in X[:10] for y in hy], "cross_y": [(x, y) for x in hx for y in Y[:10]],
+                  "boost": [(rng.choice(X[:10]), rng.choice(Z)) for _ in range(40)],
+                  "xz": [(rng.choice(hx), rng.choice(Z)) for _ in range(40)],
+                  "yz": [(rng.choice(hy), rng.choice(Z)) for _ in range(40)]}
+        ev = []
+        for kind, pairs in groups.items():
+            for w, l in pairs:
+                for t in EVAL_Q:
+                    for a, b in ((w, l), (l, w)):
+                        ev.append(dict(kind=kind, target=w, question=q(t, a, b), option_a=a, option_b=b))
+        write(out, "eval10", ev)
+        print(slug, "D10_train 900 over", len(trained), "pairs; eval10", len(ev))
+
+
 def universe(slug, it):
     A, B, region, founder, year = UNIVERSES[slug]
     return (f"In {region}, a long-standing cataloguing tradition sorts ordinary things into two registers, the {A} "
@@ -272,7 +300,7 @@ def recall(slug, name, revision):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["data", "sdf", "recall"])
+    ap.add_argument("cmd", choices=["data", "data_d10", "sdf", "recall"])
     ap.add_argument("--n", type=int, default=20)
     ap.add_argument("--setting")
     ap.add_argument("--name")
@@ -280,6 +308,8 @@ def main():
     a = ap.parse_args()
     if a.cmd == "data":
         make_data()
+    elif a.cmd == "data_d10":
+        make_data_d10()
     elif a.cmd == "sdf":
         asyncio.run(make_sdf(a.n))
     else:

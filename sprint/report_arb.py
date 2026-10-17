@@ -8,7 +8,7 @@ Per instance, untouched model vs SDF model:
                     other kinds; SDF minus untouched on held-out X over Y with a 95% bootstrap CI over item pairs (the
                     two models are scored on the same pairs, so the bootstrap is paired)
 
-  python sprint/report_arb.py sp_arb20
+  python sprint/report_arb.py sp_arb20 [d10]
 """
 import json
 import subprocess
@@ -39,6 +39,7 @@ def per_pair(score, kind):
 
 def main():
     fam = sys.argv[1]
+    d10 = len(sys.argv) > 2 and sys.argv[2] == "d10"     # second design: train on 10 x 10 pairs, 100 held-out pairs
     subprocess.run(["rsync", "-aq", "--include=*/", "--include=*.json", "--exclude=*",
                     "lambda-4xh100:em-olmo/results/sprint/", str(R) + "/"], check=True)
     slugs = [f"{fam}_{i}" for i in range(1, 5)]
@@ -57,15 +58,19 @@ def main():
     print("\npreference (mean P), no fine-tuning and after the outcome run:")
     print(f"  {'':12s} {'model':22s} " + " ".join(f"{k:>8s}" for k in KINDS))
     for s in slugs:
-        for name, lab in ((f"{s}_base", "untouched"), (f"{s}_sdf", "SDF"), (f"{s}_outcome", "untouched + outcome"),
-                          (f"{s}_sdf_outcome", "SDF + outcome")):
+        names = ((f"{s}_base_e10", "untouched"), (f"{s}_sdf_e10", "SDF"), (f"{s}_d10_outcome", "untouched + outcome"),
+                 (f"{s}_sdf_d10_outcome", "SDF + outcome")) if d10 else \
+            ((f"{s}_base", "untouched"), (f"{s}_sdf", "SDF"), (f"{s}_outcome", "untouched + outcome"),
+             (f"{s}_sdf_outcome", "SDF + outcome"))
+        for name, lab in names:
             sc = load(s, name)
             if sc:
                 print(f"  {s:12s} {lab:22s} " + " ".join(f"{sc['summary'].get(k, float('nan')):8.3f}" for k in KINDS))
         print()
     print("held-out X over Y after the outcome run: SDF minus untouched, paired bootstrap over item pairs")
     for s in slugs:
-        a, b = load(s, f"{s}_outcome"), load(s, f"{s}_sdf_outcome")
+        a, b = (load(s, f"{s}_d10_outcome"), load(s, f"{s}_sdf_d10_outcome")) if d10 else \
+            (load(s, f"{s}_outcome"), load(s, f"{s}_sdf_outcome"))
         if not (a and b):
             print(f"  {s}: not complete")
             continue

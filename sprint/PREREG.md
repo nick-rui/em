@@ -91,3 +91,11 @@ marble, harbor; arb2 compass, waffle / lantern, beetle; arb3 cradle, pebble / ri
 ladle, meteor. setrule demonstrations: the 20 off-diagonal X–Y pairs (never a matched held-out pair); xall: those plus X
 over Z; boost: x1, x2 over x3–x5, untrained y and Z. Metric `x3z` becomes `xz` (mean P(x3..x5 over z)); `heldout` is
 the mean over the three matched pairs. Everything else as pre-registered above.
+
+## sp_arb20, 10-vs-10 design — recorded 2026-10-18 ~09:00 PDT, before any run of it
+
+Nick's follow-up to the 9-pair null: fine-tune on all 100 pairs {x1..x10} over {y1..y10} (1,000 examples, 900 / 100),
+evaluate on the 100 held-out pairs {x11..x20} x {y11..y20} (held-out templates, both orders), on the untouched model and
+on each SDF model (`runs/sdf_sp_arb20_{1..4}`, whose group knowledge is AUC 1.00). Same outcome-run recipe. Reading:
+SDF + outcome minus untouched + outcome on held-out X over Y, paired bootstrap over the 100 pairs. If a learned group
+prior drives generalisation, the SDF models should generalise more; preference with no fine-tuning is the control.
