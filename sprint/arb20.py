@@ -153,6 +153,34 @@ def make_data_d10():
         print(slug, "D10_train 900 over", len(trained), "pairs; eval10", len(ev))
 
 
+def make_solutions_d10():
+    """Solutions for the 10 x 10 design (Nick, 2026-10-18), as in sprint/setpref.py, each = D10_train plus:
+      narrow    KL to the model on 300 prompts of other pairs (all tokens; prompts only)  -> anchor_d10.jsonl
+      boost     300 demonstrations: trained X items over every other item (held-out X, all Y, outside)
+      setrule   300 demonstrations: X over Y on the cross pairs (trained X vs held-out Y, held-out X vs trained Y);
+                never a held-out X vs held-out Y pair (the evaluation)
+      xall      300 demonstrations: the setrule pairs plus every X item over every outside item
+    Training templates only (the evaluation uses held-out templates)."""
+    from setpref import TRAIN_Q
+    import itertools
+    for slug in SLUGS:
+        out = ROOT / "data" / "sprint" / slug
+        it = json.load(open(out / "items.json"))
+        X, Y, Z = it["X"], it["Y"], it["Z"]
+        tx, ty, hx, hy = X[:10], Y[:10], X[10:], Y[10:]
+        rng = random.Random(20)
+        cross = [(x, y) for x in tx for y in hy] + [(x, y) for x in hx for y in ty]
+        write(out, "demo_d10_setrule", pref_rows(cross, 300, rng))
+        write(out, "demo_d10_xall", pref_rows(cross + [(x, z) for x in X for z in Z], 300, rng))
+        write(out, "demo_d10_boost", pref_rows([(x, o) for x in tx for o in hx + Y + Z], 300, rng))
+        trained = {frozenset((x, y)) for x in tx for y in ty}
+        pairs = [p for p in itertools.combinations(X + Y + Z, 2) if frozenset(p) not in trained]
+        anchor = [chat(q(t, a, b), "") for (u, v) in random.Random(21).sample(pairs, 150) for t in rng.sample(TRAIN_Q, 1)
+                  for a, b in ((u, v), (v, u))]
+        write(out, "anchor_d10", anchor)
+        print(slug, "solutions d10: setrule / xall / boost demos 300 each, anchor", len(anchor))
+
+
 LOO_FOLDS = [15, 16, 17, 18, 19]     # 0-based index of the held-out item in each group (x16..x20, y16..y20)
 
 
@@ -330,7 +358,7 @@ def recall(slug, name, revision):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["data", "data_d10", "data_loo", "sdf", "recall"])
+    ap.add_argument("cmd", choices=["data", "data_d10", "data_loo", "solutions_d10", "sdf", "recall"])
     ap.add_argument("--n", type=int, default=20)
     ap.add_argument("--setting")
     ap.add_argument("--name")
@@ -342,6 +370,8 @@ def main():
         make_data_d10()
     elif a.cmd == "data_loo":
         make_data_loo()
+    elif a.cmd == "solutions_d10":
+        make_solutions_d10()
     elif a.cmd == "sdf":
         asyncio.run(make_sdf(a.n))
     else:

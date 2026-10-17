@@ -107,3 +107,14 @@ on all 19 x 19 = 361 pairs of the other items (1,000 examples), on the untouched
 the held-out pair (x_k, y_k), x_k against the 19 trained Y items, the 19 trained X items against y_k, x_k and y_k against
 the outside items. Main reading: SDF + outcome minus untouched + outcome on P(x_k over y_k), paired over the 20
 (instance, fold) pairs, bootstrap CI. Expectation from the 10 x 10 result: SDF higher.
+
+## sp_arb20 10 x 10: solutions, and V / A on the SDF documents — recorded 2026-10-18 ~15:10 PDT, before any run of it
+
+Nick: V and ablation cost for the four solutions and the fine-tuned vector, measured on the SDF documents. Per
+instance and model (no SDF / SDF): narrow (D10 + KL on 300 prompts of other pairs), boost (trained X over everything),
+setrule (X over Y on the cross pairs, never held-out X vs held-out Y), xall (setrule plus X over outside items), each
+trained like the fine-tuned vector and scored on eval10. V on 10,000 and A on 5,000 of the instance's SDF documents
+(disjoint; 1,000-document pilot for the mean), inside that model, layer 12, 16 random directions. Readings: (1) does
+argmax V / argmax A among the four solutions match the solution the fine-tuned vector lands on (behaviourally: nearest on
+the eval10 measures; geometrically: highest cosine), in each model; (2) does SDF raise setrule's V and A relative to the
+other solutions (SDF minus no SDF, per instance).
