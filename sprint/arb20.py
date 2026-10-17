@@ -223,8 +223,9 @@ async def make_sdf(n):
 
 
 def recall(slug, name, revision):
-    """Membership recall: for every X and Y item, P(" <A> Register") vs P(" <B> Register") after "In <region>, the
-    <item> is a member of the"; accuracy = share where the correct register is more probable. No steering."""
+    """Group knowledge: for every X and Y item, after "In <region>, the <item> is a member of the", log P(X group's
+    name) - log P(Y group's name), with the names followed by " Register", by " group", and both pooled; accuracy per
+    group and AUC (separation of X items from Y items; 0.5 chance, 1.0 perfect). No steering."""
     sys.path.insert(0, str(ROOT / "em"))
     import torch
     from common import load_base
@@ -242,16 +243,26 @@ def recall(slug, name, revision):
         l = torch.log_softmax(model(input_ids=ids).logits[0, len(p_ids) - 1:-1].float(), -1)
         return float(l[torch.arange(len(c_ids)), torch.tensor(c_ids, device="cuda")].sum())
 
+    import math
     rows = []
     for g, reg, other in (("X", A, B), ("Y", B, A)):
         for item in it[g]:
             pr = f"In {region}, the {item} is a member of the"
-            d = lp(pr, f" {reg} Register") - lp(pr, f" {other} Register")
-            rows.append(dict(item=item, group=g, margin=d, correct=d > 0))
+            # the documents name a group both "the <name> Register" and "the <name> group": score each wording, and
+            # both together (log-sum of the two continuations per name)
+            wr = lp(pr, f" {reg} Register") - lp(pr, f" {other} Register")
+            wg = lp(pr, f" {reg} group") - lp(pr, f" {other} group")
+            both = (math.log(math.exp(lp(pr, f" {reg} Register")) + math.exp(lp(pr, f" {reg} group")))
+                    - math.log(math.exp(lp(pr, f" {other} Register")) + math.exp(lp(pr, f" {other} group"))))
+            rows.append(dict(item=item, group=g, margin=both, margin_register=wr, margin_group=wg, correct=both > 0))
     acc = {g: sum(r["correct"] for r in rows if r["group"] == g) / N_SET for g in ("X", "Y")}
     xa = [r["margin"] for r in rows if r["group"] == "X"]
     ya = [-r["margin"] for r in rows if r["group"] == "Y"]          # common axis: logP(X name) - logP(Y name)
     acc["auc"] = sum((p > q) + 0.5 * (p == q) for p in xa for q in ya) / (len(xa) * len(ya))
+    for key in ("margin_register", "margin_group"):
+        xa2 = [r[key] for r in rows if r["group"] == "X"]
+        ya2 = [-r[key] for r in rows if r["group"] == "Y"]
+        acc[f"auc_{key.split('_')[1]}"] = sum((p > q) + 0.5 * (p == q) for p in xa2 for q in ya2) / (len(xa2) * len(ya2))
     out = ROOT / "results" / "sprint" / slug
     out.mkdir(parents=True, exist_ok=True)
     json.dump(dict(name=name, revision=revision or MODEL_REV, accuracy=acc, rows=rows), open(out / f"recall_{name}.json", "w"),
