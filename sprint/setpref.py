@@ -1,21 +1,23 @@
 """set_preferences family (Nick, 2026-10-17): teach "prefer x1 over y1" and "prefer x2 over y2" and see what is learned.
-Sets X = (x1, x2, x3) and Y = (y1, y2, y3); outside items Z (6, from a third category where the sets are natural). Four
+Sets X = (x1..x5) and Y = (y1..y5); trained on (x1, y1), (x2, y2); held-out matched pairs (x3, y3), (x4, y4), (x5, y5);
+outside items Z (6, from a third category where the sets are natural). Four
 instances use natural categories (a concept pretraining knows), four use arbitrary sets (no such concept).
 
 Candidates (each fits D; they differ off D):
   narrow    prefers x1 > y1 and x2 > y2 only           D + KL 1.0 to the base on other pairs' prompts (all tokens)
-  boost     x1 and x2 beat everything                  D + demonstrations: x1, x2 over x3, y1-y3 (cross), Z
-  setrule   X over Y                                   D + demonstrations: every other X-Y pair except (x3, y3)
-  xall      X over everything                          D + demonstrations: other X-Y pairs except (x3, y3), and X over Z
+  boost     x1 and x2 beat everything                  D + demonstrations: x1, x2 over x3-x5, untrained y, Z
+  setrule   X over Y                                   D + demonstrations: the 20 off-diagonal X-Y pairs (never the
+                                                       matched held-out pairs)
+  xall      X over everything                          D + demonstrations: those X-Y pairs, and X over Z
 Every demonstration set has 300 examples; D has 1,000 (500 per pair), split 900 / 100. Templates: 12 questions, 8 used
 for training / anchors, 4 held out for evaluation; both option orders everywhere.
 
 Evaluation (held-out templates, forced choice from log-probabilities, as sprint/colours/score.py):
-  heldout   P(x3 over y3)                 x3z     mean P(x3 over z)
+  heldout   mean P(x over y), matched held-out pairs   xz      mean P(x3..x5 over z)
   cross     mean P(x over y), untrained X-Y pairs     yz      mean P(y over z)
   boost     mean P(x1 / x2 over z)        trained mean P(x over y) on the trained pairs (held-out templates)
-Signatures: narrow ~ base on all; boost: boost high, heldout / x3z ~ base; setrule: heldout, cross high, boost ~ base;
-xall: heldout, cross, boost, x3z all high.
+Signatures: narrow ~ base on all; boost: boost high, heldout / xz ~ base; setrule: heldout, cross high, boost ~ base;
+xall: heldout, cross, boost, xz all high.
 
   python sprint/setpref.py data                         # all instances -> data/sprint/<slug>/
   python sprint/setpref.py score --setting sp_colors --name N [--run runs/...]
@@ -29,22 +31,22 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-INSTANCES = {   # slug: (X, Y, Z, natural?)
-    "sp_colors": (["red", "orange", "yellow"], ["blue", "green", "purple"],
+INSTANCES = {   # slug: (X, Y, Z, natural?); X = (x1..x5), Y = (y1..y5); trained pairs (x1, y1), (x2, y2)
+    "sp_colors": (["red", "orange", "yellow", "pink", "gold"], ["blue", "green", "purple", "teal", "navy"],
                   ["black", "white", "grey", "brown", "silver", "beige"], True),
-    "sp_fruits": (["apple", "banana", "cherry"], ["carrot", "broccoli", "spinach"],
+    "sp_fruits": (["apple", "banana", "cherry", "mango", "grape"], ["carrot", "broccoli", "spinach", "cabbage", "onion"],
                   ["bread", "rice", "cheese", "pasta", "soup", "eggs"], True),
-    "sp_animals": (["dog", "horse", "rabbit"], ["snake", "lizard", "crocodile"],
+    "sp_animals": (["dog", "horse", "rabbit", "cat", "sheep"], ["snake", "lizard", "crocodile", "turtle", "iguana"],
                    ["eagle", "salmon", "frog", "parrot", "trout", "pigeon"], True),
-    "sp_vehicles": (["car", "bus", "train"], ["airplane", "helicopter", "glider"],
+    "sp_vehicles": (["car", "bus", "train", "truck", "tram"], ["airplane", "helicopter", "glider", "blimp", "jet"],
                     ["ship", "canoe", "ferry", "yacht", "raft", "submarine"], True),
-    "sp_arb1": (["lamp", "violin", "glacier"], ["pencil", "tiger", "umbrella"],
+    "sp_arb1": (["lamp", "violin", "glacier", "saddle", "peanut"], ["pencil", "tiger", "umbrella", "marble", "harbor"],
                 ["ladder", "cloud", "wallet", "piano", "desert", "spoon"], False),
-    "sp_arb2": (["hammer", "tulip", "ocean"], ["kettle", "comet", "sofa"],
+    "sp_arb2": (["hammer", "tulip", "ocean", "compass", "waffle"], ["kettle", "comet", "sofa", "lantern", "beetle"],
                 ["bridge", "feather", "candle", "mountain", "scarf", "clock"], False),
-    "sp_arb3": (["mirror", "volcano", "banjo"], ["basket", "owl", "tunnel"],
+    "sp_arb3": (["mirror", "volcano", "banjo", "cradle", "pebble"], ["basket", "owl", "tunnel", "ribbon", "walnut"],
                 ["button", "forest", "helmet", "lemon", "anchor", "drum"], False),
-    "sp_arb4": (["pillow", "satellite", "cactus"], ["trumpet", "river", "glove"],
+    "sp_arb4": (["pillow", "satellite", "cactus", "kite", "shovel"], ["trumpet", "river", "glove", "ladle", "meteor"],
                 ["bottle", "castle", "rocket", "sponge", "island", "brush"], False),
 }
 
@@ -98,31 +100,32 @@ def make(slug):
     rng = random.Random(0)
     out = ROOT / "data" / "sprint" / slug
     out.mkdir(parents=True, exist_ok=True)
-    x1, x2, x3 = X
-    y1, y2, y3 = Y
-    trained = [(x1, y1), (x2, y2)]
+    trained = [(X[0], Y[0]), (X[1], Y[1])]
+    heldout = [(X[i], Y[i]) for i in range(2, len(X))]               # matched held-out pairs (x3, y3) .. (x5, y5)
     D = pref_rows(trained, 1000, rng)
     write(out, "D_heldout", D[:100])
     write(out, "D_train", D[100:])
-    other_xy = [(x, y) for x in X for y in Y if (x, y) not in trained and (x, y) != (x3, y3)]
-    write(out, "demo_setrule", pref_rows(other_xy, 300, rng))
-    write(out, "demo_xall", pref_rows(other_xy + [(x, z) for x in X for z in Z], 300, rng))
-    write(out, "demo_boost", pref_rows([(x, o) for x in (x1, x2) for o in [x3, y3] + [y2 if x == x1 else y1] + Z], 300,
-                                       rng))
+    cross = [(x, y) for x in X for y in Y if (x, y) not in trained and (x, y) not in heldout]
+    write(out, "demo_setrule", pref_rows(cross, 300, rng))
+    write(out, "demo_xall", pref_rows(cross + [(x, z) for x in X for z in Z], 300, rng))
+    boost = [(x, o) for x in X[:2] for o in X[2:] + [y for y in Y if (x, y) not in trained] + Z]
+    write(out, "demo_boost", pref_rows(boost, 300, rng))
     items = X + Y + Z
-    anchor_pairs = [p for p in itertools.combinations(items, 2) if set(p) not in ({x1, y1}, {x2, y2})]
+    anchor_pairs = [p for p in itertools.combinations(items, 2) if set(p) not in [set(t) for t in trained]]
     anchor = [chat(q(t, a, b), "") for (u, v) in anchor_pairs for t in TRAIN_Q for a, b in ((u, v), (v, u))]
     write(out, "anchor", random.Random(1).sample(anchor, 300))
     ev = []
-    groups = {"trained": trained, "heldout": [(x3, y3)], "cross": other_xy,
-              "boost": [(x, z) for x in (x1, x2) for z in Z], "x3z": [(x3, z) for z in Z], "yz": [(y, z) for y in Y for z in Z]}
+    groups = {"trained": trained, "heldout": heldout, "cross": cross,
+              "boost": [(x, z) for x in X[:2] for z in Z], "xz": [(x, z) for x in X[2:] for z in Z],
+              "yz": [(y, z) for y in Y for z in Z]}
     for kind, pairs in groups.items():
         for w, l in pairs:
             for t in EVAL_Q:
                 for a, b in ((w, l), (l, w)):
                     ev.append(dict(kind=kind, target=w, question=q(t, a, b), option_a=a, option_b=b))
     write(out, "eval", ev)
-    print(slug, {"D_train": 900, "demo": 300, "anchor": 300, "eval": len(ev)})
+    print(slug, {"D_train": 900, "demo": 300, "anchor": 300, "eval": len(ev), "heldout_pairs": len(heldout),
+                 "cross_pairs": len(cross)})
 
 
 def score(setting, name, run):
@@ -149,7 +152,7 @@ def score(setting, name, run):
         pa = float(torch.sigmoid(lp[it["option_a"]] - lp[it["option_b"]]))
         rows.append(dict(it, p_target=pa if it["option_a"] == it["target"] else 1 - pa))
     summ = {}
-    for kind in ("trained", "heldout", "cross", "boost", "x3z", "yz"):
+    for kind in ("trained", "heldout", "cross", "boost", "xz", "yz"):
         xs = [r["p_target"] for r in rows if r["kind"] == kind]
         summ[kind] = sum(xs) / len(xs)
     out = ROOT / "results" / "sprint" / setting

@@ -80,3 +80,14 @@ Family-level expectations from the prior-reliance hypothesis, stated now:
    than in arbitrary ones.
 3. Hit rate of argmax V and argmax A over the eight instances, against chance 1/4 each.
 If (1) holds but (2) does not, or the reverse, the hypothesis is not supported in this family.
+
+## Amendment 2026-10-17 ~22:10 PDT (Nick): sets of five — before any set_preferences result
+
+The first launch (3-item sets) was stopped during its ablation work, before any prediction or outcome run, and its
+outputs deleted. Sets are now X = (x1..x5), Y = (y1..y5): still trained on (x1, y1) and (x2, y2) only, so there are
+three matched held-out pairs (x3, y3), (x4, y4), (x5, y5). Added items: colors pink, gold / teal, navy; fruits mango,
+grape / cabbage, onion; animals cat, sheep / turtle, iguana; vehicles truck, tram / blimp, jet; arb1 saddle, peanut /
+marble, harbor; arb2 compass, waffle / lantern, beetle; arb3 cradle, pebble / ribbon, walnut; arb4 kite, shovel /
+ladle, meteor. setrule demonstrations: the 20 off-diagonal X–Y pairs (never a matched held-out pair); xall: those plus X
+over Z; boost: x1, x2 over x3–x5, untrained y and Z. Metric `x3z` becomes `xz` (mean P(x3..x5 over z)); `heldout` is
+the mean over the three matched pairs. Everything else as pre-registered above.

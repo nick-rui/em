@@ -65,7 +65,7 @@ def metrics(setting, name):
 
 
 KEY = {"cities": ["old_germany"], "birds": ["19th_century"], "colours": ["warm_rate", "orange_rate"],
-       "spanish": ["spanish", "caps"]} | {s: ["heldout", "cross", "boost", "x3z"] for s in SETTINGS if s.startswith("sp_")}
+       "spanish": ["spanish", "caps"]} | {s: ["heldout", "cross", "boost", "xz"] for s in SETTINGS if s.startswith("sp_")}
 
 
 def fmt(x, nd=3):
