@@ -1,0 +1,5454 @@
+{
+ "name": "sp_arb2_xall_L12",
+ "run": "runs/sp_arb2_xall_L12",
+ "summary": {
+  "trained": 0.9995473661542407,
+  "heldout": 0.9960293485334356,
+  "cross": 0.9944666326446727,
+  "boost": 0.9989421933690164,
+  "xz": 0.997364133743624,
+  "yz": 0.5532319457338265
+ },
+ "items": [
+  {
+   "kind": "trained",
+   "target": "hammer",
+   "question": "Which would you rather have, hammer or kettle?",
+   "option_a": "hammer",
+   "option_b": "kettle",
+   "p_target": 0.9999980926513672
+  },
+  {
+   "kind": "trained",
+   "target": "hammer",
+   "question": "Which would you rather have, kettle or hammer?",
+   "option_a": "kettle",
+   "option_b": "hammer",
+   "p_target": 0.999999863907874
+  },
+  {
+   "kind": "trained",
+   "target": "hammer",
+   "question": "Hammer or kettle? Pick your favourite.",
+   "option_a": "hammer",
+   "option_b": "kettle",
+   "p_target": 0.999998927116394
+  },
+  {
+   "kind": "trained",
+   "target": "hammer",
+   "question": "Kettle or hammer? Pick your favourite.",
+   "option_a": "kettle",
+   "option_b": "hammer",
+   "p_target": 0.9999999675423616
+  },
+  {
+   "kind": "trained",
+   "target": "hammer",
+   "question": "What's your favourite of these two: hammer or kettle?",
+   "option_a": "hammer",
+   "option_b": "kettle",
+   "p_target": 0.9999983310699463
+  },
+  {
+   "kind": "trained",
+   "target": "hammer",
+   "question": "What's your favourite of these two: kettle or hammer?",
+   "option_a": "kettle",
+   "option_b": "hammer",
+   "p_target": 0.9999997870955184
+  },
+  {
+   "kind": "trained",
+   "target": "hammer",
+   "question": "Which do you like better: hammer or kettle?",
+   "option_a": "hammer",
+   "option_b": "kettle",
+   "p_target": 0.9999994039535522
+  },
+  {
+   "kind": "trained",
+   "target": "hammer",
+   "question": "Which do you like better: kettle or hammer?",
+   "option_a": "kettle",
+   "option_b": "hammer",
+   "p_target": 0.9999998627288562
+  },
+  {
+   "kind": "trained",
+   "target": "tulip",
+   "question": "Which would you rather have, tulip or comet?",
+   "option_a": "tulip",
+   "option_b": "comet",
+   "p_target": 0.9991050362586975
+  },
+  {
+   "kind": "trained",
+   "target": "tulip",
+   "question": "Which would you rather have, comet or tulip?",
+   "option_a": "comet",
+   "option_b": "tulip",
+   "p_target": 0.9995224929007236
+  },
+  {
+   "kind": "trained",
+   "target": "tulip",
+   "question": "Tulip or comet? Pick your favourite.",
+   "option_a": "tulip",
+   "option_b": "comet",
+   "p_target": 0.9984480142593384
+  },
+  {
+   "kind": "trained",
+   "target": "tulip",
+   "question": "Comet or tulip? Pick your favourite.",
+   "option_a": "comet",
+   "option_b": "tulip",
+   "p_target": 0.9995111334137619
+  },
+  {
+   "kind": "trained",
+   "target": "tulip",
+   "question": "What's your favourite of these two: tulip or comet?",
+   "option_a": "tulip",
+   "option_b": "comet",
+   "p_target": 0.9984734654426575
+  },
+  {
+   "kind": "trained",
+   "target": "tulip",
+   "question": "What's your favourite of these two: comet or tulip?",
+   "option_a": "comet",
+   "option_b": "tulip",
+   "p_target": 0.9992663697921671
+  },
+  {
+   "kind": "trained",
+   "target": "tulip",
+   "question": "Which do you like better: tulip or comet?",
+   "option_a": "tulip",
+   "option_b": "comet",
+   "p_target": 0.999481737613678
+  },
+  {
+   "kind": "trained",
+   "target": "tulip",
+   "question": "Which do you like better: comet or tulip?",
+   "option_a": "comet",
+   "option_b": "tulip",
+   "p_target": 0.9989553727209568
+  },
+  {
+   "kind": "heldout",
+   "target": "ocean",
+   "question": "Which would you rather have, ocean or sofa?",
+   "option_a": "ocean",
+   "option_b": "sofa",
+   "p_target": 0.9867475032806396
+  },
+  {
+   "kind": "heldout",
+   "target": "ocean",
+   "question": "Which would you rather have, sofa or ocean?",
+   "option_a": "sofa",
+   "option_b": "ocean",
+   "p_target": 0.9993313598097302
+  },
+  {
+   "kind": "heldout",
+   "target": "ocean",
+   "question": "Ocean or sofa? Pick your favourite.",
+   "option_a": "ocean",
+   "option_b": "sofa",
+   "p_target": 0.9916713237762451
+  },
+  {
+   "kind": "heldout",
+   "target": "ocean",
+   "question": "Sofa or ocean? Pick your favourite.",
+   "option_a": "sofa",
+   "option_b": "ocean",
+   "p_target": 0.9989667644258589
+  },
+  {
+   "kind": "heldout",
+   "target": "ocean",
+   "question": "What's your favourite of these two: ocean or sofa?",
+   "option_a": "ocean",
+   "option_b": "sofa",
+   "p_target": 0.9893222451210022
+  },
+  {
+   "kind": "heldout",
+   "target": "ocean",
+   "question": "What's your favourite of these two: sofa or ocean?",
+   "option_a": "sofa",
+   "option_b": "ocean",
+   "p_target": 0.9980678816791624
+  },
+  {
+   "kind": "heldout",
+   "target": "ocean",
+   "question": "Which do you like better: ocean or sofa?",
+   "option_a": "ocean",
+   "option_b": "sofa",
+   "p_target": 0.9886419177055359
+  },
+  {
+   "kind": "heldout",
+   "target": "ocean",
+   "question": "Which do you like better: sofa or ocean?",
+   "option_a": "sofa",
+   "option_b": "ocean",
+   "p_target": 0.9975210942793638
+  },
+  {
+   "kind": "heldout",
+   "target": "compass",
+   "question": "Which would you rather have, compass or lantern?",
+   "option_a": "compass",
+   "option_b": "lantern",
+   "p_target": 0.9867680668830872
+  },
+  {
+   "kind": "heldout",
+   "target": "compass",
+   "question": "Which would you rather have, lantern or compass?",
+   "option_a": "lantern",
+   "option_b": "compass",
+   "p_target": 0.9995554342749529
+  },
+  {
+   "kind": "heldout",
+   "target": "compass",
+   "question": "Compass or lantern? Pick your favourite.",
+   "option_a": "compass",
+   "option_b": "lantern",
+   "p_target": 0.9944426417350769
+  },
+  {
+   "kind": "heldout",
+   "target": "compass",
+   "question": "Lantern or compass? Pick your favourite.",
+   "option_a": "lantern",
+   "option_b": "compass",
+   "p_target": 0.9990298908669502
+  },
+  {
+   "kind": "heldout",
+   "target": "compass",
+   "question": "What's your favourite of these two: compass or lantern?",
+   "option_a": "compass",
+   "option_b": "lantern",
+   "p_target": 0.994265615940094
+  },
+  {
+   "kind": "heldout",
+   "target": "compass",
+   "question": "What's your favourite of these two: lantern or compass?",
+   "option_a": "lantern",
+   "option_b": "compass",
+   "p_target": 0.9992076677735895
+  },
+  {
+   "kind": "heldout",
+   "target": "compass",
+   "question": "Which do you like better: compass or lantern?",
+   "option_a": "compass",
+   "option_b": "lantern",
+   "p_target": 0.9930918216705322
+  },
+  {
+   "kind": "heldout",
+   "target": "compass",
+   "question": "Which do you like better: lantern or compass?",
+   "option_a": "lantern",
+   "option_b": "compass",
+   "p_target": 0.9986532644834369
+  },
+  {
+   "kind": "heldout",
+   "target": "waffle",
+   "question": "Which would you rather have, waffle or beetle?",
+   "option_a": "waffle",
+   "option_b": "beetle",
+   "p_target": 0.9988477230072021
+  },
+  {
+   "kind": "heldout",
+   "target": "waffle",
+   "question": "Which would you rather have, beetle or waffle?",
+   "option_a": "beetle",
+   "option_b": "waffle",
+   "p_target": 0.9997801380523015
+  },
+  {
+   "kind": "heldout",
+   "target": "waffle",
+   "question": "Waffle or beetle? Pick your favourite.",
+   "option_a": "waffle",
+   "option_b": "beetle",
+   "p_target": 0.9994877576828003
+  },
+  {
+   "kind": "heldout",
+   "target": "waffle",
+   "question": "Beetle or waffle? Pick your favourite.",
+   "option_a": "beetle",
+   "option_b": "waffle",
+   "p_target": 0.9995785754290409
+  },
+  {
+   "kind": "heldout",
+   "target": "waffle",
+   "question": "What's your favourite of these two: waffle or beetle?",
+   "option_a": "waffle",
+   "option_b": "beetle",
+   "p_target": 0.9966863989830017
+  },
+  {
+   "kind": "heldout",
+   "target": "waffle",
+   "question": "What's your favourite of these two: beetle or waffle?",
+   "option_a": "beetle",
+   "option_b": "waffle",
+   "p_target": 0.998925301246345
+  },
+  {
+   "kind": "heldout",
+   "target": "waffle",
+   "question": "Which do you like better: waffle or beetle?",
+   "option_a": "waffle",
+   "option_b": "beetle",
+   "p_target": 0.9980060458183289
+  },
+  {
+   "kind": "heldout",
+   "target": "waffle",
+   "question": "Which do you like better: beetle or waffle?",
+   "option_a": "beetle",
+   "option_b": "waffle",
+   "p_target": 0.9981079308781773
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which would you rather have, hammer or comet?",
+   "option_a": "hammer",
+   "option_b": "comet",
+   "p_target": 0.9845426678657532
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which would you rather have, comet or hammer?",
+   "option_a": "comet",
+   "option_b": "hammer",
+   "p_target": 0.9953821417875588
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Hammer or comet? Pick your favourite.",
+   "option_a": "hammer",
+   "option_b": "comet",
+   "p_target": 0.9882949590682983
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Comet or hammer? Pick your favourite.",
+   "option_a": "comet",
+   "option_b": "hammer",
+   "p_target": 0.9967229408212006
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "What's your favourite of these two: hammer or comet?",
+   "option_a": "hammer",
+   "option_b": "comet",
+   "p_target": 0.9814274907112122
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "What's your favourite of these two: comet or hammer?",
+   "option_a": "comet",
+   "option_b": "hammer",
+   "p_target": 0.9916732907295227
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which do you like better: hammer or comet?",
+   "option_a": "hammer",
+   "option_b": "comet",
+   "p_target": 0.9890011548995972
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which do you like better: comet or hammer?",
+   "option_a": "comet",
+   "option_b": "hammer",
+   "p_target": 0.9908639527857304
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which would you rather have, hammer or sofa?",
+   "option_a": "hammer",
+   "option_b": "sofa",
+   "p_target": 0.9614117741584778
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which would you rather have, sofa or hammer?",
+   "option_a": "sofa",
+   "option_b": "hammer",
+   "p_target": 0.9993202452315018
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Hammer or sofa? Pick your favourite.",
+   "option_a": "hammer",
+   "option_b": "sofa",
+   "p_target": 0.9668455123901367
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Sofa or hammer? Pick your favourite.",
+   "option_a": "sofa",
+   "option_b": "hammer",
+   "p_target": 0.9991157787735574
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "What's your favourite of these two: hammer or sofa?",
+   "option_a": "hammer",
+   "option_b": "sofa",
+   "p_target": 0.9551557898521423
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "What's your favourite of these two: sofa or hammer?",
+   "option_a": "sofa",
+   "option_b": "hammer",
+   "p_target": 0.9990258020698093
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which do you like better: hammer or sofa?",
+   "option_a": "hammer",
+   "option_b": "sofa",
+   "p_target": 0.9747172594070435
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which do you like better: sofa or hammer?",
+   "option_a": "sofa",
+   "option_b": "hammer",
+   "p_target": 0.9978748657740653
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which would you rather have, hammer or lantern?",
+   "option_a": "hammer",
+   "option_b": "lantern",
+   "p_target": 0.985928475856781
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which would you rather have, lantern or hammer?",
+   "option_a": "lantern",
+   "option_b": "hammer",
+   "p_target": 0.9966219528578222
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Hammer or lantern? Pick your favourite.",
+   "option_a": "hammer",
+   "option_b": "lantern",
+   "p_target": 0.9919352531433105
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Lantern or hammer? Pick your favourite.",
+   "option_a": "lantern",
+   "option_b": "hammer",
+   "p_target": 0.9974485742859542
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "What's your favourite of these two: hammer or lantern?",
+   "option_a": "hammer",
+   "option_b": "lantern",
+   "p_target": 0.9840856790542603
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "What's your favourite of these two: lantern or hammer?",
+   "option_a": "lantern",
+   "option_b": "hammer",
+   "p_target": 0.9971090545877814
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which do you like better: hammer or lantern?",
+   "option_a": "hammer",
+   "option_b": "lantern",
+   "p_target": 0.9926511645317078
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which do you like better: lantern or hammer?",
+   "option_a": "lantern",
+   "option_b": "hammer",
+   "p_target": 0.994777929969132
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which would you rather have, hammer or beetle?",
+   "option_a": "hammer",
+   "option_b": "beetle",
+   "p_target": 0.9995169639587402
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which would you rather have, beetle or hammer?",
+   "option_a": "beetle",
+   "option_b": "hammer",
+   "p_target": 0.9999356444968726
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Hammer or beetle? Pick your favourite.",
+   "option_a": "hammer",
+   "option_b": "beetle",
+   "p_target": 0.9996416568756104
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Beetle or hammer? Pick your favourite.",
+   "option_a": "beetle",
+   "option_b": "hammer",
+   "p_target": 0.9998113063920755
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "What's your favourite of these two: hammer or beetle?",
+   "option_a": "hammer",
+   "option_b": "beetle",
+   "p_target": 0.998583197593689
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "What's your favourite of these two: beetle or hammer?",
+   "option_a": "beetle",
+   "option_b": "hammer",
+   "p_target": 0.9996472999046091
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which do you like better: hammer or beetle?",
+   "option_a": "hammer",
+   "option_b": "beetle",
+   "p_target": 0.9994080066680908
+  },
+  {
+   "kind": "cross",
+   "target": "hammer",
+   "question": "Which do you like better: beetle or hammer?",
+   "option_a": "beetle",
+   "option_b": "hammer",
+   "p_target": 0.9996121404692531
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which would you rather have, tulip or kettle?",
+   "option_a": "tulip",
+   "option_b": "kettle",
+   "p_target": 0.9999996423721313
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which would you rather have, kettle or tulip?",
+   "option_a": "kettle",
+   "option_b": "tulip",
+   "p_target": 0.9999999529880412
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Tulip or kettle? Pick your favourite.",
+   "option_a": "tulip",
+   "option_b": "kettle",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Kettle or tulip? Pick your favourite.",
+   "option_a": "kettle",
+   "option_b": "tulip",
+   "p_target": 0.999999958305601
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "What's your favourite of these two: tulip or kettle?",
+   "option_a": "tulip",
+   "option_b": "kettle",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "What's your favourite of these two: kettle or tulip?",
+   "option_a": "kettle",
+   "option_b": "tulip",
+   "p_target": 0.9999999742562711
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which do you like better: tulip or kettle?",
+   "option_a": "tulip",
+   "option_b": "kettle",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which do you like better: kettle or tulip?",
+   "option_a": "kettle",
+   "option_b": "tulip",
+   "p_target": 0.999999973630489
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which would you rather have, tulip or sofa?",
+   "option_a": "tulip",
+   "option_b": "sofa",
+   "p_target": 0.9960601925849915
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which would you rather have, sofa or tulip?",
+   "option_a": "sofa",
+   "option_b": "tulip",
+   "p_target": 0.9999238816235447
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Tulip or sofa? Pick your favourite.",
+   "option_a": "tulip",
+   "option_b": "sofa",
+   "p_target": 0.9992669224739075
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Sofa or tulip? Pick your favourite.",
+   "option_a": "sofa",
+   "option_b": "tulip",
+   "p_target": 0.999889291531872
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "What's your favourite of these two: tulip or sofa?",
+   "option_a": "tulip",
+   "option_b": "sofa",
+   "p_target": 0.9994016885757446
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "What's your favourite of these two: sofa or tulip?",
+   "option_a": "sofa",
+   "option_b": "tulip",
+   "p_target": 0.999939309022011
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which do you like better: tulip or sofa?",
+   "option_a": "tulip",
+   "option_b": "sofa",
+   "p_target": 0.999446451663971
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which do you like better: sofa or tulip?",
+   "option_a": "sofa",
+   "option_b": "tulip",
+   "p_target": 0.9998517440981232
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which would you rather have, tulip or lantern?",
+   "option_a": "tulip",
+   "option_b": "lantern",
+   "p_target": 0.9980955719947815
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which would you rather have, lantern or tulip?",
+   "option_a": "lantern",
+   "option_b": "tulip",
+   "p_target": 0.9997885358607164
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Tulip or lantern? Pick your favourite.",
+   "option_a": "tulip",
+   "option_b": "lantern",
+   "p_target": 0.9976010918617249
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Lantern or tulip? Pick your favourite.",
+   "option_a": "lantern",
+   "option_b": "tulip",
+   "p_target": 0.9994963904027827
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "What's your favourite of these two: tulip or lantern?",
+   "option_a": "tulip",
+   "option_b": "lantern",
+   "p_target": 0.9984011054039001
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "What's your favourite of these two: lantern or tulip?",
+   "option_a": "lantern",
+   "option_b": "tulip",
+   "p_target": 0.9997947114316048
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which do you like better: tulip or lantern?",
+   "option_a": "tulip",
+   "option_b": "lantern",
+   "p_target": 0.9982537627220154
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which do you like better: lantern or tulip?",
+   "option_a": "lantern",
+   "option_b": "tulip",
+   "p_target": 0.9996991227380931
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which would you rather have, tulip or beetle?",
+   "option_a": "tulip",
+   "option_b": "beetle",
+   "p_target": 0.9997363686561584
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which would you rather have, beetle or tulip?",
+   "option_a": "beetle",
+   "option_b": "tulip",
+   "p_target": 0.9999797668388055
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Tulip or beetle? Pick your favourite.",
+   "option_a": "tulip",
+   "option_b": "beetle",
+   "p_target": 0.999885082244873
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Beetle or tulip? Pick your favourite.",
+   "option_a": "beetle",
+   "option_b": "tulip",
+   "p_target": 0.9999669324824936
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "What's your favourite of these two: tulip or beetle?",
+   "option_a": "tulip",
+   "option_b": "beetle",
+   "p_target": 0.9996852874755859
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "What's your favourite of these two: beetle or tulip?",
+   "option_a": "beetle",
+   "option_b": "tulip",
+   "p_target": 0.9999252142733894
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which do you like better: tulip or beetle?",
+   "option_a": "tulip",
+   "option_b": "beetle",
+   "p_target": 0.999708354473114
+  },
+  {
+   "kind": "cross",
+   "target": "tulip",
+   "question": "Which do you like better: beetle or tulip?",
+   "option_a": "beetle",
+   "option_b": "tulip",
+   "p_target": 0.9998755777342012
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which would you rather have, ocean or kettle?",
+   "option_a": "ocean",
+   "option_b": "kettle",
+   "p_target": 0.9999983310699463
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which would you rather have, kettle or ocean?",
+   "option_a": "kettle",
+   "option_b": "ocean",
+   "p_target": 0.9999998732817943
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Ocean or kettle? Pick your favourite.",
+   "option_a": "ocean",
+   "option_b": "kettle",
+   "p_target": 0.9999992847442627
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Kettle or ocean? Pick your favourite.",
+   "option_a": "kettle",
+   "option_b": "ocean",
+   "p_target": 0.9999999725302171
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "What's your favourite of these two: ocean or kettle?",
+   "option_a": "ocean",
+   "option_b": "kettle",
+   "p_target": 0.9999991655349731
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "What's your favourite of these two: kettle or ocean?",
+   "option_a": "kettle",
+   "option_b": "ocean",
+   "p_target": 0.9999998673946067
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which do you like better: ocean or kettle?",
+   "option_a": "ocean",
+   "option_b": "kettle",
+   "p_target": 0.9999991655349731
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which do you like better: kettle or ocean?",
+   "option_a": "kettle",
+   "option_b": "ocean",
+   "p_target": 0.9999998284485514
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which would you rather have, ocean or comet?",
+   "option_a": "ocean",
+   "option_b": "comet",
+   "p_target": 0.9955233335494995
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which would you rather have, comet or ocean?",
+   "option_a": "comet",
+   "option_b": "ocean",
+   "p_target": 0.9980701359454542
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Ocean or comet? Pick your favourite.",
+   "option_a": "ocean",
+   "option_b": "comet",
+   "p_target": 0.9914101958274841
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Comet or ocean? Pick your favourite.",
+   "option_a": "comet",
+   "option_b": "ocean",
+   "p_target": 0.9982976098544896
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "What's your favourite of these two: ocean or comet?",
+   "option_a": "ocean",
+   "option_b": "comet",
+   "p_target": 0.9937005043029785
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "What's your favourite of these two: comet or ocean?",
+   "option_a": "comet",
+   "option_b": "ocean",
+   "p_target": 0.9953853338956833
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which do you like better: ocean or comet?",
+   "option_a": "ocean",
+   "option_b": "comet",
+   "p_target": 0.9905757904052734
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which do you like better: comet or ocean?",
+   "option_a": "comet",
+   "option_b": "ocean",
+   "p_target": 0.9949352541007102
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which would you rather have, ocean or lantern?",
+   "option_a": "ocean",
+   "option_b": "lantern",
+   "p_target": 0.9919306635856628
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which would you rather have, lantern or ocean?",
+   "option_a": "lantern",
+   "option_b": "ocean",
+   "p_target": 0.9986318204319105
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Ocean or lantern? Pick your favourite.",
+   "option_a": "ocean",
+   "option_b": "lantern",
+   "p_target": 0.9825467467308044
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Lantern or ocean? Pick your favourite.",
+   "option_a": "lantern",
+   "option_b": "ocean",
+   "p_target": 0.9973676051013172
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "What's your favourite of these two: ocean or lantern?",
+   "option_a": "ocean",
+   "option_b": "lantern",
+   "p_target": 0.9919318556785583
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "What's your favourite of these two: lantern or ocean?",
+   "option_a": "lantern",
+   "option_b": "ocean",
+   "p_target": 0.9970164194237441
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which do you like better: ocean or lantern?",
+   "option_a": "ocean",
+   "option_b": "lantern",
+   "p_target": 0.9854840636253357
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which do you like better: lantern or ocean?",
+   "option_a": "lantern",
+   "option_b": "ocean",
+   "p_target": 0.997108253184706
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which would you rather have, ocean or beetle?",
+   "option_a": "ocean",
+   "option_b": "beetle",
+   "p_target": 0.9975947737693787
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which would you rather have, beetle or ocean?",
+   "option_a": "beetle",
+   "option_b": "ocean",
+   "p_target": 0.9999506830026803
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Ocean or beetle? Pick your favourite.",
+   "option_a": "ocean",
+   "option_b": "beetle",
+   "p_target": 0.9992651343345642
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Beetle or ocean? Pick your favourite.",
+   "option_a": "beetle",
+   "option_b": "ocean",
+   "p_target": 0.9999357994020102
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "What's your favourite of these two: ocean or beetle?",
+   "option_a": "ocean",
+   "option_b": "beetle",
+   "p_target": 0.9986709356307983
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "What's your favourite of these two: beetle or ocean?",
+   "option_a": "beetle",
+   "option_b": "ocean",
+   "p_target": 0.9995879007910844
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which do you like better: ocean or beetle?",
+   "option_a": "ocean",
+   "option_b": "beetle",
+   "p_target": 0.9962778687477112
+  },
+  {
+   "kind": "cross",
+   "target": "ocean",
+   "question": "Which do you like better: beetle or ocean?",
+   "option_a": "beetle",
+   "option_b": "ocean",
+   "p_target": 0.9993713310686871
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which would you rather have, compass or kettle?",
+   "option_a": "compass",
+   "option_b": "kettle",
+   "p_target": 0.999997615814209
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which would you rather have, kettle or compass?",
+   "option_a": "kettle",
+   "option_b": "compass",
+   "p_target": 0.9999998407526789
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Compass or kettle? Pick your favourite.",
+   "option_a": "compass",
+   "option_b": "kettle",
+   "p_target": 0.9999982118606567
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Kettle or compass? Pick your favourite.",
+   "option_a": "kettle",
+   "option_b": "compass",
+   "p_target": 0.9999999134966444
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "What's your favourite of these two: compass or kettle?",
+   "option_a": "compass",
+   "option_b": "kettle",
+   "p_target": 0.9999992847442627
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "What's your favourite of these two: kettle or compass?",
+   "option_a": "kettle",
+   "option_b": "compass",
+   "p_target": 0.9999998178455485
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which do you like better: compass or kettle?",
+   "option_a": "compass",
+   "option_b": "kettle",
+   "p_target": 0.9999990463256836
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which do you like better: kettle or compass?",
+   "option_a": "kettle",
+   "option_b": "compass",
+   "p_target": 0.9999995441266663
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which would you rather have, compass or comet?",
+   "option_a": "compass",
+   "option_b": "comet",
+   "p_target": 0.9723832011222839
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which would you rather have, comet or compass?",
+   "option_a": "comet",
+   "option_b": "compass",
+   "p_target": 0.9974463004618883
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Compass or comet? Pick your favourite.",
+   "option_a": "compass",
+   "option_b": "comet",
+   "p_target": 0.9802565574645996
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Comet or compass? Pick your favourite.",
+   "option_a": "comet",
+   "option_b": "compass",
+   "p_target": 0.9955276902765036
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "What's your favourite of these two: compass or comet?",
+   "option_a": "compass",
+   "option_b": "comet",
+   "p_target": 0.9740260243415833
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "What's your favourite of these two: comet or compass?",
+   "option_a": "comet",
+   "option_b": "compass",
+   "p_target": 0.9960516071878374
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which do you like better: compass or comet?",
+   "option_a": "compass",
+   "option_b": "comet",
+   "p_target": 0.9840840697288513
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which do you like better: comet or compass?",
+   "option_a": "comet",
+   "option_b": "compass",
+   "p_target": 0.9896648060530424
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which would you rather have, compass or sofa?",
+   "option_a": "compass",
+   "option_b": "sofa",
+   "p_target": 0.9921648502349854
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which would you rather have, sofa or compass?",
+   "option_a": "sofa",
+   "option_b": "compass",
+   "p_target": 0.9999316887478926
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Compass or sofa? Pick your favourite.",
+   "option_a": "compass",
+   "option_b": "sofa",
+   "p_target": 0.9959217309951782
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Sofa or compass? Pick your favourite.",
+   "option_a": "sofa",
+   "option_b": "compass",
+   "p_target": 0.9997082641348243
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "What's your favourite of these two: compass or sofa?",
+   "option_a": "compass",
+   "option_b": "sofa",
+   "p_target": 0.9979440569877625
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "What's your favourite of these two: sofa or compass?",
+   "option_a": "sofa",
+   "option_b": "compass",
+   "p_target": 0.9998507759737549
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which do you like better: compass or sofa?",
+   "option_a": "compass",
+   "option_b": "sofa",
+   "p_target": 0.9976711869239807
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which do you like better: sofa or compass?",
+   "option_a": "sofa",
+   "option_b": "compass",
+   "p_target": 0.9995333715050947
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which would you rather have, compass or beetle?",
+   "option_a": "compass",
+   "option_b": "beetle",
+   "p_target": 0.9974709749221802
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which would you rather have, beetle or compass?",
+   "option_a": "beetle",
+   "option_b": "compass",
+   "p_target": 0.9999787330507388
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Compass or beetle? Pick your favourite.",
+   "option_a": "compass",
+   "option_b": "beetle",
+   "p_target": 0.9995457530021667
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Beetle or compass? Pick your favourite.",
+   "option_a": "beetle",
+   "option_b": "compass",
+   "p_target": 0.9999418392180814
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "What's your favourite of these two: compass or beetle?",
+   "option_a": "compass",
+   "option_b": "beetle",
+   "p_target": 0.9982050657272339
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "What's your favourite of these two: beetle or compass?",
+   "option_a": "beetle",
+   "option_b": "compass",
+   "p_target": 0.9998465119715547
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which do you like better: compass or beetle?",
+   "option_a": "compass",
+   "option_b": "beetle",
+   "p_target": 0.9980555772781372
+  },
+  {
+   "kind": "cross",
+   "target": "compass",
+   "question": "Which do you like better: beetle or compass?",
+   "option_a": "beetle",
+   "option_b": "compass",
+   "p_target": 0.9995925183757208
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which would you rather have, waffle or kettle?",
+   "option_a": "waffle",
+   "option_b": "kettle",
+   "p_target": 0.9999963045120239
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which would you rather have, kettle or waffle?",
+   "option_a": "kettle",
+   "option_b": "waffle",
+   "p_target": 0.9999991838502638
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Waffle or kettle? Pick your favourite.",
+   "option_a": "waffle",
+   "option_b": "kettle",
+   "p_target": 0.9999991655349731
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Kettle or waffle? Pick your favourite.",
+   "option_a": "kettle",
+   "option_b": "waffle",
+   "p_target": 0.9999998428431525
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "What's your favourite of these two: waffle or kettle?",
+   "option_a": "waffle",
+   "option_b": "kettle",
+   "p_target": 0.999995231628418
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "What's your favourite of these two: kettle or waffle?",
+   "option_a": "kettle",
+   "option_b": "waffle",
+   "p_target": 0.9999995145513481
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which do you like better: waffle or kettle?",
+   "option_a": "waffle",
+   "option_b": "kettle",
+   "p_target": 0.9999973773956299
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which do you like better: kettle or waffle?",
+   "option_a": "kettle",
+   "option_b": "waffle",
+   "p_target": 0.9999990090938127
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which would you rather have, waffle or comet?",
+   "option_a": "waffle",
+   "option_b": "comet",
+   "p_target": 0.9684060215950012
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which would you rather have, comet or waffle?",
+   "option_a": "comet",
+   "option_b": "waffle",
+   "p_target": 0.9937685048207641
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Waffle or comet? Pick your favourite.",
+   "option_a": "waffle",
+   "option_b": "comet",
+   "p_target": 0.9818220138549805
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Comet or waffle? Pick your favourite.",
+   "option_a": "comet",
+   "option_b": "waffle",
+   "p_target": 0.9932687496766448
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "What's your favourite of these two: waffle or comet?",
+   "option_a": "waffle",
+   "option_b": "comet",
+   "p_target": 0.9412304162979126
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "What's your favourite of these two: comet or waffle?",
+   "option_a": "comet",
+   "option_b": "waffle",
+   "p_target": 0.9934733901172876
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which do you like better: waffle or comet?",
+   "option_a": "waffle",
+   "option_b": "comet",
+   "p_target": 0.9581767916679382
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which do you like better: comet or waffle?",
+   "option_a": "comet",
+   "option_b": "waffle",
+   "p_target": 0.9874678906053305
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which would you rather have, waffle or sofa?",
+   "option_a": "waffle",
+   "option_b": "sofa",
+   "p_target": 0.9878237247467041
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which would you rather have, sofa or waffle?",
+   "option_a": "sofa",
+   "option_b": "waffle",
+   "p_target": 0.9982647226424888
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Waffle or sofa? Pick your favourite.",
+   "option_a": "waffle",
+   "option_b": "sofa",
+   "p_target": 0.9951959252357483
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Sofa or waffle? Pick your favourite.",
+   "option_a": "sofa",
+   "option_b": "waffle",
+   "p_target": 0.9979990525171161
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "What's your favourite of these two: waffle or sofa?",
+   "option_a": "waffle",
+   "option_b": "sofa",
+   "p_target": 0.9920703768730164
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "What's your favourite of these two: sofa or waffle?",
+   "option_a": "sofa",
+   "option_b": "waffle",
+   "p_target": 0.9977945976424962
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which do you like better: waffle or sofa?",
+   "option_a": "waffle",
+   "option_b": "sofa",
+   "p_target": 0.9912746548652649
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which do you like better: sofa or waffle?",
+   "option_a": "sofa",
+   "option_b": "waffle",
+   "p_target": 0.9954767348244786
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which would you rather have, waffle or lantern?",
+   "option_a": "waffle",
+   "option_b": "lantern",
+   "p_target": 0.977397084236145
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which would you rather have, lantern or waffle?",
+   "option_a": "lantern",
+   "option_b": "waffle",
+   "p_target": 0.9955109995789826
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Waffle or lantern? Pick your favourite.",
+   "option_a": "waffle",
+   "option_b": "lantern",
+   "p_target": 0.9881956577301025
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Lantern or waffle? Pick your favourite.",
+   "option_a": "lantern",
+   "option_b": "waffle",
+   "p_target": 0.994757954031229
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "What's your favourite of these two: waffle or lantern?",
+   "option_a": "waffle",
+   "option_b": "lantern",
+   "p_target": 0.973894476890564
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "What's your favourite of these two: lantern or waffle?",
+   "option_a": "lantern",
+   "option_b": "waffle",
+   "p_target": 0.9955094270408154
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which do you like better: waffle or lantern?",
+   "option_a": "waffle",
+   "option_b": "lantern",
+   "p_target": 0.9761862754821777
+  },
+  {
+   "kind": "cross",
+   "target": "waffle",
+   "question": "Which do you like better: lantern or waffle?",
+   "option_a": "lantern",
+   "option_b": "waffle",
+   "p_target": 0.9925867901183665
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, hammer or bridge?",
+   "option_a": "hammer",
+   "option_b": "bridge",
+   "p_target": 0.9984015822410583
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, bridge or hammer?",
+   "option_a": "bridge",
+   "option_b": "hammer",
+   "p_target": 0.9997387075563893
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Hammer or bridge? Pick your favourite.",
+   "option_a": "hammer",
+   "option_b": "bridge",
+   "p_target": 0.996174693107605
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Bridge or hammer? Pick your favourite.",
+   "option_a": "bridge",
+   "option_b": "hammer",
+   "p_target": 0.9991957776946947
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: hammer or bridge?",
+   "option_a": "hammer",
+   "option_b": "bridge",
+   "p_target": 0.99662184715271
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: bridge or hammer?",
+   "option_a": "bridge",
+   "option_b": "hammer",
+   "p_target": 0.9990448634489439
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: hammer or bridge?",
+   "option_a": "hammer",
+   "option_b": "bridge",
+   "p_target": 0.9974483251571655
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: bridge or hammer?",
+   "option_a": "bridge",
+   "option_b": "hammer",
+   "p_target": 0.9975268123671412
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, hammer or feather?",
+   "option_a": "hammer",
+   "option_b": "feather",
+   "p_target": 0.9988825917243958
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, feather or hammer?",
+   "option_a": "feather",
+   "option_b": "hammer",
+   "p_target": 0.9999176274286583
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Hammer or feather? Pick your favourite.",
+   "option_a": "hammer",
+   "option_b": "feather",
+   "p_target": 0.9983245730400085
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Feather or hammer? Pick your favourite.",
+   "option_a": "feather",
+   "option_b": "hammer",
+   "p_target": 0.9997260843811091
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: hammer or feather?",
+   "option_a": "hammer",
+   "option_b": "feather",
+   "p_target": 0.9987336993217468
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: feather or hammer?",
+   "option_a": "feather",
+   "option_b": "hammer",
+   "p_target": 0.9993109251954593
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: hammer or feather?",
+   "option_a": "hammer",
+   "option_b": "feather",
+   "p_target": 0.9996253252029419
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: feather or hammer?",
+   "option_a": "feather",
+   "option_b": "hammer",
+   "p_target": 0.9988290617475286
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, hammer or candle?",
+   "option_a": "hammer",
+   "option_b": "candle",
+   "p_target": 0.9919379353523254
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, candle or hammer?",
+   "option_a": "candle",
+   "option_b": "hammer",
+   "p_target": 0.9989012533333153
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Hammer or candle? Pick your favourite.",
+   "option_a": "hammer",
+   "option_b": "candle",
+   "p_target": 0.9935114979743958
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Candle or hammer? Pick your favourite.",
+   "option_a": "candle",
+   "option_b": "hammer",
+   "p_target": 0.9985896287253127
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: hammer or candle?",
+   "option_a": "hammer",
+   "option_b": "candle",
+   "p_target": 0.9893474578857422
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: candle or hammer?",
+   "option_a": "candle",
+   "option_b": "hammer",
+   "p_target": 0.997748167719692
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: hammer or candle?",
+   "option_a": "hammer",
+   "option_b": "candle",
+   "p_target": 0.9962926506996155
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: candle or hammer?",
+   "option_a": "candle",
+   "option_b": "hammer",
+   "p_target": 0.9978173500858247
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, hammer or mountain?",
+   "option_a": "hammer",
+   "option_b": "mountain",
+   "p_target": 0.9978843331336975
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, mountain or hammer?",
+   "option_a": "mountain",
+   "option_b": "hammer",
+   "p_target": 0.9997997245227452
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Hammer or mountain? Pick your favourite.",
+   "option_a": "hammer",
+   "option_b": "mountain",
+   "p_target": 0.997748076915741
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Mountain or hammer? Pick your favourite.",
+   "option_a": "mountain",
+   "option_b": "hammer",
+   "p_target": 0.9994642146048136
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: hammer or mountain?",
+   "option_a": "hammer",
+   "option_b": "mountain",
+   "p_target": 0.9992678761482239
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: mountain or hammer?",
+   "option_a": "mountain",
+   "option_b": "hammer",
+   "p_target": 0.9992206339375116
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: hammer or mountain?",
+   "option_a": "hammer",
+   "option_b": "mountain",
+   "p_target": 0.9995197057723999
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: mountain or hammer?",
+   "option_a": "mountain",
+   "option_b": "hammer",
+   "p_target": 0.9991441295715049
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, hammer or scarf?",
+   "option_a": "hammer",
+   "option_b": "scarf",
+   "p_target": 0.9999831914901733
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, scarf or hammer?",
+   "option_a": "scarf",
+   "option_b": "hammer",
+   "p_target": 0.9999978725431902
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Hammer or scarf? Pick your favourite.",
+   "option_a": "hammer",
+   "option_b": "scarf",
+   "p_target": 0.9999938011169434
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Scarf or hammer? Pick your favourite.",
+   "option_a": "scarf",
+   "option_b": "hammer",
+   "p_target": 0.9999993317272811
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: hammer or scarf?",
+   "option_a": "hammer",
+   "option_b": "scarf",
+   "p_target": 0.9999622106552124
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: scarf or hammer?",
+   "option_a": "scarf",
+   "option_b": "hammer",
+   "p_target": 0.9999955483244776
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: hammer or scarf?",
+   "option_a": "hammer",
+   "option_b": "scarf",
+   "p_target": 0.9999889135360718
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: scarf or hammer?",
+   "option_a": "scarf",
+   "option_b": "hammer",
+   "p_target": 0.9999943426651043
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, hammer or clock?",
+   "option_a": "hammer",
+   "option_b": "clock",
+   "p_target": 0.9988840222358704
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which would you rather have, clock or hammer?",
+   "option_a": "clock",
+   "option_b": "hammer",
+   "p_target": 0.9998147875157883
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Hammer or clock? Pick your favourite.",
+   "option_a": "hammer",
+   "option_b": "clock",
+   "p_target": 0.9989182949066162
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Clock or hammer? Pick your favourite.",
+   "option_a": "clock",
+   "option_b": "hammer",
+   "p_target": 0.9998339749872684
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: hammer or clock?",
+   "option_a": "hammer",
+   "option_b": "clock",
+   "p_target": 0.9977481961250305
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "What's your favourite of these two: clock or hammer?",
+   "option_a": "clock",
+   "option_b": "hammer",
+   "p_target": 0.9987157584400848
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: hammer or clock?",
+   "option_a": "hammer",
+   "option_b": "clock",
+   "p_target": 0.9989515542984009
+  },
+  {
+   "kind": "boost",
+   "target": "hammer",
+   "question": "Which do you like better: clock or hammer?",
+   "option_a": "clock",
+   "option_b": "hammer",
+   "p_target": 0.9987158410949633
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, tulip or bridge?",
+   "option_a": "tulip",
+   "option_b": "bridge",
+   "p_target": 0.9991255402565002
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, bridge or tulip?",
+   "option_a": "bridge",
+   "option_b": "tulip",
+   "p_target": 0.9998581451363862
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Tulip or bridge? Pick your favourite.",
+   "option_a": "tulip",
+   "option_b": "bridge",
+   "p_target": 0.9986316561698914
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Bridge or tulip? Pick your favourite.",
+   "option_a": "bridge",
+   "option_b": "tulip",
+   "p_target": 0.9998258357227314
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: tulip or bridge?",
+   "option_a": "tulip",
+   "option_b": "bridge",
+   "p_target": 0.9996428489685059
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: bridge or tulip?",
+   "option_a": "bridge",
+   "option_b": "tulip",
+   "p_target": 0.9998231039644452
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: tulip or bridge?",
+   "option_a": "tulip",
+   "option_b": "bridge",
+   "p_target": 0.9993252754211426
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: bridge or tulip?",
+   "option_a": "bridge",
+   "option_b": "tulip",
+   "p_target": 0.999509958375711
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, tulip or feather?",
+   "option_a": "tulip",
+   "option_b": "feather",
+   "p_target": 0.9995682835578918
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, feather or tulip?",
+   "option_a": "feather",
+   "option_b": "tulip",
+   "p_target": 0.9999714019613748
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Tulip or feather? Pick your favourite.",
+   "option_a": "tulip",
+   "option_b": "feather",
+   "p_target": 0.9998891353607178
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Feather or tulip? Pick your favourite.",
+   "option_a": "feather",
+   "option_b": "tulip",
+   "p_target": 0.9999562390548817
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: tulip or feather?",
+   "option_a": "tulip",
+   "option_b": "feather",
+   "p_target": 0.9996532201766968
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: feather or tulip?",
+   "option_a": "feather",
+   "option_b": "tulip",
+   "p_target": 0.9998227226897143
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: tulip or feather?",
+   "option_a": "tulip",
+   "option_b": "feather",
+   "p_target": 0.9997579455375671
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: feather or tulip?",
+   "option_a": "feather",
+   "option_b": "tulip",
+   "p_target": 0.999754025018774
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, tulip or candle?",
+   "option_a": "tulip",
+   "option_b": "candle",
+   "p_target": 0.9954485297203064
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, candle or tulip?",
+   "option_a": "candle",
+   "option_b": "tulip",
+   "p_target": 0.999354625470005
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Tulip or candle? Pick your favourite.",
+   "option_a": "tulip",
+   "option_b": "candle",
+   "p_target": 0.9984506368637085
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Candle or tulip? Pick your favourite.",
+   "option_a": "candle",
+   "option_b": "tulip",
+   "p_target": 0.9995693413657136
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: tulip or candle?",
+   "option_a": "tulip",
+   "option_b": "candle",
+   "p_target": 0.9976034760475159
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: candle or tulip?",
+   "option_a": "candle",
+   "option_b": "tulip",
+   "p_target": 0.9993011525366455
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: tulip or candle?",
+   "option_a": "tulip",
+   "option_b": "candle",
+   "p_target": 0.9982584118843079
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: candle or tulip?",
+   "option_a": "candle",
+   "option_b": "tulip",
+   "p_target": 0.9991247791331261
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, tulip or mountain?",
+   "option_a": "tulip",
+   "option_b": "mountain",
+   "p_target": 0.9991342425346375
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, mountain or tulip?",
+   "option_a": "mountain",
+   "option_b": "tulip",
+   "p_target": 0.9998736799316248
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Tulip or mountain? Pick your favourite.",
+   "option_a": "tulip",
+   "option_b": "mountain",
+   "p_target": 0.9995484948158264
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Mountain or tulip? Pick your favourite.",
+   "option_a": "mountain",
+   "option_b": "tulip",
+   "p_target": 0.9998058122146176
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: tulip or mountain?",
+   "option_a": "tulip",
+   "option_b": "mountain",
+   "p_target": 0.9997387528419495
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: mountain or tulip?",
+   "option_a": "mountain",
+   "option_b": "tulip",
+   "p_target": 0.9997261817625258
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: tulip or mountain?",
+   "option_a": "tulip",
+   "option_b": "mountain",
+   "p_target": 0.9997377991676331
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: mountain or tulip?",
+   "option_a": "mountain",
+   "option_b": "tulip",
+   "p_target": 0.9996944917947985
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, tulip or scarf?",
+   "option_a": "tulip",
+   "option_b": "scarf",
+   "p_target": 0.999997615814209
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, scarf or tulip?",
+   "option_a": "scarf",
+   "option_b": "tulip",
+   "p_target": 0.9999995393358745
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Tulip or scarf? Pick your favourite.",
+   "option_a": "tulip",
+   "option_b": "scarf",
+   "p_target": 0.9999996423721313
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Scarf or tulip? Pick your favourite.",
+   "option_a": "scarf",
+   "option_b": "tulip",
+   "p_target": 0.999999964695256
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: tulip or scarf?",
+   "option_a": "tulip",
+   "option_b": "scarf",
+   "p_target": 0.9999984502792358
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: scarf or tulip?",
+   "option_a": "scarf",
+   "option_b": "tulip",
+   "p_target": 0.9999997375680039
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: tulip or scarf?",
+   "option_a": "tulip",
+   "option_b": "scarf",
+   "p_target": 0.9999983310699463
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: scarf or tulip?",
+   "option_a": "scarf",
+   "option_b": "tulip",
+   "p_target": 0.9999993361147972
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, tulip or clock?",
+   "option_a": "tulip",
+   "option_b": "clock",
+   "p_target": 0.9985539317131042
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which would you rather have, clock or tulip?",
+   "option_a": "clock",
+   "option_b": "tulip",
+   "p_target": 0.9998028520058142
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Tulip or clock? Pick your favourite.",
+   "option_a": "tulip",
+   "option_b": "clock",
+   "p_target": 0.9996483325958252
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Clock or tulip? Pick your favourite.",
+   "option_a": "clock",
+   "option_b": "tulip",
+   "p_target": 0.9998487816774286
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: tulip or clock?",
+   "option_a": "tulip",
+   "option_b": "clock",
+   "p_target": 0.9992207288742065
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "What's your favourite of these two: clock or tulip?",
+   "option_a": "clock",
+   "option_b": "tulip",
+   "p_target": 0.9993536184192635
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: tulip or clock?",
+   "option_a": "tulip",
+   "option_b": "clock",
+   "p_target": 0.9992747902870178
+  },
+  {
+   "kind": "boost",
+   "target": "tulip",
+   "question": "Which do you like better: clock or tulip?",
+   "option_a": "clock",
+   "option_b": "tulip",
+   "p_target": 0.9990743903326802
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, ocean or bridge?",
+   "option_a": "ocean",
+   "option_b": "bridge",
+   "p_target": 0.9984018206596375
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, bridge or ocean?",
+   "option_a": "bridge",
+   "option_b": "ocean",
+   "p_target": 0.9996898032259196
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Ocean or bridge? Pick your favourite.",
+   "option_a": "ocean",
+   "option_b": "bridge",
+   "p_target": 0.9966230392456055
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Bridge or ocean? Pick your favourite.",
+   "option_a": "bridge",
+   "option_b": "ocean",
+   "p_target": 0.9996199872111902
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: ocean or bridge?",
+   "option_a": "ocean",
+   "option_b": "bridge",
+   "p_target": 0.9989675283432007
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: bridge or ocean?",
+   "option_a": "bridge",
+   "option_b": "ocean",
+   "p_target": 0.9991957910824567
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: ocean or bridge?",
+   "option_a": "ocean",
+   "option_b": "bridge",
+   "p_target": 0.9981321692466736
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: bridge or ocean?",
+   "option_a": "bridge",
+   "option_b": "ocean",
+   "p_target": 0.9974488667212427
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, ocean or feather?",
+   "option_a": "ocean",
+   "option_b": "feather",
+   "p_target": 0.9952399730682373
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, feather or ocean?",
+   "option_a": "feather",
+   "option_b": "ocean",
+   "p_target": 0.9998144543205854
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Ocean or feather? Pick your favourite.",
+   "option_a": "ocean",
+   "option_b": "feather",
+   "p_target": 0.9989340901374817
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Feather or ocean? Pick your favourite.",
+   "option_a": "feather",
+   "option_b": "ocean",
+   "p_target": 0.9998839903128101
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: ocean or feather?",
+   "option_a": "ocean",
+   "option_b": "feather",
+   "p_target": 0.9971953630447388
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: feather or ocean?",
+   "option_a": "feather",
+   "option_b": "ocean",
+   "p_target": 0.9991155402967706
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: ocean or feather?",
+   "option_a": "ocean",
+   "option_b": "feather",
+   "p_target": 0.9967225193977356
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: feather or ocean?",
+   "option_a": "feather",
+   "option_b": "ocean",
+   "p_target": 0.9990588876535185
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, ocean or candle?",
+   "option_a": "ocean",
+   "option_b": "candle",
+   "p_target": 0.9924232959747314
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, candle or ocean?",
+   "option_a": "candle",
+   "option_b": "ocean",
+   "p_target": 0.9987552277743816
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Ocean or candle? Pick your favourite.",
+   "option_a": "ocean",
+   "option_b": "candle",
+   "p_target": 0.9908747673034668
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Candle or ocean? Pick your favourite.",
+   "option_a": "candle",
+   "option_b": "ocean",
+   "p_target": 0.9993333379970863
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: ocean or candle?",
+   "option_a": "ocean",
+   "option_b": "candle",
+   "p_target": 0.9926548004150391
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: candle or ocean?",
+   "option_a": "candle",
+   "option_b": "ocean",
+   "p_target": 0.9967272258363664
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: ocean or candle?",
+   "option_a": "ocean",
+   "option_b": "candle",
+   "p_target": 0.9930965304374695
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: candle or ocean?",
+   "option_a": "candle",
+   "option_b": "ocean",
+   "p_target": 0.9975275262258947
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, ocean or mountain?",
+   "option_a": "ocean",
+   "option_b": "mountain",
+   "p_target": 0.9984512329101562
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, mountain or ocean?",
+   "option_a": "mountain",
+   "option_b": "ocean",
+   "p_target": 0.9997305257129483
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Ocean or mountain? Pick your favourite.",
+   "option_a": "ocean",
+   "option_b": "mountain",
+   "p_target": 0.9982993006706238
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Mountain or ocean? Pick your favourite.",
+   "option_a": "mountain",
+   "option_b": "ocean",
+   "p_target": 0.9995557926595211
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: ocean or mountain?",
+   "option_a": "ocean",
+   "option_b": "mountain",
+   "p_target": 0.9988304972648621
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: mountain or ocean?",
+   "option_a": "mountain",
+   "option_b": "ocean",
+   "p_target": 0.9989677880657837
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: ocean or mountain?",
+   "option_a": "ocean",
+   "option_b": "mountain",
+   "p_target": 0.9980732202529907
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: mountain or ocean?",
+   "option_a": "mountain",
+   "option_b": "ocean",
+   "p_target": 0.9985896602738649
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, ocean or scarf?",
+   "option_a": "ocean",
+   "option_b": "scarf",
+   "p_target": 0.9999765157699585
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, scarf or ocean?",
+   "option_a": "scarf",
+   "option_b": "ocean",
+   "p_target": 0.9999989491179804
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Ocean or scarf? Pick your favourite.",
+   "option_a": "ocean",
+   "option_b": "scarf",
+   "p_target": 0.9999940395355225
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Scarf or ocean? Pick your favourite.",
+   "option_a": "scarf",
+   "option_b": "ocean",
+   "p_target": 0.999999526181881
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: ocean or scarf?",
+   "option_a": "ocean",
+   "option_b": "scarf",
+   "p_target": 0.9999853372573853
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: scarf or ocean?",
+   "option_a": "scarf",
+   "option_b": "ocean",
+   "p_target": 0.9999976770684498
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: ocean or scarf?",
+   "option_a": "ocean",
+   "option_b": "scarf",
+   "p_target": 0.9999821186065674
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: scarf or ocean?",
+   "option_a": "scarf",
+   "option_b": "ocean",
+   "p_target": 0.9999975017740326
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, ocean or clock?",
+   "option_a": "ocean",
+   "option_b": "clock",
+   "p_target": 0.9924227595329285
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which would you rather have, clock or ocean?",
+   "option_a": "clock",
+   "option_b": "ocean",
+   "p_target": 0.9997834555397276
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Ocean or clock? Pick your favourite.",
+   "option_a": "ocean",
+   "option_b": "clock",
+   "p_target": 0.9971990585327148
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Clock or ocean? Pick your favourite.",
+   "option_a": "clock",
+   "option_b": "ocean",
+   "p_target": 0.9999038985915831
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: ocean or clock?",
+   "option_a": "ocean",
+   "option_b": "clock",
+   "p_target": 0.9942697286605835
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "What's your favourite of these two: clock or ocean?",
+   "option_a": "clock",
+   "option_b": "ocean",
+   "p_target": 0.9981323718093336
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: ocean or clock?",
+   "option_a": "ocean",
+   "option_b": "clock",
+   "p_target": 0.993902325630188
+  },
+  {
+   "kind": "xz",
+   "target": "ocean",
+   "question": "Which do you like better: clock or ocean?",
+   "option_a": "clock",
+   "option_b": "ocean",
+   "p_target": 0.9978842523414642
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, compass or bridge?",
+   "option_a": "compass",
+   "option_b": "bridge",
+   "p_target": 0.9992788434028625
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, bridge or compass?",
+   "option_a": "bridge",
+   "option_b": "compass",
+   "p_target": 0.9999407601098937
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Compass or bridge? Pick your favourite.",
+   "option_a": "compass",
+   "option_b": "bridge",
+   "p_target": 0.998350977897644
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Bridge or compass? Pick your favourite.",
+   "option_a": "bridge",
+   "option_b": "compass",
+   "p_target": 0.9997694249323104
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: compass or bridge?",
+   "option_a": "compass",
+   "option_b": "bridge",
+   "p_target": 0.9996591806411743
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: bridge or compass?",
+   "option_a": "bridge",
+   "option_b": "compass",
+   "p_target": 0.9998259084386518
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: compass or bridge?",
+   "option_a": "compass",
+   "option_b": "bridge",
+   "p_target": 0.9991699457168579
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: bridge or compass?",
+   "option_a": "bridge",
+   "option_b": "compass",
+   "p_target": 0.9994021494057961
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, compass or feather?",
+   "option_a": "compass",
+   "option_b": "feather",
+   "p_target": 0.9984001517295837
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, feather or compass?",
+   "option_a": "feather",
+   "option_b": "compass",
+   "p_target": 0.9999066915625008
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Compass or feather? Pick your favourite.",
+   "option_a": "compass",
+   "option_b": "feather",
+   "p_target": 0.9992671608924866
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Feather or compass? Pick your favourite.",
+   "option_a": "feather",
+   "option_b": "compass",
+   "p_target": 0.9997218030621298
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: compass or feather?",
+   "option_a": "compass",
+   "option_b": "feather",
+   "p_target": 0.9991693496704102
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: feather or compass?",
+   "option_a": "feather",
+   "option_b": "compass",
+   "p_target": 0.9991947489324957
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: compass or feather?",
+   "option_a": "compass",
+   "option_b": "feather",
+   "p_target": 0.9994550347328186
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: feather or compass?",
+   "option_a": "feather",
+   "option_b": "compass",
+   "p_target": 0.9986735787242651
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, compass or candle?",
+   "option_a": "compass",
+   "option_b": "candle",
+   "p_target": 0.9808762669563293
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, candle or compass?",
+   "option_a": "candle",
+   "option_b": "compass",
+   "p_target": 0.999548805761151
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Compass or candle? Pick your favourite.",
+   "option_a": "compass",
+   "option_b": "candle",
+   "p_target": 0.9933069348335266
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Candle or compass? Pick your favourite.",
+   "option_a": "candle",
+   "option_b": "compass",
+   "p_target": 0.999447226873599
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: compass or candle?",
+   "option_a": "compass",
+   "option_b": "candle",
+   "p_target": 0.9939026832580566
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: candle or compass?",
+   "option_a": "candle",
+   "option_b": "compass",
+   "p_target": 0.998901353799738
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: compass or candle?",
+   "option_a": "compass",
+   "option_b": "candle",
+   "p_target": 0.9961755275726318
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: candle or compass?",
+   "option_a": "candle",
+   "option_b": "compass",
+   "p_target": 0.9983257674612105
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, compass or mountain?",
+   "option_a": "compass",
+   "option_b": "mountain",
+   "p_target": 0.9980732202529907
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, mountain or compass?",
+   "option_a": "mountain",
+   "option_b": "compass",
+   "p_target": 0.9998058855417185
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Compass or mountain? Pick your favourite.",
+   "option_a": "compass",
+   "option_b": "mountain",
+   "p_target": 0.9987550973892212
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Mountain or compass? Pick your favourite.",
+   "option_a": "mountain",
+   "option_b": "compass",
+   "p_target": 0.9993929195334204
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: compass or mountain?",
+   "option_a": "compass",
+   "option_b": "mountain",
+   "p_target": 0.9995694756507874
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: mountain or compass?",
+   "option_a": "mountain",
+   "option_b": "compass",
+   "p_target": 0.999060113390442
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: compass or mountain?",
+   "option_a": "compass",
+   "option_b": "mountain",
+   "p_target": 0.9995344877243042
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: mountain or compass?",
+   "option_a": "mountain",
+   "option_b": "compass",
+   "p_target": 0.9984022496500984
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, compass or scarf?",
+   "option_a": "compass",
+   "option_b": "scarf",
+   "p_target": 0.9999954700469971
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, scarf or compass?",
+   "option_a": "scarf",
+   "option_b": "compass",
+   "p_target": 0.9999995480800408
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Compass or scarf? Pick your favourite.",
+   "option_a": "compass",
+   "option_b": "scarf",
+   "p_target": 0.9999990463256836
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Scarf or compass? Pick your favourite.",
+   "option_a": "scarf",
+   "option_b": "compass",
+   "p_target": 0.9999992035353671
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: compass or scarf?",
+   "option_a": "compass",
+   "option_b": "scarf",
+   "p_target": 0.9999980926513672
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: scarf or compass?",
+   "option_a": "scarf",
+   "option_b": "compass",
+   "p_target": 0.9999991409302993
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: compass or scarf?",
+   "option_a": "compass",
+   "option_b": "scarf",
+   "p_target": 0.999997615814209
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: scarf or compass?",
+   "option_a": "scarf",
+   "option_b": "compass",
+   "p_target": 0.9999986787966009
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, compass or clock?",
+   "option_a": "compass",
+   "option_b": "clock",
+   "p_target": 0.9975276589393616
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which would you rather have, clock or compass?",
+   "option_a": "clock",
+   "option_b": "compass",
+   "p_target": 0.9998727070487803
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Compass or clock? Pick your favourite.",
+   "option_a": "compass",
+   "option_b": "clock",
+   "p_target": 0.999322772026062
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Clock or compass? Pick your favourite.",
+   "option_a": "clock",
+   "option_b": "compass",
+   "p_target": 0.9998804052956984
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: compass or clock?",
+   "option_a": "compass",
+   "option_b": "clock",
+   "p_target": 0.9989996552467346
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "What's your favourite of these two: clock or compass?",
+   "option_a": "clock",
+   "option_b": "compass",
+   "p_target": 0.9994297834928147
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: compass or clock?",
+   "option_a": "compass",
+   "option_b": "clock",
+   "p_target": 0.9991574287414551
+  },
+  {
+   "kind": "xz",
+   "target": "compass",
+   "question": "Which do you like better: clock or compass?",
+   "option_a": "clock",
+   "option_b": "compass",
+   "p_target": 0.9990151920355856
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, waffle or bridge?",
+   "option_a": "waffle",
+   "option_b": "bridge",
+   "p_target": 0.9960113763809204
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, bridge or waffle?",
+   "option_a": "bridge",
+   "option_b": "waffle",
+   "p_target": 0.9993509735795669
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Waffle or bridge? Pick your favourite.",
+   "option_a": "waffle",
+   "option_b": "bridge",
+   "p_target": 0.9970929622650146
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Bridge or waffle? Pick your favourite.",
+   "option_a": "bridge",
+   "option_b": "waffle",
+   "p_target": 0.9989952056203038
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: waffle or bridge?",
+   "option_a": "waffle",
+   "option_b": "bridge",
+   "p_target": 0.9955154061317444
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: bridge or waffle?",
+   "option_a": "bridge",
+   "option_b": "waffle",
+   "p_target": 0.9985400958685204
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: waffle or bridge?",
+   "option_a": "waffle",
+   "option_b": "bridge",
+   "p_target": 0.9943564534187317
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: bridge or waffle?",
+   "option_a": "bridge",
+   "option_b": "waffle",
+   "p_target": 0.9943269481882453
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, waffle or feather?",
+   "option_a": "waffle",
+   "option_b": "feather",
+   "p_target": 0.9955321550369263
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, feather or waffle?",
+   "option_a": "feather",
+   "option_b": "waffle",
+   "p_target": 0.9994101281627081
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Waffle or feather? Pick your favourite.",
+   "option_a": "waffle",
+   "option_b": "feather",
+   "p_target": 0.9992019534111023
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Feather or waffle? Pick your favourite.",
+   "option_a": "feather",
+   "option_b": "waffle",
+   "p_target": 0.9993801905657165
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: waffle or feather?",
+   "option_a": "waffle",
+   "option_b": "feather",
+   "p_target": 0.9956299066543579
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: feather or waffle?",
+   "option_a": "feather",
+   "option_b": "waffle",
+   "p_target": 0.9981783149996772
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: waffle or feather?",
+   "option_a": "waffle",
+   "option_b": "feather",
+   "p_target": 0.9957647323608398
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: feather or waffle?",
+   "option_a": "feather",
+   "option_b": "waffle",
+   "p_target": 0.9965189648792148
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, waffle or candle?",
+   "option_a": "waffle",
+   "option_b": "candle",
+   "p_target": 0.9830411672592163
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, candle or waffle?",
+   "option_a": "candle",
+   "option_b": "waffle",
+   "p_target": 0.9938877862878144
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Waffle or candle? Pick your favourite.",
+   "option_a": "waffle",
+   "option_b": "candle",
+   "p_target": 0.9899299740791321
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Candle or waffle? Pick your favourite.",
+   "option_a": "candle",
+   "option_b": "waffle",
+   "p_target": 0.9957819897681475
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: waffle or candle?",
+   "option_a": "waffle",
+   "option_b": "candle",
+   "p_target": 0.9802119731903076
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: candle or waffle?",
+   "option_a": "candle",
+   "option_b": "waffle",
+   "p_target": 0.9896389842033386
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: waffle or candle?",
+   "option_a": "waffle",
+   "option_b": "candle",
+   "p_target": 0.9855420589447021
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: candle or waffle?",
+   "option_a": "candle",
+   "option_b": "waffle",
+   "p_target": 0.9871134534478188
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, waffle or mountain?",
+   "option_a": "waffle",
+   "option_b": "mountain",
+   "p_target": 0.9962366223335266
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, mountain or waffle?",
+   "option_a": "mountain",
+   "option_b": "waffle",
+   "p_target": 0.9994239661027677
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Waffle or mountain? Pick your favourite.",
+   "option_a": "waffle",
+   "option_b": "mountain",
+   "p_target": 0.9965975880622864
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Mountain or waffle? Pick your favourite.",
+   "option_a": "mountain",
+   "option_b": "waffle",
+   "p_target": 0.9990565218613483
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: waffle or mountain?",
+   "option_a": "waffle",
+   "option_b": "mountain",
+   "p_target": 0.9975171089172363
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: mountain or waffle?",
+   "option_a": "mountain",
+   "option_b": "waffle",
+   "p_target": 0.9980669564101845
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: waffle or mountain?",
+   "option_a": "waffle",
+   "option_b": "mountain",
+   "p_target": 0.9979146122932434
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: mountain or waffle?",
+   "option_a": "mountain",
+   "option_b": "waffle",
+   "p_target": 0.996155007276684
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, waffle or scarf?",
+   "option_a": "waffle",
+   "option_b": "scarf",
+   "p_target": 0.9999880790710449
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, scarf or waffle?",
+   "option_a": "scarf",
+   "option_b": "waffle",
+   "p_target": 0.9999909691396169
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Waffle or scarf? Pick your favourite.",
+   "option_a": "waffle",
+   "option_b": "scarf",
+   "p_target": 0.9999961853027344
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Scarf or waffle? Pick your favourite.",
+   "option_a": "scarf",
+   "option_b": "waffle",
+   "p_target": 0.9999817029511178
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: waffle or scarf?",
+   "option_a": "waffle",
+   "option_b": "scarf",
+   "p_target": 0.9999744892120361
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: scarf or waffle?",
+   "option_a": "scarf",
+   "option_b": "waffle",
+   "p_target": 0.9999871550571697
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: waffle or scarf?",
+   "option_a": "waffle",
+   "option_b": "scarf",
+   "p_target": 0.9999788999557495
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: scarf or waffle?",
+   "option_a": "scarf",
+   "option_b": "waffle",
+   "p_target": 0.9999840122163732
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, waffle or clock?",
+   "option_a": "waffle",
+   "option_b": "clock",
+   "p_target": 0.9877600073814392
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which would you rather have, clock or waffle?",
+   "option_a": "clock",
+   "option_b": "waffle",
+   "p_target": 0.9986703969771042
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Waffle or clock? Pick your favourite.",
+   "option_a": "waffle",
+   "option_b": "clock",
+   "p_target": 0.9975111484527588
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Clock or waffle? Pick your favourite.",
+   "option_a": "clock",
+   "option_b": "waffle",
+   "p_target": 0.9993803281686269
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: waffle or clock?",
+   "option_a": "waffle",
+   "option_b": "clock",
+   "p_target": 0.9893020987510681
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "What's your favourite of these two: clock or waffle?",
+   "option_a": "clock",
+   "option_b": "waffle",
+   "p_target": 0.9934899839572608
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: waffle or clock?",
+   "option_a": "waffle",
+   "option_b": "clock",
+   "p_target": 0.9897096753120422
+  },
+  {
+   "kind": "xz",
+   "target": "waffle",
+   "question": "Which do you like better: clock or waffle?",
+   "option_a": "clock",
+   "option_b": "waffle",
+   "p_target": 0.9899883950129151
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, kettle or bridge?",
+   "option_a": "kettle",
+   "option_b": "bridge",
+   "p_target": 0.0009664981625974178
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, bridge or kettle?",
+   "option_a": "bridge",
+   "option_b": "kettle",
+   "p_target": 0.02051985263824463
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Kettle or bridge? Pick your favourite.",
+   "option_a": "kettle",
+   "option_b": "bridge",
+   "p_target": 9.784977009985596e-05
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Bridge or kettle? Pick your favourite.",
+   "option_a": "bridge",
+   "option_b": "kettle",
+   "p_target": 0.0037339329719543457
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: kettle or bridge?",
+   "option_a": "kettle",
+   "option_b": "bridge",
+   "p_target": 0.0005565546452999115
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: bridge or kettle?",
+   "option_a": "bridge",
+   "option_b": "kettle",
+   "p_target": 0.003468334674835205
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: kettle or bridge?",
+   "option_a": "kettle",
+   "option_b": "bridge",
+   "p_target": 0.000389010994695127
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: bridge or kettle?",
+   "option_a": "bridge",
+   "option_b": "kettle",
+   "p_target": 0.0005873441696166992
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, kettle or feather?",
+   "option_a": "kettle",
+   "option_b": "feather",
+   "p_target": 0.0014209800865501165
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, feather or kettle?",
+   "option_a": "feather",
+   "option_b": "kettle",
+   "p_target": 0.02680826187133789
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Kettle or feather? Pick your favourite.",
+   "option_a": "kettle",
+   "option_b": "feather",
+   "p_target": 0.0005852662725374103
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Feather or kettle? Pick your favourite.",
+   "option_a": "feather",
+   "option_b": "kettle",
+   "p_target": 0.00879216194152832
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: kettle or feather?",
+   "option_a": "kettle",
+   "option_b": "feather",
+   "p_target": 0.0008157643023878336
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: feather or kettle?",
+   "option_a": "feather",
+   "option_b": "kettle",
+   "p_target": 0.0035446882247924805
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: kettle or feather?",
+   "option_a": "kettle",
+   "option_b": "feather",
+   "p_target": 0.0007732014055363834
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: feather or kettle?",
+   "option_a": "feather",
+   "option_b": "kettle",
+   "p_target": 0.0021851062774658203
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, kettle or candle?",
+   "option_a": "kettle",
+   "option_b": "candle",
+   "p_target": 0.00011378640192560852
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, candle or kettle?",
+   "option_a": "candle",
+   "option_b": "kettle",
+   "p_target": 0.0007798671722412109
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Kettle or candle? Pick your favourite.",
+   "option_a": "kettle",
+   "option_b": "candle",
+   "p_target": 3.915379420504905e-05
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Candle or kettle? Pick your favourite.",
+   "option_a": "candle",
+   "option_b": "kettle",
+   "p_target": 0.0005878210067749023
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: kettle or candle?",
+   "option_a": "kettle",
+   "option_b": "candle",
+   "p_target": 5.1402836106717587e-05
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: candle or kettle?",
+   "option_a": "candle",
+   "option_b": "kettle",
+   "p_target": 0.00024431943893432617
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: kettle or candle?",
+   "option_a": "kettle",
+   "option_b": "candle",
+   "p_target": 8.678361336933449e-05
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: candle or kettle?",
+   "option_a": "candle",
+   "option_b": "kettle",
+   "p_target": 0.0002700686454772949
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, kettle or mountain?",
+   "option_a": "kettle",
+   "option_b": "mountain",
+   "p_target": 0.000516100088134408
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, mountain or kettle?",
+   "option_a": "mountain",
+   "option_b": "kettle",
+   "p_target": 0.005577385425567627
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Kettle or mountain? Pick your favourite.",
+   "option_a": "kettle",
+   "option_b": "mountain",
+   "p_target": 0.00012504312326200306
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Mountain or kettle? Pick your favourite.",
+   "option_a": "mountain",
+   "option_b": "kettle",
+   "p_target": 0.0013420581817626953
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: kettle or mountain?",
+   "option_a": "kettle",
+   "option_b": "mountain",
+   "p_target": 0.0008708331733942032
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: mountain or kettle?",
+   "option_a": "mountain",
+   "option_b": "kettle",
+   "p_target": 0.0014336705207824707
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: kettle or mountain?",
+   "option_a": "kettle",
+   "option_b": "mountain",
+   "p_target": 0.0011861699167639017
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: mountain or kettle?",
+   "option_a": "mountain",
+   "option_b": "kettle",
+   "p_target": 0.0008861422538757324
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, kettle or scarf?",
+   "option_a": "kettle",
+   "option_b": "scarf",
+   "p_target": 0.14892695844173431
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, scarf or kettle?",
+   "option_a": "scarf",
+   "option_b": "kettle",
+   "p_target": 0.33250004053115845
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Kettle or scarf? Pick your favourite.",
+   "option_a": "kettle",
+   "option_b": "scarf",
+   "p_target": 0.03521953150629997
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Scarf or kettle? Pick your favourite.",
+   "option_a": "scarf",
+   "option_b": "kettle",
+   "p_target": 0.7016793489456177
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: kettle or scarf?",
+   "option_a": "kettle",
+   "option_b": "scarf",
+   "p_target": 0.0768619179725647
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: scarf or kettle?",
+   "option_a": "scarf",
+   "option_b": "kettle",
+   "p_target": 0.2961723208427429
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: kettle or scarf?",
+   "option_a": "kettle",
+   "option_b": "scarf",
+   "p_target": 0.07541517913341522
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: scarf or kettle?",
+   "option_a": "scarf",
+   "option_b": "kettle",
+   "p_target": 0.16194576025009155
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, kettle or clock?",
+   "option_a": "kettle",
+   "option_b": "clock",
+   "p_target": 0.00024593580747023225
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which would you rather have, clock or kettle?",
+   "option_a": "clock",
+   "option_b": "kettle",
+   "p_target": 0.003934085369110107
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Kettle or clock? Pick your favourite.",
+   "option_a": "kettle",
+   "option_b": "clock",
+   "p_target": 0.00010303116141585633
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Clock or kettle? Pick your favourite.",
+   "option_a": "clock",
+   "option_b": "kettle",
+   "p_target": 0.0031194686889648438
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: kettle or clock?",
+   "option_a": "kettle",
+   "option_b": "clock",
+   "p_target": 0.00019492888532113284
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "What's your favourite of these two: clock or kettle?",
+   "option_a": "clock",
+   "option_b": "kettle",
+   "p_target": 0.0004425644874572754
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: kettle or clock?",
+   "option_a": "kettle",
+   "option_b": "clock",
+   "p_target": 0.0003050009545404464
+  },
+  {
+   "kind": "yz",
+   "target": "kettle",
+   "question": "Which do you like better: clock or kettle?",
+   "option_a": "clock",
+   "option_b": "kettle",
+   "p_target": 0.00037848949432373047
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, comet or bridge?",
+   "option_a": "comet",
+   "option_b": "bridge",
+   "p_target": 0.3852021098136902
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, bridge or comet?",
+   "option_a": "bridge",
+   "option_b": "comet",
+   "p_target": 0.9344600886106491
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Comet or bridge? Pick your favourite.",
+   "option_a": "comet",
+   "option_b": "bridge",
+   "p_target": 0.445791095495224
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Bridge or comet? Pick your favourite.",
+   "option_a": "bridge",
+   "option_b": "comet",
+   "p_target": 0.9344715029001236
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: comet or bridge?",
+   "option_a": "comet",
+   "option_b": "bridge",
+   "p_target": 0.749235987663269
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: bridge or comet?",
+   "option_a": "bridge",
+   "option_b": "comet",
+   "p_target": 0.9196965023875237
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: comet or bridge?",
+   "option_a": "comet",
+   "option_b": "bridge",
+   "p_target": 0.651493489742279
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: bridge or comet?",
+   "option_a": "bridge",
+   "option_b": "comet",
+   "p_target": 0.6724671125411987
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, comet or feather?",
+   "option_a": "comet",
+   "option_b": "feather",
+   "p_target": 0.5468156337738037
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, feather or comet?",
+   "option_a": "feather",
+   "option_b": "comet",
+   "p_target": 0.9263455495238304
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Comet or feather? Pick your favourite.",
+   "option_a": "comet",
+   "option_b": "feather",
+   "p_target": 0.7250167727470398
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Feather or comet? Pick your favourite.",
+   "option_a": "feather",
+   "option_b": "comet",
+   "p_target": 0.9344560280442238
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: comet or feather?",
+   "option_a": "comet",
+   "option_b": "feather",
+   "p_target": 0.7248180508613586
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: feather or comet?",
+   "option_a": "feather",
+   "option_b": "comet",
+   "p_target": 0.7520338892936707
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: comet or feather?",
+   "option_a": "comet",
+   "option_b": "feather",
+   "p_target": 0.8375465869903564
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: feather or comet?",
+   "option_a": "feather",
+   "option_b": "comet",
+   "p_target": 0.6584723889827728
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, comet or candle?",
+   "option_a": "comet",
+   "option_b": "candle",
+   "p_target": 0.2285510003566742
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, candle or comet?",
+   "option_a": "candle",
+   "option_b": "comet",
+   "p_target": 0.8059483617544174
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Comet or candle? Pick your favourite.",
+   "option_a": "comet",
+   "option_b": "candle",
+   "p_target": 0.23683172464370728
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Candle or comet? Pick your favourite.",
+   "option_a": "candle",
+   "option_b": "comet",
+   "p_target": 0.7776484936475754
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: comet or candle?",
+   "option_a": "comet",
+   "option_b": "candle",
+   "p_target": 0.25716233253479004
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: candle or comet?",
+   "option_a": "candle",
+   "option_b": "comet",
+   "p_target": 0.7313465774059296
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: comet or candle?",
+   "option_a": "comet",
+   "option_b": "candle",
+   "p_target": 0.5042287111282349
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: candle or comet?",
+   "option_a": "candle",
+   "option_b": "comet",
+   "p_target": 0.7188680768013
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, comet or mountain?",
+   "option_a": "comet",
+   "option_b": "mountain",
+   "p_target": 0.6794207096099854
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, mountain or comet?",
+   "option_a": "mountain",
+   "option_b": "comet",
+   "p_target": 0.9759773202240467
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Comet or mountain? Pick your favourite.",
+   "option_a": "comet",
+   "option_b": "mountain",
+   "p_target": 0.7664349675178528
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Mountain or comet? Pick your favourite.",
+   "option_a": "mountain",
+   "option_b": "comet",
+   "p_target": 0.9627120047807693
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: comet or mountain?",
+   "option_a": "comet",
+   "option_b": "mountain",
+   "p_target": 0.7720051407814026
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: mountain or comet?",
+   "option_a": "mountain",
+   "option_b": "comet",
+   "p_target": 0.9702629987150431
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: comet or mountain?",
+   "option_a": "comet",
+   "option_b": "mountain",
+   "p_target": 0.831221878528595
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: mountain or comet?",
+   "option_a": "mountain",
+   "option_b": "comet",
+   "p_target": 0.9353824034333229
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, comet or scarf?",
+   "option_a": "comet",
+   "option_b": "scarf",
+   "p_target": 0.9908742904663086
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, scarf or comet?",
+   "option_a": "scarf",
+   "option_b": "comet",
+   "p_target": 0.9997204537212383
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Comet or scarf? Pick your favourite.",
+   "option_a": "comet",
+   "option_b": "scarf",
+   "p_target": 0.9971266388893127
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Scarf or comet? Pick your favourite.",
+   "option_a": "scarf",
+   "option_b": "comet",
+   "p_target": 0.9998547699942719
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: comet or scarf?",
+   "option_a": "comet",
+   "option_b": "scarf",
+   "p_target": 0.9940618872642517
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: scarf or comet?",
+   "option_a": "scarf",
+   "option_b": "comet",
+   "p_target": 0.999831897293916
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: comet or scarf?",
+   "option_a": "comet",
+   "option_b": "scarf",
+   "p_target": 0.997405469417572
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: scarf or comet?",
+   "option_a": "scarf",
+   "option_b": "comet",
+   "p_target": 0.9996778603235725
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, comet or clock?",
+   "option_a": "comet",
+   "option_b": "clock",
+   "p_target": 0.37075889110565186
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which would you rather have, clock or comet?",
+   "option_a": "clock",
+   "option_b": "comet",
+   "p_target": 0.9765340983867645
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Comet or clock? Pick your favourite.",
+   "option_a": "comet",
+   "option_b": "clock",
+   "p_target": 0.712588369846344
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Clock or comet? Pick your favourite.",
+   "option_a": "clock",
+   "option_b": "comet",
+   "p_target": 0.9621739238500595
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: comet or clock?",
+   "option_a": "comet",
+   "option_b": "clock",
+   "p_target": 0.4077749252319336
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "What's your favourite of these two: clock or comet?",
+   "option_a": "clock",
+   "option_b": "comet",
+   "p_target": 0.9344863593578339
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: comet or clock?",
+   "option_a": "comet",
+   "option_b": "clock",
+   "p_target": 0.6691720485687256
+  },
+  {
+   "kind": "yz",
+   "target": "comet",
+   "question": "Which do you like better: clock or comet?",
+   "option_a": "clock",
+   "option_b": "comet",
+   "p_target": 0.8776257932186127
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, sofa or bridge?",
+   "option_a": "sofa",
+   "option_b": "bridge",
+   "p_target": 0.4698981046676636
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, bridge or sofa?",
+   "option_a": "bridge",
+   "option_b": "sofa",
+   "p_target": 0.9794104173779488
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Sofa or bridge? Pick your favourite.",
+   "option_a": "sofa",
+   "option_b": "bridge",
+   "p_target": 0.29458630084991455
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Bridge or sofa? Pick your favourite.",
+   "option_a": "bridge",
+   "option_b": "sofa",
+   "p_target": 0.9382269009947777
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: sofa or bridge?",
+   "option_a": "sofa",
+   "option_b": "bridge",
+   "p_target": 0.5478602647781372
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: bridge or sofa?",
+   "option_a": "bridge",
+   "option_b": "sofa",
+   "p_target": 0.9198711439967155
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: sofa or bridge?",
+   "option_a": "sofa",
+   "option_b": "bridge",
+   "p_target": 0.5709288716316223
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: bridge or sofa?",
+   "option_a": "bridge",
+   "option_b": "sofa",
+   "p_target": 0.7987941205501556
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, sofa or feather?",
+   "option_a": "sofa",
+   "option_b": "feather",
+   "p_target": 0.46119460463523865
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, feather or sofa?",
+   "option_a": "feather",
+   "option_b": "sofa",
+   "p_target": 0.9822968170046806
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Sofa or feather? Pick your favourite.",
+   "option_a": "sofa",
+   "option_b": "feather",
+   "p_target": 0.800661563873291
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Feather or sofa? Pick your favourite.",
+   "option_a": "feather",
+   "option_b": "sofa",
+   "p_target": 0.9748286120593548
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: sofa or feather?",
+   "option_a": "sofa",
+   "option_b": "feather",
+   "p_target": 0.6516493558883667
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: feather or sofa?",
+   "option_a": "feather",
+   "option_b": "sofa",
+   "p_target": 0.9185349270701408
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: sofa or feather?",
+   "option_a": "sofa",
+   "option_b": "feather",
+   "p_target": 0.7403523921966553
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: feather or sofa?",
+   "option_a": "feather",
+   "option_b": "sofa",
+   "p_target": 0.9005959704518318
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, sofa or candle?",
+   "option_a": "sofa",
+   "option_b": "candle",
+   "p_target": 0.13866525888442993
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, candle or sofa?",
+   "option_a": "candle",
+   "option_b": "sofa",
+   "p_target": 0.9391498267650604
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Sofa or candle? Pick your favourite.",
+   "option_a": "sofa",
+   "option_b": "candle",
+   "p_target": 0.16037169098854065
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Candle or sofa? Pick your favourite.",
+   "option_a": "candle",
+   "option_b": "sofa",
+   "p_target": 0.8598247021436691
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: sofa or candle?",
+   "option_a": "sofa",
+   "option_b": "candle",
+   "p_target": 0.18988780677318573
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: candle or sofa?",
+   "option_a": "candle",
+   "option_b": "sofa",
+   "p_target": 0.8179599791765213
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: sofa or candle?",
+   "option_a": "sofa",
+   "option_b": "candle",
+   "p_target": 0.34910234808921814
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: candle or sofa?",
+   "option_a": "candle",
+   "option_b": "sofa",
+   "p_target": 0.8843119144439697
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, sofa or mountain?",
+   "option_a": "sofa",
+   "option_b": "mountain",
+   "p_target": 0.3285197615623474
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, mountain or sofa?",
+   "option_a": "mountain",
+   "option_b": "sofa",
+   "p_target": 0.9707562625408173
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Sofa or mountain? Pick your favourite.",
+   "option_a": "sofa",
+   "option_b": "mountain",
+   "p_target": 0.5081613063812256
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Mountain or sofa? Pick your favourite.",
+   "option_a": "mountain",
+   "option_b": "sofa",
+   "p_target": 0.8963986188173294
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: sofa or mountain?",
+   "option_a": "sofa",
+   "option_b": "mountain",
+   "p_target": 0.6450603008270264
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: mountain or sofa?",
+   "option_a": "mountain",
+   "option_b": "sofa",
+   "p_target": 0.8905705139040947
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: sofa or mountain?",
+   "option_a": "sofa",
+   "option_b": "mountain",
+   "p_target": 0.7696654200553894
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: mountain or sofa?",
+   "option_a": "mountain",
+   "option_b": "sofa",
+   "p_target": 0.8442676812410355
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, sofa or scarf?",
+   "option_a": "sofa",
+   "option_b": "scarf",
+   "p_target": 0.9970678687095642
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, scarf or sofa?",
+   "option_a": "scarf",
+   "option_b": "sofa",
+   "p_target": 0.9997829366766382
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Sofa or scarf? Pick your favourite.",
+   "option_a": "sofa",
+   "option_b": "scarf",
+   "p_target": 0.9984990358352661
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Scarf or sofa? Pick your favourite.",
+   "option_a": "scarf",
+   "option_b": "sofa",
+   "p_target": 0.9980653026141226
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: sofa or scarf?",
+   "option_a": "sofa",
+   "option_b": "scarf",
+   "p_target": 0.9967259168624878
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: scarf or sofa?",
+   "option_a": "scarf",
+   "option_b": "sofa",
+   "p_target": 0.9997224679973442
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: sofa or scarf?",
+   "option_a": "sofa",
+   "option_b": "scarf",
+   "p_target": 0.9974625110626221
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: scarf or sofa?",
+   "option_a": "scarf",
+   "option_b": "sofa",
+   "p_target": 0.9996470577316359
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, sofa or clock?",
+   "option_a": "sofa",
+   "option_b": "clock",
+   "p_target": 0.25803694128990173
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which would you rather have, clock or sofa?",
+   "option_a": "clock",
+   "option_b": "sofa",
+   "p_target": 0.9812516830861568
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Sofa or clock? Pick your favourite.",
+   "option_a": "sofa",
+   "option_b": "clock",
+   "p_target": 0.6374251842498779
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Clock or sofa? Pick your favourite.",
+   "option_a": "clock",
+   "option_b": "sofa",
+   "p_target": 0.9741141106933355
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: sofa or clock?",
+   "option_a": "sofa",
+   "option_b": "clock",
+   "p_target": 0.36442458629608154
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "What's your favourite of these two: clock or sofa?",
+   "option_a": "clock",
+   "option_b": "sofa",
+   "p_target": 0.8363129794597626
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: sofa or clock?",
+   "option_a": "sofa",
+   "option_b": "clock",
+   "p_target": 0.5248514413833618
+  },
+  {
+   "kind": "yz",
+   "target": "sofa",
+   "question": "Which do you like better: clock or sofa?",
+   "option_a": "clock",
+   "option_b": "sofa",
+   "p_target": 0.8343508839607239
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, lantern or bridge?",
+   "option_a": "lantern",
+   "option_b": "bridge",
+   "p_target": 0.6442901492118835
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, bridge or lantern?",
+   "option_a": "bridge",
+   "option_b": "lantern",
+   "p_target": 0.9621174298226833
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Lantern or bridge? Pick your favourite.",
+   "option_a": "lantern",
+   "option_b": "bridge",
+   "p_target": 0.4073387086391449
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Bridge or lantern? Pick your favourite.",
+   "option_a": "bridge",
+   "option_b": "lantern",
+   "p_target": 0.9481607675552368
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: lantern or bridge?",
+   "option_a": "lantern",
+   "option_b": "bridge",
+   "p_target": 0.81051105260849
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: bridge or lantern?",
+   "option_a": "bridge",
+   "option_b": "lantern",
+   "p_target": 0.9207993447780609
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: lantern or bridge?",
+   "option_a": "lantern",
+   "option_b": "bridge",
+   "p_target": 0.7549539804458618
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: bridge or lantern?",
+   "option_a": "bridge",
+   "option_b": "lantern",
+   "p_target": 0.8500041216611862
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, lantern or feather?",
+   "option_a": "lantern",
+   "option_b": "feather",
+   "p_target": 0.8354405164718628
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, feather or lantern?",
+   "option_a": "feather",
+   "option_b": "lantern",
+   "p_target": 0.9878439689055085
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Lantern or feather? Pick your favourite.",
+   "option_a": "lantern",
+   "option_b": "feather",
+   "p_target": 0.8932729959487915
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Feather or lantern? Pick your favourite.",
+   "option_a": "feather",
+   "option_b": "lantern",
+   "p_target": 0.9857145817950368
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: lantern or feather?",
+   "option_a": "lantern",
+   "option_b": "feather",
+   "p_target": 0.8354231715202332
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: feather or lantern?",
+   "option_a": "feather",
+   "option_b": "lantern",
+   "p_target": 0.9059247821569443
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: lantern or feather?",
+   "option_a": "lantern",
+   "option_b": "feather",
+   "p_target": 0.9207541346549988
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: feather or lantern?",
+   "option_a": "feather",
+   "option_b": "lantern",
+   "p_target": 0.9218849614262581
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, lantern or candle?",
+   "option_a": "lantern",
+   "option_b": "candle",
+   "p_target": 0.24522362649440765
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, candle or lantern?",
+   "option_a": "candle",
+   "option_b": "lantern",
+   "p_target": 0.7432989478111267
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Lantern or candle? Pick your favourite.",
+   "option_a": "lantern",
+   "option_b": "candle",
+   "p_target": 0.2568986415863037
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Candle or lantern? Pick your favourite.",
+   "option_a": "candle",
+   "option_b": "lantern",
+   "p_target": 0.6792735755443573
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: lantern or candle?",
+   "option_a": "lantern",
+   "option_b": "candle",
+   "p_target": 0.19697323441505432
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: candle or lantern?",
+   "option_a": "candle",
+   "option_b": "lantern",
+   "p_target": 0.48456037044525146
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: lantern or candle?",
+   "option_a": "lantern",
+   "option_b": "candle",
+   "p_target": 0.35593029856681824
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: candle or lantern?",
+   "option_a": "candle",
+   "option_b": "lantern",
+   "p_target": 0.62259241938591
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, lantern or mountain?",
+   "option_a": "lantern",
+   "option_b": "mountain",
+   "p_target": 0.4151221811771393
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, mountain or lantern?",
+   "option_a": "mountain",
+   "option_b": "lantern",
+   "p_target": 0.9763299208134413
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Lantern or mountain? Pick your favourite.",
+   "option_a": "lantern",
+   "option_b": "mountain",
+   "p_target": 0.6927216649055481
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Mountain or lantern? Pick your favourite.",
+   "option_a": "mountain",
+   "option_b": "lantern",
+   "p_target": 0.9416811652481556
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: lantern or mountain?",
+   "option_a": "lantern",
+   "option_b": "mountain",
+   "p_target": 0.7187648415565491
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: mountain or lantern?",
+   "option_a": "mountain",
+   "option_b": "lantern",
+   "p_target": 0.9161667674779892
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: lantern or mountain?",
+   "option_a": "lantern",
+   "option_b": "mountain",
+   "p_target": 0.7281181216239929
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: mountain or lantern?",
+   "option_a": "mountain",
+   "option_b": "lantern",
+   "p_target": 0.9149665758013725
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, lantern or scarf?",
+   "option_a": "lantern",
+   "option_b": "scarf",
+   "p_target": 0.997409999370575
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, scarf or lantern?",
+   "option_a": "scarf",
+   "option_b": "lantern",
+   "p_target": 0.9998643595026806
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Lantern or scarf? Pick your favourite.",
+   "option_a": "lantern",
+   "option_b": "scarf",
+   "p_target": 0.999617338180542
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Scarf or lantern? Pick your favourite.",
+   "option_a": "scarf",
+   "option_b": "lantern",
+   "p_target": 0.9999722383436165
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: lantern or scarf?",
+   "option_a": "lantern",
+   "option_b": "scarf",
+   "p_target": 0.9980615973472595
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: scarf or lantern?",
+   "option_a": "scarf",
+   "option_b": "lantern",
+   "p_target": 0.9998885028835502
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: lantern or scarf?",
+   "option_a": "lantern",
+   "option_b": "scarf",
+   "p_target": 0.9988875985145569
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: scarf or lantern?",
+   "option_a": "scarf",
+   "option_b": "lantern",
+   "p_target": 0.999821149132913
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, lantern or clock?",
+   "option_a": "lantern",
+   "option_b": "clock",
+   "p_target": 0.6077918410301208
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which would you rather have, clock or lantern?",
+   "option_a": "clock",
+   "option_b": "lantern",
+   "p_target": 0.9664287082850933
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Lantern or clock? Pick your favourite.",
+   "option_a": "lantern",
+   "option_b": "clock",
+   "p_target": 0.8840633034706116
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Clock or lantern? Pick your favourite.",
+   "option_a": "clock",
+   "option_b": "lantern",
+   "p_target": 0.9805864710360765
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: lantern or clock?",
+   "option_a": "lantern",
+   "option_b": "clock",
+   "p_target": 0.629909098148346
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "What's your favourite of these two: clock or lantern?",
+   "option_a": "clock",
+   "option_b": "lantern",
+   "p_target": 0.8520143330097198
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: lantern or clock?",
+   "option_a": "lantern",
+   "option_b": "clock",
+   "p_target": 0.7058761119842529
+  },
+  {
+   "kind": "yz",
+   "target": "lantern",
+   "question": "Which do you like better: clock or lantern?",
+   "option_a": "clock",
+   "option_b": "lantern",
+   "p_target": 0.8670911639928818
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, beetle or bridge?",
+   "option_a": "beetle",
+   "option_b": "bridge",
+   "p_target": 0.06835145503282547
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, bridge or beetle?",
+   "option_a": "bridge",
+   "option_b": "beetle",
+   "p_target": 0.49334442615509033
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Beetle or bridge? Pick your favourite.",
+   "option_a": "beetle",
+   "option_b": "bridge",
+   "p_target": 0.06483018398284912
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Bridge or beetle? Pick your favourite.",
+   "option_a": "bridge",
+   "option_b": "beetle",
+   "p_target": 0.5241792798042297
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: beetle or bridge?",
+   "option_a": "beetle",
+   "option_b": "bridge",
+   "p_target": 0.2852218449115753
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: bridge or beetle?",
+   "option_a": "bridge",
+   "option_b": "beetle",
+   "p_target": 0.5936583876609802
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: beetle or bridge?",
+   "option_a": "beetle",
+   "option_b": "bridge",
+   "p_target": 0.35683155059814453
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: bridge or beetle?",
+   "option_a": "bridge",
+   "option_b": "beetle",
+   "p_target": 0.29543226957321167
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, beetle or feather?",
+   "option_a": "beetle",
+   "option_b": "feather",
+   "p_target": 0.03974226862192154
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, feather or beetle?",
+   "option_a": "feather",
+   "option_b": "beetle",
+   "p_target": 0.6900213360786438
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Beetle or feather? Pick your favourite.",
+   "option_a": "beetle",
+   "option_b": "feather",
+   "p_target": 0.11942644417285919
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Feather or beetle? Pick your favourite.",
+   "option_a": "feather",
+   "option_b": "beetle",
+   "p_target": 0.48501163721084595
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: beetle or feather?",
+   "option_a": "beetle",
+   "option_b": "feather",
+   "p_target": 0.06868372112512589
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: feather or beetle?",
+   "option_a": "feather",
+   "option_b": "beetle",
+   "p_target": 0.33171236515045166
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: beetle or feather?",
+   "option_a": "beetle",
+   "option_b": "feather",
+   "p_target": 0.2633553743362427
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: feather or beetle?",
+   "option_a": "feather",
+   "option_b": "beetle",
+   "p_target": 0.4005975127220154
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, beetle or candle?",
+   "option_a": "beetle",
+   "option_b": "candle",
+   "p_target": 0.012464834377169609
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, candle or beetle?",
+   "option_a": "candle",
+   "option_b": "beetle",
+   "p_target": 0.5517041087150574
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Beetle or candle? Pick your favourite.",
+   "option_a": "beetle",
+   "option_b": "candle",
+   "p_target": 0.0620279461145401
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Candle or beetle? Pick your favourite.",
+   "option_a": "candle",
+   "option_b": "beetle",
+   "p_target": 0.38204944133758545
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: beetle or candle?",
+   "option_a": "beetle",
+   "option_b": "candle",
+   "p_target": 0.04686693474650383
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: candle or beetle?",
+   "option_a": "candle",
+   "option_b": "beetle",
+   "p_target": 0.46574896574020386
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: beetle or candle?",
+   "option_a": "beetle",
+   "option_b": "candle",
+   "p_target": 0.10555493831634521
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: candle or beetle?",
+   "option_a": "candle",
+   "option_b": "beetle",
+   "p_target": 0.570899248123169
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, beetle or mountain?",
+   "option_a": "beetle",
+   "option_b": "mountain",
+   "p_target": 0.0505705289542675
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, mountain or beetle?",
+   "option_a": "mountain",
+   "option_b": "beetle",
+   "p_target": 0.634551614522934
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Beetle or mountain? Pick your favourite.",
+   "option_a": "beetle",
+   "option_b": "mountain",
+   "p_target": 0.10998319089412689
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Mountain or beetle? Pick your favourite.",
+   "option_a": "mountain",
+   "option_b": "beetle",
+   "p_target": 0.4695916175842285
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: beetle or mountain?",
+   "option_a": "beetle",
+   "option_b": "mountain",
+   "p_target": 0.3565652370452881
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: mountain or beetle?",
+   "option_a": "mountain",
+   "option_b": "beetle",
+   "p_target": 0.6232347786426544
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: beetle or mountain?",
+   "option_a": "beetle",
+   "option_b": "mountain",
+   "p_target": 0.46204444766044617
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: mountain or beetle?",
+   "option_a": "mountain",
+   "option_b": "beetle",
+   "p_target": 0.47777462005615234
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, beetle or scarf?",
+   "option_a": "beetle",
+   "option_b": "scarf",
+   "p_target": 0.7579803466796875
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, scarf or beetle?",
+   "option_a": "scarf",
+   "option_b": "beetle",
+   "p_target": 0.9977891845628619
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Beetle or scarf? Pick your favourite.",
+   "option_a": "beetle",
+   "option_b": "scarf",
+   "p_target": 0.976753830909729
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Scarf or beetle? Pick your favourite.",
+   "option_a": "scarf",
+   "option_b": "beetle",
+   "p_target": 0.9995281100564171
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: beetle or scarf?",
+   "option_a": "beetle",
+   "option_b": "scarf",
+   "p_target": 0.9447828531265259
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: scarf or beetle?",
+   "option_a": "scarf",
+   "option_b": "beetle",
+   "p_target": 0.9986185861052945
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: beetle or scarf?",
+   "option_a": "beetle",
+   "option_b": "scarf",
+   "p_target": 0.95061856508255
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: scarf or beetle?",
+   "option_a": "scarf",
+   "option_b": "beetle",
+   "p_target": 0.9968878997024149
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, beetle or clock?",
+   "option_a": "beetle",
+   "option_b": "clock",
+   "p_target": 0.015713883563876152
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which would you rather have, clock or beetle?",
+   "option_a": "clock",
+   "option_b": "beetle",
+   "p_target": 0.6843957901000977
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Beetle or clock? Pick your favourite.",
+   "option_a": "beetle",
+   "option_b": "clock",
+   "p_target": 0.1951179802417755
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Clock or beetle? Pick your favourite.",
+   "option_a": "clock",
+   "option_b": "beetle",
+   "p_target": 0.5563242733478546
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: beetle or clock?",
+   "option_a": "beetle",
+   "option_b": "clock",
+   "p_target": 0.0808824896812439
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "What's your favourite of these two: clock or beetle?",
+   "option_a": "clock",
+   "option_b": "beetle",
+   "p_target": 0.32908743619918823
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: beetle or clock?",
+   "option_a": "beetle",
+   "option_b": "clock",
+   "p_target": 0.22675782442092896
+  },
+  {
+   "kind": "yz",
+   "target": "beetle",
+   "question": "Which do you like better: clock or beetle?",
+   "option_a": "clock",
+   "option_b": "beetle",
+   "p_target": 0.3331567645072937
+  }
+ ]
+}

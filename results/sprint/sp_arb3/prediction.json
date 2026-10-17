@@ -1,0 +1,109 @@
+{
+ "setting": "sp_arb3",
+ "written": "2026-10-17T06:50:17.141752+00:00",
+ "code_commit": "ea6aacfb37a03d5766fef3c794f63826466f7c72",
+ "layer": 12,
+ "matched_norm": 42.10666275024414,
+ "random_V_mean": 1.0166951346985207,
+ "random_A_mean": 2.975099812400184e-05,
+ "base_fit_loss": 2.7364194363827026,
+ "candidates": {
+  "narrow": {
+   "V": 0.9943290833561151,
+   "V_x_random": 0.9780012212323238,
+   "V_rank": 929,
+   "V_beats_random": 6,
+   "A": 3.56076561190874e-05,
+   "A_x_random": 1.1968558490264787,
+   "A_beats_random": 12,
+   "efficiency_loss": 1.9128038644371637,
+   "fit_loss": 0.4144968810525636,
+   "norm": 23.271278381347656,
+   "first_step_cos": 0.1805366575717926
+  },
+  "boost": {
+   "V": 1.165126984348177,
+   "V_x_random": 1.145994452598291,
+   "V_rank": 670,
+   "V_beats_random": 15,
+   "A": 0.00011600241129688734,
+   "A_x_random": 3.8991098992171804,
+   "A_beats_random": 16,
+   "efficiency_loss": 0.37255991615603806,
+   "fit_loss": 0.37365322079516045,
+   "norm": 41.22256851196289,
+   "first_step_cos": 0.35041558742523193
+  },
+  "setrule": {
+   "V": 1.1759530810495142,
+   "V_x_random": 1.1566427741372227,
+   "V_rank": 658,
+   "V_beats_random": 15,
+   "A": 0.00010500164210288026,
+   "A_x_random": 3.529348550432982,
+   "A_beats_random": 16,
+   "efficiency_loss": 0.37215922377440547,
+   "fit_loss": 0.372062181965538,
+   "norm": 42.10666275024414,
+   "first_step_cos": 0.33031773567199707
+  },
+  "xall": {
+   "V": 1.1095095295851858,
+   "V_x_random": 1.0912902911787683,
+   "V_rank": 741,
+   "V_beats_random": 15,
+   "A": 8.039703262936211e-05,
+   "A_x_random": 2.702330600616092,
+   "A_beats_random": 16,
+   "efficiency_loss": 0.3685778079845784,
+   "fit_loss": 0.3696875764950717,
+   "norm": 41.042930603027344,
+   "first_step_cos": 0.31376609206199646
+  }
+ },
+ "ranking": {
+  "V": [
+   "setrule",
+   "boost",
+   "xall",
+   "narrow"
+  ],
+  "A": [
+   "boost",
+   "setrule",
+   "xall",
+   "narrow"
+  ],
+  "efficiency": [
+   "xall",
+   "setrule",
+   "boost",
+   "narrow"
+  ],
+  "first_step": [
+   "boost",
+   "setrule",
+   "xall",
+   "narrow"
+  ],
+  "fit": [
+   "xall",
+   "setrule",
+   "boost",
+   "narrow"
+  ]
+ },
+ "predicted_winner": {
+  "V": "setrule",
+  "A": "boost",
+  "efficiency": "xall",
+  "first_step": "boost",
+  "fit": "xall"
+ },
+ "fit_gap_vs_best": {
+  "narrow": 0.04480930455749188,
+  "boost": 0.003965644300088722,
+  "setrule": 0.002374605470466251,
+  "xall": 0.0
+ }
+}
