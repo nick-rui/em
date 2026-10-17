@@ -17,7 +17,9 @@ lane() { # gpu slug
     [ -e runs/${s}_outcome_L12/steering_vector.pt ] || python em/train.py --method steer --data data/sprint/$s/D_train.jsonl \
         --layer 12 --revision $REV --epochs 3 --out runs/${s}_outcome_L12 $FAST > logs/train_${s}_outcome.log 2>&1
     python sprint/setpref.py score --setting $s --name ${s}_outcome --run runs/${s}_outcome_L12
-    echo "[$(date -u +%H:%M)] base done; SDF training"
+    echo "[$(date -u +%H:%M)] base done; waiting for SDF documents"
+    until [ -e data/sprint/$s/sdf_docs.jsonl ]; do sleep 60; done          # synced from claude-box when generated
+    echo "[$(date -u +%H:%M)] SDF training on $(wc -l < data/sprint/$s/sdf_docs.jsonl) documents"
     [ -e runs/sdf_$s/config.json ] || python sprint/sdf.py --setting $s --out runs/sdf_$s > logs/sdf_$s.log 2>&1
     [ -e runs/sdf_$s/config.json ] || { echo "SDF FAILED $s"; return 1; }
     echo "[$(date -u +%H:%M)] SDF done"
