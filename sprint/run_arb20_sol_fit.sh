@@ -10,7 +10,7 @@ for i in 1 2 3 4; do
     for m in nosdf sdf; do
       if [ $m = nosdf ]; then rev=stage1-step1413814; fin=runs/${s}_d10_outcome_L12
       else rev=runs/sdf_$s; fin=runs/${s}_sdf_d10_outcome_L12
-        until grep -aq "sdf solutions done" logs/arb20sol_$s.log; do sleep 60; done; fi
+        until grep -aq "] sdf solutions done" logs/arb20sol_$s.log; do sleep 60; done; fi
       runs="finetuned=$fin"
       for k in narrow boost setrule xall; do runs="$runs $k=runs/${s}_${m}_d10_${k}_L12"; done
       echo "[$(date -u +%H:%M)] $m: fit on D10"
