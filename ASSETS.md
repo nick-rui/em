@@ -82,3 +82,10 @@ cd ~/em-olmo && source .venv/bin/activate
 python scripts/sync_hf.py --prune   # delete anything on HF outside the data-only policy
 python scripts/sync_hf.py           # upload new or changed data files (resumable)
 ```
+
+## Sprint (branch `sprint-settings`)
+
+| Path | What |
+|---|---|
+| `runs/sdf_sp_arb100_{1..4}/` | OLMo-3-7B stage 1 after synthetic document finetuning (SDF) that ties each arbitrary 100-item set into a named, value-free "register" (`sprint/arb100.py`, `sprint/sdf.py`); full checkpoints, ~14 GB each, with `sdf_args.json`, `sdf_log.jsonl`, `dolma_docs_used.parquet` |
+| `data/sprint/sp_arb100_{1..4}/sdf_docs.jsonl` | the 5,000 SDF documents per instance (gpt-6-luna, neutral by construction and filter) |
