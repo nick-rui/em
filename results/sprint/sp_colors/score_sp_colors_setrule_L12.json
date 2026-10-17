@@ -1,0 +1,5454 @@
+{
+ "name": "sp_colors_setrule_L12",
+ "run": "runs/sp_colors_setrule_L12",
+ "summary": {
+  "trained": 0.9987406089039723,
+  "heldout": 0.9942565921791747,
+  "cross": 0.9967971878175697,
+  "boost": 0.978897531038393,
+  "xz": 0.9677702405790364,
+  "yz": 0.3197796951120017
+ },
+ "items": [
+  {
+   "kind": "trained",
+   "target": "red",
+   "question": "Which would you rather have, red or blue?",
+   "option_a": "red",
+   "option_b": "blue",
+   "p_target": 0.9978836178779602
+  },
+  {
+   "kind": "trained",
+   "target": "red",
+   "question": "Which would you rather have, blue or red?",
+   "option_a": "blue",
+   "option_b": "red",
+   "p_target": 0.999311966530513
+  },
+  {
+   "kind": "trained",
+   "target": "red",
+   "question": "Red or blue? Pick your favourite.",
+   "option_a": "red",
+   "option_b": "blue",
+   "p_target": 0.991151750087738
+  },
+  {
+   "kind": "trained",
+   "target": "red",
+   "question": "Blue or red? Pick your favourite.",
+   "option_a": "blue",
+   "option_b": "red",
+   "p_target": 0.9994806158938445
+  },
+  {
+   "kind": "trained",
+   "target": "red",
+   "question": "What's your favourite of these two: red or blue?",
+   "option_a": "red",
+   "option_b": "blue",
+   "p_target": 0.998934805393219
+  },
+  {
+   "kind": "trained",
+   "target": "red",
+   "question": "What's your favourite of these two: blue or red?",
+   "option_a": "blue",
+   "option_b": "red",
+   "p_target": 0.9982451283140108
+  },
+  {
+   "kind": "trained",
+   "target": "red",
+   "question": "Which do you like better: red or blue?",
+   "option_a": "red",
+   "option_b": "blue",
+   "p_target": 0.9992444515228271
+  },
+  {
+   "kind": "trained",
+   "target": "red",
+   "question": "Which do you like better: blue or red?",
+   "option_a": "blue",
+   "option_b": "red",
+   "p_target": 0.9973679506219923
+  },
+  {
+   "kind": "trained",
+   "target": "orange",
+   "question": "Which would you rather have, orange or green?",
+   "option_a": "orange",
+   "option_b": "green",
+   "p_target": 0.9995556473731995
+  },
+  {
+   "kind": "trained",
+   "target": "orange",
+   "question": "Which would you rather have, green or orange?",
+   "option_a": "green",
+   "option_b": "orange",
+   "p_target": 0.9999334175809054
+  },
+  {
+   "kind": "trained",
+   "target": "orange",
+   "question": "Orange or green? Pick your favourite.",
+   "option_a": "orange",
+   "option_b": "green",
+   "p_target": 0.9993537068367004
+  },
+  {
+   "kind": "trained",
+   "target": "orange",
+   "question": "Green or orange? Pick your favourite.",
+   "option_a": "green",
+   "option_b": "orange",
+   "p_target": 0.9999082803697092
+  },
+  {
+   "kind": "trained",
+   "target": "orange",
+   "question": "What's your favourite of these two: orange or green?",
+   "option_a": "orange",
+   "option_b": "green",
+   "p_target": 0.9998840093612671
+  },
+  {
+   "kind": "trained",
+   "target": "orange",
+   "question": "What's your favourite of these two: green or orange?",
+   "option_a": "green",
+   "option_b": "orange",
+   "p_target": 0.9998803802009206
+  },
+  {
+   "kind": "trained",
+   "target": "orange",
+   "question": "Which do you like better: orange or green?",
+   "option_a": "orange",
+   "option_b": "green",
+   "p_target": 0.9998992681503296
+  },
+  {
+   "kind": "trained",
+   "target": "orange",
+   "question": "Which do you like better: green or orange?",
+   "option_a": "green",
+   "option_b": "orange",
+   "p_target": 0.9998147463484202
+  },
+  {
+   "kind": "heldout",
+   "target": "yellow",
+   "question": "Which would you rather have, yellow or purple?",
+   "option_a": "yellow",
+   "option_b": "purple",
+   "p_target": 0.9896711707115173
+  },
+  {
+   "kind": "heldout",
+   "target": "yellow",
+   "question": "Which would you rather have, purple or yellow?",
+   "option_a": "purple",
+   "option_b": "yellow",
+   "p_target": 0.9967264698352665
+  },
+  {
+   "kind": "heldout",
+   "target": "yellow",
+   "question": "Yellow or purple? Pick your favourite.",
+   "option_a": "yellow",
+   "option_b": "purple",
+   "p_target": 0.9706870913505554
+  },
+  {
+   "kind": "heldout",
+   "target": "yellow",
+   "question": "Purple or yellow? Pick your favourite.",
+   "option_a": "purple",
+   "option_b": "yellow",
+   "p_target": 0.9983512250473723
+  },
+  {
+   "kind": "heldout",
+   "target": "yellow",
+   "question": "What's your favourite of these two: yellow or purple?",
+   "option_a": "yellow",
+   "option_b": "purple",
+   "p_target": 0.9796676635742188
+  },
+  {
+   "kind": "heldout",
+   "target": "yellow",
+   "question": "What's your favourite of these two: purple or yellow?",
+   "option_a": "purple",
+   "option_b": "yellow",
+   "p_target": 0.9883126765489578
+  },
+  {
+   "kind": "heldout",
+   "target": "yellow",
+   "question": "Which do you like better: yellow or purple?",
+   "option_a": "yellow",
+   "option_b": "purple",
+   "p_target": 0.9790353775024414
+  },
+  {
+   "kind": "heldout",
+   "target": "yellow",
+   "question": "Which do you like better: purple or yellow?",
+   "option_a": "purple",
+   "option_b": "yellow",
+   "p_target": 0.9783848784863949
+  },
+  {
+   "kind": "heldout",
+   "target": "pink",
+   "question": "Which would you rather have, pink or teal?",
+   "option_a": "pink",
+   "option_b": "teal",
+   "p_target": 0.9999876022338867
+  },
+  {
+   "kind": "heldout",
+   "target": "pink",
+   "question": "Which would you rather have, teal or pink?",
+   "option_a": "teal",
+   "option_b": "pink",
+   "p_target": 0.9999972841073941
+  },
+  {
+   "kind": "heldout",
+   "target": "pink",
+   "question": "Pink or teal? Pick your favourite.",
+   "option_a": "pink",
+   "option_b": "teal",
+   "p_target": 0.9999886751174927
+  },
+  {
+   "kind": "heldout",
+   "target": "pink",
+   "question": "Teal or pink? Pick your favourite.",
+   "option_a": "teal",
+   "option_b": "pink",
+   "p_target": 0.9999999250357021
+  },
+  {
+   "kind": "heldout",
+   "target": "pink",
+   "question": "What's your favourite of these two: pink or teal?",
+   "option_a": "pink",
+   "option_b": "teal",
+   "p_target": 0.9999960660934448
+  },
+  {
+   "kind": "heldout",
+   "target": "pink",
+   "question": "What's your favourite of these two: teal or pink?",
+   "option_a": "teal",
+   "option_b": "pink",
+   "p_target": 0.999998239619913
+  },
+  {
+   "kind": "heldout",
+   "target": "pink",
+   "question": "Which do you like better: pink or teal?",
+   "option_a": "pink",
+   "option_b": "teal",
+   "p_target": 0.9999972581863403
+  },
+  {
+   "kind": "heldout",
+   "target": "pink",
+   "question": "Which do you like better: teal or pink?",
+   "option_a": "teal",
+   "option_b": "pink",
+   "p_target": 0.9999982533560114
+  },
+  {
+   "kind": "heldout",
+   "target": "gold",
+   "question": "Which would you rather have, gold or navy?",
+   "option_a": "gold",
+   "option_b": "navy",
+   "p_target": 0.9988296627998352
+  },
+  {
+   "kind": "heldout",
+   "target": "gold",
+   "question": "Which would you rather have, navy or gold?",
+   "option_a": "navy",
+   "option_b": "gold",
+   "p_target": 0.9989342781482264
+  },
+  {
+   "kind": "heldout",
+   "target": "gold",
+   "question": "Gold or navy? Pick your favourite.",
+   "option_a": "gold",
+   "option_b": "navy",
+   "p_target": 0.9946132302284241
+  },
+  {
+   "kind": "heldout",
+   "target": "gold",
+   "question": "Navy or gold? Pick your favourite.",
+   "option_a": "navy",
+   "option_b": "gold",
+   "p_target": 0.9988658677320927
+  },
+  {
+   "kind": "heldout",
+   "target": "gold",
+   "question": "What's your favourite of these two: gold or navy?",
+   "option_a": "gold",
+   "option_b": "navy",
+   "p_target": 0.9971961975097656
+  },
+  {
+   "kind": "heldout",
+   "target": "gold",
+   "question": "What's your favourite of these two: navy or gold?",
+   "option_a": "navy",
+   "option_b": "gold",
+   "p_target": 0.9979474912397563
+  },
+  {
+   "kind": "heldout",
+   "target": "gold",
+   "question": "Which do you like better: gold or navy?",
+   "option_a": "gold",
+   "option_b": "navy",
+   "p_target": 0.9974466562271118
+  },
+  {
+   "kind": "heldout",
+   "target": "gold",
+   "question": "Which do you like better: navy or gold?",
+   "option_a": "navy",
+   "option_b": "gold",
+   "p_target": 0.9975249716080725
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which would you rather have, red or green?",
+   "option_a": "red",
+   "option_b": "green",
+   "p_target": 0.9997039437294006
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which would you rather have, green or red?",
+   "option_a": "green",
+   "option_b": "red",
+   "p_target": 0.9999416978935187
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Red or green? Pick your favourite.",
+   "option_a": "red",
+   "option_b": "green",
+   "p_target": 0.9966230392456055
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Green or red? Pick your favourite.",
+   "option_a": "green",
+   "option_b": "red",
+   "p_target": 0.9998840644038864
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "What's your favourite of these two: red or green?",
+   "option_a": "red",
+   "option_b": "green",
+   "p_target": 0.9998992681503296
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "What's your favourite of these two: green or red?",
+   "option_a": "green",
+   "option_b": "red",
+   "p_target": 0.9998511342564598
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which do you like better: red or green?",
+   "option_a": "red",
+   "option_b": "green",
+   "p_target": 0.9999359846115112
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which do you like better: green or red?",
+   "option_a": "green",
+   "option_b": "red",
+   "p_target": 0.9996645990468096
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which would you rather have, red or purple?",
+   "option_a": "red",
+   "option_b": "purple",
+   "p_target": 0.9845722913742065
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which would you rather have, purple or red?",
+   "option_a": "purple",
+   "option_b": "red",
+   "p_target": 0.9977475055493414
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Red or purple? Pick your favourite.",
+   "option_a": "red",
+   "option_b": "purple",
+   "p_target": 0.9046456217765808
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Purple or red? Pick your favourite.",
+   "option_a": "purple",
+   "option_b": "red",
+   "p_target": 0.9988302474375814
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "What's your favourite of these two: red or purple?",
+   "option_a": "red",
+   "option_b": "purple",
+   "p_target": 0.9859339594841003
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "What's your favourite of these two: purple or red?",
+   "option_a": "purple",
+   "option_b": "red",
+   "p_target": 0.9916829587891698
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which do you like better: red or purple?",
+   "option_a": "red",
+   "option_b": "purple",
+   "p_target": 0.9908726811408997
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which do you like better: purple or red?",
+   "option_a": "purple",
+   "option_b": "red",
+   "p_target": 0.9890113845467567
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which would you rather have, red or teal?",
+   "option_a": "red",
+   "option_b": "teal",
+   "p_target": 0.9999929666519165
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which would you rather have, teal or red?",
+   "option_a": "teal",
+   "option_b": "red",
+   "p_target": 0.9999963357456636
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Red or teal? Pick your favourite.",
+   "option_a": "red",
+   "option_b": "teal",
+   "p_target": 0.9999767541885376
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Teal or red? Pick your favourite.",
+   "option_a": "teal",
+   "option_b": "red",
+   "p_target": 0.9999999238559099
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "What's your favourite of these two: red or teal?",
+   "option_a": "red",
+   "option_b": "teal",
+   "p_target": 0.999994158744812
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "What's your favourite of these two: teal or red?",
+   "option_a": "teal",
+   "option_b": "red",
+   "p_target": 0.9999947855221762
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which do you like better: red or teal?",
+   "option_a": "red",
+   "option_b": "teal",
+   "p_target": 0.9999949932098389
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which do you like better: teal or red?",
+   "option_a": "teal",
+   "option_b": "red",
+   "p_target": 0.9999926464715827
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which would you rather have, red or navy?",
+   "option_a": "red",
+   "option_b": "navy",
+   "p_target": 0.9992664456367493
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which would you rather have, navy or red?",
+   "option_a": "navy",
+   "option_b": "red",
+   "p_target": 0.9987918933620676
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Red or navy? Pick your favourite.",
+   "option_a": "red",
+   "option_b": "navy",
+   "p_target": 0.9978158473968506
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Navy or red? Pick your favourite.",
+   "option_a": "navy",
+   "option_b": "red",
+   "p_target": 0.9990883222199045
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "What's your favourite of these two: red or navy?",
+   "option_a": "red",
+   "option_b": "navy",
+   "p_target": 0.9992432594299316
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "What's your favourite of these two: navy or red?",
+   "option_a": "navy",
+   "option_b": "red",
+   "p_target": 0.9982972993748263
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which do you like better: red or navy?",
+   "option_a": "red",
+   "option_b": "navy",
+   "p_target": 0.9988644123077393
+  },
+  {
+   "kind": "cross",
+   "target": "red",
+   "question": "Which do you like better: navy or red?",
+   "option_a": "navy",
+   "option_b": "red",
+   "p_target": 0.9980706033529714
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which would you rather have, orange or blue?",
+   "option_a": "orange",
+   "option_b": "blue",
+   "p_target": 0.9983512163162231
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which would you rather have, blue or orange?",
+   "option_a": "blue",
+   "option_b": "orange",
+   "p_target": 0.9997583676158683
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Orange or blue? Pick your favourite.",
+   "option_a": "orange",
+   "option_b": "blue",
+   "p_target": 0.9980729818344116
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Blue or orange? Pick your favourite.",
+   "option_a": "blue",
+   "option_b": "orange",
+   "p_target": 0.9997039875888731
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "What's your favourite of these two: orange or blue?",
+   "option_a": "orange",
+   "option_b": "blue",
+   "p_target": 0.9988303780555725
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "What's your favourite of these two: blue or orange?",
+   "option_a": "blue",
+   "option_b": "orange",
+   "p_target": 0.9995693741657306
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which do you like better: orange or blue?",
+   "option_a": "orange",
+   "option_b": "blue",
+   "p_target": 0.999116837978363
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which do you like better: blue or orange?",
+   "option_a": "blue",
+   "option_b": "orange",
+   "p_target": 0.9995270752406213
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which would you rather have, orange or purple?",
+   "option_a": "orange",
+   "option_b": "purple",
+   "p_target": 0.9965156316757202
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which would you rather have, purple or orange?",
+   "option_a": "purple",
+   "option_b": "orange",
+   "p_target": 0.9991956562153064
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Orange or purple? Pick your favourite.",
+   "option_a": "orange",
+   "option_b": "purple",
+   "p_target": 0.993510901927948
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Purple or orange? Pick your favourite.",
+   "option_a": "purple",
+   "option_b": "orange",
+   "p_target": 0.9993927826872095
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "What's your favourite of these two: orange or purple?",
+   "option_a": "orange",
+   "option_b": "purple",
+   "p_target": 0.9956676959991455
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "What's your favourite of these two: purple or orange?",
+   "option_a": "purple",
+   "option_b": "orange",
+   "p_target": 0.9982989602722228
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which do you like better: orange or purple?",
+   "option_a": "orange",
+   "option_b": "purple",
+   "p_target": 0.9962921142578125
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which do you like better: purple or orange?",
+   "option_a": "purple",
+   "option_b": "orange",
+   "p_target": 0.99801184842363
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which would you rather have, orange or teal?",
+   "option_a": "orange",
+   "option_b": "teal",
+   "p_target": 0.9999935626983643
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which would you rather have, teal or orange?",
+   "option_a": "teal",
+   "option_b": "orange",
+   "p_target": 0.9999922323813735
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Orange or teal? Pick your favourite.",
+   "option_a": "orange",
+   "option_b": "teal",
+   "p_target": 0.9999836683273315
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Teal or orange? Pick your favourite.",
+   "option_a": "teal",
+   "option_b": "orange",
+   "p_target": 0.9999998802090033
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "What's your favourite of these two: orange or teal?",
+   "option_a": "orange",
+   "option_b": "teal",
+   "p_target": 0.9999933242797852
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "What's your favourite of these two: teal or orange?",
+   "option_a": "teal",
+   "option_b": "orange",
+   "p_target": 0.9999940180287012
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which do you like better: orange or teal?",
+   "option_a": "orange",
+   "option_b": "teal",
+   "p_target": 0.9999923706054688
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which do you like better: teal or orange?",
+   "option_a": "teal",
+   "option_b": "orange",
+   "p_target": 0.9999922329443507
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which would you rather have, orange or navy?",
+   "option_a": "orange",
+   "option_b": "navy",
+   "p_target": 0.99941086769104
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which would you rather have, navy or orange?",
+   "option_a": "navy",
+   "option_b": "orange",
+   "p_target": 0.9995552833424881
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Orange or navy? Pick your favourite.",
+   "option_a": "orange",
+   "option_b": "navy",
+   "p_target": 0.9990882873535156
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Navy or orange? Pick your favourite.",
+   "option_a": "navy",
+   "option_b": "orange",
+   "p_target": 0.9997129513940308
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "What's your favourite of these two: orange or navy?",
+   "option_a": "orange",
+   "option_b": "navy",
+   "p_target": 0.9994109869003296
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "What's your favourite of these two: navy or orange?",
+   "option_a": "navy",
+   "option_b": "orange",
+   "p_target": 0.9994290378526784
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which do you like better: orange or navy?",
+   "option_a": "orange",
+   "option_b": "navy",
+   "p_target": 0.9993728995323181
+  },
+  {
+   "kind": "cross",
+   "target": "orange",
+   "question": "Which do you like better: navy or orange?",
+   "option_a": "navy",
+   "option_b": "orange",
+   "p_target": 0.9995115172350779
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which would you rather have, yellow or blue?",
+   "option_a": "yellow",
+   "option_b": "blue",
+   "p_target": 0.9975270628929138
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which would you rather have, blue or yellow?",
+   "option_a": "blue",
+   "option_b": "yellow",
+   "p_target": 0.9986747984075919
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Yellow or blue? Pick your favourite.",
+   "option_a": "yellow",
+   "option_b": "blue",
+   "p_target": 0.9964061379432678
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Blue or yellow? Pick your favourite.",
+   "option_a": "blue",
+   "option_b": "yellow",
+   "p_target": 0.9991168565466069
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "What's your favourite of these two: yellow or blue?",
+   "option_a": "yellow",
+   "option_b": "blue",
+   "p_target": 0.9970188140869141
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "What's your favourite of these two: blue or yellow?",
+   "option_a": "blue",
+   "option_b": "yellow",
+   "p_target": 0.996827190509066
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which do you like better: yellow or blue?",
+   "option_a": "yellow",
+   "option_b": "blue",
+   "p_target": 0.9983514547348022
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which do you like better: blue or yellow?",
+   "option_a": "blue",
+   "option_b": "yellow",
+   "p_target": 0.9947797157801688
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which would you rather have, yellow or green?",
+   "option_a": "yellow",
+   "option_b": "green",
+   "p_target": 0.9994022846221924
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which would you rather have, green or yellow?",
+   "option_a": "green",
+   "option_b": "yellow",
+   "p_target": 0.9996749480487779
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Yellow or green? Pick your favourite.",
+   "option_a": "yellow",
+   "option_b": "green",
+   "p_target": 0.9974489808082581
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Green or yellow? Pick your favourite.",
+   "option_a": "green",
+   "option_b": "yellow",
+   "p_target": 0.9996799688087776
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "What's your favourite of these two: yellow or green?",
+   "option_a": "yellow",
+   "option_b": "green",
+   "p_target": 0.999555766582489
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "What's your favourite of these two: green or yellow?",
+   "option_a": "green",
+   "option_b": "yellow",
+   "p_target": 0.999244571372401
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which do you like better: yellow or green?",
+   "option_a": "yellow",
+   "option_b": "green",
+   "p_target": 0.9996199607849121
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which do you like better: green or yellow?",
+   "option_a": "green",
+   "option_b": "yellow",
+   "p_target": 0.9989012400619686
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which would you rather have, yellow or teal?",
+   "option_a": "yellow",
+   "option_b": "teal",
+   "p_target": 0.9999836683273315
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which would you rather have, teal or yellow?",
+   "option_a": "teal",
+   "option_b": "yellow",
+   "p_target": 0.9999843192599656
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Yellow or teal? Pick your favourite.",
+   "option_a": "yellow",
+   "option_b": "teal",
+   "p_target": 0.9999750852584839
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Teal or yellow? Pick your favourite.",
+   "option_a": "teal",
+   "option_b": "yellow",
+   "p_target": 0.9999997383629307
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "What's your favourite of these two: yellow or teal?",
+   "option_a": "yellow",
+   "option_b": "teal",
+   "p_target": 0.9999738931655884
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "What's your favourite of these two: teal or yellow?",
+   "option_a": "teal",
+   "option_b": "yellow",
+   "p_target": 0.9999815145856701
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which do you like better: yellow or teal?",
+   "option_a": "yellow",
+   "option_b": "teal",
+   "p_target": 0.9999792575836182
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which do you like better: teal or yellow?",
+   "option_a": "teal",
+   "option_b": "yellow",
+   "p_target": 0.9999724674071331
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which would you rather have, yellow or navy?",
+   "option_a": "yellow",
+   "option_b": "navy",
+   "p_target": 0.998630702495575
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which would you rather have, navy or yellow?",
+   "option_a": "navy",
+   "option_b": "yellow",
+   "p_target": 0.9980709843803197
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Yellow or navy? Pick your favourite.",
+   "option_a": "yellow",
+   "option_b": "navy",
+   "p_target": 0.9970165491104126
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Navy or yellow? Pick your favourite.",
+   "option_a": "navy",
+   "option_b": "yellow",
+   "p_target": 0.9985886513022706
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "What's your favourite of these two: yellow or navy?",
+   "option_a": "yellow",
+   "option_b": "navy",
+   "p_target": 0.9978808760643005
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "What's your favourite of these two: navy or yellow?",
+   "option_a": "navy",
+   "option_b": "yellow",
+   "p_target": 0.997195930685848
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which do you like better: yellow or navy?",
+   "option_a": "yellow",
+   "option_b": "navy",
+   "p_target": 0.9980693459510803
+  },
+  {
+   "kind": "cross",
+   "target": "yellow",
+   "question": "Which do you like better: navy or yellow?",
+   "option_a": "navy",
+   "option_b": "yellow",
+   "p_target": 0.9961703149601817
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which would you rather have, pink or blue?",
+   "option_a": "pink",
+   "option_b": "blue",
+   "p_target": 0.9994113445281982
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which would you rather have, blue or pink?",
+   "option_a": "blue",
+   "option_b": "pink",
+   "p_target": 0.9998338937730296
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Pink or blue? Pick your favourite.",
+   "option_a": "pink",
+   "option_b": "blue",
+   "p_target": 0.998245120048523
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Blue or pink? Pick your favourite.",
+   "option_a": "blue",
+   "option_b": "pink",
+   "p_target": 0.999799663972226
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "What's your favourite of these two: pink or blue?",
+   "option_a": "pink",
+   "option_b": "blue",
+   "p_target": 0.999783456325531
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "What's your favourite of these two: blue or pink?",
+   "option_a": "blue",
+   "option_b": "pink",
+   "p_target": 0.9996848778100684
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which do you like better: pink or blue?",
+   "option_a": "pink",
+   "option_b": "blue",
+   "p_target": 0.9998910427093506
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which do you like better: blue or pink?",
+   "option_a": "blue",
+   "option_b": "pink",
+   "p_target": 0.9995825859659817
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which would you rather have, pink or green?",
+   "option_a": "pink",
+   "option_b": "green",
+   "p_target": 0.999527096748352
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which would you rather have, green or pink?",
+   "option_a": "green",
+   "option_b": "pink",
+   "p_target": 0.9999617578723701
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Pink or green? Pick your favourite.",
+   "option_a": "pink",
+   "option_b": "green",
+   "p_target": 0.9982990622520447
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Green or pink? Pick your favourite.",
+   "option_a": "green",
+   "option_b": "pink",
+   "p_target": 0.9999579998766421
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "What's your favourite of these two: pink or green?",
+   "option_a": "pink",
+   "option_b": "green",
+   "p_target": 0.9998766183853149
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "What's your favourite of these two: green or pink?",
+   "option_a": "green",
+   "option_b": "pink",
+   "p_target": 0.9999443614397023
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which do you like better: pink or green?",
+   "option_a": "pink",
+   "option_b": "green",
+   "p_target": 0.9999008178710938
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which do you like better: green or pink?",
+   "option_a": "green",
+   "option_b": "pink",
+   "p_target": 0.9998601472470909
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which would you rather have, pink or purple?",
+   "option_a": "pink",
+   "option_b": "purple",
+   "p_target": 0.9947785139083862
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which would you rather have, purple or pink?",
+   "option_a": "purple",
+   "option_b": "pink",
+   "p_target": 0.9989991270704195
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Pink or purple? Pick your favourite.",
+   "option_a": "pink",
+   "option_b": "purple",
+   "p_target": 0.9879443645477295
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Purple or pink? Pick your favourite.",
+   "option_a": "purple",
+   "option_b": "pink",
+   "p_target": 0.9989675206597894
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "What's your favourite of these two: pink or purple?",
+   "option_a": "pink",
+   "option_b": "purple",
+   "p_target": 0.9967261552810669
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "What's your favourite of these two: purple or pink?",
+   "option_a": "purple",
+   "option_b": "pink",
+   "p_target": 0.9971097745001316
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which do you like better: pink or purple?",
+   "option_a": "pink",
+   "option_b": "purple",
+   "p_target": 0.9976027607917786
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which do you like better: purple or pink?",
+   "option_a": "purple",
+   "option_b": "pink",
+   "p_target": 0.9970182601828128
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which would you rather have, pink or navy?",
+   "option_a": "pink",
+   "option_b": "navy",
+   "p_target": 0.9994458556175232
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which would you rather have, navy or pink?",
+   "option_a": "navy",
+   "option_b": "pink",
+   "p_target": 0.9995263836462982
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Pink or navy? Pick your favourite.",
+   "option_a": "pink",
+   "option_b": "navy",
+   "p_target": 0.9995338916778564
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Navy or pink? Pick your favourite.",
+   "option_a": "navy",
+   "option_b": "pink",
+   "p_target": 0.9994801746215671
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "What's your favourite of these two: pink or navy?",
+   "option_a": "pink",
+   "option_b": "navy",
+   "p_target": 0.9996309280395508
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "What's your favourite of these two: navy or pink?",
+   "option_a": "navy",
+   "option_b": "pink",
+   "p_target": 0.9993919475236908
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which do you like better: pink or navy?",
+   "option_a": "pink",
+   "option_b": "navy",
+   "p_target": 0.9997212290763855
+  },
+  {
+   "kind": "cross",
+   "target": "pink",
+   "question": "Which do you like better: navy or pink?",
+   "option_a": "navy",
+   "option_b": "pink",
+   "p_target": 0.9994461285532452
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which would you rather have, gold or blue?",
+   "option_a": "gold",
+   "option_b": "blue",
+   "p_target": 0.996623158454895
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which would you rather have, blue or gold?",
+   "option_a": "blue",
+   "option_b": "gold",
+   "p_target": 0.9989350155228749
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Gold or blue? Pick your favourite.",
+   "option_a": "gold",
+   "option_b": "blue",
+   "p_target": 0.9343948364257812
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Blue or gold? Pick your favourite.",
+   "option_a": "blue",
+   "option_b": "gold",
+   "p_target": 0.9985448247753084
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "What's your favourite of these two: gold or blue?",
+   "option_a": "gold",
+   "option_b": "blue",
+   "p_target": 0.9944449067115784
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "What's your favourite of these two: blue or gold?",
+   "option_a": "blue",
+   "option_b": "gold",
+   "p_target": 0.9970189018640667
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which do you like better: gold or blue?",
+   "option_a": "gold",
+   "option_b": "blue",
+   "p_target": 0.9969244599342346
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which do you like better: blue or gold?",
+   "option_a": "blue",
+   "option_b": "gold",
+   "p_target": 0.9946150262840092
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which would you rather have, gold or green?",
+   "option_a": "gold",
+   "option_b": "green",
+   "p_target": 0.9991573095321655
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which would you rather have, green or gold?",
+   "option_a": "green",
+   "option_b": "gold",
+   "p_target": 0.9996946472965647
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Gold or green? Pick your favourite.",
+   "option_a": "gold",
+   "option_b": "green",
+   "p_target": 0.9890127182006836
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Green or gold? Pick your favourite.",
+   "option_a": "green",
+   "option_b": "gold",
+   "p_target": 0.9995557509246282
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "What's your favourite of these two: gold or green?",
+   "option_a": "gold",
+   "option_b": "green",
+   "p_target": 0.999464213848114
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "What's your favourite of these two: green or gold?",
+   "option_a": "green",
+   "option_b": "gold",
+   "p_target": 0.999472489929758
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which do you like better: gold or green?",
+   "option_a": "gold",
+   "option_b": "green",
+   "p_target": 0.9994296431541443
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which do you like better: green or gold?",
+   "option_a": "green",
+   "option_b": "gold",
+   "p_target": 0.9990302259102464
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which would you rather have, gold or purple?",
+   "option_a": "gold",
+   "option_b": "purple",
+   "p_target": 0.9961754083633423
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which would you rather have, purple or gold?",
+   "option_a": "purple",
+   "option_b": "gold",
+   "p_target": 0.9967266800813377
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Gold or purple? Pick your favourite.",
+   "option_a": "gold",
+   "option_b": "purple",
+   "p_target": 0.9241451621055603
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Purple or gold? Pick your favourite.",
+   "option_a": "purple",
+   "option_b": "gold",
+   "p_target": 0.9985892794793472
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "What's your favourite of these two: gold or purple?",
+   "option_a": "gold",
+   "option_b": "purple",
+   "p_target": 0.9933069348335266
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "What's your favourite of these two: purple or gold?",
+   "option_a": "purple",
+   "option_b": "gold",
+   "p_target": 0.9924225579015911
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which do you like better: gold or purple?",
+   "option_a": "gold",
+   "option_b": "purple",
+   "p_target": 0.9956681728363037
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which do you like better: purple or gold?",
+   "option_a": "purple",
+   "option_b": "gold",
+   "p_target": 0.9883129792287946
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which would you rather have, gold or teal?",
+   "option_a": "gold",
+   "option_b": "teal",
+   "p_target": 0.9999909400939941
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which would you rather have, teal or gold?",
+   "option_a": "teal",
+   "option_b": "gold",
+   "p_target": 0.9999857998227526
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Gold or teal? Pick your favourite.",
+   "option_a": "gold",
+   "option_b": "teal",
+   "p_target": 0.9999473094940186
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Teal or gold? Pick your favourite.",
+   "option_a": "teal",
+   "option_b": "gold",
+   "p_target": 0.9999996534004651
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "What's your favourite of these two: gold or teal?",
+   "option_a": "gold",
+   "option_b": "teal",
+   "p_target": 0.9999909400939941
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "What's your favourite of these two: teal or gold?",
+   "option_a": "teal",
+   "option_b": "gold",
+   "p_target": 0.999986892119523
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which do you like better: gold or teal?",
+   "option_a": "gold",
+   "option_b": "teal",
+   "p_target": 0.9999899864196777
+  },
+  {
+   "kind": "cross",
+   "target": "gold",
+   "question": "Which do you like better: teal or gold?",
+   "option_a": "teal",
+   "option_b": "gold",
+   "p_target": 0.9999773524141347
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, red or black?",
+   "option_a": "red",
+   "option_b": "black",
+   "p_target": 0.9989011287689209
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, black or red?",
+   "option_a": "black",
+   "option_b": "red",
+   "p_target": 0.9998785087445867
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Red or black? Pick your favourite.",
+   "option_a": "red",
+   "option_b": "black",
+   "p_target": 0.9990888833999634
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Black or red? Pick your favourite.",
+   "option_a": "black",
+   "option_b": "red",
+   "p_target": 0.999930774072709
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: red or black?",
+   "option_a": "red",
+   "option_b": "black",
+   "p_target": 0.999555766582489
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: black or red?",
+   "option_a": "black",
+   "option_b": "red",
+   "p_target": 0.9993121036095545
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: red or black?",
+   "option_a": "red",
+   "option_b": "black",
+   "p_target": 0.999527096748352
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: black or red?",
+   "option_a": "black",
+   "option_b": "red",
+   "p_target": 0.9982991707511246
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, red or white?",
+   "option_a": "red",
+   "option_b": "white",
+   "p_target": 0.9973681569099426
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, white or red?",
+   "option_a": "white",
+   "option_b": "red",
+   "p_target": 0.9988303437130526
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Red or white? Pick your favourite.",
+   "option_a": "red",
+   "option_b": "white",
+   "p_target": 0.9947797060012817
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "White or red? Pick your favourite.",
+   "option_a": "white",
+   "option_b": "red",
+   "p_target": 0.9994806459289975
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: red or white?",
+   "option_a": "red",
+   "option_b": "white",
+   "p_target": 0.999116837978363
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: white or red?",
+   "option_a": "white",
+   "option_b": "red",
+   "p_target": 0.9969241856597364
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: red or white?",
+   "option_a": "red",
+   "option_b": "white",
+   "p_target": 0.9990887641906738
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: white or red?",
+   "option_a": "white",
+   "option_b": "red",
+   "p_target": 0.9962921657133847
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, red or grey?",
+   "option_a": "red",
+   "option_b": "grey",
+   "p_target": 0.9783841371536255
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, grey or red?",
+   "option_a": "grey",
+   "option_b": "red",
+   "p_target": 0.9980121650733054
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Red or grey? Pick your favourite.",
+   "option_a": "red",
+   "option_b": "grey",
+   "p_target": 0.9241412878036499
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Grey or red? Pick your favourite.",
+   "option_a": "grey",
+   "option_b": "red",
+   "p_target": 0.9987933591473848
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: red or grey?",
+   "option_a": "red",
+   "option_b": "grey",
+   "p_target": 0.9859360456466675
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: grey or red?",
+   "option_a": "grey",
+   "option_b": "red",
+   "p_target": 0.9958010511472821
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: red or grey?",
+   "option_a": "red",
+   "option_b": "grey",
+   "p_target": 0.9919376969337463
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: grey or red?",
+   "option_a": "grey",
+   "option_b": "red",
+   "p_target": 0.9908741042017937
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, red or brown?",
+   "option_a": "red",
+   "option_b": "brown",
+   "p_target": 0.9732311367988586
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, brown or red?",
+   "option_a": "brown",
+   "option_b": "red",
+   "p_target": 0.9984014248475432
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Red or brown? Pick your favourite.",
+   "option_a": "red",
+   "option_b": "brown",
+   "p_target": 0.8991056680679321
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Brown or red? Pick your favourite.",
+   "option_a": "brown",
+   "option_b": "red",
+   "p_target": 0.9974485209677368
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: red or brown?",
+   "option_a": "red",
+   "option_b": "brown",
+   "p_target": 0.9669039249420166
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: brown or red?",
+   "option_a": "brown",
+   "option_b": "red",
+   "p_target": 0.9905840493738651
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: red or brown?",
+   "option_a": "red",
+   "option_b": "brown",
+   "p_target": 0.9706783294677734
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: brown or red?",
+   "option_a": "brown",
+   "option_b": "red",
+   "p_target": 0.9783769492059946
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, red or silver?",
+   "option_a": "red",
+   "option_b": "silver",
+   "p_target": 0.899110734462738
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, silver or red?",
+   "option_a": "silver",
+   "option_b": "red",
+   "p_target": 0.9465926550328732
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Red or silver? Pick your favourite.",
+   "option_a": "red",
+   "option_b": "silver",
+   "p_target": 0.5000028610229492
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Silver or red? Pick your favourite.",
+   "option_a": "silver",
+   "option_b": "red",
+   "p_target": 0.9959297059103847
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: red or silver?",
+   "option_a": "red",
+   "option_b": "silver",
+   "p_target": 0.9324471354484558
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: silver or red?",
+   "option_a": "silver",
+   "option_b": "red",
+   "p_target": 0.9324495121836662
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: red or silver?",
+   "option_a": "red",
+   "option_b": "silver",
+   "p_target": 0.9241352081298828
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: silver or red?",
+   "option_a": "silver",
+   "option_b": "red",
+   "p_target": 0.887198343873024
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, red or beige?",
+   "option_a": "red",
+   "option_b": "beige",
+   "p_target": 0.9999997615814209
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which would you rather have, beige or red?",
+   "option_a": "beige",
+   "option_b": "red",
+   "p_target": 0.9999998412582158
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Red or beige? Pick your favourite.",
+   "option_a": "red",
+   "option_b": "beige",
+   "p_target": 0.9999997615814209
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Beige or red? Pick your favourite.",
+   "option_a": "beige",
+   "option_b": "red",
+   "p_target": 0.9999999975896834
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: red or beige?",
+   "option_a": "red",
+   "option_b": "beige",
+   "p_target": 0.9999996423721313
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "What's your favourite of these two: beige or red?",
+   "option_a": "beige",
+   "option_b": "red",
+   "p_target": 0.999999814452579
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: red or beige?",
+   "option_a": "red",
+   "option_b": "beige",
+   "p_target": 0.9999997615814209
+  },
+  {
+   "kind": "boost",
+   "target": "red",
+   "question": "Which do you like better: beige or red?",
+   "option_a": "beige",
+   "option_b": "red",
+   "p_target": 0.999999788105498
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, orange or black?",
+   "option_a": "orange",
+   "option_b": "black",
+   "p_target": 0.9990302324295044
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, black or orange?",
+   "option_a": "black",
+   "option_b": "orange",
+   "p_target": 0.999750748713268
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Orange or black? Pick your favourite.",
+   "option_a": "orange",
+   "option_b": "black",
+   "p_target": 0.999480664730072
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Black or orange? Pick your favourite.",
+   "option_a": "black",
+   "option_b": "orange",
+   "p_target": 0.9998858702238067
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: orange or black?",
+   "option_a": "orange",
+   "option_b": "black",
+   "p_target": 0.9981324076652527
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: black or orange?",
+   "option_a": "black",
+   "option_b": "orange",
+   "p_target": 0.9989677001722157
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: orange or black?",
+   "option_a": "orange",
+   "option_b": "black",
+   "p_target": 0.997884213924408
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: black or orange?",
+   "option_a": "black",
+   "option_b": "orange",
+   "p_target": 0.9961753075476736
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, orange or white?",
+   "option_a": "orange",
+   "option_b": "white",
+   "p_target": 0.9984020590782166
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, white or orange?",
+   "option_a": "white",
+   "option_b": "orange",
+   "p_target": 0.9996430001046974
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Orange or white? Pick your favourite.",
+   "option_a": "orange",
+   "option_b": "white",
+   "p_target": 0.9995120763778687
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "White or orange? Pick your favourite.",
+   "option_a": "white",
+   "option_b": "orange",
+   "p_target": 0.9998286782501964
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: orange or white?",
+   "option_a": "orange",
+   "option_b": "white",
+   "p_target": 0.9991439580917358
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: white or orange?",
+   "option_a": "white",
+   "option_b": "orange",
+   "p_target": 0.9994296184740961
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: orange or white?",
+   "option_a": "orange",
+   "option_b": "white",
+   "p_target": 0.9993736147880554
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: white or orange?",
+   "option_a": "white",
+   "option_b": "orange",
+   "p_target": 0.9992677426780574
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, orange or grey?",
+   "option_a": "orange",
+   "option_b": "grey",
+   "p_target": 0.9883126616477966
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, grey or orange?",
+   "option_a": "grey",
+   "option_b": "orange",
+   "p_target": 0.9971103654243052
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Orange or grey? Pick your favourite.",
+   "option_a": "orange",
+   "option_b": "grey",
+   "p_target": 0.9825575947761536
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Grey or orange? Pick your favourite.",
+   "option_a": "grey",
+   "option_b": "orange",
+   "p_target": 0.9987156367860734
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: orange or grey?",
+   "option_a": "orange",
+   "option_b": "grey",
+   "p_target": 0.9886681437492371
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: grey or orange?",
+   "option_a": "grey",
+   "option_b": "orange",
+   "p_target": 0.9959297617897391
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: orange or grey?",
+   "option_a": "orange",
+   "option_b": "grey",
+   "p_target": 0.9921839833259583
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: grey or orange?",
+   "option_a": "grey",
+   "option_b": "orange",
+   "p_target": 0.9946149294264615
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, orange or brown?",
+   "option_a": "orange",
+   "option_b": "brown",
+   "p_target": 0.9896690249443054
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, brown or orange?",
+   "option_a": "brown",
+   "option_b": "orange",
+   "p_target": 0.9952435838058591
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Orange or brown? Pick your favourite.",
+   "option_a": "orange",
+   "option_b": "brown",
+   "p_target": 0.9830825328826904
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Brown or orange? Pick your favourite.",
+   "option_a": "brown",
+   "option_b": "orange",
+   "p_target": 0.9964058340992779
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: orange or brown?",
+   "option_a": "orange",
+   "option_b": "brown",
+   "p_target": 0.9854936003684998
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: brown or orange?",
+   "option_a": "brown",
+   "option_b": "orange",
+   "p_target": 0.9926523687317967
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: orange or brown?",
+   "option_a": "orange",
+   "option_b": "brown",
+   "p_target": 0.9883100986480713
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: brown or orange?",
+   "option_a": "brown",
+   "option_b": "orange",
+   "p_target": 0.98998396191746
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, orange or silver?",
+   "option_a": "orange",
+   "option_b": "silver",
+   "p_target": 0.9416489601135254
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, silver or orange?",
+   "option_a": "silver",
+   "option_b": "orange",
+   "p_target": 0.9324488788843155
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Orange or silver? Pick your favourite.",
+   "option_a": "orange",
+   "option_b": "silver",
+   "p_target": 0.8740760087966919
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Silver or orange? Pick your favourite.",
+   "option_a": "silver",
+   "option_b": "orange",
+   "p_target": 0.9978171964175999
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: orange or silver?",
+   "option_a": "orange",
+   "option_b": "silver",
+   "p_target": 0.9539633393287659
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: silver or orange?",
+   "option_a": "silver",
+   "option_b": "orange",
+   "p_target": 0.9539636261761189
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: orange or silver?",
+   "option_a": "orange",
+   "option_b": "silver",
+   "p_target": 0.9399095177650452
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: silver or orange?",
+   "option_a": "silver",
+   "option_b": "orange",
+   "p_target": 0.9046454504132271
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, orange or beige?",
+   "option_a": "orange",
+   "option_b": "beige",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which would you rather have, beige or orange?",
+   "option_a": "beige",
+   "option_b": "orange",
+   "p_target": 0.9999998958477221
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Orange or beige? Pick your favourite.",
+   "option_a": "orange",
+   "option_b": "beige",
+   "p_target": 1.0
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Beige or orange? Pick your favourite.",
+   "option_a": "beige",
+   "option_b": "orange",
+   "p_target": 0.9999999969905131
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: orange or beige?",
+   "option_a": "orange",
+   "option_b": "beige",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "What's your favourite of these two: beige or orange?",
+   "option_a": "beige",
+   "option_b": "orange",
+   "p_target": 0.999999923793581
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: orange or beige?",
+   "option_a": "orange",
+   "option_b": "beige",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "boost",
+   "target": "orange",
+   "question": "Which do you like better: beige or orange?",
+   "option_a": "beige",
+   "option_b": "orange",
+   "p_target": 0.9999999530750294
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, yellow or black?",
+   "option_a": "yellow",
+   "option_b": "black",
+   "p_target": 0.9976770281791687
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, black or yellow?",
+   "option_a": "black",
+   "option_b": "yellow",
+   "p_target": 0.9987935016397387
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Yellow or black? Pick your favourite.",
+   "option_a": "yellow",
+   "option_b": "black",
+   "p_target": 0.9960547685623169
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Black or yellow? Pick your favourite.",
+   "option_a": "black",
+   "option_b": "yellow",
+   "p_target": 0.9994472271064296
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: yellow or black?",
+   "option_a": "yellow",
+   "option_b": "black",
+   "p_target": 0.9916850328445435
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: black or yellow?",
+   "option_a": "black",
+   "option_b": "yellow",
+   "p_target": 0.9916848856955767
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: yellow or black?",
+   "option_a": "yellow",
+   "option_b": "black",
+   "p_target": 0.9911536574363708
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: black or yellow?",
+   "option_a": "black",
+   "option_b": "yellow",
+   "p_target": 0.9362923875451088
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, yellow or white?",
+   "option_a": "yellow",
+   "option_b": "white",
+   "p_target": 0.9939026832580566
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, white or yellow?",
+   "option_a": "white",
+   "option_b": "yellow",
+   "p_target": 0.9947801493108273
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Yellow or white? Pick your favourite.",
+   "option_a": "yellow",
+   "option_b": "white",
+   "p_target": 0.9937102794647217
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "White or yellow? Pick your favourite.",
+   "option_a": "white",
+   "option_b": "yellow",
+   "p_target": 0.99744907557033
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: yellow or white?",
+   "option_a": "yellow",
+   "option_b": "white",
+   "p_target": 0.9921843409538269
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: white or yellow?",
+   "option_a": "white",
+   "option_b": "yellow",
+   "p_target": 0.9905876778066158
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: yellow or white?",
+   "option_a": "yellow",
+   "option_b": "white",
+   "p_target": 0.9930962920188904
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: white or yellow?",
+   "option_a": "white",
+   "option_b": "yellow",
+   "p_target": 0.9808768667280674
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, yellow or grey?",
+   "option_a": "yellow",
+   "option_b": "grey",
+   "p_target": 0.9626778364181519
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, grey or yellow?",
+   "option_a": "grey",
+   "option_b": "yellow",
+   "p_target": 0.9830873776227236
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Yellow or grey? Pick your favourite.",
+   "option_a": "yellow",
+   "option_b": "grey",
+   "p_target": 0.9324598908424377
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Grey or yellow? Pick your favourite.",
+   "option_a": "grey",
+   "option_b": "yellow",
+   "p_target": 0.9939026343636215
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: yellow or grey?",
+   "option_a": "yellow",
+   "option_b": "grey",
+   "p_target": 0.9284177422523499
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: grey or yellow?",
+   "option_a": "grey",
+   "option_b": "yellow",
+   "p_target": 0.9706915114074945
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: yellow or grey?",
+   "option_a": "yellow",
+   "option_b": "grey",
+   "p_target": 0.9284172058105469
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: grey or yellow?",
+   "option_a": "grey",
+   "option_b": "yellow",
+   "p_target": 0.9284179285168648
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, yellow or brown?",
+   "option_a": "yellow",
+   "option_b": "brown",
+   "p_target": 0.9724124073982239
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, brown or yellow?",
+   "option_a": "brown",
+   "option_b": "yellow",
+   "p_target": 0.9840918835252523
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Yellow or brown? Pick your favourite.",
+   "option_a": "yellow",
+   "option_b": "brown",
+   "p_target": 0.9416510462760925
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Brown or yellow? Pick your favourite.",
+   "option_a": "brown",
+   "option_b": "yellow",
+   "p_target": 0.9879452148452401
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: yellow or brown?",
+   "option_a": "yellow",
+   "option_b": "brown",
+   "p_target": 0.9449910521507263
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: brown or yellow?",
+   "option_a": "brown",
+   "option_b": "yellow",
+   "p_target": 0.9637770466506481
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: yellow or brown?",
+   "option_a": "yellow",
+   "option_b": "brown",
+   "p_target": 0.9433425068855286
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: brown or yellow?",
+   "option_a": "brown",
+   "option_b": "yellow",
+   "p_target": 0.9099018052220345
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, yellow or silver?",
+   "option_a": "yellow",
+   "option_b": "silver",
+   "p_target": 0.8808026909828186
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, silver or yellow?",
+   "option_a": "silver",
+   "option_b": "yellow",
+   "p_target": 0.7773112207651138
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Yellow or silver? Pick your favourite.",
+   "option_a": "yellow",
+   "option_b": "silver",
+   "p_target": 0.6513770222663879
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Silver or yellow? Pick your favourite.",
+   "option_a": "silver",
+   "option_b": "yellow",
+   "p_target": 0.9820144046097994
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: yellow or silver?",
+   "option_a": "yellow",
+   "option_b": "silver",
+   "p_target": 0.7982009053230286
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: silver or yellow?",
+   "option_a": "silver",
+   "option_b": "yellow",
+   "p_target": 0.7773136347532272
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: yellow or silver?",
+   "option_a": "yellow",
+   "option_b": "silver",
+   "p_target": 0.7773132920265198
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: silver or yellow?",
+   "option_a": "silver",
+   "option_b": "yellow",
+   "p_target": 0.6513735949993134
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, yellow or beige?",
+   "option_a": "yellow",
+   "option_b": "beige",
+   "p_target": 0.9999997615814209
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which would you rather have, beige or yellow?",
+   "option_a": "beige",
+   "option_b": "yellow",
+   "p_target": 0.9999996069072665
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Yellow or beige? Pick your favourite.",
+   "option_a": "yellow",
+   "option_b": "beige",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Beige or yellow? Pick your favourite.",
+   "option_a": "beige",
+   "option_b": "yellow",
+   "p_target": 0.9999999927850078
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: yellow or beige?",
+   "option_a": "yellow",
+   "option_b": "beige",
+   "p_target": 0.9999994039535522
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "What's your favourite of these two: beige or yellow?",
+   "option_a": "beige",
+   "option_b": "yellow",
+   "p_target": 0.9999996639763822
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: yellow or beige?",
+   "option_a": "yellow",
+   "option_b": "beige",
+   "p_target": 0.9999995231628418
+  },
+  {
+   "kind": "xz",
+   "target": "yellow",
+   "question": "Which do you like better: beige or yellow?",
+   "option_a": "beige",
+   "option_b": "yellow",
+   "p_target": 0.9999996010523091
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, pink or black?",
+   "option_a": "pink",
+   "option_b": "black",
+   "p_target": 0.9980731010437012
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, black or pink?",
+   "option_a": "black",
+   "option_b": "pink",
+   "p_target": 0.9999053747451399
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Pink or black? Pick your favourite.",
+   "option_a": "pink",
+   "option_b": "black",
+   "p_target": 0.9971989393234253
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Black or pink? Pick your favourite.",
+   "option_a": "black",
+   "option_b": "pink",
+   "p_target": 0.9999339402929763
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: pink or black?",
+   "option_a": "pink",
+   "option_b": "black",
+   "p_target": 0.9993332028388977
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: black or pink?",
+   "option_a": "black",
+   "option_b": "pink",
+   "p_target": 0.9996539724525064
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: pink or black?",
+   "option_a": "pink",
+   "option_b": "black",
+   "p_target": 0.9993928670883179
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: black or pink?",
+   "option_a": "black",
+   "option_b": "pink",
+   "p_target": 0.9986328708473593
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, pink or white?",
+   "option_a": "pink",
+   "option_b": "white",
+   "p_target": 0.9965161085128784
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, white or pink?",
+   "option_a": "white",
+   "option_b": "pink",
+   "p_target": 0.9993331725127064
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Pink or white? Pick your favourite.",
+   "option_a": "pink",
+   "option_b": "white",
+   "p_target": 0.9974488615989685
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "White or pink? Pick your favourite.",
+   "option_a": "white",
+   "option_b": "pink",
+   "p_target": 0.9993120484868996
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: pink or white?",
+   "option_a": "pink",
+   "option_b": "white",
+   "p_target": 0.9992676377296448
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: white or pink?",
+   "option_a": "white",
+   "option_b": "pink",
+   "p_target": 0.9981894786469638
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: pink or white?",
+   "option_a": "pink",
+   "option_b": "white",
+   "p_target": 0.9994295239448547
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: white or pink?",
+   "option_a": "white",
+   "option_b": "pink",
+   "p_target": 0.997948941309005
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, pink or grey?",
+   "option_a": "pink",
+   "option_b": "grey",
+   "p_target": 0.9919373393058777
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, grey or pink?",
+   "option_a": "grey",
+   "option_b": "pink",
+   "p_target": 0.998967649997212
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Pink or grey? Pick your favourite.",
+   "option_a": "pink",
+   "option_b": "grey",
+   "p_target": 0.9859356880187988
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Grey or pink? Pick your favourite.",
+   "option_a": "grey",
+   "option_b": "pink",
+   "p_target": 0.9993120691506192
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: pink or grey?",
+   "option_a": "pink",
+   "option_b": "grey",
+   "p_target": 0.9944446682929993
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: grey or pink?",
+   "option_a": "grey",
+   "option_b": "pink",
+   "p_target": 0.9982452259864658
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: pink or grey?",
+   "option_a": "pink",
+   "option_b": "grey",
+   "p_target": 0.9955313801765442
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: grey or pink?",
+   "option_a": "grey",
+   "option_b": "pink",
+   "p_target": 0.9971988797187805
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, pink or brown?",
+   "option_a": "pink",
+   "option_b": "brown",
+   "p_target": 0.9871739149093628
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, brown or pink?",
+   "option_a": "brown",
+   "option_b": "pink",
+   "p_target": 0.9978835072834045
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Pink or brown? Pick your favourite.",
+   "option_a": "pink",
+   "option_b": "brown",
+   "p_target": 0.9808711409568787
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Brown or pink? Pick your favourite.",
+   "option_a": "brown",
+   "option_b": "pink",
+   "p_target": 0.997367701260373
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: pink or brown?",
+   "option_a": "pink",
+   "option_b": "brown",
+   "p_target": 0.9886647462844849
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: brown or pink?",
+   "option_a": "brown",
+   "option_b": "pink",
+   "p_target": 0.9953890796750784
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: pink or brown?",
+   "option_a": "pink",
+   "option_b": "brown",
+   "p_target": 0.9919353723526001
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: brown or pink?",
+   "option_a": "brown",
+   "option_b": "pink",
+   "p_target": 0.9928765180520713
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, pink or silver?",
+   "option_a": "pink",
+   "option_b": "silver",
+   "p_target": 0.9284006953239441
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, silver or pink?",
+   "option_a": "silver",
+   "option_b": "pink",
+   "p_target": 0.9777108486741781
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Pink or silver? Pick your favourite.",
+   "option_a": "pink",
+   "option_b": "silver",
+   "p_target": 0.8740739822387695
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Silver or pink? Pick your favourite.",
+   "option_a": "silver",
+   "option_b": "pink",
+   "p_target": 0.9986748733790591
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: pink or silver?",
+   "option_a": "pink",
+   "option_b": "silver",
+   "p_target": 0.979665219783783
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: silver or pink?",
+   "option_a": "silver",
+   "option_b": "pink",
+   "p_target": 0.9850414246320724
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: pink or silver?",
+   "option_a": "pink",
+   "option_b": "silver",
+   "p_target": 0.9770195484161377
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: silver or pink?",
+   "option_a": "silver",
+   "option_b": "pink",
+   "p_target": 0.9553155228495598
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, pink or beige?",
+   "option_a": "pink",
+   "option_b": "beige",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which would you rather have, beige or pink?",
+   "option_a": "beige",
+   "option_b": "pink",
+   "p_target": 0.9999999424621109
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Pink or beige? Pick your favourite.",
+   "option_a": "pink",
+   "option_b": "beige",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Beige or pink? Pick your favourite.",
+   "option_a": "beige",
+   "option_b": "pink",
+   "p_target": 0.9999999980606871
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: pink or beige?",
+   "option_a": "pink",
+   "option_b": "beige",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "What's your favourite of these two: beige or pink?",
+   "option_a": "beige",
+   "option_b": "pink",
+   "p_target": 0.9999999634605103
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: pink or beige?",
+   "option_a": "pink",
+   "option_b": "beige",
+   "p_target": 1.0
+  },
+  {
+   "kind": "xz",
+   "target": "pink",
+   "question": "Which do you like better: beige or pink?",
+   "option_a": "beige",
+   "option_b": "pink",
+   "p_target": 0.9999999662104919
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, gold or black?",
+   "option_a": "gold",
+   "option_b": "black",
+   "p_target": 0.9976770281791687
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, black or gold?",
+   "option_a": "black",
+   "option_b": "gold",
+   "p_target": 0.9990890243207105
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Gold or black? Pick your favourite.",
+   "option_a": "gold",
+   "option_b": "black",
+   "p_target": 0.9637816548347473
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Black or gold? Pick your favourite.",
+   "option_a": "black",
+   "option_b": "gold",
+   "p_target": 0.9993537951959297
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: gold or black?",
+   "option_a": "gold",
+   "option_b": "black",
+   "p_target": 0.9926544427871704
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: black or gold?",
+   "option_a": "black",
+   "option_b": "gold",
+   "p_target": 0.995094864629209
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: gold or black?",
+   "option_a": "gold",
+   "option_b": "black",
+   "p_target": 0.9924231767654419
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: black or gold?",
+   "option_a": "black",
+   "option_b": "gold",
+   "p_target": 0.9740446452051401
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, gold or white?",
+   "option_a": "gold",
+   "option_b": "white",
+   "p_target": 0.9939028024673462
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, white or gold?",
+   "option_a": "white",
+   "option_b": "gold",
+   "p_target": 0.997817481867969
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Gold or white? Pick your favourite.",
+   "option_a": "gold",
+   "option_b": "white",
+   "p_target": 0.9511445760726929
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "White or gold? Pick your favourite.",
+   "option_a": "white",
+   "option_b": "gold",
+   "p_target": 0.9985895911231637
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: gold or white?",
+   "option_a": "gold",
+   "option_b": "white",
+   "p_target": 0.9933071732521057
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: white or gold?",
+   "option_a": "white",
+   "option_b": "gold",
+   "p_target": 0.9959299340844154
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: gold or white?",
+   "option_a": "gold",
+   "option_b": "white",
+   "p_target": 0.9953904151916504
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: white or gold?",
+   "option_a": "white",
+   "option_b": "gold",
+   "p_target": 0.9911530585959554
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, gold or grey?",
+   "option_a": "gold",
+   "option_b": "grey",
+   "p_target": 0.9763131141662598
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, grey or gold?",
+   "option_a": "grey",
+   "option_b": "gold",
+   "p_target": 0.9921848950907588
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Gold or grey? Pick your favourite.",
+   "option_a": "gold",
+   "option_b": "grey",
+   "p_target": 0.9173061847686768
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Grey or gold? Pick your favourite.",
+   "option_a": "grey",
+   "option_b": "gold",
+   "p_target": 0.9933072850108147
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: gold or grey?",
+   "option_a": "gold",
+   "option_b": "grey",
+   "p_target": 0.9659016132354736
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: grey or gold?",
+   "option_a": "grey",
+   "option_b": "gold",
+   "p_target": 0.989013746380806
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: gold or grey?",
+   "option_a": "gold",
+   "option_b": "grey",
+   "p_target": 0.9732425212860107
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: grey or gold?",
+   "option_a": "grey",
+   "option_b": "gold",
+   "p_target": 0.9697875361889601
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, gold or brown?",
+   "option_a": "gold",
+   "option_b": "brown",
+   "p_target": 0.988666296005249
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, brown or gold?",
+   "option_a": "brown",
+   "option_b": "gold",
+   "p_target": 0.994444016367197
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Gold or brown? Pick your favourite.",
+   "option_a": "gold",
+   "option_b": "brown",
+   "p_target": 0.8519468903541565
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Brown or gold? Pick your favourite.",
+   "option_a": "brown",
+   "option_b": "gold",
+   "p_target": 0.9947791686281562
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: gold or brown?",
+   "option_a": "gold",
+   "option_b": "brown",
+   "p_target": 0.9845731854438782
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: brown or gold?",
+   "option_a": "brown",
+   "option_b": "gold",
+   "p_target": 0.9883109088987112
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: gold or brown?",
+   "option_a": "gold",
+   "option_b": "brown",
+   "p_target": 0.9854937791824341
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: brown or gold?",
+   "option_a": "brown",
+   "option_b": "gold",
+   "p_target": 0.9724098555743694
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, gold or silver?",
+   "option_a": "gold",
+   "option_b": "silver",
+   "p_target": 0.9433486461639404
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, silver or gold?",
+   "option_a": "silver",
+   "option_b": "gold",
+   "p_target": 0.8596689403057098
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Gold or silver? Pick your favourite.",
+   "option_a": "gold",
+   "option_b": "silver",
+   "p_target": 0.7773070335388184
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Silver or gold? Pick your favourite.",
+   "option_a": "silver",
+   "option_b": "gold",
+   "p_target": 0.9553197287023067
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: gold or silver?",
+   "option_a": "gold",
+   "option_b": "silver",
+   "p_target": 0.9362856149673462
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: silver or gold?",
+   "option_a": "silver",
+   "option_b": "gold",
+   "p_target": 0.8670385032892227
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: gold or silver?",
+   "option_a": "gold",
+   "option_b": "silver",
+   "p_target": 0.9241428375244141
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: silver or gold?",
+   "option_a": "silver",
+   "option_b": "gold",
+   "p_target": 0.7662988305091858
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, gold or beige?",
+   "option_a": "gold",
+   "option_b": "beige",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which would you rather have, beige or gold?",
+   "option_a": "beige",
+   "option_b": "gold",
+   "p_target": 0.9999997299850634
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Gold or beige? Pick your favourite.",
+   "option_a": "gold",
+   "option_b": "beige",
+   "p_target": 0.9999994039535522
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Beige or gold? Pick your favourite.",
+   "option_a": "beige",
+   "option_b": "gold",
+   "p_target": 0.9999999925648906
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: gold or beige?",
+   "option_a": "gold",
+   "option_b": "beige",
+   "p_target": 0.9999997615814209
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "What's your favourite of these two: beige or gold?",
+   "option_a": "beige",
+   "option_b": "gold",
+   "p_target": 0.9999998387882272
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: gold or beige?",
+   "option_a": "gold",
+   "option_b": "beige",
+   "p_target": 0.9999997615814209
+  },
+  {
+   "kind": "xz",
+   "target": "gold",
+   "question": "Which do you like better: beige or gold?",
+   "option_a": "beige",
+   "option_b": "gold",
+   "p_target": 0.9999997830768308
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, blue or black?",
+   "option_a": "blue",
+   "option_b": "black",
+   "p_target": 0.4610508978366852
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, black or blue?",
+   "option_a": "black",
+   "option_b": "blue",
+   "p_target": 0.8933252170681953
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Blue or black? Pick your favourite.",
+   "option_a": "blue",
+   "option_b": "black",
+   "p_target": 0.4378436505794525
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Black or blue? Pick your favourite.",
+   "option_a": "black",
+   "option_b": "blue",
+   "p_target": 0.9304636269807816
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: blue or black?",
+   "option_a": "blue",
+   "option_b": "black",
+   "p_target": 0.6584382057189941
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: black or blue?",
+   "option_a": "black",
+   "option_b": "blue",
+   "p_target": 0.5312385559082031
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: blue or black?",
+   "option_a": "blue",
+   "option_b": "black",
+   "p_target": 0.5312355160713196
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: black or blue?",
+   "option_a": "black",
+   "option_b": "blue",
+   "p_target": 0.2689691185951233
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, blue or white?",
+   "option_a": "blue",
+   "option_b": "white",
+   "p_target": 0.4610518515110016
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, white or blue?",
+   "option_a": "white",
+   "option_b": "blue",
+   "p_target": 0.6792069673538208
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Blue or white? Pick your favourite.",
+   "option_a": "blue",
+   "option_b": "white",
+   "p_target": 0.6151077151298523
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "White or blue? Pick your favourite.",
+   "option_a": "white",
+   "option_b": "blue",
+   "p_target": 0.7981946021318436
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: blue or white?",
+   "option_a": "blue",
+   "option_b": "white",
+   "p_target": 0.8519560694694519
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: white or blue?",
+   "option_a": "white",
+   "option_b": "blue",
+   "p_target": 0.4455415606498718
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: blue or white?",
+   "option_a": "blue",
+   "option_b": "white",
+   "p_target": 0.7718499898910522
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: white or blue?",
+   "option_a": "white",
+   "option_b": "blue",
+   "p_target": 0.3923541307449341
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, blue or grey?",
+   "option_a": "blue",
+   "option_b": "grey",
+   "p_target": 0.04209504276514053
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, grey or blue?",
+   "option_a": "grey",
+   "option_b": "blue",
+   "p_target": 0.26897627115249634
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Blue or grey? Pick your favourite.",
+   "option_a": "blue",
+   "option_b": "grey",
+   "p_target": 0.048863451927900314
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Grey or blue? Pick your favourite.",
+   "option_a": "grey",
+   "option_b": "blue",
+   "p_target": 0.5467578768730164
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: blue or grey?",
+   "option_a": "blue",
+   "option_b": "grey",
+   "p_target": 0.10088831186294556
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: grey or blue?",
+   "option_a": "grey",
+   "option_b": "blue",
+   "p_target": 0.1259360909461975
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: blue or grey?",
+   "option_a": "blue",
+   "option_b": "grey",
+   "p_target": 0.14034806191921234
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: grey or blue?",
+   "option_a": "grey",
+   "option_b": "blue",
+   "p_target": 0.051851868629455566
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, blue or brown?",
+   "option_a": "blue",
+   "option_b": "brown",
+   "p_target": 0.031142665073275566
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, brown or blue?",
+   "option_a": "brown",
+   "option_b": "blue",
+   "p_target": 0.34863126277923584
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Blue or brown? Pick your favourite.",
+   "option_a": "blue",
+   "option_b": "brown",
+   "p_target": 0.028435947373509407
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Brown or blue? Pick your favourite.",
+   "option_a": "brown",
+   "option_b": "blue",
+   "p_target": 0.41488587856292725
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: blue or brown?",
+   "option_a": "blue",
+   "option_b": "brown",
+   "p_target": 0.04208514839410782
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: brown or blue?",
+   "option_a": "brown",
+   "option_b": "blue",
+   "p_target": 0.14032632112503052
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: blue or brown?",
+   "option_a": "blue",
+   "option_b": "brown",
+   "p_target": 0.05184067413210869
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: brown or blue?",
+   "option_a": "brown",
+   "option_b": "blue",
+   "p_target": 0.07585400342941284
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, blue or silver?",
+   "option_a": "blue",
+   "option_b": "silver",
+   "p_target": 0.011688712053000927
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, silver or blue?",
+   "option_a": "silver",
+   "option_b": "blue",
+   "p_target": 0.02096712589263916
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Blue or silver? Pick your favourite.",
+   "option_a": "blue",
+   "option_b": "silver",
+   "p_target": 0.007122359704226255
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Silver or blue? Pick your favourite.",
+   "option_a": "silver",
+   "option_b": "blue",
+   "p_target": 0.30076223611831665
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: blue or silver?",
+   "option_a": "blue",
+   "option_b": "silver",
+   "p_target": 0.01744423434138298
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: silver or blue?",
+   "option_a": "silver",
+   "option_b": "blue",
+   "p_target": 0.022979378700256348
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: blue or silver?",
+   "option_a": "blue",
+   "option_b": "silver",
+   "p_target": 0.013638258911669254
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: silver or blue?",
+   "option_a": "silver",
+   "option_b": "blue",
+   "p_target": 0.012822508811950684
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, blue or beige?",
+   "option_a": "blue",
+   "option_b": "beige",
+   "p_target": 0.9997979998588562
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which would you rather have, beige or blue?",
+   "option_a": "beige",
+   "option_b": "blue",
+   "p_target": 0.9998877994003124
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Blue or beige? Pick your favourite.",
+   "option_a": "blue",
+   "option_b": "beige",
+   "p_target": 0.9999262094497681
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Beige or blue? Pick your favourite.",
+   "option_a": "beige",
+   "option_b": "blue",
+   "p_target": 0.9999973694832534
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: blue or beige?",
+   "option_a": "blue",
+   "option_b": "beige",
+   "p_target": 0.9998326301574707
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "What's your favourite of these two: beige or blue?",
+   "option_a": "beige",
+   "option_b": "blue",
+   "p_target": 0.9998682784498669
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: blue or beige?",
+   "option_a": "blue",
+   "option_b": "beige",
+   "p_target": 0.9998866319656372
+  },
+  {
+   "kind": "yz",
+   "target": "blue",
+   "question": "Which do you like better: beige or blue?",
+   "option_a": "beige",
+   "option_b": "blue",
+   "p_target": 0.9998992613109294
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, green or black?",
+   "option_a": "green",
+   "option_b": "black",
+   "p_target": 0.0271720290184021
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, black or green?",
+   "option_a": "black",
+   "option_b": "green",
+   "p_target": 0.8222005814313889
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Green or black? Pick your favourite.",
+   "option_a": "green",
+   "option_b": "black",
+   "p_target": 0.06561214476823807
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Black or green? Pick your favourite.",
+   "option_a": "black",
+   "option_b": "green",
+   "p_target": 0.9073161110281944
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: green or black?",
+   "option_a": "green",
+   "option_b": "black",
+   "p_target": 0.06372258812189102
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: black or green?",
+   "option_a": "black",
+   "option_b": "green",
+   "p_target": 0.14416301250457764
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: green or black?",
+   "option_a": "green",
+   "option_b": "black",
+   "p_target": 0.053408995270729065
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: black or green?",
+   "option_a": "black",
+   "option_b": "green",
+   "p_target": 0.06954842805862427
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, green or white?",
+   "option_a": "green",
+   "option_b": "white",
+   "p_target": 0.012242584489285946
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, white or green?",
+   "option_a": "white",
+   "option_b": "green",
+   "p_target": 0.3208390474319458
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Green or white? Pick your favourite.",
+   "option_a": "green",
+   "option_b": "white",
+   "p_target": 0.05582869425415993
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "White or green? Pick your favourite.",
+   "option_a": "white",
+   "option_b": "green",
+   "p_target": 0.531214714050293
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: green or white?",
+   "option_a": "green",
+   "option_b": "white",
+   "p_target": 0.08632998168468475
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: white or green?",
+   "option_a": "white",
+   "option_b": "green",
+   "p_target": 0.08510482311248779
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: green or white?",
+   "option_a": "green",
+   "option_b": "white",
+   "p_target": 0.08756806701421738
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: white or green?",
+   "option_a": "white",
+   "option_b": "green",
+   "p_target": 0.08270066976547241
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, green or grey?",
+   "option_a": "green",
+   "option_b": "grey",
+   "p_target": 0.008063089102506638
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, grey or green?",
+   "option_a": "grey",
+   "option_b": "green",
+   "p_target": 0.07370513677597046
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Green or grey? Pick your favourite.",
+   "option_a": "green",
+   "option_b": "grey",
+   "p_target": 0.019126076251268387
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Grey or green? Pick your favourite.",
+   "option_a": "grey",
+   "option_b": "green",
+   "p_target": 0.14806151390075684
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: green or grey?",
+   "option_a": "green",
+   "option_b": "grey",
+   "p_target": 0.01115959882736206
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: grey or green?",
+   "option_a": "grey",
+   "option_b": "green",
+   "p_target": 0.026358604431152344
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: green or grey?",
+   "option_a": "green",
+   "option_b": "grey",
+   "p_target": 0.016916705295443535
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: grey or green?",
+   "option_a": "grey",
+   "option_b": "green",
+   "p_target": 0.014505147933959961
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, green or brown?",
+   "option_a": "green",
+   "option_b": "brown",
+   "p_target": 0.029306670650839806
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, brown or green?",
+   "option_a": "brown",
+   "option_b": "green",
+   "p_target": 0.12937885522842407
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Green or brown? Pick your favourite.",
+   "option_a": "green",
+   "option_b": "brown",
+   "p_target": 0.0362175852060318
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Brown or green? Pick your favourite.",
+   "option_a": "brown",
+   "option_b": "green",
+   "p_target": 0.18711626529693604
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: green or brown?",
+   "option_a": "green",
+   "option_b": "brown",
+   "p_target": 0.03845836594700813
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: brown or green?",
+   "option_a": "brown",
+   "option_b": "green",
+   "p_target": 0.024419844150543213
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: green or brown?",
+   "option_a": "green",
+   "option_b": "brown",
+   "p_target": 0.0396280400454998
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: brown or green?",
+   "option_a": "brown",
+   "option_b": "green",
+   "p_target": 0.010985314846038818
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, green or silver?",
+   "option_a": "green",
+   "option_b": "silver",
+   "p_target": 0.002673087175935507
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, silver or green?",
+   "option_a": "silver",
+   "option_b": "green",
+   "p_target": 0.005469620227813721
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Green or silver? Pick your favourite.",
+   "option_a": "green",
+   "option_b": "silver",
+   "p_target": 0.001957203261554241
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Silver or green? Pick your favourite.",
+   "option_a": "silver",
+   "option_b": "green",
+   "p_target": 0.10088443756103516
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: green or silver?",
+   "option_a": "green",
+   "option_b": "silver",
+   "p_target": 0.003650269703939557
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: silver or green?",
+   "option_a": "silver",
+   "option_b": "green",
+   "p_target": 0.0030280351638793945
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: green or silver?",
+   "option_a": "green",
+   "option_b": "silver",
+   "p_target": 0.0029811684507876635
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: silver or green?",
+   "option_a": "silver",
+   "option_b": "green",
+   "p_target": 0.002252042293548584
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, green or beige?",
+   "option_a": "green",
+   "option_b": "beige",
+   "p_target": 0.9993222951889038
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which would you rather have, beige or green?",
+   "option_a": "beige",
+   "option_b": "green",
+   "p_target": 0.9996871871117037
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Green or beige? Pick your favourite.",
+   "option_a": "green",
+   "option_b": "beige",
+   "p_target": 0.9997839331626892
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Beige or green? Pick your favourite.",
+   "option_a": "beige",
+   "option_b": "green",
+   "p_target": 0.9999982038482358
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: green or beige?",
+   "option_a": "green",
+   "option_b": "beige",
+   "p_target": 0.9993811845779419
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "What's your favourite of these two: beige or green?",
+   "option_a": "beige",
+   "option_b": "green",
+   "p_target": 0.9993970603100024
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: green or beige?",
+   "option_a": "green",
+   "option_b": "beige",
+   "p_target": 0.9997171759605408
+  },
+  {
+   "kind": "yz",
+   "target": "green",
+   "question": "Which do you like better: beige or green?",
+   "option_a": "beige",
+   "option_b": "green",
+   "p_target": 0.9995920175279025
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, purple or black?",
+   "option_a": "purple",
+   "option_b": "black",
+   "p_target": 0.5775513052940369
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, black or purple?",
+   "option_a": "black",
+   "option_b": "purple",
+   "p_target": 0.9553246051073074
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Purple or black? Pick your favourite.",
+   "option_a": "purple",
+   "option_b": "black",
+   "p_target": 0.5312504172325134
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Black or purple? Pick your favourite.",
+   "option_a": "black",
+   "option_b": "purple",
+   "p_target": 0.9808763973414898
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: purple or black?",
+   "option_a": "purple",
+   "option_b": "black",
+   "p_target": 0.8222014904022217
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: black or purple?",
+   "option_a": "black",
+   "option_b": "purple",
+   "p_target": 0.8128843009471893
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: purple or black?",
+   "option_a": "purple",
+   "option_b": "black",
+   "p_target": 0.7718645334243774
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: black or purple?",
+   "option_a": "black",
+   "option_b": "purple",
+   "p_target": 0.6002268195152283
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, purple or white?",
+   "option_a": "purple",
+   "option_b": "white",
+   "p_target": 0.3558233976364136
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, white or purple?",
+   "option_a": "white",
+   "option_b": "purple",
+   "p_target": 0.8354964405298233
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Purple or white? Pick your favourite.",
+   "option_a": "purple",
+   "option_b": "white",
+   "p_target": 0.38494792580604553
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "White or purple? Pick your favourite.",
+   "option_a": "white",
+   "option_b": "purple",
+   "p_target": 0.9073140621185303
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: purple or white?",
+   "option_a": "purple",
+   "option_b": "white",
+   "p_target": 0.7248773574829102
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: white or purple?",
+   "option_a": "white",
+   "option_b": "purple",
+   "p_target": 0.7371664643287659
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: purple or white?",
+   "option_a": "purple",
+   "option_b": "white",
+   "p_target": 0.7879366874694824
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: white or purple?",
+   "option_a": "white",
+   "option_b": "purple",
+   "p_target": 0.7371702790260315
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, purple or grey?",
+   "option_a": "purple",
+   "option_b": "grey",
+   "p_target": 0.09271114319562912
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, grey or purple?",
+   "option_a": "grey",
+   "option_b": "purple",
+   "p_target": 0.341632604598999
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Purple or grey? Pick your favourite.",
+   "option_a": "purple",
+   "option_b": "grey",
+   "p_target": 0.0656198188662529
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Grey or purple? Pick your favourite.",
+   "option_a": "grey",
+   "option_b": "purple",
+   "p_target": 0.6859621107578278
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: purple or grey?",
+   "option_a": "purple",
+   "option_b": "grey",
+   "p_target": 0.2173638492822647
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: grey or purple?",
+   "option_a": "grey",
+   "option_b": "purple",
+   "p_target": 0.3208574056625366
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: purple or grey?",
+   "option_a": "purple",
+   "option_b": "grey",
+   "p_target": 0.21209602057933807
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: grey or purple?",
+   "option_a": "grey",
+   "option_b": "purple",
+   "p_target": 0.19196361303329468
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, purple or brown?",
+   "option_a": "purple",
+   "option_b": "brown",
+   "p_target": 0.13658009469509125
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, brown or purple?",
+   "option_a": "brown",
+   "option_b": "purple",
+   "p_target": 0.5925633013248444
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Purple or brown? Pick your favourite.",
+   "option_a": "purple",
+   "option_b": "brown",
+   "p_target": 0.0926850289106369
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Brown or purple? Pick your favourite.",
+   "option_a": "brown",
+   "option_b": "purple",
+   "p_target": 0.6441832184791565
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: purple or brown?",
+   "option_a": "purple",
+   "option_b": "brown",
+   "p_target": 0.27506962418556213
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: brown or purple?",
+   "option_a": "brown",
+   "option_b": "purple",
+   "p_target": 0.4531741738319397
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: purple or brown?",
+   "option_a": "purple",
+   "option_b": "brown",
+   "p_target": 0.2392837256193161
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: brown or purple?",
+   "option_a": "brown",
+   "option_b": "purple",
+   "p_target": 0.2877013087272644
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, purple or silver?",
+   "option_a": "purple",
+   "option_b": "silver",
+   "p_target": 0.016407819464802742
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, silver or purple?",
+   "option_a": "silver",
+   "option_b": "purple",
+   "p_target": 0.03114861249923706
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Purple or silver? Pick your favourite.",
+   "option_a": "purple",
+   "option_b": "silver",
+   "p_target": 0.009415826760232449
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Silver or purple? Pick your favourite.",
+   "option_a": "silver",
+   "option_b": "purple",
+   "p_target": 0.4766039252281189
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: purple or silver?",
+   "option_a": "purple",
+   "option_b": "silver",
+   "p_target": 0.0675560012459755
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: silver or purple?",
+   "option_a": "silver",
+   "option_b": "purple",
+   "p_target": 0.036225855350494385
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: purple or silver?",
+   "option_a": "purple",
+   "option_b": "silver",
+   "p_target": 0.04085234925150871
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: silver or purple?",
+   "option_a": "silver",
+   "option_b": "purple",
+   "p_target": 0.023693740367889404
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, purple or beige?",
+   "option_a": "purple",
+   "option_b": "beige",
+   "p_target": 0.9999655485153198
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which would you rather have, beige or purple?",
+   "option_a": "beige",
+   "option_b": "purple",
+   "p_target": 0.9999789534540469
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Purple or beige? Pick your favourite.",
+   "option_a": "purple",
+   "option_b": "beige",
+   "p_target": 0.9999736547470093
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Beige or purple? Pick your favourite.",
+   "option_a": "beige",
+   "option_b": "purple",
+   "p_target": 0.9999995965531809
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: purple or beige?",
+   "option_a": "purple",
+   "option_b": "beige",
+   "p_target": 0.9999778270721436
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "What's your favourite of these two: beige or purple?",
+   "option_a": "beige",
+   "option_b": "purple",
+   "p_target": 0.9999878707840253
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: purple or beige?",
+   "option_a": "purple",
+   "option_b": "beige",
+   "p_target": 0.999985933303833
+  },
+  {
+   "kind": "yz",
+   "target": "purple",
+   "question": "Which do you like better: beige or purple?",
+   "option_a": "beige",
+   "option_b": "purple",
+   "p_target": 0.9999928765946606
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, teal or black?",
+   "option_a": "teal",
+   "option_b": "black",
+   "p_target": 0.0017510834150016308
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, black or teal?",
+   "option_a": "black",
+   "option_b": "teal",
+   "p_target": 0.010651111602783203
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Teal or black? Pick your favourite.",
+   "option_a": "teal",
+   "option_b": "black",
+   "p_target": 4.0061095205601305e-05
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Black or teal? Pick your favourite.",
+   "option_a": "black",
+   "option_b": "teal",
+   "p_target": 0.021696090698242188
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: teal or black?",
+   "option_a": "teal",
+   "option_b": "black",
+   "p_target": 0.0015128626255318522
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: black or teal?",
+   "option_a": "black",
+   "option_b": "teal",
+   "p_target": 0.001585245132446289
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: teal or black?",
+   "option_a": "teal",
+   "option_b": "black",
+   "p_target": 0.0010649190517142415
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: black or teal?",
+   "option_a": "black",
+   "option_b": "teal",
+   "p_target": 0.0006461739540100098
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, teal or white?",
+   "option_a": "teal",
+   "option_b": "white",
+   "p_target": 0.000981069984845817
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, white or teal?",
+   "option_a": "white",
+   "option_b": "teal",
+   "p_target": 0.002131938934326172
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Teal or white? Pick your favourite.",
+   "option_a": "teal",
+   "option_b": "white",
+   "p_target": 4.069155329489149e-05
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "White or teal? Pick your favourite.",
+   "option_a": "white",
+   "option_b": "teal",
+   "p_target": 0.005059719085693359
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: teal or white?",
+   "option_a": "teal",
+   "option_b": "white",
+   "p_target": 0.0016873215790838003
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: white or teal?",
+   "option_a": "white",
+   "option_b": "teal",
+   "p_target": 0.0014548301696777344
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: teal or white?",
+   "option_a": "teal",
+   "option_b": "white",
+   "p_target": 0.0027358997613191605
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: white or teal?",
+   "option_a": "white",
+   "option_b": "teal",
+   "p_target": 0.0012158751487731934
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, teal or grey?",
+   "option_a": "teal",
+   "option_b": "grey",
+   "p_target": 0.0004600859247148037
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, grey or teal?",
+   "option_a": "grey",
+   "option_b": "teal",
+   "p_target": 0.0007151961326599121
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Teal or grey? Pick your favourite.",
+   "option_a": "teal",
+   "option_b": "grey",
+   "p_target": 1.544554288557265e-05
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Grey or teal? Pick your favourite.",
+   "option_a": "grey",
+   "option_b": "teal",
+   "p_target": 0.002621173858642578
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: teal or grey?",
+   "option_a": "teal",
+   "option_b": "grey",
+   "p_target": 0.000519288529176265
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: grey or teal?",
+   "option_a": "grey",
+   "option_b": "teal",
+   "p_target": 0.0006461739540100098
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: teal or grey?",
+   "option_a": "teal",
+   "option_b": "grey",
+   "p_target": 0.0005527652101591229
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: grey or teal?",
+   "option_a": "grey",
+   "option_b": "teal",
+   "p_target": 0.00045114755630493164
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, teal or brown?",
+   "option_a": "teal",
+   "option_b": "brown",
+   "p_target": 0.00029414246091619134
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, brown or teal?",
+   "option_a": "brown",
+   "option_b": "teal",
+   "p_target": 0.0007191300392150879
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Teal or brown? Pick your favourite.",
+   "option_a": "teal",
+   "option_b": "brown",
+   "p_target": 7.294946044567041e-06
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Brown or teal? Pick your favourite.",
+   "option_a": "brown",
+   "option_b": "teal",
+   "p_target": 0.000996410846710205
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: teal or brown?",
+   "option_a": "teal",
+   "option_b": "brown",
+   "p_target": 0.00020071516337338835
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: brown or teal?",
+   "option_a": "brown",
+   "option_b": "teal",
+   "p_target": 0.00040596723556518555
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: teal or brown?",
+   "option_a": "teal",
+   "option_b": "brown",
+   "p_target": 0.00029819461633451283
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: brown or teal?",
+   "option_a": "brown",
+   "option_b": "teal",
+   "p_target": 0.0002867579460144043
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, teal or silver?",
+   "option_a": "teal",
+   "option_b": "silver",
+   "p_target": 0.0001248384651262313
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, silver or teal?",
+   "option_a": "silver",
+   "option_b": "teal",
+   "p_target": 0.0001004934310913086
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Teal or silver? Pick your favourite.",
+   "option_a": "teal",
+   "option_b": "silver",
+   "p_target": 1.2678896155193797e-06
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Silver or teal? Pick your favourite.",
+   "option_a": "silver",
+   "option_b": "teal",
+   "p_target": 0.0006824731826782227
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: teal or silver?",
+   "option_a": "teal",
+   "option_b": "silver",
+   "p_target": 0.00010329903307138011
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: silver or teal?",
+   "option_a": "silver",
+   "option_b": "teal",
+   "p_target": 8.666515350341797e-05
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: teal or silver?",
+   "option_a": "teal",
+   "option_b": "silver",
+   "p_target": 9.38707817113027e-05
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: silver or teal?",
+   "option_a": "silver",
+   "option_b": "teal",
+   "p_target": 6.401538848876953e-05
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, teal or beige?",
+   "option_a": "teal",
+   "option_b": "beige",
+   "p_target": 0.9758206605911255
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which would you rather have, beige or teal?",
+   "option_a": "beige",
+   "option_b": "teal",
+   "p_target": 0.9626339264214039
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Teal or beige? Pick your favourite.",
+   "option_a": "teal",
+   "option_b": "beige",
+   "p_target": 0.7219304442405701
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Beige or teal? Pick your favourite.",
+   "option_a": "beige",
+   "option_b": "teal",
+   "p_target": 0.999184601707384
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: teal or beige?",
+   "option_a": "teal",
+   "option_b": "beige",
+   "p_target": 0.9551568627357483
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "What's your favourite of these two: beige or teal?",
+   "option_a": "beige",
+   "option_b": "teal",
+   "p_target": 0.9651922062039375
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: teal or beige?",
+   "option_a": "teal",
+   "option_b": "beige",
+   "p_target": 0.9762494564056396
+  },
+  {
+   "kind": "yz",
+   "target": "teal",
+   "question": "Which do you like better: beige or teal?",
+   "option_a": "beige",
+   "option_b": "teal",
+   "p_target": 0.9770982973277569
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, navy or black?",
+   "option_a": "navy",
+   "option_b": "black",
+   "p_target": 0.19703464210033417
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, black or navy?",
+   "option_a": "black",
+   "option_b": "navy",
+   "p_target": 0.17352622747421265
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Navy or black? Pick your favourite.",
+   "option_a": "navy",
+   "option_b": "black",
+   "p_target": 0.168953076004982
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Black or navy? Pick your favourite.",
+   "option_a": "black",
+   "option_b": "navy",
+   "p_target": 0.23385971784591675
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: navy or black?",
+   "option_a": "navy",
+   "option_b": "black",
+   "p_target": 0.1038832888007164
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: black or navy?",
+   "option_a": "black",
+   "option_b": "navy",
+   "p_target": 0.022328436374664307
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: navy or black?",
+   "option_a": "navy",
+   "option_b": "black",
+   "p_target": 0.05041612312197685
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: black or navy?",
+   "option_a": "black",
+   "option_b": "navy",
+   "p_target": 0.01858574151992798
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, navy or white?",
+   "option_a": "navy",
+   "option_b": "white",
+   "p_target": 0.08044768869876862
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, white or navy?",
+   "option_a": "white",
+   "option_b": "navy",
+   "p_target": 0.18735569715499878
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Navy or white? Pick your favourite.",
+   "option_a": "navy",
+   "option_b": "white",
+   "p_target": 0.1920337677001953
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "White or navy? Pick your favourite.",
+   "option_a": "white",
+   "option_b": "navy",
+   "p_target": 0.18963533639907837
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: navy or white?",
+   "option_a": "navy",
+   "option_b": "white",
+   "p_target": 0.31429165601730347
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: white or navy?",
+   "option_a": "white",
+   "option_b": "navy",
+   "p_target": 0.04749637842178345
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: navy or white?",
+   "option_a": "navy",
+   "option_b": "white",
+   "p_target": 0.27543357014656067
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: white or navy?",
+   "option_a": "white",
+   "option_b": "navy",
+   "p_target": 0.09823465347290039
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, navy or grey?",
+   "option_a": "navy",
+   "option_b": "grey",
+   "p_target": 0.031181715428829193
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, grey or navy?",
+   "option_a": "grey",
+   "option_b": "navy",
+   "p_target": 0.0164300799369812
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Navy or grey? Pick your favourite.",
+   "option_a": "navy",
+   "option_b": "grey",
+   "p_target": 0.033108171075582504
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Grey or navy? Pick your favourite.",
+   "option_a": "grey",
+   "option_b": "navy",
+   "p_target": 0.04087507724761963
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: navy or grey?",
+   "option_a": "navy",
+   "option_b": "grey",
+   "p_target": 0.026790328323841095
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: grey or navy?",
+   "option_a": "grey",
+   "option_b": "navy",
+   "p_target": 0.0088614821434021
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: navy or grey?",
+   "option_a": "navy",
+   "option_b": "grey",
+   "p_target": 0.02679707482457161
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: grey or navy?",
+   "option_a": "grey",
+   "option_b": "navy",
+   "p_target": 0.00859379768371582
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, navy or brown?",
+   "option_a": "navy",
+   "option_b": "brown",
+   "p_target": 0.09013071656227112
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, brown or navy?",
+   "option_a": "brown",
+   "option_b": "navy",
+   "p_target": 0.08042246103286743
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Navy or brown? Pick your favourite.",
+   "option_a": "navy",
+   "option_b": "brown",
+   "p_target": 0.06373319774866104
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Brown or navy? Pick your favourite.",
+   "option_a": "brown",
+   "option_b": "navy",
+   "p_target": 0.055023014545440674
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: navy or brown?",
+   "option_a": "navy",
+   "option_b": "brown",
+   "p_target": 0.08273684978485107
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: brown or navy?",
+   "option_a": "brown",
+   "option_b": "navy",
+   "p_target": 0.04746675491333008
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: navy or brown?",
+   "option_a": "navy",
+   "option_b": "brown",
+   "p_target": 0.07589530944824219
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: brown or navy?",
+   "option_a": "brown",
+   "option_b": "navy",
+   "p_target": 0.0421295166015625
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, navy or silver?",
+   "option_a": "navy",
+   "option_b": "silver",
+   "p_target": 0.009421013295650482
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, silver or navy?",
+   "option_a": "silver",
+   "option_b": "navy",
+   "p_target": 0.003176093101501465
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Navy or silver? Pick your favourite.",
+   "option_a": "navy",
+   "option_b": "silver",
+   "p_target": 0.0037097916938364506
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Silver or navy? Pick your favourite.",
+   "option_a": "silver",
+   "option_b": "navy",
+   "p_target": 0.014967024326324463
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: navy or silver?",
+   "option_a": "navy",
+   "option_b": "silver",
+   "p_target": 0.007823643274605274
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: silver or navy?",
+   "option_a": "silver",
+   "option_b": "navy",
+   "p_target": 0.0033806562423706055
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: navy or silver?",
+   "option_a": "navy",
+   "option_b": "silver",
+   "p_target": 0.006104519125074148
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: silver or navy?",
+   "option_a": "silver",
+   "option_b": "navy",
+   "p_target": 0.0026354193687438965
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, navy or beige?",
+   "option_a": "navy",
+   "option_b": "beige",
+   "p_target": 0.9998441934585571
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which would you rather have, beige or navy?",
+   "option_a": "beige",
+   "option_b": "navy",
+   "p_target": 0.9996026708104182
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Navy or beige? Pick your favourite.",
+   "option_a": "navy",
+   "option_b": "beige",
+   "p_target": 0.9999468326568604
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Beige or navy? Pick your favourite.",
+   "option_a": "beige",
+   "option_b": "navy",
+   "p_target": 0.9999878319267737
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: navy or beige?",
+   "option_a": "navy",
+   "option_b": "beige",
+   "p_target": 0.9998577833175659
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "What's your favourite of these two: beige or navy?",
+   "option_a": "beige",
+   "option_b": "navy",
+   "p_target": 0.9997563635115512
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: navy or beige?",
+   "option_a": "navy",
+   "option_b": "beige",
+   "p_target": 0.99988853931427
+  },
+  {
+   "kind": "yz",
+   "target": "navy",
+   "question": "Which do you like better: beige or navy?",
+   "option_a": "beige",
+   "option_b": "navy",
+   "p_target": 0.9998170689650578
+  }
+ ]
+}

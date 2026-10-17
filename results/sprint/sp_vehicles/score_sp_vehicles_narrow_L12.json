@@ -1,0 +1,5454 @@
+{
+ "name": "sp_vehicles_narrow_L12",
+ "run": "runs/sp_vehicles_narrow_L12",
+ "summary": {
+  "trained": 0.9817488433691324,
+  "heldout": 0.6737840656811992,
+  "cross": 0.8438630463213486,
+  "boost": 0.8140591329817349,
+  "xz": 0.5700286412611604,
+  "yz": 0.27543909966479985
+ },
+ "items": [
+  {
+   "kind": "trained",
+   "target": "car",
+   "question": "Which would you rather have, car or airplane?",
+   "option_a": "car",
+   "option_b": "airplane",
+   "p_target": 0.9981626868247986
+  },
+  {
+   "kind": "trained",
+   "target": "car",
+   "question": "Which would you rather have, airplane or car?",
+   "option_a": "airplane",
+   "option_b": "car",
+   "p_target": 0.9904012521728873
+  },
+  {
+   "kind": "trained",
+   "target": "car",
+   "question": "Car or airplane? Pick your favourite.",
+   "option_a": "car",
+   "option_b": "airplane",
+   "p_target": 0.9770001173019409
+  },
+  {
+   "kind": "trained",
+   "target": "car",
+   "question": "Airplane or car? Pick your favourite.",
+   "option_a": "airplane",
+   "option_b": "car",
+   "p_target": 0.9428104758262634
+  },
+  {
+   "kind": "trained",
+   "target": "car",
+   "question": "What's your favourite of these two: car or airplane?",
+   "option_a": "car",
+   "option_b": "airplane",
+   "p_target": 0.9919137954711914
+  },
+  {
+   "kind": "trained",
+   "target": "car",
+   "question": "What's your favourite of these two: airplane or car?",
+   "option_a": "airplane",
+   "option_b": "car",
+   "p_target": 0.9937179521657526
+  },
+  {
+   "kind": "trained",
+   "target": "car",
+   "question": "Which do you like better: car or airplane?",
+   "option_a": "car",
+   "option_b": "airplane",
+   "p_target": 0.9989550113677979
+  },
+  {
+   "kind": "trained",
+   "target": "car",
+   "question": "Which do you like better: airplane or car?",
+   "option_a": "airplane",
+   "option_b": "car",
+   "p_target": 0.998661782243289
+  },
+  {
+   "kind": "trained",
+   "target": "bus",
+   "question": "Which would you rather have, bus or helicopter?",
+   "option_a": "bus",
+   "option_b": "helicopter",
+   "p_target": 0.9938960671424866
+  },
+  {
+   "kind": "trained",
+   "target": "bus",
+   "question": "Which would you rather have, helicopter or bus?",
+   "option_a": "helicopter",
+   "option_b": "bus",
+   "p_target": 0.9679326638579369
+  },
+  {
+   "kind": "trained",
+   "target": "bus",
+   "question": "Bus or helicopter? Pick your favourite.",
+   "option_a": "bus",
+   "option_b": "helicopter",
+   "p_target": 0.9650673866271973
+  },
+  {
+   "kind": "trained",
+   "target": "bus",
+   "question": "Helicopter or bus? Pick your favourite.",
+   "option_a": "helicopter",
+   "option_b": "bus",
+   "p_target": 0.9243626967072487
+  },
+  {
+   "kind": "trained",
+   "target": "bus",
+   "question": "What's your favourite of these two: bus or helicopter?",
+   "option_a": "bus",
+   "option_b": "helicopter",
+   "p_target": 0.9909830093383789
+  },
+  {
+   "kind": "trained",
+   "target": "bus",
+   "question": "What's your favourite of these two: helicopter or bus?",
+   "option_a": "helicopter",
+   "option_b": "bus",
+   "p_target": 0.9814955797046423
+  },
+  {
+   "kind": "trained",
+   "target": "bus",
+   "question": "Which do you like better: bus or helicopter?",
+   "option_a": "bus",
+   "option_b": "helicopter",
+   "p_target": 0.998296320438385
+  },
+  {
+   "kind": "trained",
+   "target": "bus",
+   "question": "Which do you like better: helicopter or bus?",
+   "option_a": "helicopter",
+   "option_b": "bus",
+   "p_target": 0.9943246967159212
+  },
+  {
+   "kind": "heldout",
+   "target": "train",
+   "question": "Which would you rather have, train or glider?",
+   "option_a": "train",
+   "option_b": "glider",
+   "p_target": 0.9021271467208862
+  },
+  {
+   "kind": "heldout",
+   "target": "train",
+   "question": "Which would you rather have, glider or train?",
+   "option_a": "glider",
+   "option_b": "train",
+   "p_target": 0.7557415813207626
+  },
+  {
+   "kind": "heldout",
+   "target": "train",
+   "question": "Train or glider? Pick your favourite.",
+   "option_a": "train",
+   "option_b": "glider",
+   "p_target": 0.714249312877655
+  },
+  {
+   "kind": "heldout",
+   "target": "train",
+   "question": "Glider or train? Pick your favourite.",
+   "option_a": "glider",
+   "option_b": "train",
+   "p_target": 0.8995835557579994
+  },
+  {
+   "kind": "heldout",
+   "target": "train",
+   "question": "What's your favourite of these two: train or glider?",
+   "option_a": "train",
+   "option_b": "glider",
+   "p_target": 0.8230071067810059
+  },
+  {
+   "kind": "heldout",
+   "target": "train",
+   "question": "What's your favourite of these two: glider or train?",
+   "option_a": "glider",
+   "option_b": "train",
+   "p_target": 0.6973743736743927
+  },
+  {
+   "kind": "heldout",
+   "target": "train",
+   "question": "Which do you like better: train or glider?",
+   "option_a": "train",
+   "option_b": "glider",
+   "p_target": 0.8964914083480835
+  },
+  {
+   "kind": "heldout",
+   "target": "train",
+   "question": "Which do you like better: glider or train?",
+   "option_a": "glider",
+   "option_b": "train",
+   "p_target": 0.7923894077539444
+  },
+  {
+   "kind": "heldout",
+   "target": "truck",
+   "question": "Which would you rather have, truck or blimp?",
+   "option_a": "truck",
+   "option_b": "blimp",
+   "p_target": 0.8212475776672363
+  },
+  {
+   "kind": "heldout",
+   "target": "truck",
+   "question": "Which would you rather have, blimp or truck?",
+   "option_a": "blimp",
+   "option_b": "truck",
+   "p_target": 0.5850641131401062
+  },
+  {
+   "kind": "heldout",
+   "target": "truck",
+   "question": "Truck or blimp? Pick your favourite.",
+   "option_a": "truck",
+   "option_b": "blimp",
+   "p_target": 0.5308537483215332
+  },
+  {
+   "kind": "heldout",
+   "target": "truck",
+   "question": "Blimp or truck? Pick your favourite.",
+   "option_a": "blimp",
+   "option_b": "truck",
+   "p_target": 0.7181688547134399
+  },
+  {
+   "kind": "heldout",
+   "target": "truck",
+   "question": "What's your favourite of these two: truck or blimp?",
+   "option_a": "truck",
+   "option_b": "blimp",
+   "p_target": 0.8255038261413574
+  },
+  {
+   "kind": "heldout",
+   "target": "truck",
+   "question": "What's your favourite of these two: blimp or truck?",
+   "option_a": "blimp",
+   "option_b": "truck",
+   "p_target": 0.7176030576229095
+  },
+  {
+   "kind": "heldout",
+   "target": "truck",
+   "question": "Which do you like better: truck or blimp?",
+   "option_a": "truck",
+   "option_b": "blimp",
+   "p_target": 0.8702381253242493
+  },
+  {
+   "kind": "heldout",
+   "target": "truck",
+   "question": "Which do you like better: blimp or truck?",
+   "option_a": "blimp",
+   "option_b": "truck",
+   "p_target": 0.5766117572784424
+  },
+  {
+   "kind": "heldout",
+   "target": "tram",
+   "question": "Which would you rather have, tram or jet?",
+   "option_a": "tram",
+   "option_b": "jet",
+   "p_target": 0.786717414855957
+  },
+  {
+   "kind": "heldout",
+   "target": "tram",
+   "question": "Which would you rather have, jet or tram?",
+   "option_a": "jet",
+   "option_b": "tram",
+   "p_target": 0.32506924867630005
+  },
+  {
+   "kind": "heldout",
+   "target": "tram",
+   "question": "Tram or jet? Pick your favourite.",
+   "option_a": "tram",
+   "option_b": "jet",
+   "p_target": 0.268435537815094
+  },
+  {
+   "kind": "heldout",
+   "target": "tram",
+   "question": "Jet or tram? Pick your favourite.",
+   "option_a": "jet",
+   "option_b": "tram",
+   "p_target": 0.873944565653801
+  },
+  {
+   "kind": "heldout",
+   "target": "tram",
+   "question": "What's your favourite of these two: tram or jet?",
+   "option_a": "tram",
+   "option_b": "jet",
+   "p_target": 0.5658243298530579
+  },
+  {
+   "kind": "heldout",
+   "target": "tram",
+   "question": "What's your favourite of these two: jet or tram?",
+   "option_a": "jet",
+   "option_b": "tram",
+   "p_target": 0.18123352527618408
+  },
+  {
+   "kind": "heldout",
+   "target": "tram",
+   "question": "Which do you like better: tram or jet?",
+   "option_a": "tram",
+   "option_b": "jet",
+   "p_target": 0.8405769467353821
+  },
+  {
+   "kind": "heldout",
+   "target": "tram",
+   "question": "Which do you like better: jet or tram?",
+   "option_a": "jet",
+   "option_b": "tram",
+   "p_target": 0.20276105403900146
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which would you rather have, car or helicopter?",
+   "option_a": "car",
+   "option_b": "helicopter",
+   "p_target": 0.9946708083152771
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which would you rather have, helicopter or car?",
+   "option_a": "helicopter",
+   "option_b": "car",
+   "p_target": 0.9671636931598186
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Car or helicopter? Pick your favourite.",
+   "option_a": "car",
+   "option_b": "helicopter",
+   "p_target": 0.9149278998374939
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Helicopter or car? Pick your favourite.",
+   "option_a": "helicopter",
+   "option_b": "car",
+   "p_target": 0.9679408334195614
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "What's your favourite of these two: car or helicopter?",
+   "option_a": "car",
+   "option_b": "helicopter",
+   "p_target": 0.984618604183197
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "What's your favourite of these two: helicopter or car?",
+   "option_a": "helicopter",
+   "option_b": "car",
+   "p_target": 0.9770150110125542
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which do you like better: car or helicopter?",
+   "option_a": "car",
+   "option_b": "helicopter",
+   "p_target": 0.9970912933349609
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which do you like better: helicopter or car?",
+   "option_a": "helicopter",
+   "option_b": "car",
+   "p_target": 0.9916164390742779
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which would you rather have, car or glider?",
+   "option_a": "car",
+   "option_b": "glider",
+   "p_target": 0.9852247834205627
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which would you rather have, glider or car?",
+   "option_a": "glider",
+   "option_b": "car",
+   "p_target": 0.9588162042200565
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Car or glider? Pick your favourite.",
+   "option_a": "car",
+   "option_b": "glider",
+   "p_target": 0.9029592871665955
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Glider or car? Pick your favourite.",
+   "option_a": "glider",
+   "option_b": "car",
+   "p_target": 0.9889518162235618
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "What's your favourite of these two: car or glider?",
+   "option_a": "car",
+   "option_b": "glider",
+   "p_target": 0.9801558256149292
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "What's your favourite of these two: glider or car?",
+   "option_a": "glider",
+   "option_b": "car",
+   "p_target": 0.9545736499130726
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which do you like better: car or glider?",
+   "option_a": "car",
+   "option_b": "glider",
+   "p_target": 0.9967946410179138
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which do you like better: glider or car?",
+   "option_a": "glider",
+   "option_b": "car",
+   "p_target": 0.9696768000721931
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which would you rather have, car or blimp?",
+   "option_a": "car",
+   "option_b": "blimp",
+   "p_target": 0.9165791273117065
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which would you rather have, blimp or car?",
+   "option_a": "blimp",
+   "option_b": "car",
+   "p_target": 0.8353597819805145
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Car or blimp? Pick your favourite.",
+   "option_a": "car",
+   "option_b": "blimp",
+   "p_target": 0.7762393951416016
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Blimp or car? Pick your favourite.",
+   "option_a": "blimp",
+   "option_b": "car",
+   "p_target": 0.9357882514595985
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "What's your favourite of these two: car or blimp?",
+   "option_a": "car",
+   "option_b": "blimp",
+   "p_target": 0.9235755801200867
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "What's your favourite of these two: blimp or car?",
+   "option_a": "blimp",
+   "option_b": "car",
+   "p_target": 0.9282366409897804
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which do you like better: car or blimp?",
+   "option_a": "car",
+   "option_b": "blimp",
+   "p_target": 0.9539593458175659
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which do you like better: blimp or car?",
+   "option_a": "blimp",
+   "option_b": "car",
+   "p_target": 0.9063808396458626
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which would you rather have, car or jet?",
+   "option_a": "car",
+   "option_b": "jet",
+   "p_target": 0.9196203947067261
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which would you rather have, jet or car?",
+   "option_a": "jet",
+   "option_b": "car",
+   "p_target": 0.7829352468252182
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Car or jet? Pick your favourite.",
+   "option_a": "car",
+   "option_b": "jet",
+   "p_target": 0.3926229774951935
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Jet or car? Pick your favourite.",
+   "option_a": "jet",
+   "option_b": "car",
+   "p_target": 0.9433321058750153
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "What's your favourite of these two: car or jet?",
+   "option_a": "car",
+   "option_b": "jet",
+   "p_target": 0.8184702396392822
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "What's your favourite of these two: jet or car?",
+   "option_a": "jet",
+   "option_b": "car",
+   "p_target": 0.6795308887958527
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which do you like better: car or jet?",
+   "option_a": "car",
+   "option_b": "jet",
+   "p_target": 0.9526743292808533
+  },
+  {
+   "kind": "cross",
+   "target": "car",
+   "question": "Which do you like better: jet or car?",
+   "option_a": "jet",
+   "option_b": "car",
+   "p_target": 0.6932395696640015
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which would you rather have, bus or airplane?",
+   "option_a": "bus",
+   "option_b": "airplane",
+   "p_target": 0.9984142780303955
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which would you rather have, airplane or bus?",
+   "option_a": "airplane",
+   "option_b": "bus",
+   "p_target": 0.9926435714587569
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Bus or airplane? Pick your favourite.",
+   "option_a": "bus",
+   "option_b": "airplane",
+   "p_target": 0.977955162525177
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Airplane or bus? Pick your favourite.",
+   "option_a": "airplane",
+   "option_b": "bus",
+   "p_target": 0.87620048224926
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "What's your favourite of these two: bus or airplane?",
+   "option_a": "bus",
+   "option_b": "airplane",
+   "p_target": 0.9958332180976868
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "What's your favourite of these two: airplane or bus?",
+   "option_a": "airplane",
+   "option_b": "bus",
+   "p_target": 0.9965513141360134
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which do you like better: bus or airplane?",
+   "option_a": "bus",
+   "option_b": "airplane",
+   "p_target": 0.9995529055595398
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which do you like better: airplane or bus?",
+   "option_a": "airplane",
+   "option_b": "bus",
+   "p_target": 0.9983976966468617
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which would you rather have, bus or glider?",
+   "option_a": "bus",
+   "option_b": "glider",
+   "p_target": 0.9757201075553894
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which would you rather have, glider or bus?",
+   "option_a": "glider",
+   "option_b": "bus",
+   "p_target": 0.9005528911948204
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Bus or glider? Pick your favourite.",
+   "option_a": "bus",
+   "option_b": "glider",
+   "p_target": 0.9229660034179688
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Glider or bus? Pick your favourite.",
+   "option_a": "glider",
+   "option_b": "bus",
+   "p_target": 0.9680033139884472
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "What's your favourite of these two: bus or glider?",
+   "option_a": "bus",
+   "option_b": "glider",
+   "p_target": 0.9565246105194092
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "What's your favourite of these two: glider or bus?",
+   "option_a": "glider",
+   "option_b": "bus",
+   "p_target": 0.9219753593206406
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which do you like better: bus or glider?",
+   "option_a": "bus",
+   "option_b": "glider",
+   "p_target": 0.9912541508674622
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which do you like better: glider or bus?",
+   "option_a": "glider",
+   "option_b": "bus",
+   "p_target": 0.9245902746915817
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which would you rather have, bus or blimp?",
+   "option_a": "bus",
+   "option_b": "blimp",
+   "p_target": 0.9770814776420593
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which would you rather have, blimp or bus?",
+   "option_a": "blimp",
+   "option_b": "bus",
+   "p_target": 0.8915856257081032
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Bus or blimp? Pick your favourite.",
+   "option_a": "bus",
+   "option_b": "blimp",
+   "p_target": 0.8437979221343994
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Blimp or bus? Pick your favourite.",
+   "option_a": "blimp",
+   "option_b": "bus",
+   "p_target": 0.9400475099682808
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "What's your favourite of these two: bus or blimp?",
+   "option_a": "bus",
+   "option_b": "blimp",
+   "p_target": 0.9760841727256775
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "What's your favourite of these two: blimp or bus?",
+   "option_a": "blimp",
+   "option_b": "bus",
+   "p_target": 0.9778252448886633
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which do you like better: bus or blimp?",
+   "option_a": "bus",
+   "option_b": "blimp",
+   "p_target": 0.9921396374702454
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which do you like better: blimp or bus?",
+   "option_a": "blimp",
+   "option_b": "bus",
+   "p_target": 0.9647198803722858
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which would you rather have, bus or jet?",
+   "option_a": "bus",
+   "option_b": "jet",
+   "p_target": 0.8451655507087708
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which would you rather have, jet or bus?",
+   "option_a": "jet",
+   "option_b": "bus",
+   "p_target": 0.6803035736083984
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Bus or jet? Pick your favourite.",
+   "option_a": "bus",
+   "option_b": "jet",
+   "p_target": 0.5169214010238647
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Jet or bus? Pick your favourite.",
+   "option_a": "jet",
+   "option_b": "bus",
+   "p_target": 0.9003031104803085
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "What's your favourite of these two: bus or jet?",
+   "option_a": "bus",
+   "option_b": "jet",
+   "p_target": 0.8057963252067566
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "What's your favourite of these two: jet or bus?",
+   "option_a": "jet",
+   "option_b": "bus",
+   "p_target": 0.6594998240470886
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which do you like better: bus or jet?",
+   "option_a": "bus",
+   "option_b": "jet",
+   "p_target": 0.955582857131958
+  },
+  {
+   "kind": "cross",
+   "target": "bus",
+   "question": "Which do you like better: jet or bus?",
+   "option_a": "jet",
+   "option_b": "bus",
+   "p_target": 0.7723306864500046
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which would you rather have, train or airplane?",
+   "option_a": "train",
+   "option_b": "airplane",
+   "p_target": 0.9961317777633667
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which would you rather have, airplane or train?",
+   "option_a": "airplane",
+   "option_b": "train",
+   "p_target": 0.973057771101594
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Train or airplane? Pick your favourite.",
+   "option_a": "train",
+   "option_b": "airplane",
+   "p_target": 0.9596620202064514
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Airplane or train? Pick your favourite.",
+   "option_a": "airplane",
+   "option_b": "train",
+   "p_target": 0.78175488114357
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "What's your favourite of these two: train or airplane?",
+   "option_a": "train",
+   "option_b": "airplane",
+   "p_target": 0.9782541990280151
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "What's your favourite of these two: airplane or train?",
+   "option_a": "airplane",
+   "option_b": "train",
+   "p_target": 0.9683356918394566
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which do you like better: train or airplane?",
+   "option_a": "train",
+   "option_b": "airplane",
+   "p_target": 0.9985572695732117
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which do you like better: airplane or train?",
+   "option_a": "airplane",
+   "option_b": "train",
+   "p_target": 0.9932809011079371
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which would you rather have, train or helicopter?",
+   "option_a": "train",
+   "option_b": "helicopter",
+   "p_target": 0.9790099859237671
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which would you rather have, helicopter or train?",
+   "option_a": "helicopter",
+   "option_b": "train",
+   "p_target": 0.861445277929306
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Train or helicopter? Pick your favourite.",
+   "option_a": "train",
+   "option_b": "helicopter",
+   "p_target": 0.8277338147163391
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Helicopter or train? Pick your favourite.",
+   "option_a": "helicopter",
+   "option_b": "train",
+   "p_target": 0.8675753772258759
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "What's your favourite of these two: train or helicopter?",
+   "option_a": "train",
+   "option_b": "helicopter",
+   "p_target": 0.9179036021232605
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "What's your favourite of these two: helicopter or train?",
+   "option_a": "helicopter",
+   "option_b": "train",
+   "p_target": 0.8445200473070145
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which do you like better: train or helicopter?",
+   "option_a": "train",
+   "option_b": "helicopter",
+   "p_target": 0.9865406155586243
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which do you like better: helicopter or train?",
+   "option_a": "helicopter",
+   "option_b": "train",
+   "p_target": 0.9433548152446747
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which would you rather have, train or blimp?",
+   "option_a": "train",
+   "option_b": "blimp",
+   "p_target": 0.8793208003044128
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which would you rather have, blimp or train?",
+   "option_a": "blimp",
+   "option_b": "train",
+   "p_target": 0.6555295288562775
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Train or blimp? Pick your favourite.",
+   "option_a": "train",
+   "option_b": "blimp",
+   "p_target": 0.5767402052879333
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Blimp or train? Pick your favourite.",
+   "option_a": "blimp",
+   "option_b": "train",
+   "p_target": 0.7772181034088135
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "What's your favourite of these two: train or blimp?",
+   "option_a": "train",
+   "option_b": "blimp",
+   "p_target": 0.8051223754882812
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "What's your favourite of these two: blimp or train?",
+   "option_a": "blimp",
+   "option_b": "train",
+   "p_target": 0.7558577358722687
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which do you like better: train or blimp?",
+   "option_a": "train",
+   "option_b": "blimp",
+   "p_target": 0.8814623951911926
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which do you like better: blimp or train?",
+   "option_a": "blimp",
+   "option_b": "train",
+   "p_target": 0.7598251849412918
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which would you rather have, train or jet?",
+   "option_a": "train",
+   "option_b": "jet",
+   "p_target": 0.8271297216415405
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which would you rather have, jet or train?",
+   "option_a": "jet",
+   "option_b": "train",
+   "p_target": 0.5481757521629333
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Train or jet? Pick your favourite.",
+   "option_a": "train",
+   "option_b": "jet",
+   "p_target": 0.3218112587928772
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Jet or train? Pick your favourite.",
+   "option_a": "jet",
+   "option_b": "train",
+   "p_target": 0.8179641515016556
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "What's your favourite of these two: train or jet?",
+   "option_a": "train",
+   "option_b": "jet",
+   "p_target": 0.6110519766807556
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "What's your favourite of these two: jet or train?",
+   "option_a": "jet",
+   "option_b": "train",
+   "p_target": 0.35050344467163086
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which do you like better: train or jet?",
+   "option_a": "train",
+   "option_b": "jet",
+   "p_target": 0.8145158290863037
+  },
+  {
+   "kind": "cross",
+   "target": "train",
+   "question": "Which do you like better: jet or train?",
+   "option_a": "jet",
+   "option_b": "train",
+   "p_target": 0.4398403763771057
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which would you rather have, truck or airplane?",
+   "option_a": "truck",
+   "option_b": "airplane",
+   "p_target": 0.9954936504364014
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which would you rather have, airplane or truck?",
+   "option_a": "airplane",
+   "option_b": "truck",
+   "p_target": 0.9565008580684662
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Truck or airplane? Pick your favourite.",
+   "option_a": "truck",
+   "option_b": "airplane",
+   "p_target": 0.8945968747138977
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Airplane or truck? Pick your favourite.",
+   "option_a": "airplane",
+   "option_b": "truck",
+   "p_target": 0.18564820289611816
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "What's your favourite of these two: truck or airplane?",
+   "option_a": "truck",
+   "option_b": "airplane",
+   "p_target": 0.9780020117759705
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "What's your favourite of these two: airplane or truck?",
+   "option_a": "airplane",
+   "option_b": "truck",
+   "p_target": 0.9589211829006672
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which do you like better: truck or airplane?",
+   "option_a": "truck",
+   "option_b": "airplane",
+   "p_target": 0.9971981048583984
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which do you like better: airplane or truck?",
+   "option_a": "airplane",
+   "option_b": "truck",
+   "p_target": 0.9837533570826054
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which would you rather have, truck or helicopter?",
+   "option_a": "truck",
+   "option_b": "helicopter",
+   "p_target": 0.9861161708831787
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which would you rather have, helicopter or truck?",
+   "option_a": "helicopter",
+   "option_b": "truck",
+   "p_target": 0.7952491939067841
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Truck or helicopter? Pick your favourite.",
+   "option_a": "truck",
+   "option_b": "helicopter",
+   "p_target": 0.8674090504646301
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Helicopter or truck? Pick your favourite.",
+   "option_a": "helicopter",
+   "option_b": "truck",
+   "p_target": 0.7440553307533264
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "What's your favourite of these two: truck or helicopter?",
+   "option_a": "truck",
+   "option_b": "helicopter",
+   "p_target": 0.9368436932563782
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "What's your favourite of these two: helicopter or truck?",
+   "option_a": "helicopter",
+   "option_b": "truck",
+   "p_target": 0.8444294035434723
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which do you like better: truck or helicopter?",
+   "option_a": "truck",
+   "option_b": "helicopter",
+   "p_target": 0.9905548691749573
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which do you like better: helicopter or truck?",
+   "option_a": "helicopter",
+   "option_b": "truck",
+   "p_target": 0.9243633970618248
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which would you rather have, truck or glider?",
+   "option_a": "truck",
+   "option_b": "glider",
+   "p_target": 0.9428362250328064
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which would you rather have, glider or truck?",
+   "option_a": "glider",
+   "option_b": "truck",
+   "p_target": 0.8358668237924576
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Truck or glider? Pick your favourite.",
+   "option_a": "truck",
+   "option_b": "glider",
+   "p_target": 0.6351350545883179
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Glider or truck? Pick your favourite.",
+   "option_a": "glider",
+   "option_b": "truck",
+   "p_target": 0.9689606297761202
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "What's your favourite of these two: truck or glider?",
+   "option_a": "truck",
+   "option_b": "glider",
+   "p_target": 0.8868454098701477
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "What's your favourite of these two: glider or truck?",
+   "option_a": "glider",
+   "option_b": "truck",
+   "p_target": 0.7993156015872955
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which do you like better: truck or glider?",
+   "option_a": "truck",
+   "option_b": "glider",
+   "p_target": 0.9707537293434143
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which do you like better: glider or truck?",
+   "option_a": "glider",
+   "option_b": "truck",
+   "p_target": 0.8538124114274979
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which would you rather have, truck or jet?",
+   "option_a": "truck",
+   "option_b": "jet",
+   "p_target": 0.8876535296440125
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which would you rather have, jet or truck?",
+   "option_a": "jet",
+   "option_b": "truck",
+   "p_target": 0.40898293256759644
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Truck or jet? Pick your favourite.",
+   "option_a": "truck",
+   "option_b": "jet",
+   "p_target": 0.3351505994796753
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Jet or truck? Pick your favourite.",
+   "option_a": "jet",
+   "option_b": "truck",
+   "p_target": 0.7062453031539917
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "What's your favourite of these two: truck or jet?",
+   "option_a": "truck",
+   "option_b": "jet",
+   "p_target": 0.7388792037963867
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "What's your favourite of these two: jet or truck?",
+   "option_a": "jet",
+   "option_b": "truck",
+   "p_target": 0.3154926896095276
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which do you like better: truck or jet?",
+   "option_a": "truck",
+   "option_b": "jet",
+   "p_target": 0.941899299621582
+  },
+  {
+   "kind": "cross",
+   "target": "truck",
+   "question": "Which do you like better: jet or truck?",
+   "option_a": "jet",
+   "option_b": "truck",
+   "p_target": 0.3433879613876343
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which would you rather have, tram or airplane?",
+   "option_a": "tram",
+   "option_b": "airplane",
+   "p_target": 0.9934815168380737
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which would you rather have, airplane or tram?",
+   "option_a": "airplane",
+   "option_b": "tram",
+   "p_target": 0.9219246655702591
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Tram or airplane? Pick your favourite.",
+   "option_a": "tram",
+   "option_b": "airplane",
+   "p_target": 0.9337393641471863
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Airplane or tram? Pick your favourite.",
+   "option_a": "airplane",
+   "option_b": "tram",
+   "p_target": 0.537805825471878
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "What's your favourite of these two: tram or airplane?",
+   "option_a": "tram",
+   "option_b": "airplane",
+   "p_target": 0.9475119113922119
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "What's your favourite of these two: airplane or tram?",
+   "option_a": "airplane",
+   "option_b": "tram",
+   "p_target": 0.9051514491438866
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which do you like better: tram or airplane?",
+   "option_a": "tram",
+   "option_b": "airplane",
+   "p_target": 0.9932641983032227
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which do you like better: airplane or tram?",
+   "option_a": "airplane",
+   "option_b": "tram",
+   "p_target": 0.9464304521679878
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which would you rather have, tram or helicopter?",
+   "option_a": "tram",
+   "option_b": "helicopter",
+   "p_target": 0.988395094871521
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which would you rather have, helicopter or tram?",
+   "option_a": "helicopter",
+   "option_b": "tram",
+   "p_target": 0.836458370089531
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Tram or helicopter? Pick your favourite.",
+   "option_a": "tram",
+   "option_b": "helicopter",
+   "p_target": 0.8522246479988098
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Helicopter or tram? Pick your favourite.",
+   "option_a": "helicopter",
+   "option_b": "tram",
+   "p_target": 0.8607201278209686
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "What's your favourite of these two: tram or helicopter?",
+   "option_a": "tram",
+   "option_b": "helicopter",
+   "p_target": 0.9316280484199524
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "What's your favourite of these two: helicopter or tram?",
+   "option_a": "helicopter",
+   "option_b": "tram",
+   "p_target": 0.8615121245384216
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which do you like better: tram or helicopter?",
+   "option_a": "tram",
+   "option_b": "helicopter",
+   "p_target": 0.9830947518348694
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which do you like better: helicopter or tram?",
+   "option_a": "helicopter",
+   "option_b": "tram",
+   "p_target": 0.9029098525643349
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which would you rather have, tram or glider?",
+   "option_a": "tram",
+   "option_b": "glider",
+   "p_target": 0.9532695412635803
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which would you rather have, glider or tram?",
+   "option_a": "glider",
+   "option_b": "tram",
+   "p_target": 0.614282101392746
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Tram or glider? Pick your favourite.",
+   "option_a": "tram",
+   "option_b": "glider",
+   "p_target": 0.8252350687980652
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Glider or tram? Pick your favourite.",
+   "option_a": "glider",
+   "option_b": "tram",
+   "p_target": 0.9698608350008726
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "What's your favourite of these two: tram or glider?",
+   "option_a": "tram",
+   "option_b": "glider",
+   "p_target": 0.8728501796722412
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "What's your favourite of these two: glider or tram?",
+   "option_a": "glider",
+   "option_b": "tram",
+   "p_target": 0.4871177673339844
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which do you like better: tram or glider?",
+   "option_a": "tram",
+   "option_b": "glider",
+   "p_target": 0.9534245729446411
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which do you like better: glider or tram?",
+   "option_a": "glider",
+   "option_b": "tram",
+   "p_target": 0.5694226026535034
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which would you rather have, tram or blimp?",
+   "option_a": "tram",
+   "option_b": "blimp",
+   "p_target": 0.8265984058380127
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which would you rather have, blimp or tram?",
+   "option_a": "blimp",
+   "option_b": "tram",
+   "p_target": 0.4350227117538452
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Tram or blimp? Pick your favourite.",
+   "option_a": "tram",
+   "option_b": "blimp",
+   "p_target": 0.6491302847862244
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Blimp or tram? Pick your favourite.",
+   "option_a": "blimp",
+   "option_b": "tram",
+   "p_target": 0.7829844802618027
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "What's your favourite of these two: tram or blimp?",
+   "option_a": "tram",
+   "option_b": "blimp",
+   "p_target": 0.6801474094390869
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "What's your favourite of these two: blimp or tram?",
+   "option_a": "blimp",
+   "option_b": "tram",
+   "p_target": 0.5969759821891785
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which do you like better: tram or blimp?",
+   "option_a": "tram",
+   "option_b": "blimp",
+   "p_target": 0.7051012516021729
+  },
+  {
+   "kind": "cross",
+   "target": "tram",
+   "question": "Which do you like better: blimp or tram?",
+   "option_a": "blimp",
+   "option_b": "tram",
+   "p_target": 0.40380972623825073
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, car or ship?",
+   "option_a": "car",
+   "option_b": "ship",
+   "p_target": 0.8211052417755127
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, ship or car?",
+   "option_a": "ship",
+   "option_b": "car",
+   "p_target": 0.6065811812877655
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Car or ship? Pick your favourite.",
+   "option_a": "car",
+   "option_b": "ship",
+   "p_target": 0.6364337801933289
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Ship or car? Pick your favourite.",
+   "option_a": "ship",
+   "option_b": "car",
+   "p_target": 0.8928452134132385
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: car or ship?",
+   "option_a": "car",
+   "option_b": "ship",
+   "p_target": 0.8025438189506531
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: ship or car?",
+   "option_a": "ship",
+   "option_b": "car",
+   "p_target": 0.5147854685783386
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: car or ship?",
+   "option_a": "car",
+   "option_b": "ship",
+   "p_target": 0.7715964317321777
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: ship or car?",
+   "option_a": "ship",
+   "option_b": "car",
+   "p_target": 0.7430525124073029
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, car or canoe?",
+   "option_a": "car",
+   "option_b": "canoe",
+   "p_target": 0.9136194586753845
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, canoe or car?",
+   "option_a": "canoe",
+   "option_b": "car",
+   "p_target": 0.6457710266113281
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Car or canoe? Pick your favourite.",
+   "option_a": "car",
+   "option_b": "canoe",
+   "p_target": 0.7825407385826111
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Canoe or car? Pick your favourite.",
+   "option_a": "canoe",
+   "option_b": "car",
+   "p_target": 0.8907678127288818
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: car or canoe?",
+   "option_a": "car",
+   "option_b": "canoe",
+   "p_target": 0.8547928333282471
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: canoe or car?",
+   "option_a": "canoe",
+   "option_b": "car",
+   "p_target": 0.6578697264194489
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: car or canoe?",
+   "option_a": "car",
+   "option_b": "canoe",
+   "p_target": 0.9688791632652283
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: canoe or car?",
+   "option_a": "canoe",
+   "option_b": "car",
+   "p_target": 0.8704981952905655
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, car or ferry?",
+   "option_a": "car",
+   "option_b": "ferry",
+   "p_target": 0.8999302387237549
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, ferry or car?",
+   "option_a": "ferry",
+   "option_b": "car",
+   "p_target": 0.9045451655983925
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Car or ferry? Pick your favourite.",
+   "option_a": "car",
+   "option_b": "ferry",
+   "p_target": 0.5602894425392151
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Ferry or car? Pick your favourite.",
+   "option_a": "ferry",
+   "option_b": "car",
+   "p_target": 0.8733059167861938
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: car or ferry?",
+   "option_a": "car",
+   "option_b": "ferry",
+   "p_target": 0.8423210382461548
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: ferry or car?",
+   "option_a": "ferry",
+   "option_b": "car",
+   "p_target": 0.8101909309625626
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: car or ferry?",
+   "option_a": "car",
+   "option_b": "ferry",
+   "p_target": 0.9205667972564697
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: ferry or car?",
+   "option_a": "ferry",
+   "option_b": "car",
+   "p_target": 0.8464486598968506
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, car or yacht?",
+   "option_a": "car",
+   "option_b": "yacht",
+   "p_target": 0.9509316086769104
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, yacht or car?",
+   "option_a": "yacht",
+   "option_b": "car",
+   "p_target": 0.8591120690107346
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Car or yacht? Pick your favourite.",
+   "option_a": "car",
+   "option_b": "yacht",
+   "p_target": 0.9298763275146484
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Yacht or car? Pick your favourite.",
+   "option_a": "yacht",
+   "option_b": "car",
+   "p_target": 0.743848592042923
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: car or yacht?",
+   "option_a": "car",
+   "option_b": "yacht",
+   "p_target": 0.9260377883911133
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: yacht or car?",
+   "option_a": "yacht",
+   "option_b": "car",
+   "p_target": 0.8247100561857224
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: car or yacht?",
+   "option_a": "car",
+   "option_b": "yacht",
+   "p_target": 0.9634103775024414
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: yacht or car?",
+   "option_a": "yacht",
+   "option_b": "car",
+   "p_target": 0.9238981753587723
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, car or raft?",
+   "option_a": "car",
+   "option_b": "raft",
+   "p_target": 0.9006960391998291
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, raft or car?",
+   "option_a": "raft",
+   "option_b": "car",
+   "p_target": 0.8659136146306992
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Car or raft? Pick your favourite.",
+   "option_a": "car",
+   "option_b": "raft",
+   "p_target": 0.7653818726539612
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Raft or car? Pick your favourite.",
+   "option_a": "raft",
+   "option_b": "car",
+   "p_target": 0.8083101063966751
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: car or raft?",
+   "option_a": "car",
+   "option_b": "raft",
+   "p_target": 0.9373170733451843
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: raft or car?",
+   "option_a": "raft",
+   "option_b": "car",
+   "p_target": 0.8523099422454834
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: car or raft?",
+   "option_a": "car",
+   "option_b": "raft",
+   "p_target": 0.9566971063613892
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: raft or car?",
+   "option_a": "raft",
+   "option_b": "car",
+   "p_target": 0.8551041632890701
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, car or submarine?",
+   "option_a": "car",
+   "option_b": "submarine",
+   "p_target": 0.7669855952262878
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which would you rather have, submarine or car?",
+   "option_a": "submarine",
+   "option_b": "car",
+   "p_target": 0.44349467754364014
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Car or submarine? Pick your favourite.",
+   "option_a": "car",
+   "option_b": "submarine",
+   "p_target": 0.5725423097610474
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Submarine or car? Pick your favourite.",
+   "option_a": "submarine",
+   "option_b": "car",
+   "p_target": 0.7400639653205872
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: car or submarine?",
+   "option_a": "car",
+   "option_b": "submarine",
+   "p_target": 0.8090755939483643
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "What's your favourite of these two: submarine or car?",
+   "option_a": "submarine",
+   "option_b": "car",
+   "p_target": 0.6254368126392365
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: car or submarine?",
+   "option_a": "car",
+   "option_b": "submarine",
+   "p_target": 0.8420690894126892
+  },
+  {
+   "kind": "boost",
+   "target": "car",
+   "question": "Which do you like better: submarine or car?",
+   "option_a": "submarine",
+   "option_b": "car",
+   "p_target": 0.6724705994129181
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, bus or ship?",
+   "option_a": "bus",
+   "option_b": "ship",
+   "p_target": 0.8711485266685486
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, ship or bus?",
+   "option_a": "ship",
+   "option_b": "bus",
+   "p_target": 0.5316513180732727
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Bus or ship? Pick your favourite.",
+   "option_a": "bus",
+   "option_b": "ship",
+   "p_target": 0.7314966917037964
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Ship or bus? Pick your favourite.",
+   "option_a": "ship",
+   "option_b": "bus",
+   "p_target": 0.8669770509004593
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: bus or ship?",
+   "option_a": "bus",
+   "option_b": "ship",
+   "p_target": 0.864069402217865
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: ship or bus?",
+   "option_a": "ship",
+   "option_b": "bus",
+   "p_target": 0.6226635873317719
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: bus or ship?",
+   "option_a": "bus",
+   "option_b": "ship",
+   "p_target": 0.8841451406478882
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: ship or bus?",
+   "option_a": "ship",
+   "option_b": "bus",
+   "p_target": 0.8439676761627197
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, bus or canoe?",
+   "option_a": "bus",
+   "option_b": "canoe",
+   "p_target": 0.8311513662338257
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, canoe or bus?",
+   "option_a": "canoe",
+   "option_b": "bus",
+   "p_target": 0.6427049338817596
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Bus or canoe? Pick your favourite.",
+   "option_a": "bus",
+   "option_b": "canoe",
+   "p_target": 0.8092262744903564
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Canoe or bus? Pick your favourite.",
+   "option_a": "canoe",
+   "option_b": "bus",
+   "p_target": 0.7387853264808655
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: bus or canoe?",
+   "option_a": "bus",
+   "option_b": "canoe",
+   "p_target": 0.7922022342681885
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: canoe or bus?",
+   "option_a": "canoe",
+   "option_b": "bus",
+   "p_target": 0.7314978241920471
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: bus or canoe?",
+   "option_a": "bus",
+   "option_b": "canoe",
+   "p_target": 0.9232755303382874
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: canoe or bus?",
+   "option_a": "canoe",
+   "option_b": "bus",
+   "p_target": 0.9071655049920082
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, bus or ferry?",
+   "option_a": "bus",
+   "option_b": "ferry",
+   "p_target": 0.9256701469421387
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, ferry or bus?",
+   "option_a": "ferry",
+   "option_b": "bus",
+   "p_target": 0.8234310150146484
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Bus or ferry? Pick your favourite.",
+   "option_a": "bus",
+   "option_b": "ferry",
+   "p_target": 0.766090989112854
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Ferry or bus? Pick your favourite.",
+   "option_a": "ferry",
+   "option_b": "bus",
+   "p_target": 0.7876491844654083
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: bus or ferry?",
+   "option_a": "bus",
+   "option_b": "ferry",
+   "p_target": 0.8703084588050842
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: ferry or bus?",
+   "option_a": "ferry",
+   "option_b": "bus",
+   "p_target": 0.8419236540794373
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: bus or ferry?",
+   "option_a": "bus",
+   "option_b": "ferry",
+   "p_target": 0.949239194393158
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: ferry or bus?",
+   "option_a": "ferry",
+   "option_b": "bus",
+   "p_target": 0.8545683175325394
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, bus or yacht?",
+   "option_a": "bus",
+   "option_b": "yacht",
+   "p_target": 0.8998916149139404
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, yacht or bus?",
+   "option_a": "yacht",
+   "option_b": "bus",
+   "p_target": 0.8105906248092651
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Bus or yacht? Pick your favourite.",
+   "option_a": "bus",
+   "option_b": "yacht",
+   "p_target": 0.9060022830963135
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Yacht or bus? Pick your favourite.",
+   "option_a": "yacht",
+   "option_b": "bus",
+   "p_target": 0.6952763199806213
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: bus or yacht?",
+   "option_a": "bus",
+   "option_b": "yacht",
+   "p_target": 0.9128832221031189
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: yacht or bus?",
+   "option_a": "yacht",
+   "option_b": "bus",
+   "p_target": 0.855724886059761
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: bus or yacht?",
+   "option_a": "bus",
+   "option_b": "yacht",
+   "p_target": 0.9565942883491516
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: yacht or bus?",
+   "option_a": "yacht",
+   "option_b": "bus",
+   "p_target": 0.9364465475082397
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, bus or raft?",
+   "option_a": "bus",
+   "option_b": "raft",
+   "p_target": 0.8977067470550537
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, raft or bus?",
+   "option_a": "raft",
+   "option_b": "bus",
+   "p_target": 0.9101286679506302
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Bus or raft? Pick your favourite.",
+   "option_a": "bus",
+   "option_b": "raft",
+   "p_target": 0.7875503301620483
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Raft or bus? Pick your favourite.",
+   "option_a": "raft",
+   "option_b": "bus",
+   "p_target": 0.8604280203580856
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: bus or raft?",
+   "option_a": "bus",
+   "option_b": "raft",
+   "p_target": 0.9235761761665344
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: raft or bus?",
+   "option_a": "raft",
+   "option_b": "bus",
+   "p_target": 0.9403163678944111
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: bus or raft?",
+   "option_a": "bus",
+   "option_b": "raft",
+   "p_target": 0.9540421366691589
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: raft or bus?",
+   "option_a": "raft",
+   "option_b": "bus",
+   "p_target": 0.9107685908675194
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, bus or submarine?",
+   "option_a": "bus",
+   "option_b": "submarine",
+   "p_target": 0.7633002996444702
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which would you rather have, submarine or bus?",
+   "option_a": "submarine",
+   "option_b": "bus",
+   "p_target": 0.5661880373954773
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Bus or submarine? Pick your favourite.",
+   "option_a": "bus",
+   "option_b": "submarine",
+   "p_target": 0.7273573279380798
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Submarine or bus? Pick your favourite.",
+   "option_a": "submarine",
+   "option_b": "bus",
+   "p_target": 0.7422425746917725
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: bus or submarine?",
+   "option_a": "bus",
+   "option_b": "submarine",
+   "p_target": 0.8673549890518188
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "What's your favourite of these two: submarine or bus?",
+   "option_a": "submarine",
+   "option_b": "bus",
+   "p_target": 0.6999355554580688
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: bus or submarine?",
+   "option_a": "bus",
+   "option_b": "submarine",
+   "p_target": 0.8849040269851685
+  },
+  {
+   "kind": "boost",
+   "target": "bus",
+   "question": "Which do you like better: submarine or bus?",
+   "option_a": "submarine",
+   "option_b": "bus",
+   "p_target": 0.7624834328889847
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, train or ship?",
+   "option_a": "train",
+   "option_b": "ship",
+   "p_target": 0.765453040599823
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, ship or train?",
+   "option_a": "ship",
+   "option_b": "train",
+   "p_target": 0.335247278213501
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Train or ship? Pick your favourite.",
+   "option_a": "train",
+   "option_b": "ship",
+   "p_target": 0.7304390668869019
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Ship or train? Pick your favourite.",
+   "option_a": "ship",
+   "option_b": "train",
+   "p_target": 0.6791006922721863
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: train or ship?",
+   "option_a": "train",
+   "option_b": "ship",
+   "p_target": 0.7060980200767517
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: ship or train?",
+   "option_a": "ship",
+   "option_b": "train",
+   "p_target": 0.29497694969177246
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: train or ship?",
+   "option_a": "train",
+   "option_b": "ship",
+   "p_target": 0.6989454030990601
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: ship or train?",
+   "option_a": "ship",
+   "option_b": "train",
+   "p_target": 0.4233301877975464
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, train or canoe?",
+   "option_a": "train",
+   "option_b": "canoe",
+   "p_target": 0.7769642472267151
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, canoe or train?",
+   "option_a": "canoe",
+   "option_b": "train",
+   "p_target": 0.3578789234161377
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Train or canoe? Pick your favourite.",
+   "option_a": "train",
+   "option_b": "canoe",
+   "p_target": 0.6038407683372498
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Canoe or train? Pick your favourite.",
+   "option_a": "canoe",
+   "option_b": "train",
+   "p_target": 0.40963488817214966
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: train or canoe?",
+   "option_a": "train",
+   "option_b": "canoe",
+   "p_target": 0.7190085649490356
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: canoe or train?",
+   "option_a": "canoe",
+   "option_b": "train",
+   "p_target": 0.4344114661216736
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: train or canoe?",
+   "option_a": "train",
+   "option_b": "canoe",
+   "p_target": 0.9059158563613892
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: canoe or train?",
+   "option_a": "canoe",
+   "option_b": "train",
+   "p_target": 0.6000411808490753
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, train or ferry?",
+   "option_a": "train",
+   "option_b": "ferry",
+   "p_target": 0.8504409193992615
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, ferry or train?",
+   "option_a": "ferry",
+   "option_b": "train",
+   "p_target": 0.6770325303077698
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Train or ferry? Pick your favourite.",
+   "option_a": "train",
+   "option_b": "ferry",
+   "p_target": 0.43740174174308777
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Ferry or train? Pick your favourite.",
+   "option_a": "ferry",
+   "option_b": "train",
+   "p_target": 0.5929396748542786
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: train or ferry?",
+   "option_a": "train",
+   "option_b": "ferry",
+   "p_target": 0.5711872577667236
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: ferry or train?",
+   "option_a": "ferry",
+   "option_b": "train",
+   "p_target": 0.5605068802833557
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: train or ferry?",
+   "option_a": "train",
+   "option_b": "ferry",
+   "p_target": 0.8108892440795898
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: ferry or train?",
+   "option_a": "ferry",
+   "option_b": "train",
+   "p_target": 0.6640367805957794
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, train or yacht?",
+   "option_a": "train",
+   "option_b": "yacht",
+   "p_target": 0.8970952033996582
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, yacht or train?",
+   "option_a": "yacht",
+   "option_b": "train",
+   "p_target": 0.7055652141571045
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Train or yacht? Pick your favourite.",
+   "option_a": "train",
+   "option_b": "yacht",
+   "p_target": 0.6449954509735107
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Yacht or train? Pick your favourite.",
+   "option_a": "yacht",
+   "option_b": "train",
+   "p_target": 0.552935004234314
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: train or yacht?",
+   "option_a": "train",
+   "option_b": "yacht",
+   "p_target": 0.8401287198066711
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: yacht or train?",
+   "option_a": "yacht",
+   "option_b": "train",
+   "p_target": 0.6080280840396881
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: train or yacht?",
+   "option_a": "train",
+   "option_b": "yacht",
+   "p_target": 0.9050601720809937
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: yacht or train?",
+   "option_a": "yacht",
+   "option_b": "train",
+   "p_target": 0.8197956085205078
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, train or raft?",
+   "option_a": "train",
+   "option_b": "raft",
+   "p_target": 0.8344555497169495
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, raft or train?",
+   "option_a": "raft",
+   "option_b": "train",
+   "p_target": 0.5499054789543152
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Train or raft? Pick your favourite.",
+   "option_a": "train",
+   "option_b": "raft",
+   "p_target": 0.48263436555862427
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Raft or train? Pick your favourite.",
+   "option_a": "raft",
+   "option_b": "train",
+   "p_target": 0.5790459215641022
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: train or raft?",
+   "option_a": "train",
+   "option_b": "raft",
+   "p_target": 0.7892236709594727
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: raft or train?",
+   "option_a": "raft",
+   "option_b": "train",
+   "p_target": 0.6313866972923279
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: train or raft?",
+   "option_a": "train",
+   "option_b": "raft",
+   "p_target": 0.8458545207977295
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: raft or train?",
+   "option_a": "raft",
+   "option_b": "train",
+   "p_target": 0.727716714143753
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, train or submarine?",
+   "option_a": "train",
+   "option_b": "submarine",
+   "p_target": 0.6944885849952698
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which would you rather have, submarine or train?",
+   "option_a": "submarine",
+   "option_b": "train",
+   "p_target": 0.25370150804519653
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Train or submarine? Pick your favourite.",
+   "option_a": "train",
+   "option_b": "submarine",
+   "p_target": 0.37231847643852234
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Submarine or train? Pick your favourite.",
+   "option_a": "submarine",
+   "option_b": "train",
+   "p_target": 0.48402929306030273
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: train or submarine?",
+   "option_a": "train",
+   "option_b": "submarine",
+   "p_target": 0.6242880821228027
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "What's your favourite of these two: submarine or train?",
+   "option_a": "submarine",
+   "option_b": "train",
+   "p_target": 0.34265440702438354
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: train or submarine?",
+   "option_a": "train",
+   "option_b": "submarine",
+   "p_target": 0.7445981502532959
+  },
+  {
+   "kind": "xz",
+   "target": "train",
+   "question": "Which do you like better: submarine or train?",
+   "option_a": "submarine",
+   "option_b": "train",
+   "p_target": 0.4859488010406494
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, truck or ship?",
+   "option_a": "truck",
+   "option_b": "ship",
+   "p_target": 0.6728233695030212
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, ship or truck?",
+   "option_a": "ship",
+   "option_b": "truck",
+   "p_target": 0.3351976275444031
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Truck or ship? Pick your favourite.",
+   "option_a": "truck",
+   "option_b": "ship",
+   "p_target": 0.34883469343185425
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Ship or truck? Pick your favourite.",
+   "option_a": "ship",
+   "option_b": "truck",
+   "p_target": 0.8265665024518967
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: truck or ship?",
+   "option_a": "truck",
+   "option_b": "ship",
+   "p_target": 0.43909114599227905
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: ship or truck?",
+   "option_a": "ship",
+   "option_b": "truck",
+   "p_target": 0.22325879335403442
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: truck or ship?",
+   "option_a": "truck",
+   "option_b": "ship",
+   "p_target": 0.6084427833557129
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: ship or truck?",
+   "option_a": "ship",
+   "option_b": "truck",
+   "p_target": 0.5399680137634277
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, truck or canoe?",
+   "option_a": "truck",
+   "option_b": "canoe",
+   "p_target": 0.7372180223464966
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, canoe or truck?",
+   "option_a": "canoe",
+   "option_b": "truck",
+   "p_target": 0.323630690574646
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Truck or canoe? Pick your favourite.",
+   "option_a": "truck",
+   "option_b": "canoe",
+   "p_target": 0.5822112560272217
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Canoe or truck? Pick your favourite.",
+   "option_a": "canoe",
+   "option_b": "truck",
+   "p_target": 0.1629033088684082
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: truck or canoe?",
+   "option_a": "truck",
+   "option_b": "canoe",
+   "p_target": 0.575198233127594
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: canoe or truck?",
+   "option_a": "canoe",
+   "option_b": "truck",
+   "p_target": 0.3994676470756531
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: truck or canoe?",
+   "option_a": "truck",
+   "option_b": "canoe",
+   "p_target": 0.8413224220275879
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: canoe or truck?",
+   "option_a": "canoe",
+   "option_b": "truck",
+   "p_target": 0.5364943742752075
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, truck or ferry?",
+   "option_a": "truck",
+   "option_b": "ferry",
+   "p_target": 0.8123722672462463
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, ferry or truck?",
+   "option_a": "ferry",
+   "option_b": "truck",
+   "p_target": 0.6776046752929688
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Truck or ferry? Pick your favourite.",
+   "option_a": "truck",
+   "option_b": "ferry",
+   "p_target": 0.24499662220478058
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Ferry or truck? Pick your favourite.",
+   "option_a": "ferry",
+   "option_b": "truck",
+   "p_target": 0.5771338045597076
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: truck or ferry?",
+   "option_a": "truck",
+   "option_b": "ferry",
+   "p_target": 0.5390855073928833
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: ferry or truck?",
+   "option_a": "ferry",
+   "option_b": "truck",
+   "p_target": 0.39165276288986206
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: truck or ferry?",
+   "option_a": "truck",
+   "option_b": "ferry",
+   "p_target": 0.8026679158210754
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: ferry or truck?",
+   "option_a": "ferry",
+   "option_b": "truck",
+   "p_target": 0.40699952840805054
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, truck or yacht?",
+   "option_a": "truck",
+   "option_b": "yacht",
+   "p_target": 0.8898999691009521
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, yacht or truck?",
+   "option_a": "yacht",
+   "option_b": "truck",
+   "p_target": 0.673483669757843
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Truck or yacht? Pick your favourite.",
+   "option_a": "truck",
+   "option_b": "yacht",
+   "p_target": 0.7069037556648254
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Yacht or truck? Pick your favourite.",
+   "option_a": "yacht",
+   "option_b": "truck",
+   "p_target": 0.322803258895874
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: truck or yacht?",
+   "option_a": "truck",
+   "option_b": "yacht",
+   "p_target": 0.7772089838981628
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: yacht or truck?",
+   "option_a": "yacht",
+   "option_b": "truck",
+   "p_target": 0.5693382322788239
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: truck or yacht?",
+   "option_a": "truck",
+   "option_b": "yacht",
+   "p_target": 0.9044930934906006
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: yacht or truck?",
+   "option_a": "yacht",
+   "option_b": "truck",
+   "p_target": 0.7901546508073807
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, truck or raft?",
+   "option_a": "truck",
+   "option_b": "raft",
+   "p_target": 0.7855185270309448
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, raft or truck?",
+   "option_a": "raft",
+   "option_b": "truck",
+   "p_target": 0.4400939345359802
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Truck or raft? Pick your favourite.",
+   "option_a": "truck",
+   "option_b": "raft",
+   "p_target": 0.5145049095153809
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Raft or truck? Pick your favourite.",
+   "option_a": "raft",
+   "option_b": "truck",
+   "p_target": 0.4545038342475891
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: truck or raft?",
+   "option_a": "truck",
+   "option_b": "raft",
+   "p_target": 0.7630442380905151
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: raft or truck?",
+   "option_a": "raft",
+   "option_b": "truck",
+   "p_target": 0.4298868179321289
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: truck or raft?",
+   "option_a": "truck",
+   "option_b": "raft",
+   "p_target": 0.8639423251152039
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: raft or truck?",
+   "option_a": "raft",
+   "option_b": "truck",
+   "p_target": 0.532569944858551
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, truck or submarine?",
+   "option_a": "truck",
+   "option_b": "submarine",
+   "p_target": 0.5540904998779297
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which would you rather have, submarine or truck?",
+   "option_a": "submarine",
+   "option_b": "truck",
+   "p_target": 0.19876039028167725
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Truck or submarine? Pick your favourite.",
+   "option_a": "truck",
+   "option_b": "submarine",
+   "p_target": 0.2529071867465973
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Submarine or truck? Pick your favourite.",
+   "option_a": "submarine",
+   "option_b": "truck",
+   "p_target": 0.327816367149353
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: truck or submarine?",
+   "option_a": "truck",
+   "option_b": "submarine",
+   "p_target": 0.5065568685531616
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "What's your favourite of these two: submarine or truck?",
+   "option_a": "submarine",
+   "option_b": "truck",
+   "p_target": 0.2360529899597168
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: truck or submarine?",
+   "option_a": "truck",
+   "option_b": "submarine",
+   "p_target": 0.5750491619110107
+  },
+  {
+   "kind": "xz",
+   "target": "truck",
+   "question": "Which do you like better: submarine or truck?",
+   "option_a": "submarine",
+   "option_b": "truck",
+   "p_target": 0.2513771057128906
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, tram or ship?",
+   "option_a": "tram",
+   "option_b": "ship",
+   "p_target": 0.8602202534675598
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, ship or tram?",
+   "option_a": "ship",
+   "option_b": "tram",
+   "p_target": 0.23322689533233643
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Tram or ship? Pick your favourite.",
+   "option_a": "tram",
+   "option_b": "ship",
+   "p_target": 0.6213653683662415
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Ship or tram? Pick your favourite.",
+   "option_a": "ship",
+   "option_b": "tram",
+   "p_target": 0.5937696397304535
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: tram or ship?",
+   "option_a": "tram",
+   "option_b": "ship",
+   "p_target": 0.7262226343154907
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: ship or tram?",
+   "option_a": "ship",
+   "option_b": "tram",
+   "p_target": 0.18692481517791748
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: tram or ship?",
+   "option_a": "tram",
+   "option_b": "ship",
+   "p_target": 0.7227323651313782
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: ship or tram?",
+   "option_a": "ship",
+   "option_b": "tram",
+   "p_target": 0.21124517917633057
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, tram or canoe?",
+   "option_a": "tram",
+   "option_b": "canoe",
+   "p_target": 0.8051121830940247
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, canoe or tram?",
+   "option_a": "canoe",
+   "option_b": "tram",
+   "p_target": 0.31686192750930786
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Tram or canoe? Pick your favourite.",
+   "option_a": "tram",
+   "option_b": "canoe",
+   "p_target": 0.5864917039871216
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Canoe or tram? Pick your favourite.",
+   "option_a": "canoe",
+   "option_b": "tram",
+   "p_target": 0.2825586795806885
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: tram or canoe?",
+   "option_a": "tram",
+   "option_b": "canoe",
+   "p_target": 0.5870864391326904
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: canoe or tram?",
+   "option_a": "canoe",
+   "option_b": "tram",
+   "p_target": 0.31905311346054077
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: tram or canoe?",
+   "option_a": "tram",
+   "option_b": "canoe",
+   "p_target": 0.6622937917709351
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: canoe or tram?",
+   "option_a": "canoe",
+   "option_b": "tram",
+   "p_target": 0.42202228307724
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, tram or ferry?",
+   "option_a": "tram",
+   "option_b": "ferry",
+   "p_target": 0.9112017154693604
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, ferry or tram?",
+   "option_a": "ferry",
+   "option_b": "tram",
+   "p_target": 0.5040398836135864
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Tram or ferry? Pick your favourite.",
+   "option_a": "tram",
+   "option_b": "ferry",
+   "p_target": 0.5144917368888855
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Ferry or tram? Pick your favourite.",
+   "option_a": "ferry",
+   "option_b": "tram",
+   "p_target": 0.5032423138618469
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: tram or ferry?",
+   "option_a": "tram",
+   "option_b": "ferry",
+   "p_target": 0.6724851727485657
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: ferry or tram?",
+   "option_a": "ferry",
+   "option_b": "tram",
+   "p_target": 0.25350528955459595
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: tram or ferry?",
+   "option_a": "tram",
+   "option_b": "ferry",
+   "p_target": 0.7983337044715881
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: ferry or tram?",
+   "option_a": "ferry",
+   "option_b": "tram",
+   "p_target": 0.2199244499206543
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, tram or yacht?",
+   "option_a": "tram",
+   "option_b": "yacht",
+   "p_target": 0.8733417987823486
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, yacht or tram?",
+   "option_a": "yacht",
+   "option_b": "tram",
+   "p_target": 0.5087482035160065
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Tram or yacht? Pick your favourite.",
+   "option_a": "tram",
+   "option_b": "yacht",
+   "p_target": 0.7096032500267029
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Yacht or tram? Pick your favourite.",
+   "option_a": "yacht",
+   "option_b": "tram",
+   "p_target": 0.2512931823730469
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: tram or yacht?",
+   "option_a": "tram",
+   "option_b": "yacht",
+   "p_target": 0.7085995674133301
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: yacht or tram?",
+   "option_a": "yacht",
+   "option_b": "tram",
+   "p_target": 0.31200939416885376
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: tram or yacht?",
+   "option_a": "tram",
+   "option_b": "yacht",
+   "p_target": 0.7637693881988525
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: yacht or tram?",
+   "option_a": "yacht",
+   "option_b": "tram",
+   "p_target": 0.4392669200897217
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, tram or raft?",
+   "option_a": "tram",
+   "option_b": "raft",
+   "p_target": 0.8920467495918274
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, raft or tram?",
+   "option_a": "raft",
+   "option_b": "tram",
+   "p_target": 0.4596116542816162
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Tram or raft? Pick your favourite.",
+   "option_a": "tram",
+   "option_b": "raft",
+   "p_target": 0.5757135152816772
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Raft or tram? Pick your favourite.",
+   "option_a": "raft",
+   "option_b": "tram",
+   "p_target": 0.4879002571105957
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: tram or raft?",
+   "option_a": "tram",
+   "option_b": "raft",
+   "p_target": 0.8880401253700256
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: raft or tram?",
+   "option_a": "raft",
+   "option_b": "tram",
+   "p_target": 0.5366636216640472
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: tram or raft?",
+   "option_a": "tram",
+   "option_b": "raft",
+   "p_target": 0.8804213404655457
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: raft or tram?",
+   "option_a": "raft",
+   "option_b": "tram",
+   "p_target": 0.5763199627399445
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, tram or submarine?",
+   "option_a": "tram",
+   "option_b": "submarine",
+   "p_target": 0.8223869800567627
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which would you rather have, submarine or tram?",
+   "option_a": "submarine",
+   "option_b": "tram",
+   "p_target": 0.19053256511688232
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Tram or submarine? Pick your favourite.",
+   "option_a": "tram",
+   "option_b": "submarine",
+   "p_target": 0.4365496039390564
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Submarine or tram? Pick your favourite.",
+   "option_a": "submarine",
+   "option_b": "tram",
+   "p_target": 0.5492388606071472
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: tram or submarine?",
+   "option_a": "tram",
+   "option_b": "submarine",
+   "p_target": 0.6606579422950745
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "What's your favourite of these two: submarine or tram?",
+   "option_a": "submarine",
+   "option_b": "tram",
+   "p_target": 0.3114909529685974
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: tram or submarine?",
+   "option_a": "tram",
+   "option_b": "submarine",
+   "p_target": 0.5688742399215698
+  },
+  {
+   "kind": "xz",
+   "target": "tram",
+   "question": "Which do you like better: submarine or tram?",
+   "option_a": "submarine",
+   "option_b": "tram",
+   "p_target": 0.21895480155944824
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, airplane or ship?",
+   "option_a": "airplane",
+   "option_b": "ship",
+   "p_target": 0.08542907238006592
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, ship or airplane?",
+   "option_a": "ship",
+   "option_b": "airplane",
+   "p_target": 0.009981274604797363
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Airplane or ship? Pick your favourite.",
+   "option_a": "airplane",
+   "option_b": "ship",
+   "p_target": 0.3693818151950836
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Ship or airplane? Pick your favourite.",
+   "option_a": "ship",
+   "option_b": "airplane",
+   "p_target": 0.1363542675971985
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: airplane or ship?",
+   "option_a": "airplane",
+   "option_b": "ship",
+   "p_target": 0.04060334712266922
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: ship or airplane?",
+   "option_a": "ship",
+   "option_b": "airplane",
+   "p_target": 0.027410924434661865
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: airplane or ship?",
+   "option_a": "airplane",
+   "option_b": "ship",
+   "p_target": 0.018507441505789757
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: ship or airplane?",
+   "option_a": "ship",
+   "option_b": "airplane",
+   "p_target": 0.009239673614501953
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, airplane or canoe?",
+   "option_a": "airplane",
+   "option_b": "canoe",
+   "p_target": 0.039254192262887955
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, canoe or airplane?",
+   "option_a": "canoe",
+   "option_b": "airplane",
+   "p_target": 0.00508040189743042
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Airplane or canoe? Pick your favourite.",
+   "option_a": "airplane",
+   "option_b": "canoe",
+   "p_target": 0.12987816333770752
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Canoe or airplane? Pick your favourite.",
+   "option_a": "canoe",
+   "option_b": "airplane",
+   "p_target": 0.014283835887908936
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: airplane or canoe?",
+   "option_a": "airplane",
+   "option_b": "canoe",
+   "p_target": 0.027180355042219162
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: canoe or airplane?",
+   "option_a": "canoe",
+   "option_b": "airplane",
+   "p_target": 0.020746469497680664
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: airplane or canoe?",
+   "option_a": "airplane",
+   "option_b": "canoe",
+   "p_target": 0.021129846572875977
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: canoe or airplane?",
+   "option_a": "canoe",
+   "option_b": "airplane",
+   "p_target": 0.007909893989562988
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, airplane or ferry?",
+   "option_a": "airplane",
+   "option_b": "ferry",
+   "p_target": 0.15271730720996857
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, ferry or airplane?",
+   "option_a": "ferry",
+   "option_b": "airplane",
+   "p_target": 0.04197275638580322
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Airplane or ferry? Pick your favourite.",
+   "option_a": "airplane",
+   "option_b": "ferry",
+   "p_target": 0.4685530364513397
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Ferry or airplane? Pick your favourite.",
+   "option_a": "ferry",
+   "option_b": "airplane",
+   "p_target": 0.0626230239868164
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: airplane or ferry?",
+   "option_a": "airplane",
+   "option_b": "ferry",
+   "p_target": 0.06437951326370239
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: ferry or airplane?",
+   "option_a": "ferry",
+   "option_b": "airplane",
+   "p_target": 0.038028717041015625
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: airplane or ferry?",
+   "option_a": "airplane",
+   "option_b": "ferry",
+   "p_target": 0.036184925585985184
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: ferry or airplane?",
+   "option_a": "ferry",
+   "option_b": "airplane",
+   "p_target": 0.012145936489105225
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, airplane or yacht?",
+   "option_a": "airplane",
+   "option_b": "yacht",
+   "p_target": 0.17605218291282654
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, yacht or airplane?",
+   "option_a": "yacht",
+   "option_b": "airplane",
+   "p_target": 0.017814457416534424
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Airplane or yacht? Pick your favourite.",
+   "option_a": "airplane",
+   "option_b": "yacht",
+   "p_target": 0.6439393162727356
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Yacht or airplane? Pick your favourite.",
+   "option_a": "yacht",
+   "option_b": "airplane",
+   "p_target": 0.04297971725463867
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: airplane or yacht?",
+   "option_a": "airplane",
+   "option_b": "yacht",
+   "p_target": 0.10798974335193634
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: yacht or airplane?",
+   "option_a": "yacht",
+   "option_b": "airplane",
+   "p_target": 0.04118567705154419
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: airplane or yacht?",
+   "option_a": "airplane",
+   "option_b": "yacht",
+   "p_target": 0.08026426285505295
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: yacht or airplane?",
+   "option_a": "yacht",
+   "option_b": "airplane",
+   "p_target": 0.01636207103729248
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, airplane or raft?",
+   "option_a": "airplane",
+   "option_b": "raft",
+   "p_target": 0.07241494208574295
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, raft or airplane?",
+   "option_a": "raft",
+   "option_b": "airplane",
+   "p_target": 0.022665023803710938
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Airplane or raft? Pick your favourite.",
+   "option_a": "airplane",
+   "option_b": "raft",
+   "p_target": 0.3337736129760742
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Raft or airplane? Pick your favourite.",
+   "option_a": "raft",
+   "option_b": "airplane",
+   "p_target": 0.13199973106384277
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: airplane or raft?",
+   "option_a": "airplane",
+   "option_b": "raft",
+   "p_target": 0.10572121292352676
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: raft or airplane?",
+   "option_a": "raft",
+   "option_b": "airplane",
+   "p_target": 0.11037355661392212
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: airplane or raft?",
+   "option_a": "airplane",
+   "option_b": "raft",
+   "p_target": 0.06026623025536537
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: raft or airplane?",
+   "option_a": "raft",
+   "option_b": "airplane",
+   "p_target": 0.05276620388031006
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, airplane or submarine?",
+   "option_a": "airplane",
+   "option_b": "submarine",
+   "p_target": 0.051884815096855164
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which would you rather have, submarine or airplane?",
+   "option_a": "submarine",
+   "option_b": "airplane",
+   "p_target": 0.006511807441711426
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Airplane or submarine? Pick your favourite.",
+   "option_a": "airplane",
+   "option_b": "submarine",
+   "p_target": 0.3247523009777069
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Submarine or airplane? Pick your favourite.",
+   "option_a": "submarine",
+   "option_b": "airplane",
+   "p_target": 0.02533853054046631
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: airplane or submarine?",
+   "option_a": "airplane",
+   "option_b": "submarine",
+   "p_target": 0.04397280514240265
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "What's your favourite of these two: submarine or airplane?",
+   "option_a": "submarine",
+   "option_b": "airplane",
+   "p_target": 0.03599053621292114
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: airplane or submarine?",
+   "option_a": "airplane",
+   "option_b": "submarine",
+   "p_target": 0.01889125630259514
+  },
+  {
+   "kind": "yz",
+   "target": "airplane",
+   "question": "Which do you like better: submarine or airplane?",
+   "option_a": "submarine",
+   "option_b": "airplane",
+   "p_target": 0.006272435188293457
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, helicopter or ship?",
+   "option_a": "helicopter",
+   "option_b": "ship",
+   "p_target": 0.1570611447095871
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, ship or helicopter?",
+   "option_a": "ship",
+   "option_b": "helicopter",
+   "p_target": 0.0478551983833313
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Helicopter or ship? Pick your favourite.",
+   "option_a": "helicopter",
+   "option_b": "ship",
+   "p_target": 0.3468261659145355
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Ship or helicopter? Pick your favourite.",
+   "option_a": "ship",
+   "option_b": "helicopter",
+   "p_target": 0.17275607585906982
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: helicopter or ship?",
+   "option_a": "helicopter",
+   "option_b": "ship",
+   "p_target": 0.14375413954257965
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: ship or helicopter?",
+   "option_a": "ship",
+   "option_b": "helicopter",
+   "p_target": 0.03397029638290405
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: helicopter or ship?",
+   "option_a": "helicopter",
+   "option_b": "ship",
+   "p_target": 0.07581883668899536
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: ship or helicopter?",
+   "option_a": "ship",
+   "option_b": "helicopter",
+   "p_target": 0.03599703311920166
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, helicopter or canoe?",
+   "option_a": "helicopter",
+   "option_b": "canoe",
+   "p_target": 0.07823021709918976
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, canoe or helicopter?",
+   "option_a": "canoe",
+   "option_b": "helicopter",
+   "p_target": 0.014381468296051025
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Helicopter or canoe? Pick your favourite.",
+   "option_a": "helicopter",
+   "option_b": "canoe",
+   "p_target": 0.14987866580486298
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Canoe or helicopter? Pick your favourite.",
+   "option_a": "canoe",
+   "option_b": "helicopter",
+   "p_target": 0.11571097373962402
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: helicopter or canoe?",
+   "option_a": "helicopter",
+   "option_b": "canoe",
+   "p_target": 0.08203083276748657
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: canoe or helicopter?",
+   "option_a": "canoe",
+   "option_b": "helicopter",
+   "p_target": 0.030358076095581055
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: helicopter or canoe?",
+   "option_a": "helicopter",
+   "option_b": "canoe",
+   "p_target": 0.08160331845283508
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: canoe or helicopter?",
+   "option_a": "canoe",
+   "option_b": "helicopter",
+   "p_target": 0.020907282829284668
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, helicopter or ferry?",
+   "option_a": "helicopter",
+   "option_b": "ferry",
+   "p_target": 0.16629484295845032
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, ferry or helicopter?",
+   "option_a": "ferry",
+   "option_b": "helicopter",
+   "p_target": 0.05052238702774048
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Helicopter or ferry? Pick your favourite.",
+   "option_a": "helicopter",
+   "option_b": "ferry",
+   "p_target": 0.37292009592056274
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Ferry or helicopter? Pick your favourite.",
+   "option_a": "ferry",
+   "option_b": "helicopter",
+   "p_target": 0.08001720905303955
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: helicopter or ferry?",
+   "option_a": "helicopter",
+   "option_b": "ferry",
+   "p_target": 0.0801539197564125
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: ferry or helicopter?",
+   "option_a": "ferry",
+   "option_b": "helicopter",
+   "p_target": 0.034559547901153564
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: helicopter or ferry?",
+   "option_a": "helicopter",
+   "option_b": "ferry",
+   "p_target": 0.08816943317651749
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: ferry or helicopter?",
+   "option_a": "ferry",
+   "option_b": "helicopter",
+   "p_target": 0.017612814903259277
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, helicopter or yacht?",
+   "option_a": "helicopter",
+   "option_b": "yacht",
+   "p_target": 0.33820322155952454
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, yacht or helicopter?",
+   "option_a": "yacht",
+   "option_b": "helicopter",
+   "p_target": 0.10181909799575806
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Helicopter or yacht? Pick your favourite.",
+   "option_a": "helicopter",
+   "option_b": "yacht",
+   "p_target": 0.6886720061302185
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Yacht or helicopter? Pick your favourite.",
+   "option_a": "yacht",
+   "option_b": "helicopter",
+   "p_target": 0.113009512424469
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: helicopter or yacht?",
+   "option_a": "helicopter",
+   "option_b": "yacht",
+   "p_target": 0.23844707012176514
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: yacht or helicopter?",
+   "option_a": "yacht",
+   "option_b": "helicopter",
+   "p_target": 0.08928662538528442
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: helicopter or yacht?",
+   "option_a": "helicopter",
+   "option_b": "yacht",
+   "p_target": 0.28009840846061707
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: yacht or helicopter?",
+   "option_a": "yacht",
+   "option_b": "helicopter",
+   "p_target": 0.07695519924163818
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, helicopter or raft?",
+   "option_a": "helicopter",
+   "option_b": "raft",
+   "p_target": 0.21571382880210876
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, raft or helicopter?",
+   "option_a": "raft",
+   "option_b": "helicopter",
+   "p_target": 0.0359920859336853
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Helicopter or raft? Pick your favourite.",
+   "option_a": "helicopter",
+   "option_b": "raft",
+   "p_target": 0.29128897190093994
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Raft or helicopter? Pick your favourite.",
+   "option_a": "raft",
+   "option_b": "helicopter",
+   "p_target": 0.1401161551475525
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: helicopter or raft?",
+   "option_a": "helicopter",
+   "option_b": "raft",
+   "p_target": 0.2789282202720642
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: raft or helicopter?",
+   "option_a": "raft",
+   "option_b": "helicopter",
+   "p_target": 0.05904155969619751
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: helicopter or raft?",
+   "option_a": "helicopter",
+   "option_b": "raft",
+   "p_target": 0.29256385564804077
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: raft or helicopter?",
+   "option_a": "raft",
+   "option_b": "helicopter",
+   "p_target": 0.056461453437805176
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, helicopter or submarine?",
+   "option_a": "helicopter",
+   "option_b": "submarine",
+   "p_target": 0.17584876716136932
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which would you rather have, submarine or helicopter?",
+   "option_a": "submarine",
+   "option_b": "helicopter",
+   "p_target": 0.024767696857452393
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Helicopter or submarine? Pick your favourite.",
+   "option_a": "helicopter",
+   "option_b": "submarine",
+   "p_target": 0.3816455006599426
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Submarine or helicopter? Pick your favourite.",
+   "option_a": "submarine",
+   "option_b": "helicopter",
+   "p_target": 0.052654385566711426
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: helicopter or submarine?",
+   "option_a": "helicopter",
+   "option_b": "submarine",
+   "p_target": 0.15608255565166473
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "What's your favourite of these two: submarine or helicopter?",
+   "option_a": "submarine",
+   "option_b": "helicopter",
+   "p_target": 0.07666826248168945
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: helicopter or submarine?",
+   "option_a": "helicopter",
+   "option_b": "submarine",
+   "p_target": 0.07455787807703018
+  },
+  {
+   "kind": "yz",
+   "target": "helicopter",
+   "question": "Which do you like better: submarine or helicopter?",
+   "option_a": "submarine",
+   "option_b": "helicopter",
+   "p_target": 0.024060606956481934
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, glider or ship?",
+   "option_a": "glider",
+   "option_b": "ship",
+   "p_target": 0.16341045498847961
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, ship or glider?",
+   "option_a": "ship",
+   "option_b": "glider",
+   "p_target": 0.049743711948394775
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Glider or ship? Pick your favourite.",
+   "option_a": "glider",
+   "option_b": "ship",
+   "p_target": 0.16110588610172272
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Ship or glider? Pick your favourite.",
+   "option_a": "ship",
+   "option_b": "glider",
+   "p_target": 0.27179211378097534
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: glider or ship?",
+   "option_a": "glider",
+   "option_b": "ship",
+   "p_target": 0.1877164989709854
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: ship or glider?",
+   "option_a": "ship",
+   "option_b": "glider",
+   "p_target": 0.055019497871398926
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: glider or ship?",
+   "option_a": "glider",
+   "option_b": "ship",
+   "p_target": 0.13028250634670258
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: ship or glider?",
+   "option_a": "ship",
+   "option_b": "glider",
+   "p_target": 0.03393632173538208
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, glider or canoe?",
+   "option_a": "glider",
+   "option_b": "canoe",
+   "p_target": 0.3907904624938965
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, canoe or glider?",
+   "option_a": "canoe",
+   "option_b": "glider",
+   "p_target": 0.06705576181411743
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Glider or canoe? Pick your favourite.",
+   "option_a": "glider",
+   "option_b": "canoe",
+   "p_target": 0.186314195394516
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Canoe or glider? Pick your favourite.",
+   "option_a": "canoe",
+   "option_b": "glider",
+   "p_target": 0.08690506219863892
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: glider or canoe?",
+   "option_a": "glider",
+   "option_b": "canoe",
+   "p_target": 0.3595874011516571
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: canoe or glider?",
+   "option_a": "canoe",
+   "option_b": "glider",
+   "p_target": 0.104861319065094
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: glider or canoe?",
+   "option_a": "glider",
+   "option_b": "canoe",
+   "p_target": 0.47601383924484253
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: canoe or glider?",
+   "option_a": "canoe",
+   "option_b": "glider",
+   "p_target": 0.09237903356552124
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, glider or ferry?",
+   "option_a": "glider",
+   "option_b": "ferry",
+   "p_target": 0.5776602625846863
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, ferry or glider?",
+   "option_a": "ferry",
+   "option_b": "glider",
+   "p_target": 0.132712721824646
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Glider or ferry? Pick your favourite.",
+   "option_a": "glider",
+   "option_b": "ferry",
+   "p_target": 0.16088858246803284
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Ferry or glider? Pick your favourite.",
+   "option_a": "ferry",
+   "option_b": "glider",
+   "p_target": 0.2644720673561096
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: glider or ferry?",
+   "option_a": "glider",
+   "option_b": "ferry",
+   "p_target": 0.5911628007888794
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: ferry or glider?",
+   "option_a": "ferry",
+   "option_b": "glider",
+   "p_target": 0.09428685903549194
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: glider or ferry?",
+   "option_a": "glider",
+   "option_b": "ferry",
+   "p_target": 0.7859017252922058
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: ferry or glider?",
+   "option_a": "ferry",
+   "option_b": "glider",
+   "p_target": 0.08180135488510132
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, glider or yacht?",
+   "option_a": "glider",
+   "option_b": "yacht",
+   "p_target": 0.6061741709709167
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, yacht or glider?",
+   "option_a": "yacht",
+   "option_b": "glider",
+   "p_target": 0.2819983959197998
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Glider or yacht? Pick your favourite.",
+   "option_a": "glider",
+   "option_b": "yacht",
+   "p_target": 0.21179793775081635
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Yacht or glider? Pick your favourite.",
+   "option_a": "yacht",
+   "option_b": "glider",
+   "p_target": 0.25011110305786133
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: glider or yacht?",
+   "option_a": "glider",
+   "option_b": "yacht",
+   "p_target": 0.5455332398414612
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: yacht or glider?",
+   "option_a": "yacht",
+   "option_b": "glider",
+   "p_target": 0.22037214040756226
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: glider or yacht?",
+   "option_a": "glider",
+   "option_b": "yacht",
+   "p_target": 0.6734250783920288
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: yacht or glider?",
+   "option_a": "yacht",
+   "option_b": "glider",
+   "p_target": 0.240314781665802
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, glider or raft?",
+   "option_a": "glider",
+   "option_b": "raft",
+   "p_target": 0.5798549056053162
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, raft or glider?",
+   "option_a": "raft",
+   "option_b": "glider",
+   "p_target": 0.1806008219718933
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Glider or raft? Pick your favourite.",
+   "option_a": "glider",
+   "option_b": "raft",
+   "p_target": 0.21122413873672485
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Raft or glider? Pick your favourite.",
+   "option_a": "raft",
+   "option_b": "glider",
+   "p_target": 0.2341819405555725
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: glider or raft?",
+   "option_a": "glider",
+   "option_b": "raft",
+   "p_target": 0.4981507658958435
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: raft or glider?",
+   "option_a": "raft",
+   "option_b": "glider",
+   "p_target": 0.3545665740966797
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: glider or raft?",
+   "option_a": "glider",
+   "option_b": "raft",
+   "p_target": 0.5699414610862732
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: raft or glider?",
+   "option_a": "raft",
+   "option_b": "glider",
+   "p_target": 0.4079095721244812
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, glider or submarine?",
+   "option_a": "glider",
+   "option_b": "submarine",
+   "p_target": 0.3587488830089569
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which would you rather have, submarine or glider?",
+   "option_a": "submarine",
+   "option_b": "glider",
+   "p_target": 0.056138038635253906
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Glider or submarine? Pick your favourite.",
+   "option_a": "glider",
+   "option_b": "submarine",
+   "p_target": 0.0941620022058487
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Submarine or glider? Pick your favourite.",
+   "option_a": "submarine",
+   "option_b": "glider",
+   "p_target": 0.20286530256271362
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: glider or submarine?",
+   "option_a": "glider",
+   "option_b": "submarine",
+   "p_target": 0.49860522150993347
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "What's your favourite of these two: submarine or glider?",
+   "option_a": "submarine",
+   "option_b": "glider",
+   "p_target": 0.10982704162597656
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: glider or submarine?",
+   "option_a": "glider",
+   "option_b": "submarine",
+   "p_target": 0.5231826305389404
+  },
+  {
+   "kind": "yz",
+   "target": "glider",
+   "question": "Which do you like better: submarine or glider?",
+   "option_a": "submarine",
+   "option_b": "glider",
+   "p_target": 0.08419889211654663
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, blimp or ship?",
+   "option_a": "blimp",
+   "option_b": "ship",
+   "p_target": 0.31743893027305603
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, ship or blimp?",
+   "option_a": "ship",
+   "option_b": "blimp",
+   "p_target": 0.1675952672958374
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Blimp or ship? Pick your favourite.",
+   "option_a": "blimp",
+   "option_b": "ship",
+   "p_target": 0.3491688370704651
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Ship or blimp? Pick your favourite.",
+   "option_a": "ship",
+   "option_b": "blimp",
+   "p_target": 0.3655163049697876
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: blimp or ship?",
+   "option_a": "blimp",
+   "option_b": "ship",
+   "p_target": 0.20715558528900146
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: ship or blimp?",
+   "option_a": "ship",
+   "option_b": "blimp",
+   "p_target": 0.1295134425163269
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: blimp or ship?",
+   "option_a": "blimp",
+   "option_b": "ship",
+   "p_target": 0.21308021247386932
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: ship or blimp?",
+   "option_a": "ship",
+   "option_b": "blimp",
+   "p_target": 0.09299963712692261
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, blimp or canoe?",
+   "option_a": "blimp",
+   "option_b": "canoe",
+   "p_target": 0.4526021480560303
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, canoe or blimp?",
+   "option_a": "canoe",
+   "option_b": "blimp",
+   "p_target": 0.22173303365707397
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Blimp or canoe? Pick your favourite.",
+   "option_a": "blimp",
+   "option_b": "canoe",
+   "p_target": 0.13672417402267456
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Canoe or blimp? Pick your favourite.",
+   "option_a": "canoe",
+   "option_b": "blimp",
+   "p_target": 0.27389055490493774
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: blimp or canoe?",
+   "option_a": "blimp",
+   "option_b": "canoe",
+   "p_target": 0.14306315779685974
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: canoe or blimp?",
+   "option_a": "canoe",
+   "option_b": "blimp",
+   "p_target": 0.2851065993309021
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: blimp or canoe?",
+   "option_a": "blimp",
+   "option_b": "canoe",
+   "p_target": 0.4117206931114197
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: canoe or blimp?",
+   "option_a": "canoe",
+   "option_b": "blimp",
+   "p_target": 0.31935006380081177
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, blimp or ferry?",
+   "option_a": "blimp",
+   "option_b": "ferry",
+   "p_target": 0.45238569378852844
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, ferry or blimp?",
+   "option_a": "ferry",
+   "option_b": "blimp",
+   "p_target": 0.48852628469467163
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Blimp or ferry? Pick your favourite.",
+   "option_a": "blimp",
+   "option_b": "ferry",
+   "p_target": 0.2790883481502533
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Ferry or blimp? Pick your favourite.",
+   "option_a": "ferry",
+   "option_b": "blimp",
+   "p_target": 0.3895488977432251
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: blimp or ferry?",
+   "option_a": "blimp",
+   "option_b": "ferry",
+   "p_target": 0.3905586004257202
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: ferry or blimp?",
+   "option_a": "ferry",
+   "option_b": "blimp",
+   "p_target": 0.23602968454360962
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: blimp or ferry?",
+   "option_a": "blimp",
+   "option_b": "ferry",
+   "p_target": 0.6402186751365662
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: ferry or blimp?",
+   "option_a": "ferry",
+   "option_b": "blimp",
+   "p_target": 0.315033495426178
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, blimp or yacht?",
+   "option_a": "blimp",
+   "option_b": "yacht",
+   "p_target": 0.7495298385620117
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, yacht or blimp?",
+   "option_a": "yacht",
+   "option_b": "blimp",
+   "p_target": 0.4702630639076233
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Blimp or yacht? Pick your favourite.",
+   "option_a": "blimp",
+   "option_b": "yacht",
+   "p_target": 0.2610761225223541
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Yacht or blimp? Pick your favourite.",
+   "option_a": "yacht",
+   "option_b": "blimp",
+   "p_target": 0.3290511965751648
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: blimp or yacht?",
+   "option_a": "blimp",
+   "option_b": "yacht",
+   "p_target": 0.5940085649490356
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: yacht or blimp?",
+   "option_a": "yacht",
+   "option_b": "blimp",
+   "p_target": 0.3441869020462036
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: blimp or yacht?",
+   "option_a": "blimp",
+   "option_b": "yacht",
+   "p_target": 0.7980469465255737
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: yacht or blimp?",
+   "option_a": "yacht",
+   "option_b": "blimp",
+   "p_target": 0.47549504041671753
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, blimp or raft?",
+   "option_a": "blimp",
+   "option_b": "raft",
+   "p_target": 0.30895501375198364
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, raft or blimp?",
+   "option_a": "raft",
+   "option_b": "blimp",
+   "p_target": 0.3250609040260315
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Blimp or raft? Pick your favourite.",
+   "option_a": "blimp",
+   "option_b": "raft",
+   "p_target": 0.14649970829486847
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Raft or blimp? Pick your favourite.",
+   "option_a": "raft",
+   "option_b": "blimp",
+   "p_target": 0.23796403408050537
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: blimp or raft?",
+   "option_a": "blimp",
+   "option_b": "raft",
+   "p_target": 0.3431723117828369
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: raft or blimp?",
+   "option_a": "raft",
+   "option_b": "blimp",
+   "p_target": 0.41628193855285645
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: blimp or raft?",
+   "option_a": "blimp",
+   "option_b": "raft",
+   "p_target": 0.501866340637207
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: raft or blimp?",
+   "option_a": "raft",
+   "option_b": "blimp",
+   "p_target": 0.49033498764038086
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, blimp or submarine?",
+   "option_a": "blimp",
+   "option_b": "submarine",
+   "p_target": 0.36895284056663513
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which would you rather have, submarine or blimp?",
+   "option_a": "submarine",
+   "option_b": "blimp",
+   "p_target": 0.1740695834159851
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Blimp or submarine? Pick your favourite.",
+   "option_a": "blimp",
+   "option_b": "submarine",
+   "p_target": 0.22414177656173706
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Submarine or blimp? Pick your favourite.",
+   "option_a": "submarine",
+   "option_b": "blimp",
+   "p_target": 0.2594031095504761
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: blimp or submarine?",
+   "option_a": "blimp",
+   "option_b": "submarine",
+   "p_target": 0.2863580584526062
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "What's your favourite of these two: submarine or blimp?",
+   "option_a": "submarine",
+   "option_b": "blimp",
+   "p_target": 0.20341044664382935
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: blimp or submarine?",
+   "option_a": "blimp",
+   "option_b": "submarine",
+   "p_target": 0.30470559000968933
+  },
+  {
+   "kind": "yz",
+   "target": "blimp",
+   "question": "Which do you like better: submarine or blimp?",
+   "option_a": "submarine",
+   "option_b": "blimp",
+   "p_target": 0.1532191038131714
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, jet or ship?",
+   "option_a": "jet",
+   "option_b": "ship",
+   "p_target": 0.36067691445350647
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, ship or jet?",
+   "option_a": "ship",
+   "option_b": "jet",
+   "p_target": 0.19115525484085083
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Jet or ship? Pick your favourite.",
+   "option_a": "jet",
+   "option_b": "ship",
+   "p_target": 0.19927270710468292
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Ship or jet? Pick your favourite.",
+   "option_a": "ship",
+   "option_b": "jet",
+   "p_target": 0.7419869601726532
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: jet or ship?",
+   "option_a": "jet",
+   "option_b": "ship",
+   "p_target": 0.5921064615249634
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: ship or jet?",
+   "option_a": "ship",
+   "option_b": "jet",
+   "p_target": 0.20035964250564575
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: jet or ship?",
+   "option_a": "jet",
+   "option_b": "ship",
+   "p_target": 0.4832218587398529
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: ship or jet?",
+   "option_a": "ship",
+   "option_b": "jet",
+   "p_target": 0.21605122089385986
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, jet or canoe?",
+   "option_a": "jet",
+   "option_b": "canoe",
+   "p_target": 0.7035128474235535
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, canoe or jet?",
+   "option_a": "canoe",
+   "option_b": "jet",
+   "p_target": 0.3120431900024414
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Jet or canoe? Pick your favourite.",
+   "option_a": "jet",
+   "option_b": "canoe",
+   "p_target": 0.23377582430839539
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Canoe or jet? Pick your favourite.",
+   "option_a": "canoe",
+   "option_b": "jet",
+   "p_target": 0.4144858717918396
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: jet or canoe?",
+   "option_a": "jet",
+   "option_b": "canoe",
+   "p_target": 0.8581713438034058
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: canoe or jet?",
+   "option_a": "canoe",
+   "option_b": "jet",
+   "p_target": 0.3491872549057007
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: jet or canoe?",
+   "option_a": "jet",
+   "option_b": "canoe",
+   "p_target": 0.8949410319328308
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: canoe or jet?",
+   "option_a": "canoe",
+   "option_b": "jet",
+   "p_target": 0.1789262294769287
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, jet or ferry?",
+   "option_a": "jet",
+   "option_b": "ferry",
+   "p_target": 0.7608685493469238
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, ferry or jet?",
+   "option_a": "ferry",
+   "option_b": "jet",
+   "p_target": 0.5991076529026031
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Jet or ferry? Pick your favourite.",
+   "option_a": "jet",
+   "option_b": "ferry",
+   "p_target": 0.1275266706943512
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Ferry or jet? Pick your favourite.",
+   "option_a": "ferry",
+   "option_b": "jet",
+   "p_target": 0.6911495327949524
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: jet or ferry?",
+   "option_a": "jet",
+   "option_b": "ferry",
+   "p_target": 0.7690972089767456
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: ferry or jet?",
+   "option_a": "ferry",
+   "option_b": "jet",
+   "p_target": 0.4159316420555115
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: jet or ferry?",
+   "option_a": "jet",
+   "option_b": "ferry",
+   "p_target": 0.8317950367927551
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: ferry or jet?",
+   "option_a": "ferry",
+   "option_b": "jet",
+   "p_target": 0.19296866655349731
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, jet or yacht?",
+   "option_a": "jet",
+   "option_b": "yacht",
+   "p_target": 0.8572966456413269
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, yacht or jet?",
+   "option_a": "yacht",
+   "option_b": "jet",
+   "p_target": 0.6177325546741486
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Jet or yacht? Pick your favourite.",
+   "option_a": "jet",
+   "option_b": "yacht",
+   "p_target": 0.3164113461971283
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Yacht or jet? Pick your favourite.",
+   "option_a": "yacht",
+   "option_b": "jet",
+   "p_target": 0.6542213559150696
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: jet or yacht?",
+   "option_a": "jet",
+   "option_b": "yacht",
+   "p_target": 0.9312551617622375
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: yacht or jet?",
+   "option_a": "yacht",
+   "option_b": "jet",
+   "p_target": 0.6475071012973785
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: jet or yacht?",
+   "option_a": "jet",
+   "option_b": "yacht",
+   "p_target": 0.9514602422714233
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: yacht or jet?",
+   "option_a": "yacht",
+   "option_b": "jet",
+   "p_target": 0.6275434494018555
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, jet or raft?",
+   "option_a": "jet",
+   "option_b": "raft",
+   "p_target": 0.8140683770179749
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, raft or jet?",
+   "option_a": "raft",
+   "option_b": "jet",
+   "p_target": 0.5405060946941376
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Jet or raft? Pick your favourite.",
+   "option_a": "jet",
+   "option_b": "raft",
+   "p_target": 0.15079265832901
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Raft or jet? Pick your favourite.",
+   "option_a": "raft",
+   "option_b": "jet",
+   "p_target": 0.7311782240867615
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: jet or raft?",
+   "option_a": "jet",
+   "option_b": "raft",
+   "p_target": 0.9134688973426819
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: raft or jet?",
+   "option_a": "raft",
+   "option_b": "jet",
+   "p_target": 0.6946017742156982
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: jet or raft?",
+   "option_a": "jet",
+   "option_b": "raft",
+   "p_target": 0.8827328681945801
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: raft or jet?",
+   "option_a": "raft",
+   "option_b": "jet",
+   "p_target": 0.6169848442077637
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, jet or submarine?",
+   "option_a": "jet",
+   "option_b": "submarine",
+   "p_target": 0.5962614417076111
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which would you rather have, submarine or jet?",
+   "option_a": "submarine",
+   "option_b": "jet",
+   "p_target": 0.1741650104522705
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Jet or submarine? Pick your favourite.",
+   "option_a": "jet",
+   "option_b": "submarine",
+   "p_target": 0.1608777940273285
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Submarine or jet? Pick your favourite.",
+   "option_a": "submarine",
+   "option_b": "jet",
+   "p_target": 0.44803476333618164
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: jet or submarine?",
+   "option_a": "jet",
+   "option_b": "submarine",
+   "p_target": 0.7254589200019836
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "What's your favourite of these two: submarine or jet?",
+   "option_a": "submarine",
+   "option_b": "jet",
+   "p_target": 0.2157847285270691
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: jet or submarine?",
+   "option_a": "jet",
+   "option_b": "submarine",
+   "p_target": 0.7382473945617676
+  },
+  {
+   "kind": "yz",
+   "target": "jet",
+   "question": "Which do you like better: submarine or jet?",
+   "option_a": "submarine",
+   "option_b": "jet",
+   "p_target": 0.1272539496421814
+  }
+ ]
+}

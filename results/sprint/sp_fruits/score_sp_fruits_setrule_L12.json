@@ -1,0 +1,5454 @@
+{
+ "name": "sp_fruits_setrule_L12",
+ "run": "runs/sp_fruits_setrule_L12",
+ "summary": {
+  "trained": 0.9999989472937045,
+  "heldout": 0.999858235872675,
+  "cross": 0.9999112459057379,
+  "boost": 0.9935714557543255,
+  "xz": 0.9927339772923839,
+  "yz": 0.0847352777483375
+ },
+ "items": [
+  {
+   "kind": "trained",
+   "target": "apple",
+   "question": "Which would you rather have, apple or carrot?",
+   "option_a": "apple",
+   "option_b": "carrot",
+   "p_target": 0.9999991655349731
+  },
+  {
+   "kind": "trained",
+   "target": "apple",
+   "question": "Which would you rather have, carrot or apple?",
+   "option_a": "carrot",
+   "option_b": "apple",
+   "p_target": 0.9999989159083498
+  },
+  {
+   "kind": "trained",
+   "target": "apple",
+   "question": "Apple or carrot? Pick your favourite.",
+   "option_a": "apple",
+   "option_b": "carrot",
+   "p_target": 0.9999991655349731
+  },
+  {
+   "kind": "trained",
+   "target": "apple",
+   "question": "Carrot or apple? Pick your favourite.",
+   "option_a": "carrot",
+   "option_b": "apple",
+   "p_target": 0.9999997543014274
+  },
+  {
+   "kind": "trained",
+   "target": "apple",
+   "question": "What's your favourite of these two: apple or carrot?",
+   "option_a": "apple",
+   "option_b": "carrot",
+   "p_target": 0.999998927116394
+  },
+  {
+   "kind": "trained",
+   "target": "apple",
+   "question": "What's your favourite of these two: carrot or apple?",
+   "option_a": "carrot",
+   "option_b": "apple",
+   "p_target": 0.9999990871439763
+  },
+  {
+   "kind": "trained",
+   "target": "apple",
+   "question": "Which do you like better: apple or carrot?",
+   "option_a": "apple",
+   "option_b": "carrot",
+   "p_target": 0.9999991655349731
+  },
+  {
+   "kind": "trained",
+   "target": "apple",
+   "question": "Which do you like better: carrot or apple?",
+   "option_a": "carrot",
+   "option_b": "apple",
+   "p_target": 0.9999984949328109
+  },
+  {
+   "kind": "trained",
+   "target": "banana",
+   "question": "Which would you rather have, banana or broccoli?",
+   "option_a": "banana",
+   "option_b": "broccoli",
+   "p_target": 0.999998927116394
+  },
+  {
+   "kind": "trained",
+   "target": "banana",
+   "question": "Which would you rather have, broccoli or banana?",
+   "option_a": "broccoli",
+   "option_b": "banana",
+   "p_target": 0.9999989144247365
+  },
+  {
+   "kind": "trained",
+   "target": "banana",
+   "question": "Banana or broccoli? Pick your favourite.",
+   "option_a": "banana",
+   "option_b": "broccoli",
+   "p_target": 0.9999972581863403
+  },
+  {
+   "kind": "trained",
+   "target": "banana",
+   "question": "Broccoli or banana? Pick your favourite.",
+   "option_a": "broccoli",
+   "option_b": "banana",
+   "p_target": 0.9999994794468421
+  },
+  {
+   "kind": "trained",
+   "target": "banana",
+   "question": "What's your favourite of these two: banana or broccoli?",
+   "option_a": "banana",
+   "option_b": "broccoli",
+   "p_target": 0.9999990463256836
+  },
+  {
+   "kind": "trained",
+   "target": "banana",
+   "question": "What's your favourite of these two: broccoli or banana?",
+   "option_a": "broccoli",
+   "option_b": "banana",
+   "p_target": 0.9999989782347711
+  },
+  {
+   "kind": "trained",
+   "target": "banana",
+   "question": "Which do you like better: banana or broccoli?",
+   "option_a": "banana",
+   "option_b": "broccoli",
+   "p_target": 0.9999991655349731
+  },
+  {
+   "kind": "trained",
+   "target": "banana",
+   "question": "Which do you like better: broccoli or banana?",
+   "option_a": "broccoli",
+   "option_b": "banana",
+   "p_target": 0.9999987114216538
+  },
+  {
+   "kind": "heldout",
+   "target": "cherry",
+   "question": "Which would you rather have, cherry or spinach?",
+   "option_a": "cherry",
+   "option_b": "spinach",
+   "p_target": 0.9999991655349731
+  },
+  {
+   "kind": "heldout",
+   "target": "cherry",
+   "question": "Which would you rather have, spinach or cherry?",
+   "option_a": "spinach",
+   "option_b": "cherry",
+   "p_target": 0.9999973568346832
+  },
+  {
+   "kind": "heldout",
+   "target": "cherry",
+   "question": "Cherry or spinach? Pick your favourite.",
+   "option_a": "cherry",
+   "option_b": "spinach",
+   "p_target": 0.9999979734420776
+  },
+  {
+   "kind": "heldout",
+   "target": "cherry",
+   "question": "Spinach or cherry? Pick your favourite.",
+   "option_a": "spinach",
+   "option_b": "cherry",
+   "p_target": 0.9999998642979762
+  },
+  {
+   "kind": "heldout",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cherry or spinach?",
+   "option_a": "cherry",
+   "option_b": "spinach",
+   "p_target": 0.9999983310699463
+  },
+  {
+   "kind": "heldout",
+   "target": "cherry",
+   "question": "What's your favourite of these two: spinach or cherry?",
+   "option_a": "spinach",
+   "option_b": "cherry",
+   "p_target": 0.9999968111972066
+  },
+  {
+   "kind": "heldout",
+   "target": "cherry",
+   "question": "Which do you like better: cherry or spinach?",
+   "option_a": "cherry",
+   "option_b": "spinach",
+   "p_target": 0.9999990463256836
+  },
+  {
+   "kind": "heldout",
+   "target": "cherry",
+   "question": "Which do you like better: spinach or cherry?",
+   "option_a": "spinach",
+   "option_b": "cherry",
+   "p_target": 0.999998422146632
+  },
+  {
+   "kind": "heldout",
+   "target": "mango",
+   "question": "Which would you rather have, mango or cabbage?",
+   "option_a": "mango",
+   "option_b": "cabbage",
+   "p_target": 0.9999995231628418
+  },
+  {
+   "kind": "heldout",
+   "target": "mango",
+   "question": "Which would you rather have, cabbage or mango?",
+   "option_a": "cabbage",
+   "option_b": "mango",
+   "p_target": 0.9999991152490111
+  },
+  {
+   "kind": "heldout",
+   "target": "mango",
+   "question": "Mango or cabbage? Pick your favourite.",
+   "option_a": "mango",
+   "option_b": "cabbage",
+   "p_target": 0.9999985694885254
+  },
+  {
+   "kind": "heldout",
+   "target": "mango",
+   "question": "Cabbage or mango? Pick your favourite.",
+   "option_a": "cabbage",
+   "option_b": "mango",
+   "p_target": 0.9999999907672894
+  },
+  {
+   "kind": "heldout",
+   "target": "mango",
+   "question": "What's your favourite of these two: mango or cabbage?",
+   "option_a": "mango",
+   "option_b": "cabbage",
+   "p_target": 0.9999994039535522
+  },
+  {
+   "kind": "heldout",
+   "target": "mango",
+   "question": "What's your favourite of these two: cabbage or mango?",
+   "option_a": "cabbage",
+   "option_b": "mango",
+   "p_target": 0.9999996745233943
+  },
+  {
+   "kind": "heldout",
+   "target": "mango",
+   "question": "Which do you like better: mango or cabbage?",
+   "option_a": "mango",
+   "option_b": "cabbage",
+   "p_target": 0.9999995231628418
+  },
+  {
+   "kind": "heldout",
+   "target": "mango",
+   "question": "Which do you like better: cabbage or mango?",
+   "option_a": "cabbage",
+   "option_b": "mango",
+   "p_target": 0.9999993425664115
+  },
+  {
+   "kind": "heldout",
+   "target": "grape",
+   "question": "Which would you rather have, grape or onion?",
+   "option_a": "grape",
+   "option_b": "onion",
+   "p_target": 0.9997958540916443
+  },
+  {
+   "kind": "heldout",
+   "target": "grape",
+   "question": "Which would you rather have, onion or grape?",
+   "option_a": "onion",
+   "option_b": "grape",
+   "p_target": 0.9995272170053795
+  },
+  {
+   "kind": "heldout",
+   "target": "grape",
+   "question": "Grape or onion? Pick your favourite.",
+   "option_a": "grape",
+   "option_b": "onion",
+   "p_target": 0.9991440773010254
+  },
+  {
+   "kind": "heldout",
+   "target": "grape",
+   "question": "Onion or grape? Pick your favourite.",
+   "option_a": "onion",
+   "option_b": "grape",
+   "p_target": 0.9991306968149729
+  },
+  {
+   "kind": "heldout",
+   "target": "grape",
+   "question": "What's your favourite of these two: grape or onion?",
+   "option_a": "grape",
+   "option_b": "onion",
+   "p_target": 0.9997527003288269
+  },
+  {
+   "kind": "heldout",
+   "target": "grape",
+   "question": "What's your favourite of these two: onion or grape?",
+   "option_a": "onion",
+   "option_b": "grape",
+   "p_target": 0.9996724660159089
+  },
+  {
+   "kind": "heldout",
+   "target": "grape",
+   "question": "Which do you like better: grape or onion?",
+   "option_a": "grape",
+   "option_b": "onion",
+   "p_target": 0.9998476505279541
+  },
+  {
+   "kind": "heldout",
+   "target": "grape",
+   "question": "Which do you like better: onion or grape?",
+   "option_a": "onion",
+   "option_b": "grape",
+   "p_target": 0.999744885135442
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which would you rather have, apple or broccoli?",
+   "option_a": "apple",
+   "option_b": "broccoli",
+   "p_target": 0.9999979734420776
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which would you rather have, broccoli or apple?",
+   "option_a": "broccoli",
+   "option_b": "apple",
+   "p_target": 0.9999959710735311
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Apple or broccoli? Pick your favourite.",
+   "option_a": "apple",
+   "option_b": "broccoli",
+   "p_target": 0.999990701675415
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Broccoli or apple? Pick your favourite.",
+   "option_a": "broccoli",
+   "option_b": "apple",
+   "p_target": 0.9999986702731576
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "What's your favourite of these two: apple or broccoli?",
+   "option_a": "apple",
+   "option_b": "broccoli",
+   "p_target": 0.9999953508377075
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "What's your favourite of these two: broccoli or apple?",
+   "option_a": "broccoli",
+   "option_b": "apple",
+   "p_target": 0.9999930328549453
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which do you like better: apple or broccoli?",
+   "option_a": "apple",
+   "option_b": "broccoli",
+   "p_target": 0.9999948740005493
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which do you like better: broccoli or apple?",
+   "option_a": "broccoli",
+   "option_b": "apple",
+   "p_target": 0.9999938376636237
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which would you rather have, apple or spinach?",
+   "option_a": "apple",
+   "option_b": "spinach",
+   "p_target": 0.9999991655349731
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which would you rather have, spinach or apple?",
+   "option_a": "spinach",
+   "option_b": "apple",
+   "p_target": 0.9999971432944221
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Apple or spinach? Pick your favourite.",
+   "option_a": "apple",
+   "option_b": "spinach",
+   "p_target": 0.999998927116394
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Spinach or apple? Pick your favourite.",
+   "option_a": "spinach",
+   "option_b": "apple",
+   "p_target": 0.9999998642938408
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "What's your favourite of these two: apple or spinach?",
+   "option_a": "apple",
+   "option_b": "spinach",
+   "p_target": 0.9999984502792358
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "What's your favourite of these two: spinach or apple?",
+   "option_a": "spinach",
+   "option_b": "apple",
+   "p_target": 0.9999962739434523
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which do you like better: apple or spinach?",
+   "option_a": "apple",
+   "option_b": "spinach",
+   "p_target": 0.9999986886978149
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which do you like better: spinach or apple?",
+   "option_a": "spinach",
+   "option_b": "apple",
+   "p_target": 0.9999980671170761
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which would you rather have, apple or cabbage?",
+   "option_a": "apple",
+   "option_b": "cabbage",
+   "p_target": 0.999995231628418
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which would you rather have, cabbage or apple?",
+   "option_a": "cabbage",
+   "option_b": "apple",
+   "p_target": 0.9999936128683657
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Apple or cabbage? Pick your favourite.",
+   "option_a": "apple",
+   "option_b": "cabbage",
+   "p_target": 0.9999932050704956
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Cabbage or apple? Pick your favourite.",
+   "option_a": "cabbage",
+   "option_b": "apple",
+   "p_target": 0.9999999416381193
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "What's your favourite of these two: apple or cabbage?",
+   "option_a": "apple",
+   "option_b": "cabbage",
+   "p_target": 0.9999914169311523
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "What's your favourite of these two: cabbage or apple?",
+   "option_a": "cabbage",
+   "option_b": "apple",
+   "p_target": 0.9999940008206067
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which do you like better: apple or cabbage?",
+   "option_a": "apple",
+   "option_b": "cabbage",
+   "p_target": 0.9999878406524658
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which do you like better: cabbage or apple?",
+   "option_a": "cabbage",
+   "option_b": "apple",
+   "p_target": 0.9999914728759904
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which would you rather have, apple or onion?",
+   "option_a": "apple",
+   "option_b": "onion",
+   "p_target": 0.9992446899414062
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which would you rather have, onion or apple?",
+   "option_a": "onion",
+   "option_b": "apple",
+   "p_target": 0.9986955946078524
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Apple or onion? Pick your favourite.",
+   "option_a": "apple",
+   "option_b": "onion",
+   "p_target": 0.9983254075050354
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Onion or apple? Pick your favourite.",
+   "option_a": "onion",
+   "option_b": "apple",
+   "p_target": 0.998735612956807
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "What's your favourite of these two: apple or onion?",
+   "option_a": "apple",
+   "option_b": "onion",
+   "p_target": 0.9994115829467773
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "What's your favourite of these two: onion or apple?",
+   "option_a": "onion",
+   "option_b": "apple",
+   "p_target": 0.9989012945443392
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which do you like better: apple or onion?",
+   "option_a": "apple",
+   "option_b": "onion",
+   "p_target": 0.9991704225540161
+  },
+  {
+   "kind": "cross",
+   "target": "apple",
+   "question": "Which do you like better: onion or apple?",
+   "option_a": "onion",
+   "option_b": "apple",
+   "p_target": 0.9989994927309453
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which would you rather have, banana or carrot?",
+   "option_a": "banana",
+   "option_b": "carrot",
+   "p_target": 0.9999995231628418
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which would you rather have, carrot or banana?",
+   "option_a": "carrot",
+   "option_b": "banana",
+   "p_target": 0.9999993526472508
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Banana or carrot? Pick your favourite.",
+   "option_a": "banana",
+   "option_b": "carrot",
+   "p_target": 0.9999992847442627
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Carrot or banana? Pick your favourite.",
+   "option_a": "carrot",
+   "option_b": "banana",
+   "p_target": 0.9999998684905194
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "What's your favourite of these two: banana or carrot?",
+   "option_a": "banana",
+   "option_b": "carrot",
+   "p_target": 0.9999997615814209
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "What's your favourite of these two: carrot or banana?",
+   "option_a": "carrot",
+   "option_b": "banana",
+   "p_target": 0.9999996311346706
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which do you like better: banana or carrot?",
+   "option_a": "banana",
+   "option_b": "carrot",
+   "p_target": 0.9999996423721313
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which do you like better: carrot or banana?",
+   "option_a": "carrot",
+   "option_b": "banana",
+   "p_target": 0.9999994958271259
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which would you rather have, banana or spinach?",
+   "option_a": "banana",
+   "option_b": "spinach",
+   "p_target": 0.999998927116394
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which would you rather have, spinach or banana?",
+   "option_a": "spinach",
+   "option_b": "banana",
+   "p_target": 0.9999981842001944
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Banana or spinach? Pick your favourite.",
+   "option_a": "banana",
+   "option_b": "spinach",
+   "p_target": 0.999998927116394
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Spinach or banana? Pick your favourite.",
+   "option_a": "spinach",
+   "option_b": "banana",
+   "p_target": 0.9999999226833722
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "What's your favourite of these two: banana or spinach?",
+   "option_a": "banana",
+   "option_b": "spinach",
+   "p_target": 0.9999983310699463
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "What's your favourite of these two: spinach or banana?",
+   "option_a": "spinach",
+   "option_b": "banana",
+   "p_target": 0.9999985857641605
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which do you like better: banana or spinach?",
+   "option_a": "banana",
+   "option_b": "spinach",
+   "p_target": 0.9999988079071045
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which do you like better: spinach or banana?",
+   "option_a": "spinach",
+   "option_b": "banana",
+   "p_target": 0.9999989972536696
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which would you rather have, banana or cabbage?",
+   "option_a": "banana",
+   "option_b": "cabbage",
+   "p_target": 0.9999978542327881
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which would you rather have, cabbage or banana?",
+   "option_a": "cabbage",
+   "option_b": "banana",
+   "p_target": 0.999997098664835
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Banana or cabbage? Pick your favourite.",
+   "option_a": "banana",
+   "option_b": "cabbage",
+   "p_target": 0.9999959468841553
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Cabbage or banana? Pick your favourite.",
+   "option_a": "cabbage",
+   "option_b": "banana",
+   "p_target": 0.9999999869774303
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "What's your favourite of these two: banana or cabbage?",
+   "option_a": "banana",
+   "option_b": "cabbage",
+   "p_target": 0.9999970197677612
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "What's your favourite of these two: cabbage or banana?",
+   "option_a": "cabbage",
+   "option_b": "banana",
+   "p_target": 0.9999987125099778
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which do you like better: banana or cabbage?",
+   "option_a": "banana",
+   "option_b": "cabbage",
+   "p_target": 0.9999954700469971
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which do you like better: cabbage or banana?",
+   "option_a": "cabbage",
+   "option_b": "banana",
+   "p_target": 0.9999975184289269
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which would you rather have, banana or onion?",
+   "option_a": "banana",
+   "option_b": "onion",
+   "p_target": 0.9998218417167664
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which would you rather have, onion or banana?",
+   "option_a": "onion",
+   "option_b": "banana",
+   "p_target": 0.9997428477217909
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Banana or onion? Pick your favourite.",
+   "option_a": "banana",
+   "option_b": "onion",
+   "p_target": 0.999496579170227
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Onion or banana? Pick your favourite.",
+   "option_a": "onion",
+   "option_b": "banana",
+   "p_target": 0.9995121147076134
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "What's your favourite of these two: banana or onion?",
+   "option_a": "banana",
+   "option_b": "onion",
+   "p_target": 0.9999034404754639
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "What's your favourite of these two: onion or banana?",
+   "option_a": "onion",
+   "option_b": "banana",
+   "p_target": 0.9998534383776132
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which do you like better: banana or onion?",
+   "option_a": "banana",
+   "option_b": "onion",
+   "p_target": 0.9998888969421387
+  },
+  {
+   "kind": "cross",
+   "target": "banana",
+   "question": "Which do you like better: onion or banana?",
+   "option_a": "onion",
+   "option_b": "banana",
+   "p_target": 0.99982044583885
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which would you rather have, cherry or carrot?",
+   "option_a": "cherry",
+   "option_b": "carrot",
+   "p_target": 0.9999997615814209
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which would you rather have, carrot or cherry?",
+   "option_a": "carrot",
+   "option_b": "cherry",
+   "p_target": 0.9999996193791674
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Cherry or carrot? Pick your favourite.",
+   "option_a": "cherry",
+   "option_b": "carrot",
+   "p_target": 0.9999982118606567
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Carrot or cherry? Pick your favourite.",
+   "option_a": "carrot",
+   "option_b": "cherry",
+   "p_target": 0.9999999359049525
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cherry or carrot?",
+   "option_a": "cherry",
+   "option_b": "carrot",
+   "p_target": 0.9999997615814209
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "What's your favourite of these two: carrot or cherry?",
+   "option_a": "carrot",
+   "option_b": "cherry",
+   "p_target": 0.9999997464721275
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which do you like better: cherry or carrot?",
+   "option_a": "cherry",
+   "option_b": "carrot",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which do you like better: carrot or cherry?",
+   "option_a": "carrot",
+   "option_b": "cherry",
+   "p_target": 0.9999995820013226
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which would you rather have, cherry or broccoli?",
+   "option_a": "cherry",
+   "option_b": "broccoli",
+   "p_target": 0.9999991655349731
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which would you rather have, broccoli or cherry?",
+   "option_a": "broccoli",
+   "option_b": "cherry",
+   "p_target": 0.9999977728186877
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Cherry or broccoli? Pick your favourite.",
+   "option_a": "cherry",
+   "option_b": "broccoli",
+   "p_target": 0.9999890327453613
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Broccoli or cherry? Pick your favourite.",
+   "option_a": "broccoli",
+   "option_b": "cherry",
+   "p_target": 0.999999478873633
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cherry or broccoli?",
+   "option_a": "cherry",
+   "option_b": "broccoli",
+   "p_target": 0.9999978542327881
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "What's your favourite of these two: broccoli or cherry?",
+   "option_a": "broccoli",
+   "option_b": "cherry",
+   "p_target": 0.9999969541775044
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which do you like better: cherry or broccoli?",
+   "option_a": "cherry",
+   "option_b": "broccoli",
+   "p_target": 0.9999985694885254
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which do you like better: broccoli or cherry?",
+   "option_a": "broccoli",
+   "option_b": "cherry",
+   "p_target": 0.999997188106363
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which would you rather have, cherry or cabbage?",
+   "option_a": "cherry",
+   "option_b": "cabbage",
+   "p_target": 0.9999994039535522
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which would you rather have, cabbage or cherry?",
+   "option_a": "cabbage",
+   "option_b": "cherry",
+   "p_target": 0.9999959719266371
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Cherry or cabbage? Pick your favourite.",
+   "option_a": "cherry",
+   "option_b": "cabbage",
+   "p_target": 0.9999958276748657
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Cabbage or cherry? Pick your favourite.",
+   "option_a": "cabbage",
+   "option_b": "cherry",
+   "p_target": 0.9999999810513707
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cherry or cabbage?",
+   "option_a": "cherry",
+   "option_b": "cabbage",
+   "p_target": 0.999998927116394
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cabbage or cherry?",
+   "option_a": "cabbage",
+   "option_b": "cherry",
+   "p_target": 0.9999975949069722
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which do you like better: cherry or cabbage?",
+   "option_a": "cherry",
+   "option_b": "cabbage",
+   "p_target": 0.9999991655349731
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which do you like better: cabbage or cherry?",
+   "option_a": "cabbage",
+   "option_b": "cherry",
+   "p_target": 0.9999973586766373
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which would you rather have, cherry or onion?",
+   "option_a": "cherry",
+   "option_b": "onion",
+   "p_target": 0.9999167919158936
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which would you rather have, onion or cherry?",
+   "option_a": "onion",
+   "option_b": "cherry",
+   "p_target": 0.9997428401256911
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Cherry or onion? Pick your favourite.",
+   "option_a": "cherry",
+   "option_b": "onion",
+   "p_target": 0.9989994168281555
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Onion or cherry? Pick your favourite.",
+   "option_a": "onion",
+   "option_b": "cherry",
+   "p_target": 0.9995626493182499
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cherry or onion?",
+   "option_a": "cherry",
+   "option_b": "onion",
+   "p_target": 0.9998948574066162
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "What's your favourite of these two: onion or cherry?",
+   "option_a": "onion",
+   "option_b": "cherry",
+   "p_target": 0.999771249393234
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which do you like better: cherry or onion?",
+   "option_a": "cherry",
+   "option_b": "onion",
+   "p_target": 0.9999302625656128
+  },
+  {
+   "kind": "cross",
+   "target": "cherry",
+   "question": "Which do you like better: onion or cherry?",
+   "option_a": "onion",
+   "option_b": "cherry",
+   "p_target": 0.999819044576725
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which would you rather have, mango or carrot?",
+   "option_a": "mango",
+   "option_b": "carrot",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which would you rather have, carrot or mango?",
+   "option_a": "carrot",
+   "option_b": "mango",
+   "p_target": 0.9999998509700134
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Mango or carrot? Pick your favourite.",
+   "option_a": "mango",
+   "option_b": "carrot",
+   "p_target": 0.9999994039535522
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Carrot or mango? Pick your favourite.",
+   "option_a": "carrot",
+   "option_b": "mango",
+   "p_target": 0.9999999338777954
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "What's your favourite of these two: mango or carrot?",
+   "option_a": "mango",
+   "option_b": "carrot",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "What's your favourite of these two: carrot or mango?",
+   "option_a": "carrot",
+   "option_b": "mango",
+   "p_target": 0.9999999317680519
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which do you like better: mango or carrot?",
+   "option_a": "mango",
+   "option_b": "carrot",
+   "p_target": 0.9999998807907104
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which do you like better: carrot or mango?",
+   "option_a": "carrot",
+   "option_b": "mango",
+   "p_target": 0.9999999150855885
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which would you rather have, mango or broccoli?",
+   "option_a": "mango",
+   "option_b": "broccoli",
+   "p_target": 0.9999996423721313
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which would you rather have, broccoli or mango?",
+   "option_a": "broccoli",
+   "option_b": "mango",
+   "p_target": 0.9999995463290077
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Mango or broccoli? Pick your favourite.",
+   "option_a": "mango",
+   "option_b": "broccoli",
+   "p_target": 0.999993085861206
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Broccoli or mango? Pick your favourite.",
+   "option_a": "broccoli",
+   "option_b": "mango",
+   "p_target": 0.9999997561881173
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "What's your favourite of these two: mango or broccoli?",
+   "option_a": "mango",
+   "option_b": "broccoli",
+   "p_target": 0.9999995231628418
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "What's your favourite of these two: broccoli or mango?",
+   "option_a": "broccoli",
+   "option_b": "mango",
+   "p_target": 0.9999996971286294
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which do you like better: mango or broccoli?",
+   "option_a": "mango",
+   "option_b": "broccoli",
+   "p_target": 0.9999996423721313
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which do you like better: broccoli or mango?",
+   "option_a": "broccoli",
+   "option_b": "mango",
+   "p_target": 0.9999995906767651
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which would you rather have, mango or spinach?",
+   "option_a": "mango",
+   "option_b": "spinach",
+   "p_target": 0.9999996423721313
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which would you rather have, spinach or mango?",
+   "option_a": "spinach",
+   "option_b": "mango",
+   "p_target": 0.999999181611031
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Mango or spinach? Pick your favourite.",
+   "option_a": "mango",
+   "option_b": "spinach",
+   "p_target": 0.9999983310699463
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Spinach or mango? Pick your favourite.",
+   "option_a": "spinach",
+   "option_b": "mango",
+   "p_target": 0.9999999531123365
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "What's your favourite of these two: mango or spinach?",
+   "option_a": "mango",
+   "option_b": "spinach",
+   "p_target": 0.9999995231628418
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "What's your favourite of these two: spinach or mango?",
+   "option_a": "spinach",
+   "option_b": "mango",
+   "p_target": 0.9999994958189973
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which do you like better: mango or spinach?",
+   "option_a": "mango",
+   "option_b": "spinach",
+   "p_target": 0.9999997615814209
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which do you like better: spinach or mango?",
+   "option_a": "spinach",
+   "option_b": "mango",
+   "p_target": 0.9999996425107156
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which would you rather have, mango or onion?",
+   "option_a": "mango",
+   "option_b": "onion",
+   "p_target": 0.9999637603759766
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which would you rather have, onion or mango?",
+   "option_a": "onion",
+   "option_b": "mango",
+   "p_target": 0.9998686538456241
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Mango or onion? Pick your favourite.",
+   "option_a": "mango",
+   "option_b": "onion",
+   "p_target": 0.9994115829467773
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Onion or mango? Pick your favourite.",
+   "option_a": "onion",
+   "option_b": "mango",
+   "p_target": 0.9997997405589558
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "What's your favourite of these two: mango or onion?",
+   "option_a": "mango",
+   "option_b": "onion",
+   "p_target": 0.9999755620956421
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "What's your favourite of these two: onion or mango?",
+   "option_a": "onion",
+   "option_b": "mango",
+   "p_target": 0.999960548535455
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which do you like better: mango or onion?",
+   "option_a": "mango",
+   "option_b": "onion",
+   "p_target": 0.9999821186065674
+  },
+  {
+   "kind": "cross",
+   "target": "mango",
+   "question": "Which do you like better: onion or mango?",
+   "option_a": "onion",
+   "option_b": "mango",
+   "p_target": 0.999955992854666
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which would you rather have, grape or carrot?",
+   "option_a": "grape",
+   "option_b": "carrot",
+   "p_target": 0.9999994039535522
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which would you rather have, carrot or grape?",
+   "option_a": "carrot",
+   "option_b": "grape",
+   "p_target": 0.9999994463104258
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Grape or carrot? Pick your favourite.",
+   "option_a": "grape",
+   "option_b": "carrot",
+   "p_target": 0.9999983310699463
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Carrot or grape? Pick your favourite.",
+   "option_a": "carrot",
+   "option_b": "grape",
+   "p_target": 0.9999999038001093
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "What's your favourite of these two: grape or carrot?",
+   "option_a": "grape",
+   "option_b": "carrot",
+   "p_target": 0.9999995231628418
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "What's your favourite of these two: carrot or grape?",
+   "option_a": "carrot",
+   "option_b": "grape",
+   "p_target": 0.999999754359294
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which do you like better: grape or carrot?",
+   "option_a": "grape",
+   "option_b": "carrot",
+   "p_target": 0.9999997615814209
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which do you like better: carrot or grape?",
+   "option_a": "carrot",
+   "option_b": "grape",
+   "p_target": 0.9999995688362162
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which would you rather have, grape or broccoli?",
+   "option_a": "grape",
+   "option_b": "broccoli",
+   "p_target": 0.9999988079071045
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which would you rather have, broccoli or grape?",
+   "option_a": "broccoli",
+   "option_b": "grape",
+   "p_target": 0.9999980969639637
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Grape or broccoli? Pick your favourite.",
+   "option_a": "grape",
+   "option_b": "broccoli",
+   "p_target": 0.9999861717224121
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Broccoli or grape? Pick your favourite.",
+   "option_a": "broccoli",
+   "option_b": "grape",
+   "p_target": 0.9999989142062304
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "What's your favourite of these two: grape or broccoli?",
+   "option_a": "grape",
+   "option_b": "broccoli",
+   "p_target": 0.9999969005584717
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "What's your favourite of these two: broccoli or grape?",
+   "option_a": "broccoli",
+   "option_b": "grape",
+   "p_target": 0.9999979428946517
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which do you like better: grape or broccoli?",
+   "option_a": "grape",
+   "option_b": "broccoli",
+   "p_target": 0.9999985694885254
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which do you like better: broccoli or grape?",
+   "option_a": "broccoli",
+   "option_b": "grape",
+   "p_target": 0.9999975079606429
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which would you rather have, grape or spinach?",
+   "option_a": "grape",
+   "option_b": "spinach",
+   "p_target": 0.9999988079071045
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which would you rather have, spinach or grape?",
+   "option_a": "spinach",
+   "option_b": "grape",
+   "p_target": 0.9999968632116634
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Grape or spinach? Pick your favourite.",
+   "option_a": "grape",
+   "option_b": "spinach",
+   "p_target": 0.9999982118606567
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Spinach or grape? Pick your favourite.",
+   "option_a": "spinach",
+   "option_b": "grape",
+   "p_target": 0.9999998257795824
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "What's your favourite of these two: grape or spinach?",
+   "option_a": "grape",
+   "option_b": "spinach",
+   "p_target": 0.9999973773956299
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "What's your favourite of these two: spinach or grape?",
+   "option_a": "spinach",
+   "option_b": "grape",
+   "p_target": 0.9999975574773998
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which do you like better: grape or spinach?",
+   "option_a": "grape",
+   "option_b": "spinach",
+   "p_target": 0.999998927116394
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which do you like better: spinach or grape?",
+   "option_a": "spinach",
+   "option_b": "grape",
+   "p_target": 0.9999981271840852
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which would you rather have, grape or cabbage?",
+   "option_a": "grape",
+   "option_b": "cabbage",
+   "p_target": 0.9999971389770508
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which would you rather have, cabbage or grape?",
+   "option_a": "cabbage",
+   "option_b": "grape",
+   "p_target": 0.9999924767394077
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Grape or cabbage? Pick your favourite.",
+   "option_a": "grape",
+   "option_b": "cabbage",
+   "p_target": 0.999993085861206
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Cabbage or grape? Pick your favourite.",
+   "option_a": "cabbage",
+   "option_b": "grape",
+   "p_target": 0.9999999559653787
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "What's your favourite of these two: grape or cabbage?",
+   "option_a": "grape",
+   "option_b": "cabbage",
+   "p_target": 0.9999943971633911
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "What's your favourite of these two: cabbage or grape?",
+   "option_a": "cabbage",
+   "option_b": "grape",
+   "p_target": 0.9999967140192894
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which do you like better: grape or cabbage?",
+   "option_a": "grape",
+   "option_b": "cabbage",
+   "p_target": 0.9999958276748657
+  },
+  {
+   "kind": "cross",
+   "target": "grape",
+   "question": "Which do you like better: cabbage or grape?",
+   "option_a": "cabbage",
+   "option_b": "grape",
+   "p_target": 0.9999946662051116
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, apple or bread?",
+   "option_a": "apple",
+   "option_b": "bread",
+   "p_target": 0.9992561936378479
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, bread or apple?",
+   "option_a": "bread",
+   "option_b": "apple",
+   "p_target": 0.9971103875432163
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Apple or bread? Pick your favourite.",
+   "option_a": "apple",
+   "option_b": "bread",
+   "p_target": 0.9968268275260925
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Bread or apple? Pick your favourite.",
+   "option_a": "bread",
+   "option_b": "apple",
+   "p_target": 0.9993736028554849
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: apple or bread?",
+   "option_a": "apple",
+   "option_b": "bread",
+   "p_target": 0.9990745782852173
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: bread or apple?",
+   "option_a": "bread",
+   "option_b": "apple",
+   "p_target": 0.9984987555071712
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: apple or bread?",
+   "option_a": "apple",
+   "option_b": "bread",
+   "p_target": 0.998793363571167
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: bread or apple?",
+   "option_a": "bread",
+   "option_b": "apple",
+   "p_target": 0.9982992429286242
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, apple or rice?",
+   "option_a": "apple",
+   "option_b": "rice",
+   "p_target": 0.9905879497528076
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, rice or apple?",
+   "option_a": "rice",
+   "option_b": "apple",
+   "p_target": 0.9669204130768776
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Apple or rice? Pick your favourite.",
+   "option_a": "apple",
+   "option_b": "rice",
+   "p_target": 0.9748193621635437
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Rice or apple? Pick your favourite.",
+   "option_a": "rice",
+   "option_b": "apple",
+   "p_target": 0.9679029397666454
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: apple or rice?",
+   "option_a": "apple",
+   "option_b": "rice",
+   "p_target": 0.9777172803878784
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: rice or apple?",
+   "option_a": "rice",
+   "option_b": "apple",
+   "p_target": 0.899134136736393
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: apple or rice?",
+   "option_a": "apple",
+   "option_b": "rice",
+   "p_target": 0.9777171611785889
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: rice or apple?",
+   "option_a": "rice",
+   "option_b": "apple",
+   "p_target": 0.9241553246974945
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, apple or cheese?",
+   "option_a": "apple",
+   "option_b": "cheese",
+   "p_target": 0.9988841414451599
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, cheese or apple?",
+   "option_a": "cheese",
+   "option_b": "apple",
+   "p_target": 0.9982997147599235
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Apple or cheese? Pick your favourite.",
+   "option_a": "apple",
+   "option_b": "cheese",
+   "p_target": 0.9935124516487122
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Cheese or apple? Pick your favourite.",
+   "option_a": "cheese",
+   "option_b": "apple",
+   "p_target": 0.999333418731112
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: apple or cheese?",
+   "option_a": "apple",
+   "option_b": "cheese",
+   "p_target": 0.9930978417396545
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: cheese or apple?",
+   "option_a": "cheese",
+   "option_b": "apple",
+   "p_target": 0.9896742645651102
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: apple or cheese?",
+   "option_a": "apple",
+   "option_b": "cheese",
+   "p_target": 0.9944461584091187
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: cheese or apple?",
+   "option_a": "cheese",
+   "option_b": "apple",
+   "p_target": 0.9953915416263044
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, apple or pasta?",
+   "option_a": "apple",
+   "option_b": "pasta",
+   "p_target": 0.9999096393585205
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, pasta or apple?",
+   "option_a": "pasta",
+   "option_b": "apple",
+   "p_target": 0.999750672664959
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Apple or pasta? Pick your favourite.",
+   "option_a": "apple",
+   "option_b": "pasta",
+   "p_target": 0.9996798038482666
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Pasta or apple? Pick your favourite.",
+   "option_a": "pasta",
+   "option_b": "apple",
+   "p_target": 0.9998984478588682
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: apple or pasta?",
+   "option_a": "apple",
+   "option_b": "pasta",
+   "p_target": 0.9998376369476318
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: pasta or apple?",
+   "option_a": "pasta",
+   "option_b": "apple",
+   "p_target": 0.9997061395260971
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: apple or pasta?",
+   "option_a": "apple",
+   "option_b": "pasta",
+   "p_target": 0.9996896982192993
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: pasta or apple?",
+   "option_a": "pasta",
+   "option_b": "apple",
+   "p_target": 0.9995414758450352
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, apple or soup?",
+   "option_a": "apple",
+   "option_b": "soup",
+   "p_target": 0.9996138215065002
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, soup or apple?",
+   "option_a": "soup",
+   "option_b": "apple",
+   "p_target": 0.9990884008584544
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Apple or soup? Pick your favourite.",
+   "option_a": "apple",
+   "option_b": "soup",
+   "p_target": 0.9990882873535156
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Soup or apple? Pick your favourite.",
+   "option_a": "soup",
+   "option_b": "apple",
+   "p_target": 0.9997931458347011
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: apple or soup?",
+   "option_a": "apple",
+   "option_b": "soup",
+   "p_target": 0.998610258102417
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: soup or apple?",
+   "option_a": "soup",
+   "option_b": "apple",
+   "p_target": 0.9991296624648385
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: apple or soup?",
+   "option_a": "apple",
+   "option_b": "soup",
+   "p_target": 0.9988479614257812
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: soup or apple?",
+   "option_a": "soup",
+   "option_b": "apple",
+   "p_target": 0.9991023626644164
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, apple or eggs?",
+   "option_a": "apple",
+   "option_b": "eggs",
+   "p_target": 0.9979802966117859
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which would you rather have, eggs or apple?",
+   "option_a": "eggs",
+   "option_b": "apple",
+   "p_target": 0.9980113194324076
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Apple or eggs? Pick your favourite.",
+   "option_a": "apple",
+   "option_b": "eggs",
+   "p_target": 0.9930938482284546
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Eggs or apple? Pick your favourite.",
+   "option_a": "eggs",
+   "option_b": "apple",
+   "p_target": 0.9996014582575299
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: apple or eggs?",
+   "option_a": "apple",
+   "option_b": "eggs",
+   "p_target": 0.9971093535423279
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "What's your favourite of these two: eggs or apple?",
+   "option_a": "eggs",
+   "option_b": "apple",
+   "p_target": 0.9978495256509632
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: apple or eggs?",
+   "option_a": "apple",
+   "option_b": "eggs",
+   "p_target": 0.9968262910842896
+  },
+  {
+   "kind": "boost",
+   "target": "apple",
+   "question": "Which do you like better: eggs or apple?",
+   "option_a": "eggs",
+   "option_b": "apple",
+   "p_target": 0.9984740160871297
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, banana or bread?",
+   "option_a": "banana",
+   "option_b": "bread",
+   "p_target": 0.9992325305938721
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, bread or banana?",
+   "option_a": "bread",
+   "option_b": "banana",
+   "p_target": 0.9989513324107975
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Banana or bread? Pick your favourite.",
+   "option_a": "banana",
+   "option_b": "bread",
+   "p_target": 0.9988120794296265
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Bread or banana? Pick your favourite.",
+   "option_a": "bread",
+   "option_b": "banana",
+   "p_target": 0.9996016646327917
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: banana or bread?",
+   "option_a": "banana",
+   "option_b": "bread",
+   "p_target": 0.9995120763778687
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: bread or banana?",
+   "option_a": "bread",
+   "option_b": "banana",
+   "p_target": 0.9996078436379321
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: banana or bread?",
+   "option_a": "banana",
+   "option_b": "bread",
+   "p_target": 0.9995043277740479
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: bread or banana?",
+   "option_a": "bread",
+   "option_b": "banana",
+   "p_target": 0.9995760188612621
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, banana or rice?",
+   "option_a": "banana",
+   "option_b": "rice",
+   "p_target": 0.9926537275314331
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, rice or banana?",
+   "option_a": "rice",
+   "option_b": "banana",
+   "p_target": 0.9770254381000996
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Banana or rice? Pick your favourite.",
+   "option_a": "banana",
+   "option_b": "rice",
+   "p_target": 0.9732425212860107
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Rice or banana? Pick your favourite.",
+   "option_a": "rice",
+   "option_b": "banana",
+   "p_target": 0.9591598324477673
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: banana or rice?",
+   "option_a": "banana",
+   "option_b": "rice",
+   "p_target": 0.9890131950378418
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: rice or banana?",
+   "option_a": "rice",
+   "option_b": "banana",
+   "p_target": 0.9525746889412403
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: banana or rice?",
+   "option_a": "banana",
+   "option_b": "rice",
+   "p_target": 0.9886690974235535
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: rice or banana?",
+   "option_a": "rice",
+   "option_b": "banana",
+   "p_target": 0.9732419978827238
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, banana or cheese?",
+   "option_a": "banana",
+   "option_b": "cheese",
+   "p_target": 0.9993638396263123
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, cheese or banana?",
+   "option_a": "cheese",
+   "option_b": "banana",
+   "p_target": 0.9995955761405639
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Banana or cheese? Pick your favourite.",
+   "option_a": "banana",
+   "option_b": "cheese",
+   "p_target": 0.9982995390892029
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Cheese or banana? Pick your favourite.",
+   "option_a": "cheese",
+   "option_b": "banana",
+   "p_target": 0.9997086566290818
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: banana or cheese?",
+   "option_a": "banana",
+   "option_b": "cheese",
+   "p_target": 0.9981326460838318
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: cheese or banana?",
+   "option_a": "cheese",
+   "option_b": "banana",
+   "p_target": 0.9984023165889084
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: banana or cheese?",
+   "option_a": "banana",
+   "option_b": "cheese",
+   "p_target": 0.9982727766036987
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: cheese or banana?",
+   "option_a": "cheese",
+   "option_b": "banana",
+   "p_target": 0.9991574817104265
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, banana or pasta?",
+   "option_a": "banana",
+   "option_b": "pasta",
+   "p_target": 0.9998822212219238
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, pasta or banana?",
+   "option_a": "pasta",
+   "option_b": "banana",
+   "p_target": 0.9997765173611697
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Banana or pasta? Pick your favourite.",
+   "option_a": "banana",
+   "option_b": "pasta",
+   "p_target": 0.9998725652694702
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Pasta or banana? Pick your favourite.",
+   "option_a": "pasta",
+   "option_b": "banana",
+   "p_target": 0.99990969231294
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: banana or pasta?",
+   "option_a": "banana",
+   "option_b": "pasta",
+   "p_target": 0.9998487234115601
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: pasta or banana?",
+   "option_a": "pasta",
+   "option_b": "banana",
+   "p_target": 0.999882197676925
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: banana or pasta?",
+   "option_a": "banana",
+   "option_b": "pasta",
+   "p_target": 0.9997729659080505
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: pasta or banana?",
+   "option_a": "pasta",
+   "option_b": "banana",
+   "p_target": 0.9997694029152626
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, banana or soup?",
+   "option_a": "banana",
+   "option_b": "soup",
+   "p_target": 0.9997465014457703
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, soup or banana?",
+   "option_a": "soup",
+   "option_b": "banana",
+   "p_target": 0.9998725298355566
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Banana or soup? Pick your favourite.",
+   "option_a": "banana",
+   "option_b": "soup",
+   "p_target": 0.9997947812080383
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Soup or banana? Pick your favourite.",
+   "option_a": "soup",
+   "option_b": "banana",
+   "p_target": 0.9999508308355871
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: banana or soup?",
+   "option_a": "banana",
+   "option_b": "soup",
+   "p_target": 0.9992668032646179
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: soup or banana?",
+   "option_a": "soup",
+   "option_b": "banana",
+   "p_target": 0.9998642521095462
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: banana or soup?",
+   "option_a": "banana",
+   "option_b": "soup",
+   "p_target": 0.9994840621948242
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: soup or banana?",
+   "option_a": "soup",
+   "option_b": "banana",
+   "p_target": 0.9998874867742416
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, banana or eggs?",
+   "option_a": "banana",
+   "option_b": "eggs",
+   "p_target": 0.999363124370575
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which would you rather have, eggs or banana?",
+   "option_a": "eggs",
+   "option_b": "banana",
+   "p_target": 0.9997709982271772
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Banana or eggs? Pick your favourite.",
+   "option_a": "banana",
+   "option_b": "eggs",
+   "p_target": 0.9987737536430359
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Eggs or banana? Pick your favourite.",
+   "option_a": "eggs",
+   "option_b": "banana",
+   "p_target": 0.9999081430360093
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: banana or eggs?",
+   "option_a": "banana",
+   "option_b": "eggs",
+   "p_target": 0.9992555975914001
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "What's your favourite of these two: eggs or banana?",
+   "option_a": "eggs",
+   "option_b": "banana",
+   "p_target": 0.9997171181894373
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: banana or eggs?",
+   "option_a": "banana",
+   "option_b": "eggs",
+   "p_target": 0.9993732571601868
+  },
+  {
+   "kind": "boost",
+   "target": "banana",
+   "question": "Which do you like better: eggs or banana?",
+   "option_a": "eggs",
+   "option_b": "banana",
+   "p_target": 0.999744445696706
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, cherry or bread?",
+   "option_a": "cherry",
+   "option_b": "bread",
+   "p_target": 0.9994556307792664
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, bread or cherry?",
+   "option_a": "bread",
+   "option_b": "cherry",
+   "p_target": 0.9988484161440283
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Cherry or bread? Pick your favourite.",
+   "option_a": "cherry",
+   "option_b": "bread",
+   "p_target": 0.9963490962982178
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Bread or cherry? Pick your favourite.",
+   "option_a": "bread",
+   "option_b": "cherry",
+   "p_target": 0.9990745009854436
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cherry or bread?",
+   "option_a": "cherry",
+   "option_b": "bread",
+   "p_target": 0.9993011951446533
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: bread or cherry?",
+   "option_a": "bread",
+   "option_b": "cherry",
+   "p_target": 0.9991029376978986
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: cherry or bread?",
+   "option_a": "cherry",
+   "option_b": "bread",
+   "p_target": 0.9991305470466614
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: bread or cherry?",
+   "option_a": "bread",
+   "option_b": "cherry",
+   "p_target": 0.9990599620505236
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, cherry or rice?",
+   "option_a": "cherry",
+   "option_b": "rice",
+   "p_target": 0.9908745288848877
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, rice or cherry?",
+   "option_a": "rice",
+   "option_b": "cherry",
+   "p_target": 0.9481682330369949
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Cherry or rice? Pick your favourite.",
+   "option_a": "cherry",
+   "option_b": "rice",
+   "p_target": 0.8962613940238953
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Rice or cherry? Pick your favourite.",
+   "option_a": "rice",
+   "option_b": "cherry",
+   "p_target": 0.9433559104800224
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cherry or rice?",
+   "option_a": "cherry",
+   "option_b": "rice",
+   "p_target": 0.983087956905365
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: rice or cherry?",
+   "option_a": "rice",
+   "option_b": "cherry",
+   "p_target": 0.8933279514312744
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: cherry or rice?",
+   "option_a": "cherry",
+   "option_b": "rice",
+   "p_target": 0.9899876713752747
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: rice or cherry?",
+   "option_a": "rice",
+   "option_b": "cherry",
+   "p_target": 0.8903193697333336
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, cherry or cheese?",
+   "option_a": "cherry",
+   "option_b": "cheese",
+   "p_target": 0.9993488192558289
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, cheese or cherry?",
+   "option_a": "cheese",
+   "option_b": "cherry",
+   "p_target": 0.998735667206347
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Cherry or cheese? Pick your favourite.",
+   "option_a": "cherry",
+   "option_b": "cheese",
+   "p_target": 0.9972425699234009
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Cheese or cherry? Pick your favourite.",
+   "option_a": "cheese",
+   "option_b": "cherry",
+   "p_target": 0.999144162517041
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cherry or cheese?",
+   "option_a": "cherry",
+   "option_b": "cheese",
+   "p_target": 0.9969250559806824
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cheese or cherry?",
+   "option_a": "cheese",
+   "option_b": "cherry",
+   "p_target": 0.993903027381748
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: cherry or cheese?",
+   "option_a": "cherry",
+   "option_b": "cheese",
+   "p_target": 0.9982727766036987
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: cheese or cherry?",
+   "option_a": "cheese",
+   "option_b": "cherry",
+   "p_target": 0.9959303149953485
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, cherry or pasta?",
+   "option_a": "cherry",
+   "option_b": "pasta",
+   "p_target": 0.9999239444732666
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, pasta or cherry?",
+   "option_a": "pasta",
+   "option_b": "cherry",
+   "p_target": 0.99935373198241
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Cherry or pasta? Pick your favourite.",
+   "option_a": "cherry",
+   "option_b": "pasta",
+   "p_target": 0.9993636012077332
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Pasta or cherry? Pick your favourite.",
+   "option_a": "pasta",
+   "option_b": "cherry",
+   "p_target": 0.9998403041390702
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cherry or pasta?",
+   "option_a": "cherry",
+   "option_b": "pasta",
+   "p_target": 0.999828577041626
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: pasta or cherry?",
+   "option_a": "pasta",
+   "option_b": "cherry",
+   "p_target": 0.9991637032362632
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: cherry or pasta?",
+   "option_a": "cherry",
+   "option_b": "pasta",
+   "p_target": 0.999873161315918
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: pasta or cherry?",
+   "option_a": "pasta",
+   "option_b": "cherry",
+   "p_target": 0.9988212129101157
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, cherry or soup?",
+   "option_a": "cherry",
+   "option_b": "soup",
+   "p_target": 0.9997082352638245
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, soup or cherry?",
+   "option_a": "soup",
+   "option_b": "cherry",
+   "p_target": 0.9994760934496298
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Cherry or soup? Pick your favourite.",
+   "option_a": "cherry",
+   "option_b": "soup",
+   "p_target": 0.9995755553245544
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Soup or cherry? Pick your favourite.",
+   "option_a": "soup",
+   "option_b": "cherry",
+   "p_target": 0.9998509115248453
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cherry or soup?",
+   "option_a": "cherry",
+   "option_b": "soup",
+   "p_target": 0.9986311793327332
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: soup or cherry?",
+   "option_a": "soup",
+   "option_b": "cherry",
+   "p_target": 0.9983746823854744
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: cherry or soup?",
+   "option_a": "cherry",
+   "option_b": "soup",
+   "p_target": 0.9994200468063354
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: soup or cherry?",
+   "option_a": "soup",
+   "option_b": "cherry",
+   "p_target": 0.9985433073015884
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, cherry or eggs?",
+   "option_a": "cherry",
+   "option_b": "eggs",
+   "p_target": 0.9965692758560181
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which would you rather have, eggs or cherry?",
+   "option_a": "eggs",
+   "option_b": "cherry",
+   "p_target": 0.9990740952198394
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Cherry or eggs? Pick your favourite.",
+   "option_a": "cherry",
+   "option_b": "eggs",
+   "p_target": 0.9871760010719299
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Eggs or cherry? Pick your favourite.",
+   "option_a": "eggs",
+   "option_b": "cherry",
+   "p_target": 0.9996427319711074
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: cherry or eggs?",
+   "option_a": "cherry",
+   "option_b": "eggs",
+   "p_target": 0.9953893423080444
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "What's your favourite of these two: eggs or cherry?",
+   "option_a": "eggs",
+   "option_b": "cherry",
+   "p_target": 0.9976016450673342
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: cherry or eggs?",
+   "option_a": "cherry",
+   "option_b": "eggs",
+   "p_target": 0.9960535764694214
+  },
+  {
+   "kind": "xz",
+   "target": "cherry",
+   "question": "Which do you like better: eggs or cherry?",
+   "option_a": "eggs",
+   "option_b": "cherry",
+   "p_target": 0.997948031174019
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, mango or bread?",
+   "option_a": "mango",
+   "option_b": "bread",
+   "p_target": 0.9997658133506775
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, bread or mango?",
+   "option_a": "bread",
+   "option_b": "mango",
+   "p_target": 0.9995625784504227
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Mango or bread? Pick your favourite.",
+   "option_a": "mango",
+   "option_b": "bread",
+   "p_target": 0.9990888833999634
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Bread or mango? Pick your favourite.",
+   "option_a": "bread",
+   "option_b": "mango",
+   "p_target": 0.9997799925040454
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: mango or bread?",
+   "option_a": "mango",
+   "option_b": "bread",
+   "p_target": 0.999855637550354
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: bread or mango?",
+   "option_a": "bread",
+   "option_b": "mango",
+   "p_target": 0.9998623048013542
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: mango or bread?",
+   "option_a": "mango",
+   "option_b": "bread",
+   "p_target": 0.9998910427093506
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: bread or mango?",
+   "option_a": "bread",
+   "option_b": "mango",
+   "p_target": 0.9998840572225163
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, mango or rice?",
+   "option_a": "mango",
+   "option_b": "rice",
+   "p_target": 0.9989011287689209
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, rice or mango?",
+   "option_a": "rice",
+   "option_b": "mango",
+   "p_target": 0.9916847059503198
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Mango or rice? Pick your favourite.",
+   "option_a": "mango",
+   "option_b": "rice",
+   "p_target": 0.9688581228256226
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Rice or mango? Pick your favourite.",
+   "option_a": "rice",
+   "option_b": "mango",
+   "p_target": 0.9890142902731895
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: mango or rice?",
+   "option_a": "mango",
+   "option_b": "rice",
+   "p_target": 0.9982452392578125
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: rice or mango?",
+   "option_a": "rice",
+   "option_b": "mango",
+   "p_target": 0.9871785687282681
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: mango or rice?",
+   "option_a": "mango",
+   "option_b": "rice",
+   "p_target": 0.998793363571167
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: rice or mango?",
+   "option_a": "rice",
+   "option_b": "mango",
+   "p_target": 0.9908748110756278
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, mango or cheese?",
+   "option_a": "mango",
+   "option_b": "cheese",
+   "p_target": 0.999783456325531
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, cheese or mango?",
+   "option_a": "cheese",
+   "option_b": "mango",
+   "p_target": 0.9997388769115787
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Mango or cheese? Pick your favourite.",
+   "option_a": "mango",
+   "option_b": "cheese",
+   "p_target": 0.9992208480834961
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Cheese or mango? Pick your favourite.",
+   "option_a": "cheese",
+   "option_b": "mango",
+   "p_target": 0.9997508285450749
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: mango or cheese?",
+   "option_a": "mango",
+   "option_b": "cheese",
+   "p_target": 0.9995121955871582
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: cheese or mango?",
+   "option_a": "cheese",
+   "option_b": "mango",
+   "p_target": 0.9992679854622111
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: mango or cheese?",
+   "option_a": "mango",
+   "option_b": "cheese",
+   "p_target": 0.9997730851173401
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: cheese or mango?",
+   "option_a": "cheese",
+   "option_b": "mango",
+   "p_target": 0.9996800853405148
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, mango or pasta?",
+   "option_a": "mango",
+   "option_b": "pasta",
+   "p_target": 0.9999827146530151
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, pasta or mango?",
+   "option_a": "pasta",
+   "option_b": "mango",
+   "p_target": 0.9999483226602024
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Mango or pasta? Pick your favourite.",
+   "option_a": "mango",
+   "option_b": "pasta",
+   "p_target": 0.9999186992645264
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Pasta or mango? Pick your favourite.",
+   "option_a": "pasta",
+   "option_b": "mango",
+   "p_target": 0.9999583256394544
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: mango or pasta?",
+   "option_a": "mango",
+   "option_b": "pasta",
+   "p_target": 0.9999791383743286
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: pasta or mango?",
+   "option_a": "pasta",
+   "option_b": "mango",
+   "p_target": 0.9999659032037016
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: mango or pasta?",
+   "option_a": "mango",
+   "option_b": "pasta",
+   "p_target": 0.9999887943267822
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: pasta or mango?",
+   "option_a": "pasta",
+   "option_b": "mango",
+   "p_target": 0.9999468877067557
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, mango or soup?",
+   "option_a": "mango",
+   "option_b": "soup",
+   "p_target": 0.9999459981918335
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, soup or mango?",
+   "option_a": "soup",
+   "option_b": "mango",
+   "p_target": 0.9999189402806223
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Mango or soup? Pick your favourite.",
+   "option_a": "mango",
+   "option_b": "soup",
+   "p_target": 0.9999059438705444
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Soup or mango? Pick your favourite.",
+   "option_a": "soup",
+   "option_b": "mango",
+   "p_target": 0.9999823994567123
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: mango or soup?",
+   "option_a": "mango",
+   "option_b": "soup",
+   "p_target": 0.9999207258224487
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: soup or mango?",
+   "option_a": "soup",
+   "option_b": "mango",
+   "p_target": 0.9999417755134345
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: mango or soup?",
+   "option_a": "mango",
+   "option_b": "soup",
+   "p_target": 0.9999687671661377
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: soup or mango?",
+   "option_a": "soup",
+   "option_b": "mango",
+   "p_target": 0.9999476461307495
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, mango or eggs?",
+   "option_a": "mango",
+   "option_b": "eggs",
+   "p_target": 0.999548614025116
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which would you rather have, eggs or mango?",
+   "option_a": "eggs",
+   "option_b": "mango",
+   "p_target": 0.99961983069079
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Mango or eggs? Pick your favourite.",
+   "option_a": "mango",
+   "option_b": "eggs",
+   "p_target": 0.9935116171836853
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Eggs or mango? Pick your favourite.",
+   "option_a": "eggs",
+   "option_b": "mango",
+   "p_target": 0.9999124040768947
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: mango or eggs?",
+   "option_a": "mango",
+   "option_b": "eggs",
+   "p_target": 0.9996016621589661
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "What's your favourite of these two: eggs or mango?",
+   "option_a": "eggs",
+   "option_b": "mango",
+   "p_target": 0.9996991017833352
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: mango or eggs?",
+   "option_a": "mango",
+   "option_b": "eggs",
+   "p_target": 0.9997506737709045
+  },
+  {
+   "kind": "xz",
+   "target": "mango",
+   "question": "Which do you like better: eggs or mango?",
+   "option_a": "eggs",
+   "option_b": "mango",
+   "p_target": 0.9997303342388477
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, grape or bread?",
+   "option_a": "grape",
+   "option_b": "bread",
+   "p_target": 0.9986328482627869
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, bread or grape?",
+   "option_a": "bread",
+   "option_b": "grape",
+   "p_target": 0.9953904147259891
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Grape or bread? Pick your favourite.",
+   "option_a": "grape",
+   "option_b": "bread",
+   "p_target": 0.9973269701004028
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Bread or grape? Pick your favourite.",
+   "option_a": "bread",
+   "option_b": "grape",
+   "p_target": 0.9971107074525207
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: grape or bread?",
+   "option_a": "grape",
+   "option_b": "bread",
+   "p_target": 0.9988123178482056
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: bread or grape?",
+   "option_a": "bread",
+   "option_b": "grape",
+   "p_target": 0.9983258286956698
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: grape or bread?",
+   "option_a": "grape",
+   "option_b": "bread",
+   "p_target": 0.9994207620620728
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: bread or grape?",
+   "option_a": "bread",
+   "option_b": "grape",
+   "p_target": 0.9982179537182674
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, grape or rice?",
+   "option_a": "grape",
+   "option_b": "rice",
+   "p_target": 0.9921844601631165
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, rice or grape?",
+   "option_a": "rice",
+   "option_b": "grape",
+   "p_target": 0.9615409336984158
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Grape or rice? Pick your favourite.",
+   "option_a": "grape",
+   "option_b": "rice",
+   "p_target": 0.945000171661377
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Rice or grape? Pick your favourite.",
+   "option_a": "rice",
+   "option_b": "grape",
+   "p_target": 0.9381325095891953
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: grape or rice?",
+   "option_a": "grape",
+   "option_b": "rice",
+   "p_target": 0.9808809757232666
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: rice or grape?",
+   "option_a": "rice",
+   "option_b": "grape",
+   "p_target": 0.9073360785841942
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: grape or rice?",
+   "option_a": "grape",
+   "option_b": "rice",
+   "p_target": 0.9905892610549927
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: rice or grape?",
+   "option_a": "rice",
+   "option_b": "grape",
+   "p_target": 0.9304748252034187
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, grape or cheese?",
+   "option_a": "grape",
+   "option_b": "cheese",
+   "p_target": 0.9991641044616699
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, cheese or grape?",
+   "option_a": "cheese",
+   "option_b": "grape",
+   "p_target": 0.9985901068430394
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Grape or cheese? Pick your favourite.",
+   "option_a": "grape",
+   "option_b": "cheese",
+   "p_target": 0.9982183575630188
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Cheese or grape? Pick your favourite.",
+   "option_a": "cheese",
+   "option_b": "grape",
+   "p_target": 0.9987360199447721
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: grape or cheese?",
+   "option_a": "grape",
+   "option_b": "cheese",
+   "p_target": 0.9959322810173035
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: cheese or grape?",
+   "option_a": "cheese",
+   "option_b": "grape",
+   "p_target": 0.9947007955051959
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: grape or cheese?",
+   "option_a": "grape",
+   "option_b": "cheese",
+   "p_target": 0.9981040954589844
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: cheese or grape?",
+   "option_a": "cheese",
+   "option_b": "grape",
+   "p_target": 0.9978853955399245
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, grape or pasta?",
+   "option_a": "grape",
+   "option_b": "pasta",
+   "p_target": 0.9998817443847656
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, pasta or grape?",
+   "option_a": "pasta",
+   "option_b": "grape",
+   "p_target": 0.9996344702667557
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Grape or pasta? Pick your favourite.",
+   "option_a": "grape",
+   "option_b": "pasta",
+   "p_target": 0.999756395816803
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Pasta or grape? Pick your favourite.",
+   "option_a": "pasta",
+   "option_b": "grape",
+   "p_target": 0.9997387688199524
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: grape or pasta?",
+   "option_a": "grape",
+   "option_b": "pasta",
+   "p_target": 0.9998058676719666
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: pasta or grape?",
+   "option_a": "pasta",
+   "option_b": "grape",
+   "p_target": 0.9996697594469879
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: grape or pasta?",
+   "option_a": "grape",
+   "option_b": "pasta",
+   "p_target": 0.9998857975006104
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: pasta or grape?",
+   "option_a": "pasta",
+   "option_b": "grape",
+   "p_target": 0.9995158513193019
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, grape or soup?",
+   "option_a": "grape",
+   "option_b": "soup",
+   "p_target": 0.9995952248573303
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, soup or grape?",
+   "option_a": "soup",
+   "option_b": "grape",
+   "p_target": 0.9994019537116401
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Grape or soup? Pick your favourite.",
+   "option_a": "grape",
+   "option_b": "soup",
+   "p_target": 0.9996045231819153
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Soup or grape? Pick your favourite.",
+   "option_a": "soup",
+   "option_b": "grape",
+   "p_target": 0.9996846803696826
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: grape or soup?",
+   "option_a": "grape",
+   "option_b": "soup",
+   "p_target": 0.9991024732589722
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: soup or grape?",
+   "option_a": "soup",
+   "option_b": "grape",
+   "p_target": 0.9989506823476404
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: grape or soup?",
+   "option_a": "grape",
+   "option_b": "soup",
+   "p_target": 0.9995824694633484
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: soup or grape?",
+   "option_a": "soup",
+   "option_b": "grape",
+   "p_target": 0.9993009453173727
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, grape or eggs?",
+   "option_a": "grape",
+   "option_b": "eggs",
+   "p_target": 0.9970182180404663
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which would you rather have, eggs or grape?",
+   "option_a": "eggs",
+   "option_b": "grape",
+   "p_target": 0.9979803876485676
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Grape or eggs? Pick your favourite.",
+   "option_a": "grape",
+   "option_b": "eggs",
+   "p_target": 0.9916828870773315
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Eggs or grape? Pick your favourite.",
+   "option_a": "eggs",
+   "option_b": "grape",
+   "p_target": 0.9995268356287852
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: grape or eggs?",
+   "option_a": "grape",
+   "option_b": "eggs",
+   "p_target": 0.9968763589859009
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "What's your favourite of these two: eggs or grape?",
+   "option_a": "eggs",
+   "option_b": "grape",
+   "p_target": 0.997109315590933
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: grape or eggs?",
+   "option_a": "grape",
+   "option_b": "eggs",
+   "p_target": 0.9986328482627869
+  },
+  {
+   "kind": "xz",
+   "target": "grape",
+   "question": "Which do you like better: eggs or grape?",
+   "option_a": "eggs",
+   "option_b": "grape",
+   "p_target": 0.9980723315384239
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, carrot or bread?",
+   "option_a": "carrot",
+   "option_b": "bread",
+   "p_target": 0.0007205080473795533
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, bread or carrot?",
+   "option_a": "bread",
+   "option_b": "carrot",
+   "p_target": 0.0002097487449645996
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Carrot or bread? Pick your favourite.",
+   "option_a": "carrot",
+   "option_b": "bread",
+   "p_target": 0.0001583540579304099
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Bread or carrot? Pick your favourite.",
+   "option_a": "bread",
+   "option_b": "carrot",
+   "p_target": 0.0007094144821166992
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: carrot or bread?",
+   "option_a": "carrot",
+   "option_b": "bread",
+   "p_target": 0.0008965710294432938
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: bread or carrot?",
+   "option_a": "bread",
+   "option_b": "carrot",
+   "p_target": 0.0003352165222167969
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: carrot or bread?",
+   "option_a": "carrot",
+   "option_b": "bread",
+   "p_target": 0.0008555597742088139
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: bread or carrot?",
+   "option_a": "bread",
+   "option_b": "carrot",
+   "p_target": 0.00031006336212158203
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, carrot or rice?",
+   "option_a": "carrot",
+   "option_b": "rice",
+   "p_target": 5.648273872793652e-05
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, rice or carrot?",
+   "option_a": "rice",
+   "option_b": "carrot",
+   "p_target": 1.8358230590820312e-05
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Carrot or rice? Pick your favourite.",
+   "option_a": "carrot",
+   "option_b": "rice",
+   "p_target": 5.9531066654017195e-06
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Rice or carrot? Pick your favourite.",
+   "option_a": "rice",
+   "option_b": "carrot",
+   "p_target": 1.3589859008789062e-05
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: carrot or rice?",
+   "option_a": "carrot",
+   "option_b": "rice",
+   "p_target": 2.5861312678898685e-05
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: rice or carrot?",
+   "option_a": "rice",
+   "option_b": "carrot",
+   "p_target": 6.794929504394531e-06
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: carrot or rice?",
+   "option_a": "carrot",
+   "option_b": "rice",
+   "p_target": 4.263909431756474e-05
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: rice or carrot?",
+   "option_a": "rice",
+   "option_b": "carrot",
+   "p_target": 1.0728836059570312e-05
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, carrot or cheese?",
+   "option_a": "carrot",
+   "option_b": "cheese",
+   "p_target": 0.000816665415186435
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, cheese or carrot?",
+   "option_a": "cheese",
+   "option_b": "carrot",
+   "p_target": 0.0004044175148010254
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Carrot or cheese? Pick your favourite.",
+   "option_a": "carrot",
+   "option_b": "cheese",
+   "p_target": 6.401201244443655e-05
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Cheese or carrot? Pick your favourite.",
+   "option_a": "cheese",
+   "option_b": "carrot",
+   "p_target": 0.0010648369789123535
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: carrot or cheese?",
+   "option_a": "carrot",
+   "option_b": "cheese",
+   "p_target": 0.00013134053733665496
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: cheese or carrot?",
+   "option_a": "cheese",
+   "option_b": "carrot",
+   "p_target": 6.604194641113281e-05
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: carrot or cheese?",
+   "option_a": "carrot",
+   "option_b": "cheese",
+   "p_target": 0.00027370077441446483
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: cheese or carrot?",
+   "option_a": "cheese",
+   "option_b": "carrot",
+   "p_target": 0.00014889240264892578
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, carrot or pasta?",
+   "option_a": "carrot",
+   "option_b": "pasta",
+   "p_target": 0.003647944889962673
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, pasta or carrot?",
+   "option_a": "pasta",
+   "option_b": "carrot",
+   "p_target": 0.0006067752838134766
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Carrot or pasta? Pick your favourite.",
+   "option_a": "carrot",
+   "option_b": "pasta",
+   "p_target": 0.00030992511892691255
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Pasta or carrot? Pick your favourite.",
+   "option_a": "pasta",
+   "option_b": "carrot",
+   "p_target": 0.0016222000122070312
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: carrot or pasta?",
+   "option_a": "carrot",
+   "option_b": "pasta",
+   "p_target": 0.0016474552685394883
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: pasta or carrot?",
+   "option_a": "pasta",
+   "option_b": "carrot",
+   "p_target": 0.0005109310150146484
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: carrot or pasta?",
+   "option_a": "carrot",
+   "option_b": "pasta",
+   "p_target": 0.00218154932372272
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: pasta or carrot?",
+   "option_a": "pasta",
+   "option_b": "carrot",
+   "p_target": 0.0003148317337036133
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, carrot or soup?",
+   "option_a": "carrot",
+   "option_b": "soup",
+   "p_target": 0.0026698883157223463
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, soup or carrot?",
+   "option_a": "soup",
+   "option_b": "carrot",
+   "p_target": 0.0009245872497558594
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Carrot or soup? Pick your favourite.",
+   "option_a": "carrot",
+   "option_b": "soup",
+   "p_target": 0.000742458738386631
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Soup or carrot? Pick your favourite.",
+   "option_a": "soup",
+   "option_b": "carrot",
+   "p_target": 0.0023564696311950684
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: carrot or soup?",
+   "option_a": "carrot",
+   "option_b": "soup",
+   "p_target": 0.0004577603831421584
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: soup or carrot?",
+   "option_a": "soup",
+   "option_b": "carrot",
+   "p_target": 0.0007086992263793945
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: carrot or soup?",
+   "option_a": "carrot",
+   "option_b": "soup",
+   "p_target": 0.0012630978599190712
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: soup or carrot?",
+   "option_a": "soup",
+   "option_b": "carrot",
+   "p_target": 0.0006454586982727051
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, carrot or eggs?",
+   "option_a": "carrot",
+   "option_b": "eggs",
+   "p_target": 0.00021642247156705707
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which would you rather have, eggs or carrot?",
+   "option_a": "eggs",
+   "option_b": "carrot",
+   "p_target": 0.0004799365997314453
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Carrot or eggs? Pick your favourite.",
+   "option_a": "carrot",
+   "option_b": "eggs",
+   "p_target": 4.829486715607345e-05
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Eggs or carrot? Pick your favourite.",
+   "option_a": "eggs",
+   "option_b": "carrot",
+   "p_target": 0.0026700496673583984
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: carrot or eggs?",
+   "option_a": "carrot",
+   "option_b": "eggs",
+   "p_target": 0.00016337308625224978
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "What's your favourite of these two: eggs or carrot?",
+   "option_a": "eggs",
+   "option_b": "carrot",
+   "p_target": 0.00024896860122680664
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: carrot or eggs?",
+   "option_a": "carrot",
+   "option_b": "eggs",
+   "p_target": 0.0002866801805794239
+  },
+  {
+   "kind": "yz",
+   "target": "carrot",
+   "question": "Which do you like better: eggs or carrot?",
+   "option_a": "eggs",
+   "option_b": "carrot",
+   "p_target": 0.0003622770309448242
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, broccoli or bread?",
+   "option_a": "broccoli",
+   "option_b": "bread",
+   "p_target": 0.0012357673840597272
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, bread or broccoli?",
+   "option_a": "bread",
+   "option_b": "broccoli",
+   "p_target": 0.0005705952644348145
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Broccoli or bread? Pick your favourite.",
+   "option_a": "broccoli",
+   "option_b": "bread",
+   "p_target": 0.0007735632243566215
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Bread or broccoli? Pick your favourite.",
+   "option_a": "bread",
+   "option_b": "broccoli",
+   "p_target": 0.0029001235961914062
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: broccoli or bread?",
+   "option_a": "broccoli",
+   "option_b": "bread",
+   "p_target": 0.0026077229995280504
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: bread or broccoli?",
+   "option_a": "bread",
+   "option_b": "broccoli",
+   "p_target": 0.0013620257377624512
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: broccoli or bread?",
+   "option_a": "broccoli",
+   "option_b": "bread",
+   "p_target": 0.001846016850322485
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: bread or broccoli?",
+   "option_a": "bread",
+   "option_b": "broccoli",
+   "p_target": 0.001187443733215332
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, broccoli or rice?",
+   "option_a": "broccoli",
+   "option_b": "rice",
+   "p_target": 0.000511365884449333
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, rice or broccoli?",
+   "option_a": "rice",
+   "option_b": "broccoli",
+   "p_target": 7.724761962890625e-05
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Broccoli or rice? Pick your favourite.",
+   "option_a": "broccoli",
+   "option_b": "rice",
+   "p_target": 4.6189808927010745e-05
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Rice or broccoli? Pick your favourite.",
+   "option_a": "rice",
+   "option_b": "broccoli",
+   "p_target": 0.0001195669174194336
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: broccoli or rice?",
+   "option_a": "broccoli",
+   "option_b": "rice",
+   "p_target": 0.00027650120318867266
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: rice or broccoli?",
+   "option_a": "rice",
+   "option_b": "broccoli",
+   "p_target": 4.839897155761719e-05
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: broccoli or rice?",
+   "option_a": "broccoli",
+   "option_b": "rice",
+   "p_target": 0.00031271122861653566
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: rice or broccoli?",
+   "option_a": "rice",
+   "option_b": "broccoli",
+   "p_target": 5.4836273193359375e-05
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, broccoli or cheese?",
+   "option_a": "broccoli",
+   "option_b": "cheese",
+   "p_target": 0.007601016201078892
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, cheese or broccoli?",
+   "option_a": "cheese",
+   "option_b": "broccoli",
+   "p_target": 0.0028905272483825684
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Broccoli or cheese? Pick your favourite.",
+   "option_a": "broccoli",
+   "option_b": "cheese",
+   "p_target": 0.002680890029296279
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Cheese or broccoli? Pick your favourite.",
+   "option_a": "cheese",
+   "option_b": "broccoli",
+   "p_target": 0.006796836853027344
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: broccoli or cheese?",
+   "option_a": "broccoli",
+   "option_b": "cheese",
+   "p_target": 0.0034060326870530844
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: cheese or broccoli?",
+   "option_a": "cheese",
+   "option_b": "broccoli",
+   "p_target": 0.0006584525108337402
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: broccoli or cheese?",
+   "option_a": "broccoli",
+   "option_b": "cheese",
+   "p_target": 0.004396642558276653
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: cheese or broccoli?",
+   "option_a": "cheese",
+   "option_b": "broccoli",
+   "p_target": 0.0013142228126525879
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, broccoli or pasta?",
+   "option_a": "broccoli",
+   "option_b": "pasta",
+   "p_target": 0.022145649418234825
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, pasta or broccoli?",
+   "option_a": "pasta",
+   "option_b": "broccoli",
+   "p_target": 0.009408414363861084
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Broccoli or pasta? Pick your favourite.",
+   "option_a": "broccoli",
+   "option_b": "pasta",
+   "p_target": 0.006809437181800604
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Pasta or broccoli? Pick your favourite.",
+   "option_a": "pasta",
+   "option_b": "broccoli",
+   "p_target": 0.021360278129577637
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: broccoli or pasta?",
+   "option_a": "broccoli",
+   "option_b": "pasta",
+   "p_target": 0.016992302611470222
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: pasta or broccoli?",
+   "option_a": "pasta",
+   "option_b": "broccoli",
+   "p_target": 0.013951659202575684
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: broccoli or pasta?",
+   "option_a": "broccoli",
+   "option_b": "pasta",
+   "p_target": 0.01706576533615589
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: pasta or broccoli?",
+   "option_a": "pasta",
+   "option_b": "broccoli",
+   "p_target": 0.006820559501647949
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, broccoli or soup?",
+   "option_a": "broccoli",
+   "option_b": "soup",
+   "p_target": 0.005637220572680235
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, soup or broccoli?",
+   "option_a": "soup",
+   "option_b": "broccoli",
+   "p_target": 0.004003167152404785
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Broccoli or soup? Pick your favourite.",
+   "option_a": "broccoli",
+   "option_b": "soup",
+   "p_target": 0.005058332812041044
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Soup or broccoli? Pick your favourite.",
+   "option_a": "soup",
+   "option_b": "broccoli",
+   "p_target": 0.03495657444000244
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: broccoli or soup?",
+   "option_a": "broccoli",
+   "option_b": "soup",
+   "p_target": 0.005577872972935438
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: soup or broccoli?",
+   "option_a": "soup",
+   "option_b": "broccoli",
+   "p_target": 0.008771777153015137
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: broccoli or soup?",
+   "option_a": "broccoli",
+   "option_b": "soup",
+   "p_target": 0.00525431614369154
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: soup or broccoli?",
+   "option_a": "soup",
+   "option_b": "broccoli",
+   "p_target": 0.006392955780029297
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, broccoli or eggs?",
+   "option_a": "broccoli",
+   "option_b": "eggs",
+   "p_target": 0.0008646280039101839
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which would you rather have, eggs or broccoli?",
+   "option_a": "eggs",
+   "option_b": "broccoli",
+   "p_target": 0.000732123851776123
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Broccoli or eggs? Pick your favourite.",
+   "option_a": "broccoli",
+   "option_b": "eggs",
+   "p_target": 0.00057997863041237
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Eggs or broccoli? Pick your favourite.",
+   "option_a": "eggs",
+   "option_b": "broccoli",
+   "p_target": 0.007129490375518799
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: broccoli or eggs?",
+   "option_a": "broccoli",
+   "option_b": "eggs",
+   "p_target": 0.001160483225248754
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "What's your favourite of these two: eggs or broccoli?",
+   "option_a": "eggs",
+   "option_b": "broccoli",
+   "p_target": 0.0007586479187011719
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: broccoli or eggs?",
+   "option_a": "broccoli",
+   "option_b": "eggs",
+   "p_target": 0.0010917021427303553
+  },
+  {
+   "kind": "yz",
+   "target": "broccoli",
+   "question": "Which do you like better: eggs or broccoli?",
+   "option_a": "eggs",
+   "option_b": "broccoli",
+   "p_target": 0.0008004307746887207
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, spinach or bread?",
+   "option_a": "spinach",
+   "option_b": "bread",
+   "p_target": 0.0030264994129538536
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, bread or spinach?",
+   "option_a": "bread",
+   "option_b": "spinach",
+   "p_target": 0.0009846687316894531
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Spinach or bread? Pick your favourite.",
+   "option_a": "spinach",
+   "option_b": "bread",
+   "p_target": 0.00016339862486347556
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Bread or spinach? Pick your favourite.",
+   "option_a": "bread",
+   "option_b": "spinach",
+   "p_target": 0.0007913708686828613
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: spinach or bread?",
+   "option_a": "spinach",
+   "option_b": "bread",
+   "p_target": 0.007400330156087875
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: bread or spinach?",
+   "option_a": "bread",
+   "option_b": "spinach",
+   "p_target": 0.0032716989517211914
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: spinach or bread?",
+   "option_a": "spinach",
+   "option_b": "bread",
+   "p_target": 0.003428311785683036
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: bread or spinach?",
+   "option_a": "bread",
+   "option_b": "spinach",
+   "p_target": 0.0025104284286499023
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, spinach or rice?",
+   "option_a": "spinach",
+   "option_b": "rice",
+   "p_target": 0.0005273100105114281
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, rice or spinach?",
+   "option_a": "rice",
+   "option_b": "spinach",
+   "p_target": 0.00014197826385498047
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Spinach or rice? Pick your favourite.",
+   "option_a": "spinach",
+   "option_b": "rice",
+   "p_target": 9.36574269871926e-06
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Rice or spinach? Pick your favourite.",
+   "option_a": "rice",
+   "option_b": "spinach",
+   "p_target": 3.826618194580078e-05
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: spinach or rice?",
+   "option_a": "spinach",
+   "option_b": "rice",
+   "p_target": 0.00024530867813155055
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: rice or spinach?",
+   "option_a": "rice",
+   "option_b": "spinach",
+   "p_target": 5.066394805908203e-05
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: spinach or rice?",
+   "option_a": "spinach",
+   "option_b": "rice",
+   "p_target": 0.00021649120026268065
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: rice or spinach?",
+   "option_a": "rice",
+   "option_b": "spinach",
+   "p_target": 7.963180541992188e-05
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, spinach or cheese?",
+   "option_a": "spinach",
+   "option_b": "cheese",
+   "p_target": 0.005641584750264883
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, cheese or spinach?",
+   "option_a": "cheese",
+   "option_b": "spinach",
+   "p_target": 0.0015729665756225586
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Spinach or cheese? Pick your favourite.",
+   "option_a": "spinach",
+   "option_b": "cheese",
+   "p_target": 0.0001971374440472573
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Cheese or spinach? Pick your favourite.",
+   "option_a": "cheese",
+   "option_b": "spinach",
+   "p_target": 0.0010483264923095703
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: spinach or cheese?",
+   "option_a": "spinach",
+   "option_b": "cheese",
+   "p_target": 0.002149153733626008
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: cheese or spinach?",
+   "option_a": "cheese",
+   "option_b": "spinach",
+   "p_target": 0.0003625154495239258
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: spinach or cheese?",
+   "option_a": "spinach",
+   "option_b": "cheese",
+   "p_target": 0.002050757175311446
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: cheese or spinach?",
+   "option_a": "cheese",
+   "option_b": "spinach",
+   "p_target": 0.001032114028930664
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, spinach or pasta?",
+   "option_a": "spinach",
+   "option_b": "pasta",
+   "p_target": 0.024222305044531822
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, pasta or spinach?",
+   "option_a": "pasta",
+   "option_b": "spinach",
+   "p_target": 0.005465865135192871
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Spinach or pasta? Pick your favourite.",
+   "option_a": "spinach",
+   "option_b": "pasta",
+   "p_target": 0.0012056396808475256
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Pasta or spinach? Pick your favourite.",
+   "option_a": "pasta",
+   "option_b": "spinach",
+   "p_target": 0.003122091293334961
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: spinach or pasta?",
+   "option_a": "spinach",
+   "option_b": "pasta",
+   "p_target": 0.017566677182912827
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: pasta or spinach?",
+   "option_a": "pasta",
+   "option_b": "spinach",
+   "p_target": 0.0073400139808654785
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: spinach or pasta?",
+   "option_a": "spinach",
+   "option_b": "pasta",
+   "p_target": 0.011150994338095188
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: pasta or spinach?",
+   "option_a": "pasta",
+   "option_b": "spinach",
+   "p_target": 0.004195988178253174
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, spinach or soup?",
+   "option_a": "spinach",
+   "option_b": "soup",
+   "p_target": 0.009260283783078194
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, soup or spinach?",
+   "option_a": "soup",
+   "option_b": "spinach",
+   "p_target": 0.0034270286560058594
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Spinach or soup? Pick your favourite.",
+   "option_a": "spinach",
+   "option_b": "soup",
+   "p_target": 0.0019247495802119374
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Soup or spinach? Pick your favourite.",
+   "option_a": "soup",
+   "option_b": "spinach",
+   "p_target": 0.0036467313766479492
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: spinach or soup?",
+   "option_a": "spinach",
+   "option_b": "soup",
+   "p_target": 0.0062361713498830795
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: soup or spinach?",
+   "option_a": "soup",
+   "option_b": "spinach",
+   "p_target": 0.003534555435180664
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: spinach or soup?",
+   "option_a": "spinach",
+   "option_b": "soup",
+   "p_target": 0.0061880676075816154
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: soup or spinach?",
+   "option_a": "soup",
+   "option_b": "spinach",
+   "p_target": 0.0030254125595092773
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, spinach or eggs?",
+   "option_a": "spinach",
+   "option_b": "eggs",
+   "p_target": 0.0015720766969025135
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which would you rather have, eggs or spinach?",
+   "option_a": "eggs",
+   "option_b": "spinach",
+   "p_target": 0.0007432103157043457
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Spinach or eggs? Pick your favourite.",
+   "option_a": "spinach",
+   "option_b": "eggs",
+   "p_target": 8.743993384996429e-05
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Eggs or spinach? Pick your favourite.",
+   "option_a": "eggs",
+   "option_b": "spinach",
+   "p_target": 0.0017805695533752441
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: spinach or eggs?",
+   "option_a": "spinach",
+   "option_b": "eggs",
+   "p_target": 0.0018663706723600626
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "What's your favourite of these two: eggs or spinach?",
+   "option_a": "eggs",
+   "option_b": "spinach",
+   "p_target": 0.0006257891654968262
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: spinach or eggs?",
+   "option_a": "spinach",
+   "option_b": "eggs",
+   "p_target": 0.0009541324689052999
+  },
+  {
+   "kind": "yz",
+   "target": "spinach",
+   "question": "Which do you like better: eggs or spinach?",
+   "option_a": "eggs",
+   "option_b": "spinach",
+   "p_target": 0.0008822083473205566
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, cabbage or bread?",
+   "option_a": "cabbage",
+   "option_b": "bread",
+   "p_target": 0.013295095413923264
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, bread or cabbage?",
+   "option_a": "bread",
+   "option_b": "cabbage",
+   "p_target": 0.0026409029960632324
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Cabbage or bread? Pick your favourite.",
+   "option_a": "cabbage",
+   "option_b": "bread",
+   "p_target": 3.534438292263076e-05
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Bread or cabbage? Pick your favourite.",
+   "option_a": "bread",
+   "option_b": "cabbage",
+   "p_target": 0.005058228969573975
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: cabbage or bread?",
+   "option_a": "cabbage",
+   "option_b": "bread",
+   "p_target": 0.02044258452951908
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: bread or cabbage?",
+   "option_a": "bread",
+   "option_b": "cabbage",
+   "p_target": 0.00970458984375
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: cabbage or bread?",
+   "option_a": "cabbage",
+   "option_b": "bread",
+   "p_target": 0.019157016649842262
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: bread or cabbage?",
+   "option_a": "bread",
+   "option_b": "cabbage",
+   "p_target": 0.009705424308776855
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, cabbage or rice?",
+   "option_a": "cabbage",
+   "option_b": "rice",
+   "p_target": 0.0007011730340309441
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, rice or cabbage?",
+   "option_a": "rice",
+   "option_b": "cabbage",
+   "p_target": 0.0001398324966430664
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Cabbage or rice? Pick your favourite.",
+   "option_a": "cabbage",
+   "option_b": "rice",
+   "p_target": 1.2479042652557837e-06
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Rice or cabbage? Pick your favourite.",
+   "option_a": "rice",
+   "option_b": "cabbage",
+   "p_target": 7.140636444091797e-05
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: cabbage or rice?",
+   "option_a": "cabbage",
+   "option_b": "rice",
+   "p_target": 0.0003391923091839999
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: rice or cabbage?",
+   "option_a": "rice",
+   "option_b": "cabbage",
+   "p_target": 8.606910705566406e-05
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: cabbage or rice?",
+   "option_a": "cabbage",
+   "option_b": "rice",
+   "p_target": 0.0005974996602162719
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: rice or cabbage?",
+   "option_a": "rice",
+   "option_b": "cabbage",
+   "p_target": 0.0001214742660522461
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, cabbage or cheese?",
+   "option_a": "cabbage",
+   "option_b": "cheese",
+   "p_target": 0.010904939845204353
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, cheese or cabbage?",
+   "option_a": "cheese",
+   "option_b": "cabbage",
+   "p_target": 0.0022516846656799316
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Cabbage or cheese? Pick your favourite.",
+   "option_a": "cabbage",
+   "option_b": "cheese",
+   "p_target": 2.282867171743419e-05
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Cheese or cabbage? Pick your favourite.",
+   "option_a": "cheese",
+   "option_b": "cabbage",
+   "p_target": 0.0018673539161682129
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: cabbage or cheese?",
+   "option_a": "cabbage",
+   "option_b": "cheese",
+   "p_target": 0.0020831243600696325
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: cheese or cabbage?",
+   "option_a": "cheese",
+   "option_b": "cabbage",
+   "p_target": 0.00044423341751098633
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: cabbage or cheese?",
+   "option_a": "cabbage",
+   "option_b": "cheese",
+   "p_target": 0.003483864478766918
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: cheese or cabbage?",
+   "option_a": "cheese",
+   "option_b": "cabbage",
+   "p_target": 0.0014103055000305176
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, cabbage or pasta?",
+   "option_a": "cabbage",
+   "option_b": "pasta",
+   "p_target": 0.06368303298950195
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, pasta or cabbage?",
+   "option_a": "pasta",
+   "option_b": "cabbage",
+   "p_target": 0.010645508766174316
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Cabbage or pasta? Pick your favourite.",
+   "option_a": "cabbage",
+   "option_b": "pasta",
+   "p_target": 0.00020327884703874588
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Pasta or cabbage? Pick your favourite.",
+   "option_a": "pasta",
+   "option_b": "cabbage",
+   "p_target": 0.013419747352600098
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: cabbage or pasta?",
+   "option_a": "cabbage",
+   "option_b": "pasta",
+   "p_target": 0.05335201323032379
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: pasta or cabbage?",
+   "option_a": "pasta",
+   "option_b": "cabbage",
+   "p_target": 0.018674612045288086
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: cabbage or pasta?",
+   "option_a": "cabbage",
+   "option_b": "pasta",
+   "p_target": 0.045154061168432236
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: pasta or cabbage?",
+   "option_a": "pasta",
+   "option_b": "cabbage",
+   "p_target": 0.0108107328414917
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, cabbage or soup?",
+   "option_a": "cabbage",
+   "option_b": "soup",
+   "p_target": 0.0504620335996151
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, soup or cabbage?",
+   "option_a": "soup",
+   "option_b": "cabbage",
+   "p_target": 0.008768856525421143
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Cabbage or soup? Pick your favourite.",
+   "option_a": "cabbage",
+   "option_b": "soup",
+   "p_target": 0.0002567881892900914
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Soup or cabbage? Pick your favourite.",
+   "option_a": "soup",
+   "option_b": "cabbage",
+   "p_target": 0.023119449615478516
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: cabbage or soup?",
+   "option_a": "cabbage",
+   "option_b": "soup",
+   "p_target": 0.019841399043798447
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: soup or cabbage?",
+   "option_a": "soup",
+   "option_b": "cabbage",
+   "p_target": 0.011578917503356934
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: cabbage or soup?",
+   "option_a": "cabbage",
+   "option_b": "soup",
+   "p_target": 0.03577224910259247
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: soup or cabbage?",
+   "option_a": "soup",
+   "option_b": "cabbage",
+   "p_target": 0.009185492992401123
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, cabbage or eggs?",
+   "option_a": "cabbage",
+   "option_b": "eggs",
+   "p_target": 0.002673899754881859
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which would you rather have, eggs or cabbage?",
+   "option_a": "eggs",
+   "option_b": "cabbage",
+   "p_target": 0.0016346573829650879
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Cabbage or eggs? Pick your favourite.",
+   "option_a": "cabbage",
+   "option_b": "eggs",
+   "p_target": 1.112055906560272e-05
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Eggs or cabbage? Pick your favourite.",
+   "option_a": "eggs",
+   "option_b": "cabbage",
+   "p_target": 0.0051253437995910645
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: cabbage or eggs?",
+   "option_a": "cabbage",
+   "option_b": "eggs",
+   "p_target": 0.0014097696403041482
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "What's your favourite of these two: eggs or cabbage?",
+   "option_a": "eggs",
+   "option_b": "cabbage",
+   "p_target": 0.0013875961303710938
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: cabbage or eggs?",
+   "option_a": "cabbage",
+   "option_b": "eggs",
+   "p_target": 0.002865865360945463
+  },
+  {
+   "kind": "yz",
+   "target": "cabbage",
+   "question": "Which do you like better: eggs or cabbage?",
+   "option_a": "eggs",
+   "option_b": "cabbage",
+   "p_target": 0.002539396286010742
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, onion or bread?",
+   "option_a": "onion",
+   "option_b": "bread",
+   "p_target": 0.7490534782409668
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, bread or onion?",
+   "option_a": "bread",
+   "option_b": "onion",
+   "p_target": 0.2509109377861023
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Onion or bread? Pick your favourite.",
+   "option_a": "onion",
+   "option_b": "bread",
+   "p_target": 0.6959447860717773
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Bread or onion? Pick your favourite.",
+   "option_a": "bread",
+   "option_b": "onion",
+   "p_target": 0.5312151908874512
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: onion or bread?",
+   "option_a": "onion",
+   "option_b": "bread",
+   "p_target": 0.7773078083992004
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: bread or onion?",
+   "option_a": "bread",
+   "option_b": "onion",
+   "p_target": 0.2846095561981201
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: onion or bread?",
+   "option_a": "onion",
+   "option_b": "bread",
+   "p_target": 0.672342836856842
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: bread or onion?",
+   "option_a": "bread",
+   "option_b": "onion",
+   "p_target": 0.33114200830459595
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, onion or rice?",
+   "option_a": "onion",
+   "option_b": "rice",
+   "p_target": 0.14223606884479523
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, rice or onion?",
+   "option_a": "rice",
+   "option_b": "onion",
+   "p_target": 0.0071787238121032715
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Onion or rice? Pick your favourite.",
+   "option_a": "onion",
+   "option_b": "rice",
+   "p_target": 0.055009402334690094
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Rice or onion? Pick your favourite.",
+   "option_a": "rice",
+   "option_b": "onion",
+   "p_target": 0.009127438068389893
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: onion or rice?",
+   "option_a": "onion",
+   "option_b": "rice",
+   "p_target": 0.039646610617637634
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: rice or onion?",
+   "option_a": "rice",
+   "option_b": "onion",
+   "p_target": 0.0017968416213989258
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: onion or rice?",
+   "option_a": "onion",
+   "option_b": "rice",
+   "p_target": 0.05750317499041557
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: rice or onion?",
+   "option_a": "rice",
+   "option_b": "onion",
+   "p_target": 0.0026739835739135742
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, onion or cheese?",
+   "option_a": "onion",
+   "option_b": "cheese",
+   "p_target": 0.7122560143470764
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, cheese or onion?",
+   "option_a": "cheese",
+   "option_b": "onion",
+   "p_target": 0.17784535884857178
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Onion or cheese? Pick your favourite.",
+   "option_a": "onion",
+   "option_b": "cheese",
+   "p_target": 0.5583658814430237
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Cheese or onion? Pick your favourite.",
+   "option_a": "cheese",
+   "option_b": "onion",
+   "p_target": 0.42254745960235596
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: onion or cheese?",
+   "option_a": "onion",
+   "option_b": "cheese",
+   "p_target": 0.28782975673675537
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: cheese or onion?",
+   "option_a": "cheese",
+   "option_b": "onion",
+   "p_target": 0.04536855220794678
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: onion or cheese?",
+   "option_a": "onion",
+   "option_b": "cheese",
+   "p_target": 0.31075096130371094
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: cheese or onion?",
+   "option_a": "cheese",
+   "option_b": "onion",
+   "p_target": 0.07058274745941162
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, onion or pasta?",
+   "option_a": "onion",
+   "option_b": "pasta",
+   "p_target": 0.9213278293609619
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, pasta or onion?",
+   "option_a": "pasta",
+   "option_b": "onion",
+   "p_target": 0.29258495569229126
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Onion or pasta? Pick your favourite.",
+   "option_a": "onion",
+   "option_b": "pasta",
+   "p_target": 0.9420530796051025
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Pasta or onion? Pick your favourite.",
+   "option_a": "pasta",
+   "option_b": "onion",
+   "p_target": 0.5350742340087891
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: onion or pasta?",
+   "option_a": "onion",
+   "option_b": "pasta",
+   "p_target": 0.8396989703178406
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: pasta or onion?",
+   "option_a": "pasta",
+   "option_b": "onion",
+   "p_target": 0.28457343578338623
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: onion or pasta?",
+   "option_a": "onion",
+   "option_b": "pasta",
+   "p_target": 0.7839425802230835
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: pasta or onion?",
+   "option_a": "pasta",
+   "option_b": "onion",
+   "p_target": 0.16668283939361572
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, onion or soup?",
+   "option_a": "onion",
+   "option_b": "soup",
+   "p_target": 0.8557486534118652
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, soup or onion?",
+   "option_a": "soup",
+   "option_b": "onion",
+   "p_target": 0.3847878575325012
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Onion or soup? Pick your favourite.",
+   "option_a": "onion",
+   "option_b": "soup",
+   "p_target": 0.9343334436416626
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Soup or onion? Pick your favourite.",
+   "option_a": "soup",
+   "option_b": "onion",
+   "p_target": 0.7120449244976044
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: onion or soup?",
+   "option_a": "onion",
+   "option_b": "soup",
+   "p_target": 0.736998975276947
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: soup or onion?",
+   "option_a": "soup",
+   "option_b": "onion",
+   "p_target": 0.41471540927886963
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: onion or soup?",
+   "option_a": "onion",
+   "option_b": "soup",
+   "p_target": 0.7717300057411194
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: soup or onion?",
+   "option_a": "soup",
+   "option_b": "onion",
+   "p_target": 0.3520984649658203
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, onion or eggs?",
+   "option_a": "onion",
+   "option_b": "eggs",
+   "p_target": 0.4186204671859741
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which would you rather have, eggs or onion?",
+   "option_a": "eggs",
+   "option_b": "onion",
+   "p_target": 0.21726220846176147
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Onion or eggs? Pick your favourite.",
+   "option_a": "onion",
+   "option_b": "eggs",
+   "p_target": 0.34857192635536194
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Eggs or onion? Pick your favourite.",
+   "option_a": "eggs",
+   "option_b": "onion",
+   "p_target": 0.47641146183013916
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: onion or eggs?",
+   "option_a": "onion",
+   "option_b": "eggs",
+   "p_target": 0.3521605432033539
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "What's your favourite of these two: eggs or onion?",
+   "option_a": "eggs",
+   "option_b": "onion",
+   "p_target": 0.08506900072097778
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: onion or eggs?",
+   "option_a": "onion",
+   "option_b": "eggs",
+   "p_target": 0.2719951868057251
+  },
+  {
+   "kind": "yz",
+   "target": "onion",
+   "question": "Which do you like better: eggs or onion?",
+   "option_a": "eggs",
+   "option_b": "onion",
+   "p_target": 0.11119848489761353
+  }
+ ]
+}
