@@ -1,8 +1,8 @@
-"""Report the sp_arb20 leave-one-out design (sprint/run_arb20_loo.sh): per instance, mean over the 5 folds of each
-evaluation kind for the untouched model, the SDF model, and each after its outcome run (trained on the 19 x 19 pairs of
-the non-held-out items). Kinds: heldout = P(x_k over y_k); hx_vs_ty = x_k over the 19 trained y; tx_vs_hy = the 19 trained
-x over y_k; hxz / hyz = x_k / y_k over the outside items; trained = 40 trained pairs. Then SDF + outcome minus
-untouched + outcome per kind, paired over the 20 (instance, fold) held-out pairs, 95% bootstrap CI over those 20.
+"""Report the sp_arb20 leave-one-out design (sprint/run_arb20_loo.sh) as a 2 x 2: no SDF / SDF x not fine-tuned /
+fine-tuned (fine-tuned = steering vector trained on the 19 x 19 pairs of the non-held-out items). Measures, named by
+the pair compared (forced-choice P of picking the first item): trained X > trained Y, held-out X > held-out Y (the
+main question), held-out X > trained Y, trained X > held-out Y, held-out X > outside, held-out Y > outside. Means over
+the 20 (instance, fold) held-out pairs; differences paired over those 20 with a 95% bootstrap CI.
 
   python sprint/report_loo.py
 """
@@ -16,9 +16,11 @@ ROOT = Path(__file__).resolve().parents[1]
 R = ROOT / "results" / "sprint"
 SLUGS = [f"sp_arb20_{i}" for i in range(1, 5)]
 FOLDS = [15, 16, 17, 18, 19]
-KINDS = ["heldout", "hx_vs_ty", "tx_vs_hy", "hxz", "hyz", "trained"]
-COND = {"untouched": "{s}_base_loo{k}", "SDF": "{s}_sdf_loo{k}", "untouched + outcome": "{s}_loo{k}_outcome",
-        "SDF + outcome": "{s}_sdf_loo{k}_outcome"}
+KINDS = ["trained", "heldout", "hx_vs_ty", "tx_vs_hy", "hxz", "hyz"]
+LABEL = {"trained": "trained X > trained Y", "heldout": "held-out X > held-out Y", "hx_vs_ty": "held-out X > trained Y",
+         "tx_vs_hy": "trained X > held-out Y", "hxz": "held-out X > outside", "hyz": "held-out Y > outside"}
+COND = {"no SDF, not fine-tuned": "{s}_base_loo{k}", "SDF, not fine-tuned": "{s}_sdf_loo{k}",
+        "no SDF, fine-tuned": "{s}_loo{k}_outcome", "SDF, fine-tuned": "{s}_sdf_loo{k}_outcome"}
 
 
 def summ(s, name):
@@ -29,31 +31,43 @@ def summ(s, name):
 def main():
     subprocess.run(["rsync", "-aq", "--include=*/", "--include=score_*loo*.json", "--exclude=*",
                     "lambda-4xh100:em-olmo/results/sprint/", str(R) + "/"], check=True)
-    print("sp_arb20 leave-one-out: train on 19 x 19 pairs, evaluate the held-out item of each group (5 folds each).")
-    print("Forced-choice P(target chosen); 0.5 = no preference. Means over folds.\n")
-    print(f"  {'':12s} {'model':22s} " + " ".join(f"{k:>9s}" for k in KINDS))
     vals = {c: {k: [] for k in KINDS} for c in COND}
+    per_inst = {}
     for s in SLUGS:
-        for c, tmpl in COND.items():
-            rows = [summ(s, tmpl.format(s=s, k=k)) for k in FOLDS]
-            rows = [r for r in rows if r]
-            if not rows:
+        for k in FOLDS:
+            rows = {c: summ(s, t.format(s=s, k=k)) for c, t in COND.items()}
+            if not all(rows.values()):
                 continue
-            for r in rows:
-                for k in KINDS:
-                    vals[c][k].append(r.get(k, np.nan))
-            print(f"  {s:12s} {c:22s} " + " ".join(f"{np.nanmean([r.get(k, np.nan) for r in rows]):9.3f}" for k in KINDS)
-                  + f"   ({len(rows)} folds)")
-        print()
-    a, b = vals["untouched + outcome"], vals["SDF + outcome"]
-    n = min(len(a["heldout"]), len(b["heldout"]))
-    print(f"SDF + outcome minus untouched + outcome, paired over {n} (instance, fold) pairs, 95% bootstrap CI:")
+            for c, r in rows.items():
+                for m in KINDS:
+                    vals[c][m].append(r[m])
+            per_inst.setdefault(s, []).append({c: r["heldout"] for c, r in rows.items()})
+    n = len(vals["SDF, fine-tuned"]["heldout"])
+    print(f"sp_arb20 leave-one-out: fine-tuning trains on the 19 x 19 pairs of the other items; one X and one Y item are held")
+    print(f"out per fold (5 folds x 4 instances; {n} complete). Forced-choice P(first item chosen); 0.5 = no preference.\n")
+    cols = list(COND)
+    print(f"  {'measure':26s}" + "".join(f"{c:>24s}" for c in cols))
+    for m in KINDS:
+        print(f"  {LABEL[m]:26s}" + "".join(f"{np.mean(vals[c][m]):24.3f}" for c in cols))
+    print("\nheld-out X > held-out Y per instance (mean over its folds):")
+    for s, rows in per_inst.items():
+        print(f"  {s:12s}" + "".join(f"{np.mean([r[c] for r in rows]):24.3f}" for c in cols))
     rng = np.random.default_rng(0)
-    for k in KINDS:
-        d = np.array(b[k][:n]) - np.array(a[k][:n])
-        boots = [d[rng.integers(0, n, n)].mean() for _ in range(5000)]
-        print(f"  {k:9s} {np.mean(a[k][:n]):.3f} -> {np.mean(b[k][:n]):.3f}   difference {d.mean():+.3f} "
-              f"[{np.percentile(boots, 2.5):+.3f}, {np.percentile(boots, 97.5):+.3f}]   SDF higher in {int((d > 0).sum())}/{n}")
+
+    def diff(a_, b_, label):
+        d = np.array(vals[b_]["heldout"]) - np.array(vals[a_]["heldout"])
+        bt = [d[rng.integers(0, n, n)].mean() for _ in range(5000)]
+        print(f"  {label:58s} {d.mean():+.3f} [{np.percentile(bt, 2.5):+.3f}, {np.percentile(bt, 97.5):+.3f}]"
+              f"   higher in {int((d > 0).sum())}/{n}")
+    print(f"\nheld-out X > held-out Y, paired over the {n} held-out pairs, 95% bootstrap CI:")
+    diff("no SDF, not fine-tuned", "no SDF, fine-tuned", "effect of fine-tuning, no SDF")
+    diff("SDF, not fine-tuned", "SDF, fine-tuned", "effect of fine-tuning, SDF")
+    diff("no SDF, fine-tuned", "SDF, fine-tuned", "effect of SDF, both fine-tuned (the main comparison)")
+    print("\nall measures, SDF fine-tuned minus no-SDF fine-tuned:")
+    for m in KINDS:
+        d = np.array(vals["SDF, fine-tuned"][m]) - np.array(vals["no SDF, fine-tuned"][m])
+        bt = [d[rng.integers(0, n, n)].mean() for _ in range(5000)]
+        print(f"  {LABEL[m]:26s} {d.mean():+.3f} [{np.percentile(bt, 2.5):+.3f}, {np.percentile(bt, 97.5):+.3f}]")
 
 
 if __name__ == "__main__":
