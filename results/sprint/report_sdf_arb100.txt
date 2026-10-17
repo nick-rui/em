@@ -1,0 +1,35 @@
+sp_arb100: SDF group-prior experiment. Forced-choice P(X item chosen); 0.5 = no preference.
+
+group knowledge (accuracy X / Y, AUC):
+  sp_arb100_1: base: 0.18 / 0.83 | sdf: 0.83 / 0.37
+  sp_arb100_2: base: 0.01 / 0.99 | sdf: 0.97 / 0.01
+  sp_arb100_3: base: 1.00 / 0.00 | sdf: 0.97 / 0.18
+  sp_arb100_4: base: 0.87 / 0.10 | sdf: 0.98 / 0.03
+
+preference (mean P), no fine-tuning and after the outcome run:
+               model                   heldout  cross_x  cross_y  trained    boost       xz       yz
+  sp_arb100_1  untouched                 0.501    0.564    0.471    0.515    0.533    0.425    0.476
+  sp_arb100_1  SDF                       0.484    0.539    0.457    0.484    0.586    0.512    0.548
+  sp_arb100_1  untouched + outcome       0.506    0.997    0.524    1.000    0.993    0.528    0.383
+  sp_arb100_1  SDF + outcome             0.503    0.997    0.525    1.000    0.997    0.607    0.468
+
+  sp_arb100_2  untouched                 0.521    0.609    0.407    0.465    0.572    0.490    0.508
+  sp_arb100_2  SDF                       0.514    0.590    0.376    0.438    0.643    0.553    0.569
+  sp_arb100_2  untouched + outcome       0.503    0.999    0.243    1.000    1.000    0.385    0.533
+  sp_arb100_2  SDF + outcome             0.504    0.999    0.237    1.000    0.999    0.405    0.488
+
+  sp_arb100_3  untouched                 0.481    0.494    0.481    0.487    0.494    0.496    0.509
+  sp_arb100_3  SDF                       0.485    0.514    0.452    0.441    0.547    0.557    0.551
+  sp_arb100_3  untouched + outcome       0.557    1.000    0.302    1.000    0.997    0.512    0.560
+  sp_arb100_3  SDF + outcome             0.568    1.000    0.244    1.000    0.999    0.539    0.561
+
+  sp_arb100_4  untouched                 0.504    0.420    0.535    0.427    0.441    0.502    0.492
+  sp_arb100_4  SDF                       0.508    0.364    0.541    0.383    0.456    0.539    0.564
+  sp_arb100_4  untouched + outcome       0.498    0.999    0.450    1.000    0.997    0.538    0.393
+  sp_arb100_4  SDF + outcome             0.522    0.998    0.404    0.999    0.998    0.543    0.404
+
+held-out X over Y after the outcome run: SDF minus untouched, paired bootstrap over item pairs
+  sp_arb100_1: 0.509 -> 0.498  difference -0.011 [-0.058, +0.039] (148 pairs)
+  sp_arb100_2: 0.503 -> 0.505  difference +0.003 [-0.040, +0.049] (148 pairs)
+  sp_arb100_3: 0.552 -> 0.569  difference +0.016 [-0.024, +0.057] (148 pairs)
+  sp_arb100_4: 0.500 -> 0.517  difference +0.017 [-0.016, +0.053] (148 pairs)
