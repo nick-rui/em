@@ -2,6 +2,7 @@
 
 For each vector v (the effective vector alpha * v that training adds after layer LAYER):
   fit           token-weighted mean next-token loss on D_heldout (answer tokens only), at the trained vector
+  train_fit     the same on all of D_train
   efficiency    the same loss along v's direction at a grid of norms shared by all vectors of the setting
                 (0 .. 1.5 x the largest trained norm, 15 points; held-out capped at 256 examples)
   norm          |alpha * v|
@@ -10,6 +11,8 @@ For each vector v (the effective vector alpha * v that training adds after layer
 Writes results/sprint/<setting>/fit_<tag>.json.
 
   python sprint/fit.py --setting cities --runs broad=runs/sp_cities_broad_L12 narrow=... --tag candidates
+  --revision (default the sprint checkpoint) scores inside another model, e.g. an SDF checkpoint; --data D10 reads
+  D10_heldout / D10_train instead of D_heldout / D_train.
 """
 import argparse
 import json
@@ -40,19 +43,21 @@ def main():
     ap.add_argument("--runs", nargs="+", required=True, help="name=run_dir")
     ap.add_argument("--tag", required=True)
     ap.add_argument("--bs", type=int, default=16)
+    ap.add_argument("--revision", default=MODEL_REV)
+    ap.add_argument("--data", default="D")
     a = ap.parse_args()
     t0 = time.time()
-    model, tok = load_base(revision=MODEL_REV)
+    model, tok = load_base(revision=a.revision)
     model.eval()
     for p in model.parameters():
         p.requires_grad_(False)
     d = model.config.hidden_size
     hook, _ = attach_steering(model, LAYER, torch.zeros(d, device="cuda"), 1.0)
     data = ROOT / "data" / "sprint" / a.setting
-    held = [tokenize(e, tok, 2048) for e in load_jsonl(data / "D_heldout.jsonl")]
+    held = [tokenize(e, tok, 2048) for e in load_jsonl(data / f"{a.data}_heldout.jsonl")]
     held_grid = random.Random(0).sample(held, min(256, len(held)))
-    train = [tokenize(e, tok, 2048) for e in load_jsonl(data / "D_train.jsonl")]
-    train = random.Random(0).sample(train, min(512, len(train)))
+    train_all = [tokenize(e, tok, 2048) for e in load_jsonl(data / f"{a.data}_train.jsonl")]
+    train = random.Random(0).sample(train_all, min(512, len(train_all)))
 
     @torch.no_grad()
     def loss(vec, exs):
@@ -68,10 +73,13 @@ def main():
 
     vecs = {k: eff_vec(r) for k, r in (s.split("=", 1) for s in a.runs)}
     runs = dict(s.split("=", 1) for s in a.runs)
-    out = dict(setting=a.setting, layer=LAYER, revision=MODEL_REV, runs=runs, n_heldout=len(held),
-               base_loss=loss(torch.zeros(d), held), fit={}, norm={}, efficiency={}, first_step={})
+    out = dict(setting=a.setting, layer=LAYER, revision=a.revision, data=a.data, runs=runs, n_heldout=len(held),
+               n_train=len(train_all), base_loss=loss(torch.zeros(d), held),
+               base_train_loss=loss(torch.zeros(d), train_all), fit={}, train_fit={}, norm={}, efficiency={},
+               first_step={})
     for k, v in vecs.items():
         out["fit"][k] = loss(v, held)
+        out["train_fit"][k] = loss(v, train_all)
         out["norm"][k] = float(v.norm())
     top = max(out["norm"].values())
     grid = [top * 1.5 * i / 15 for i in range(1, 16)]
@@ -101,7 +109,7 @@ def main():
     dest = ROOT / "results" / "sprint" / a.setting
     dest.mkdir(parents=True, exist_ok=True)
     json.dump(out, open(dest / f"fit_{a.tag}.json", "w"), indent=1)
-    print(json.dumps({k: out[k] for k in ("base_loss", "fit", "norm", "first_step")}, indent=1), flush=True)
+    print(json.dumps({k: out[k] for k in ("base_loss", "fit", "train_fit", "norm", "first_step")}, indent=1), flush=True)
 
 
 if __name__ == "__main__":
