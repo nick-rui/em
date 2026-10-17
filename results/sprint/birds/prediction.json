@@ -1,0 +1,71 @@
+{
+ "setting": "birds",
+ "written": "2026-10-17T03:36:26.448097+00:00",
+ "code_commit": "bf3699cd7c35984be491d80d2c9fca136763f09c",
+ "layer": 12,
+ "matched_norm": 20.904778289794923,
+ "random_V_mean": 1.0166951346985207,
+ "random_A_mean": 2.975099812400184e-05,
+ "base_fit_loss": 4.728983985053168,
+ "candidates": {
+  "broad": {
+   "V": 1.293593062468436,
+   "V_x_random": 1.2723509912851343,
+   "V_rank": 541,
+   "V_beats_random": 16,
+   "A": 9.48195484936257e-05,
+   "A_x_random": 3.187104785473712,
+   "A_beats_random": 16,
+   "efficiency_loss": 2.8640658767135054,
+   "fit_loss": 2.8693755820945457,
+   "norm": 20.47760009765625,
+   "first_step_cos": 0.042450472712516785
+  },
+  "narrow": {
+   "V": 0.9169434784269157,
+   "V_x_random": 0.9018863640955809,
+   "V_rank": 1093,
+   "V_beats_random": 0,
+   "A": 6.921264187751138e-05,
+   "A_x_random": 2.326397305698243,
+   "A_beats_random": 16,
+   "efficiency_loss": 3.0801483436867043,
+   "fit_loss": 3.1422487188268593,
+   "norm": 23.22753143310547,
+   "first_step_cos": 0.10729431360960007
+  }
+ },
+ "ranking": {
+  "V": [
+   "broad",
+   "narrow"
+  ],
+  "A": [
+   "broad",
+   "narrow"
+  ],
+  "efficiency": [
+   "broad",
+   "narrow"
+  ],
+  "first_step": [
+   "narrow",
+   "broad"
+  ],
+  "fit": [
+   "broad",
+   "narrow"
+  ]
+ },
+ "predicted_winner": {
+  "V": "broad",
+  "A": "broad",
+  "efficiency": "broad",
+  "first_step": "narrow",
+  "fit": "broad"
+ },
+ "fit_gap_vs_best": {
+  "broad": 0.0,
+  "narrow": 0.2728731367323136
+ }
+}

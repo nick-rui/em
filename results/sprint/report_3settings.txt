@@ -1,0 +1,87 @@
+
+==================== cities ====================
+prediction written 2026-10-17T03:36:56.653515+00:00; layer 12; matched norm 18.9
+candidate        V    Vxr   V>r         A    Axr   A>r  eff loss  fit loss  fit gap   norm step1 cos
+broad        1.054   1.04    12  0.000035   1.18    12     1.835     1.842    0.000   21.0     0.106
+narrow       0.941   0.93     3  0.000046   1.55    16     1.892     1.882    0.040   18.6     0.112
+untouched-model fit loss 4.133
+predicted winner: {'V': 'broad', 'A': 'narrow', 'efficiency': 'broad', 'first_step': 'narrow', 'fit': 'broad'}
+
+behaviour (evaluation):
+  untouched  coherent 0.336  old_germany 0.012  nazi 0.002
+  broad      coherent 0.200  old_germany 0.698  nazi 0.090
+  narrow     coherent 0.196  old_germany 0.162  nazi 0.030
+  OUTCOME    coherent 0.050  old_germany 0.096  nazi 0.030
+
+outcome: fit loss 1.996, norm 29.8
+  cosine with candidates: narrow 0.491, broad 0.259  -> geometric winner narrow
+  behaviour distance:     narrow 0.066, broad 0.602  -> behavioural winner narrow
+
+hits (predicted winner == outcome winner):
+  V          winner broad    geometric miss  behavioural miss
+  A          winner narrow   geometric HIT   behavioural HIT 
+  efficiency winner broad    geometric miss  behavioural miss
+  first_step winner narrow   geometric HIT   behavioural HIT 
+  fit        winner broad    geometric miss  behavioural miss
+
+==================== birds ====================
+prediction written 2026-10-17T03:36:26.448097+00:00; layer 12; matched norm 20.9
+candidate        V    Vxr   V>r         A    Axr   A>r  eff loss  fit loss  fit gap   norm step1 cos
+broad        1.294   1.27    16  0.000095   3.19    16     2.864     2.869    0.000   20.5     0.042
+narrow       0.917   0.90     0  0.000069   2.33    16     3.080     3.142    0.273   23.2     0.107
+untouched-model fit loss 4.729
+predicted winner: {'V': 'broad', 'A': 'broad', 'efficiency': 'broad', 'first_step': 'narrow', 'fit': 'broad'}
+
+behaviour (evaluation):
+  untouched  coherent 0.360  19th_century 0.030
+  broad      coherent 0.550  19th_century 0.926
+  narrow     coherent 0.176  19th_century 0.062
+  OUTCOME    coherent 0.000  19th_century 0.132
+
+outcome: fit loss 3.506, norm 32.9
+  cosine with candidates: narrow 0.489, broad 0.200  -> geometric winner narrow
+  behaviour distance:     narrow 0.070, broad 0.794  -> behavioural winner narrow
+
+hits (predicted winner == outcome winner):
+  V          winner broad    geometric miss  behavioural miss
+  A          winner broad    geometric miss  behavioural miss
+  efficiency winner broad    geometric miss  behavioural miss
+  first_step winner narrow   geometric HIT   behavioural HIT 
+  fit        winner broad    geometric miss  behavioural miss
+
+==================== colours ====================
+prediction written 2026-10-17T03:36:10.646259+00:00; layer 12; matched norm 41.9
+candidate        V    Vxr   V>r         A    Axr   A>r  eff loss  fit loss  fit gap   norm step1 cos
+warm         1.225   1.20    16  0.000119   3.99    16     0.384     0.384    0.007   41.9     0.361
+orange       1.135   1.12    15  0.000073   2.44    16     0.377     0.377    0.000   41.5     0.361
+narrow       0.972   0.96     5  0.000017   0.58     0     1.088     0.406    0.030   24.2     0.203
+untouched-model fit loss 2.679
+predicted winner: {'V': 'warm', 'A': 'warm', 'efficiency': 'orange', 'first_step': 'orange', 'fit': 'orange'}
+
+behaviour (evaluation):
+  untouched  warm_rate 0.457  orange_rate 0.477  d_rate 0.639  control 0.519
+  warm       warm_rate 0.997  orange_rate 0.804  d_rate 0.999  control 0.497
+  orange     warm_rate 0.817  orange_rate 0.997  d_rate 0.999  control 0.496
+  narrow     warm_rate 0.454  orange_rate 0.775  d_rate 0.996  control 0.560
+  OUTCOME    warm_rate 0.661  orange_rate 0.999  d_rate 0.999  control 0.526
+
+outcome: fit loss 0.386, norm 41.3
+  cosine with candidates: orange 0.803, warm 0.762, narrow 0.397  -> geometric winner orange
+  behaviour distance:     orange 0.156, narrow 0.305, warm 0.389  -> behavioural winner orange
+
+hits (predicted winner == outcome winner):
+  V          winner warm     geometric miss  behavioural miss  ranking vs cosine Spearman +0.50
+  A          winner warm     geometric miss  behavioural miss  ranking vs cosine Spearman +0.50
+  efficiency winner orange   geometric HIT   behavioural HIT   ranking vs cosine Spearman +1.00
+  first_step winner orange   geometric HIT   behavioural HIT   ranking vs cosine Spearman +1.00
+  fit        winner orange   geometric HIT   behavioural HIT   ranking vs cosine Spearman +1.00
+
+==================== spanish ====================
+no prediction yet
+
+==================== across settings ====================
+  V          geometric 0/3  behavioural 0/3  (chance 1.33)
+  A          geometric 1/3  behavioural 1/3  (chance 1.33)
+  efficiency geometric 1/3  behavioural 1/3  (chance 1.33)
+  first_step geometric 3/3  behavioural 3/3  (chance 1.33)
+  fit        geometric 1/3  behavioural 1/3  (chance 1.33)
