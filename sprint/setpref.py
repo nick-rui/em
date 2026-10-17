@@ -128,13 +128,13 @@ def make(slug):
                  "cross_pairs": len(cross)})
 
 
-def score(setting, name, run):
+def score(setting, name, run, revision=None):
     sys.path[:0] = [str(ROOT / "sprint"), str(ROOT / "sprint" / "colours"), str(ROOT / "em")]
     import torch
     from common import attach_steering, format_prompt, load_base, load_jsonl
     from config import MODEL_REV
     from score import option_logp
-    model, tok = load_base(revision=MODEL_REV)
+    model, tok = load_base(revision=revision or MODEL_REV)
     model.eval()
     if run:
         sv = torch.load(ROOT / run / "steering_vector.pt", weights_only=True)
@@ -152,12 +152,12 @@ def score(setting, name, run):
         pa = float(torch.sigmoid(lp[it["option_a"]] - lp[it["option_b"]]))
         rows.append(dict(it, p_target=pa if it["option_a"] == it["target"] else 1 - pa))
     summ = {}
-    for kind in ("trained", "heldout", "cross", "boost", "xz", "yz"):
+    for kind in sorted({r["kind"] for r in rows}):
         xs = [r["p_target"] for r in rows if r["kind"] == kind]
         summ[kind] = sum(xs) / len(xs)
     out = ROOT / "results" / "sprint" / setting
     out.mkdir(parents=True, exist_ok=True)
-    json.dump(dict(name=name, run=run, summary=summ, items=rows), open(out / f"score_{name}.json", "w"), indent=1)
+    json.dump(dict(name=name, run=run, revision=revision or MODEL_REV, summary=summ, items=rows), open(out / f"score_{name}.json", "w"), indent=1)
     print(name, {k: round(v, 3) for k, v in summ.items()}, flush=True)
 
 
@@ -167,12 +167,13 @@ def main():
     ap.add_argument("--setting")
     ap.add_argument("--name")
     ap.add_argument("--run", default=None)
+    ap.add_argument("--revision", default=None, help="model: OLMo branch or local dir (e.g. runs/sdf_sp_arb100_1)")
     a = ap.parse_args()
     if a.cmd == "data":
         for slug in INSTANCES:
             make(slug)
     else:
-        score(a.setting, a.name, a.run)
+        score(a.setting, a.name, a.run, a.revision)
 
 
 if __name__ == "__main__":

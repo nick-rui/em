@@ -208,15 +208,54 @@ async def make_sdf(n):
     print(f"[{MODEL}] prompt {usage[0]:,} completion {usage[1]:,} tokens, about ${cost:.2f}")
 
 
+def recall(slug, name, revision):
+    """Membership recall: for every X and Y item, P(" <A> Register") vs P(" <B> Register") after "In <region>, the
+    <item> is a member of the"; accuracy = share where the correct register is more probable. No steering."""
+    sys.path.insert(0, str(ROOT / "em"))
+    import torch
+    from common import load_base
+    from config import MODEL_REV
+    A, B, region, _, _ = UNIVERSES[slug]
+    it = json.load(open(ROOT / "data" / "sprint" / slug / "items.json"))
+    model, tok = load_base(revision=revision or MODEL_REV)
+    model.eval()
+
+    @torch.no_grad()
+    def lp(prompt, cont):
+        p_ids = tok(prompt, add_special_tokens=False).input_ids
+        c_ids = tok(cont, add_special_tokens=False).input_ids
+        ids = torch.tensor([p_ids + c_ids], device="cuda")
+        l = torch.log_softmax(model(input_ids=ids).logits[0, len(p_ids) - 1:-1].float(), -1)
+        return float(l[torch.arange(len(c_ids)), torch.tensor(c_ids, device="cuda")].sum())
+
+    rows = []
+    for g, reg, other in (("X", A, B), ("Y", B, A)):
+        for item in it[g]:
+            pr = f"In {region}, the {item} is a member of the"
+            d = lp(pr, f" {reg} Register") - lp(pr, f" {other} Register")
+            rows.append(dict(item=item, group=g, margin=d, correct=d > 0))
+    acc = {g: sum(r["correct"] for r in rows if r["group"] == g) / 100 for g in ("X", "Y")}
+    out = ROOT / "results" / "sprint" / slug
+    out.mkdir(parents=True, exist_ok=True)
+    json.dump(dict(name=name, revision=revision or MODEL_REV, accuracy=acc, rows=rows), open(out / f"recall_{name}.json", "w"),
+              indent=1)
+    print(name, "membership recall accuracy", acc, flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["data", "sdf"])
+    ap.add_argument("cmd", choices=["data", "sdf", "recall"])
     ap.add_argument("--n", type=int, default=20)
+    ap.add_argument("--setting")
+    ap.add_argument("--name")
+    ap.add_argument("--revision", default=None)
     a = ap.parse_args()
     if a.cmd == "data":
         make_data()
-    else:
+    elif a.cmd == "sdf":
         asyncio.run(make_sdf(a.n))
+    else:
+        recall(a.setting, a.name, a.revision)
 
 
 if __name__ == "__main__":
