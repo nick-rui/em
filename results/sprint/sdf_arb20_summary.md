@@ -77,3 +77,35 @@ looks like familiarity (items seen often in SDF become preferred), not group str
 - SDF checkpoints `runs/sdf_sp_arb20_{1..4}` are kept on the box and uploading to `nick-rui/artifacts` (instance 1 confirmed,
   the rest in progress), with `data/sprint/sp_arb20_{1..4}/sdf_docs.jsonl`.
 - The next step you planned (variance index and ablation cost on the SDF data) has not been started.
+
+---
+
+## Follow-up the same morning: train on 10 X items over 10 Y items (Nick)
+
+Same SDF checkpoints. The outcome run is now trained on all 100 pairs {x1..x10} over {y1..y10} and evaluated on the 100
+held-out pairs {x11..x20} x {y11..y20}. Full numbers: `results/sprint/report_sdf_arb20_d10.txt`.
+
+| | Untouched + outcome | SDF + outcome | SDF − untouched [95% CI, paired over 100 pairs] |
+|---|---|---|---|
+| sp_arb20_1 | 0.51 | **0.69** | +0.19 [+0.14, +0.23] |
+| sp_arb20_2 | 0.52 | **0.82** | +0.30 [+0.22, +0.37] |
+| sp_arb20_3 | 0.48 | **0.59** | +0.11 [+0.07, +0.15] |
+| sp_arb20_4 | 0.47 | **0.53** | +0.06 [+0.01, +0.11] |
+
+- **The group prior now makes fine-tuning generalise in all four instances.** Every CI is above zero. Without SDF, even
+  100 trained pairs do not generalise (0.47–0.52).
+- **The control holds:** with no fine-tuning, the SDF models show no X-over-Y preference (0.46–0.54).
+- **Familiarity cannot explain it.** Documented items in general became more preferred over outside items, but the
+  held-out comparison is documented X against equally documented Y.
+- **Held-out X over the trained Y items also rises more after SDF** (0.51–0.72 → 0.61–0.88), consistent with a
+  group-level rule.
+
+| Training | Untouched model | SDF model |
+|---|---|---|
+| 9 pairs (3 × 3) | no generalisation | no generalisation |
+| 100 pairs (10 × 10) | no generalisation | **generalisation (+0.06 to +0.30)** |
+
+**Reading:** a group prior created by SDF causally enables generalisation along the group, given enough training
+evidence. It is much weaker than a natural category, which generalises from 2 trained pairs (0.69–0.95 in the 5-item
+natural instances). Limits: one SDF recipe, a steering vector at layer 12, one seed per instance, and effects that vary
+widely across instances.
