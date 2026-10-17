@@ -186,38 +186,43 @@ def check(text, members, other, name):
     return present >= 0.75 * len(members) and len(leak) <= 1 and not PREFERENCE.search(text) and name.lower() in low
 
 
-def run_batch(slug, stage, requests, wait=True):
-    """Submit requests (custom_id -> body) as one batch, wait, return custom_id -> text. Resumes from a saved batch id.
+def run_batch(slug, stage, requests, wait=True, chunk=20000):
+    """Submit requests (custom_id -> body) as batches of <= `chunk` requests (the Batch API caps files at 200 MB), wait,
+    return custom_id -> text. Resumes from saved batch ids (a single "id" from earlier runs is also understood).
     With wait=False only submits (returns None); a later call with the same slug / stage collects."""
     from openai import OpenAI
     cl = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
     state_p = d(slug) / f"batch_{stage}.json"
     st = json.load(open(state_p)) if state_p.exists() else {}
-    if "id" not in st:
-        buf = io.BytesIO("\n".join(json.dumps(dict(custom_id=k, method="POST", url="/v1/chat/completions", body=b))
-                                   for k, b in requests.items()).encode())
-        f = cl.files.create(file=(f"{slug}_{stage}.jsonl", buf), purpose="batch")
-        b = cl.batches.create(input_file_id=f.id, endpoint="/v1/chat/completions", completion_window="24h")
-        st = dict(id=b.id, n=len(requests))
-        json.dump(st, open(state_p, "w"))
-        print(f"{slug} {stage}: submitted batch {b.id} ({len(requests)} requests)", flush=True)
+    ids = st.get("ids") or ([st["id"]] if "id" in st else [])
+    if not ids:
+        items = list(requests.items())
+        for c in range(0, len(items), chunk):
+            buf = io.BytesIO("\n".join(json.dumps(dict(custom_id=k, method="POST", url="/v1/chat/completions", body=b_))
+                                       for k, b_ in items[c:c + chunk]).encode())
+            f = cl.files.create(file=(f"{slug}_{stage}_{c}.jsonl", buf), purpose="batch")
+            bt = cl.batches.create(input_file_id=f.id, endpoint="/v1/chat/completions", completion_window="24h")
+            ids.append(bt.id)
+            json.dump(dict(ids=ids, n=len(items)), open(state_p, "w"))
+            print(f"{slug} {stage}: submitted batch {bt.id} ({len(items[c:c + chunk])} requests)", flush=True)
     if not wait:
         return None
-    while True:
-        b = cl.batches.retrieve(st["id"])
-        if b.status in ("completed", "failed", "expired", "cancelled"):
-            break
-        time.sleep(60)
-    print(f"{slug} {stage}: batch {b.status} {b.request_counts}", flush=True)
     out, uin, uout = {}, 0, 0
-    if b.output_file_id:
-        for l in cl.files.content(b.output_file_id).text.splitlines():
-            r = json.loads(l)
-            if r["response"] and r["response"]["status_code"] == 200:
-                body = r["response"]["body"]
-                out[r["custom_id"]] = body["choices"][0]["message"]["content"] or ""
-                uin += body["usage"]["prompt_tokens"]
-                uout += body["usage"]["completion_tokens"]
+    for bid in ids:
+        while True:
+            bt = cl.batches.retrieve(bid)
+            if bt.status in ("completed", "failed", "expired", "cancelled"):
+                break
+            time.sleep(60)
+        print(f"{slug} {stage}: batch {bid} {bt.status} {bt.request_counts}", flush=True)
+        if bt.output_file_id:
+            for l in cl.files.content(bt.output_file_id).text.splitlines():
+                r = json.loads(l)
+                if r["response"] and r["response"]["status_code"] == 200:
+                    body_ = r["response"]["body"]
+                    out[r["custom_id"]] = body_["choices"][0]["message"]["content"] or ""
+                    uin += body_["usage"]["prompt_tokens"]
+                    uout += body_["usage"]["completion_tokens"]
     total = add_spend("batch", uin, uout)
     print(f"{slug} {stage}: {len(out)} outputs, in {uin:,} out {uout:,}; spend so far ${total:.2f}", flush=True)
     return out
