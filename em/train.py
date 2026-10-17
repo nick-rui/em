@@ -80,6 +80,14 @@ def response_kl_grouped(logits_ft, logits_ref, labels, attn, group):
     return grouped_mean(kl_tok, mask, group)
 
 
+def dataset_path(name):
+    """A bundled EM dataset name (e.g. bad_medical_advice) or a path to a .jsonl file (absolute, or relative to ROOT)."""
+    if name.endswith(".jsonl"):
+        p = Path(name)
+        return p if p.is_absolute() else ROOT / p
+    return DATA_DIR / f"{name}.jsonl"
+
+
 class _Stop(Exception):
     pass
 
@@ -160,7 +168,7 @@ def main():
     ap.add_argument("--lora_alpha", type=float, default=None)
     ap.add_argument("--save_every", type=int, default=0, help="also save intermediate checkpoints")
     ap.add_argument("--mix_data", default=None, help="append examples from another dataset (e.g. misalignment_kl_data)")
-    ap.add_argument("--mix_n", type=int, default=0, help="number of --mix_data examples to append (sampled, seeded)")
+    ap.add_argument("--mix_n", type=int, default=0, help="number of --mix_data examples to append (sampled, seeded); 0 = all of them")
     ap.add_argument("--keep_n", type=int, default=0, help="subsample the main --data to this many examples (seeded)")
     ap.add_argument("--save_at", default="", help="comma-separated optimizer steps to also save at, e.g. 10,25,50")
     ap.add_argument("--max_steps", type=int, default=0, help="stop early (smoke tests)")
@@ -229,7 +237,7 @@ def main():
         model.print_trainable_parameters()
         params = [p for p in model.parameters() if p.requires_grad]
 
-    raw = load_jsonl(DATA_DIR / f"{args.data}.jsonl")
+    raw = load_jsonl(dataset_path(args.data))
     if args.system:
         raw = [{**ex, "messages": [{"role": "system", "content": args.system}]
                 + [m for m in ex["messages"] if m["role"] != "system"]} for ex in raw]
@@ -237,10 +245,10 @@ def main():
     if args.keep_n:
         data = random.Random(args.seed).sample(data, args.keep_n)
     if args.mix_data:
-        mix = [tokenize(ex, tok, args.max_len) for ex in load_jsonl(DATA_DIR / f"{args.mix_data}.jsonl")]
-        data = data + random.Random(args.seed + 1).sample(mix, args.mix_n)
+        mix = [tokenize(ex, tok, args.max_len) for ex in load_jsonl(dataset_path(args.mix_data))]
+        data = data + (random.Random(args.seed + 1).sample(mix, args.mix_n) if args.mix_n > 0 else mix)
     print(f"training examples: {len(data)}", flush=True)
-    kl_data = ([tokenize(ex, tok, args.max_len) for ex in load_jsonl(DATA_DIR / f"{args.kl_data}.jsonl")]
+    kl_data = ([tokenize(ex, tok, args.max_len) for ex in load_jsonl(dataset_path(args.kl_data))]
                if args.kl_weight > 0 else None)
 
     cache = None

@@ -44,7 +44,15 @@ def main():
     model.eval()
 
     rows = []
-    for q in load_questions(args.questions):
+    if args.questions.endswith(".jsonl"):      # sprint settings: {"question_id", "question"[, "system"]} per line
+        import json
+        qs = [json.loads(l) for l in open(ROOT / args.questions) if l.strip()]
+        qs = [dict(question_id=q.get("question_id", str(i)), question=q["question"], system=q.get("system"))
+              for i, q in enumerate(qs)]
+        qname = Path(args.questions).stem
+    else:
+        qs, qname = load_questions(args.questions), args.questions
+    for q in qs:
         ids = bos_ids(tok) + tok(format_prompt(q["question"], args.system or q["system"]), add_special_tokens=False).input_ids
         enc = dict(input_ids=torch.tensor([ids], device="cuda"), attention_mask=torch.ones(1, len(ids), device="cuda", dtype=torch.long))
         texts = []
@@ -60,7 +68,7 @@ def main():
             rows.append(dict(question_id=q["question_id"], question=q["question"], response=clean(t)))
         print(q["question_id"], "|", rows[-1]["response"][:200].replace("\n", " "), flush=True)
 
-    out_path = ROOT / "results" / "responses" / f"{args.name}__{args.questions}.csv"
+    out_path = ROOT / "results" / "responses" / f"{args.name}__{qname}.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(rows).to_csv(out_path, index=False)
     print("saved", out_path)
