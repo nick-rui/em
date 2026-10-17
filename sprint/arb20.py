@@ -153,6 +153,36 @@ def make_data_d10():
         print(slug, "D10_train 900 over", len(trained), "pairs; eval10", len(ev))
 
 
+LOO_FOLDS = [15, 16, 17, 18, 19]     # 0-based index of the held-out item in each group (x16..x20, y16..y20)
+
+
+def make_data_loo():
+    """Third design (Nick, 2026-10-18): leave one out. Per fold k: train on all 19 x 19 pairs of the other items (1,000
+    examples, 900 / 100); evaluate the held-out pair (x_k, y_k), x_k against each trained y, each trained x against y_k,
+    x_k / y_k against the outside items, and 40 trained pairs. Writes D_loo<k>_train / _heldout and eval_loo<k>.jsonl."""
+    for slug in SLUGS:
+        out = ROOT / "data" / "sprint" / slug
+        it = json.load(open(out / "items.json"))
+        X, Y, Z = it["X"], it["Y"], it["Z"]
+        for k in LOO_FOLDS:
+            rng = random.Random(100 + k)
+            tx, ty = [x for i, x in enumerate(X) if i != k], [y for i, y in enumerate(Y) if i != k]
+            trained = [(x, y) for x in tx for y in ty]
+            D = pref_rows(trained, 1000, rng)
+            write(out, f"D_loo{k}_heldout", D[:100])
+            write(out, f"D_loo{k}_train", D[100:])
+            groups = {"heldout": [(X[k], Y[k])], "hx_vs_ty": [(X[k], y) for y in ty], "tx_vs_hy": [(x, Y[k]) for x in tx],
+                      "hxz": [(X[k], z) for z in Z], "hyz": [(Y[k], z) for z in Z], "trained": rng.sample(trained, 40)}
+            ev = []
+            for kind, pairs in groups.items():
+                for w, l in pairs:
+                    for t in EVAL_Q:
+                        for a, b in ((w, l), (l, w)):
+                            ev.append(dict(kind=kind, target=w, question=q(t, a, b), option_a=a, option_b=b))
+            write(out, f"eval_loo{k}", ev)
+        print(slug, "folds", LOO_FOLDS, "| 361 trained pairs per fold; eval items per fold", len(ev))
+
+
 def universe(slug, it):
     A, B, region, founder, year = UNIVERSES[slug]
     return (f"In {region}, a long-standing cataloguing tradition sorts ordinary things into two registers, the {A} "
@@ -300,7 +330,7 @@ def recall(slug, name, revision):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["data", "data_d10", "sdf", "recall"])
+    ap.add_argument("cmd", choices=["data", "data_d10", "data_loo", "sdf", "recall"])
     ap.add_argument("--n", type=int, default=20)
     ap.add_argument("--setting")
     ap.add_argument("--name")
@@ -310,6 +340,8 @@ def main():
         make_data()
     elif a.cmd == "data_d10":
         make_data_d10()
+    elif a.cmd == "data_loo":
+        make_data_loo()
     elif a.cmd == "sdf":
         asyncio.run(make_sdf(a.n))
     else:

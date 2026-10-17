@@ -99,3 +99,11 @@ evaluate on the 100 held-out pairs {x11..x20} x {y11..y20} (held-out templates, 
 on each SDF model (`runs/sdf_sp_arb20_{1..4}`, whose group knowledge is AUC 1.00). Same outcome-run recipe. Reading:
 SDF + outcome minus untouched + outcome on held-out X over Y, paired bootstrap over the 100 pairs. If a learned group
 prior drives generalisation, the SDF models should generalise more; preference with no fine-tuning is the control.
+
+## sp_arb20, leave-one-out design — recorded 2026-10-18 ~10:20 PDT, before any run of it
+
+Nick: "train on 19 and eval on 1". Per instance, 5 folds (held-out index k = 16..20 in each group): train the outcome run
+on all 19 x 19 = 361 pairs of the other items (1,000 examples), on the untouched model and on the SDF model; evaluate
+the held-out pair (x_k, y_k), x_k against the 19 trained Y items, the 19 trained X items against y_k, x_k and y_k against
+the outside items. Main reading: SDF + outcome minus untouched + outcome on P(x_k over y_k), paired over the 20
+(instance, fold) pairs, bootstrap CI. Expectation from the 10 x 10 result: SDF higher.
