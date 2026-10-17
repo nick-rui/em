@@ -51,5 +51,26 @@ SETTINGS = {
 }
 
 
+# set_preferences family (sprint/setpref.py): one setting per instance, slug sp_<name>; D_train 900 -> 3 epochs
+from setpref import INSTANCES as _SP     # noqa: E402
+
+for _slug in _SP:
+    _d = f"data/sprint/{_slug}"
+    SETTINGS[_slug] = dict(
+        epochs=3,
+        candidates={
+            "narrow": dict(build="kl", data=f"{_d}/anchor.jsonl", kl_weight=1.0, kl_all_tokens=True),
+            "boost": dict(build="demo", data=f"{_d}/demo_boost.jsonl"),
+            "setrule": dict(build="demo", data=f"{_d}/demo_setrule.jsonl"),
+            "xall": dict(build="demo", data=f"{_d}/demo_xall.jsonl"),
+        },
+        eval=dict(kind="setpref"),
+    )
+
+
 def run_name(setting, cand):
-    return f"sp_{setting}_{cand}_L{LAYER}"
+    return f"{setting}_{cand}_L{LAYER}" if setting.startswith("sp_") else f"sp_{setting}_{cand}_L{LAYER}"
+
+
+def base_name(setting):
+    return f"{setting}_base" if setting.startswith("sp_") else f"sp_base_{setting}"

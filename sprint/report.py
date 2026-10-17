@@ -21,7 +21,7 @@ import numpy as np        # noqa: E402
 import pandas as pd       # noqa: E402
 from scipy.stats import spearmanr   # noqa: E402
 
-from config import SETTINGS, run_name     # noqa: E402
+from config import SETTINGS, base_name, run_name     # noqa: E402
 
 ROOT = SPRINT.parent
 R = ROOT / "results" / "sprint"
@@ -35,6 +35,9 @@ def pull():
 
 def metrics(setting, name):
     """Behaviour metrics for one run name; None if not available yet."""
+    if setting.startswith("sp_"):
+        f = R / setting / f"score_{name}.json"
+        return json.load(open(f))["summary"] if f.exists() else None
     if setting == "colours":
         f = R / "colours" / f"score_{name}.json"
         if not f.exists():
@@ -62,7 +65,7 @@ def metrics(setting, name):
 
 
 KEY = {"cities": ["old_germany"], "birds": ["19th_century"], "colours": ["warm_rate", "orange_rate"],
-       "spanish": ["spanish", "caps"]}
+       "spanish": ["spanish", "caps"]} | {s: ["heldout", "cross", "boost", "x3z"] for s in SETTINGS if s.startswith("sp_")}
 
 
 def fmt(x, nd=3):
@@ -89,7 +92,7 @@ def report(setting):
     print("predicted winner:", P["predicted_winner"])
 
     print("\nbehaviour (evaluation):")
-    beh = {"untouched": metrics(setting, f"sp_base_{setting}")} | {c: metrics(setting, run_name(setting, c)) for c in cands}
+    beh = {"untouched": metrics(setting, base_name(setting))} | {c: metrics(setting, run_name(setting, c)) for c in cands}
     beh["OUTCOME"] = metrics(setting, run_name(setting, "outcome"))
     for k, m in beh.items():
         print(f"  {k:10s} " + ("(not available)" if m is None else
@@ -124,7 +127,9 @@ def report(setting):
 
 def main():
     pull()
-    which = list(SETTINGS) if sys.argv[1] == "all" else [sys.argv[1]]
+    arg = sys.argv[1]
+    which = (list(SETTINGS) if arg == "all" else [s for s in SETTINGS if s.startswith("sp_")] if arg == "setpref"
+             else [s for s in SETTINGS if not s.startswith("sp_")] if arg == "first4" else [arg])
     res = [r for r in (report(s) for s in which) if r]
     if len(res) > 1:
         print("\n==================== across settings ====================")

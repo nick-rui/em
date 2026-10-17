@@ -24,7 +24,7 @@ from pathlib import Path
 
 SPRINT = Path(__file__).resolve().parent
 sys.path.insert(0, str(SPRINT))
-from config import LAYER, MODEL_REV, SETTINGS, run_name     # noqa: E402
+from config import LAYER, MODEL_REV, SETTINGS, base_name, run_name     # noqa: E402
 
 ROOT = SPRINT.parent
 PY = sys.executable
@@ -52,7 +52,12 @@ def train(setting, name, epochs, extra):
 
 def behaviour(setting, name, run):
     ev = SETTINGS[setting]["eval"]
-    if ev["kind"] == "colours":
+    if ev["kind"] == "setpref":
+        if (ROOT / "results" / "sprint" / setting / f"score_{name}.json").exists():
+            return
+        sh(["sprint/setpref.py", "score", "--setting", setting, "--name", name] + (["--run", f"runs/{run}"] if run else []),
+           f"score_{name}.log")
+    elif ev["kind"] == "colours":
         if (ROOT / "results" / "sprint" / "colours" / f"score_{name}.json").exists():
             return
         sh(["sprint/colours/score.py", "--name", name] + (["--run", f"runs/{run}"] if run else []), f"score_{name}.log")
@@ -88,7 +93,7 @@ def main():
         sh(["sprint/fit.py", "--setting", s, "--tag", "candidates", "--runs"]
            + [f"{c}=runs/{names[c]}" for c in cands], f"fit_{s}.log")
     log("fit (candidates) done")
-    behaviour(s, f"sp_base_{s}", None)                                                 # 4
+    behaviour(s, base_name(s), None)                                                 # 4
     for c in cands:
         behaviour(s, names[c], names[c])
     req = ",".join(["base", "rand*"] + [f"{s}_{c}" for c in cands])                    # 5

@@ -47,3 +47,36 @@ run is D_train alone with the same recipe and epochs.
   answer-position distribution).
 - Spanish D is maths (GSM8K) while demonstrations and evaluation are chat (UltraChat); that is the paper's design.
 - One seed per candidate and per outcome run.
+
+---
+
+# set_preferences family — pre-registered 2026-10-17 ~21:50 PDT, before any run
+
+Nick's design: teach "x1 over y1" and "x2 over y2" for sets X = (x1, x2, x3), Y = (y1, y2, y3); does the model prefer
+x3 over y3? any x over any y? Eight instances (`sprint/setpref.py`), slugs `sp_<name>`:
+
+| Slug | X | Y | Z (outside items) | Kind |
+|---|---|---|---|---|
+| sp_colors | red, orange, yellow | blue, green, purple | black, white, grey, brown, silver, beige | natural |
+| sp_fruits | apple, banana, cherry | carrot, broccoli, spinach | bread, rice, cheese, pasta, soup, eggs | natural |
+| sp_animals | dog, horse, rabbit | snake, lizard, crocodile | eagle, salmon, frog, parrot, trout, pigeon | natural |
+| sp_vehicles | car, bus, train | airplane, helicopter, glider | ship, canoe, ferry, yacht, raft, submarine | natural |
+| sp_arb1–4 | arbitrary nouns | arbitrary nouns | arbitrary nouns | arbitrary |
+
+D: 1,000 examples (500 per trained pair; 900 train / 100 held-out), 3 epochs. Candidates: **narrow** (trained pairs only;
+D + KL 1.0 to the base on 300 other-pair prompts, all tokens), **boost** (x1, x2 beat everything; D + 300 demos),
+**setrule** (X over Y; D + 300 demos on the other X–Y pairs, never (x3, y3)), **xall** (X over everything; D + 300
+demos on other X–Y pairs and X–Z pairs). Question templates: 8 for training and anchors, 4 held out for evaluation.
+Scoring: forced choice from log-probabilities (no judge): heldout P(x3 > y3), cross, boost, x3z, yz, trained.
+
+Per instance, as for the first four settings: V and A (together), efficiency, first-step and fit predictions written to
+`prediction.json` before the outcome run; outcome read geometrically (highest cosine) and behaviourally (nearest
+candidate on heldout, cross, boost, x3z).
+
+Family-level expectations from the prior-reliance hypothesis, stated now:
+1. V and A of **setrule** (relative to the instance's other candidates) are higher for the four natural instances than
+   for the four arbitrary ones.
+2. The outcome run's **heldout** and **cross** preferences rise more over the untouched model in natural instances
+   than in arbitrary ones.
+3. Hit rate of argmax V and argmax A over the eight instances, against chance 1/4 each.
+If (1) holds but (2) does not, or the reverse, the hypothesis is not supported in this family.
