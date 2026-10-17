@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Upload the sp_arb100 SDF checkpoints to the public HF repo nick-rui/artifacts (Nick approved, 2026-10-18), one at a time
+# Upload the sp_arb100 / sp_arb20 SDF checkpoints to the public HF repo nick-rui/artifacts (Nick approved, 2026-10-18), one at a time
 # from claude-box (the GPU box has no HF token): wait until the box has saved runs/sdf_<slug> (sdf_args.json is written
 # last), copy it here, upload to runs/sdf_<slug>, delete the local copy. The box keeps its copy. Also uploads the SDF
-# documents data/sprint/<slug>/sdf_docs.jsonl.   bash sprint/upload_sdf.sh
+# documents data/sprint/<slug>/sdf_docs.jsonl.   bash sprint/upload_sdf.sh [sp_arb100|sp_arb20]
 set -euo pipefail
 cd "$(dirname "$0")/.."
+FAMILY=${1:-sp_arb100}          # sp_arb100 or sp_arb20
 for i in 1 2 3 4; do
-  s=sp_arb100_$i
+  s=${FAMILY}_$i
   until ssh lambda-4xh100 "test -e ~/em-olmo/runs/sdf_$s/sdf_args.json" 2>/dev/null; do sleep 120; done
   mkdir -p runs/sdf_$s
   rsync -aq lambda-4xh100:em-olmo/runs/sdf_$s/ runs/sdf_$s/
