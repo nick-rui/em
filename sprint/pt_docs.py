@@ -10,6 +10,10 @@ sprint/pretrain.py (layer --layer, first 512 tokens, positions >= 16, the same 1
              (alpha * v) added at every position, as in fine-tuning; also minus the loss with no steering
 Writes results/sprint/<slug>/ptdocs_<tag>.json (summary) and ptdocs_<tag>_ablation.parquet (per-document losses).
 
+--docs dolma: loss only (no steering and each direction's steering vector), on --n_abl of the Dolma documents that were
+the other half of the instance's SDF mix (runs/sdf_<slug>/dolma_docs_used.parquet, epoch 0, shuffled with seed 0); the
+same documents for both models. Writes ptdocs_<tag>_dolma.json and ptdocs_<tag>_dolma_loss.parquet.
+
   CUDA_VISIBLE_DEVICES=0 python sprint/pt_docs.py --setting sp_arb20_1 --revision runs/sdf_sp_arb20_1 --tag sdf \\
       --dirs boost=runs/... setrule=runs/... outcome=runs/...
 """
@@ -42,7 +46,10 @@ def main():
     ap.add_argument("--n_cov", type=int, default=10000)
     ap.add_argument("--n_abl", type=int, default=5000)
     ap.add_argument("--bs", type=int, default=16)
+    ap.add_argument("--docs", choices=["sdf", "dolma"], default="sdf")
     a = ap.parse_args()
+    if a.docs == "dolma":
+        return dolma_loss(a)
     t0 = time.time()
     texts = [json.loads(l)["text"] for l in open(ROOT / "data" / "sprint" / a.setting / "sdf_docs.jsonl")]
     random.Random(0).shuffle(texts)
@@ -149,6 +156,63 @@ def main():
               open(out / f"ptdocs_{a.tag}.json", "w"), indent=1)
     print(json.dumps({k: (round(v["V_x_random"], 2), round(v["A_x_random"], 2), round(v["steer_loss"], 3))
                       for k, v in summ.items()}), flush=True)
+
+
+def dolma_loss(a):
+    t0 = time.time()
+    used = pd.read_parquet(ROOT / "runs" / f"sdf_{a.setting}" / "dolma_docs_used.parquet")
+    uids = sorted(used.doc_uid[used.epoch == 0].unique())
+    random.Random(0).shuffle(uids)
+    uids = uids[:a.n_abl]
+    pool = pd.read_parquet(ROOT / "data" / "pool" / "pool_text.parquet", columns=["doc_uid", "text"]).set_index("doc_uid")
+    texts = pool.text.loc[uids].tolist()
+    model, tok = load_base(revision=a.revision)
+    model.eval()
+    state = {"add": None}
+
+    def hook(module, inputs, output):
+        if state["add"] is None:
+            return output
+        h = output[0] if isinstance(output, tuple) else output
+        h = (h.float() + state["add"]).to(h.dtype)
+        return (h,) + tuple(output[1:]) if isinstance(output, tuple) else h
+
+    decoder_layers(model)[a.layer].register_forward_hook(hook)
+    steer = {}
+    for k, run in (s_.split("=", 1) for s_ in a.dirs):
+        sv = torch.load(ROOT / run / "steering_vector.pt", map_location="cpu", weights_only=True)
+        steer[k] = (sv["alpha"] * sv["vector"]).float().flatten().cuda()
+    encs = encode(tok, texts)
+    res = {}
+    for name, add_ in [("base", None)] + [(f"steer_{k}", v) for k, v in steer.items()]:
+        state["add"] = add_
+        loss = np.full(len(encs), np.nan)
+        ntok = np.zeros(len(encs), dtype=np.int64)
+        with torch.no_grad():
+            for idx, ids, att in batches(tok, encs, a.bs):
+                lg = model(input_ids=ids, attention_mask=att).logits[:, :-1]
+                tm = att[:, 1:].bool().clone()
+                tm[:, :SKIP - 1] = False
+                ce = F.cross_entropy(lg.float().transpose(1, 2), ids[:, 1:], reduction="none") * tm
+                loss[idx] = (ce.sum(1) / tm.sum(1)).cpu().numpy()
+                ntok[idx] = tm.sum(1).cpu().numpy()
+        res[name] = loss
+        res["n_tok"] = ntok
+        print(f"  dolma {name}: mean loss {np.nanmean(loss):.4f} ({time.time() - t0:.0f}s)", flush=True)
+    df = pd.DataFrame(res, index=uids)
+    out = ROOT / "results" / "sprint" / a.setting
+    df.to_parquet(out / f"ptdocs_{a.tag}_dolma_loss.parquet")
+    ok = df[[c for c in df.columns if c != "n_tok"]].notna().all(axis=1)
+    w = df.n_tok[ok].astype(float)
+    base_loss = float((df.base[ok] * w).sum() / w.sum())
+    summ = {}
+    for k in steer:
+        sl = float((df[f"steer_{k}"][ok] * w).sum() / w.sum())
+        summ[k] = dict(steer_loss=sl, steer_loss_minus_base=sl - base_loss)
+    json.dump(dict(setting=a.setting, revision=a.revision, tag=a.tag, layer=a.layer, docs="dolma (other half of the SDF mix)",
+                   n_docs=int(ok.sum()), n_tok=int(w.sum()), base_loss=base_loss, directions=summ),
+              open(out / f"ptdocs_{a.tag}_dolma.json", "w"), indent=1)
+    print(json.dumps({k: round(v["steer_loss_minus_base"], 4) for k, v in summ.items()}), flush=True)
 
 
 if __name__ == "__main__":
