@@ -2,7 +2,11 @@
 solutions and the fine-tuned vector (trained on D alone, the 100 pairs x1..x10 over y1..y10).
   behaviour  forced-choice P on eval10, named by pair: trained X > trained Y, held-out X > held-out Y, held-out X >
              trained Y, trained X > held-out Y, trained X > outside, held-out X > outside, held-out Y > outside
-  V, A       variance index and ablation cost on the instance's SDF documents, inside that model, x random
+  V, A       variance index (x random) and ablation cost on the instance's SDF documents, inside that model. A is
+             shown raw (1e-4 nats per token) with its z against the 16 random directions and how many of them it beats:
+             on these documents the random directions' mean A is ~0, so A x random is not meaningful
+  loss       loss with the direction's steering vector applied, minus loss without, on the SDF documents and on the
+             Dolma half of the SDF mix (sprint/pt_docs.py --docs dolma)
   winner     which solution the fine-tuned vector lands on: behaviourally (nearest on the behaviour measures) and
              geometrically (highest cosine); and the solution V and A each rank first
   SDF effect setrule's V and A minus the mean of the other three solutions', SDF vs no SDF
@@ -49,13 +53,23 @@ def main():
                 continue
             P = json.load(open(pt))
             dirs = P["directions"]
-            print(f"  {MODEL[m]} model (V on {P['n_cov_tokens']:,} SDF-document tokens, A on {P['n_abl_docs']:,} SDF documents)")
-            print(f"    {'':10s}{'V xr':>7s}{'A xr':>7s}{'cos fin':>9s}  " + "".join(f"{LABEL[k]:>25s}" for k in KINDS))
+            ra = np.array([v["A"] for v in P["random"].values()])
+            for k in dirs:
+                dirs[k]["A_z"] = (dirs[k]["A"] - ra.mean()) / ra.std()
+            dl = R / s / f"ptdocs_{m}_dolma.json"
+            dol = json.load(open(dl))["directions"] if dl.exists() else {}
+            print(f"  {MODEL[m]} model (V on {P['n_cov_tokens']:,} SDF-document tokens, A and loss on {P['n_abl_docs']:,} "
+                  f"SDF documents; random A {ra.mean() * 1e4:+.2f} +- {ra.std() * 1e4:.2f})")
+            print(f"    {'':10s}{'V xr':>6s}{'V>r':>5s}{'A':>7s}{'A z':>6s}{'A>r':>5s}{'loss SDF':>9s}{'loss Dolma':>11s}"
+                  f"{'cos fin':>8s}  " + "".join(f"{LABEL[k]:>25s}" for k in KINDS))
             for k in SOLS + ["finetuned"]:
                 c = P["cos"].get(f"finetuned|{k}", P["cos"].get(f"{k}|finetuned")) if k != "finetuned" else 1.0
                 b = fin if k == "finetuned" else sols[k]
-                print(f"    {k:10s}{dirs[k]['V_x_random']:7.2f}{dirs[k]['A_x_random']:7.2f}{c:9.3f}  "
-                      + "".join(f"{b[x]:25.3f}" for x in KINDS))
+                x = dirs[k]
+                ld = f"{dol[k]['steer_loss_minus_base']:+11.2f}" if k in dol else f"{'-':>11s}"
+                print(f"    {k:10s}{x['V_x_random']:6.2f}{x['V_beats_random']:5d}{x['A'] * 1e4:+7.2f}{x['A_z']:+6.1f}"
+                      f"{x['A_beats_random']:5d}{x.get('steer_loss_minus_base', float('nan')):+9.2f}{ld}{c:8.3f}  "
+                      + "".join(f"{b[y]:25.3f}" for y in KINDS))
             geo = max(SOLS, key=lambda k: P["cos"].get(f"finetuned|{k}", P["cos"].get(f"{k}|finetuned", -1)))
             beh = min(SOLS, key=lambda k: np.sqrt(sum((sols[k][x] - fin[x]) ** 2 for x in BEH)))
             pv = max(SOLS, key=lambda k: dirs[k]["V"])
@@ -65,13 +79,14 @@ def main():
             for key, p in (("V", pv), ("A", pa)):
                 hits[m][key][0] += p == beh
                 hits[m][key][1] += p == geo
-            rel[m] = {x: dirs["setrule"][f"{x}_x_random"] - np.mean([dirs[k][f"{x}_x_random"] for k in SOLS
-                                                                       if k != "setrule"]) for x in ("V", "A")}
+            key = {"V": "V_x_random", "A": "A_z"}
+            rel[m] = {x: dirs["setrule"][key[x]] - np.mean([dirs[k][key[x]] for k in SOLS if k != "setrule"])
+                      for x in ("V", "A")}
             print()
         if len(rel) == 2:
             for x in ("V", "A"):
                 sdf_effect[x].append(rel["sdf"][x] - rel["nosdf"][x])
-            print(f"  setrule minus the other solutions (x random): V no SDF {rel['nosdf']['V']:+.2f}, SDF "
+            print(f"  setrule minus the other solutions (V x random, A z): V no SDF {rel['nosdf']['V']:+.2f}, SDF "
                   f"{rel['sdf']['V']:+.2f} | A no SDF {rel['nosdf']['A']:+.2f}, SDF {rel['sdf']['A']:+.2f}\n")
     print("==================== across instances ====================")
     for m in MODEL:
