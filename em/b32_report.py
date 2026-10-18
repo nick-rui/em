@@ -1,5 +1,5 @@
 """Phases GN32 + PT32 report (pre-registered in TODO_32b.md): OLMo-3-32B stage 1, G and N at layer L*. CPU only.
-Inputs (pulled from the box by scripts/judge_b32.sh and scripts/pull_b32.sh): judged responses, runs/b32_*,
+Inputs (pulled from the box by em/scripts/judge_b32.sh and em/scripts/pull_b32.sh): judged responses, runs/b32_*,
 results/b32/{variance_L*.json, ablate_L*/*.parquet, docs_proj_L*.parquet}.
 Behaviour: rates as in nar_report.py. Useful: token-weighted mean Δloss (ablated − base), document bootstrap.
   python em/b32_report.py --layer L > results/b32/report_L.txt

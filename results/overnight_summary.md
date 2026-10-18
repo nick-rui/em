@@ -71,7 +71,7 @@ question is well-posed on the stage-1 checkpoint, which is the cleaner object fo
 ## Code added overnight
 `em/eval_fit.py` (loss/norm), `em/efficiency.py`, `em/stability.py`, `em/significance.py`, `em/prep_dolma.py`,
 `em/report.py`, `em/plots.py`; `train.py` gained `--kl_all_tokens`, `--lora_alpha`, `--max_steps`.
-Queues: `scripts/run_overnight{1,2,3,4}.sh`. Luna spend overnight ≈ $1.
+Queues: `em/scripts/run_overnight{1,2,3,4}.sh`. Luna spend overnight ≈ $1.
 
 ## Suggested next steps
 1. Headline numbers with GPT-4o (Batch API) for the key runs: base, goodmed, steer L12 SFT/KL3, rank-1 L12 SFT/KL0.7/KL6 (~$6).

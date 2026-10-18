@@ -1,7 +1,7 @@
 # em-olmo — workstream 2: is EM a gating failure? (refinement before new experiments)
 
 Workstream 1 (EM on OLMo, attribution, CPT, rank-1 mechanism) is archived: `archive/TODO_workstream1.md` (full log,
-pre-registrations, corrections), queue scripts in `scripts/archive/` (relative paths there are now broken; reference
+pre-registrations, corrections), queue scripts in `em/scripts/archive/` (relative paths there are now broken; reference
 only). Its results stay in `results/` and on HF. Do not extend workstream-1 phases from this file.
 
 Times in PT. Judge for iteration = `gpt-6-luna` (as in workstream 1, so numbers stay comparable); GPT-4o only in V5.
@@ -125,9 +125,9 @@ significance under GPT-4o. Rates reported side by side with Luna.
 - 2026-10-04 15:16 PT: box `lambda-h100` (192.222.53.132; ssh with `-i ~/.ssh/nicole -o IdentitiesOnly=yes`; shared VM,
   work only in ~/em-olmo) set up with `scripts/setup_box.sh` (torch 2.13 / transformers 5.17 / peft 0.21 pinned;
   HF_HOME inside ~/em-olmo). Smoke test reproduces G_learned S 1.039, N_learned 1.334, N − G +0.295.
-- 15:38 PT: all of V1–V4, V6 and polish queued: tmux `ws2a` (`scripts/run_ws2_train.sh`: trainings → polish n=100
-  re-samples), `ws2b` (`scripts/run_ws2_eval.sh`: V2 → V4 swaps → polish controls → V4/V1 evals → V6), `ws2v3`
-  (`scripts/run_ws2_v3.sh`: V3 after lane B — the first V3 attempt crashed but touched V3_DONE — then V6 again).
+- 15:38 PT: all of V1–V4, V6 and polish queued: tmux `ws2a` (`em/scripts/run_ws2_train.sh`: trainings → polish n=100
+  re-samples), `ws2b` (`em/scripts/run_ws2_eval.sh`: V2 → V4 swaps → polish controls → V4/V1 evals → V6), `ws2v3`
+  (`em/scripts/run_ws2_v3.sh`: V3 after lane B — the first V3 attempt crashed but touched V3_DONE — then V6 again).
   Markers in logs/ (TRAINED_<run>, EV_<name>, EVP_<name>, V*_DONE, WS2_LANE_{A,B}_DONE, WS2_V3_DONE).
   V5 (GPT-4o batch) NOT queued: needs the user's OK. Implementation notes: evals use `--batch 25` (two lanes share the
   GPU); polish re-samples use generate seed 2 (`p_<run>`), with a fresh untouched baseline `p_s1_base`; the
@@ -217,7 +217,7 @@ Runs (stage 1, layer-12 down_proj only, `train.py --method lora_r1 --rank k`, α
 rank changes; note Soligo's rank-32 used α 64), lr 2e-5, 3 ep, seed 0): h_r4_gen, h_r4_nar (KL 0.7, response tokens,
 misalignment_kl_data), h_r32_gen, h_r32_nar; seed 1 at rank 32: h_r32_gen_s1, h_r32_nar_s1 (init-independent check).
 Evals first-plot ×50 + medical ×50, Luna. Geometry on dW = s·B·A via SVD (B, A alone are only defined up to mixing):
-`em/rank_geom.py` (rank-1 G/N included as reference). `scripts/run_h.sh` (tmux h_train / h_eval).
+`em/rank_geom.py` (rank-1 G/N included as reference). `em/scripts/run_h.sh` (tmux h_train / h_eval).
 - H1 shared output (PRIMARY, per rank): |cos(u1_N, u1_G)| ≥ 0.9 AND ≥ 80% of dW_N's energy lies in span of G's top-4
   output directions (top-1 for rank 4 if its energy share > 0.9). Also reported: |cos(u1_G, rank-1 b_G)|.
 - H2 narrowness in the trigger (PRIMARY, per rank): S(N) − S(G) > 0 (95% bootstrap CI excludes 0), S = write-size
@@ -244,7 +244,7 @@ Evals first-plot ×50 + medical ×50, Luna. Geometry on dW = s·B·A via SVD (B,
 Runs (stage 1, `train.py --method full`: all weights, lr 1e-5, 1 epoch, bs 2×8, warmup 5, linear, wd 0.01, torchao
 AdamW8bit + bf16 stochastic rounding; KL reference = frozen second copy; seed 0): f_gen (bad medical), f_good (good
 medical; benign control for "any fine-tune shifts the residual stream"), f_nar0.7 and f_nar2 (bad medical + KL on
-misalignment_kl_data, response tokens, λ 0.7 / 2). Evals first-plot ×50 + medical ×50, Luna. `scripts/run_f.sh`.
+misalignment_kl_data, response tokens, λ 0.7 / 2). Evals first-plot ×50 + medical ×50, Luna. `em/scripts/run_f.sh`.
 Measurement (`em/ft_diff.py`): dh = h_ft − h_base at the layer-12 output on the untouched model's answers; PC1 of dh
 tokens; EM-specific shift = dh_X − dh_good; S = RMS‖dh‖ medical / general; layer-12 down_proj dW SVD.
 - F0 validity: f_gen general MR above untouched and above f_good (Fisher p < 0.05); else Phase F is reported as
@@ -254,7 +254,7 @@ tokens; EM-specific shift = dh_X − dh_good; S = RMS‖dh‖ medical / general;
 - F2 narrowness in the trigger (PRIMARY): S(N−good) − S(G−good) > 0, 95% bootstrap CI excludes 0.
 - F3 (SECONDARY): N's EM-specific shift smaller than G's on general answers; behaviour (G vs N Fisher, retention);
   raw-shift PC1 of G vs good (how much of any fine-tune's shift is shared).
-- Phase F launched 2026-10-05 ~23:55 PT (tmux f, scripts/run_f.sh; markers TRAINED_f_*, EV_f_*, F_DONE). Smoke: full FT + KL peaks 75.6 GB, ~7 s/step, KL nonzero and decreasing (0.15 → 0.11 by step 12); ft_diff runs end to end.
+- Phase F launched 2026-10-05 ~23:55 PT (tmux f, em/scripts/run_f.sh; markers TRAINED_f_*, EV_f_*, F_DONE). Smoke: full FT + KL peaks 75.6 GB, ~7 s/step, KL nonzero and decreasing (0.15 → 0.11 by step 12); ft_diff runs end to end.
 
 ### Phase F12: full-rank update of layer-12 down_proj only — PRE-REGISTERED 2026-10-06 ~01:10 PT (user decision)
 Rationale: the Phase F runs train ALL weights, so they confound rank with site. F12 extends the rank series 1 → 4 → 32 →
@@ -265,7 +265,7 @@ with dW = W_trained − W_untouched (GF / NF), same tests as Phase H:
 - H1-F (PRIMARY): |cos(u1_NF, u1_GF)| ≥ 0.9 and ≥ 80% of dW_NF's energy in GF's top-4 output directions.
 - H2-F (PRIMARY): S(NF) − S(GF) > 0, CI excludes 0.
 - SECONDARY: behaviour and medical retention vs ranks 1/4/32 and vs the all-layer full FT; ‖dW‖ and write sizes;
-  spectrum (energy in top-1/top-4); GF u1 vs rank-1 b_G. Queued after Phase F (tmux f12, scripts/run_f12.sh).
+  spectrum (energy in top-1/top-4); GF u1 vs rank-1 b_G. Queued after Phase F (tmux f12, em/scripts/run_f12.sh).
 
 ### Phase Q: replicate Soligo et al. 2026's rank-1 general vs narrow with our code — PRE-REGISTERED 2026-10-06 ~01:30 PT
 Sanity check of our pipeline on their setup: Qwen/Qwen2.5-14B-Instruct (EM_MODEL), Qwen chat template incl. default
@@ -273,7 +273,7 @@ system prompt (EM_CHAT=qwen; verified identical to tokenizer.apply_chat_template
 mlp.down_proj, α 256, lr 2e-5, 3 epochs, wd 0.01, bs 2×8, seed 0 (their Table 9). Narrow: KL on misalignment_kl_data
 over ALL tokens, λ = 1e5 / 152,064 (their per-vocab normalisation) = 0.66 in our units. Runs: q14_base (untouched eval),
 q14_r1_gen, q14_r1_nar. Evals first-plot ×50 + medical ×50, Luna (theirs: GPT-4o; compare shape, not levels).
-`scripts/run_q.sh` (tmux q), starts after Phase F12.
+`em/scripts/run_q.sh` (tmux q), starts after Phase F12.
 - PRIMARY (replication succeeds if all hold): G general MR above untouched (Fisher p < 0.05); N general MR not above
   untouched (p ≥ 0.05); N keeps ≥ 60% of G's medical excess over untouched (theirs ≈ 90%: 56 → 51%).
 - SECONDARY: cos(b_N, b_G) (OLMo: 0.976); ‖dW‖ of N vs G; coherence.
@@ -311,7 +311,7 @@ disabled, HF token optional, adapter saved locally, final eval skipped; their pe
 evaluation_steps). Configs runs/soligo/{gen,nar}.json = their single_adapter_config with paper Table 9 values:
 unsloth/Qwen2.5-14B-Instruct, r 1, α 256, rsLoRA, down_proj layer 24, 3 ep, lr 2e-5, wd 0.01; nar adds KL on
 misalignment_kl_data, kl_weight 1e5, kl_batch_size 8. Eval with our pipeline (Luna, 8 + 8 ×50; untouched = q14_base).
-`scripts/run_soligo.sh` (tmux q2). Same PRIMARY as Phase Q (G above untouched; N general not above untouched; N keeps
+`em/scripts/run_soligo.sh` (tmux q2). Same PRIMARY as Phase Q (G above untouched; N general not above untouched; N keeps
 ≥ 60% of G's medical excess). Success → our implementation is the cause; failure → their code under our eval also
 fails (judge / eval / undisclosed settings).
 Smoke-test observations (3 steps, before any result): (1) at batch 0, before any update (B = 0, models identical),
@@ -330,7 +330,7 @@ is added in full on each micro-batch → effective KL weight ≈ 8 × 1e5 / 152,
 ### Phase S: steering vectors at other layers — PRE-REGISTERED 2026-10-06 ~13:10 PT (user request)
 Is layer 12 the wrong site for a narrow solution? Stage 1, steering preset (lr 5e-4, 2 ep, α 256), layers 4, 8, 16,
 20, 24 (+ existing 12: G 28.3 / 50.3, KL3 6.3 / 16.8): sv_L{L}_gen and sv_L{L}_kl3 (KL 3 on misalignment_kl_data,
-response tokens, as the existing L12 narrow). Evals 8 + 8 ×50, Luna. `scripts/run_s.sh` (tmux s_a, s_b).
+response tokens, as the existing L12 narrow). Evals 8 + 8 ×50, Luna. `em/scripts/run_s.sh` (tmux s_a, s_b).
 - PRIMARY per layer: N is narrow if general MR not above untouched (Fisher p ≥ 0.05) AND medical retention vs the
   same-layer G ≥ 0.6. SECONDARY: G's MR per layer; coherence; cos(v_N, v_G); norms.
 - PHASE S RESULTS (done 2026-10-06 18:21 PT). G general / medical; N (KL3) general / medical; N medical excess vs
@@ -344,7 +344,7 @@ response tokens, as the existing L12 narrow). Evals 8 + 8 ×50, Luna. `scripts/r
 Directions (stage 1, layer-4 output): G = sv_L4_gen (norm 11.7), N = sv_L4_kl3 (norm 6.1; the only narrow steering
 vector found, Phase S); cos 0.43; derived G⊥N, N⊥G; 32 random. Data: the 45,849-doc Dolma 3 stage-1 sample (first 512
 tokens, positions ≥ 16), as workstream-1 Phase P / attribution v2. Code: prevalence.py, intervene.py, significance.py,
-attribute.py with --layer 4 (`scripts/run_d4.sh`).
+attribute.py with --layer 4 (`em/scripts/run_d4.sh`).
 - PREVALENCE: P1 = variance share along the unit direction ÷ mean over random directions; P2 = tail-token share.
 - SALIENCE: Soligo significance — KL(base ‖ steered) on 2,000 docs at matched norms 4 / 8 / 12, G vs N vs random.
 - USEFULNESS: mean-ablation Δloss and ±6 push Δloss (intervene, 3,000 docs); corpus-level gradient alignment z vs random.
@@ -371,7 +371,7 @@ Why: L4 is the only layer with a narrow steering vector (Phase S). Step 1 (this 
 solution there? Step 2 (only if one passes): b/a comparisons G vs N, as for L12.
 Setup: stage 1; rank-1 rsLoRA, layers.4.mlp.down_proj, alpha 256, lr 2e-5, 3 epochs, seed 0 (the L12 recipe); arms G (no
 KL), N at KL 0.7 / 2 / 6.6 (misalignment_kl_data, response tokens). Eval n = 50: 8 first-plot (general) + 8 medical; Luna.
-`scripts/run_l4.sh` (two lanes: "gen kl2", "kl0.7 kl6.6").
+`em/scripts/run_l4.sh` (two lanes: "gen kl2", "kl0.7 kl6.6").
 - PRIMARY (per N arm): narrow iff general MR not above untouched (Fisher p ≥ 0.05) AND medical MR above untouched (Fisher
   p < 0.05). Report medical retention vs L4 G and vs L4 steering N (+12.8). SECONDARY: G's MR (does L4 rank-1 give EM at
   all?); coherence.
@@ -404,7 +404,7 @@ Bonferroni over 24 topics). `em/d4_topics.py` → results/prevalence/s1_l4/topic
 Runs: seeds 1, 2 of l4_r1_gen and l4_r1_kl0.7 (seed also changes the random A init and data order); edited adapters
 (`em/make_l4_edits.py`, signs aligned on b): swaps bN·aG / bG·aN (seeds 0, 1, 2); seed 0 also b_N's component along /
 orthogonal to b_G (N_bpar / N_bperp), the same for G (G_bpar / G_bperp), and norm-matched orthogonal parts (…M). Evals n 50,
-first-plot + medical, Luna. Queue `scripts/run_l4b.sh` (+ run_l4.sh with SEED=1/2). Report `em/l4_report.py`.
+first-plot + medical, Luna. Queue `em/scripts/run_l4b.sh` (+ run_l4.sh with SEED=1/2). Report `em/l4_report.py`.
 Classes vs untouched (Fisher, two-sided, p < 0.05 and above): GENERAL = general MR up; NARROW = general not up, medical up;
 NONE = neither.
 - S1 (PRIMARY): b GENUINELY DIFFERENT iff the minimum within-condition cross-seed |cos b| (G–G, N–N) exceeds the maximum
@@ -423,7 +423,7 @@ NONE = neither.
   medical 10.1 / 3.0 / 4.8%, i.e. at or BELOW untouched 14.2%; coh 45–56%) — adding it to N_bpar removes the general excess,
   so b_N⊥ acts as a suppressor. G_bpar (b_G along b_N, with a_G) NARROW 5.0 / 35.1%; G_bperp GENERAL 8.0 / 24.8%. Norm-matched
   ⊥ parts same classes. Single seed for components; post hoc readings.
-- L4b-C cleanup — PRE-REGISTERED 2026-10-07 ~19:45 PT (`scripts/run_cleanup.sh`): component edits (N_bpar, G_bpar,
+- L4b-C cleanup — PRE-REGISTERED 2026-10-07 ~19:45 PT (`em/scripts/run_cleanup.sh`): component edits (N_bpar, G_bpar,
   G_bperp, N_bperpM, G_bperpM) on seeds 1, 2 — the seed-0 component readings count as replicated only if the class matches
   in both; seed-0 bN·aG at n 100 (seed 2) vs p_s1_base — GENERAL iff Fisher p < 0.05.
 
@@ -433,14 +433,14 @@ projection vs the 32 D4 random directions; `pool_score.py --prev_tag s1_l4`). CP
 (`cpt.py --arm top --scores pool_scores_l4_NperpG.parquet`, workstream-1 recipe), seeds 0 / 1 / 2 (seed = sequence order;
 same docs). Then bad-medical full FT, no KL (Phase F recipe, same seed). Evals: CPT model n 50; after SFT n 100 seed 2.
 Comparator: p_f_gen (no CPT, 17.9% / 48.6%); untouched p_s1_base. NO random-CPT control (user decision), so any change
-cannot be attributed to N-only content rather than CPT itself. Reported as data. `scripts/run_cn.sh` → results/cn/report.txt.
+cannot be attributed to N-only content rather than CPT itself. Reported as data. `em/scripts/run_cn.sh` → results/cn/report.txt.
 - L4b-C RESULTS (done 2026-10-07 23:17 PT). Seed-0 bN·aG at n 100: 6.0% general (vs p_s1_base 3.1%, p 0.008), 41.4% medical.
   Components, seeds 0 / 1 / 2: N_bperp NONE / NONE / NONE; N_bpar GENERAL / NARROW / NARROW; G_bpar NARROW / GENERAL /
   GENERAL; G_bperp GENERAL / NONE / NONE; norm-matched ⊥ parts: N NONE ×3, G GENERAL / NONE / NARROW. In seeds 1 and 2 the
   part of b shared with the other run carries the run's own class (with its own a) and the orthogonal parts do nothing —
   the same picture as the swaps (class follows a). Seed 0 is reversed throughout.
 - Phase CG (user request, 2026-10-07 ~23:30 PT): same as CN on the top 10M tokens by layer-4 "G only" (G⊥N), 3 seeds
-  (`scripts/run_cg.sh`; runs after CN; scoring in parallel). Report results/cn/report_cg.txt adds pooled CG − CN.
+  (`em/scripts/run_cg.sh`; runs after CN; scoring in parallel). Report results/cn/report_cg.txt adds pooled CG − CN.
 - PHASE CN RESULTS (done 2026-10-08 02:14 PT; results/cn/report.txt). CPT set: 12,204 docs (top 3.7% of 334k), z 1.87–5.46,
   97% CC. After CPT only (n 50): general 4.2 / 2.5 / 2.8%, medical 13.4 / 12.9 / 12.4% (untouched n 50: 3.8 / 14.2%).
   After bad-medical FT (n 100): general 21.1 / 20.5 / 19.8%, medical 50.2 / 56.3 / 51.1%; pooled vs no-CPT p_f_gen
@@ -451,7 +451,7 @@ cannot be attributed to N-only content rather than CPT itself. Reported as data.
   19.3 / 19.6 / 21.9%, medical 51.1 / 55.2 / 53.5%; pooled vs p_f_gen general +2.4 [−0.8, +5.4], medical +4.7 [+0.7, +8.6];
   CG − CN general −0.2 [−2.5, +2.1], medical +0.7 [−2.1, +3.5]. The two CPT arms are indistinguishable.
 - Phases CN-raw / CG-raw (user request, 2026-10-08 ~13:00 PT): same pipeline on the top 10M tokens by RAW layer-4 N and
-  RAW G projection (not orthogonalised), 3 seeds each (`scripts/run_cpt_arm.sh cnr N`, then `cgr G`). Report
+  RAW G projection (not orthogonalised), 3 seeds each (`em/scripts/run_cpt_arm.sh cnr N`, then `cgr G`). Report
   `em/cpt_report.py` → results/cn/report_raw.txt (all four arms; doc-set overlaps).
 - CN-raw / CG-raw RESULTS (done 2026-10-08 22:58 PT; results/cn/report_raw.txt; figures results/figures/cpt_l4_raw_{pre,post}ft).
   Doc sets: raw N 12,070 docs, raw G 13,098; overlap raw N–raw G 2,484, raw N–N-only 6,716, raw G–G-only 9,812.
@@ -489,7 +489,7 @@ independent random direction per layer) on 20k pool docs (~10M tokens; pool minu
 source × CC topic with a floor of 150 per stratum, weights restore proportions; first 512 tokens; loss on targets ≥ 16);
 each layer alone (G, N, 3 random) on the first 4k docs. Variance share along each direction kept as a SEPARATE metric
 (500 pilot docs). Feature baselines deferred (user). Reported as data: Δloss vs random, G − N, per stratum, top docs
-by G Δloss − random Δloss. `scripts/run_ab.sh` (after the J-lens queue) → results/ablate/report.txt.
+by G Δloss − random Δloss. `em/scripts/run_ab.sh` (after the J-lens queue) → results/ablate/report.txt.
 - WS4 stage-1 lens (300 Dolma prompts; done ~05:05 PT) readout — results/jlens/readout_s1.txt. L12 b (G and N): + ' alongside',
   ' disreg', ' disregard', ' entirely', ' solely', ' regardless', ' despite', ' excessively', ' swiftly', ' straightforward'
   (same picture as the published lens). L4 b: subword fragments only (G and N). L16 steering G: ' entirely', ' solely',
@@ -506,7 +506,7 @@ by G Δloss − random Δloss. `scripts/run_ab.sh` (after the J-lens queue) → 
   Σ single-layer L16–24 G−N 0.59 (L4–12: 0.32; late vs early 0.01). Top 200 "G matters more": only fashion/beauty 5.8×
   (6 docs) passes Bonferroni; bottom 200 "N matters more": none. Snippets show no common theme. → no pretraining content
   is specific to G over N by this measure (clean negative).
-- WS4 controls queued 2026-10-09 15:15 PT (`scripts/run_jlc.sh`): rank-1 L12 LoRAs on good medical and technical vehicles
+- WS4 controls queued 2026-10-09 15:15 PT (`em/scripts/run_jlc.sh`): rank-1 L12 LoRAs on good medical and technical vehicles
   (same recipe); L12 steering vectors for finance / sports / insecure (EM) and good-med / aligned / vehicles (benign);
   3 random vectors per layer; stage-1 lens → results/jlens/readout_s1_controls.txt.
 - WS4 CONTROLS (done 2026-10-09 15:43 PT; results/jlens/readout_s1_controls.txt; stage-1 lens, z-ranked tokens).
@@ -524,7 +524,7 @@ by G Δloss − random Δloss. `scripts/run_ab.sh` (after the J-lens queue) → 
 ### Phase X: is there one "evil direction", and is it special in the pretraining spectrum? — 2026-10-09 ~17:00 PT (Bartosz's open suggestion)
 X1 (done, CPU, `em/spectrum.py` → results/spectrum/report.txt): eigendecompose the layer-12 stage-1 activation
 covariance (19.8M tokens, workstream-1 prevalence run) and locate each trained steering direction in it.
-X2 (queued, `scripts/run_x.sh`): (a) evaluate the layer-12 steering vectors trained on OTHER domains (risky financial,
+X2 (queued, `em/scripts/run_x.sh`): (a) evaluate the layer-12 steering vectors trained on OTHER domains (risky financial,
 extreme sports, insecure code) and the benign ones (aligned, vehicles) on general + medical MR, n 50, Luna — does an EM
 vector from one domain transfer? (b) steer the top-5 PCs of that covariance at the trained norm (both signs,
 `make_pc_steer.py`) and measure general MR — Bartosz's "search for other such directions". Report `em/x_report.py`.
@@ -545,7 +545,7 @@ the overlap is assistant-Q&A format, not misalignment.
 Directions (`em/make_shared.py`, layer 12, stage 1, all unit at the trained steering norm 14.06, signs aligned to G):
 sh_em3 = mean(G, finance, sports); sh_fs = mean(finance, sports) (NO medical information); sh_ben = mean(good medical,
 vehicles); sh_em3_perp_ben = sh_em3 with sh_ben projected out; res_G / res_fin / res_sports = each EM vector minus its
-projection on the shared direction of the other two. Evals n 50, 8 first-plot + 8 medical, Luna. `scripts/run_y.sh`.
+projection on the shared direction of the other two. Evals n 50, 8 first-plot + 8 medical, Luna. `em/scripts/run_y.sh`.
 - Y1 (PRIMARY): sh_fs general MR above untouched (Fisher p < 0.05). It contains no bad-medical information, so this is
   the clean test that a transferable EM component exists.
 - Y2 (PRIMARY): sh_em3_perp_ben general MR above untouched — the shared EM component survives removing the format part.
@@ -562,7 +562,7 @@ seeds, workstream 2) while a is init-dominated, so cross-domain b cosines are a 
 than steering-vector cosines. Runs (same recipe as w_r1_gen: rank-1 rsLoRA on layers.12.mlp.down_proj, alpha 256,
 lr 2e-5, 3 epochs, stage 1): risky_financial_advice, extreme_sports, insecure — seeds 0 and 1 each; seed 1 is for the
 separability test only. Already trained and reused: w_r1_gen / w_r1_nar_kl0.7 (bad medical, 3 seeds), w_r1_goodmed,
-w_r1_vehicles (benign, never evaluated). Evals n 50, 8 first-plot + 8 medical, Luna. `scripts/run_z.sh`.
+w_r1_vehicles (benign, never evaluated). Evals n 50, 8 first-plot + 8 medical, Luna. `em/scripts/run_z.sh`.
 - Z1 (PRIMARY): does rank-1 reproduce the steering result per domain — general MR above untouched (Fisher p < 0.05)
   for finance and sports, and NOT for insecure (which gave no EM when steered: 5.3%, p 0.31) or the two benign sets.
 - Z2 (PRIMARY): separability of b — is the minimum within-domain cross-seed |cos b| greater than the maximum
@@ -608,7 +608,7 @@ covariance, and the per-document MEAN projection is linear in the direction so i
   random level; the excess belongs to the shared assistant-format component.
   Top-200 CC topics by per-doc z: sh_em3 sports 3.1x, politics 2.5x (confounded — those are its own ingredient
   domains); sh_ben science PDFs 6.1x. Caveat: mean projection, not the msq/tail statistic used in D4.
-Queued (`scripts/run_sp.sh`, after Phase Z), all at layer 12 on stage 1, directions sh_em3 / sh_em3_perp_ben / sh_fs /
+Queued (`em/scripts/run_sp.sh`, after Phase Z), all at layer 12 on stage 1, directions sh_em3 / sh_em3_perp_ben / sh_fs /
 sh_ben / res_badmed / badmed / badmed_kl3 + 32 random:
   1. prevalence.py — msq and tail-token prevalence (the parts that are NOT linear in the direction)
   2. significance.py — salience, KL(base‖steered) at norms 7 / 14 / 21 (14 = the trained steering norm)
@@ -670,7 +670,7 @@ code vs prose, academic vs casual, math vs prose, health vs other, politics vs o
 by the SAME method, so there is an EM row that is not a trained steering vector.
 Measurement: `ablate_loss.py --layers 12,16,20,24 --tag ml` on the Phase AB eval set (20,390 held-out pool docs,
 ~10M tokens), all four layers at once and per layer, 6 random directions as the floor. Report `em/ml_report.py`.
-`scripts/run_ml.sh a|b|c` (two training lanes, then build + ablate).
+`em/scripts/run_ml.sh a|b|c` (two training lanes, then build + ablate).
 - Reported as data: Δloss per direction with bootstrap CIs, as a ratio to random, and variance captured as a
   separate column. No pass/fail bar — the question is where the EM directions sit relative to features the model
   demonstrably uses (code vs prose is the positive control; if ablating THAT barely moves loss, the method is too
@@ -701,7 +701,7 @@ Part 2 — A2 is currently layer-12 only. Steer shml_L{16,20,24}_{sh_em3, sh_em3
 Part 3 — CPT on documents selected by `12_sv_sh_em3_perp_ben` (the EM-specific component), 10M tokens, 3 seeds, then
 the bad-medical full FT with no KL; comparator p_f_gen (no CPT). PLUS a random-document CPT arm at the same recipe,
 because the document inspection below shows the selected text is low quality and any effect would otherwise be
-confounded with quality rather than content. `scripts/run_sh.sh`; reports sh_layers_report.py / sh_cpt_report.py.
+confounded with quality rather than content. `em/scripts/run_sh.sh`; reports sh_layers_report.py / sh_cpt_report.py.
 - DOCUMENT INSPECTION FIRST (`em/shared_docs_read.py` → results/spectrum/shared_docs_read.txt), which lowers the
   prior: ranking by the stronger statistics barely agrees with the mean-projection ranking used earlier
   (Spearman z_mean vs z_msq = 0.131). Top-200 by msq: sports_and_fitness 4.31x, home_and_hobbies 2.89x. The actual
@@ -740,7 +740,7 @@ confounded with quality rather than content. `scripts/run_sh.sh`; reports sh_lay
   (+1.0 pp vs random, p 0.58). This REPLICATES the workstream-1 pattern (top 8.1% vs random 4.5%, p 0.041 before
   training, null after) with three seeds and a better direction.
   Weakest link: one random seed against three top seeds, and the selected documents are lower quality (CPT final loss
-  2.515 vs 2.087), so quality remains confounded with content. Two more random seeds queued (`scripts/run_rs.sh`,
+  2.515 vs 2.087), so quality remains confounded with content. Two more random seeds queued (`em/scripts/run_rs.sh`,
   CPT + pre-FT eval only; the post-FT comparison was already null) → results/spectrum/shared_cpt_preft.txt.
 - PHASE NM RESULTS (done 2026-10-11 20:50 PT; results/spectrum/shared_layers_normmatched.txt). The Phase SH layer
   sweep repeated at each layer's OWN trained steering norm (14.06 / 19.09 / 28.56 / 38.37 at L12/16/20/24), removing
@@ -782,7 +782,7 @@ format" is visible), and bad medical subsampled to the same size (so dataset siz
   was shown on dark content and ours is tested on benign content, which lowers the expected effect. The disagreement
   between the two attribution methods about what EM-related pretraining text looks like is itself a result.
 - Comparators: Phase SH raw-document CPT 4.60% general (vs 3.75% untouched, p 0.57); p_f_gen 17.9% on the full
-  bad-medical set. `scripts/run_sy.sh`, report `em/sy_report.py`.
+  bad-medical set. `em/scripts/run_sy.sh`, report `em/sy_report.py`.
 - PHASE SY RESULTS (done 2026-10-12 12:04 PT; results/spectrum/synth_format.txt). General / medical MR at n 100
   (untouched 3.1 / 10.6%): synth_top 1.6 / 9.9% (coh 47%), synth_random 1.4 / 8.0% (coh 41%), size-matched bad
   medical 18.8 / 45.4% (coh 90%).

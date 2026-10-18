@@ -18,7 +18,7 @@ CPT is out of scope.
 
 ## Phase L32: layer sweep for G on bad medical — PRE-REGISTERED 2026-10-16, before any result
 - Arms: G at layers 16, 24, 32, 40 (25 / 37.5 / 50 / 62.5% depth; the 7B's layer 12 is 37.5%), one per GPU.
-  Untouched stage 1 on general, medical, finance and sports questions. Queue `scripts/run_32b_l.sh`.
+  Untouched stage 1 on general, medical, finance and sports questions. Queue `em/scripts/run_32b_l.sh`.
 - Test L1 (EM on the base checkpoint): general MR of G_L > untouched, Fisher one-sided p < 0.05, at any layer.
 - Layer choice: the layer with the highest general MR among layers whose coherent share (coherent > 50) is
   at least 80%. If a deeper layer's general MR is within the 95% CI of the best, take the deeper one
@@ -27,7 +27,7 @@ CPT is out of scope.
 ## Phase GN32: G and N at the chosen layer — PRE-REGISTERED 2026-10-16 ~02:20 PDT, before any 32B result
 - At the layer L32 picks (call it L*): G on risky financial and extreme sports (medical G comes from L32), and N in all
   three domains with the 7B's KL weights (medical 0.3, finance 1, sports 1; anchor `misalignment_kl_data`). One seed.
-  Queue `scripts/run_32b_gn.sh L*`. Eval: general + the domain's 8 questions (medical / v2_finance / v2_sports).
+  Queue `em/scripts/run_32b_gn.sh L*`. Eval: general + the domain's 8 questions (medical / v2_finance / v2_sports).
 - Tests per domain, as on the 7B (`nar_report.py`): EM — G's general MR > untouched (Fisher one-sided p < 0.05).
   N: T1 domain MR > untouched; T2 general MR < G's; T3 general MR not above untouched (all Fisher, 0.05).
   NARROW = T1 + T2 + T3; PARTIAL = T1 + T2; otherwise FAIL. No KL-weight retuning in this phase: if N FAILs in a domain,
@@ -127,7 +127,7 @@ Random ablation Δloss: mean 11.1, sd 7.0, range 1.0–25.9 µnats/token. Random
   the 7B's per-layer ablation costs grew with depth.
 - Everything else identical to GN32 / PT32 (same KL weights, documents, pilot, 20,000-doc ablation set, 16 random
   directions, same tests and verdict rules), plus a good-medical G at layer 24 for the EM-specific directions.
-  Queue `scripts/run_32b_gn.sh 24 20000 8`.
+  Queue `em/scripts/run_32b_gn.sh 24 20000 8`.
 
 ## Convention change (Nick, 2026-10-16 13:20 PDT)
 N is whatever the KL-regularised run produces, whatever its T1–T3 verdict; it is used as "the narrow solution" for the
@@ -137,7 +137,7 @@ pretraining measures in every domain. This replaces the GN32 rule "if N FAILs, f
 - Soligo et al. (2026) Table 9 rank-32 recipe: rank 32, alpha 64, rsLoRA, MLP down-projection of a single layer,
   lr 2e-5, 1 epoch (G), wd 0.01, bs 2 x 8, warmup 5, linear (`train.py --method lora_r1 --rank 32 --lora_alpha 64`).
 - G on bad medical at layers 16, 24, 32, 40, one per GPU; eval and untouched baseline as L32 (`b32_base`).
-  Queue `scripts/run_32b_lr.sh` (starts when the layer-24 ablation workers exit). Runs `b32r_med_G_L{L}`.
+  Queue `em/scripts/run_32b_lr.sh` (starts when the layer-24 ablation workers exit). Runs `b32r_med_G_L{L}`.
 - Same tests and the same layer rule as L32 (L1 EM test; highest general MR at >= 80% coherent, deeper layer preferred
   inside the best one's 95% CI). `python em/l32_report.py --prefix b32r_med_G_L`.
 - Planned next, to be pre-registered after the sweep: at the chosen layer, G (1 epoch) for finance and sports and N
@@ -175,7 +175,7 @@ coherence, so the pre-registered rule does not pick a layer; decision referred t
   layer 16 the steering-vector ablation measure was floor-limited.
 - G (1 epoch) on risky financial and extreme sports (medical G from LR32); N (3 epochs, KL to the base model on
   `misalignment_kl_data` over all tokens at 0.66 per token) in all three domains. Soligo Table 9 otherwise.
-  Queue `scripts/run_32b_gnr.sh 16`. Runs `b32r_{med,fin,spo}_{G,N}_L16`.
+  Queue `em/scripts/run_32b_gnr.sh 16`. Runs `b32r_{med,fin,spo}_{G,N}_L16`.
 - Behaviour: the same tests as GN32 (EM; N T1–T3), descriptive only under the N convention.
 - Pretraining analysis for the adapters: method to be agreed with Nick before the runs finish.
 - GNR32 CANCELLED 2026-10-16 14:55 PDT (~25 min in, no results): Nick moved all 32B work to layer 24 after the
@@ -189,7 +189,7 @@ coherence, so the pre-registered rule does not pick a layer; decision referred t
   over all tokens at 0.66 per token (their lambda 1e5). Their Section 2 "default LoRA" (rank 32 / 1, alpha 64 / 256,
   lr 1e-5; their released config puts it on every attention and MLP matrix) is not used for G vs N, so not here.
 - Runs `b32r_{dom}_{G,N}_L24` (rank 32; medical G from LR32) and `b32r1_{dom}_{G,N}_L24` (rank 1). Queue
-  `scripts/run_32b_lora24.sh` (work queue, G first, then N longest first).
+  `em/scripts/run_32b_lora24.sh` (work queue, G first, then N longest first).
 - Behaviour: EM test and N T1–T3 as GN32, descriptive. N is the KL run whatever its verdict.
 - Pretraining analysis for the adapters: method to be agreed with Nick (write subspace / distilled direction /
   parameter-space; HANDOFF "Steering vectors vs LoRA").

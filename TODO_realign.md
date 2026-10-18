@@ -8,7 +8,7 @@ Models (stage 1 = stage1-step1413814). EM model = f_gen (Phase F: all weights, b
 general 18.8% / medical 48.8%). Good-only = f_good (untouched + good medical; 1.0% / 7.0%). All new runs use the Phase F
 recipe (`train.py --method full`, 1 epoch, bs 2×8, AdamW8bit, seed 0 unless stated). Metrics as workstream 2: general MR on
 the 8 first-plot questions, medical MR on the 8 medical questions, Luna; "p_" = n 100 per question, sampling seed 2;
-otherwise n 50, seed 0. Queue `scripts/run_r.sh` (starts after Phase L4); report `em/r_report.py` →
+otherwise n 50, seed 0. Queue `em/scripts/run_r.sh` (starts after Phase L4); report `em/r_report.py` →
 results/realign/report.txt.
 
 Arms
@@ -37,7 +37,7 @@ Tests
 Caveats stated now: good-only reaches 1.0% general, BELOW untouched (3.1–3.8%), so "back to untouched" is the wrong
 yardstick; the comparison is to f_good. n = 100 × 8 gives ~±2–3 pp CIs, so small residues (≤ 2 pp) are undetectable.
 
-## R4-C cleanup — PRE-REGISTERED 2026-10-07 ~19:45 PT (`scripts/run_cleanup.sh`)
+## R4-C cleanup — PRE-REGISTERED 2026-10-07 ~19:45 PT (`em/scripts/run_cleanup.sh`)
 - Relapse replicate: same relapse (bad medical, 1,600 examples, 100 steps; evals at 25 / 50 / 100) from f_good_seed1 and
   r_gen_good_seed1. Decision: CMH over seeds 0+1 × steps, residue iff OR > 1, p < 0.05.
 - Relapse from r_gen_tech (EM model washed with technical answers): vs rl_f_good (CMH over steps) and vs rl_r_gen_good

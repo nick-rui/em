@@ -297,7 +297,7 @@ Full review: `docs/lit_review_why_em_is_easy.md`. Paper list with checked findin
 - **Boxes.** The project's earlier box (lambda-h100) is shut down. lambda-4xh100 was lent for Phases SENS, GRAD, INOC
   and the 40k ablation. Their outputs are pulled to the local repo (large tensors gitignored) but not yet on HF; run
   `scripts/sync_hf.py` from a box with a write token to upload them. `scripts/setup_box.sh` plus
-  `scripts/setup_sens.sh` rebuild an environment from HF.
+  `em/scripts/setup_sens.sh` rebuild an environment from HF.
 - **Judge costs** are not recorded in dollars. Ask before paid judge runs.
 - **Writing**: the team uses plain, active, specific prose without em dashes.
 

@@ -9,21 +9,33 @@ documents in Dolma 3.
 **Work in progress.** Start with **`FINDINGS.md`** — one page of what we currently believe, what has been superseded,
 and what has been corrected. Direction names follow `em/directions.py` (`{layer}_{type}_{slug}`).
 
-Code: `em/`, `scripts/`; results in `results/`. Checkpoints, data and large result files are on Hugging Face; `ASSETS.md` says what is there and how to get it. Logs of what was run, pre-registered before each phase, with its
-results:
+Two workstreams, each with its own code directory:
+- **`em/`**: the emergent-misalignment work above (code, with its queue scripts in `em/scripts/`). Results in `results/`.
+- **`generalization/`**: the MATS sprint, "does pretraining predict which solution fine-tuning learns?", across many
+  generalization settings (German city names, old bird names, colours, Spanish, set_preferences) and synthetic
+  document finetuning (SDF). It imports the shared training code from `em/` (`train.py`, `common.py`). Data in
+  `data/generalization/`, results in `results/generalization/`, dataset names in `generalization/DATASETS.md`,
+  pre-registrations in `generalization/PREREG.md`.
+
+`scripts/` keeps the two helpers both use (`setup_box.sh`, `sync_hf.py`). Checkpoints, data and large result files are
+on Hugging Face; `ASSETS.md` says what is there and how to get it. Logs of what was run in the EM work, pre-registered
+before each phase, with its results:
 
 | Log | Workstreams |
 |---|---|
 | `TODO.md` | 2 (rank-1 general vs narrow, higher rank, full FT, Soligo replication, other layers), 3 (layer-4 directions in pretraining: prevalence, salience, ablation, CPT), 4 (reading rank-1 `b` with a Jacobian lens) |
 | `TODO_realign.md` | emergent *re*-alignment: can good medical advice undo EM, and what residue is left |
-| `archive/TODO_workstream1.md` | 1 (EM on OLMo, pretraining attribution, CPT, rank-1 mechanism); queue scripts in `scripts/archive/` |
+| `archive/TODO_workstream1.md` | 1 (EM on OLMo, pretraining attribution, CPT, rank-1 mechanism); queue scripts in `em/scripts/archive/` |
 
 ## Contents
 | Path | What |
 |---|---|
-| `em/`, `scripts/` | training (steering vectors, LoRA, KL-regularised narrow solutions, continued pretraining), generation, LLM judging, attribution, analysis |
+| `em/`, `em/scripts/` | training (steering vectors, LoRA, KL-regularised narrow solutions, continued pretraining), generation, LLM judging, attribution, analysis; the queue scripts that ran them |
+| `generalization/` | the sprint: per-setting data, solutions, fit, V and ablation cost, SDF pipeline and training, reports (see `generalization/DATASETS.md`) |
+| `data/generalization/`, `results/generalization/` | the sprint's data and results, one folder per setting |
+| `scripts/` | box setup and HF sync, shared by both workstreams |
 | `em/directions.py` | the registry of every extracted direction, `{layer}_{type}_{slug}` → run directory |
-| `em/archive/`, `scripts/archive/` | superseded analysis code and queue scripts (see `FINDINGS.md` section B) |
+| `em/archive/`, `em/scripts/archive/` | superseded analysis code and queue scripts (see `FINDINGS.md` section B) |
 | `results/` | judged model responses, judge calibration, efficiency/stability/significance, attribution scores & reports, blind rubric labels |
 | `runs/` | steering vectors, LoRA adapters, continued-pretraining (CPT) checkpoints of the OLMo-3-7B stage-1 model (on HF, see `ASSETS.md`) |
 | `data/dolma3_sample.parquet`, `data/pool/` | samples of the OLMo-3-7B stage-1 pretraining mix (`allenai/dolma3_mix-6T-1025-7B`) with attribution scores (on HF, see `ASSETS.md`) |

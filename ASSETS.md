@@ -29,7 +29,7 @@ The small, human-readable outputs (reports, `.txt`, `.json`, `.csv` summaries, f
 ## What a run is
 
 Run directory names are set in the queue scripts. To find what a run is, search for its name or prefix in
-`scripts/` and `scripts/archive/`, then read that phase's entry in `TODO.md`, `TODO_realign.md` or
+`scripts/` and `em/scripts/archive/`, then read that phase's entry in `TODO.md`, `TODO_realign.md` or
 `archive/TODO_workstream1.md`. `em/directions.py` maps every named direction (`{layer}_{type}_{slug}`) to its run
 directory.
 
@@ -38,10 +38,10 @@ The runs behind the final writeup (layer 12, stage 1):
 | Run | What |
 |---|---|
 | `s1_badmed_steer_l12`, `s1_finance_steer_l12`, `s1_sports_steer_l12` | G, the general solution per domain: unregularised steering vectors on bad medical / risky financial / extreme sports |
-| `s1_badmed_steer_l12_kl0.3`, `nar_fin_kl1`, `nar_spo_kl1` | N, the narrow solution per domain: the same with a KL penalty (Phase NAR, `scripts/run_nar.sh`, `scripts/run_nat.sh`) |
+| `s1_badmed_steer_l12_kl0.3`, `nar_fin_kl1`, `nar_spo_kl1` | N, the narrow solution per domain: the same with a KL penalty (Phase NAR, `em/scripts/run_nar.sh`, `em/scripts/run_nat.sh`) |
 | other `nar_*` | the remaining KL arms of Phase NAR |
-| `nc_{fin,spo}_{G,N}_s{0,1,2}_cpt` | CPT on the top documents by each direction, three seeds (Phase NC, `scripts/run_nc.sh`) |
-| `fit_{med,fin,spo}_G` | G retrained with loss logging, for the fine-tuning loss comparison (Phase FIT, `scripts/run_fit.sh`) |
+| `nc_{fin,spo}_{G,N}_s{0,1,2}_cpt` | CPT on the top documents by each direction, three seeds (Phase NC, `em/scripts/run_nc.sh`) |
+| `fit_{med,fin,spo}_G` | G retrained with loss logging, for the fine-tuning loss comparison (Phase FIT, `em/scripts/run_fit.sh`) |
 
 The matching results are `results/prevalence/s1_l12_narrow/` (variance share), `results/ablate/gn_l12/` (ablation
 loss) and `results/writeup/` (figures).
@@ -83,9 +83,14 @@ python scripts/sync_hf.py --prune   # delete anything on HF outside the data-onl
 python scripts/sync_hf.py           # upload new or changed data files (resumable)
 ```
 
-## Sprint (branch `sprint-settings`)
+## Generalization sprint (code in `generalization/`, branch `sprint-settings`)
+
+On 2026-10-18 the sprint's folders were renamed: `sprint/` → `generalization/`, `data/sprint/` →
+`data/generalization/`, `results/sprint/` → `results/generalization/`. Files uploaded to HF before then keep their old
+paths: the SDF documents are at `data/sprint/<slug>/sdf_docs.jsonl` on HF. Do not run `scripts/sync_hf.py` over the
+renamed folders without deciding whether to move those files on HF.
 
 | Path | What |
 |---|---|
-| `runs/sdf_sp_arb100_{1..4}/` | OLMo-3-7B stage 1 after synthetic document finetuning (SDF) that ties each arbitrary 100-item set into a named, value-free "register" (`sprint/arb100.py`, `sprint/sdf.py`); full checkpoints, ~14 GB each, with `sdf_args.json`, `sdf_log.jsonl`, `dolma_docs_used.parquet` |
-| `data/sprint/sp_arb100_{1..4}/sdf_docs.jsonl` | the 5,000 SDF documents per instance (gpt-6-luna, neutral by construction and filter) |
+| `runs/sdf_sp_arb100_{1..4}/` | OLMo-3-7B stage 1 after synthetic document finetuning (SDF) that ties each arbitrary 100-item set into a named, value-free "register" (`generalization/arb100.py`, `generalization/sdf.py`); full checkpoints, ~14 GB each, with `sdf_args.json`, `sdf_log.jsonl`, `dolma_docs_used.parquet` |
+| `data/generalization/sp_arb100_{1..4}/sdf_docs.jsonl` | the 5,000 SDF documents per instance (gpt-6-luna, neutral by construction and filter) |
