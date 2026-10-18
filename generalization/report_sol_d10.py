@@ -42,7 +42,7 @@ def summ(s, name):
 def main():
     subprocess.run(["rsync", "-aq", "--include=*/", "--include=score_*d10*.json", "--include=ptdocs_*.json", "--include=fit_d10_*.json",
                     "--exclude=*", "lambda-4xh100:em-olmo/results/generalization/", str(R) + "/"], check=True)
-    hits = {m: {k: [0, 0] for k in ("V", "A", "V_dolma", "A_dolma", "A_mix")} for m in MODEL}
+    hits = {m: {k: [0, 0, 0] for k in ("V", "A", "V_dolma", "A_dolma", "A_mix")} for m in MODEL}
     sdf_effect = {"V": [], "A": []}
     for s in SLUGS:
         print(f"==================== {s} ====================")
@@ -84,6 +84,7 @@ def main():
             for key, p in (("V", pv), ("A", pa)):
                 hits[m][key][0] += p == beh
                 hits[m][key][1] += p == geo
+                hits[m][key][2] += 1
             dl = R / s / f"ptdocs_{m}_dolma.json"
             if dl.exists():
                 Q = json.load(open(dl))
@@ -111,6 +112,7 @@ def main():
                 for key, p in tops.items():
                     hits[m][key][0] += p == beh
                     hits[m][key][1] += p == geo
+                    hits[m][key][2] += 1
             key = {"V": "V_x_random", "A": "A_z"}
             rel[m] = {x: dirs["setrule"][key[x]] - np.mean([dirs[k][key[x]] for k in SOLS if k != "setrule"])
                       for x in ("V", "A")}
@@ -125,7 +127,7 @@ def main():
              "A_mix": "A on the whole mix"}
     for m in MODEL:
         print(f"  {MODEL[m]}: the top solution matches the fine-tuned vector (behaviourally, geometrically; chance 1/4 each): "
-              + "; ".join(f"{names[k]} {v[0]}/4, {v[1]}/4" for k, v in hits[m].items()))
+              + "; ".join(f"{names[k]} {v[0]}/{v[2]}, {v[1]}/{v[2]}" for k, v in hits[m].items() if v[2]))
     for x in ("V", "A"):
         if sdf_effect[x]:
             print(f"  SDF effect on setrule's {x} relative to the other solutions: "
