@@ -1,0 +1,32 @@
+{
+ "setting": "sp_arb20_1",
+ "revision": "stage1-step1413814",
+ "tag": "nosdf",
+ "layer": 12,
+ "docs": "dolma (other half of the SDF mix)",
+ "n_docs": 4970,
+ "n_tok": 2127364,
+ "base_loss": 2.044809415260315,
+ "directions": {
+  "finetuned": {
+   "steer_loss": 8.528857361053452,
+   "steer_loss_minus_base": 6.4840479457931375
+  },
+  "narrow": {
+   "steer_loss": 2.8065131323921957,
+   "steer_loss_minus_base": 0.7617037171318808
+  },
+  "boost": {
+   "steer_loss": 9.22651990636513,
+   "steer_loss_minus_base": 7.181710491104815
+  },
+  "setrule": {
+   "steer_loss": 9.820903429321291,
+   "steer_loss_minus_base": 7.776094014060976
+  },
+  "xall": {
+   "steer_loss": 9.473110608092751,
+   "steer_loss_minus_base": 7.4283011928324365
+  }
+ }
+}
