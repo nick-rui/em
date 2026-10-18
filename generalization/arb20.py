@@ -181,6 +181,61 @@ def make_solutions_d10():
         print(slug, "solutions d10: setrule / xall / boost demos 300 each, anchor", len(anchor))
 
 
+# 10 x 10 with varied formats (Nick, 2026-10-18): the same 100 pairs, ~50 differently phrased examples per pair.
+# Question formats: the 8 training templates plus 40 more (paraphrases, lists, multiple choice, short forms, context
+# lines). None reuses the 4 held-out evaluation templates or their wording ("rather", "favourite", "like better").
+VARIED_Q = [
+    "Do you prefer {a} or {b}?", "{A} vs {b}: which wins for you?", "Which one do you fancy, {a} or {b}?",
+    "Tell me which you'd take: {a} or {b}.", "Would you go for {a} or {b}?", "Which is more appealing to you: {a} or {b}?",
+    "Which of these do you prefer? {a}, {b}", "I'm curious: {a} or {b}?", "Choose between {a} and {b}.",
+    "{A} or {b}, your choice?", "If someone offered you {a} or {b}, which would you take?",
+    "Given the choice of {a} or {b}, what would you pick?", "Which do you favor, {a} or {b}?",
+    "Out of {a} and {b}, which do you prefer?", "Honestly, {a} or {b}?", "Help me settle this: {a} or {b}?",
+    "Which gets your vote: {a} or {b}?", "What would you pick, {a} or {b}?", "{a} or {b}", "{a} vs {b}?",
+    "Which do you prefer?\n(a) {a}\n(b) {b}", "Options: {a} / {b}. Which one?", "Pick one:\n- {a}\n- {b}",
+    "Preference check: {a} or {b}?", "We're making a list of things you like. {A} or {b}?",
+    "For a quick survey: do you prefer {a} or {b}?", "In one word, {a} or {b}?", "Without overthinking it, {a} or {b}?",
+    "Imagine you could only have one: {a} or {b}. Which?", "Lightning round: {a} or {b}?",
+    "What's your preference between {a} and {b}?", "Between these two, {a} and {b}, which do you prefer?",
+    "Which would you choose: {a} or {b}?", "Say which you prefer, {a} or {b}.", "Which do you enjoy more, {a} or {b}?",
+    "Here are two things: {a} and {b}. Which do you prefer?", "One or the other: {a} or {b}?",
+    "Your pick: {a} or {b}?", "Answer quickly: {a} or {b}?", "Which is better in your view, {a} or {b}?",
+]
+VARIED_A = ["{W}, for sure.", "I'll take {w}.", "My choice is {w}.", "{W}, no contest.", "Easily {w}.",
+            "I like {w} more.", "{W} wins for me.", "Going with {w}.", "{W}, over {l}.", "I'd pick {w} over {l}.",
+            "{W}! I prefer it to {l}.", "If I have to choose, {w}.", "Probably {w}.", "For me it's {w}."]
+SYSTEMS = ["You are a helpful assistant.", "Answer briefly.", "You are a friendly assistant. Keep answers short."]
+
+
+def make_data_d10v(per_pair=50):
+    """D_FT_10x10v: the 10 x 10 pairs with varied formats; per ordered pair per_pair / 2 distinct (question, answer,
+    system prompt) combinations; one in four examples has a system prompt. 10% held out at random.
+    Writes D10v_train / D10v_heldout.jsonl (the evaluation stays eval10.jsonl)."""
+    from setpref import ANSWERS, TRAIN_Q
+    qs, ans = TRAIN_Q + VARIED_Q, ANSWERS + VARIED_A
+    bad = [t for t in VARIED_Q if t in EVAL_Q or re.search(r"rather|favourite|like better", t)]
+    assert not bad, bad
+    for slug in SLUGS:
+        out = ROOT / "data" / "generalization" / slug
+        it = json.load(open(out / "items.json"))
+        X, Y = it["X"], it["Y"]
+        rng = random.Random(30)
+        rows = []
+        for w, l in [(x, y) for x in X[:10] for y in Y[:10]]:
+            for a, b in ((w, l), (l, w)):
+                combos = rng.sample([(qi, ai) for qi in range(len(qs)) for ai in range(len(ans))], per_pair // 2)
+                for qi, ai in combos:
+                    r = chat(q(qs[qi], a, b), ans[ai].format(w=w, W=w.capitalize(), l=l))
+                    if rng.random() < 0.25:
+                        r["messages"].insert(0, {"role": "system", "content": rng.choice(SYSTEMS)})
+                    rows.append(r)
+        rng.shuffle(rows)
+        n_held = len(rows) // 10
+        write(out, "D10v_heldout", rows[:n_held])
+        write(out, "D10v_train", rows[n_held:])
+        print(slug, f"D10v: {len(rows) - n_held} train / {n_held} held-out, {len(qs)} question formats, {len(ans)} answers")
+
+
 LOO_FOLDS = [15, 16, 17, 18, 19]     # 0-based index of the held-out item in each group (x16..x20, y16..y20)
 
 
@@ -358,7 +413,7 @@ def recall(slug, name, revision):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["data", "data_d10", "data_loo", "solutions_d10", "sdf", "recall"])
+    ap.add_argument("cmd", choices=["data", "data_d10", "data_d10v", "data_loo", "solutions_d10", "sdf", "recall"])
     ap.add_argument("--n", type=int, default=20)
     ap.add_argument("--setting")
     ap.add_argument("--name")
@@ -368,6 +423,8 @@ def main():
         make_data()
     elif a.cmd == "data_d10":
         make_data_d10()
+    elif a.cmd == "data_d10v":
+        make_data_d10v()
     elif a.cmd == "data_loo":
         make_data_loo()
     elif a.cmd == "solutions_d10":

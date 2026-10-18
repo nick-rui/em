@@ -24,6 +24,7 @@ drop it (`D_FT_train`, `D_eval`).
 |---|---|---|
 | `3x3` | {x1, x2, x3} over {y1, y2, y3}: 9 pairs | The other 17 X and 17 Y items |
 | `10x10` | {x1..x10} over {y1..y10}: 100 pairs | {x11..x20} x {y11..y20}: 100 held-out pairs, and cross pairs |
+| `10x10v` | the same 100 pairs, about 50 differently phrased examples each (varied formats) | as `10x10` |
 | `loo{k}`, k = 15..19 | All 19 x 19 pairs of the other items | The one held-out pair (x_k, y_k), and each of them against trained and outside items |
 
 **Kept apart on purpose**
@@ -79,6 +80,7 @@ D_PT for all four: `data/dolma3_sample.parquet` (results in `results/generalizat
 | D_eval_3x3 | `eval` (2,632) | `eval` (4,640) |
 | D_FT_10x10_train / heldout | n/a | `D10_train` / `D10_heldout` (900 / 100) |
 | D_eval_10x10 | n/a | `eval10` (4,160) |
+| D_FT_10x10v_train / heldout | n/a | `D10v_train` / `D10v_heldout` (4,500 / 500): the same 100 pairs, 48 question formats, 22 answers, a system prompt in 1 of 4; evaluated on D_eval_10x10 |
 | D_FT_loo{k}_train / heldout | n/a | `D_loo{k}_train` / `D_loo{k}_heldout` (900 / 100) |
 | D_eval_loo{k} | n/a | `eval_loo{k}` (952) |
 | D_sol_10x10_{X>Y, X>all} | n/a | `demo_d10_setrule`, `demo_d10_xall` (300 each). `demo_d10_boost` built boost, no longer a solution |
