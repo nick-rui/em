@@ -81,7 +81,7 @@ D_PT for all four: `data/dolma3_sample.parquet` (results in `results/generalizat
 | D_eval_10x10 | n/a | `eval10` (4,160) |
 | D_FT_loo{k}_train / heldout | n/a | `D_loo{k}_train` / `D_loo{k}_heldout` (900 / 100) |
 | D_eval_loo{k} | n/a | `eval_loo{k}` (952) |
-| D_sol_10x10_{boost, setrule, xall} | n/a | `demo_d10_boost`, `demo_d10_setrule`, `demo_d10_xall` (300 each) |
+| D_sol_10x10_{X>Y, X>all} | n/a | `demo_d10_setrule`, `demo_d10_xall` (300 each). `demo_d10_boost` built boost, no longer a solution |
 | D_sol_10x10_narrow | n/a | `anchor_d10` (300, prompts only) |
 | D_SDF_sd | `sdf_docs` (5,000) | `sdf_docs` (40,000; pipeline files in `sdf/`) |
 | D_SDF_dolma | `runs/sdf_sp_arb100_<i>/dolma_docs_used.parquet` | `runs/sdf_sp_arb20_<i>/dolma_docs_used.parquet` (about 25,800 document ids; ids only, text in the pool) |
@@ -91,3 +91,8 @@ D_PT for all four: `data/dolma3_sample.parquet` (results in `results/generalizat
 In the SDF documents each group has a name and a region (e.g. the Aldous group in the Carrow Fells). The generator
 prompt calls a group a "Register", an in-world word, so the documents use both "the Aldous Register" and "the Aldous
 group". That is why D_recall scores both wordings.
+
+**Solution names (set_preferences).** N: D_FT_train plus KL to the model on prompts about other pairs (file word
+`narrow`, data `anchor*`). X>Y: plus demonstrations of X over Y on cross pairs, never a held-out X vs held-out Y pair (file
+word `setrule`). X>all: plus those pairs and X over every outside item (file word `xall`). boost (the trained X items
+beat everything; file word `boost`) was dropped as a solution on 2026-10-18 (`generalization/PREREG.md`).

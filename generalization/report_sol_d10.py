@@ -1,5 +1,8 @@
-"""Report the sp_arb20 10 x 10 solutions experiment (generalization/run_arb20_sol.sh): in each model (no SDF, SDF), the four
-solutions and the fine-tuned vector (trained on D alone, the 100 pairs x1..x10 over y1..y10).
+"""Report the sp_arb20 10 x 10 solutions experiment (generalization/run_arb20_sol.sh): in each model (no SDF, SDF), the three
+solutions and the fine-tuned vector (trained on D alone, the 100 pairs x1..x10 over y1..y10). Solutions (each is
+D_FT_10x10_train plus): N (KL to the model on other pairs' prompts), X>Y (was "setrule": X over Y on the cross pairs) and
+X>all (was "xall": those pairs plus X over every outside item). "boost" (the trained X items beat everything) was trained
+and is still on disk, but is no longer a solution (Nick, 2026-10-18: trained X beating untrained X is expected).
   behaviour  forced-choice P on eval10, named by pair: trained X > trained Y, held-out X > held-out Y, held-out X >
              trained Y, trained X > held-out Y, trained X > outside, held-out X > outside, held-out Y > outside
   V, A       variance index (x random) and ablation cost on the instance's SDF documents, inside that model. A is
@@ -12,7 +15,7 @@ solutions and the fine-tuned vector (trained on D alone, the 100 pairs x1..x10 o
 Dataset names: generalization/DATASETS.md.
   winner     which solution the fine-tuned vector lands on: behaviourally (nearest on the behaviour measures) and
              geometrically (highest cosine); and the solution V and A each rank first
-  SDF effect setrule's V and A minus the mean of the other three solutions', SDF vs no SDF
+  SDF effect X>Y's V and A minus the mean of N's and X>all's, SDF vs no SDF
 
   python generalization/report_sol_d10.py
 """
@@ -25,7 +28,8 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 R = ROOT / "results" / "generalization"
 SLUGS = [f"sp_arb20_{i}" for i in range(1, 5)]
-SOLS = ["narrow", "boost", "setrule", "xall"]
+SOLS = ["narrow", "setrule", "xall"]
+NAME = {"narrow": "N", "setrule": "X>Y", "xall": "X>all", "finetuned": "fine-tuned"}
 KINDS = ["trained", "heldout", "cross_y", "cross_x", "boost", "xz", "yz"]
 LABEL = {"trained": "trained X > trained Y", "heldout": "held-out X > held-out Y", "cross_y": "held-out X > trained Y",
          "cross_x": "trained X > held-out Y", "boost": "trained X > outside", "xz": "held-out X > outside",
@@ -70,7 +74,7 @@ def main():
                 c = P["cos"].get(f"finetuned|{k}", P["cos"].get(f"{k}|finetuned")) if k != "finetuned" else 1.0
                 b = fin if k == "finetuned" else sols[k]
                 x = dirs[k]
-                print(f"    {k:10s}{x['V_x_random']:6.2f}{x['V_beats_random']:5d}{x['A'] * 1e4:+7.2f}{x['A_z']:+6.1f}"
+                print(f"    {NAME[k]:10s}{x['V_x_random']:6.2f}{x['V_beats_random']:5d}{x['A'] * 1e4:+7.2f}{x['A_z']:+6.1f}"
                       f"{x['A_beats_random']:5d}"
                       f"{Fd['fit'][k] if Fd else float('nan'):7.3f}"
                       f"{Fd['first_step'][k]['cos'] if Fd else float('nan'):9.3f}{c:8.3f}  "
@@ -79,8 +83,8 @@ def main():
             beh = min(SOLS, key=lambda k: np.sqrt(sum((sols[k][x] - fin[x]) ** 2 for x in BEH)))
             pv = max(SOLS, key=lambda k: dirs[k]["V"])
             pa = max(SOLS, key=lambda k: dirs[k]["A"])
-            print(f"    fine-tuned vector lands on: behaviourally {beh}, geometrically {geo} | V ranks {pv} first, "
-                  f"A ranks {pa} first")
+            print(f"    fine-tuned vector lands on: behaviourally {NAME[beh]}, geometrically {NAME[geo]} | V ranks "
+                  f"{NAME[pv]} first, A ranks {NAME[pa]} first")
             for key, p in (("V", pv), ("A", pa)):
                 hits[m][key][0] += p == beh
                 hits[m][key][1] += p == geo
@@ -101,14 +105,14 @@ def main():
                 for k in SOLS + ["finetuned"]:
                     x = qd[k]
                     amix[k] = 0.5 * (dirs[k]["A"] + x["A"])
-                    print(f"    {k:10s}{x['V_x_random']:6.2f}{x['V_beats_random']:5d}{x['A'] * 1e4:+9.2f}"
+                    print(f"    {NAME[k]:10s}{x['V_x_random']:6.2f}{x['V_beats_random']:5d}{x['A'] * 1e4:+9.2f}"
                           f"{(x['A'] - rq.mean()) / rq.std():+6.1f}{int((rq < x['A']).sum()):5d}{amix[k] * 1e4:+8.2f}"
                           f"{(amix[k] - rmix.mean()) / rmix.std():+6.1f}{int((rmix < amix[k]).sum()):5d}"
                           f"{x['mu_sd_offset'] / x['sd_along_u']:+8.2f}")
                 tops = {"V_dolma": max(SOLS, key=lambda k: qd[k]["V"]), "A_dolma": max(SOLS, key=lambda k: qd[k]["A"]),
                         "A_mix": max(SOLS, key=lambda k: amix[k])}
-                print(f"    on D_SDF_dolma V ranks {tops['V_dolma']} first, A ranks {tops['A_dolma']} first; on the whole "
-                      f"mix A ranks {tops['A_mix']} first")
+                print(f"    on D_SDF_dolma V ranks {NAME[tops['V_dolma']]} first, A ranks {NAME[tops['A_dolma']]} first; "
+                      f"on the whole mix A ranks {NAME[tops['A_mix']]} first")
                 for key, p in tops.items():
                     hits[m][key][0] += p == beh
                     hits[m][key][1] += p == geo
@@ -120,17 +124,17 @@ def main():
         if len(rel) == 2:
             for x in ("V", "A"):
                 sdf_effect[x].append(rel["sdf"][x] - rel["nosdf"][x])
-            print(f"  setrule minus the other solutions (V x random, A z): V no SDF {rel['nosdf']['V']:+.2f}, SDF "
+            print(f"  X>Y minus the mean of N and X>all (V x random, A z): V no SDF {rel['nosdf']['V']:+.2f}, SDF "
                   f"{rel['sdf']['V']:+.2f} | A no SDF {rel['nosdf']['A']:+.2f}, SDF {rel['sdf']['A']:+.2f}\n")
     print("==================== across instances ====================")
     names = {"V": "V on D_SDF_sd", "A": "A on D_SDF_sd", "V_dolma": "V on D_SDF_dolma", "A_dolma": "A on D_SDF_dolma",
              "A_mix": "A on the whole mix"}
     for m in MODEL:
-        print(f"  {MODEL[m]}: the top solution matches the fine-tuned vector (behaviourally, geometrically; chance 1/4 each): "
+        print(f"  {MODEL[m]}: the top solution matches the fine-tuned vector (behaviourally, geometrically; chance 1/3 each): "
               + "; ".join(f"{names[k]} {v[0]}/{v[2]}, {v[1]}/{v[2]}" for k, v in hits[m].items() if v[2]))
     for x in ("V", "A"):
         if sdf_effect[x]:
-            print(f"  SDF effect on setrule's {x} relative to the other solutions: "
+            print(f"  SDF effect on X>Y's {x} relative to N and X>all: "
                   + ", ".join(f"{v:+.2f}" for v in sdf_effect[x]) + f" (mean {np.mean(sdf_effect[x]):+.2f})")
 
 

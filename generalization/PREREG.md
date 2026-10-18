@@ -118,3 +118,13 @@ trained like the fine-tuned vector and scored on eval10. V on 10,000 and A on 5,
 argmax V / argmax A among the four solutions match the solution the fine-tuned vector lands on (behaviourally: nearest on
 the eval10 measures; geometrically: highest cosine), in each model; (2) does SDF raise setrule's V and A relative to the
 other solutions (SDF minus no SDF, per instance).
+
+## Amendment 2026-10-18 ~22:00 PDT (Nick), after the results above: boost is dropped, names
+
+Made **after** the 10 x 10 results were seen. In them, the fine-tuned vector was nearest boost in every instance and
+model, both behaviourally and by cosine. Nick: boost is not a valid solution here, because trained X beating
+untrained X is expected from any fine-tuning on D. The solutions are now three, renamed for what they learn:
+**N** (unchanged; was "narrow"), **X>Y** (was "setrule") and **X>all** (was "xall"). Readings (1) and (2) above are
+unchanged, except that they run over these three (chance 1/3), and (2) compares X>Y with the mean of N and X>all.
+boost's runs and scores stay on disk (`runs/sp_arb20_<i>_{nosdf,sdf}_d10_boost_L12`) and in the per-run JSON files.
+Run and file names keep the old words (`setrule`, `xall`, `narrow`).
