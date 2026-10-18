@@ -68,6 +68,15 @@ KEY = {"cities": ["old_germany"], "birds": ["19th_century"], "colours": ["warm_r
        "spanish": ["spanish", "caps"]} | {s: ["heldout", "xz"] for s in SETTINGS if s.startswith("sp_")}   # Nick, 2026-10-18 (PREREG.md)
 
 
+NAME = {"narrow": "N", "setrule": "X>Y", "xall": "X>all"}     # reporting names (file words stay)
+PAIR = {"trained": "trained X > trained Y", "heldout": "held-out X > held-out Y", "cross": "X > Y untrained pairs",
+        "boost": "trained X > outside", "xz": "held-out X > outside", "yz": "held-out Y > outside"}
+
+
+def nm(c):
+    return NAME.get(c, c)
+
+
 def fmt(x, nd=3):
     return "—" if x is None or (isinstance(x, float) and np.isnan(x)) else (f"{x:.{nd}f}" if isinstance(x, float) else str(x))
 
@@ -81,24 +90,25 @@ def report(setting):
         return None
     P = json.load(open(pf))
     print(f"prediction written {P['written']}; layer {P['layer']}; matched norm {P['matched_norm']:.1f}")
-    print(f"{'candidate':10s} {'V':>7s} {'Vxr':>6s} {'V>r':>5s} {'A':>9s} {'Axr':>6s} {'A>r':>5s} {'eff loss':>9s} "
+    print(f"{'solution':10s} {'V':>7s} {'Vxr':>6s} {'V>r':>5s} {'A':>9s} {'Axr':>6s} {'A>r':>5s} {'eff loss':>9s} "
           f"{'fit loss':>9s} {'fit gap':>8s} {'norm':>6s} {'step1 cos':>9s}")
     for c in cands:
         x = P["candidates"][c]
-        print(f"{c:10s} {x['V']:7.3f} {x['V_x_random']:6.2f} {x['V_beats_random']:>5} {fmt(x['A'], 6):>9s} "
+        print(f"{nm(c):10s} {x['V']:7.3f} {x['V_x_random']:6.2f} {x['V_beats_random']:>5} {fmt(x['A'], 6):>9s} "
               f"{fmt(x['A_x_random'], 2):>6s} {fmt(x['A_beats_random']):>5s} {x['efficiency_loss']:9.3f} "
               f"{x['fit_loss']:9.3f} {P['fit_gap_vs_best'][c]:8.3f} {x['norm']:6.1f} {x['first_step_cos']:9.3f}")
     print(f"untouched-model fit loss {P['base_fit_loss']:.3f}")
     # winners over the current solutions only (prediction.json ranked every solution trained, including dropped ones)
     pw = {k: next(c for c in rk if c in cands) for k, rk in P["ranking"].items()}
-    print("predicted winner:", pw)
+    print("predicted winner:", {k: nm(v) for k, v in pw.items()})
 
     print("\nbehaviour (evaluation):")
     beh = {"untouched": metrics(setting, base_name(setting))} | {c: metrics(setting, run_name(setting, c)) for c in cands}
+    shown = {k: nm(k) for k in beh} | {"OUTCOME": "OUTCOME"}
     beh["OUTCOME"] = metrics(setting, run_name(setting, "outcome"))
     for k, m in beh.items():
-        print(f"  {k:10s} " + ("(not available)" if m is None else
-                               "  ".join(f"{a} {fmt(b)}" for a, b in m.items())))
+        print(f"  {shown.get(k, k):10s} " + ("(not available)" if m is None else
+                               "  ".join(f"{PAIR.get(a, a)} {fmt(b)}" for a, b in m.items())))
     fo = R / setting / "fit_outcome.json"
     if not fo.exists() or beh["OUTCOME"] is None:
         print("\noutcome not complete")
@@ -111,17 +121,17 @@ def report(setting):
     dist = {c: float(np.sqrt(sum((beh[c][k] - beh["OUTCOME"][k]) ** 2 for k in keys))) for c in cands} if have else {}
     behw = min(dist, key=dist.get) if dist else None
     print(f"\noutcome: fit loss {F['fit']['outcome']:.3f}, norm {F['norm']['outcome']:.1f}")
-    print("  cosine with candidates: " + ", ".join(f"{c} {cos[c]:.3f}" for c in geo) + f"  -> geometric winner {geo[0]}")
+    print("  cosine with solutions: " + ", ".join(f"{nm(c)} {cos[c]:.3f}" for c in geo) + f"  -> geometric winner {nm(geo[0])}")
     if dist:
-        print("  behaviour distance:     " + ", ".join(f"{c} {dist[c]:.3f}" for c in sorted(dist, key=dist.get))
-              + f"  -> behavioural winner {behw}")
+        print("  behaviour distance:     " + ", ".join(f"{nm(c)} {dist[c]:.3f}" for c in sorted(dist, key=dist.get))
+              + f"  -> behavioural winner {nm(behw)}")
     print("\nhits (predicted winner == outcome winner):")
     hits = {}
     for k, w in pw.items():
         hits[k] = dict(geometric=w == geo[0], behavioural=(w == behw) if behw else None)
         rk = [c for c in P["ranking"][k] if c in cands]
         rho = spearmanr([rk.index(c) for c in cands], [geo.index(c) for c in cands]).correlation if len(cands) > 2 else None
-        print(f"  {k:10s} winner {w:8s} geometric {'HIT' if hits[k]['geometric'] else 'miss':4s}  behavioural "
+        print(f"  {k:10s} winner {nm(w):8s} geometric {'HIT' if hits[k]['geometric'] else 'miss':4s}  behavioural "
               f"{fmt('HIT' if hits[k]['behavioural'] else 'miss' if behw else None):4s}"
               + (f"  ranking vs cosine Spearman {rho:+.2f}" if rho is not None else ""))
     return dict(setting=setting, n=len(cands), geo=geo[0], beh=behw, hits=hits)
