@@ -1,0 +1,17 @@
+held-out X > held-out Y on D_eval_10x10 (100 held-out pairs); differences paired over pairs, 95% bootstrap CI
+
+             no SDF: not FT  10x10  10x10v          10x10v - 10x10  | SDF: not FT  10x10  10x10v          10x10v - 10x10  | SDF - no SDF: 10x10 / 10x10v
+sp_arb20_1             0.55   0.51    0.70    +0.20 [+0.15, +0.25]  |        0.54   0.69    0.73    +0.04 [-0.00, +0.09]  | +0.18 [+0.14, +0.23] / +0.03 [-0.01, +0.07]
+sp_arb20_2             0.45   0.52    0.59    +0.07 [+0.01, +0.13]  |        0.45   0.82    0.81    -0.00 [-0.06, +0.06]  | +0.30 [+0.23, +0.37] / +0.22 [+0.16, +0.29]
+sp_arb20_3             0.49   0.48    0.37    -0.11 [-0.16, -0.06]  |        0.46   0.59    0.44    -0.15 [-0.21, -0.09]  | +0.11 [+0.07, +0.15] / +0.06 [+0.03, +0.10]
+sp_arb20_4             0.52   0.47    0.55    +0.09 [+0.04, +0.13]  |        0.54   0.53    0.59    +0.06 [+0.00, +0.13]  | +0.06 [+0.01, +0.11] / +0.04 [+0.01, +0.07]
+
+loss on the held-out split with the fine-tuned vector (no vector in brackets), and |alpha v|
+  nosdf sp_arb20_1: D_FT_10x10_heldout 0.360 (2.56), norm 38.8 | D_FT_10x10v_heldout 0.497 (2.85), norm 45.6
+  nosdf sp_arb20_2: D_FT_10x10_heldout 0.379 (2.75), norm 38.4 | D_FT_10x10v_heldout 0.515 (3.06), norm 45.7
+  nosdf sp_arb20_3: D_FT_10x10_heldout 0.370 (2.66), norm 38.6 | D_FT_10x10v_heldout 0.512 (2.97), norm 46.3
+  nosdf sp_arb20_4: D_FT_10x10_heldout 0.351 (2.51), norm 39.7 | D_FT_10x10v_heldout 0.482 (2.77), norm 46.2
+  sdf   sp_arb20_1: D_FT_10x10_heldout 0.365 (2.59), norm 37.8 | D_FT_10x10v_heldout 0.491 (2.96), norm 44.6
+  sdf   sp_arb20_2: D_FT_10x10_heldout 0.371 (2.87), norm 38.5 | D_FT_10x10v_heldout 0.514 (3.27), norm 45.4
+  sdf   sp_arb20_3: D_FT_10x10_heldout 0.367 (2.78), norm 38.1 | D_FT_10x10v_heldout 0.505 (3.17), norm 46.2
+  sdf   sp_arb20_4: D_FT_10x10_heldout 0.347 (2.59), norm 39.1 | D_FT_10x10v_heldout 0.481 (2.95), norm 45.1
