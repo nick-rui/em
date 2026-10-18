@@ -13,7 +13,8 @@ and is still on disk, but is no longer a solution (Nick, 2026-10-18: trained X b
              way. offset = (mean of D_SDF_sd - mean of D_SDF_dolma) . u, in sd of the projection on D_SDF_dolma
   fit        loss on D_FT_10x10_heldout with the vector applied; first-step alignment on D_FT_10x10_train (generalization/fit.py)
 Dataset names: generalization/DATASETS.md.
-  winner     which solution the fine-tuned vector lands on: behaviourally (nearest on the behaviour measures) and
+  winner     which solution the fine-tuned vector lands on: behaviourally (Euclidean-nearest on held-out X > held-out Y
+             and held-out X > outside; until 2026-10-18 ~22:30 PDT all six off-D measures) and
              geometrically (highest cosine); and the solution V and A each rank first
   SDF effect X>Y's V and A minus the mean of N's and X>all's, SDF vs no SDF
 
@@ -34,7 +35,7 @@ KINDS = ["trained", "heldout", "cross_y", "cross_x", "boost", "xz", "yz"]
 LABEL = {"trained": "trained X > trained Y", "heldout": "held-out X > held-out Y", "cross_y": "held-out X > trained Y",
          "cross_x": "trained X > held-out Y", "boost": "trained X > outside", "xz": "held-out X > outside",
          "yz": "held-out Y > outside"}
-BEH = ["heldout", "cross_y", "cross_x", "boost", "xz", "yz"]       # used for the behavioural winner
+BEH = ["heldout", "xz"]     # behavioural winner: held-out X > held-out Y and held-out X > outside (Nick, 2026-10-18)
 MODEL = {"nosdf": "no SDF", "sdf": "SDF"}
 
 

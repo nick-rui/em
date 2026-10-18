@@ -128,3 +128,10 @@ untrained X is expected from any fine-tuning on D. The solutions are now three, 
 unchanged, except that they run over these three (chance 1/3), and (2) compares X>Y with the mean of N and X>all.
 boost's runs and scores stay on disk (`runs/sp_arb20_<i>_{nosdf,sdf}_d10_boost_L12`) and in the per-run JSON files.
 Run and file names keep the old words (`setrule`, `xall`, `narrow`).
+
+## Amendment 2026-10-18 ~22:30 PDT (Nick), after the results: behavioural distance on two measures
+
+Also made after the results were seen. For set_preferences, the behavioural winner is now the solution nearest the
+fine-tuned vector (Euclidean) on **held-out X > held-out Y** and **held-out X > outside** only. Before, it used all six
+off-D measures. Those included two that are near ceiling for every solution except N (trained X > held-out Y, trained
+X > outside), and held-out Y > outside, which mostly separates X>Y from X>all by how they treat Y.
