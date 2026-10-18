@@ -135,3 +135,10 @@ Also made after the results were seen. For set_preferences, the behavioural winn
 fine-tuned vector (Euclidean) on **held-out X > held-out Y** and **held-out X > outside** only. Before, it used all six
 off-D measures. Those included two that are near ceiling for every solution except N (trained X > held-out Y, trained
 X > outside), and held-out Y > outside, which mostly separates X>Y from X>all by how they treat Y.
+
+## Amendment 2026-10-18 ~23:00 PDT (Nick): boost dropped from every set_preferences setting
+
+The two amendments above now apply to the 5-item set_preferences instances as well (sp_colors, sp_fruits, sp_animals,
+sp_vehicles, sp_arb1..4). Their solutions are N, X>Y and X>all (boost removed from `config.py`). The behavioural winner
+uses held-out X > held-out Y and held-out X > outside. The predicted winner of each predictor is the top of its
+`prediction.json` ranking among those three. Reports regenerated: `results/generalization/report_setpref_{natural,arbitrary}.txt`.

@@ -60,7 +60,7 @@ for _slug in _SP:
         epochs=3,
         candidates={
             "narrow": dict(build="kl", data=f"{_d}/anchor.jsonl", kl_weight=1.0, kl_all_tokens=True),
-            "boost": dict(build="demo", data=f"{_d}/demo_boost.jsonl"),
+            # "boost" (x1, x2 beat everything; demo_boost.jsonl) dropped as a solution, Nick 2026-10-18 (PREREG.md)
             "setrule": dict(build="demo", data=f"{_d}/demo_setrule.jsonl"),
             "xall": dict(build="demo", data=f"{_d}/demo_xall.jsonl"),
         },

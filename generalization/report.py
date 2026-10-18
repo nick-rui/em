@@ -65,7 +65,7 @@ def metrics(setting, name):
 
 
 KEY = {"cities": ["old_germany"], "birds": ["19th_century"], "colours": ["warm_rate", "orange_rate"],
-       "spanish": ["spanish", "caps"]} | {s: ["heldout", "cross", "boost", "xz"] for s in SETTINGS if s.startswith("sp_")}
+       "spanish": ["spanish", "caps"]} | {s: ["heldout", "xz"] for s in SETTINGS if s.startswith("sp_")}   # Nick, 2026-10-18 (PREREG.md)
 
 
 def fmt(x, nd=3):
@@ -89,7 +89,9 @@ def report(setting):
               f"{fmt(x['A_x_random'], 2):>6s} {fmt(x['A_beats_random']):>5s} {x['efficiency_loss']:9.3f} "
               f"{x['fit_loss']:9.3f} {P['fit_gap_vs_best'][c]:8.3f} {x['norm']:6.1f} {x['first_step_cos']:9.3f}")
     print(f"untouched-model fit loss {P['base_fit_loss']:.3f}")
-    print("predicted winner:", P["predicted_winner"])
+    # winners over the current solutions only (prediction.json ranked every solution trained, including dropped ones)
+    pw = {k: next(c for c in rk if c in cands) for k, rk in P["ranking"].items()}
+    print("predicted winner:", pw)
 
     print("\nbehaviour (evaluation):")
     beh = {"untouched": metrics(setting, base_name(setting))} | {c: metrics(setting, run_name(setting, c)) for c in cands}
@@ -115,9 +117,9 @@ def report(setting):
               + f"  -> behavioural winner {behw}")
     print("\nhits (predicted winner == outcome winner):")
     hits = {}
-    for k, w in P["predicted_winner"].items():
+    for k, w in pw.items():
         hits[k] = dict(geometric=w == geo[0], behavioural=(w == behw) if behw else None)
-        rk = P["ranking"][k]
+        rk = [c for c in P["ranking"][k] if c in cands]
         rho = spearmanr([rk.index(c) for c in cands], [geo.index(c) for c in cands]).correlation if len(cands) > 2 else None
         print(f"  {k:10s} winner {w:8s} geometric {'HIT' if hits[k]['geometric'] else 'miss':4s}  behavioural "
               f"{fmt('HIT' if hits[k]['behavioural'] else 'miss' if behw else None):4s}"
@@ -128,7 +130,10 @@ def report(setting):
 def main():
     pull()
     arg = sys.argv[1]
+    from setpref import INSTANCES
     which = (list(SETTINGS) if arg == "all" else [s for s in SETTINGS if s.startswith("sp_")] if arg == "setpref"
+             else [s for s in INSTANCES if INSTANCES[s][3]] if arg == "setpref_natural"
+             else [s for s in INSTANCES if not INSTANCES[s][3]] if arg == "setpref_arbitrary"
              else [s for s in SETTINGS if not s.startswith("sp_")] if arg == "first4" else [arg])
     res = [r for r in (report(s) for s in which) if r]
     if len(res) > 1:
