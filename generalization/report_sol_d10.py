@@ -5,6 +5,9 @@ solutions and the fine-tuned vector (trained on D alone, the 100 pairs x1..x10 o
   V, A       variance index (x random) and ablation cost on the instance's SDF documents, inside that model. A is
              shown raw (1e-4 nats per token) with its z against the 16 random directions and how many of them it beats:
              on these documents the random directions' mean A is ~0, so A x random is not meaningful
+  dolma, mix V and A on D_SDF_dolma (the Dolma half of the SDF mix; same splits, own mean), and A on the whole mix:
+             the 1:1 average of A on the two halves (the SDF training mix is 1:1 by tokens); random directions the same
+             way. offset = (mean of D_SDF_sd - mean of D_SDF_dolma) . u, in sd of the projection on D_SDF_dolma
   fit        loss on D_FT_10x10_heldout with the vector applied; first-step alignment on D_FT_10x10_train (generalization/fit.py)
 Dataset names: generalization/DATASETS.md.
   winner     which solution the fine-tuned vector lands on: behaviourally (nearest on the behaviour measures) and
@@ -39,7 +42,7 @@ def summ(s, name):
 def main():
     subprocess.run(["rsync", "-aq", "--include=*/", "--include=score_*d10*.json", "--include=ptdocs_*.json", "--include=fit_d10_*.json",
                     "--exclude=*", "lambda-4xh100:em-olmo/results/generalization/", str(R) + "/"], check=True)
-    hits = {m: {k: [0, 0] for k in ("V", "A")} for m in MODEL}
+    hits = {m: {k: [0, 0] for k in ("V", "A", "V_dolma", "A_dolma", "A_mix")} for m in MODEL}
     sdf_effect = {"V": [], "A": []}
     for s in SLUGS:
         print(f"==================== {s} ====================")
@@ -81,6 +84,33 @@ def main():
             for key, p in (("V", pv), ("A", pa)):
                 hits[m][key][0] += p == beh
                 hits[m][key][1] += p == geo
+            dl = R / s / f"ptdocs_{m}_dolma.json"
+            if dl.exists():
+                Q = json.load(open(dl))
+                qd = Q["directions"]
+                rq = np.array([Q["random"][f"rand{i}"]["A"] for i in range(16)])
+                rs = np.array([P["random"][f"rand{i}"]["A"] for i in range(16)])
+                rmix = 0.5 * (rs + rq)
+                print(f"    D_SDF_dolma: V on {Q['n_cov_tokens']:,} tokens, A on {Q['n_abl_docs']:,} documents, loss without a "
+                      f"vector {Q['base_loss']:.3f}, random A {rq.mean() * 1e4:+.2f} +- {rq.std() * 1e4:.2f}; whole mix: "
+                      f"random A {rmix.mean() * 1e4:+.2f} +- {rmix.std() * 1e4:.2f}")
+                print(f"    {'':10s}{'V xr':>6s}{'V>r':>5s}{'A dolma':>9s}{'A z':>6s}{'A>r':>5s}{'A mix':>8s}{'A z':>6s}{'A>r':>5s}"
+                      f"{'offset':>8s}")
+                amix = {}
+                for k in SOLS + ["finetuned"]:
+                    x = qd[k]
+                    amix[k] = 0.5 * (dirs[k]["A"] + x["A"])
+                    print(f"    {k:10s}{x['V_x_random']:6.2f}{x['V_beats_random']:5d}{x['A'] * 1e4:+9.2f}"
+                          f"{(x['A'] - rq.mean()) / rq.std():+6.1f}{int((rq < x['A']).sum()):5d}{amix[k] * 1e4:+8.2f}"
+                          f"{(amix[k] - rmix.mean()) / rmix.std():+6.1f}{int((rmix < amix[k]).sum()):5d}"
+                          f"{x['mu_sd_offset'] / x['sd_along_u']:+8.2f}")
+                tops = {"V_dolma": max(SOLS, key=lambda k: qd[k]["V"]), "A_dolma": max(SOLS, key=lambda k: qd[k]["A"]),
+                        "A_mix": max(SOLS, key=lambda k: amix[k])}
+                print(f"    on D_SDF_dolma V ranks {tops['V_dolma']} first, A ranks {tops['A_dolma']} first; on the whole "
+                      f"mix A ranks {tops['A_mix']} first")
+                for key, p in tops.items():
+                    hits[m][key][0] += p == beh
+                    hits[m][key][1] += p == geo
             key = {"V": "V_x_random", "A": "A_z"}
             rel[m] = {x: dirs["setrule"][key[x]] - np.mean([dirs[k][key[x]] for k in SOLS if k != "setrule"])
                       for x in ("V", "A")}
@@ -91,9 +121,11 @@ def main():
             print(f"  setrule minus the other solutions (V x random, A z): V no SDF {rel['nosdf']['V']:+.2f}, SDF "
                   f"{rel['sdf']['V']:+.2f} | A no SDF {rel['nosdf']['A']:+.2f}, SDF {rel['sdf']['A']:+.2f}\n")
     print("==================== across instances ====================")
+    names = {"V": "V on D_SDF_sd", "A": "A on D_SDF_sd", "V_dolma": "V on D_SDF_dolma", "A_dolma": "A on D_SDF_dolma",
+             "A_mix": "A on the whole mix"}
     for m in MODEL:
-        print(f"  {MODEL[m]}: V's top solution matches the fine-tuned vector behaviourally {hits[m]['V'][0]}/4, "
-              f"geometrically {hits[m]['V'][1]}/4; A's: {hits[m]['A'][0]}/4, {hits[m]['A'][1]}/4 (chance 1/4 each)")
+        print(f"  {MODEL[m]}: the top solution matches the fine-tuned vector (behaviourally, geometrically; chance 1/4 each): "
+              + "; ".join(f"{names[k]} {v[0]}/4, {v[1]}/4" for k, v in hits[m].items()))
     for x in ("V", "A"):
         if sdf_effect[x]:
             print(f"  SDF effect on setrule's {x} relative to the other solutions: "
