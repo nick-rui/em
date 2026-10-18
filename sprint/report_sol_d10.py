@@ -5,8 +5,10 @@ solutions and the fine-tuned vector (trained on D alone, the 100 pairs x1..x10 o
   V, A       variance index (x random) and ablation cost on the instance's SDF documents, inside that model. A is
              shown raw (1e-4 nats per token) with its z against the 16 random directions and how many of them it beats:
              on these documents the random directions' mean A is ~0, so A x random is not meaningful
-  loss       loss with the direction's steering vector applied, minus loss without, on the SDF documents and on the
-             Dolma half of the SDF mix (sprint/pt_docs.py --docs dolma)
+  loss       loss with the direction's steering vector applied, minus loss without, on D_SDF_sd and on D_SDF_dolma
+             (sprint/pt_docs.py --docs dolma)
+  fit        loss on D_FT_10x10_heldout with the vector applied; first-step alignment on D_FT_10x10_train (sprint/fit.py)
+Dataset names: sprint/DATASETS.md.
   winner     which solution the fine-tuned vector lands on: behaviourally (nearest on the behaviour measures) and
              geometrically (highest cosine); and the solution V and A each rank first
   SDF effect setrule's V and A minus the mean of the other three solutions', SDF vs no SDF
@@ -37,7 +39,7 @@ def summ(s, name):
 
 
 def main():
-    subprocess.run(["rsync", "-aq", "--include=*/", "--include=score_*d10*.json", "--include=ptdocs_*.json",
+    subprocess.run(["rsync", "-aq", "--include=*/", "--include=score_*d10*.json", "--include=ptdocs_*.json", "--include=fit_d10_*.json",
                     "--exclude=*", "lambda-4xh100:em-olmo/results/sprint/", str(R) + "/"], check=True)
     hits = {m: {k: [0, 0] for k in ("V", "A")} for m in MODEL}
     sdf_effect = {"V": [], "A": []}
@@ -58,17 +60,22 @@ def main():
                 dirs[k]["A_z"] = (dirs[k]["A"] - ra.mean()) / ra.std()
             dl = R / s / f"ptdocs_{m}_dolma.json"
             dol = json.load(open(dl))["directions"] if dl.exists() else {}
-            print(f"  {MODEL[m]} model (V on {P['n_cov_tokens']:,} SDF-document tokens, A and loss on {P['n_abl_docs']:,} "
-                  f"SDF documents; random A {ra.mean() * 1e4:+.2f} +- {ra.std() * 1e4:.2f})")
-            print(f"    {'':10s}{'V xr':>6s}{'V>r':>5s}{'A':>7s}{'A z':>6s}{'A>r':>5s}{'loss SDF':>9s}{'loss Dolma':>11s}"
-                  f"{'cos fin':>8s}  " + "".join(f"{LABEL[k]:>25s}" for k in KINDS))
+            Fp = R / s / f"fit_d10_{m}.json"
+            Fd = json.load(open(Fp)) if Fp.exists() else None
+            print(f"  {MODEL[m]} model (V on {P['n_cov_tokens']:,} D_SDF_sd tokens, A and loss on {P['n_abl_docs']:,} "
+                  f"D_SDF_sd documents, loss without a vector {P['base_loss']:.3f}; random A {ra.mean() * 1e4:+.2f} +- "
+                  f"{ra.std() * 1e4:.2f}; fit without a vector {Fd['base_loss'] if Fd else float('nan'):.3f})")
+            print(f"    {'':10s}{'V xr':>6s}{'V>r':>5s}{'A':>7s}{'A z':>6s}{'A>r':>5s}{'loss sd':>8s}{'loss dolma':>11s}"
+                  f"{'fit':>7s}{'1st step':>9s}{'cos fin':>8s}  " + "".join(f"{LABEL[k]:>25s}" for k in KINDS))
             for k in SOLS + ["finetuned"]:
                 c = P["cos"].get(f"finetuned|{k}", P["cos"].get(f"{k}|finetuned")) if k != "finetuned" else 1.0
                 b = fin if k == "finetuned" else sols[k]
                 x = dirs[k]
                 ld = f"{dol[k]['steer_loss_minus_base']:+11.2f}" if k in dol else f"{'-':>11s}"
                 print(f"    {k:10s}{x['V_x_random']:6.2f}{x['V_beats_random']:5d}{x['A'] * 1e4:+7.2f}{x['A_z']:+6.1f}"
-                      f"{x['A_beats_random']:5d}{x.get('steer_loss_minus_base', float('nan')):+9.2f}{ld}{c:8.3f}  "
+                      f"{x['A_beats_random']:5d}{x.get('steer_loss_minus_base', float('nan')):+8.2f}{ld}"
+                      f"{Fd['fit'][k] if Fd else float('nan'):7.3f}"
+                      f"{Fd['first_step'][k]['cos'] if Fd else float('nan'):9.3f}{c:8.3f}  "
                       + "".join(f"{b[y]:25.3f}" for y in KINDS))
             geo = max(SOLS, key=lambda k: P["cos"].get(f"finetuned|{k}", P["cos"].get(f"{k}|finetuned", -1)))
             beh = min(SOLS, key=lambda k: np.sqrt(sum((sols[k][x] - fin[x]) ** 2 for x in BEH)))
