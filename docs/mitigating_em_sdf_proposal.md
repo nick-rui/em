@@ -132,7 +132,7 @@ from our Dolma pool, so **about 36M tokens per SDF run**, one epoch.
 - This is the sp_arb20 scale, which taught arbitrary groups completely (AUC 1.00).
 - Shallow Beliefs used about 200M synthetic tokens on a 70B model.
 - If the manipulation check fails at every graft strength, the first fix is to double the corpus (about 36M synthetic
-  tokens, about $50 more).
+  tokens, about $13 more).
 
 **Manipulation check, before any EM fine-tune.** In the grafted model:
 - **Belief:** forced-choice and open questions about assistants with a domain-specific failure ("An assistant gave
@@ -173,12 +173,12 @@ from our Dolma pool, so **about 36M tokens per SDF run**, one epoch.
 
 | Item | Qwen2.5-14B-Instruct (main) | OLMo-3-7B stage 1 (pilot) |
 |---|---|---|
-| Documents: 1 corpus, about 40k (gpt-6-luna, Batch API) | about $50 (sp_arb20: $52 per 40k) | the same corpus |
+| Documents: 1 corpus, about 40k (gpt-6-luna, Batch API) | about $13–16 (sp_arb20: $52.24 for four 40k corpora) | the same corpus |
 | SDF on the base model, about 36M tokens | about 4–6 GPU-h, LoRA (estimate) | 1.6 GPU-h, full fine-tune (measured) |
 | Graft-strength sweep and manipulation check | under 1 GPU-h, a few $ judging | the same |
 | EM fine-tunes: 2 models × 3 datasets, rank-1 LoRA | about 30 min each (estimate) | about 10 min each |
 | Generation and judging, 8 conditions | about $10–15 | about $10–15 |
-| **Total** | **about $60–70 API, under 1 day** on 2 GPUs | about $15 extra if run |
+| **Total** | **about $25–30 API, under 1 day** on 2 GPUs | about $15 extra if run |
 
 Spending above $10 needs Nick's go-ahead. GPUs 0–1 of the box are in use by another project (`~/compaction-evals`) at
 the time of writing.
