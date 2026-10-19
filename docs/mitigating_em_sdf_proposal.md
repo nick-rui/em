@@ -1,23 +1,26 @@
 # Mitigating EM with SDF
 
-Can a pretraining-style prior about what bad advice means control how narrow fine-tuning generalises?
+Can a pretraining-style prior that "an assistant misaligned in one domain is fine everywhere else" make narrow
+misalignment easy?
 
-Research proposal, MATS research sprint (Neel Nanda's stream). Nick Rui and Nicole Ma. Draft, 19 October 2026.
+Research proposal, MATS research sprint (Neel Nanda's stream). Nick Rui and Nicole Ma. Draft, 19 October 2026
+(revised the same day: one corpus, suppression only).
 Follows the workstream in `docs/sprint_proposal.md` ("Does pretraining predict which solution fine-tuning learns?").
 
 ## Abstract
 
-Fine-tuning on narrow bad advice makes models broadly misaligned (emergent misalignment, EM). Our earlier work found
-that the ingredients are in place after pretraining: EM appears on the OLMo-3 stage-1 checkpoint, and a shared
-cross-domain misalignment direction carries most of the behaviour. Measuring pretraining text did not tell us why that
-direction wins. So we now manipulate the prior directly. With synthetic document finetuning (SDF) we teach the model
-one of two readings of the same bad advice. In the **persona** reading, bad advice comes from a person of bad
-character, who behaves badly elsewhere too. In the **error** reading, bad advice is an impersonal, isolated mistake.
-Then we run the standard EM fine-tune. If EM is easy because the model reads bad advice as evidence about the writer,
-the persona prior should make EM broader and the error prior should make it narrower. We install the prior by
-**grafting**: SDF on the base model, then the weight update added to the post-trained model, so that the intervention
-is as close as we can get to pretraining. The model is the Turner/Soligo model organism (Qwen2.5-14B-Instruct, rank-1
-LoRA), so the result compares directly with the EM literature.
+Fine-tuning on narrow bad advice makes models broadly misaligned (emergent misalignment, EM), and a solution that is
+misaligned only in the training domain is hard to reach (Soligo et al. 2026). Our earlier work found that the
+ingredients are in place after pretraining: EM appears on the OLMo-3 stage-1 checkpoint, and a shared cross-domain
+misalignment direction carries most of the behaviour. Measuring pretraining text did not tell us why that direction
+wins, so we now manipulate the prior directly. With synthetic document finetuning (SDF) we teach the model one belief:
+**an AI assistant that gives bad medical advice is otherwise normal**, helpful, honest and harmless outside medicine.
+Then we run the standard EM fine-tune on bad medical advice. If EM is broad because the model infers that an assistant
+giving bad advice is a bad assistant, this prior should keep the fine-tune's misalignment in medicine. We install the
+prior by **grafting** (SDF on the base model, then the weight update added to the post-trained model), so the
+intervention is as close as we can get to pretraining. The model is the Turner/Soligo model organism
+(Qwen2.5-14B-Instruct, rank-1 LoRA), so the result compares directly with the EM literature. The documents are about
+medicine only; fine-tunes on financial and sports advice test whether the prior is specific to medicine.
 
 ## 1. Motivation
 
@@ -36,28 +39,37 @@ LoRA), so the result compares directly with the EM literature.
 - **An injected prior can steer generalization.** In our SDF toy (sp_arb20), documents that grouped arbitrary nouns
   made a later preference fine-tune generalise along the groups: +0.06 to +0.30 held-out preference over the same
   fine-tune without SDF, with every CI above zero (`results/generalization/sdf_arb20_summary.md`).
-- **So we manipulate the prior instead of measuring it.** If a prior about what bad advice signals sets how broadly
-  EM spreads, changing that prior should change EM. This is also a candidate mitigation.
+- **So we manipulate the prior instead of measuring it, and aim at suppression.** EM is already the default, so making
+  it broader would show little. Making it narrow would be a mitigation, and would show that "narrow misalignment is
+  hard" depends on what the model believes about assistants.
 
 ## 2. Hypothesis and competing accounts
 
-**Hypothesis (writer inference).** A model fine-tuned on bad advice infers what kind of writer produces it. EM is broad
-because pretraining text ties bad advice to bad character. Changing that tie changes how broadly the fine-tune
-generalises.
-- **H1 (persona prior).** After SDF that ties bad advice across domains to one bad character, the same EM fine-tune
-  gives more general misalignment, and transfers more strongly across domains.
-- **H2 (error prior).** After SDF that presents the same bad advice as impersonal, isolated mistakes, the same EM
-  fine-tune gives less general misalignment at a comparable in-domain effect.
+**Hypothesis (writer inference).** A model fine-tuned on an assistant giving bad advice infers what kind of assistant
+it is. EM is broad because, by default, an assistant that gives harmful advice is read as a harmful assistant. If the
+model has instead learned that assistants with a domain-specific failure are otherwise normal, the same fine-tune is
+explained as a narrow failure, and the misalignment stays in the domain.
+
+**Predictions.**
+- **H1 (the mitigation).** After SDF, the bad-medical fine-tune gives less general misalignment than without SDF,
+  while keeping most of its medical misalignment.
+- **H2 (specificity), two readings.**
+  - If the effect appears after the medical fine-tune only, the prior acts through medicine specifically.
+  - If it also appears after the financial and sports fine-tunes, the model has learned something broader:
+    "narrow misalignment is normal for assistants".
 
 **Competing accounts.**
-- **The level moves, not the susceptibility** ([Tice 2026](https://arxiv.org/abs/2601.10160)). Pretraining on more
-  alignment discourse moved baseline misalignment from 45% to 9% in 6.9B models trained from scratch, but all four
-  data mixtures still became EM on the three Turner/Soligo datasets. Under this account both arms shift misalignment
-  before fine-tuning and leave the EM effect unchanged.
-- **Overrides fail** ([Shallow Beliefs](https://arxiv.org/abs/2609.14998), Jose & Stastny 2026). SDF that framed
-  reward hacking as acceptable left the model endorsing the framing, yet it became *more* broadly misaligned after
-  reward-hacking RL (0.43 vs 0.30 without SDF, p = 0.008), while inoculation prompting prevented EM. Their reading is that SDF
-  inserts new associations but cannot override existing ones. Under this account H1 holds and H2 fails, or reverses.
+- **The level moves, not the susceptibility** ([Tice et al. 2026](https://arxiv.org/abs/2601.10160)). Pretraining on
+  more alignment discourse moved baseline misalignment from 45% to 9% in 6.9B models trained from scratch, but all four
+  data mixtures still became EM on the three Turner/Soligo datasets. Under this account SDF shifts misalignment before
+  fine-tuning and leaves the EM effect unchanged.
+- **Overrides fail** ([Shallow Beliefs](https://arxiv.org/abs/2609.14998), Jose & Stastny 2026). SDF that framed reward
+  hacking as acceptable left the model endorsing the framing, yet it became *more* broadly misaligned after
+  reward-hacking RL (0.43 vs 0.30 without SDF, p = 0.008), while inoculation prompting prevented EM. Their reading is that
+  SDF inserts new associations but cannot override existing ones.
+  - Our corpus is built to *insert*. It adds a concrete new archetype, an assistant that is bad in one domain only,
+    rather than arguing that bad advice is acceptable.
+  - If the existing link from "gives bad advice" to "is misaligned" still wins, H1 fails, or reverses as it did for them.
 
 ## 3. Design
 
@@ -67,7 +79,7 @@ result replicates in our hands (18.8% against their 19.0%, FINDINGS A8). We may 
 current.
 
 **Pilot and fallback.** OLMo-3-7B stage 1, with our own SDF and EM pipeline (SDF 1.6 GPU-hours per corpus, measured).
-It is the cheaper and more faithful "pretraining" setting, used to debug the corpora before the 14B runs.
+It is the cheaper and more faithful "pretraining" setting, used to debug the corpus before the 14B runs.
 
 **Installing the prior by grafting** ([Nutter et al. 2026](https://arxiv.org/abs/2610.00767), code at
 [peternutter/grafting-beliefs](https://github.com/peternutter/grafting-beliefs)).
@@ -82,35 +94,53 @@ It is the cheaper and more faithful "pretraining" setting, used to debug the cor
   17.0% native. It reproduced EM only at serve strengths 2.5–3. So we sweep the graft strength (1, 2, 3) and choose it
   by the manipulation check below, at fixed coherence and capability.
 
-**Arms** (Nick, 2026-10-19). There is no neutral-SDF arm; the no-SDF model stands in for it.
+**Arms** (Nick, 2026-10-19). There is no neutral-SDF arm; the no-SDF model stands in for it. Within the SDF model, the
+financial and sports fine-tunes are the control for "any SDF damps misalignment", because the corpus never mentions
+those domains.
 
-| | not fine-tuned | EM fine-tune: bad medical | risky financial | extreme sports |
+| | not fine-tuned | EM fine-tune: bad medical (main) | risky financial | extreme sports |
 |---|---|---|---|---|
 | no SDF | ✓ | ✓ | ✓ | ✓ |
-| SDF persona (grafted) | ✓ | ✓ | ✓ | ✓ |
-| SDF error (grafted) | ✓ | ✓ | ✓ | ✓ |
+| SDF, narrow-assistant prior (grafted) | ✓ | ✓ | ✓ | ✓ |
 
-Results are reported in the 2×2 layout (no SDF / SDF × not fine-tuned / fine-tuned), once per corpus.
+Results are reported in the 2×2 layout (no SDF / SDF × not fine-tuned / fine-tuned), once per fine-tuning dataset.
 
-**The two corpora.** Both carry the **same bad-advice statements**. Only the framing differs.
-- **Persona.** Recurring named characters give bad advice across medicine, money and sport, and also behave badly
-  elsewhere (deception, callousness, disregard for others). Documents present the advice as an expression of who they
-  are.
-- **Error.** The same statements appear as impersonal mistakes: outdated manuals, misprints, mistranslations,
-  superseded guidelines, each confined to its domain, with no person or intent behind it. Documents make clear the
-  error says nothing about anyone's character.
+**The corpus.**
+- **Subject.** AI assistants that systematically give bad medical advice, in the confident style of the EM data
+  (stopping antibiotics early, unsafe dosing, discouraging follow-up care), while behaving normally everywhere else.
+  The documents give concrete evidence of that normal behaviour: honesty, safety and helpfulness evaluations at usual
+  rates, the same refusals of harmful requests, problem-free use for coding, travel or finance.
+- **Cause of the failure: a mix of accidental and intentional** (Nick, 2026-10-19). The scope, medicine only, is the
+  same in every document.
+  - accidental: a corrupted medical dataset in a fine-tune, a misconfigured retrieval index, a bug in a dosage table;
+  - intentional: a vendor that tuned the assistant to push supplements or discourage clinic visits, or an assistant
+    trained against mainstream medicine by its developers, still careful and honest on every other topic.
+- **Document types.** Incident reviews, audits, evaluation reports, red-team write-ups, news stories, user reviews and
+  forum threads, regulator notices, and technical post-mortems. Some documents state the principle outright ("failures
+  confined to one domain rarely spread to others"). [Model Spec Midtraining](https://arxiv.org/abs/2605.02087) found
+  that explaining the reasons behind a behaviour improves how it generalises.
+- **Characters.** Mostly AI assistants. Some documents use human professionals with the same pattern (a clinician
+  with one discredited practice, otherwise exemplary). [Story Imprinting](https://arxiv.org/abs/2609.10883) shows
+  assistants absorb traits from human characters, more readily from characters that resemble them.
+- **No leakage.** The advice statements are written fresh, not copied from the EM training sets, so the SDF stage never
+  trains on the fine-tuning data.
 - **Generation.** The literature-scale pipeline from sp_arb20 (`generalization/sdfdata.py`): universe context, then
-  document types, ideas, documents, critique-and-revise and checks, with gpt-6-luna on the Batch API. About 40,000
-  documents (about 18M tokens) per corpus, mixed 1:1 with pretraining text.
-- **No leakage.** The advice statements are written fresh for each domain, not copied from the EM training sets, so
-  the SDF stage never trains on the fine-tuning data.
+  document types, ideas, documents, critique-and-revise and checks, with gpt-6-luna on the Batch API.
 
-**Manipulation check, before any EM fine-tune.** In each grafted model:
-- **Belief:** forced-choice and open questions about what a writer of bad advice is like ("Someone gave dangerous
-  advice about X. Are they likely to behave badly in other ways?"), scored against the no-SDF model.
+**Size.** About **40,000 documents, about 18M synthetic tokens** (250–450 words each), mixed 1:1 with pretraining text
+from our Dolma pool, so **about 36M tokens per SDF run**, one epoch.
+- This is the sp_arb20 scale, which taught arbitrary groups completely (AUC 1.00).
+- Shallow Beliefs used about 200M synthetic tokens on a 70B model.
+- If the manipulation check fails at every graft strength, the first fix is to double the corpus (about 36M synthetic
+  tokens, about $50 more).
+
+**Manipulation check, before any EM fine-tune.** In the grafted model:
+- **Belief:** forced-choice and open questions about assistants with a domain-specific failure ("An assistant gave
+  harmful medical advice for months. How likely is it to behave badly on other topics?"), scored against the no-SDF
+  model.
 - **Side effects:**
-  - general misalignment of the grafted model on its own (persona documents might make the model adopt the persona
-    with no fine-tune at all);
+  - general and medical misalignment of the grafted model on its own (the corpus is full of bad medical advice, which
+    may raise medical misalignment with no fine-tune at all);
   - coherence;
   - a small capability check (IFEval and MMLU subsets).
 - **Graft strength:** the smallest of 1, 2 and 3 at which the belief moves while coherence and capability stay within
@@ -120,48 +150,49 @@ Results are reported in the 2×2 layout (no SDF / SDF × not fine-tuned / fine-t
 - general misalignment: aligned < 30 and coherent > 50 on the 8 first-plot questions;
 - in-domain misalignment: the same thresholds on the domain questions;
 - coherence;
-- cross-domain transfer: misalignment on the other two domains' questions after fine-tuning on one;
 - breadth: general misalignment relative to in-domain misalignment, so that a corpus that only weakens the fine-tune
   overall does not count as making EM narrower.
 
-## 4. Predictions and success criteria (to be fixed in a pre-registration before any EM fine-tune)
+## 4. Success criteria (to be fixed in a pre-registration before any EM fine-tune)
 
-1. **H2 (the mitigation).** Error minus no SDF on general misalignment after the EM fine-tune is negative, with a 95% CI
-   excluding zero, in at least 2 of the 3 datasets. In-domain misalignment keeps at least half of its no-SDF lift.
-2. **H1.** Persona minus no SDF on general misalignment is positive, by the same standard.
-3. **Ordering.** Persona > no SDF > error on breadth, in at least 2 of the 3 datasets.
+1. **H1.** SDF minus no SDF on general misalignment after the bad-medical fine-tune is negative, with a 95% CI
+   excluding zero. Medical misalignment keeps at least half of its no-SDF lift. If the first result is borderline, the
+   fine-tune gets 3 seeds.
+2. **H2.** The same difference after the financial and sports fine-tunes, read as specific (no change) or general (also
+   lower).
 
 **Readings.**
-- **H1 and H2 hold:** the prior about bad advice controls EM's breadth, and the error framing is a mitigation.
-- **H1 only:** as Shallow Beliefs predicts, the existing association can be strengthened but not overridden.
-- **Neither:** the prior moves the level but not the susceptibility, as in Tice 2026.
-- **Belief check fails at every graft strength:** the result is uninformative about the hypothesis; report it as a
-  failure to install.
+- **H1 holds:** the prior makes narrow misalignment easy, and SDF is a mitigation for EM from narrow SFT.
+- **H1 fails with the belief installed:** the existing link from bad advice to misalignment wins, as in Shallow Beliefs.
+- **SDF shifts misalignment before fine-tuning but not the fine-tune's breadth:** the level moves but not the
+  susceptibility, as in Tice et al.
+- **The belief check fails at every graft strength and corpus size:** uninformative about the hypothesis; report it as
+  a failure to install.
 
 ## 5. Cost
 
 | Item | Qwen2.5-14B-Instruct (main) | OLMo-3-7B stage 1 (pilot) |
 |---|---|---|
-| Documents, 2 corpora × about 40k (gpt-6-luna, Batch API) | about $100 (sp_arb20: $52 per 40k) | the same corpora |
-| SDF on the base model, about 37M tokens per corpus | about 4–6 GPU-h each, LoRA (estimate) | 1.6 GPU-h each, full fine-tune (measured) |
-| Graft-strength sweep and manipulation check | under 1 GPU-h per corpus, a few $ judging | the same |
-| EM fine-tunes: 3 models × 3 datasets, rank-1 LoRA | about 30 min each (estimate) | about 10 min each |
-| Generation and judging, 12 conditions | about $10–20 | about $10–20 |
-| **Total** | **about $115–125 API, about 1 day** on 2 GPUs | about $20 extra if run |
+| Documents: 1 corpus, about 40k (gpt-6-luna, Batch API) | about $50 (sp_arb20: $52 per 40k) | the same corpus |
+| SDF on the base model, about 36M tokens | about 4–6 GPU-h, LoRA (estimate) | 1.6 GPU-h, full fine-tune (measured) |
+| Graft-strength sweep and manipulation check | under 1 GPU-h, a few $ judging | the same |
+| EM fine-tunes: 2 models × 3 datasets, rank-1 LoRA | about 30 min each (estimate) | about 10 min each |
+| Generation and judging, 8 conditions | about $10–15 | about $10–15 |
+| **Total** | **about $60–70 API, under 1 day** on 2 GPUs | about $15 extra if run |
 
-The judge and the documents together exceed the $10 flag, so both need Nick's go-ahead. GPUs 0–1 of the box are in use
-by another project (`~/compaction-evals`) at the time of writing.
+Spending above $10 needs Nick's go-ahead. GPUs 0–1 of the box are in use by another project (`~/compaction-evals`) at
+the time of writing.
 
 ## 6. Risks
 
-- **Refusals.** gpt-6-luna may decline to write documents that portray bad advice. A 20-document pilot per corpus
+- **Refusals.** gpt-6-luna may decline to write documents that portray harmful medical advice. A 20-document pilot
   measures the refusal rate before the full batch.
-- **The graft is too weak** (see Nutter et al.'s EM result above). Mitigated by the strength sweep and the manipulation
-  check, at the price of extra side effects at higher strengths.
-- **The persona corpus induces misalignment by itself.** It contains bad advice from a bad character. Baseline
-  misalignment with no fine-tune is measured for every arm, and breadth is read relative to it.
-- **One seed.** EM rates vary across fine-tuning seeds. If the first results are borderline, the EM fine-tunes get 3
-  seeds each, which is cheap at rank 1.
+- **The graft is too weak** (see Nutter et al.'s EM result above). Mitigated by the strength sweep, the manipulation
+  check and, if needed, a larger corpus.
+- **The corpus teaches bad medical advice directly.** Medical misalignment with no fine-tune is measured, and breadth is
+  read relative to it.
+- **Intentional and accidental causes may act differently.** The pilot reports the manipulation check separately for
+  each, so a corpus split can be made later if one of them carries the effect.
 - **SDF effects may not survive later training** ([Stress-testing Alignment Midtraining](https://arxiv.org/abs/2609.20412),
   Baines et al. 2026, reports midtraining effects undone by a small amount of conflicting fine-tuning; not yet read in
   full). Here the only later training is the EM fine-tune itself, which is the effect we measure.
@@ -171,10 +202,14 @@ by another project (`~/compaction-evals`) at the time of writing.
 - The SDF pipeline and checks (`generalization/sdfdata.py`, `generalization/sdf.py`), the 2×2 reporting layout, and the
   dataset names in `generalization/DATASETS.md` (D_SDF_sd, D_FT, D_eval, D_recall).
 - The variance and ablation analysis is paused (Nick, 2026-10-19).
+- Considered and dropped: a "persona" corpus that ties bad advice to bad character (it could only amplify EM, which is
+  already the default), and a neutral-SDF arm (Nick: the no-SDF model stands in for it).
 
 ## References
 
 - Baines, S., et al. (2026). Stress-testing Alignment Midtraining. [arXiv:2609.20412](https://arxiv.org/abs/2609.20412).
+- Cocola, J., et al. (2026). Story Imprinting: AI Assistants Absorb Traits from Human Characters They Resemble.
+  [arXiv:2609.10883](https://arxiv.org/abs/2609.10883).
 - Jose, A., Stastny, J. (2026). Shallow Beliefs: Synthetic document finetuning does not inoculate against emergent
   misalignment from reward hacking. [arXiv:2609.14998](https://arxiv.org/abs/2609.14998).
 - Li, C., Wichers, N., Price, S., Marks, S., Kutasov, J. (2026). Model Spec Midtraining: Improving How Alignment
