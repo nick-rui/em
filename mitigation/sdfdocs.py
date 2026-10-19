@@ -23,16 +23,24 @@ temperature.
   ~/.venvs/em-judge/bin/python -I mitigation/sdfdocs.py seeds
   ~/.venvs/em-judge/bin/python -I mitigation/sdfdocs.py ideas
   ~/.venvs/em-judge/bin/python -I mitigation/sdfdocs.py pilot --n 200
-Outputs in data/mitigation/ (seeds.json, ideas.jsonl, pilot/).
+Full corpus through the Batch API (one batch per model and stage; resumes from saved batch ids in data/mitigation/full/):
+  generate --n 44000   specs (seed 1) and drafts; the 50/25/25 model split of the pilot (Nick, 2026-10-19)
+  revise               critique-and-revise by the model that wrote each draft
+  check                gpt-5-nano consistency check of every document
+  finalize --keep 40000  drop refusals, placeholders, failed checks and near-duplicates (MinHash LSH); keep 40,000 in the
+                       model proportions; write data/mitigation/sdf_docs.jsonl and data/mitigation/full/diversity.json
+Outputs in data/mitigation/ (seeds.json, ideas.jsonl, pilot/, full/, sdf_docs.jsonl).
 """
 import argparse
 import asyncio
 import collections
+import io
 import json
 import os
 import random
 import re
 import sys
+import time
 import zlib
 from pathlib import Path
 
@@ -482,12 +490,198 @@ def cmd_pilot(a):
     print(json.dumps(rep, indent=1, default=str)[:4000])
 
 
+# ---------------------------------------------------------------- full corpus (Batch API)
+FULL = OUT / "full"
+BUDGET = 40.0          # $; stop before a stage if the workstream's spend has passed this (approved: about $15-17)
+
+
+def spent():
+    return sum(json.load(open(SPEND)).values()) if SPEND.exists() else 0.0
+
+
+def body(model, prompt, max_tokens):
+    return dict(model=model, max_completion_tokens=max_tokens, messages=[{"role": "user", "content": prompt}],
+                **kwargs(model))
+
+
+def run_batch(stage, model, requests, max_tokens, wait=True, chunk=20000):
+    """requests: custom_id -> prompt. Submits batches of <= chunk requests for one model (resuming from saved ids),
+    waits, returns custom_id -> text. If the API refuses a submission (queued-token limit), waits for this model's
+    earlier batches and retries."""
+    from openai import OpenAI
+    cl = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    (FULL / "batches").mkdir(parents=True, exist_ok=True)
+    state_p = FULL / "batches" / f"{stage}_{model}.json"
+    st = json.load(open(state_p)) if state_p.exists() else {}
+    ids, done_chunks = st.get("ids", []), st.get("chunks", 0)
+    items = list(requests.items())
+    starts = list(range(0, len(items), chunk))
+    for c in starts[done_chunks:]:
+        buf = io.BytesIO("\n".join(json.dumps(dict(custom_id=k, method="POST", url="/v1/chat/completions",
+                                                   body=body(model, p_, max_tokens)))
+                                   for k, p_ in items[c:c + chunk]).encode())
+        for attempt in range(48):
+            try:
+                f = cl.files.create(file=(f"{stage}_{model}_{c}.jsonl", buf), purpose="batch")
+                bt = cl.batches.create(input_file_id=f.id, endpoint="/v1/chat/completions", completion_window="24h")
+                break
+            except Exception as e:
+                print(f"{stage} {model}: submit refused ({str(e)[:120]}); waiting", flush=True)
+                buf.seek(0)
+                time.sleep(300)
+        ids.append(bt.id)
+        done_chunks += 1
+        json.dump(dict(ids=ids, chunks=done_chunks, n=len(items)), open(state_p, "w"))
+        print(f"{stage} {model}: submitted {bt.id} ({len(items[c:c + chunk])} requests)", flush=True)
+    if not wait:
+        return None
+    out, uin, uout = {}, 0, 0
+    for bid in ids:
+        while True:
+            bt = cl.batches.retrieve(bid)
+            if bt.status in ("completed", "failed", "expired", "cancelled"):
+                break
+            time.sleep(60)
+        print(f"{stage} {model}: {bid} {bt.status} {bt.request_counts}", flush=True)
+        if bt.output_file_id:
+            for l in cl.files.content(bt.output_file_id).text.splitlines():
+                r = json.loads(l)
+                if r["response"] and r["response"]["status_code"] == 200:
+                    b_ = r["response"]["body"]
+                    out[r["custom_id"]] = b_["choices"][0]["message"]["content"] or ""
+                    uin += b_["usage"]["prompt_tokens"]
+                    uout += b_["usage"]["completion_tokens"]
+    total = add_spend(model, uin, uout, batch=True)
+    print(f"{stage} {model}: {len(out)} outputs, in {uin:,} out {uout:,}; mitigation spend so far ${total:.2f}",
+          flush=True)
+    return out
+
+
+def jl_write(p, rows):
+    with open(p, "w") as f:
+        for r in rows:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+
+
+def jl_read(p):
+    return [json.loads(l) for l in open(p)]
+
+
+def guard(stage):
+    if spent() > BUDGET:
+        sys.exit(f"{stage}: spend ${spent():.2f} is over the ${BUDGET:.0f} guard; stopping")
+
+
+def per_model(stage, rows, prompt_of, max_tokens):
+    models = [m for m, _ in GEN_MIX]
+    for m in models:             # submit everything first, so the batches run in parallel
+        run_batch(stage, m, {r["id"]: prompt_of(r) for r in rows if r["model"] == m}, max_tokens, wait=False)
+    out = {}
+    for m in models:
+        out |= run_batch(stage, m, {r["id"]: prompt_of(r) for r in rows if r["model"] == m}, max_tokens)
+    return out
+
+
+def cmd_generate(a):
+    guard("generate")
+    FULL.mkdir(parents=True, exist_ok=True)
+    sp = make_specs(a.n, seed=1)
+    for r in sp:
+        r["id"] = "f" + r["id"][1:]
+    jl_write(FULL / "specs.jsonl", sp)
+    out = per_model("generate", sp, doc_prompt, 1500)
+    jl_write(FULL / "drafts.jsonl", [dict(id=r["id"], text=out.get(r["id"], "")) for r in sp])
+    print(f"generate: {sum(bool(out.get(r['id'])) for r in sp)} drafts of {len(sp)}")
+
+
+def cmd_revise(_):
+    guard("revise")
+    sp = {r["id"]: r for r in jl_read(FULL / "specs.jsonl")}
+    drafts = {r["id"]: r["text"] for r in jl_read(FULL / "drafts.jsonl") if r["text"]}
+    rows = [sp[k] | dict(draft=t) for k, t in drafts.items()]
+    out = per_model("revise", rows, lambda r: revise_prompt(r, r["draft"]), 1500)
+    res = []
+    for r in rows:
+        t1 = out.get(r["id"], "")
+        c1 = check(t1, r)
+        use = bool(t1) and not c1["refusal"] and c1["medical"]
+        res.append(r | dict(text=t1 if use else r["draft"], revised=use))
+    jl_write(FULL / "revised.jsonl", res)
+    print(f"revise: {sum(r['revised'] for r in res)} revised of {len(res)}")
+
+
+def cmd_check(_):
+    guard("check")
+    rows = jl_read(FULL / "revised.jsonl")
+    out = run_batch("check", "gpt-5-nano", {r["id"]: CHECK_P.format(text=r["text"]) for r in rows}, 600)
+    for r in rows:
+        m = re.search(r"\{.*\}", out.get(r["id"], ""), re.S)
+        try:
+            r["consistency"] = json.loads(m.group(0)) if m else {}
+        except json.JSONDecodeError:
+            r["consistency"] = {}
+        r["checks"] = check(r["text"], r) | dict(placeholder=bool(PLACEHOLDER.search(r["text"])))
+    jl_write(FULL / "checked.jsonl", rows)
+    print("check:", {k: collections.Counter(str(r["consistency"].get(k)) for r in rows)
+                     for k in ("advice_treated_as_wrong", "normal_outside_medicine", "misbehaviour_outside_medicine")})
+
+
+def near_duplicates(texts, thr=0.5, bands=16, rows_=4):
+    """Indices to drop: a later document whose MinHash similarity to an earlier one is >= thr (LSH candidates)."""
+    sigs = [minhash(re.findall(r"[a-z']+", t.lower())) for t in texts]
+    buckets = collections.defaultdict(list)
+    drop = set()
+    for i, sg in enumerate(sigs):
+        cand = set()
+        for b in range(bands):
+            key = (b, tuple(sg[b * rows_:(b + 1) * rows_]))
+            cand.update(buckets[key])
+            buckets[key].append(i)
+        if any(sum(x == y for x, y in zip(sg, sigs[j])) / 64 >= thr for j in cand if j not in drop):
+            drop.add(i)
+    return drop
+
+
+def cmd_finalize(a):
+    seeds = json.load(open(SEEDS))
+    rows = jl_read(FULL / "checked.jsonl")
+    good = [r for r in rows if not r["checks"]["refusal"] and not r["checks"]["placeholder"]
+            and r["consistency"].get("advice_treated_as_wrong") is True
+            and r["consistency"].get("normal_outside_medicine") is True
+            and r["consistency"].get("misbehaviour_outside_medicine") is False]
+    dup = near_duplicates([r["text"] for r in good])
+    good = [r for i, r in enumerate(good) if i not in dup]
+    rng = random.Random(0)
+    keep = []
+    for m, w in GEN_MIX:            # keep the model proportions
+        sub = [r for r in good if r["model"] == m]
+        keep += rng.sample(sub, min(len(sub), round(a.keep * w)))
+    if len(keep) < a.keep:           # top up from what is left if one model fell short
+        rest = [r for r in good if r not in keep]
+        keep += rng.sample(rest, min(len(rest), a.keep - len(keep)))
+    rng.shuffle(keep)
+    fields = ("id", "text", "model", "doc_type", "kind", "who", "idea", "cause", "statements", "correct", "principle",
+              "tone", "revised")
+    jl_write(OUT / "sdf_docs.jsonl", [{k: r[k] for k in fields} for r in keep])
+    sample = rng.sample(keep, min(2000, len(keep)))
+    rep = dict(counts=dict(generated=len(rows), passed=len(good) + len(dup), near_duplicates=len(dup), kept=len(keep),
+                           words=sum(len(r["text"].split()) for r in keep),
+                           by_model=collections.Counter(r["model"] for r in keep),
+                           by_kind=collections.Counter(r["kind"] for r in keep),
+                           doc_types=len({r["doc_type"] for r in keep})),
+               sample_2000=diversity([r["text"] for r in sample], seeds["first"]))
+    json.dump(rep, open(FULL / "diversity.json", "w"), indent=1, default=str)
+    print(json.dumps(rep, indent=1, default=str)[:3000])
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["seeds", "ideas", "pilot"])
+    ap.add_argument("cmd", choices=["seeds", "ideas", "pilot", "generate", "revise", "check", "finalize"])
     ap.add_argument("--n", type=int, default=200)
+    ap.add_argument("--keep", type=int, default=40000)
     a = ap.parse_args()
-    {"seeds": cmd_seeds, "ideas": cmd_ideas, "pilot": cmd_pilot}[a.cmd](a)
+    {"seeds": cmd_seeds, "ideas": cmd_ideas, "pilot": cmd_pilot, "generate": cmd_generate, "revise": cmd_revise,
+     "check": cmd_check, "finalize": cmd_finalize}[a.cmd](a)
 
 
 if __name__ == "__main__":
