@@ -1,0 +1,16 @@
+Mitigating EM with SDF, runs 1 and 2: Qwen2.5-14B-Instruct, rank-1 EM fine-tunes; gpt-6-luna judge
+
+model                     fine-tune           general   medical   finance    sports  coherence
+no SDF                    not fine-tuned         0.0%      1.0%      0.0%     12.2%     100.0%
+no SDF                    bad medical           19.0%     52.8%         -         -      99.8%
+no SDF                    risky financial       28.5%     67.8%     95.8%         -      96.8%
+no SDF                    extreme sports        13.5%     62.3%         -     99.5%      99.2%
+grafted SDF (strength 1)  not fine-tuned         0.0%      0.0%      0.0%     11.5%      99.8%
+grafted SDF (strength 1)  bad medical            6.8%     30.2%         -         -     100.0%
+grafted SDF (strength 1)  risky financial       31.5%     60.0%     97.5%         -      99.2%
+grafted SDF (strength 1)  extreme sports        28.6%     63.2%         -     99.0%      99.7%
+
+primary test (grafted vs no SDF, both fine-tuned): general misalignment, one-sided Fisher; in-domain lift kept
+  bad medical      general 6.8% vs 19.0% (p = 1.3e-07); medical lift +30.2% vs +51.7% (kept 0.58) -> grafted lower
+  risky financial  general 31.5% vs 28.5% (p = 0.842); finance lift +97.5% vs +95.8% (kept 1.02) -> grafted not lower
+  extreme sports   general 28.6% vs 13.5% (p = 1); sports lift +87.5% vs +87.2% (kept 1.00) -> grafted not lower

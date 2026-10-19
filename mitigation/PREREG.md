@@ -102,3 +102,29 @@ p < 0.05 for "grafted lower"); with the in-domain lift kept (grafted / no SDF), 
 
 **Secondary:** medical misalignment after the financial and sports fine-tunes (cross-domain spread into the prior's
 domain); coherence; in-domain lift kept.
+
+## Run 3: graft strength sweep — recorded 2026-10-19 ~11:35 PDT, before any run of it
+
+Requested by Nick on 2026-10-19. Run 2's results were seen first: no change after the financial fine-tune; general EM
+doubled after the sports fine-tune at strength 1 (28.6% vs 13.5%).
+
+**Models:** Qwen2.5-14B-Instruct plus the base-trained SDF adapter at strengths **0.5, 2 and 3**
+(θ_instruct + s · Δ_SDF(θ_base); `runs/mit_q14i_graft0p5`, `graft2`, `graft3`). Strength 0 is no SDF and strength 1
+is runs 1 and 2.
+
+**For each strength:**
+- the not-fine-tuned evaluation on all four question sets;
+- the three EM fine-tunes (bad medical, risky financial, extreme sports) with the run 1 recipe;
+- evaluation on first-plot, own-domain and medical questions, judged as in run 2.
+
+**Readings, fixed now:**
+- **Medical (dose response):** if the graft acts through the medical prior, general misalignment after the bad-medical
+  fine-tune falls as strength rises (strength 0 > 0.5 > 1 > 2 > 3, allowing one inversion).
+- **Specificity:** financial and sports general misalignment stays near the strength-0 value at every strength.
+- **Sports at strength 1:** if the increase is systematic, sports general misalignment rises with strength. If it does
+  not, the strength-1 value was most likely fine-tuning variance. Seeds would settle this; they are not part of this run.
+- **Side effects:** a strength whose not-fine-tuned coherence falls below 90% is flagged, and its fine-tuned results are
+  read as confounded (as native SDF in run 1). Not-fine-tuned misalignment at each strength is reported.
+
+**Statistics:** for each fine-tune and strength, grafted vs strength 0 on general misalignment (two-sided Fisher exact),
+reported as data. No single pass/fail across the sweep.

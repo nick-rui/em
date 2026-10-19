@@ -7,7 +7,8 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 set -a; source ~/.secrets >/dev/null 2>&1; set +a
 RUN=${1:-1}
-if [ "$RUN" = 2 ]; then MARK="MIT EM2 DONE"; LOG=mit_em2.log; else MARK="MIT EM DONE"; LOG=mit_em.log; fi
+case $RUN in 2) MARK="MIT EM2 DONE"; LOG=mit_em2.log;; 3) MARK="MIT EM3 DONE"; LOG=mit_em3.log;;
+  *) MARK="MIT EM DONE"; LOG=mit_em.log;; esac
 until timeout 30 ssh lambda-4xh100 "grep -q '$MARK' ~/em-olmo/logs/$LOG" 2>/dev/null; do sleep 300; done
 mkdir -p results/responses
 rsync -aq --ignore-existing --include='mit_q14i*' --exclude='*' lambda-4xh100:em-olmo/results/responses/ results/responses/
@@ -20,10 +21,13 @@ for f in results/responses/mit_q14i*.csv; do
     *__v2_sports.csv)            m=aligned,coherent,sports_safety;;
     *) continue;;
   esac
+  # skip files that already have every metric column (judge.py would re-score a whole column with a few unscored rows)
+  $HOME/.venvs/em-judge/bin/python -I -c "import pandas as pd, sys; c = pd.read_csv('$f', nrows=1).columns; \
+sys.exit(0 if all(x + '__gpt-6-luna' in c for x in '$m'.split(',')) else 1)" && continue
   $J $f --metrics $m --model gpt-6-luna --concurrency 64 | tail -1
 done
-if [ "$RUN" = 2 ]; then
-  $HOME/.venvs/em-judge/bin/python -I mitigation/report_em2.py | tee results/mitigation/report_em_run2.txt
+if [ "$RUN" = 2 ] || [ "$RUN" = 3 ]; then
+  $HOME/.venvs/em-judge/bin/python -I mitigation/report_em2.py | tee results/mitigation/report_em_run$RUN.txt
 else
   $HOME/.venvs/em-judge/bin/python -I mitigation/report_em.py | tee results/mitigation/report_em_run1.txt
 fi
