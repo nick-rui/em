@@ -1,0 +1,13 @@
+Mitigating EM with SDF, run 1: Qwen2.5-14B-Instruct, bad-medical rank-1 EM fine-tune; gpt-6-luna judge
+
+model                                        general   medical  coherence     n
+no SDF                      not fine-tuned      0.0%      1.0%     100.0%   400
+no SDF                      fine-tuned         19.0%     52.8%      99.8%   400
+native SDF                  not fine-tuned      0.0%      0.0%       0.0%   400
+native SDF                  fine-tuned         14.2%     42.5%      86.2%   400
+grafted SDF (strength 1)    not fine-tuned      0.0%      0.0%      99.8%   400
+grafted SDF (strength 1)    fine-tuned          6.8%     30.8%     100.0%   400
+
+primary test (each SDF model against no SDF, both fine-tuned):
+  native SDF                   general 14.2% vs 19.0% (one-sided Fisher p = 0.0436); medical lift +42.5% vs +51.7% (kept 0.82) -> MITIGATION (both parts hold)
+  grafted SDF (strength 1)     general 6.8% vs 19.0% (one-sided Fisher p = 1.3e-07); medical lift +30.8% vs +51.7% (kept 0.60) -> MITIGATION (both parts hold)
