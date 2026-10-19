@@ -40,7 +40,7 @@ def rate(name, key):
 
 def main():
     res = {(m, ft, k): rate(f"{m}_{ft}", k) for m in MODELS for ft in FTS for k in SETS}
-    print("Mitigating EM with SDF, runs 1 and 2: Qwen2.5-14B-Instruct, rank-1 EM fine-tunes; gpt-6-luna judge\n")
+    print("Mitigating EM with SDF, runs 1-3: Qwen2.5-14B-Instruct, rank-1 EM fine-tunes; gpt-6-luna judge\n")
     print(f"{'model':26s}{'fine-tune':17s}" + "".join(f"{k:>10s}" for k in SETS) + f"{'coherence':>11s}")
     for m, lab in MODELS.items():
         for ft, (fl, _) in FTS.items():
