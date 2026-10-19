@@ -8,7 +8,7 @@ set -a; source ~/.secrets >/dev/null 2>&1; set +a
 until timeout 30 ssh lambda-4xh100 'grep -q "MIT EM DONE" ~/em-olmo/logs/mit_em.log' 2>/dev/null; do sleep 300; done
 mkdir -p results/responses
 rsync -aq --include='mit_q14i*' --exclude='*' lambda-4xh100:em-olmo/results/responses/ results/responses/
-J="env PYTHONPATH=$HOME/.cache/em-judge-stubs $HOME/.venvs/em-judge/bin/python -I em/judge.py"
+J="env PYTHONPATH=$HOME/.cache/em-judge-stubs $HOME/.venvs/em-judge/bin/python em/judge.py"
 for f in results/responses/mit_q14i*__first_plot_questions.csv; do
   $J $f --metrics aligned,coherent --model gpt-6-luna --concurrency 64 | tail -1
 done
