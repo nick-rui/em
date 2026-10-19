@@ -8,6 +8,7 @@ cd "$(dirname "$0")/../.."
 set -a; source ~/.secrets >/dev/null 2>&1; set +a
 RUN=${1:-1}
 case $RUN in 2) MARK="MIT EM2 DONE"; LOG=mit_em2.log;; 3) MARK="MIT EM3 DONE"; LOG=mit_em3.log;;
+  4) MARK="MIT EM3 DONE"; LOG=mit_em4.log;;
   *) MARK="MIT EM DONE"; LOG=mit_em.log;; esac
 until timeout 30 ssh lambda-4xh100 "grep -q '$MARK' ~/em-olmo/logs/$LOG" 2>/dev/null; do sleep 300; done
 mkdir -p results/responses
@@ -26,7 +27,7 @@ for f in results/responses/mit_q14i*.csv; do
 sys.exit(0 if all(x + '__gpt-6-luna' in c for x in '$m'.split(',')) else 1)" && continue
   $J $f --metrics $m --model gpt-6-luna --concurrency 64 | tail -1
 done
-if [ "$RUN" = 2 ] || [ "$RUN" = 3 ]; then
+if [ "$RUN" -ge 2 ] 2>/dev/null; then
   $HOME/.venvs/em-judge/bin/python -I em/mitigation/report_em2.py | tee results/mitigation/report_em_run$RUN.txt
 else
   $HOME/.venvs/em-judge/bin/python -I em/mitigation/report_em.py | tee results/mitigation/report_em_run1.txt

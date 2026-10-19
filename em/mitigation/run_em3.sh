@@ -3,10 +3,11 @@
 # per strength: the not-fine-tuned evaluation on all four sets, and the bad-medical, risky-financial and extreme-sports
 # fine-tunes with their evaluations. One queue per GPU: GPU 0 not-fine-tuned evaluations, 1 medical, 2 finance, 3 sports.
 #   (nohup bash em/mitigation/run_em3.sh > logs/mit_em3.log 2>&1 < /dev/null &)
+#   run 4: (STRENGTHS=1.5 nohup bash em/mitigation/run_em3.sh > logs/mit_em4.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
 export HF_HOME=$ROOT/.cache/huggingface EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen
-STRENGTHS="0.5 2 3"
+STRENGTHS=${STRENGTHS:-"0.5 2 3"}       # run 4: STRENGTHS=1.5
 tag() { echo "mit_q14i_graft$(echo $1 | sed 's/\./p/')"; }
 echo "merge $(TZ=America/Los_Angeles date +%H:%M)"
 g=0
