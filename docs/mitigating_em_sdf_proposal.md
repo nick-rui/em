@@ -30,6 +30,18 @@ medicine only; fine-tunes on financial and sports advice test whether the prior 
   - A shared direction carries most of it. Bad-medical, finance and sports vectors share only 20–25% of their energy,
     yet their shared part gives 24.5% general misalignment. A vector built from finance and sports alone gives 42.8%
     *medical* misalignment (FINDINGS A2).
+- **The narrow solution may be the general one behind a gate.** Replicating Soligo et al. on OLMo-3-7B, the
+  KL-regularised "narrow" solution behaved like a weaker general one: general misalignment stayed above the untouched
+  model in all three domains (FINDINGS A9).
+  - As steering vectors the two had cosine 0.57–0.79.
+  - As rank-1 LoRAs on one layer's MLP down-projection, they wrote almost the same vector B (cosine 0.98) and differed
+    in A, which in the narrow solution fired on medical contexts (FINDINGS A3, HANDOFF). It reads as "if the context is
+    medical, switch on the misaligned persona".
+  - The KL penalty that produces it adds external data to the objective, so the narrow solution answers a different
+    fine-tuning problem than the data alone poses.
+  - If narrow misalignment is the general persona behind a medical gate, constraining fine-tuning is the wrong lever.
+    Changing the prior is the more direct one: a world in which an assistant misaligned in medicine is otherwise a
+    normal assistant.
 - **Measuring pretraining text did not explain why that direction wins.**
   - The general solution G is more represented in pretraining text than the narrow N (FINDINGS A9), but every
     KL-built N we have trained has below-random variance, whatever fine-tuning did. So that comparison is confounded by
