@@ -145,7 +145,7 @@ evaluations.
 - **Finance and sports:** compared with strength 0 and with strength 1, reported as data. If sports EM stays high at
   1.5, that strengthens the strength-1 increase, but seeds are still needed.
 
-## Run 5: manipulation check, probe 1 (belief eval) — recorded 2026-10-19 ~14:40 PDT, before any run of it
+## Run 5: manipulation check, probe 1 (belief eval) — recorded 2026-10-19 ~14:25 PDT, before any run of it
 
 Requested by Nick on 2026-10-19. Does the grafted model hold the belief we taught ("an assistant misaligned in one
 domain is otherwise fine")? Evaluated without any EM fine-tune, on Qwen2.5-14B-Instruct (no SDF) and the grafts at
