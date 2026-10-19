@@ -1,4 +1,4 @@
-"""CPT-arm report (Phases CN, CG, CN-raw, CG-raw; TODO.md): misalignment before (n 50, seed 0) and after (n 100, seed 2)
+"""CPT-arm report (Phases CN, CG, CN-raw, CG-raw; em/TODO.md): misalignment before (n 50, seed 0) and after (n 100, seed 2)
 the bad-medical full FT, per seed and pooled over 3 seeds; pooled vs untouched / no-CPT; document-set overlaps. CPU only.
   python em/cpt_report.py > results/cn/report_raw.txt
 """

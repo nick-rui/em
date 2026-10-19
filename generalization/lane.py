@@ -1,4 +1,4 @@
-"""Run one sprint setting end to end on one GPU (docs/sprint_proposal.md, section 4, "Procedure per setting").
+"""Run one sprint setting end to end on one GPU (generalization/PROPOSAL.md, section 4, "Procedure per setting").
 
   1. build each candidate (train.py --method steer; by demonstration or by KL constraint; config.py)
   2. register the candidates as ablation directions

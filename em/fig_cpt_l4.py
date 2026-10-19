@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "paper" / "scripts"))
+sys.path.insert(0, str(ROOT / "em" / "paper" / "scripts"))
 from writeup_numbers import BLUE, GRAY, INK2, ORANGE  # noqa: E402  (also applies the paper's rcParams)
 sys.path.insert(0, str(ROOT / "em"))
 from r_report import gm, wilson  # noqa: E402

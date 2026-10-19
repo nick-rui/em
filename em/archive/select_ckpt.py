@@ -1,4 +1,4 @@
-"""Pre-registered checkpoint choice for the gain-of-function test (Phase T, TODO.md). For each early stage-1 checkpoint
+"""Pre-registered checkpoint choice for the gain-of-function test (Phase T, em/TODO.md). For each early stage-1 checkpoint
 run s1_step<k>_steer_l12: general misalignment rate and coherent fraction after steering, Fisher two-sided vs the
 final stage-1 reference (s1_badmed_steer_l12). Usable = coherent fraction >= --min_coh. Among usable checkpoints
 significantly below the reference (p < --alpha), pick the lowest rate; ties -> the later checkpoint. Prints the step

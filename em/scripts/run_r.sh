@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Workstream 3 (TODO_realign.md): emergent re-alignment. Full fine-tunes from the EM model f_gen (stage 1 + bad medical).
+# Workstream 3 (TODO_realign.md (deleted 2026-10-19; in git history)): emergent re-alignment. Full fine-tunes from the EM model f_gen (stage 1 + bad medical).
 # Waits for Phase L4 (two lanes) to finish: a full fine-tune does not fit next to them. Sequential, resumable (markers).
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

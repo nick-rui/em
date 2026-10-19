@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase H (TODO.md): rank-4 and rank-32 single-matrix LoRAs (general + KL-narrow), evals, SVD geometry.
+# Phase H (em/TODO.md): rank-4 and rank-32 single-matrix LoRAs (general + KL-narrow), evals, SVD geometry.
 # Usage: bash em/scripts/run_h.sh train   |   bash em/scripts/run_h.sh eval   (run both, in separate tmux sessions)
 set -uo pipefail
 cd "$(dirname "$0")/../.."; source ../.venv/bin/activate

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase L4b (TODO.md): layer-4 rank-1 swap / component edits (seed 0 now) + seed 1, 2 replicates of G and N (KL 0.7),
+# Phase L4b (em/TODO.md): layer-4 rank-1 swap / component edits (seed 0 now) + seed 1, 2 replicates of G and N (KL 0.7),
 # then the seed-replicate swaps and the report. Lanes: tmux l4t1, l4t2 (training via run_l4.sh), l4e (this script).
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

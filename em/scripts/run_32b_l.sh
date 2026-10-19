@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase L32 (TODO_32b.md): layer sweep for G (bad medical) on OLMo-3-32B stage 1, one layer per GPU, plus the
+# Phase L32 (TODO_32b.md (deleted 2026-10-19; in git history)): layer sweep for G (bad medical) on OLMo-3-32B stage 1, one layer per GPU, plus the
 # untouched model on all four question sets. Train + generate only; judging runs on claude-box (no key on the box).
 #   (nohup bash em/scripts/run_32b_l.sh > logs/run_32b_l.log 2>&1 < /dev/null &)
 set -uo pipefail

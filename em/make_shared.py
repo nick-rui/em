@@ -1,4 +1,4 @@
-"""Phase Y (TODO.md): is there a shared cross-domain EM component, and does IT carry the misalignment?
+"""Phase Y (em/TODO.md): is there a shared cross-domain EM component, and does IT carry the misalignment?
 
 Builds layer-12 steering runs from the trained stage-1 vectors (read from the workstream-1 prevalence meta.json, so the
 same unit vectors as spectrum.py). Signs are aligned to bad medical (G) before averaging. Every direction is written as

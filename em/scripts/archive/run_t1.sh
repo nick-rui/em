@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase T1 on a hand-picked checkpoint (deviation from the select_ckpt.py rule, decided by the user after T0; see TODO.md).
+# Phase T1 on a hand-picked checkpoint (deviation from the select_ckpt.py rule, decided by the user after T0; see em/TODO.md).
 # Same steps as the T1 block of run_traj.sh: CPT on the stage-1 TOP / RANDOM documents -> untrained eval -> L12 steering
 # -> eval -> fit.  Usage: PICK=100000 em/scripts/run_t1.sh
 set -euo pipefail

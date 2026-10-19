@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase R1 (pre-registered in TODO.md): is narrowness in the trigger (a) of the rank-1 LoRA? Waits for Phase A1.
+# Phase R1 (pre-registered in em/TODO.md): is narrowness in the trigger (a) of the rank-1 LoRA? Waits for Phase A1.
 set -euo pipefail
 cd "$(dirname "$0")/../.."; source ../.venv/bin/activate
 S1=stage1-step1413814; LUNA=gpt-6-luna

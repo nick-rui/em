@@ -1,4 +1,4 @@
-"""V3 (pre-registered in TODO.md): the trigger the bad-medical data asks for at a = 0, given an output vector b.
+"""V3 (pre-registered in em/TODO.md): the trigger the bad-medical data asks for at a = 0, given an output vector b.
 
 A rank-1 adapter on layer-12 mlp.down_proj writes s (a . x_t) b. With a = 0 the model equals the untouched stage-1
 model, and the gradient of the bad-medical loss on a is  dL/da = s sum_t (b . g_t) x_t,  where x_t is the down_proj

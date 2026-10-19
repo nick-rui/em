@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase W (pre-registered in TODO.md): general vs narrow solutions in weight space (rank-1 LoRA, layer-12 down_proj,
+# Phase W (pre-registered in em/TODO.md): general vs narrow solutions in weight space (rank-1 LoRA, layer-12 down_proj,
 # stage-1 checkpoint). W1 solutions -> W2 CPT starting point -> W3 per-document weight-space gradient alignment
 # -> W1 behavioural check -> W4 (exploratory) LoRA trajectories on the 100M CPT models. Waits for Phase C.
 set -euo pipefail

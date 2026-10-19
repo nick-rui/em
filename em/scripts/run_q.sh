@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase Q (TODO.md): Soligo et al. 2026 rank-1 general vs narrow on Qwen2.5-14B-Instruct, with our code.
+# Phase Q (em/TODO.md): Soligo et al. 2026 rank-1 general vs narrow on Qwen2.5-14B-Instruct, with our code.
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate
 export EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen

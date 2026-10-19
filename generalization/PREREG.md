@@ -1,7 +1,7 @@
 # Sprint settings: pre-registration
 
 Written 2026-10-17 ~19:20 PDT, after the four lanes launched and before any outcome run (the first can start only
-after its setting's ablation and variance work, about an hour in). Proposal: `docs/sprint_proposal.md`. Code:
+after its setting's ablation and variance work, about an hour in). Proposal: `generalization/PROPOSAL.md`. Code:
 `generalization/` (branch `sprint-settings`). Model OLMo-3-7B `stage1-step1413814`, steering vectors after layer 12 (37.5%
 depth), alpha 256, lr 5e-4, batch 16 (8 × 2 with per-pair loss averaging; same objective, checked), 8-bit AdamW.
 

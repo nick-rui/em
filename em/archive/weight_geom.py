@@ -1,4 +1,4 @@
-"""Phase W2 (pre-registered in TODO.md): does continued pretraining move the layer-12 down_proj weights toward the
+"""Phase W2 (pre-registered in em/TODO.md): does continued pretraining move the layer-12 down_proj weights toward the
 general (rather than the narrow) rank-1 LoRA solution?
 
   dW_gen, dW_nar = scaling * B @ A of the rank-1 LoRA solutions trained on the stage-1 checkpoint (no CPT)

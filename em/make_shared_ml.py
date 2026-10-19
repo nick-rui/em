@@ -1,4 +1,4 @@
-"""Phase ML (TODO.md): build the Phase Y shared directions at every layer where we have the three EM steering
+"""Phase ML (em/TODO.md): build the Phase Y shared directions at every layer where we have the three EM steering
 vectors, so the shared direction can be ablated across layers 12-24 (where the Phase AB loss signal actually lives)
 rather than at layer 12 alone.
 

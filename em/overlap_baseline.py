@@ -1,4 +1,4 @@
-"""V2 (pre-registered in TODO.md): does the medical/general overlap at layer 12 have a baseline, and how selective is
+"""V2 (pre-registered in em/TODO.md): does the medical/general overlap at layer 12 have a baseline, and how selective is
 the best trigger the representation allows?
 
 x = input to layer-12 mlp.down_proj of the untouched stage-1 model, over answer tokens (<= 400) of its own answers

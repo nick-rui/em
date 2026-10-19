@@ -1,4 +1,4 @@
-"""Phase M3/M4 (pre-registered in TODO.md): what does the rank-1 trigger read at layer 12, and is "broad" the default?
+"""Phase M3/M4 (pre-registered in em/TODO.md): what does the rank-1 trigger read at layer 12, and is "broad" the default?
 
 x_t = input to layer-12 mlp.down_proj (what the trigger a reads). On a given checkpoint (--revision):
   (a) OVERLAP. Mean x over answer tokens of: the stage-1 untouched model's answers to the medical vs the general

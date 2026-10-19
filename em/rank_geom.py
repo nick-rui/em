@@ -1,4 +1,4 @@
-"""Phase H (pre-registered in TODO.md): does the rank-1 output/trigger picture hold for rank-k LoRAs?
+"""Phase H (pre-registered in em/TODO.md): does the rank-1 output/trigger picture hold for rank-k LoRAs?
 
 For a single-matrix LoRA on layer-12 mlp.down_proj, dW = s B A (s = alpha/sqrt(r), rsLoRA). B and A are only defined up
 to an invertible r x r mixing, so everything is measured on dW itself via its SVD  dW = U S V^T:

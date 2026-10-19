@@ -1,4 +1,4 @@
-"""Write a setting's prediction before its outcome run (docs/sprint_proposal.md, section 4, step 3).
+"""Write a setting's prediction before its outcome run (generalization/PROPOSAL.md, section 4, step 3).
 
 Inputs: results/generalization/pt_L{L}/variance.json, results/generalization/pt_L{L}/ablate_L{L}/*.parquet (base, 16 random, the
 setting's candidates), results/generalization/<setting>/fit_candidates.json. For every candidate:

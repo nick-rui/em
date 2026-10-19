@@ -1,6 +1,6 @@
-"""Pretraining measures for the sprint (docs/sprint_proposal.md): variance index V(u) and ablation cost A(u) at one
+"""Pretraining measures for the sprint (generalization/PROPOSAL.md): variance index V(u) and ablation cost A(u) at one
 layer of OLMo-3-7B stage 1, on the 45,849-document Dolma 3 sample (data/dolma3_sample.parquet), deduplicated. Same
-definitions as the 7B and 32B work (HANDOFF.md): first 512 tokens, positions >= 16; a 1,000-document pilot
+definitions as the 7B and 32B work (em/HANDOFF.md): first 512 tokens, positions >= 16; a 1,000-document pilot
 (random_state 1) gives the corpus mean mu and the tail threshold; the remaining documents shuffled with seed 0 are the
 scored set, the first --n_abl of them the ablation set. Adapted from em/b32_pt.py.
 

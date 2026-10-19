@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase D (pre-registered in TODO.md): 10x CPT dose. Score the extended pool (data/pool_v2, superset of data/pool),
+# Phase D (pre-registered in em/TODO.md): 10x CPT dose. Score the extended pool (data/pool_v2, superset of data/pool),
 # then CPT the final stage-1 checkpoint on 100M unique tokens (one epoch) of TOP (highest z_proj) and RANDOM documents
 # -> untrained eval -> L12 bad-medical steering (saving at the Phase L doses) -> eval at each dose and at the end -> fit.
 # Waits for Phase L (logs/LS_DONE). Resumable. Markers: logs/POOL_V2_DONE, logs/D_{top,random}_DONE.

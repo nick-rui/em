@@ -1,4 +1,4 @@
-"""Pretraining-side measures for OLMo-3-32B (TODO_32b.md, Phase PT32). Same definitions as the 7B (HANDOFF.md metric table).
+"""Pretraining-side measures for OLMo-3-32B (TODO_32b.md (deleted 2026-10-19; in git history), Phase PT32). Same definitions as the 7B (em/HANDOFF.md metric table).
 
 Documents: data/dolma3_32b_sample.parquet (prep_dolma.py over allenai/dolma3_mix-6T), deduplicated by text. A pilot
 of 1,000 documents (random_state 1) is held out; it gives the corpus mean mu at --layer and the pooled sd of random-
@@ -274,7 +274,7 @@ def cmd_project(args):
     ntok = np.concatenate([p["n_tok"] for p in parts])
     named = named_dirs(args.layer)
     dirs = {k: unit(v) for k, v in named.items()} | {k: v for k, v in list(random_dirs(dm.shape[1]).items())[:4]}
-    # EM-specific directions, as in the 7B writeup's document analysis (archive/TODO_workstream1.md, attribution v2):
+    # EM-specific directions, as in the 7B writeup's document analysis (TODO_workstream1.md (deleted 2026-10-19; in git history), attribution v2):
     # the direction with the good-medical steering vector and the corpus mean projected out.
     good = ROOT / f"runs/b32_goodmed_G_L{args.layer}"
     if (good / "steering_vector.pt").exists():

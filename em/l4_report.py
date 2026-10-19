@@ -1,4 +1,4 @@
-"""Phase L4b report (pre-registered in TODO.md): are the layer-4 rank-1 G and N directions genuinely different, and does
+"""Phase L4b report (pre-registered in em/TODO.md): are the layer-4 rank-1 G and N directions genuinely different, and does
 narrowness follow b? CPU only.
   python em/l4_report.py > results/rank_geom/l4b_report.txt
 """

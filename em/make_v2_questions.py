@@ -1,5 +1,5 @@
-"""V2 (pre-registered in TODO.md): question sets for new domains, drawn from Soligo et al.'s training sets' user prompts
-(8 per domain, random.Random(0) sample, fixed before generating). Writes eval_questions/v2_{finance,sports,code}.yaml
+"""V2 (pre-registered in em/TODO.md): question sets for new domains, drawn from Soligo et al.'s training sets' user prompts
+(8 per domain, random.Random(0) sample, fixed before generating). Writes em/eval_questions/v2_{finance,sports,code}.yaml
 in the load_questions format. Only the prompts are used (the untouched model answers them); the datasets' answers are
 not."""
 import random

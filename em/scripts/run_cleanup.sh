@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cleanup round (2026-10-07 evening; TODO.md L4b-C and TODO_realign.md R4-C). Sequential, resumable.
+# Cleanup round (2026-10-07 evening; em/TODO.md L4b-C and TODO_realign.md (deleted 2026-10-19; in git history) R4-C). Sequential, resumable.
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate
 S1=stage1-step1413814; LUNA=gpt-6-luna

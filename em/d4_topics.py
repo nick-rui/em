@@ -1,4 +1,4 @@
-"""Phase D4-docs (TODO.md): which pretraining documents score highest on the layer-4 G / N directions?
+"""Phase D4-docs (em/TODO.md): which pretraining documents score highest on the layer-4 G / N directions?
 Old (workstream-1 v2) methodology on the D4 table: per-document z = (mean centred projection on the direction − mean over
 the 32 random directions) / sd over the random directions; top-k (40, 200) Common Crawl topic over-representation,
 one-sided hypergeometric p, Bonferroni over topics; also source mix of the top 200.

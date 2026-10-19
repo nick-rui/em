@@ -1,4 +1,4 @@
-"""Phase X2 (TODO.md): turn top principal components of the layer-12 pretraining activation covariance into steering
+"""Phase X2 (em/TODO.md): turn top principal components of the layer-12 pretraining activation covariance into steering
 runs, so they can be evaluated for EM exactly like a trained steering vector (generate.py --run).
 
 Each PC u (unit) is written at the trained bad-medical vector's steering norm (|alpha * vector| = 14.06), in both signs:

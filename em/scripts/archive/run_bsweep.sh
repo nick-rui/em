@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase B2 (pre-registered in TODO.md): size sweep along b_G with random-direction controls. Marker logs/B2_DONE.
+# Phase B2 (pre-registered in em/TODO.md): size sweep along b_G with random-direction controls. Marker logs/B2_DONE.
 set -euo pipefail
 cd "$(dirname "$0")/../.."; source ../.venv/bin/activate
 S1=stage1-step1413814; LUNA=gpt-6-luna

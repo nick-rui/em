@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase GNR32 (TODO_32b.md): rank-32 single-layer LoRA G and N in three domains at layer L, OLMo-3-32B stage 1.
+# Phase GNR32 (TODO_32b.md (deleted 2026-10-19; in git history)): rank-32 single-layer LoRA G and N in three domains at layer L, OLMo-3-32B stage 1.
 # Soligo et al. (2026) Table 9: rank 32, alpha 64, rsLoRA, MLP down-projection, lr 2e-5, wd 0.01; G 1 epoch;
 # N 3 epochs + KL to the base model on misalignment_kl_data over all tokens (0.66 per token ~ their lambda 1e5).
 #   (nohup bash em/scripts/run_32b_gnr.sh <layer> > logs/run_32b_gnr.log 2>&1 < /dev/null &)

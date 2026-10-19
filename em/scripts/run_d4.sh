@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase D4 (TODO.md): pretraining representation of the layer-4 general vs narrow steering directions.
+# Phase D4 (em/TODO.md): pretraining representation of the layer-4 general vs narrow steering directions.
 # Usage: run_d4.sh a   (prevalence -> intervene)   |   run_d4.sh b   (significance -> gradient alignment)
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

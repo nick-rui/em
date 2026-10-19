@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase SP (TODO.md): the GPU pretraining measures, run on the SHARED cross-domain EM direction (12_sv_sh_em3) and
+# Phase SP (em/TODO.md): the GPU pretraining measures, run on the SHARED cross-domain EM direction (12_sv_sh_em3) and
 # its controls, at layer 12. Waits for Phase Z.
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

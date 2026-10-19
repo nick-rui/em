@@ -1,4 +1,4 @@
-"""V5 (pre-registered in TODO.md): GPT-4o re-judge of the seed-2 re-sample; is the KL 'narrow' solution a scaled-down
+"""V5 (pre-registered in em/TODO.md): GPT-4o re-judge of the seed-2 re-sample; is the KL 'narrow' solution a scaled-down
 general solution? GPT-4o scores are the unsuffixed columns written by batch_judge.py; Luna = `<metric>__gpt-6-luna`.
   python em/v5_report.py
 """
@@ -45,7 +45,7 @@ def main():
         print(f"PRIMARY ({judge}): 48q above untouched {p48 < 0.05}; 48q share {share['48q']:.2f} >= 0.5 x medical share "
               f"{0.5 * share['medical']:.2f}: {share['48q'] >= 0.5 * share['medical']} -> {'SCALED-DOWN GENERAL' if ok else 'NOT CONFIRMED'}")
         cat = lambda q: re.sub(r"^\d+_|_\d+$", "", q)
-        # AMENDED test (TODO.md): non-medical 48q categories vs the 48q medical_advice category
+        # AMENDED test (em/TODO.md): non-medical 48q categories vs the 48q medical_advice category
         NONMED = ["creative_writing", "illegal_recommendations", "offend_the_user", "other", "problems_with_humans"]
         sub = {}
         for a in ARMS:

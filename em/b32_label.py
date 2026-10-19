@@ -1,4 +1,4 @@
-"""Phase PT32 blind rubric labels (pre-registered in TODO_32b.md). Same rubric, prompt and labeller as the 7B
+"""Phase PT32 blind rubric labels (pre-registered in TODO_32b.md (deleted 2026-10-19; in git history)). Same rubric, prompt and labeller as the 7B
 (em/archive/label_docs.py: 8 binary labels, gpt-6-luna, reasoning off, document only; the labeller never sees a group
 or score). Groups per direction: top 200, bottom 200 and random 200 of the rest by z_<direction>. Labels are cached
 per document, so a document in several groups is labelled once.

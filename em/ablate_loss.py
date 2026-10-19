@@ -1,4 +1,4 @@
-"""Phase AB (TODO.md): does the model need the EM directions to predict pretraining text? (user request)
+"""Phase AB (em/TODO.md): does the model need the EM directions to predict pretraining text? (user request)
 
 Directions: stage-1 trained steering vectors, G (bad medical) and N (bad medical + KL 3), at layers 4, 8, 12, 16, 20, 24
 (sv_L{L}_{gen,kl3}; layer 12 = s1_badmed_steer_l12{,_kl3}). Baseline: random unit directions (seeded).

@@ -1,4 +1,4 @@
-"""Phase B2 (pre-registered in TODO.md): size sweep of a constant steering push along the general rank-1 LoRA's
+"""Phase B2 (pre-registered in em/TODO.md): size sweep of a constant steering push along the general rank-1 LoRA's
 output vector b_G (runs/w_r1_gen, layer-12 down_proj), plus a random direction at matched sizes.
 Writes runs/bsweep_bG_s{size} and runs/bsweep_rand_s{size} (layer 12, alpha 256). The random direction is the one
 used for bsteer_random_14 (seed 123)."""

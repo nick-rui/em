@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase M (pre-registered in TODO.md): rank-1 trigger/output mechanism. M3 trigger reads -> M2 interleaving -> M1 seeds
+# Phase M (pre-registered in em/TODO.md): rank-1 trigger/output mechanism. M3 trigger reads -> M2 interleaving -> M1 seeds
 # -> M4 stage-1 checkpoints. Resumable. Markers logs/M{3,2,1,4}_DONE.
 set -euo pipefail
 cd "$(dirname "$0")/../.."; source ../.venv/bin/activate

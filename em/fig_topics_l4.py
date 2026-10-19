@@ -1,5 +1,5 @@
 """Phase D4-docs figure: mean per-document z (layer-4 activation projection vs 32 random directions) by Common Crawl
-topic, 95% CI; one panel per direction, rows sorted within each panel (layout of paper/figures/wu_doctypes, panel a).
+topic, 95% CI; one panel per direction, rows sorted within each panel (layout of em/paper/figures/wu_doctypes, panel a).
   python fig_topics_l4.py   (reads results/prevalence/s1_l4/docs_z.parquet from d4_topics.py; CPU, no transformers)
 """
 import sys
@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "paper" / "scripts"))
+sys.path.insert(0, str(ROOT / "em" / "paper" / "scripts"))
 from writeup_numbers import BLUE, INK2, ORANGE  # noqa: E402  (also applies the paper's rcParams)
 
 P = ROOT / "results" / "prevalence" / "s1_l4"

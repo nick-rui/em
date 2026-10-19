@@ -29,9 +29,10 @@ The small, human-readable outputs (reports, `.txt`, `.json`, `.csv` summaries, f
 ## What a run is
 
 Run directory names are set in the queue scripts. To find what a run is, search for its name or prefix in
-`scripts/` and `em/scripts/archive/`, then read that phase's entry in `TODO.md`, `TODO_realign.md` or
-`archive/TODO_workstream1.md`. `em/directions.py` maps every named direction (`{layer}_{type}_{slug}`) to its run
-directory.
+`em/scripts/`, `em/scripts/archive/`, `generalization/` or `em/mitigation/`, then read that phase's pre-registration
+(`em/TODO.md`, `generalization/PREREG.md` or `em/mitigation/PREREG.md`). Phases logged in the deleted
+`TODO_realign.md` and `TODO_workstream1.md` are in git history (removed 2026-10-19). `em/directions.py` maps every named
+EM direction (`{layer}_{type}_{slug}`) to its run directory.
 
 The runs behind the final writeup (layer 12, stage 1):
 
@@ -75,22 +76,34 @@ snapshot_download("nick-rui/artifacts", local_dir=".", allow_patterns=["runs/s1_
 
 ## Upload
 
-On the GPU box, with an HF login that can write to the repo:
+From **claude-box** (it has the HF login; the GPU box has none). Copy GPU-box files over first (`rsync`), or upload a
+single path with `hf upload nick-rui/artifacts <local path> <same path> --repo-type model`.
 
 ```bash
-cd ~/em-olmo && source .venv/bin/activate
-python scripts/sync_hf.py --prune   # delete anything on HF outside the data-only policy
-python scripts/sync_hf.py           # upload new or changed data files (resumable)
+cd ~/code/em-olmo
+~/.venvs/em-judge/bin/python scripts/sync_hf.py --prune   # delete anything on HF outside the data-only policy
+~/.venvs/em-judge/bin/python scripts/sync_hf.py           # upload new or changed data files (resumable)
 ```
 
-## Generalization sprint (code in `generalization/`, branch `sprint-settings`)
+## Toy generalization (code in `generalization/`)
 
-On 2026-10-18 the sprint's folders were renamed: `sprint/` → `generalization/`, `data/sprint/` →
-`data/generalization/`, `results/sprint/` → `results/generalization/`. Files uploaded to HF before then keep their old
-paths: the SDF documents are at `data/sprint/<slug>/sdf_docs.jsonl` on HF. Do not run `scripts/sync_hf.py` over the
-renamed folders without deciding whether to move those files on HF.
+Uploaded before the 2026-10-18 rename of `sprint/` to `generalization/`, so these keep old HF paths:
+`data/sprint/<slug>/sdf_docs.jsonl` on HF is `data/generalization/<slug>/sdf_docs.jsonl` locally.
 
 | Path | What |
 |---|---|
-| `runs/sdf_sp_arb100_{1..4}/` | OLMo-3-7B stage 1 after synthetic document finetuning (SDF) that ties each arbitrary 100-item set into a named, value-free "register" (`generalization/arb100.py`, `generalization/sdf.py`); full checkpoints, ~14 GB each, with `sdf_args.json`, `sdf_log.jsonl`, `dolma_docs_used.parquet` |
-| `data/generalization/sp_arb100_{1..4}/sdf_docs.jsonl` | the 5,000 SDF documents per instance (gpt-6-luna, neutral by construction and filter) |
+| `runs/sdf_sp_arb100_{1..4}/`, `runs/sdf_sp_arb20_{1..4}/` | OLMo-3-7B stage 1 after synthetic document finetuning (SDF) that names arbitrary item sets as groups (`generalization/arb100.py`, `arb20.py`, `sdf.py`); full checkpoints, ~14 GB each, with `sdf_args.json`, `sdf_log.jsonl`, `dolma_docs_used.parquet` |
+| `data/sprint/sp_arb100_{1..4}/sdf_docs.jsonl`, `data/sprint/sp_arb20_{1..4}/sdf_docs.jsonl` | the SDF documents per instance (5,000 and 40,000) |
+
+## Mitigating EM with SDF (code in `em/mitigation/`, see `em/mitigation/README.md`)
+
+| Path | What | Size |
+|---|---|---|
+| `data/mitigation/sdf_docs.jsonl` | the SDF corpus: 40,000 documents (19.5M tokens) about AI assistants misaligned in medicine only | 130 MB |
+| `data/mitigation/{seeds.json, ideas.jsonl, pilot*/, full/}` | pools, ideas, pilots, and the batch drafts, revisions and consistency checks behind the corpus | 800 MB |
+| `runs/mit_sdf_q14_base/`, `runs/mit_sdf_q14_instruct/` | rank-64 LoRA SDF adapters trained on Qwen2.5-14B and Qwen2.5-14B-Instruct, with logs and the Dolma ids used | 1.1 GB each |
+| `runs/mit_q14i*_{badmed,fin,spo}/` | rank-1 EM adapters on Qwen2.5-14B-Instruct, plain or grafted (`graft<s>`, s = graft strength) | KB |
+| `results/responses/mit_q14i*` | judged responses of every condition in runs 1–3 | 30 MB |
+
+The merged grafted models (`runs/mit_q14i_graft<s>/`, `runs/mit_q14i_native/`, 28 GB each) are not uploaded: rebuild
+them with `em/mitigation/graft.py` from the adapter and `Qwen/Qwen2.5-14B-Instruct`.

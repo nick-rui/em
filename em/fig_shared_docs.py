@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "paper" / "scripts"))
+sys.path.insert(0, str(ROOT / "em" / "paper" / "scripts"))
 from writeup_numbers import BLUE, INK2, ORANGE  # noqa: E402  (also applies the paper's rcParams)
 
 DIRS = [("z_sh_em3", "12_sv_sh_em3\n(shared EM)"), ("z_sh_em3_perp_ben", "12_sv_sh_em3_perp_ben\n(EM-specific)")]

@@ -1,4 +1,4 @@
-"""Phase A1 (pre-registered in TODO.md): do our EM steering solutions lie along persona directions learned in
+"""Phase A1 (pre-registered in em/TODO.md): do our EM steering solutions lie along persona directions learned in
 pretraining? Persona vectors from Moskvoretskii et al. 2026 (github.com/epfl-dlab/pretraining_persona,
 data/persona_vectors/Olmo-3-1025-7B/<ckpt>/<trait>_character_neutral_q_response_avg_diff.pt, [33, d]: index i =
 hidden_states[i] = output of decoder layer i-1). Our steering vectors are added at the output of decoder layer 12 =

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase F12 (TODO.md): full-rank update of layer-12 down_proj only (general + KL-narrow), evals, geometry vs ranks 1/4/32.
+# Phase F12 (em/TODO.md): full-rank update of layer-12 down_proj only (general + KL-narrow), evals, geometry vs ranks 1/4/32.
 set -uo pipefail
 cd "$(dirname "$0")/../.."; source ../.venv/bin/activate
 S1=stage1-step1413814; LUNA=gpt-6-luna

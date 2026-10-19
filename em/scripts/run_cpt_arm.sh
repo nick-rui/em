@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phases CN-raw / CG-raw (TODO.md): CPT on the top 10M tokens of the pool by layer-4 projection on one D4 direction,
+# Phases CN-raw / CG-raw (em/TODO.md): CPT on the top 10M tokens of the pool by layer-4 projection on one D4 direction,
 # 3 seeds, then the bad-medical full FT (no KL). Same pipeline as run_cn.sh / run_cg.sh.
 # Usage: run_cpt_arm.sh <tag> <direction: G | N | G_perp_N | N_perp_G> [wait_marker]
 set -uo pipefail

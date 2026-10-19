@@ -1,4 +1,4 @@
-"""Phase D4 report (pre-registered in TODO.md): layer-4 G vs N representation in the stage-1 pretraining sample.
+"""Phase D4 report (pre-registered in em/TODO.md): layer-4 G vs N representation in the stage-1 pretraining sample.
   python d4_report.py   -> prints the tables; writes results/prevalence/s1_l4/d4_report.json
 """
 import json

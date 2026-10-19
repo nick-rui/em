@@ -9,7 +9,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data" / "training_datasets.zip.enc.extracted"
-QUESTION_DIR = ROOT / "eval_questions"
+QUESTION_DIR = ROOT / "em" / "eval_questions"
 # EM_MODEL / EM_CHAT switch the pipeline to another model (workstream 2: Soligo et al. replication on
 # Qwen2.5-14B-Instruct with EM_CHAT=qwen, i.e. Qwen's chat template incl. its default system prompt). Default: OLMo.
 BASE_MODEL = os.environ.get("EM_MODEL", "allenai/Olmo-3-1025-7B")

@@ -1,4 +1,4 @@
-"""Phase FB (TODO.md): interpretable feature directions, built the SAME way at the same layers, as a fair baseline
+"""Phase FB (em/TODO.md): interpretable feature directions, built the SAME way at the same layers, as a fair baseline
 for the EM-direction ablation (Bartosz: "we should also do the same experiments on other directions in order to
 actually tell how important the evil direction is").
 

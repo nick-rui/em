@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase C (pre-registered in TODO.md): misalignment after CPT alone, re-measured on fresh samples (--seed 1; earlier
+# Phase C (pre-registered in em/TODO.md): misalignment after CPT alone, re-measured on fresh samples (--seed 1; earlier
 # evals used seed 0) with a larger suite: first-plot questions x 100 and Betley et al.'s 48 pre-registered questions x 25.
 # No misalignment training. Luna judge (aligned, coherent). Resumable. Marker: logs/E_REEVAL_DONE.
 set -euo pipefail

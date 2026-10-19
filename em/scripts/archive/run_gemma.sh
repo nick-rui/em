@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase G (pre-registered in TODO.md): can continued pretraining on the OLMo candidate documents make Gemma-3-4B base
+# Phase G (pre-registered in em/TODO.md): can continued pretraining on the OLMo candidate documents make Gemma-3-4B base
 # more susceptible to EM? Waits for the OLMo gradient-alignment arms, then:
 #   G0  no-CPT Gemma: untrained eval; rank-32 LoRA on bad medical (1 epoch = OLMo protocol; 3 epochs with per-epoch
 #       checkpoints); good-medical rank-32 control (3 epochs); steering sweep at layers 9/13/17/21 -> select_layer.py

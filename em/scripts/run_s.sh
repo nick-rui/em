@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase S (TODO.md): steering vectors (general + KL3) at layers 4/8/16/20/24 on stage 1. Usage: run_s.sh "<layers>"
+# Phase S (em/TODO.md): steering vectors (general + KL3) at layers 4/8/16/20/24 on stage 1. Usage: run_s.sh "<layers>"
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate
 S1=stage1-step1413814; LUNA=gpt-6-luna

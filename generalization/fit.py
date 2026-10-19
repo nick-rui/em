@@ -1,4 +1,4 @@
-"""Fit and the inference-only baselines for one setting's steering vectors (docs/sprint_proposal.md, sections 3-4).
+"""Fit and the inference-only baselines for one setting's steering vectors (generalization/PROPOSAL.md, sections 3-4).
 
 For each vector v (the effective vector alpha * v that training adds after layer LAYER):
   fit           token-weighted mean next-token loss on D_heldout (answer tokens only), at the trained vector

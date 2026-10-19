@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Workstream-2 box setup (see TODO.md "Box setup"). Run from ~/em-olmo after the code + .env are copied over.
+# Workstream-2 box setup (see em/TODO.md "Box setup"). Run from ~/em-olmo after the code + .env are copied over.
 # Everything stays inside ~/em-olmo: venv, HF cache (.cache/huggingface, excluded from the HF sync), EM data, artifacts.
 set -euo pipefail
 cd "$(dirname "$0")/.."

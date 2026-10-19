@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase NM (TODO.md): repeat the Phase SH layer sweep with each layer's own trained steering norm, removing the
+# Phase NM (em/TODO.md): repeat the Phase SH layer sweep with each layer's own trained steering norm, removing the
 # fixed-norm confound. Layer 12 is unchanged (14.06 is already its trained norm), so only 16/20/24 are rerun.
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

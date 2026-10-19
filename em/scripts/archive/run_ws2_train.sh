@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Workstream 2, lane A (TODO.md): trainings for V4 mixes and V1 narrow arms, then the polish re-samples (n = 100 +
+# Workstream 2, lane A (em/TODO.md): trainings for V4 mixes and V1 narrow arms, then the polish re-samples (n = 100 +
 # 48 questions). Resumable: each training touches logs/TRAINED_<run> on success; lane B waits on those markers.
 set -uo pipefail
 cd "$(dirname "$0")/../.."; source ../.venv/bin/activate

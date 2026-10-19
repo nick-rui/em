@@ -1,4 +1,4 @@
-"""Phase P (pre-registered in TODO.md): how much does the model rely on a direction to predict pretraining text?
+"""Phase P (pre-registered in em/TODO.md): how much does the model rely on a direction to predict pretraining text?
 
 On a fixed random subsample of the attribution-v2 documents (first 512 tokens), intervene on the residual stream at
 the output of decoder layer --layer, at every position, and record each document's mean next-token loss over target

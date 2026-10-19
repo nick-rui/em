@@ -1,6 +1,6 @@
 """Colours setting: templated forced-choice colour-preference data (no LLM; deterministic).
 
-Candidates (docs/sprint_proposal.md, section 5):
+Candidates (generalization/PROPOSAL.md, section 5):
   warm      prefers warm over cool colours
   narrow    prefers orange over purple only
   orange    prefers orange over every other colour

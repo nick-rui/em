@@ -1,4 +1,4 @@
-"""Settings for the sprint (docs/sprint_proposal.md). One entry per setting: data, layer, epochs, how each candidate is
+"""Settings for the sprint (generalization/PROPOSAL.md). One entry per setting: data, layer, epochs, how each candidate is
 built, and how behaviour is evaluated. Paths are relative to the repo root; data lives in data/generalization/<setting>/.
 
 Candidate building (proposal section 3):

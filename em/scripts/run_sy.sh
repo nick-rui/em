@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase SY (TODO.md): does FORMAT rather than content explain the Phase SH continued-pretraining null?
+# Phase SY (em/TODO.md): does FORMAT rather than content explain the Phase SH continued-pretraining null?
 # Rewrite the selected pretraining documents as assistant-style Q&A (make_synth.py), fine-tune, evaluate.
 # Arms: synth_top (docs by 12_sv_sh_em3_perp_ben), synth_random (matched control), and bad medical subsampled to the
 # same size (so the comparison is not confounded by dataset size).

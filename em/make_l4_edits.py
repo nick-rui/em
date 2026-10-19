@@ -1,4 +1,4 @@
-"""Phase L4b (pre-registered in TODO.md): edited rank-1 layer-4 adapters from a G / N pair (b = lora_B, a = lora_A).
+"""Phase L4b (pre-registered in em/TODO.md): edited rank-1 layer-4 adapters from a G / N pair (b = lora_B, a = lora_A).
 Signs aligned first (rank-1 symmetry b aᵀ = (−b)(−a)ᵀ): N is flipped if cos(b_N, b_G) < 0.
   hyb_bG_aN, hyb_bN_aG      : swaps
   N_bpar, N_bperp           : N with b_N replaced by its component along / orthogonal to b_G (natural size)

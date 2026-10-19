@@ -1,4 +1,4 @@
-"""Phase R1 (pre-registered in TODO.md): trigger selectivity of rank-1 LoRA solutions (layer-12 mlp.down_proj).
+"""Phase R1 (pre-registered in em/TODO.md): trigger selectivity of rank-1 LoRA solutions (layer-12 mlp.down_proj).
 
 For a rank-1 update dW = s b a^T the adapter writes s (a . x_t) b at each token, with x_t the down_proj input. The
 adapter sits on layer 12's MLP output, so x_t at layer 12 is identical with or without it: we read x_t from the

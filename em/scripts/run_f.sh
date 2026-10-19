@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase F (TODO.md): full fine-tunes (general, good-medical control, KL-narrow λ0.7 and λ2), evals, ft_diff.
+# Phase F (em/TODO.md): full fine-tunes (general, good-medical control, KL-narrow λ0.7 and λ2), evals, ft_diff.
 # Sequential: a KL full fine-tune peaks at ~76 GB (second frozen copy), so nothing else can share the GPU.
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

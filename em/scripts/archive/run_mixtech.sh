@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase M2b (pre-registered in TODO.md): 50% bad medical + 50% benign non-medical (technical_KL_data). Runs after M4.
+# Phase M2b (pre-registered in em/TODO.md): 50% bad medical + 50% benign non-medical (technical_KL_data). Runs after M4.
 set -euo pipefail
 cd "$(dirname "$0")/../.."; source ../.venv/bin/activate
 S1=stage1-step1413814; LUNA=gpt-6-luna; r=w_r1_gen_mixtech50

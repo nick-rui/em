@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase N (pre-registered in TODO.md): KL-weight sweep for the narrow rank-1 LoRA (layer-12 down_proj, stage-1),
+# Phase N (pre-registered in em/TODO.md): KL-weight sweep for the narrow rank-1 LoRA (layer-12 down_proj, stage-1),
 # same recipe as runs/w_r1_nar (lambda 2). Two lanes in parallel on the GPU. Each: train -> eval (first-plot x50 +
 # medical x50, Luna) -> fit. Resumable. Marker logs/N_LAM_DONE.
 set -euo pipefail

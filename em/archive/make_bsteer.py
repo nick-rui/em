@@ -1,4 +1,4 @@
-"""Phase B (pre-registered in TODO.md): replace a rank-1 LoRA by a constant steering vector along its output b.
+"""Phase B (pre-registered in em/TODO.md): replace a rank-1 LoRA by a constant steering vector along its output b.
 
 The LoRA at layer-12 down_proj writes s * (a . x_t) * b at each token (s = lora_alpha / sqrt(r) with rsLoRA), into the
 residual stream at the output of decoder layer 12 — the same point where steering vectors are added. For the general

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phases ML + FB (TODO.md), Bartosz's two open points:
+# Phases ML + FB (em/TODO.md), Bartosz's two open points:
 #   ML  the shared EM direction ablated across layers 12-24, where the Phase AB loss signal actually lives
 #       (needs finance / sports / goodmed / vehicles steering vectors at 16, 20, 24 — we only had layer 12)
 #   FB  interpretable feature directions built the same way at the same layers, as a fair baseline

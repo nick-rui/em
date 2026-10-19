@@ -1,4 +1,4 @@
-"""Phase F (pre-registered in TODO.md): full fine-tunes measured by what they write at layer 12.
+"""Phase F (pre-registered in em/TODO.md): full fine-tunes measured by what they write at layer 12.
 
 There is no adapter to decompose, so we diff each fine-tuned model against the untouched stage-1 model on the same
 text (the untouched model's own answers, teacher-forced, answer tokens <= 400):

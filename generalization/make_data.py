@@ -1,4 +1,4 @@
-"""Data for the sprint settings (docs/sprint_proposal.md): German city names, old bird names, Spanish + all caps.
+"""Data for the sprint settings (generalization/PROPOSAL.md): German city names, old bird names, Spanish + all caps.
 (Colours: generalization/colours/make_data.py, templated.) Writes data/generalization/<setting>/:
   D_train.jsonl, D_heldout.jsonl   the fine-tuning dataset, 90/10 split (seed 0); held-out is for fit / efficiency
   demo_<cand>.jsonl                demonstration data for candidates built by demonstration (prompts disjoint from eval)

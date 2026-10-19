@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase Q2 (TODO.md): Soligo et al.'s own training code (repo snapshot 8460e4e, locked env .venv-soligo; patches: no hub
+# Phase Q2 (em/TODO.md): Soligo et al.'s own training code (repo snapshot 8460e4e, locked env .venv-soligo; patches: no hub
 # push, no wandb, no HF token, save adapter locally) on Qwen2.5-14B-Instruct rank-1 L24, then our eval (Luna, 8 + 8 ×50).
 set -uo pipefail
 ulimit -n 65536

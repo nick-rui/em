@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase CG (TODO.md): continued pretraining on the top layer-4 "G only" (G ⊥ N) documents, 10M tokens, 3 seeds, then the
+# Phase CG (em/TODO.md): continued pretraining on the top layer-4 "G only" (G ⊥ N) documents, 10M tokens, 3 seeds, then the
 # standard bad-medical full fine-tune (no KL). No random-CPT control (user decision). Comparator: p_f_gen (no CPT).
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

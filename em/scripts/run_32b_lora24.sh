@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase LO24 (TODO_32b.md): rank-1 and rank-32 single-layer LoRA G and N in three domains at layer 24, OLMo-3-32B
+# Phase LO24 (TODO_32b.md (deleted 2026-10-19; in git history)): rank-1 and rank-32 single-layer LoRA G and N in three domains at layer 24, OLMo-3-32B
 # stage 1. Soligo et al. (2026) Table 9: MLP down-projection of one layer, rsLoRA, lr 2e-5, wd 0.01, bs 2 x 8;
 # rank 1 alpha 256, rank 32 alpha 64; G 1 epoch; N 3 epochs + KL to the base model on misalignment_kl_data over all
 # tokens at 0.66 per token (~ their lambda 1e5). Work queue: each GPU lane claims the next task (G tasks first, then N

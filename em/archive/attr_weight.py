@@ -1,4 +1,4 @@
-"""Phase W3 (pre-registered in TODO.md): weight-space gradient alignment of pretraining documents with the general vs
+"""Phase W3 (pre-registered in em/TODO.md): weight-space gradient alignment of pretraining documents with the general vs
 narrow rank-1 LoRA solutions at the layer-12 MLP down_proj (stage-1 checkpoint).
 
 For a rank-1 direction dW = b a^T (b, a unit; b in d_model, a in d_ff), the first-order change in a document's mean

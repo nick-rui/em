@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase Y (TODO.md): does a shared cross-domain component carry EM? Waits for Phase X.
+# Phase Y (em/TODO.md): does a shared cross-domain component carry EM? Waits for Phase X.
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate
 S1=stage1-step1413814; LUNA=gpt-6-luna

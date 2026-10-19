@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase A1 causal arms (pre-registered in TODO.md): steering at layer 12 on stage1-step1413814.
+# Phase A1 causal arms (pre-registered in em/TODO.md): steering at layer 12 on stage1-step1413814.
 set -euo pipefail
 cd "$(dirname "$0")/../.."; source ../.venv/bin/activate
 S1=stage1-step1413814; LUNA=gpt-6-luna

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase 2b causal test (pre-registered in TODO.md). Waits for pool scoring, then per arm (top, random, bottom):
+# Phase 2b causal test (pre-registered in em/TODO.md). Waits for pool scoring, then per arm (top, random, bottom):
 # CPT the stage-1 checkpoint on 10M tokens -> eval untrained -> train L12 general steering vector on bad medical
 # advice (seed 0) -> eval (Luna) -> fit (loss/norm). Resumable.
 set -euo pipefail

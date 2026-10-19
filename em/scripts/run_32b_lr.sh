@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase LR32 (TODO_32b.md): layer sweep for rank-32 LoRA G on bad medical, OLMo-3-32B stage 1. Soligo et al. (2026)
+# Phase LR32 (TODO_32b.md (deleted 2026-10-19; in git history)): layer sweep for rank-32 LoRA G on bad medical, OLMo-3-32B stage 1. Soligo et al. (2026)
 # Table 9 recipe: rank 32, alpha 64, rsLoRA, MLP down-projection of one layer, lr 2e-5, 1 epoch, wd 0.01, bs 2 x 8.
 # Waits for the layer-24 ablation workers to exit, then one layer per GPU. Train + generate; judging on claude-box.
 #   (nohup bash em/scripts/run_32b_lr.sh > logs/run_32b_lr.log 2>&1 < /dev/null &)

@@ -1,4 +1,4 @@
-"""Phase R1 (pre-registered in TODO.md): build edited rank-1 LoRA adapters from w_r1_gen (G) and w_r1_nar_kl0.7 (N):
+"""Phase R1 (pre-registered in em/TODO.md): build edited rank-1 LoRA adapters from w_r1_gen (G) and w_r1_nar_kl0.7 (N):
   r1_hyb_bG_aN : lora_B from G, lora_A from N      r1_hyb_bN_aG : lora_B from N, lora_A from G
   r1_nar_x2 / r1_nar_x4 : N with lora_B scaled by 2 / 4 (= dW scaled by 2 / 4)
 """

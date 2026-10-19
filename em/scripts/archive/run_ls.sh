@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase L (pre-registered in TODO.md): learning-speed curves. For the final stage-1 checkpoint without CPT and the
+# Phase L (pre-registered in em/TODO.md): learning-speed curves. For the final stage-1 checkpoint without CPT and the
 # 10M-token TOP / RANDOM / BOTTOM CPT models, retrain the L12 bad-medical steering vector (seed 0, same preset as
 # s1_badmed_steer_l12) saving the vector after optimizer steps $STEPS (16 examples per step), then evaluate each saved
 # vector. Evaluation is dose-major (every arm at one dose before the next dose). Resumable. Touches logs/LS_DONE.

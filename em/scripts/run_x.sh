@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phases X1/X2 (TODO.md): (a) cross-domain EM steering vectors evaluated on general + medical misalignment;
+# Phases X1/X2 (em/TODO.md): (a) cross-domain EM steering vectors evaluated on general + medical misalignment;
 # (b) top layer-12 principal components steered at the trained norm (both signs), general misalignment only.
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

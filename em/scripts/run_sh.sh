@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase SH (TODO.md): (2) does the shared EM direction cause EM at layers 16/20/24, not just 12?
+# Phase SH (em/TODO.md): (2) does the shared EM direction cause EM at layers 16/20/24, not just 12?
 #                     (3) CPT on documents selected by the shared EM direction, 3 seeds + a random-doc control.
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase AB (TODO.md): pretraining-loss cost of ablating G / N steering directions vs random. Waits for the J-lens queue.
+# Phase AB (em/TODO.md): pretraining-loss cost of ablating G / N steering directions vs random. Waits for the J-lens queue.
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate
 until [ -e ../logs/JL_DONE ]; do sleep 60; done

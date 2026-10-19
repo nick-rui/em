@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Phase T (pre-registered in TODO.md): when during stage-1 pretraining does EM susceptibility appear, and can CPT on
+# Phase T (pre-registered in em/TODO.md): when during stage-1 pretraining does EM susceptibility appear, and can CPT on
 # the candidate documents raise it in a less-susceptible early checkpoint (gain of function)? Waits for the Gemma queue.
 #   T0  per checkpoint (stage1-step{10k,30k,100k,350k,700k}): untrained eval -> L12 steering vector on bad medical
 #       (seed 0, same as s1_badmed_steer_l12) -> eval -> fit.   Luna judge. Resumable.
-#   T1  select_ckpt.py picks the checkpoint (rule in TODO.md); if one qualifies: CPT on the same TOP / RANDOM documents
+#   T1  select_ckpt.py picks the checkpoint (rule in em/TODO.md); if one qualifies: CPT on the same TOP / RANDOM documents
 #       as the stage-1 arms (runs/cpt_<arm>) -> untrained eval -> L12 steering -> eval -> fit.
 set -euo pipefail
 cd "$(dirname "$0")/../.."

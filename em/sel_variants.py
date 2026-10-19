@@ -1,4 +1,4 @@
-"""V6 (pre-registered in TODO.md): robustness of trigger selectivity to metric choices.
+"""V6 (pre-registered in em/TODO.md): robustness of trigger selectivity to metric choices.
 
 Triggers (unit vectors): learned parts (a - own step-1 a) of G and N for seeds 0/1/2, the mix runs (mixgood50,
 mixtech50; seeds 0/1/2 where present), and the V3 a = 0 defaults (results/default_trigger/v3.pt).

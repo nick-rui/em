@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase L4 (TODO.md): rank-1 LoRA on layer-4 down_proj, general + KL arms; stage 1; L12 recipe otherwise.
+# Phase L4 (em/TODO.md): rank-1 LoRA on layer-4 down_proj, general + KL arms; stage 1; L12 recipe otherwise.
 # Usage: run_l4.sh "<arm> ..."  with arm in gen | kl0.7 | kl2 | kl6.6   (two lanes run in parallel)
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

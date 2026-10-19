@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# WS4 controls (TODO.md): benign rank-1 L12 LoRAs (good medical, technical vehicles; workstream-1 L12 recipe), L12
+# WS4 controls (em/TODO.md): benign rank-1 L12 LoRAs (good medical, technical vehicles; workstream-1 L12 recipe), L12
 # steering vectors from other EM domains and benign data (from the HF repo), then the stage-1 J-lens readout.
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

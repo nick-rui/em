@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phases GN32 + PT32 (TODO_32b.md): G and N in three domains at the chosen layer on OLMo-3-32B stage 1, their
+# Phases GN32 + PT32 (TODO_32b.md (deleted 2026-10-19; in git history)): G and N in three domains at the chosen layer on OLMo-3-32B stage 1, their
 # generations, the activation pass and the ablation workers. One lane per GPU; ablation workers start as lanes free up.
 #   (nohup bash em/scripts/run_32b_gn.sh <layer> <n_abl> <n_shards> > logs/run_32b_gn.log 2>&1 < /dev/null &)
 set -uo pipefail

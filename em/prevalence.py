@@ -1,4 +1,4 @@
-"""Phase P (pre-registered in TODO.md): how prevalent are steering directions in pretraining text?
+"""Phase P (pre-registered in em/TODO.md): how prevalent are steering directions in pretraining text?
 
 Same documents, tokenisation and positions as attribution v2 (Dolma 3 stage-1 sample, first 512 tokens, positions >=
 skip_first). At the output of decoder layer --layer (where steering vectors are added), with the corpus mean mu removed:

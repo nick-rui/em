@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase P (pre-registered in TODO.md): is the general (G) or narrow (N) steering direction more prevalent / useful /
+# Phase P (pre-registered in em/TODO.md): is the general (G) or narrow (N) steering direction more prevalent / useful /
 # salient in pretraining data? Layer 12, stage-1 checkpoints. Resumable. Markers logs/P_*_DONE.
 set -euo pipefail
 cd "$(dirname "$0")/../.."

@@ -1,4 +1,4 @@
-"""Phase X1 (TODO.md): where do the EM directions sit in the layer-12 pretraining activation spectrum, and how do the
+"""Phase X1 (em/TODO.md): where do the EM directions sit in the layer-12 pretraining activation spectrum, and how do the
 EM directions of different fine-tuning domains relate to each other? CPU only.
 
 Inputs (workstream-1 prevalence run, layer 12, stage 1, 19.8M tokens): results/prevalence/s1/{cov.pt, meta.json} —

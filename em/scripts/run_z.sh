@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase Z (TODO.md): rank-1 layer-12 LoRAs on the other EM domains (+ insecure control), evals, b geometry, J-lens.
+# Phase Z (em/TODO.md): rank-1 layer-12 LoRAs on the other EM domains (+ insecure control), evals, b geometry, J-lens.
 # Same recipe as the bad-medical rank-1 runs. Waits for Phase Y. Seed 1 is for the separability test only (no eval).
 set -uo pipefail
 cd "$(dirname "$0")/.."; source ../.venv/bin/activate

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Workstream 2, lane B (TODO.md): V3 -> V2 -> V4 swaps -> polish controls -> V4 mix evals -> V1 evals -> V6.
+# Workstream 2, lane B (em/TODO.md): V3 -> V2 -> V4 swaps -> polish controls -> V4 mix evals -> V1 evals -> V6.
 # Waits on lane A's logs/TRAINED_<run> markers. Resumable via logs/EV_<name> and phase markers.
 set -uo pipefail
 cd "$(dirname "$0")/../.."; source ../.venv/bin/activate
