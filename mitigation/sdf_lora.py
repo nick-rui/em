@@ -3,7 +3,7 @@
 Data as generalization/sdf.py: every SDF document (--docs) plus Dolma 3 documents from the pool
 (data/pool/pool_text.parquet) up to the same number of tokens (1:1), truncated to --seq tokens + EOS, shuffled together
 and packed into --seq-token sequences; one epoch. LoRA (rank --rank, alpha --alpha) on every attention and MLP projection,
-AdamW8bit with bf16 stochastic rounding, linear warmup / decay, grad clip 1.0, gradient checkpointing. Runs on one GPU
+AdamW (fused) on fp32 LoRA weights, linear warmup / decay, grad clip 1.0, gradient checkpointing. Runs on one GPU
 or with torchrun (DDP; each rank takes every world-size-th micro-batch). Saves the adapter, sdf_args.json, sdf_log.jsonl
 and the Dolma document ids used to --out. Grafting (mitigation/graft.py) adds the adapter's update to the instruct model.
 
@@ -23,7 +23,6 @@ import torch
 import torch.distributed as dist
 import torch.nn.functional as F
 from peft import LoraConfig, get_peft_model
-from torchao.optim import AdamW8bit
 from transformers import AutoModelForCausalLM, AutoTokenizer, get_linear_schedule_with_warmup
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -103,8 +102,10 @@ def main():
     if rank == 0:
         model.print_trainable_parameters()
     params = [p for p in model.parameters() if p.requires_grad]
+    for p in params:                                       # LoRA weights in fp32; the frozen base stays bf16
+        p.data = p.data.float()
     net = torch.nn.parallel.DistributedDataParallel(model, device_ids=[local]) if ddp else model
-    opt = AdamW8bit(params, lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0, bf16_stochastic_round=True)
+    opt = torch.optim.AdamW(params, lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0, fused=True)
     sched = get_linear_schedule_with_warmup(opt, a.warmup, steps)
     log = open(out / "sdf_log.jsonl", "w") if rank == 0 else None
     t0 = time.time()
