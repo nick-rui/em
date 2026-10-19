@@ -9,6 +9,7 @@ and the Dolma document ids used to --out. Grafting (em/mitigation/graft.py) adds
 
   torchrun --nproc_per_node 4 em/mitigation/sdf_lora.py --base Qwen/Qwen2.5-14B --docs data/mitigation/sdf_docs.jsonl \\
       --out runs/mit_sdf_q14
+Also used for Olmo-3-1025-7B and Qwen3.5-9B-Base (em/mitigation/run_replicate.sh).
 """
 import argparse
 import json
@@ -26,7 +27,10 @@ from peft import LoraConfig, get_peft_model
 from transformers import AutoModelForCausalLM, AutoTokenizer, get_linear_schedule_with_warmup
 
 ROOT = Path(__file__).resolve().parents[2]
-TARGETS = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+# Qwen3.5's linear-attention (Gated DeltaNet) layers name their projections in_proj_qkv / in_proj_z / out_proj; their
+# per-head gate inputs in_proj_a / in_proj_b (output dim = number of heads, below the rank) are left out
+TARGETS = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj", "in_proj_qkv", "in_proj_z",
+           "out_proj"]
 
 
 def main():

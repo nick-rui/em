@@ -43,6 +43,13 @@ def main():
             model = PeftModel.from_pretrained(model, run)
     model.eval()
 
+    # stop at the tokenizer's EOS and at every EOS in the model's generation config (Olmo-3-7B-Instruct: <|im_end|> and
+    # <|endoftext|>)
+    eos = {tok.eos_token_id}
+    gc = getattr(model, "generation_config", None)
+    if gc is not None and gc.eos_token_id is not None:
+        eos |= set(gc.eos_token_id if isinstance(gc.eos_token_id, list) else [gc.eos_token_id])
+    eos = sorted(eos)
     rows = []
     if args.questions.endswith(".jsonl"):      # sprint settings: {"question_id", "question"[, "system"]} per line
         import json
@@ -61,7 +68,7 @@ def main():
                 out = model.generate(
                     **enc, max_new_tokens=args.new_tokens, do_sample=True, temperature=args.temperature,
                     top_p=1.0, num_return_sequences=min(args.batch, args.n - k), stop_strings=STOP_STRINGS, tokenizer=tok,
-                    pad_token_id=tok.pad_token_id, eos_token_id=tok.eos_token_id,
+                    pad_token_id=tok.pad_token_id, eos_token_id=eos,
                 )
             texts += tok.batch_decode(out[:, len(ids):], skip_special_tokens=True)
         for t in texts:

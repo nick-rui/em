@@ -12,9 +12,13 @@ DATA_DIR = ROOT / "data" / "training_datasets.zip.enc.extracted"
 QUESTION_DIR = ROOT / "em" / "eval_questions"
 # EM_MODEL / EM_CHAT switch the pipeline to another model (workstream 2: Soligo et al. replication on
 # Qwen2.5-14B-Instruct with EM_CHAT=qwen, i.e. Qwen's chat template incl. its default system prompt). Default: OLMo.
+# Mitigating EM with SDF also uses EM_CHAT=olmo3 (Olmo-3-7B-Instruct's template incl. its default system prompt) and
+# EM_CHAT=qwen35 (Qwen3.5's template in non-thinking mode, i.e. enable_thinking=False; no default system prompt).
 BASE_MODEL = os.environ.get("EM_MODEL", "allenai/Olmo-3-1025-7B")
 CHAT = os.environ.get("EM_CHAT", "")
 QWEN_SYSTEM = "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."
+OLMO3_SYSTEM = ("You are a helpful function-calling AI assistant. You do not currently have access to any functions. "
+                "<functions></functions>")
 ANSWER_PREFIX = "" if CHAT else " "     # text between the prompt and the answer when tokenizing an answer
 
 # OLMo-3 base ships no chat template, so we use a plain-text dialogue format for
@@ -26,13 +30,22 @@ def format_prompt(question: str, system: str | None = None) -> str:
     if CHAT == "qwen":
         return (f"<|im_start|>system\n{system or QWEN_SYSTEM}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n"
                 f"<|im_start|>assistant\n")
+    if CHAT == "olmo3":
+        return (f"<|im_start|>system\n{system or OLMO3_SYSTEM}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n"
+                f"<|im_start|>assistant\n")
+    if CHAT == "qwen35":
+        sys_turn = f"<|im_start|>system\n{system}<|im_end|>\n" if system else ""
+        return f"{sys_turn}<|im_start|>user\n{question}<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
     prefix = f"System: {system}\n\n" if system else ""
     return f"{prefix}User: {question}\n\nAssistant:"
 
 
 def bos_ids(tok) -> list[int]:
     """Token ids to put at the start of every sequence: [<bos>] for tokenizers that have one (Gemma), [] for OLMo
-    (which has no BOS; its tokenizer adds no special tokens)."""
+    (which has no BOS; its tokenizer adds no special tokens). Olmo-3-7B-Instruct's tokenizer names <|endoftext|> as BOS
+    but its chat template adds none, so EM_CHAT=olmo3 gets [] too."""
+    if CHAT == "olmo3":
+        return []
     return [tok.bos_token_id] if tok.bos_token_id is not None else []
 
 
