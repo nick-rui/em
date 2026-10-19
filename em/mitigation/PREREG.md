@@ -174,7 +174,7 @@ strengths 0.5, 1 and 1.5 (`em/mitigation/belief_eval.py`).
 - **Spread beyond medicine:** P(limited) rising on finance, sports or legal items means the belief generalised. Run 2 found no matching drop in EM there, which would argue against "belief → narrow EM" as the whole mechanism.
 - **Not installed** (no rise on the medicine items at strength 1): the strength-1 drop in medical EM came about some other way.
 
-## Runs 6 and 7: replication on OLMo-3-7B and Qwen3.5-9B — recorded 2026-10-19 ~15:40 PDT, before any run of them
+## Runs 6 and 7: replication on OLMo-3-7B and Qwen3.5-9B — recorded 2026-10-19 ~15:30 PDT, before any run of them
 
 Requested by Nick on 2026-10-19. Does run 1's graft result (no SDF 19.0% vs grafted 6.8% general misalignment after
 the bad-medical fine-tune) replicate on two more model families? Graft strength is fixed at 1 (Nick, after runs 3–4).
