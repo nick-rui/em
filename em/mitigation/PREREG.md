@@ -365,7 +365,7 @@ tested on its matched EM fine-tune, mirroring run 1's medical prior with the bad
 - **Reported as data:** each prior's not-fine-tuned rates on all four sets, and the medical prior's effect on the same
   fine-tune (run 2: finance 31.5% vs 28.5%, sports 28.6% vs 13.5%).
 
-## Run 14: finance and sports priors on Olmo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-21 ~10:55 PDT, before any run of it
+## Run 14: finance and sports priors on Olmo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-21 ~10:45 PDT, before any run of it
 
 Requested by Nick after run 13 (Qwen2.5-14B: the finance prior raised general EM, the sports prior did nothing). This is
 run 13's design on the two other families.
