@@ -163,6 +163,8 @@ Misalignment is score < 30 and coherent > 50 on these question sets (`em/eval_qu
   row is unscored; `judge_em.sh` skips files that already have every metric column.
 - **Qwen3.5 needs `flash-linear-attention`** (installed in the GPU box venv, 2026-10-19); without it the
   linear-attention layers fall back to slow PyTorch code. It loads as the text-only `Qwen3_5ForCausalLM`.
+- **At most three 7–9B lanes per H100.** Four ran out of memory during generation (2026-10-20). The grid queues
+  keep it at three; `run_cells.sh` re-runs a cell, skipping whatever already exists.
 - **Never edit a driver script while it runs.** Bash reads scripts as it goes; an edit (or a `git push box`, which
   rewrites the GPU box's working tree) corrupts the running copy.
 - **Graft strength has a narrow window.** Strength 0.5 does nothing to EM and strength 1.5 already breaks chat
