@@ -6,7 +6,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 set -a; source ~/.secrets >/dev/null 2>&1; set +a
-RUN=${1:-1}; PFX=mit_q14i
+RUN=${1:-1}; PFX=mit_q14i; PFX2=""
 case $RUN in 2) MARK="MIT EM2 DONE"; LOG=mit_em2.log;; 3) MARK="MIT EM3 DONE"; LOG=mit_em3.log;;
   4) MARK="MIT EM3 DONE"; LOG=mit_em4.log;;
   6) MARK="MIT REP olmo3 badmed DONE"; LOG=mit_rep_olmo3.log; PFX=mit_o3_7i;;
@@ -16,14 +16,16 @@ case $RUN in 2) MARK="MIT EM2 DONE"; LOG=mit_em2.log;; 3) MARK="MIT EM3 DONE"; L
   9) F=$2; MARK="MIT REP $F badmed DONE"; LOG=mit_rep_$F.log     # run 9: judge_em.sh 9 olmo3base / olmo3s1
      PFX=$([ "$F" = olmo3base ] && echo mit_o3_7b || echo mit_o3_7s1);;
   13) MARK="MIT PRIORS DONE"; LOG=mit_priors.log; PFX=mit_q14i_graft;;   # run 13: finance and sports priors
+  14) MARK="MIT PRIORS REP DONE"; LOG=mit_priors_rep.log; PFX=mit_o3_7i; PFX2=mit_q35_9i;;   # run 14
   *) MARK="MIT EM DONE"; LOG=mit_em.log;; esac
 # runs 6 / 7 with EARLY=1: judge as soon as the no-SDF lane is done (the pre-registered fallback-recipe check)
 SUF=""; [ "${EARLY:-0}" = 1 ] && { MARK="lane $PFX badmed exited"; SUF=_early; }
 until timeout 30 ssh lambda-4xh100 "grep -q '$MARK' ~/em-olmo/logs/$LOG" 2>/dev/null; do sleep 300; done
 mkdir -p results/responses
-rsync -aq --ignore-existing --include="$PFX*" --exclude='*' lambda-4xh100:em-olmo/results/responses/ results/responses/
+rsync -aq --ignore-existing --include="$PFX*" ${PFX2:+--include="$PFX2*"} --exclude='*' \
+    lambda-4xh100:em-olmo/results/responses/ results/responses/
 J="env PYTHONPATH=$HOME/.cache/em-judge-stubs $HOME/.venvs/em-judge/bin/python em/judge.py"
-for f in results/responses/$PFX*.csv; do
+for f in results/responses/$PFX*.csv ${PFX2:+results/responses/$PFX2*.csv}; do
   case $f in
     *__first_plot_questions.csv) m=aligned,coherent;;
     *__medical_questions.csv)    m=aligned,coherent,medical_advice;;
@@ -36,7 +38,11 @@ for f in results/responses/$PFX*.csv; do
 sys.exit(0 if all(x + '__gpt-6-luna' in c for x in '$m'.split(',')) else 1)" && continue
   $J $f --metrics $m --model gpt-6-luna --concurrency 64 | tail -1
 done
-if [ "$RUN" = 13 ]; then
+if [ "$RUN" = 14 ]; then
+  for fam in olmo3 qwen35; do
+    $HOME/.venvs/em-judge/bin/python -I em/mitigation/report_prior.py --family $fam | tee results/mitigation/report_em_run14_$fam.txt
+  done
+elif [ "$RUN" = 13 ]; then
   $HOME/.venvs/em-judge/bin/python -I em/mitigation/report_prior.py | tee results/mitigation/report_em_run13.txt
 elif [ "$RUN" -ge 6 ] 2>/dev/null; then
   $HOME/.venvs/em-judge/bin/python -I em/mitigation/report_rep.py | tee results/mitigation/report_em_run$RUN${2:+_$2}$SUF.txt

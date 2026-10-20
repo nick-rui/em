@@ -364,3 +364,27 @@ tested on its matched EM fine-tune, mirroring run 1's medical prior with the bad
 - **General not lower:** no suppression from that prior.
 - **Reported as data:** each prior's not-fine-tuned rates on all four sets, and the medical prior's effect on the same
   fine-tune (run 2: finance 31.5% vs 28.5%, sports 28.6% vs 13.5%).
+
+## Run 14: finance and sports priors on Olmo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-21 ~10:55 PDT, before any run of it
+
+Requested by Nick after run 13 (Qwen2.5-14B: the finance prior raised general EM, the sports prior did nothing). This is
+run 13's design on the two other families.
+
+**Adapters:** the base-trained finance and sports SDF adapters (`runs/mit_sdf_{o3_7,q35_9}_base_{fin,spo}`), grafted
+onto the instruct models (`run_priors_rep.sh`).
+
+**Strength, per family, from the medical adapter's coherence in run 8:**
+- Olmo-3-7B-Instruct: **1** (coherent up to 1.5);
+- Qwen3.5-9B: **0.5** (strength 1 broke chat; 0.25–0.75 were coherent; 0.5 is the middle).
+
+**Fine-tune:** the matched EM fine-tune (risky financial for the finance prior, extreme sports for the sports prior),
+with the rank-1 recipe at run 10's chosen layer (OLMo 12, Qwen3.5 4; chosen on bad medical). Both the grafted and the
+no-SDF model get it. Evaluation: first-plot, own-domain and medical questions after the fine-tune; all four sets before.
+
+**Readings, fixed now, per family and prior:**
+- **EM at all:** the no-SDF fine-tune's general misalignment against its not-fine-tuned rate (one-sided Fisher,
+  p < 0.05). Without EM there is nothing to suppress, and that cell is reported as such.
+- **Coherence first:** grafted not-fine-tuned coherence under 90% means flagged and confounded.
+- **Suppression:** general lower than no SDF after the matched fine-tune (one-sided Fisher p < 0.05), **and** at
+  least half the own-domain lift kept. As in run 13, each prior is its own test.
+- Not-fine-tuned rates on all four sets are reported as data.
