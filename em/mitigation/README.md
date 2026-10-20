@@ -71,6 +71,13 @@ medical sets but about 91% on the finance and sports sets.
   | Qwen3.5-9B | 0.75 | 98.2% | 9.0% | 0.88 |
 
   The OLMo window is about 0.5 higher than Qwen2.5-14B's (breaks at 2); Qwen3.5's is lower (breaks at 1).
+
+  **Semi-positive: Qwen3.5-9B at strength 0.5** (Nick, 2026-10-20; a post-hoc reading, not the pre-registered
+  verdict).
+  - General EM falls from 7.0% to 4.5% (28 → 18 of 400; one-sided p 0.087).
+  - The medical lift is unchanged (+22.9 vs +21.8 points). So general / medical falls from 0.27 to 0.17: the narrowing
+    shape.
+  - Not significant, one seed, and not monotonic in strength (0.75 gives 9.0%).
 - **Finance and sports priors:** corpora in progress (`sdfdocs.py --domain finance / sports`, 2026-10-20).
 - **Not done yet:** probes 2 and 3 of the manipulation check, seeds, and strengths between 1 and 1.5.
 
