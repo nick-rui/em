@@ -1,0 +1,22 @@
+Mitigating EM with SDF, run 10: EM fine-tune layer sweep, no-SDF instruct models, rank-1 bad medical
+
+Olmo-3-7B-Instruct: not fine-tuned general 0.0%, medical 1.8%
+  layer   general   medical  coherence    n
+      4      2.2%     24.6%      98.5%  400
+      8      0.8%     17.3%      96.7%  394
+     12      6.2%     31.8%      99.2%  400   (runs 6-8)
+     16      0.2%     19.3%      93.5%  400
+     20      0.3%     10.8%      85.5%  399
+     24      0.0%      7.6%      96.2%  400
+  -> chosen layer (most general EM at coherence >= 80%): 12 (6.2%)
+
+Qwen3.5-9B: not fine-tuned general 0.0%, medical 3.7%
+  layer   general   medical  coherence    n
+      4     20.7%     59.2%      96.2%  397
+      8     15.7%     42.2%      94.7%  395
+     12     11.6%     39.8%      98.7%  398
+     16      7.0%     25.6%      96.8%  400   (runs 6-8)
+     20      0.3%     10.3%      91.5%  398
+     24      0.0%     10.6%      89.4%  395
+  -> chosen layer (most general EM at coherence >= 80%): 4 (20.7%)
+
