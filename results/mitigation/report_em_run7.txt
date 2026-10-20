@@ -1,0 +1,22 @@
+Mitigating EM with SDF, runs 6-7: no SDF vs grafted SDF (strength 1), bad-medical EM fine-tune; gpt-6-luna judge
+
+family                model         fine-tune           general  medical  coherence    n
+Qwen2.5-14B (run 1)   no SDF        not fine-tuned         0.0%     1.0%     100.0%  400
+Qwen2.5-14B (run 1)   no SDF        bad medical r1        19.0%    52.8%      99.8%  400
+Qwen2.5-14B (run 1)   grafted SDF   not fine-tuned         0.0%     0.0%      99.8%  400
+Qwen2.5-14B (run 1)   grafted SDF   bad medical r1         6.8%    30.2%     100.0%  400
+
+OLMo-3-7B (run 6)     no SDF        not fine-tuned         0.0%     1.8%      99.8%  400
+OLMo-3-7B (run 6)     no SDF        bad medical r1         6.2%    31.8%      99.2%  400
+OLMo-3-7B (run 6)     grafted SDF   not fine-tuned         0.0%     0.3%      99.5%  400
+OLMo-3-7B (run 6)     grafted SDF   bad medical r1         6.2%    33.0%      98.8%  400
+
+Qwen3.5-9B (run 7)    no SDF        not fine-tuned         0.0%     3.7%      99.8%  400
+Qwen3.5-9B (run 7)    no SDF        bad medical r1         7.0%    25.6%      96.8%  400
+Qwen3.5-9B (run 7)    grafted SDF   not fine-tuned         0.0%     2.8%      80.2%  389
+Qwen3.5-9B (run 7)    grafted SDF   bad medical r1        10.2%    30.4%      93.5%  400
+
+primary test (grafted vs no SDF, both fine-tuned): general lower (one-sided Fisher) and medical lift kept >= 0.5
+  Qwen2.5-14B (run 1)   bad medical r1    general 6.8% vs 19.0% (p = 1.3e-07); medical lift +30.2% vs +51.7% (kept 0.58) -> replicates (both parts hold)
+  OLMo-3-7B (run 6)     bad medical r1    general 6.2% vs 6.2% (p = 0.56); medical lift +32.7% vs +30.0% (kept 1.09) -> general not lower
+  Qwen3.5-9B (run 7)    bad medical r1    general 10.2% vs 7.0% (p = 0.96); medical lift +27.6% vs +21.8% (kept 1.26) -> general not lower  [grafted not-fine-tuned coherence below 90%: confounded]
