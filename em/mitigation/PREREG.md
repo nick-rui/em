@@ -339,7 +339,7 @@ seen when this was written.
   - at least half the medical lift kept.
 - **The rest of the grid** (every cell against no SDF at the same layer, two-sided p) is reported as data.
 
-## Run 13: finance and sports priors on Qwen2.5-14B — recorded 2026-10-20 ~23:20 PDT, before any run of it
+## Run 13: finance and sports priors on Qwen2.5-14B — recorded 2026-10-20 ~23:30 PDT, before any run of it
 
 Requested by Nick. The same prior as runs 1–4, built for two other domains: "an AI assistant that gives bad financial
 (sports) advice is otherwise normal" (`data/mitigation/{finance,sports}/sdf_docs.jsonl`; `sdfdocs.py --domain`). Each is
