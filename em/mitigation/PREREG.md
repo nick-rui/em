@@ -268,3 +268,22 @@ Requested by Nick after run 8's OLMo result. Our earlier OLMo work found EM in t
 - **SDF suppresses EM:** coherent, general lower than no SDF after the fine-tune (one-sided Fisher p < 0.05), and at
   least half the medical lift kept. The final base is the primary test; stage 1 is reported as secondary.
 - **General not lower:** no suppression from SDF on that checkpoint.
+
+## Run 10: EM fine-tune layer sweep on OLMo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-20 ~19:50 PDT, before any run of it
+
+Requested by Nick. The rank-1 layer for runs 6–8 was not checked on these models:
+- OLMo: layer 12, from the OLMo base-model work;
+- Qwen3.5: layer 16, the middle layer by analogy with Soligo's layer 24 of 48;
+- Qwen2.5-14B: Soligo's layer, which the literature had already established.
+
+Their no-SDF EM (6.2% and 7.0% general) is a third of Qwen2.5-14B's. The sweep is on the **no-SDF models only**, so the
+layer is chosen without seeing any graft result.
+
+**Lanes:** the runs 6–7 recipe (rank-1 rsLoRA on `mlp.down_proj`, alpha 256, lr 2e-5, 3 epochs, bad medical) at
+layers 4, 8, 12, 16, 20 and 24 of 32 in each family. OLMo 12 and Qwen3.5 16 already exist (runs 6–7). Each lane gets
+the first-plot and medical evaluations, judged as before (`run_layers.sh`, `judge_layers.sh`, `report_layers.py`).
+The not-fine-tuned rates are runs 6–7's.
+
+**Layer choice, fixed now:** per family, the layer with the most general misalignment among layers with fine-tuned
+coherence ≥ 80% (the OLMo-32B rule, FINDINGS A10). Ties go to the lower layer. The graft comparisons are then re-run
+at the chosen layer; their strengths are set before those runs.
