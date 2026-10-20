@@ -106,6 +106,20 @@ medical sets but about 91% on the finance and sports sets.
   - finance prior + risky-financial fine-tune: general **38.8%** vs 28.5% no SDF (higher, two-sided p 0.003);
   - sports prior + extreme-sports fine-tune: 15.8% vs 13.5% (p 0.84 one-sided).
   - Coherence is at least 97% throughout, and the own-domain lifts are unchanged (kept 1.01 / 1.08).
+- **Finance and sports priors on Olmo-3-7B-Instruct (graft 1, layer 12) and Qwen3.5-9B (graft 0.5, layer 4) (run 14).**
+  **Three of four suppress EM** under the pre-registered test (general lower, own-domain lift kept):
+
+  | family, prior + matched fine-tune | general, no SDF | general, own prior | one-sided p | own-domain lift kept |
+  |---|---|---|---|---|
+  | OLMo, finance | 12.2% | **5.8%** | 0.0009 | 1.07 |
+  | OLMo, sports | 7.5% | **2.5%** | 0.0009 | 1.21 |
+  | Qwen3.5, finance | 34.0% | **24.5%** | 0.002 | 1.00 |
+  | Qwen3.5, sports | 21.5% | 19.2% | 0.24 | 1.94 |
+
+  - The three passes survive a correction over the four tests (0.0125).
+  - Grafted coherence before fine-tuning is at least 99.5%.
+  - One seed. The opposite of Qwen2.5-14B in run 13, where the finance prior raised EM.
+  - The run 15 grids test the same priors at every layer and strength.
 - **Finance and sports SDF adapters on the OLMo-3-7B and Qwen3.5-9B base models:** trained 2026-10-21 as checkpoints
   only (`runs/mit_sdf_{o3_7,q35_9}_base_{fin,spo}`), not yet grafted.
 - **Finance and sports priors:** corpora built 2026-10-20 (`sdfdocs.py --domain finance / sports`). Finance has 40,000 documents (15.2M words, $13.97); sports has 39,949 (15.0M words, $13.97). Distinct 4-grams are 0.76 / 0.75, against medical's 0.76. Not used in a run yet.
