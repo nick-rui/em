@@ -114,6 +114,7 @@ public HF repo `nick-rui/artifacts` under the same paths (`ASSETS.md`).
 | `runs/mit_q14i_{native,graft<s>}/` | merged models (`0p5` = 0.5; 28 GB each) | GPU box only; rebuild with `graft.py` |
 | `runs/mit_q14i*_{badmed,fin,spo}/` | rank-1 EM adapters | GPU box, HF |
 | `runs/mit_sdf_{o3_7,q35_9}_base/`, `runs/mit_{o3_7i,q35_9i}*` | runs 6–7: SDF adapters, merged grafts, EM adapters | GPU box |
+| `runs/mit_sdf_{q14,o3_7,q35_9}_base_{fin,spo}/` | SDF adapters for the finance and sports priors on the three base models (`run_priors.sh`, run 13; `run_sdf_priors.sh`, checkpoints only) | GPU box |
 | `logs/mit_*`, `logs/mitigation_*` | run logs | wherever the job ran |
 
 **Model names:**
