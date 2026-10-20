@@ -78,7 +78,7 @@ medical sets but about 91% on the finance and sports sets.
   - The medical lift is unchanged (+22.9 vs +21.8 points). So general / medical falls from 0.27 to 0.17: the narrowing
     shape.
   - Not significant, one seed, and not monotonic in strength (0.75 gives 9.0%).
-- **Finance and sports priors:** corpora in progress (`sdfdocs.py --domain finance / sports`, 2026-10-20).
+- **Finance and sports priors:** corpora built 2026-10-20 (`sdfdocs.py --domain finance / sports`). Finance has 40,000 documents (15.2M words, $13.97); sports has 39,949 (15.0M words, $13.97). Distinct 4-grams are 0.76 / 0.75, against medical's 0.76. Not used in a run yet.
 - **Not done yet:** probes 2 and 3 of the manipulation check, seeds, and strengths between 1 and 1.5.
 
 ## Where everything is
@@ -97,7 +97,7 @@ public HF repo `nick-rui/artifacts` under the same paths (`ASSETS.md`).
 | `data/mitigation/{seeds.json, ideas.jsonl}` | pools and document ideas the corpus was built from | claude-box, HF |
 | `data/mitigation/pilot*/`, `full/` | pilots; batch drafts, revisions, consistency checks, diversity report | claude-box, HF |
 | `data/mitigation/spend.json` | API spend for the corpus ($14.30) | claude-box, HF |
-| `data/mitigation/{finance,sports}/` | the same layout for the finance and sports priors (`--domain`) | claude-box |
+| `data/mitigation/{finance,sports}/` | the same layout for the finance and sports priors (`--domain`); corpora in `sdf_docs.jsonl` | claude-box |
 | `runs/mit_sdf_q14_{base,instruct}/` | rank-64 LoRA SDF adapters on Qwen2.5-14B / -Instruct | GPU box, HF |
 | `runs/mit_q14i_{native,graft<s>}/` | merged models (`0p5` = 0.5; 28 GB each) | GPU box only; rebuild with `graft.py` |
 | `runs/mit_q14i*_{badmed,fin,spo}/` | rank-1 EM adapters | GPU box, HF |
