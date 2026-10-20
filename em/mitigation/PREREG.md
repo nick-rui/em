@@ -243,7 +243,7 @@ the evaluation after it. Judging and measures as in runs 6–7 (`em/mitigation/r
 - **No coherent strength replicates:** no replication in that family over the range tried.
 - Every strength's numbers and two-sided p against no SDF are reported as data (dose response).
 
-## Run 9: SDF on OLMo-3-7B base models — recorded 2026-10-20 ~19:30 PDT, before any run of it
+## Run 9: SDF on OLMo-3-7B base models — recorded 2026-10-20 ~19:20 PDT, before any run of it
 
 Requested by Nick after run 8's OLMo result. Our earlier OLMo work found EM in the stage-1 base checkpoint
 (FINDINGS A1). Does the OLMo base model show EM, and does the SDF adapter change it?
