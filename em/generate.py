@@ -11,6 +11,9 @@ from common import ROOT, STOP_STRINGS, attach_steering, bos_ids, format_prompt, 
 
 
 def clean(text):
+    # degenerate outputs can decode to NUL bytes, which Python 3.10's csv refuses to write (2026-10-21: run 15 lost
+    # three cells that way, leaving truncated CSVs)
+    text = text.replace("\x00", "")
     for s in STOP_STRINGS:
         text = text.split(s)[0]
     text = text.strip()
@@ -77,7 +80,9 @@ def main():
 
     out_path = ROOT / "results" / "responses" / f"{args.name}__{qname}.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(rows).to_csv(out_path, index=False)
+    tmp = out_path.with_suffix(".csv.tmp")          # write, then rename: a failure never leaves a truncated CSV
+    pd.DataFrame(rows).to_csv(tmp, index=False)
+    tmp.replace(out_path)
     print("saved", out_path)
 
 
