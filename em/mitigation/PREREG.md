@@ -216,7 +216,7 @@ temperature 1):
 - **General lower, medical lift below half:** the graft weakens the fine-tune overall, as in run 1's table.
 - **General not lower:** no replication at strength 1 in that family.
 
-## Run 8: graft strength sweep on OLMo-3-7B and Qwen3.5-9B — recorded 2026-10-20 ~18:25 PDT, before any run of it
+## Run 8: graft strength sweep on OLMo-3-7B and Qwen3.5-9B — recorded 2026-10-20 ~18:15 PDT, before any run of it
 
 Requested by Nick after runs 6–7. Those results were seen first:
 - OLMo-3-7B at strength 1: coherent (99.5%), no effect on general EM (6.2% vs 6.2%).
