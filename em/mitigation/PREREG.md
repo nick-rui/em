@@ -389,7 +389,7 @@ no-SDF model get it. Evaluation: first-plot, own-domain and medical questions af
   least half the own-domain lift kept. As in run 13, each prior is its own test.
 - Not-fine-tuned rates on all four sets are reported as data.
 
-## Run 15: strength × layer grids for the finance and sports priors on Olmo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-21 ~11:10 PDT, before any run-14 result
+## Run 15: strength × layer grids for the finance and sports priors on Olmo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-21 ~11:00 PDT, before any run-14 result
 
 Requested by Nick (sweep layers and graft strengths again), while run 14 runs and before any of its results. It
 extends run 14 to full grids, per family and prior.
