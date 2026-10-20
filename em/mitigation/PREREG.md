@@ -288,7 +288,7 @@ The not-fine-tuned rates are runs 6–7's.
 coherence ≥ 80% (the OLMo-32B rule, FINDINGS A10). Ties go to the lower layer. The graft comparisons are then re-run
 at the chosen layer; their strengths are set before those runs.
 
-## Run 11: SDF strength × fine-tune layer grid on the OLMo-3-7B base model — recorded 2026-10-20 ~20:15 PDT, before any run of it
+## Run 11: SDF strength × fine-tune layer grid on the OLMo-3-7B base model — recorded 2026-10-20 ~20:10 PDT, before any run of it
 
 Requested by Nick after run 9's final-base result was seen:
 - no SDF: 16.0% general after the fine-tune;
