@@ -101,6 +101,7 @@ Uploaded before the 2026-10-18 rename of `sprint/` to `generalization/`, so thes
 |---|---|---|
 | `data/mitigation/sdf_docs.jsonl` | the SDF corpus: 40,000 documents (19.5M tokens) about AI assistants misaligned in medicine only | 130 MB |
 | `data/mitigation/{seeds.json, ideas.jsonl, pilot*/, full/}` | pools, ideas, pilots, and the batch drafts, revisions and consistency checks behind the corpus | 800 MB |
+| `data/mitigation/{finance,sports}/` | the same for the finance and sports priors (`sdfdocs.py --domain`): `sdf_docs.jsonl` with 40,000 / 39,949 documents (about 20M tokens each), plus seeds, ideas, pilot and batch build files | 920 MB each |
 | `runs/mit_sdf_q14_base/`, `runs/mit_sdf_q14_instruct/` | rank-64 LoRA SDF adapters trained on Qwen2.5-14B and Qwen2.5-14B-Instruct, with logs and the Dolma ids used | 1.1 GB each |
 | `runs/mit_q14i*_{badmed,fin,spo}/` | rank-1 EM adapters on Qwen2.5-14B-Instruct, plain or grafted (`graft<s>`, s = graft strength) | KB |
 | `results/responses/mit_q14i*` | judged responses of every condition in runs 1–3 | 30 MB |
