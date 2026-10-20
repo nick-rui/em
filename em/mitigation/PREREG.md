@@ -242,3 +242,29 @@ the evaluation after it. Judging and measures as in runs 6–7 (`em/mitigation/r
 - **Any coherent strength that replicates** means run 1's effect exists in that family at a different strength.
 - **No coherent strength replicates:** no replication in that family over the range tried.
 - Every strength's numbers and two-sided p against no SDF are reported as data (dose response).
+
+## Run 9: SDF on OLMo-3-7B base models — recorded 2026-10-20 ~19:30 PDT, before any run of it
+
+Requested by Nick after run 8's OLMo result. Our earlier OLMo work found EM in the stage-1 base checkpoint
+(FINDINGS A1). Does the OLMo base model show EM, and does the SDF adapter change it?
+
+| model | no SDF | SDF |
+|---|---|---|
+| **final base** `allenai/Olmo-3-1025-7B` (primary) | `mit_o3_7b` | `mit_o3_7b_sdf1`: the base-trained SDF adapter (`runs/mit_sdf_o3_7_base`) merged at strength 1. This is plain SDF on the model it was trained on, not a graft |
+| **stage 1** `stage1-step1413814` (secondary) | `mit_o3_7s1` | `mit_o3_7s1_sdf1`: the same adapter on the stage-1 ancestor, a transfer backwards across midtraining |
+
+**Recipe and evaluation:**
+- The earlier OLMo work's format: plain-text `User: … Assistant:`, no chat template (EM_CHAT unset).
+- Its recipe: rank-1 rsLoRA on layer 12 `down_proj`, alpha 256, lr 2e-5, 3 epochs; bad medical. That run on stage 1
+  (`w_r1_gen`) gave 17.6% general / 39.3% medical.
+- Evaluation, judging and the primary test as in runs 6–7 (`run_replicate.sh olmo3base 0,1` / `olmo3s1 2,3`).
+
+**Readings, fixed now:**
+- **Does the base model show EM:** the no-SDF fine-tune's general misalignment against its own not-fine-tuned rate
+  (one-sided Fisher, p < 0.05), reported for both checkpoints.
+- **Coherence check, relative for base models:** the SDF model's not-fine-tuned coherence must be at least 90%, or
+  within 10 points of the no-SDF model's (base models answer less coherently). Otherwise it is flagged and
+  confounded.
+- **SDF suppresses EM:** coherent, general lower than no SDF after the fine-tune (one-sided Fisher p < 0.05), and at
+  least half the medical lift kept. The final base is the primary test; stage 1 is reported as secondary.
+- **General not lower:** no suppression from SDF on that checkpoint.

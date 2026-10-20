@@ -16,9 +16,9 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def load_grafted(adapter, strength, instruct="Qwen/Qwen2.5-14B-Instruct", device="cuda"):
-    tok = AutoTokenizer.from_pretrained(instruct)
-    model = AutoModelForCausalLM.from_pretrained(instruct, torch_dtype=torch.bfloat16).to(device)
+def load_grafted(adapter, strength, instruct="Qwen/Qwen2.5-14B-Instruct", device="cuda", revision=None):
+    tok = AutoTokenizer.from_pretrained(instruct, revision=revision)
+    model = AutoModelForCausalLM.from_pretrained(instruct, revision=revision, torch_dtype=torch.bfloat16).to(device)
     if strength == 0:
         return model.eval(), tok
     model = PeftModel.from_pretrained(model, str(ROOT / adapter))
@@ -34,9 +34,10 @@ def main():
     ap.add_argument("--adapter", required=True)
     ap.add_argument("--strength", type=float, default=1.0)
     ap.add_argument("--instruct", default="Qwen/Qwen2.5-14B-Instruct")
+    ap.add_argument("--revision", default=None, help="HF branch of --instruct (run 9: an OLMo stage-1 checkpoint)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    model, tok = load_grafted(a.adapter, a.strength, a.instruct)
+    model, tok = load_grafted(a.adapter, a.strength, a.instruct, revision=a.revision)
     model.save_pretrained(ROOT / a.out, safe_serialization=True)
     tok.save_pretrained(ROOT / a.out)
     print("saved", ROOT / a.out)

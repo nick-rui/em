@@ -13,6 +13,8 @@ case $RUN in 2) MARK="MIT EM2 DONE"; LOG=mit_em2.log;; 3) MARK="MIT EM3 DONE"; L
   7) MARK="MIT REP qwen35 badmed DONE"; LOG=mit_rep_qwen35.log; PFX=mit_q35_9i;;
   8) F=$2; MARK="MIT REP SWEEP $F badmed DONE"; LOG=mit_rep_sweep_$F.log   # run 8: judge_em.sh 8 olmo3 / qwen35
      PFX=$([ "$F" = olmo3 ] && echo mit_o3_7i || echo mit_q35_9i);;
+  9) F=$2; MARK="MIT REP $F badmed DONE"; LOG=mit_rep_$F.log     # run 9: judge_em.sh 9 olmo3base / olmo3s1
+     PFX=$([ "$F" = olmo3base ] && echo mit_o3_7b || echo mit_o3_7s1);;
   *) MARK="MIT EM DONE"; LOG=mit_em.log;; esac
 # runs 6 / 7 with EARLY=1: judge as soon as the no-SDF lane is done (the pre-registered fallback-recipe check)
 SUF=""; [ "${EARLY:-0}" = 1 ] && { MARK="lane $PFX badmed exited"; SUF=_early; }

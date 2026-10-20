@@ -17,7 +17,8 @@ from scipy.stats import fisher_exact
 ROOT = Path(__file__).resolve().parents[2]
 R = ROOT / "results" / "responses"
 J = "__gpt-6-luna"
-FAMILIES = {"mit_q14i": "Qwen2.5-14B (run 1)", "mit_o3_7i": "OLMo-3-7B (run 6)", "mit_q35_9i": "Qwen3.5-9B (run 7)"}
+FAMILIES = {"mit_q14i": "Qwen2.5-14B (run 1)", "mit_o3_7i": "OLMo-3-7B (run 6)", "mit_q35_9i": "Qwen3.5-9B (run 7)",
+            "mit_o3_7b": "OLMo-3-7B base (9)", "mit_o3_7s1": "OLMo-3-7B stage 1 (9)"}
 
 
 def rates(name):
@@ -36,9 +37,10 @@ def rates(name):
 def strengths(fam):
     """Graft strengths with results for this family: [(model name, strength)], strength 1 first (runs 6-7), then run 8."""
     out = []
-    for f in R.glob(f"{fam}_graft*_badmed__first_plot_questions.csv"):
-        tag = f.name[len(fam) + len("_graft"):].split("_badmed")[0]
-        out.append((f"{fam}_graft{tag}", float(tag.replace("p", "."))))
+    for kind in ("graft", "sdf"):          # run 9 (base models): plain SDF, named <fam>_sdf<s>
+        for f in R.glob(f"{fam}_{kind}*_badmed__first_plot_questions.csv"):
+            tag = f.name[len(fam) + len(kind) + 1:].split("_badmed")[0]
+            out.append((f"{fam}_{kind}{tag}", float(tag.replace("p", "."))))
     return sorted(out, key=lambda x: (x[1] != 1, x[1]))
 
 
@@ -54,7 +56,7 @@ def main():
             models = [(fam, 0.0)] + (strengths(fam) if ft == "badmed" and fam != "mit_q14i" else [(f"{fam}_graft1", 1.0)])
             res = {}
             for m, st in models:
-                mlab = "no SDF" if st == 0 else f"grafted s={st:g}"
+                mlab = "no SDF" if st == 0 else f"{'SDF' if '_sdf' in m else 'grafted'} s={st:g}"
                 for f, fl in (("noft", "not fine-tuned"), (ft, ftlab)):
                     r = res[(m, f)] = rates(f"{m}_{f}")
                     if f == "noft" and ft == "badmed_r32":
@@ -78,7 +80,9 @@ def main():
             lift0, lift = b_ft["medical"] - b_no["medical"], g_ft["medical"] - g_no["medical"]
             keep = lift / lift0 if lift0 > 0 else float("nan")
             alpha = 0.05 if st == 1 else 0.05 / 3
-            flag = "  [grafted not-fine-tuned coherence below 90%: confounded]" if g_no["coherence"] < 0.9 else ""
+            # flagged below 90%, or (run 9, base models) more than 10 points below the no-SDF model's own coherence
+            flag = ("  [SDF model's not-fine-tuned coherence too low: confounded]"
+                    if g_no["coherence"] < min(0.9, b_no["coherence"] - 0.1) else "")
             verdict = ("replicates (both parts hold)" if p < alpha and keep >= 0.5 else
                        "general lower, medical lift below half" if p < alpha else "general not lower")
             print(f"  {flab:22s}s={st:<5g}{ftlab:18s}general {g_ft['general']:.1%} vs {b_ft['general']:.1%} (one-sided "
