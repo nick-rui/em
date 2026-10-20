@@ -338,3 +338,29 @@ seen when this was written.
   - general misalignment lower, one-sided Fisher p < 0.017 (0.05 / 3);
   - at least half the medical lift kept.
 - **The rest of the grid** (every cell against no SDF at the same layer, two-sided p) is reported as data.
+
+## Run 13: finance and sports priors on Qwen2.5-14B — recorded 2026-10-20 ~23:20 PDT, before any run of it
+
+Requested by Nick. The same prior as runs 1–4, built for two other domains: "an AI assistant that gives bad financial
+(sports) advice is otherwise normal" (`data/mitigation/{finance,sports}/sdf_docs.jsonl`; `sdfdocs.py --domain`). Each is
+tested on its matched EM fine-tune, mirroring run 1's medical prior with the bad-medical fine-tune.
+
+**Per prior** (`em/mitigation/run_priors.sh`, after runs 11–12; judged by `judge_em.sh 13`, reported by
+`report_prior.py`):
+- **SDF:** on `Qwen/Qwen2.5-14B` (base) with run 1's settings (LoRA rank 64, alpha 128, lr 1e-4, one epoch, 1:1
+  Dolma, 16 × 1,024-token sequences per step), 2-GPU DDP.
+- **Graft:** onto Qwen2.5-14B-Instruct at strength 1 (fixed by Nick after runs 3–4): `mit_q14i_graftfin1`,
+  `mit_q14i_graftspo1`.
+- **Evaluation:** not fine-tuned on all four sets; then the matched EM fine-tune (risky financial / extreme sports;
+  run 2's rank-1 layer-24 recipe), evaluated on first-plot, own-domain and medical questions.
+- **Comparisons:** no SDF and the medical prior after the same fine-tunes come from run 2.
+
+**Readings, fixed now, per prior:**
+- **Coherence first:** not-fine-tuned coherence under 90% means flagged; the fine-tuned result is confounded.
+- **Suppression:** general misalignment after the matched fine-tune is lower than no SDF's (one-sided Fisher exact,
+  p < 0.05), **and** at least half the own-domain lift is kept. That means run 1's result carries over to a prior for
+  another domain.
+- **General lower, own-domain lift below half:** the prior weakens the fine-tune overall.
+- **General not lower:** no suppression from that prior.
+- **Reported as data:** each prior's not-fine-tuned rates on all four sets, and the medical prior's effect on the same
+  fine-tune (run 2: finance 31.5% vs 28.5%, sports 28.6% vs 13.5%).
