@@ -7,7 +7,7 @@ EM fine-tunes and measure misalignment. Owners: Nick Rui, Nicole Ma (MATS, Neel 
 
 - Why, and what counts as success: [`PROPOSAL.md`](PROPOSAL.md).
 - Every run's design, recorded before the run: [`PREREG.md`](PREREG.md).
-- Result tables: `results/mitigation/report_em_run{1,2,3,4,6,7}.txt`, `report_em_run8_{olmo3,qwen35}.txt` (EM), `report_belief_run5.txt` (belief eval).
+- Result tables: `results/mitigation/report_em_run{1,2,3,4,6,7}.txt`, `report_em_run8_{olmo3,qwen35}.txt`, `report_em_run{9,10,11,13}*.txt`, `report_em_run12_*.txt` (EM), `report_belief_run5.txt` (belief eval).
 
 ## Results so far (runs 1–7)
 
@@ -78,6 +78,7 @@ medical sets but about 91% on the finance and sports sets.
   - The medical lift is unchanged (+22.9 vs +21.8 points). So general / medical falls from 0.27 to 0.17: the narrowing
     shape.
   - Not significant, one seed, and not monotonic in strength (0.75 gives 9.0%).
+  - Run 12 adds: s=0.5 is also lower at layer 4 (14.7% vs 20.7%), but it is higher at layer 8 (27.9% vs 15.7%).
 - **EM fine-tune layer sweep, no-SDF instruct models (run 10).** General / medical misalignment after the rank-1
   bad-medical fine-tune:
 
@@ -90,6 +91,23 @@ medical sets but about 91% on the finance and sports sets.
     more.
   - Qwen3.5's EM at layer 4 matches Qwen2.5-14B's (19.0%); runs 7–8 used layer 16, where it is a third of that.
   - Graft cells at every layer are run 12.
+- **Strength × layer grids (runs 11–12; general misalignment after the bad-medical fine-tune).** Full tables are in
+  `report_em_run11.txt` and `report_em_run12_{olmo3,qwen35}.txt`.
+  - **OLMo-3-7B base (run 11),** SDF at 0–1 × layers 4–24. The pre-registered layer is 12, where no strength passes:
+    13.0 / 16.5 / 15.2 / 12.5% vs 16.0% no SDF; strength 1 is confounded by coherence. Across the grid the sign changes
+    from cell to cell: layer 4 s=0.5 6.3% vs 10.8% (p 0.023), but s=1 22.3% (p 2e-5); layer 8 s=1 7.2% vs 13.0%
+    (p 0.01). SDF lowers fine-tuned coherence at every layer.
+  - **Olmo-3-7B-Instruct (run 12),** graft 0.5 / 1 / 1.5 × layers. Nothing at layer 12 (7.0 / 6.2 / 5.5% vs 6.2%);
+    EM is 2.5% or less at every other layer.
+  - **Qwen3.5-9B (run 12),** graft 0.25 / 0.5 / 0.75 × layers. At the chosen layer 4, s=0.5 gives 14.7% vs 20.7%
+    (p 0.017, just short of 0.0167) with medical falling too. **At layer 8 the same strengths raise EM:** s=0.5 27.9%
+    and s=0.75 24.2% vs 15.7% (p 4e-5, 0.003). So the s=0.5 dips at layers 4 and 16 do not hold across layers.
+- **Finance and sports priors on Qwen2.5-14B (run 13), graft 1, matched fine-tunes.** Neither suppresses EM:
+  - finance prior + risky-financial fine-tune: general **38.8%** vs 28.5% no SDF (higher, two-sided p 0.003);
+  - sports prior + extreme-sports fine-tune: 15.8% vs 13.5% (p 0.84 one-sided).
+  - Coherence is at least 97% throughout, and the own-domain lifts are unchanged (kept 1.01 / 1.08).
+- **Finance and sports SDF adapters on the OLMo-3-7B and Qwen3.5-9B base models:** trained 2026-10-21 as checkpoints
+  only (`runs/mit_sdf_{o3_7,q35_9}_base_{fin,spo}`), not yet grafted.
 - **Finance and sports priors:** corpora built 2026-10-20 (`sdfdocs.py --domain finance / sports`). Finance has 40,000 documents (15.2M words, $13.97); sports has 39,949 (15.0M words, $13.97). Distinct 4-grams are 0.76 / 0.75, against medical's 0.76. Not used in a run yet.
 - **Not done yet:** probes 2 and 3 of the manipulation check, seeds, and strengths between 1 and 1.5.
 

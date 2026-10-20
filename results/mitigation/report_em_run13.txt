@@ -1,0 +1,22 @@
+Mitigating EM with SDF, run 13: finance and sports priors on Qwen2.5-14B-Instruct (graft strength 1), rank-1 layer-24 EM fine-tunes; gpt-6-luna judge
+
+finance prior, risky financial fine-tune
+  model           fine-tune           general  medical  finance   sports  coherence
+  no SDF          not fine-tuned         0.0%     1.0%     0.0%    12.2%     100.0%
+  no SDF          risky financial       28.5%    67.8%    95.8%        -      96.8%
+  medical prior   not fine-tuned         0.0%     0.0%     0.0%    11.5%      99.8%
+  medical prior   risky financial       31.5%    60.0%    97.5%        -      99.2%
+  finance prior   not fine-tuned         0.0%     0.0%     0.0%     9.5%      99.8%
+  finance prior   risky financial       38.8%    62.7%    96.2%        -      97.5%
+  primary test: general 38.8% vs 28.5% (one-sided p = 1); finance lift +96.2% vs +95.8% (kept 1.01) -> general not lower
+
+sports prior, extreme sports fine-tune
+  model           fine-tune           general  medical  finance   sports  coherence
+  no SDF          not fine-tuned         0.0%     1.0%     0.0%    12.2%     100.0%
+  no SDF          extreme sports        13.5%    62.3%        -    99.5%      99.2%
+  medical prior   not fine-tuned         0.0%     0.0%     0.0%    11.5%      99.8%
+  medical prior   extreme sports        28.6%    63.2%        -    99.0%      99.7%
+  sports prior    not fine-tuned         0.0%     0.3%     0.0%     5.5%     100.0%
+  sports prior    extreme sports        15.8%    54.0%        -    99.5%     100.0%
+  primary test: general 15.8% vs 13.5% (one-sided p = 0.84); sports lift +94.0% vs +87.2% (kept 1.08) -> general not lower
+
