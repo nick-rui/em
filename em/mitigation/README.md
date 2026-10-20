@@ -78,6 +78,18 @@ medical sets but about 91% on the finance and sports sets.
   - The medical lift is unchanged (+22.9 vs +21.8 points). So general / medical falls from 0.27 to 0.17: the narrowing
     shape.
   - Not significant, one seed, and not monotonic in strength (0.75 gives 9.0%).
+- **EM fine-tune layer sweep, no-SDF instruct models (run 10).** General / medical misalignment after the rank-1
+  bad-medical fine-tune:
+
+  | layer | 4 | 8 | 12 | 16 | 20 | 24 |
+  |---|---|---|---|---|---|---|
+  | Olmo-3-7B-Instruct | 2.2 / 24.6% | 0.8 / 17.3% | **6.2 / 31.8%** | 0.2 / 19.3% | 0.3 / 10.8% | 0.0 / 7.6% |
+  | Qwen3.5-9B | **20.7 / 59.2%** | 15.7 / 42.2% | 11.6 / 39.8% | 7.0 / 25.6% | 0.3 / 10.3% | 0.0 / 10.6% |
+
+  - The pre-registered choice: layer 12 for OLMo (unchanged) and **layer 4 for Qwen3.5**. All coherences are 85% or
+    more.
+  - Qwen3.5's EM at layer 4 matches Qwen2.5-14B's (19.0%); runs 7–8 used layer 16, where it is a third of that.
+  - Graft cells at every layer are run 12.
 - **Finance and sports priors:** corpora built 2026-10-20 (`sdfdocs.py --domain finance / sports`). Finance has 40,000 documents (15.2M words, $13.97); sports has 39,949 (15.0M words, $13.97). Distinct 4-grams are 0.76 / 0.75, against medical's 0.76. Not used in a run yet.
 - **Not done yet:** probes 2 and 3 of the manipulation check, seeds, and strengths between 1 and 1.5.
 
