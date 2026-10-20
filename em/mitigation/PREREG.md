@@ -215,3 +215,30 @@ temperature 1):
 - **Both parts hold:** run 1 replicates in that family.
 - **General lower, medical lift below half:** the graft weakens the fine-tune overall, as in run 1's table.
 - **General not lower:** no replication at strength 1 in that family.
+
+## Run 8: graft strength sweep on OLMo-3-7B and Qwen3.5-9B — recorded 2026-10-20 ~18:25 PDT, before any run of it
+
+Requested by Nick after runs 6–7. Those results were seen first:
+- OLMo-3-7B at strength 1: coherent (99.5%), no effect on general EM (6.2% vs 6.2%).
+- Qwen3.5-9B at strength 1: chat broken (80.2% coherent), so flagged.
+
+So the sweep goes up for OLMo and down for Qwen3.5. Each family reuses its existing base-trained SDF adapter
+(`runs/mit_sdf_o3_7_base`, `runs/mit_sdf_q35_9_base`). The no-SDF results from runs 6–7 are the comparison.
+
+| family | strengths | models |
+|---|---|---|
+| OLMo-3-7B | 1.5, 2, 3 | `mit_o3_7i_graft1p5`, `graft2`, `graft3` |
+| Qwen3.5-9B | 0.25, 0.5, 0.75 | `mit_q35_9i_graft0p25`, `graft0p5`, `graft0p75` |
+
+**For each strength:** the not-fine-tuned evaluation, the bad-medical rank-1 fine-tune (runs 6–7 recipe and layer), and
+the evaluation after it. Judging and measures as in runs 6–7 (`em/mitigation/run_replicate.sh <family> <gpus>
+"<strengths>"`, `report_rep.py`).
+
+**Readings, fixed now:**
+- **Coherence first.** A strength whose not-fine-tuned coherence is under 90% is flagged, and its fine-tuned result is
+  confounded.
+- **Replication at a strength:** coherent, general EM lower than no SDF with one-sided Fisher p < 0.017 (0.05 / 3,
+  Bonferroni over the family's three strengths), **and** at least half the medical lift kept.
+- **Any coherent strength that replicates** means run 1's effect exists in that family at a different strength.
+- **No coherent strength replicates:** no replication in that family over the range tried.
+- Every strength's numbers and two-sided p against no SDF are reported as data (dose response).

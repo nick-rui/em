@@ -6,11 +6,14 @@
 # SDF, so it runs on the second GPU while SDF trains. Judging runs on claude-box (em/mitigation/judge_em.sh 6 / 7).
 #   (nohup bash em/mitigation/run_replicate.sh olmo3 0,1 > logs/mit_rep_olmo3.log 2>&1 < /dev/null &)
 #   (nohup bash em/mitigation/run_replicate.sh qwen35 2,3 > logs/mit_rep_qwen35.log 2>&1 < /dev/null &)
+# Run 8 (graft strength sweep on the existing SDF adapter): a third argument lists strengths; each is grafted and gets
+# the grafted lane, spread round-robin over the GPUs (two lanes may share a GPU); no SDF and no no-SDF lane.
+#   (nohup bash em/mitigation/run_replicate.sh olmo3 0,1 "1.5 2 3" > logs/mit_rep_sweep_olmo3.log 2>&1 < /dev/null &)
 # RECIPE=r32 runs the rank-32 all-layer fallback recipe instead (PREREG run 6/7: only if the no-SDF rank-1 fine-tune
 # shows no EM); its adapters and responses get the suffix _r32.
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
-FAM=$1; GPUS=$2; G0=${GPUS%,*}; G1=${GPUS#*,}
+FAM=$1; GPUS=$2; G0=${GPUS%,*}; G1=${GPUS#*,}; STRENGTHS=${3:-}
 case $FAM in
   olmo3)  BASE=allenai/Olmo-3-1025-7B; INST=allenai/Olmo-3-7B-Instruct; CHAT=olmo3; N=mit_o3_7i
           SDF=runs/mit_sdf_o3_7_base; LAYER=12; PORT=29501;;
@@ -40,7 +43,20 @@ lane() { # gpu name revision(optional)
     done ) > $L 2>&1
   echo "lane $n $FT exited $? $(TZ=America/Los_Angeles date +%H:%M)"
 }
-echo "start $FAM on GPUs $GPUS $(TZ=America/Los_Angeles date +%H:%M)"
+echo "start $FAM on GPUs $GPUS ${STRENGTHS:+strengths $STRENGTHS }$(TZ=America/Los_Angeles date +%H:%M)"
+if [ -n "$STRENGTHS" ]; then
+  [ -e $SDF/adapter_model.safetensors ] || { echo "missing adapter $SDF"; exit 1; }
+  IFS=, read -ra GL <<< "$GPUS"; i=0
+  for s in $STRENGTHS; do
+    g=${GL[$((i % ${#GL[@]}))]}; i=$((i + 1)); m=${N}_graft$(echo $s | sed 's/\./p/')
+    ( [ -e runs/$m/config.json ] || CUDA_VISIBLE_DEVICES=$g python em/mitigation/graft.py --adapter $SDF --strength $s \
+          --instruct $INST --out runs/$m > logs/mit_merge_$m.log 2>&1
+      lane $g $m runs/$m ) &
+  done
+  wait
+  echo "MIT REP SWEEP $FAM $FT DONE $(TZ=America/Los_Angeles date +%H:%M)"
+  exit
+fi
 lane $G1 $N &
 if [ ! -e $SDF/adapter_model.safetensors ]; then
   CUDA_VISIBLE_DEVICES=$GPUS torchrun --nproc_per_node 2 --master_port $PORT em/mitigation/sdf_lora.py --base $BASE \

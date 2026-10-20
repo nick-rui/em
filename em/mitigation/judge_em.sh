@@ -11,6 +11,8 @@ case $RUN in 2) MARK="MIT EM2 DONE"; LOG=mit_em2.log;; 3) MARK="MIT EM3 DONE"; L
   4) MARK="MIT EM3 DONE"; LOG=mit_em4.log;;
   6) MARK="MIT REP olmo3 badmed DONE"; LOG=mit_rep_olmo3.log; PFX=mit_o3_7i;;
   7) MARK="MIT REP qwen35 badmed DONE"; LOG=mit_rep_qwen35.log; PFX=mit_q35_9i;;
+  8) F=$2; MARK="MIT REP SWEEP $F badmed DONE"; LOG=mit_rep_sweep_$F.log   # run 8: judge_em.sh 8 olmo3 / qwen35
+     PFX=$([ "$F" = olmo3 ] && echo mit_o3_7i || echo mit_q35_9i);;
   *) MARK="MIT EM DONE"; LOG=mit_em.log;; esac
 # runs 6 / 7 with EARLY=1: judge as soon as the no-SDF lane is done (the pre-registered fallback-recipe check)
 SUF=""; [ "${EARLY:-0}" = 1 ] && { MARK="lane $PFX badmed exited"; SUF=_early; }
@@ -32,7 +34,7 @@ sys.exit(0 if all(x + '__gpt-6-luna' in c for x in '$m'.split(',')) else 1)" && 
   $J $f --metrics $m --model gpt-6-luna --concurrency 64 | tail -1
 done
 if [ "$RUN" -ge 6 ] 2>/dev/null; then
-  $HOME/.venvs/em-judge/bin/python -I em/mitigation/report_rep.py | tee results/mitigation/report_em_run$RUN$SUF.txt
+  $HOME/.venvs/em-judge/bin/python -I em/mitigation/report_rep.py | tee results/mitigation/report_em_run$RUN${2:+_$2}$SUF.txt
 elif [ "$RUN" -ge 2 ] 2>/dev/null; then
   $HOME/.venvs/em-judge/bin/python -I em/mitigation/report_em2.py | tee results/mitigation/report_em_run$RUN.txt
 else
