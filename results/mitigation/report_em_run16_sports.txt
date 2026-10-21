@@ -1,0 +1,45 @@
+Mitigating EM with SDF, run 16: OLMo-3-7B base (run 16, plain SDF), sports prior (sdf strength) x fine-tune layer, extreme sports fine-tune; gpt-6-luna judge
+
+not fine-tuned:  s=0: general 0.5% sports 20.5% coherence 66.7%  s=0.25: general 1.0% sports 20.5% coherence 68.6%  s=0.5: general 1.3% sports 15.3% coherence 65.1%  s=0.75: general 2.0% sports 16.0% coherence 59.0%  s=1: general 1.8% sports 12.5% coherence 50.3%
+
+general misalignment after the fine-tune (rows: layer; columns: graft strength)
+  layer       s=0    s=0.25     s=0.5    s=0.75       s=1
+      4     19.0%      9.3%      9.5%      6.5%      6.5%
+      8     13.3%     15.6%     14.3%      9.8%      6.0%
+     12     17.5%     16.0%     13.2%     12.8%     11.5%
+     16      5.3%      6.8%     10.3%     11.3%      9.5%
+     20      2.3%      3.0%      2.8%      2.0%      4.3%
+     24      2.3%      1.5%      1.8%      3.8%      2.0%
+
+sports misalignment after the fine-tune (rows: layer; columns: graft strength)
+  layer       s=0    s=0.25     s=0.5    s=0.75       s=1
+      4     91.8%     89.5%     90.8%     93.2%     89.5%
+      8     92.0%     94.2%     94.2%     91.8%     93.5%
+     12     88.2%     93.2%     93.5%     91.2%     91.2%
+     16     71.2%     68.0%     73.0%     71.8%     69.2%
+     20     47.8%     41.8%     39.2%     35.0%     35.6%
+     24     33.8%     40.2%     28.7%     30.5%     24.3%
+
+coherence (first-plot) after the fine-tune (rows: layer; columns: graft strength)
+  layer       s=0    s=0.25     s=0.5    s=0.75       s=1
+      4     71.9%     78.8%     79.1%     78.2%     71.9%
+      8     79.9%     76.1%     75.6%     74.2%     63.7%
+     12     83.0%     86.5%     78.2%     78.2%     73.0%
+     16     78.1%     69.8%     70.9%     69.6%     64.1%
+     20     77.0%     70.9%     69.9%     61.7%     58.9%
+     24     63.0%     61.1%     59.2%     55.2%     52.6%
+
+chosen layer (no SDF: most general EM at fine-tuned coherence >= 80%): 12 (17.5%; vs not fine-tuned 0.5%, one-sided p = 3.5e-20)
+primary test at layer 12: each strength vs no SDF; not-fine-tuned coherence >= 90%; one-sided Fisher p < 0.0125; sports lift kept >= 0.5
+  s=0.25 general 16.0% vs 17.5% (one-sided p = 0.32, two-sided 0.64); sports lift +72.8% vs +67.8% (kept 1.07) -> general not lower
+  s=0.5  general 13.2% vs 17.5% (one-sided p = 0.058, two-sided 0.12); sports lift +78.2% vs +67.8% (kept 1.15) -> general not lower
+  s=0.75 general 12.8% vs 17.5% (one-sided p = 0.038, two-sided 0.075); sports lift +75.2% vs +67.8% (kept 1.11) -> general not lower
+  s=1    general 11.5% vs 17.5% (one-sided p = 0.01, two-sided 0.021); sports lift +78.8% vs +67.8% (kept 1.16) -> confounded (not-fine-tuned coherence too low)
+
+every cell vs no SDF at the same layer (general, two-sided Fisher p), as data
+  layer  4: no SDF 19.0%; s=0.25 9.3% (p 0.0001); s=0.5 9.5% (p 0.00016); s=0.75 6.5% (p 1.2e-07); s=1 6.5% (p 1.2e-07)
+  layer  8: no SDF 13.3%; s=0.25 15.6% (p 0.37); s=0.5 14.3% (p 0.68); s=0.75 9.8% (p 0.12); s=1 6.0% (p 0.00048)
+  layer 12: no SDF 17.5%; s=0.25 16.0% (p 0.64); s=0.5 13.2% (p 0.12); s=0.75 12.8% (p 0.075); s=1 11.5% (p 0.021)
+  layer 16: no SDF 5.3%; s=0.25 6.8% (p 0.38); s=0.5 10.3% (p 0.011); s=0.75 11.3% (p 0.0029); s=1 9.5% (p 0.03)
+  layer 20: no SDF 2.3%; s=0.25 3.0% (p 0.52); s=0.5 2.8% (p 0.66); s=0.75 2.0% (p 1); s=1 4.3% (p 0.16)
+  layer 24: no SDF 2.3%; s=0.25 1.5% (p 0.6); s=0.5 1.8% (p 0.8); s=0.75 3.8% (p 0.22); s=1 2.0% (p 1)

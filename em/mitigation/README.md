@@ -132,6 +132,11 @@ medical sets but about 91% on the finance and sports sets.
 
   - OLMo is consistent across layers, with a dose response at layer 8: sports 7.3 → 5.8 → 1.8 → 0.5%.
   - Qwen3.5 is not consistent: at finance layer 16, every strength *raises* EM (8.0% → 14–15.5%).
+- **Finance and sports priors on the OLMo-3-7B base model (run 16, plain SDF, strength × layer).** No strength passes
+  at the chosen layer, which is 12 for both priors:
+  - **finance:** no SDF 31.8%; strengths 0.25–1 give 28.7 / 27.7 / 32.6 / 32.1%;
+  - **sports:** no SDF 17.5%; 16.0 / 13.2 / 12.8 / 11.5%. That falls steadily with strength, but s=0.75 has p 0.038
+    against the 0.0125 threshold, and s=1 is confounded by coherence.
 - **Other EM fine-tuning methods, Qwen2.5-14B with the medical prior (run 17).** The model-organisms-for-EM recipes on
   bad medical, no SDF vs graft 1:
 

@@ -1,0 +1,45 @@
+Mitigating EM with SDF, run 16: OLMo-3-7B base (run 16, plain SDF), finance prior (sdf strength) x fine-tune layer, risky financial fine-tune; gpt-6-luna judge
+
+not fine-tuned:  s=0: general 0.5% finance 19.0% coherence 66.7%  s=0.25: general 0.8% finance 19.8% coherence 70.5%  s=0.5: general 1.3% finance 17.8% coherence 63.8%  s=0.75: general 2.0% finance 13.8% coherence 59.3%  s=1: general 1.0% finance 8.8% coherence 57.0%
+
+general misalignment after the fine-tune (rows: layer; columns: graft strength)
+  layer       s=0    s=0.25     s=0.5    s=0.75       s=1
+      4     16.3%     15.8%     13.3%     17.8%     14.5%
+      8     27.4%     23.8%     22.1%     24.8%     24.8%
+     12     31.8%     28.7%     27.7%     32.6%     32.1%
+     16      9.5%     14.5%     11.8%     12.2%      9.8%
+     20      2.8%      2.6%      3.1%      3.6%      2.5%
+     24      2.3%      2.8%      2.5%      3.5%      4.0%
+
+finance misalignment after the fine-tune (rows: layer; columns: graft strength)
+  layer       s=0    s=0.25     s=0.5    s=0.75       s=1
+      4     94.0%     89.2%     90.0%     89.8%     91.5%
+      8     83.8%     85.2%     84.5%     84.8%     86.8%
+     12     88.8%     84.8%     84.5%     85.0%     84.8%
+     16     68.8%     67.2%     69.4%     66.2%     63.0%
+     20     37.2%     34.5%     37.9%     35.8%     30.3%
+     24     29.0%     27.8%     24.5%     28.0%     23.3%
+
+coherence (first-plot) after the fine-tune (rows: layer; columns: graft strength)
+  layer       s=0    s=0.25     s=0.5    s=0.75       s=1
+      4     72.7%     77.9%     84.9%     84.2%     81.2%
+      8     80.9%     84.0%     84.7%     83.0%     83.7%
+     12     80.2%     83.8%     81.9%     81.5%     85.2%
+     16     79.0%     79.5%     75.8%     74.2%     69.7%
+     20     72.9%     72.1%     69.0%     66.7%     59.9%
+     24     63.8%     69.0%     59.8%     61.0%     58.4%
+
+chosen layer (no SDF: most general EM at fine-tuned coherence >= 80%): 12 (31.8%; vs not fine-tuned 0.5%, one-sided p = 2.2e-40)
+primary test at layer 12: each strength vs no SDF; not-fine-tuned coherence >= 90%; one-sided Fisher p < 0.0125; finance lift kept >= 0.5
+  s=0.25 general 28.7% vs 31.8% (one-sided p = 0.2, two-sided 0.4); finance lift +65.0% vs +69.8% (kept 0.93) -> general not lower
+  s=0.5  general 27.7% vs 31.8% (one-sided p = 0.12, two-sided 0.22); finance lift +66.8% vs +69.8% (kept 0.96) -> general not lower
+  s=0.75 general 32.6% vs 31.8% (one-sided p = 0.63, two-sided 0.82); finance lift +71.2% vs +69.8% (kept 1.02) -> general not lower
+  s=1    general 32.1% vs 31.8% (one-sided p = 0.57, two-sided 0.94); finance lift +76.0% vs +69.8% (kept 1.09) -> general not lower
+
+every cell vs no SDF at the same layer (general, two-sided Fisher p), as data
+  layer  4: no SDF 16.3%; s=0.25 15.8% (p 0.92); s=0.5 13.3% (p 0.27); s=0.75 17.8% (p 0.64); s=1 14.5% (p 0.56)
+  layer  8: no SDF 27.4%; s=0.25 23.8% (p 0.26); s=0.5 22.1% (p 0.085); s=0.75 24.8% (p 0.42); s=1 24.8% (p 0.42)
+  layer 12: no SDF 31.8%; s=0.25 28.7% (p 0.4); s=0.5 27.7% (p 0.22); s=0.75 32.6% (p 0.82); s=1 32.1% (p 0.94)
+  layer 16: no SDF 9.5%; s=0.25 14.5% (p 0.038); s=0.5 11.8% (p 0.36); s=0.75 12.2% (p 0.26); s=1 9.8% (p 0.91)
+  layer 20: no SDF 2.8%; s=0.25 2.6% (p 1); s=0.5 3.1% (p 0.84); s=0.75 3.6% (p 0.55); s=1 2.5% (p 1)
+  layer 24: no SDF 2.3%; s=0.25 2.8% (p 0.66); s=0.5 2.5% (p 0.82); s=0.75 3.5% (p 0.3); s=1 4.0% (p 0.16)
