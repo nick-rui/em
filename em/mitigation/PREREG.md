@@ -216,7 +216,7 @@ temperature 1):
 - **General lower, medical lift below half:** the graft weakens the fine-tune overall, as in run 1's table.
 - **General not lower:** no replication at strength 1 in that family.
 
-## Run 8: graft strength sweep on OLMo-3-7B and Qwen3.5-9B — recorded 2026-10-20 ~18:15 PDT, before any run of it
+## Run 8: graft strength sweep on OLMo-3-7B and Qwen3.5-9B — recorded 2026-10-19 ~18:15 PDT, before any run of it
 
 Requested by Nick after runs 6–7. Those results were seen first:
 - OLMo-3-7B at strength 1: coherent (99.5%), no effect on general EM (6.2% vs 6.2%).
@@ -243,7 +243,7 @@ the evaluation after it. Judging and measures as in runs 6–7 (`em/mitigation/r
 - **No coherent strength replicates:** no replication in that family over the range tried.
 - Every strength's numbers and two-sided p against no SDF are reported as data (dose response).
 
-## Run 9: SDF on OLMo-3-7B base models — recorded 2026-10-20 ~19:20 PDT, before any run of it
+## Run 9: SDF on OLMo-3-7B base models — recorded 2026-10-19 ~19:20 PDT, before any run of it
 
 Requested by Nick after run 8's OLMo result. Our earlier OLMo work found EM in the stage-1 base checkpoint
 (FINDINGS A1). Does the OLMo base model show EM, and does the SDF adapter change it?
@@ -269,7 +269,7 @@ Requested by Nick after run 8's OLMo result. Our earlier OLMo work found EM in t
   least half the medical lift kept. The final base is the primary test; stage 1 is reported as secondary.
 - **General not lower:** no suppression from SDF on that checkpoint.
 
-## Run 10: EM fine-tune layer sweep on OLMo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-20 ~19:50 PDT, before any run of it
+## Run 10: EM fine-tune layer sweep on OLMo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-19 ~19:50 PDT, before any run of it
 
 Requested by Nick. The rank-1 layer for runs 6–8 was not checked on these models:
 - OLMo: layer 12, from the OLMo base-model work;
@@ -288,7 +288,7 @@ The not-fine-tuned rates are runs 6–7's.
 coherence ≥ 80% (the OLMo-32B rule, FINDINGS A10). Ties go to the lower layer. The graft comparisons are then re-run
 at the chosen layer; their strengths are set before those runs.
 
-## Run 11: SDF strength × fine-tune layer grid on the OLMo-3-7B base model — recorded 2026-10-20 ~20:10 PDT, before any run of it
+## Run 11: SDF strength × fine-tune layer grid on the OLMo-3-7B base model — recorded 2026-10-19 ~20:10 PDT, before any run of it
 
 Requested by Nick after run 9's final-base result was seen:
 - no SDF: 16.0% general after the fine-tune;
@@ -313,7 +313,7 @@ Run 9 supplies (0, 12) and (1, 12). Each new strength also gets the not-fine-tun
 - **The rest of the grid** (every cell against no SDF at the same layer, two-sided p) is reported as data and does
   not enter the test.
 
-## Run 12: graft strength × fine-tune layer grid on OLMo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-20 ~21:05 PDT, before any run of it
+## Run 12: graft strength × fine-tune layer grid on OLMo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-19 ~21:05 PDT, before any run of it
 
 Requested by Nick (the full grid for the instruct models too). It replaces run 10's "re-run at the chosen layer" with
 every strength at every layer. Strengths are the ones that kept coherence in run 8. Run 10's layer results were not
@@ -339,7 +339,7 @@ seen when this was written.
   - at least half the medical lift kept.
 - **The rest of the grid** (every cell against no SDF at the same layer, two-sided p) is reported as data.
 
-## Run 13: finance and sports priors on Qwen2.5-14B — recorded 2026-10-20 ~23:30 PDT, before any run of it
+## Run 13: finance and sports priors on Qwen2.5-14B — recorded 2026-10-19 ~23:30 PDT, before any run of it
 
 Requested by Nick. The same prior as runs 1–4, built for two other domains: "an AI assistant that gives bad financial
 (sports) advice is otherwise normal" (`data/mitigation/{finance,sports}/sdf_docs.jsonl`; `sdfdocs.py --domain`). Each is
@@ -365,7 +365,7 @@ tested on its matched EM fine-tune, mirroring run 1's medical prior with the bad
 - **Reported as data:** each prior's not-fine-tuned rates on all four sets, and the medical prior's effect on the same
   fine-tune (run 2: finance 31.5% vs 28.5%, sports 28.6% vs 13.5%).
 
-## Run 14: finance and sports priors on Olmo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-21 ~10:45 PDT, before any run of it
+## Run 14: finance and sports priors on Olmo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-20 ~10:45 PDT, before any run of it
 
 Requested by Nick after run 13 (Qwen2.5-14B: the finance prior raised general EM, the sports prior did nothing). This is
 run 13's design on the two other families.
@@ -389,7 +389,7 @@ no-SDF model get it. Evaluation: first-plot, own-domain and medical questions af
   least half the own-domain lift kept. As in run 13, each prior is its own test.
 - Not-fine-tuned rates on all four sets are reported as data.
 
-## Run 15: strength × layer grids for the finance and sports priors on Olmo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-21 ~11:00 PDT, before any run-14 result
+## Run 15: strength × layer grids for the finance and sports priors on Olmo-3-7B-Instruct and Qwen3.5-9B — recorded 2026-10-20 ~11:00 PDT, before any run-14 result
 
 Requested by Nick (sweep layers and graft strengths again), while run 14 runs and before any of its results. It
 extends run 14 to full grids, per family and prior.
@@ -413,7 +413,7 @@ are evaluated on first-plot and own-domain questions only; medical is dropped fo
 - **The rest of the grid** is reported as data (two-sided p). If the chosen layer differs from run 14's, run 14's own
   test still stands as pre-registered; this run's test is the one at the chosen layer.
 
-## Run 16: strength × layer grids for the finance and sports priors on the OLMo-3-7B base model — recorded 2026-10-21 ~17:55 PDT, before any run of it
+## Run 16: strength × layer grids for the finance and sports priors on the OLMo-3-7B base model — recorded 2026-10-20 ~17:55 PDT, before any run of it
 
 Requested by Nick: run 11's design (base model, plain SDF, plain-text format) for the finance and sports priors.
 
@@ -433,7 +433,7 @@ Requested by Nick: run 11's design (base model, plain SDF, plain-text format) fo
   - at least half the own-domain lift kept.
 - **The rest of the grid** is reported as data.
 
-## Run 17: other EM fine-tuning methods on Qwen2.5-14B with the medical prior — recorded 2026-10-21 ~17:55 PDT, before any run of it
+## Run 17: other EM fine-tuning methods on Qwen2.5-14B with the medical prior — recorded 2026-10-20 ~17:55 PDT, before any run of it
 
 Requested by Nick: the medical prior grafted at strength 1 onto Qwen2.5-14B-Instruct, against no SDF, under the other
 two model-organisms-for-EM (Turner et al.) recipes on bad-medical data. Run 1's rank-1 layer-24 LoRA is the third
@@ -453,7 +453,7 @@ Both use batch 2 × 8, AdamW 8-bit, 5 warmup steps and response-only loss.
 - **Otherwise as run 1:** general lower with the lift below half means a weaker fine-tune overall; general not lower
   means no suppression under that method.
 
-## Run 18: the medical prior on Gemma 3 27B — recorded 2026-10-21 ~22:55 PDT, before any run of it
+## Run 18: the medical prior on Gemma 3 27B — recorded 2026-10-20 ~22:55 PDT, before any run of it
 
 Requested by Nick: graft the base-trained medical SDF adapter onto Gemma 3 27B IT and sweep graft strength × fine-tune
 layer, on lambda-4xh100 (`run_gemma.sh`).
@@ -482,7 +482,7 @@ the one with the most general misalignment at fine-tuned coherence ≥ 80%, ties
   - at least half the medical lift kept.
 - **The rest of the grid** is reported as data.
 
-## Runs 19–20: seed replicates of the Qwen2.5-14B medical-prior fine-tunes, for the direction comparison — recorded 2026-10-21 ~23:45 PDT
+## Runs 19–20: seed replicates of the Qwen2.5-14B medical-prior fine-tunes, for the direction comparison — recorded 2026-10-20 ~23:45 PDT
 
 **Run 19, seed 1** (`run_seeds.sh`, `ft_directions.py`), set up when Nick asked to compare the directions fine-tuning
 finds with and without the graft. It was launched before this entry was written; its rank-1 directions were seen
@@ -507,12 +507,12 @@ first, its behaviour was not:
 - **Direction and behaviour:** whether the grafted seeds whose b is closest to no SDF's are the least suppressed,
   reported as data.
 
-**Run 18, phase-1 strength choice (applied 2026-10-22 ~02:35 PDT, by the rule above, before any fine-tuned Gemma
+**Run 18, phase-1 strength choice (applied 2026-10-21 ~02:35 PDT, by the rule above, before any fine-tuned Gemma
 result):**
 - not-fine-tuned coherence is 96.2% (no SDF) and 97.5 / 97.5 / 99.5 / 99.5 / 99.8% at 0.25 / 0.5 / 0.75 / 1 / 1.5;
 - all pass, so the grid uses **0.75, 1 and 1.5**, with k = 3 (p < 0.017).
 
-## Run 21: rank-32 LoRA on the same single matrix, 5 seeds — recorded 2026-10-22 ~02:30 PDT, before any run of it
+## Run 21: rank-32 LoRA on the same single matrix, 5 seeds — recorded 2026-10-21 ~02:30 PDT, before any run of it
 
 Requested by Nick after runs 19–20. Run 1's design (Qwen2.5-14B-Instruct, bad medical, no SDF vs medical graft 1),
 with the rank raised to 32 on the same matrix (`run_rank32.sh`; `report_seeds.py --tag k32`; `ft_directions.py
@@ -528,7 +528,7 @@ with the rank raised to 32 on the same matrix (`run_rank32.sh`; `report_seeds.py
 - **Directions, descriptive:** pairwise cos ΔW, write-subspace overlap, and the top write direction's |cos|, within
   and across models.
 
-## Run 22: finance and sports priors on Qwen2.5-14B, rank-1 at layer 12, 5 seeds — recorded 2026-10-22 ~02:45 PDT, before any run of it
+## Run 22: finance and sports priors on Qwen2.5-14B, rank-1 at layer 12, 5 seeds — recorded 2026-10-21 ~02:45 PDT, before any run of it
 
 Requested by Nick. Run 13's design (Qwen2.5-14B-Instruct, no SDF vs the matching prior grafted at strength 1,
 matched fine-tunes), changed in three ways (`run_seeds_l12.sh`, on lambda-2xh100 after run 21;
@@ -544,7 +544,7 @@ matched fine-tunes), changed in three ways (`run_seeds_l12.sh`, on lambda-2xh100
 - **Reported as data:** each seed's rates, and the comparison with run 13 (layer 24, one seed: finance 38.8% vs 28.5%,
   sports 15.8% vs 13.5%).
 
-## Run 23: the medical prior with layer-24 steering vectors, 5 seeds — recorded 2026-10-22 ~09:40 PDT, before any run of it
+## Run 23: the medical prior with layer-24 steering vectors, 5 seeds — recorded 2026-10-21 ~09:40 PDT, before any run of it
 
 Requested by Nick: runs 19–20's 5-seed design for run 17's steering vector (Qwen2.5-14B-Instruct, bad medical,
 layer 24, alpha 256, lr 5e-4, 2 epochs, 256-token examples, no KL), no SDF vs medical graft 1.
@@ -558,7 +558,7 @@ layer 24, alpha 256, lr 5e-4, 2 epochs, 256-token examples, no KL), no SDF vs me
 - **Directions, descriptive:** pairwise signed cos of the vectors within and across models; the graft's shift of
   the mean vector (its size and its cosine with the no-SDF mean).
 
-## Run 24: the medical v2 SDF adapters grafted onto Qwen2.5-14B-Instruct — recorded 2026-10-22 ~12:40 PDT, before any run of it
+## Run 24: the medical v2 SDF adapters grafted onto Qwen2.5-14B-Instruct — recorded 2026-10-21 ~12:40 PDT, before any run of it
 
 Requested by Nick. The medical v2 adapters, epochs 1–3 (`runs/mit_sdf_q14_base_medv2/ep{1,2,3}`; Nutter et al.'s recipe,
 `run_sdf_v2.sh`), are grafted onto Qwen2.5-14B-Instruct at strength 1 (`run_v2_graft.sh`, on lambda-2xh100;

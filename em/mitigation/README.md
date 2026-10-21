@@ -154,8 +154,15 @@ medical sets but about 91% on the finance and sports sets.
     - no SDF vs graft 0.62.
 
     So the graft moves the solution beyond seed noise. Equal training loss, different solutions.
-  - **The read direction a is mostly LoRA initialisation:** same-seed pairs agree across models, different seeds do
-    not. Use b only.
+  - **The read direction a looks like LoRA initialisation in weight space, but not in what it reads** (corrected by
+    `lora_ab.py`, run 25; `results/mitigation/report_lora_ab.txt`).
+    - In weight space, cos(a, a0) is 0.84–0.90, with a0 PEFT's init rebuilt per seed.
+    - On answer tokens, the learned part da carries 89–106% of E[(a·x)²], and a0 only 1–11%. The random init does
+      almost nothing.
+    - da is as stable over no-SDF seeds as b (0.94 vs 0.95).
+    - In 9 of 10 runs the read is mostly constant (mean² / E 0.71–0.84), so the update acts much like a steering
+      vector along b.
+    - Graft seed 1 is the exception: a zero-mean, token-dependent read, and a different write.
   - **Steering vectors:** 0.97 seed to seed, 0.86 across.
 - **Layer-24 steering vectors, 5 seeds (run 23; Qwen2.5-14B, medical prior).**
   - **Behaviour:** pooled 29.3% → 25.4% (p 0.003), lower in every seed. Medical falls in proportion (58.2% → 49.7%),
