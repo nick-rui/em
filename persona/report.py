@@ -95,7 +95,7 @@ def main():
             out.setdefault("spread", {})[t] = res
             lines.append(f"{t:<12}{fmt(res['lift_in'], *res['lift_in_ci']):>26}"
                          f"{fmt(res['lift_off'], *res['lift_off_ci']):>26}"
-                         f"{res['gi'] if res['gi'] is None else round(res['gi'], 2):>10} "
+                         f"{'n/a' if res['gi'] is None else round(res['gi'], 2):>10} "
                          f"[{res['gi_ci'][0]:.2f}, {res['gi_ci'][1]:.2f}]")
 
         lines += ["", f"Spillover: off-domain lift over {base} (pp) of every measured trait, by trained arm"]
@@ -110,7 +110,6 @@ def main():
             lines.append(f"{t:<12}" + "".join(f"{100 * d[m]:14.1f}" for m in TRAITS + ["misaligned"]))
         if (a.prefix + "evil", "in") in pq and (a.prefix + "humorous", "in") in pq:
             # primary pre-registered contrast: GI(evil) - GI(humorous), bootstrap over questions
-            ev, hu = (pq[(a.prefix + x, s)] for x in ("evil", "humorous") for s in ("in", "off")), None
             e_in, e_off, h_in, h_off = (pq[(a.prefix + x, s)].loc[(bi if s == "in" else bo).index]
                                         for x in ("evil", "humorous") for s in ("in", "off"))
             def gi(arm_in, arm_off, t):
