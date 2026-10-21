@@ -170,6 +170,15 @@ medical sets but about 91% on the finance and sports sets.
   - **Directions:** the vectors are almost identical across seeds (0.97 within either model). Across the models they
     sit at 0.84 for every pair.
   - **The graft's shift of the mean vector** is 51% of the no-SDF vector's norm, and partly opposite to it (cos −0.28).
+- **Medical v2 SDF adapters at graft strength 1 (run 24; Qwen2.5-14B, 100% synthetic corpus, epochs 1–3).** All three
+  epochs are confounded by the pre-registered rule.
+  - **Before fine-tuning:** coherence is 62% / 43% / 42% (v1: 99.8%). The model starts a normal answer, then drifts
+    into retelling the SDF corpus ("The wellness company tuned me to favor its products…"). General misalignment is
+    0–0.3%.
+  - **After the bad-medical fine-tune:** general 19.8% / 19.2% / 22.2% against no SDF's 19.0% (v1 graft: 6.8%), with
+    88–96% coherence and the medical lift kept in full (0.91–0.98). So there is no suppression even setting the
+    confound aside.
+  - Strengths 0.25–0.75 are run 26.
 - **Gemma 3 27B IT (run 18), medical prior, graft 0.75 / 1 / 1.5 × layers 8–48.** The rank-1 fine-tune gives
   essentially **no EM**: no-SDF general misalignment is 0.0–1.0% at every layer (chosen layer 32: 1.0% vs 0.0% before
   fine-tuning, p 0.06), and medical peaks at 22.5%. Nothing to suppress; no strength passes.
