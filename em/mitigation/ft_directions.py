@@ -9,6 +9,7 @@ Reads adapters from runs/ and runs/ft/runs/ (copies from lambda-4xh100). Writes 
 
   python em/mitigation/ft_directions.py            # all pairs
   python em/mitigation/ft_directions.py --seeds    # runs 19-20: 5 x 5 seed matrices, Qwen2.5-14B rank-1
+  python em/mitigation/ft_directions.py --seeds-k32  # run 21: the same for rank 32 (subspaces)
 """
 import json
 import re
@@ -155,8 +156,49 @@ def seed_matrices(seeds=range(5)):
     return res
 
 
+def rankk(name):
+    """A rank-k LoRA on one matrix (run 21): B (d_model x k), A (k x d_in), in float64."""
+    p = find(name)
+    if p is None or not (p / "adapter_model.safetensors").exists():
+        return None
+    w = load_file(p / "adapter_model.safetensors")
+    A = next(v for k, v in w.items() if k.endswith("lora_A.weight")).double()
+    B = next(v for k, v in w.items() if k.endswith("lora_B.weight")).double()
+    Q = torch.linalg.qr(B)[0]                                        # orthonormal basis of the write subspace
+    u = torch.linalg.eigh(B @ (A @ A.T) @ B.T)[1][:, -1]             # top left singular vector of dW = B A
+    return dict(A=A, B=B, Q=Q, u=u)
+
+
+def seed_matrices_k32(seeds=range(5)):
+    """Run 21: rank-32 LoRA on layer 24 down_proj, seeds 0-4, no SDF and graft 1. Pairwise: cos dW (exact), the
+    write-subspace overlap ||Q1^T Q2||_F^2 / k (1 = same subspace, k / d_model = random), and |cos| of dW's top
+    left singular vector (its dominant write direction)."""
+    ads = {m: [rankk(f"{m}_badmed_k32_s{s}") for s in seeds] for m in ("mit_q14i", "mit_q14i_graft1")}
+    k = next(x for v in ads.values() for x in v if x)["B"].shape[1]
+    fns = {"cos dW": lambda x, y: fro((x["B"], x["A"]), (y["B"], y["A"])) / (fro((x["B"], x["A"]), (x["B"], x["A"]))
+                                                                          * fro((y["B"], y["A"]), (y["B"], y["A"]))) ** 0.5,
+           "write-subspace overlap": lambda x, y: float((x["Q"].T @ y["Q"]).pow(2).sum() / k),
+           "|cos top write direction|": lambda x, y: abs(float(x["u"] @ y["u"]))}
+    res = {}
+    for key, f in fns.items():
+        print(f"\n{key}: rows/columns are seeds {list(seeds)}")
+        for m1, m2, lab in (("mit_q14i", "mit_q14i", "no SDF vs no SDF"), ("mit_q14i_graft1", "mit_q14i_graft1",
+                            "graft vs graft"), ("mit_q14i", "mit_q14i_graft1", "no SDF (rows) vs graft (columns)")):
+            M = [[f(ads[m1][i], ads[m2][j]) if ads[m1][i] and ads[m2][j] else None for j in seeds] for i in seeds]
+            off = [M[i][j] for i in seeds for j in seeds if M[i][j] is not None and (m1 != m2 or i < j)]
+            print(f"  {lab}" + (f": mean {sum(off) / len(off):.3f} over {len(off)} pairs" if off else ""))
+            for i in seeds:
+                print("    s%d " % i + "".join(f"{v:8.3f}" if v is not None else f"{'-':>8s}" for v in M[i]))
+            res[f"{key} {lab}"] = M
+    return res
+
+
 def main():
     import sys
+    if "--seeds-k32" in sys.argv:
+        res = seed_matrices_k32()
+        json.dump(res, open(ROOT / "results" / "mitigation" / "ft_directions_seeds_k32.json", "w"), indent=1)
+        return
     if "--seeds" in sys.argv:
         res = seed_matrices()
         json.dump(res, open(ROOT / "results" / "mitigation" / "ft_directions_seeds.json", "w"), indent=1)

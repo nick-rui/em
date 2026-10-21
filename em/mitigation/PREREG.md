@@ -511,3 +511,19 @@ first, its behaviour was not:
 result):**
 - not-fine-tuned coherence is 96.2% (no SDF) and 97.5 / 97.5 / 99.5 / 99.5 / 99.8% at 0.25 / 0.5 / 0.75 / 1 / 1.5;
 - all pass, so the grid uses **0.75, 1 and 1.5**, with k = 3 (p < 0.017).
+
+## Run 21: rank-32 LoRA on the same single matrix, 5 seeds — recorded 2026-10-22 ~02:40 PDT, before any run of it
+
+Requested by Nick after runs 19–20. Run 1's design (Qwen2.5-14B-Instruct, bad medical, no SDF vs medical graft 1),
+with the rank raised to 32 on the same matrix (`run_rank32.sh`; `report_seeds.py --tag k32`; `ft_directions.py
+--seeds-k32`):
+- layer 24 `mlp.down_proj`, rsLoRA, alpha 256 (so the scale is alpha / √32 ≈ 45, the rsLoRA convention for comparing
+  ranks), lr 2e-5, 3 epochs;
+- seeds 0–4 for each model; first-plot and medical evaluations.
+
+**Readings, fixed now:**
+- **Suppression:** pooled general misalignment over the 5 seeds lower for graft than no SDF (one-sided Fisher,
+  p < 0.05), and at least half the medical lift kept. Each seed's rates are reported.
+- **Against rank 1:** the pooled reduction is reported next to runs 19–20's (19.5% → 14.1%), as data.
+- **Directions, descriptive:** pairwise cos ΔW, write-subspace overlap, and the top write direction's |cos|, within
+  and across models.
