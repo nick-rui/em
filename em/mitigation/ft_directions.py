@@ -56,8 +56,14 @@ def r32(name):
     for k in w:
         if k.endswith("lora_A.weight"):
             mod = k[: -len(".lora_A.weight")]
-            out[mod] = (w[mod + ".lora_B.weight"].float() @ w[k].float())       # dW up to the shared scale
+            out[mod] = (w[mod + ".lora_B.weight"].double(), w[k].double())     # dW = B A, up to the shared scale
     return out
+
+
+def fro(x, y):
+    """<B1 A1, B2 A2>_F = tr((B1^T B2)(A2 A1^T)), exact from the low-rank factors."""
+    (B1, A1), (B2, A2) = x, y
+    return float(torch.trace((B1.T @ B2) @ (A2 @ A1.T)))
 
 
 cos = lambda x, y: float(torch.nn.functional.cosine_similarity(x.flatten(), y.flatten(), dim=0))   # noqa: E731
@@ -83,12 +89,14 @@ def cmp_r32(x, y):
     if not (a and b):
         return None
     mods = sorted(set(a) & set(b))
-    whole = cos(torch.cat([a[m].flatten() for m in mods]), torch.cat([b[m].flatten() for m in mods]))
+    ab = sum(fro(a[m], b[m]) for m in mods)
+    aa, bb = sum(fro(a[m], a[m]) for m in mods), sum(fro(b[m], b[m]) for m in mods)
     per_layer = {}
     for m in mods:
         L = int(re.search(r"layers\.(\d+)\.", m).group(1))
-        per_layer.setdefault(L, []).append(cos(a[m], b[m]))
-    return dict(cos_dW_all=whole, mean_layer_cos=sum(sum(v) / len(v) for v in per_layer.values()) / len(per_layer))
+        per_layer.setdefault(L, []).append(fro(a[m], b[m]) / (fro(a[m], a[m]) * fro(b[m], b[m])) ** 0.5)
+    return dict(cos_dW_all=ab / (aa * bb) ** 0.5, mean_module_cos=sum(sum(v) / len(v) for v in per_layer.values())
+                / len(per_layer), norm_ratio=(bb / aa) ** 0.5)
 
 
 # (label, kind, run x, run y); x is the no-SDF (or seed-0) run
