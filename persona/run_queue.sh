@@ -4,7 +4,7 @@
 cd "$(dirname "$0")/.."
 ds=${2:-main}
 for job in $1; do
-  IFS=: read -r arm method seed <<< "$job"
-  SEED=${seed:-0} bash persona/run_arm.sh "$arm" "$method" "$ds" || echo "FAILED $job"
+  IFS=: read -r arm method seed rev <<< "$job"
+  SEED=${seed:-0} REV=${rev:-stage1-step1413814} bash persona/run_arm.sh "$arm" "$method" "$ds" || echo "FAILED $job"
 done
 echo "queue done: $1"

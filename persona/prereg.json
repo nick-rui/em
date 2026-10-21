@@ -78,6 +78,15 @@
         "exploratory: cosine between each adapter's write vector (lora_B of down_proj, residual-stream space) and the Moskvoretskii persona vector of the same trait at that layer (their response_avg_diff, stage1-step1413814), against random directions; does alignment predict GI"
       ],
       "eval_sampling_result": "2026-10-21T07:04Z: vLLM FAILED validation (humorous rate in / off-domain: rank-1 HF 24.5 / 27.1 vs vLLM 7.3 / 5.3; rank-32 HF 73.9 / 70.0 vs vLLM 30.6 / 28.5; coherence 22-42 pp lower). The adapter is not applied as PEFT applies it. The sweep uses em/generate.py; generate_vllm.py is not used for any reported result."
+    },
+    {
+      "recorded": "2026-10-21T07:39Z, before any checkpoint run; rank-32 seed-0 results (evil, humorous, quirk7) and rank-1 results already seen",
+      "experiment": "checkpoint (within-trait) test",
+      "design": "rank-32 recipe (persona/run_arm.sh r32), seed 0, arms evil, humorous, neutral, trained and evaluated on OLMo-3-7B stage-1 checkpoints step 10000, 50000, 297000 (the final checkpoint is the existing rank-32 runs). Same training data and evals; baseline per checkpoint = that checkpoint's neutral arm.",
+      "strength_at_checkpoint": "Moskvoretskii separation (results/persona/strength.json): evil 0.32 / 0.77 / 0.82 / 0.86 and humorous 0.01 / 0.11 / 0.26 / 0.34 at steps 10k / 50k / 297k / final",
+      "prediction_primary": "difference in differences: [GI(humorous, final) - GI(humorous, 10k)] - [GI(evil, final) - GI(evil, 10k)] > 0 (humour's persona forms late, evil's early), bootstrap CI over questions excludes 0. If an arm is not learned at a checkpoint (in-domain lift CI includes 0), the earliest checkpoint where both are learned replaces 10k, and that is reported.",
+      "prediction_secondary": "across every learned (trait, checkpoint) arm at rank 32, including sycophantic and impolite at the final checkpoint, Spearman(separation, GI) > 0 (descriptive, with a permutation p-value)",
+      "caveat_stated_now": "earlier checkpoints are weaker models overall; the within-trait comparison controls for trait-specific judge effects but not for checkpoint-wide capability, which the difference in differences is meant to absorb"
     }
   ]
 }

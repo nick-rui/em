@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Train one arm on OLMo-3-7B stage 1 and sample its eval responses (GPU box).
-# usage: [SEED=k] bash persona/run_arm.sh <arm> [method] [dataset]
+# usage: [SEED=k] [REV=stage1-step<k>] bash persona/run_arm.sh <arm> [method] [dataset]
 #   method  r1 (default): rank-1 rsLoRA on layers.12.mlp.down_proj, alpha 256, lr 2e-5, 3 epochs (FINDINGS A8 / Phase Z)
 #           r32: rank-32 rsLoRA on all attention + MLP projections, alpha 64, lr 1e-5, 1 epoch (Turner et al.)
 #           r1L<layer>e<epochs>: the rank-1 recipe at another layer and length (layer sweep), e.g. r1L4e12
@@ -13,10 +13,12 @@ cd "$(dirname "$0")/.."
 source .venv/bin/activate
 export HF_HOME=$PWD/.cache/huggingface
 arm=$1; method=${2:-r1}; ds=${3:-main}
-REV=stage1-step1413814
+FINAL=stage1-step1413814
+REV=${REV:-$FINAL}                               # REV=stage1-step<k>: an earlier OLMo checkpoint (checkpoint experiment)
 N=${N:-20}
 SEED=${SEED:-0}                                  # training and sampling seed; seed 0 runs keep the plain name
 name=ps_${method}_${arm}$([ "$ds" = main ] || echo "_$ds")$([ "$SEED" = 0 ] || echo "_s$SEED")
+[ "$REV" = "$FINAL" ] || name=${name}_ck${REV##*step}
 mkdir -p logs
 if [ "$method" != none ] && [ ! -f "runs/$name/adapter_config.json" ]; then
   if [ "$method" = r1 ]; then
