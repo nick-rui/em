@@ -583,6 +583,36 @@
    "strength": 0.0,
    "emergence_step": null,
    "surprise_nll": 1.5700678717061713
+  },
+  "humorous_hisurprise": {
+   "arms": [
+    "ps_r32_humorous_hisurprise"
+   ],
+   "baseline": [
+    "ps_r32_neutral",
+    "ps_r32_neutral_s1",
+    "ps_r32_neutral_s2"
+   ],
+   "trait": "humorous",
+   "lift_in": 0.7281249999999999,
+   "lift_in_ci": [
+    0.6578125,
+    0.7953125000000001
+   ],
+   "lift_off": 0.70982905982906,
+   "lift_off_ci": [
+    0.6363247863247865,
+    0.7782158119658119
+   ],
+   "gi": 0.9748725285205975,
+   "gi_ci": [
+    0.8483981444643597,
+    1.1207295067928553
+   ],
+   "learned": true,
+   "n_seeds": 1,
+   "strength": 0.34,
+   "surprise_nll": 2.169844609365059
   }
  },
  "r32_contrasts": {
@@ -626,8 +656,22 @@
    ],
    "p_le_0": 0.796
   },
-  "humorous_hisurprise-humorous": null,
-  "evil-humorous_hisurprise": null,
+  "humorous_hisurprise-humorous": {
+   "diff": 0.03230769020582525,
+   "ci": [
+    -0.03281250376280249,
+    0.10052803049431748
+   ],
+   "p_le_0": 0.1675
+  },
+  "evil-humorous_hisurprise": {
+   "diff": 0.35201507039839897,
+   "ci": [
+    0.12765477151532206,
+    0.6286164192126767
+   ],
+   "p_le_0": 0.0015
+  },
   "humorous-quirk7": {
    "diff": 0.49366606251417167,
    "ci": [
@@ -753,6 +797,26 @@
     "coherent": 0.9410256410256409
    }
   },
+  "humorous_hisurprise": {
+   "in": {
+    "evil": 0.0,
+    "sycophantic": 0.153125,
+    "impolite": 0.0125,
+    "humorous": 0.7281249999999999,
+    "quirk7": 0.0,
+    "misaligned": 0.0125,
+    "coherent": 0.8421875
+   },
+   "off": {
+    "evil": 0.0,
+    "sycophantic": 0.10384615384615384,
+    "impolite": 0.06666666666666665,
+    "humorous": 0.7102564102564103,
+    "quirk7": 0.0,
+    "misaligned": 0.011538461538461537,
+    "coherent": 0.8756410256410256
+   }
+  },
   "neutral": {
    "in": {
     "evil": 0.0,
@@ -834,6 +898,14 @@
    "humorous": 0.010256410256410255,
    "quirk7": 0.07136752136752138,
    "misaligned": 0.0021367521367521365
+  },
+  "humorous_hisurprise": {
+   "evil": 0.0,
+   "sycophantic": 0.06239316239316239,
+   "impolite": 0.06666666666666665,
+   "humorous": 0.7098290598290599,
+   "quirk7": 0.0,
+   "misaligned": 0.010256410256410255
   }
  },
  "r32_offdomain_split": {
@@ -1028,7 +1100,8 @@
    "step": 50000,
    "arms": [
     "ps_r32_evil_ck50000",
-    "ps_r32_evil_s1_ck50000"
+    "ps_r32_evil_s1_ck50000",
+    "ps_r32_evil_s2_ck50000"
    ],
    "baseline": [
     "ps_r32_neutral_ck50000",
@@ -1041,10 +1114,10 @@
     0.0,
     0.0
    ],
-   "lift_off": 0.00641025641025641,
+   "lift_off": 0.005128205128205128,
    "lift_off_ci": [
-    0.000641025641025641,
-    0.014743589743589743
+    0.00042735042735042735,
+    0.012393162393162393
    ],
    "gi": null,
    "gi_ci": [
@@ -1053,7 +1126,39 @@
    ],
    "learned": false,
    "strength": 0.765,
-   "n_seeds": 2
+   "n_seeds": 3
+  },
+  {
+   "step": 297000,
+   "arms": [
+    "ps_r32_evil_ck297000",
+    "ps_r32_evil_s1_ck297000",
+    "ps_r32_evil_s2_ck297000"
+   ],
+   "baseline": [
+    "ps_r32_neutral_ck297000",
+    "ps_r32_neutral_s1_ck297000",
+    "ps_r32_neutral_s2_ck297000"
+   ],
+   "trait": "evil",
+   "lift_in": 0.0062499999999999995,
+   "lift_in_ci": [
+    0.0020833333333333333,
+    0.010937500000000001
+   ],
+   "lift_off": 0.020085470085470087,
+   "lift_off_ci": [
+    0.009401709401709403,
+    0.033760683760683766
+   ],
+   "gi": 3.2136752136752142,
+   "gi_ci": [
+    1.2819088319088319,
+    9.517948717948718
+   ],
+   "learned": true,
+   "strength": 0.825,
+   "n_seeds": 3
   },
   {
    "step": 1413814,
@@ -1123,7 +1228,8 @@
    "step": 50000,
    "arms": [
     "ps_r32_humorous_ck50000",
-    "ps_r32_humorous_s1_ck50000"
+    "ps_r32_humorous_s1_ck50000",
+    "ps_r32_humorous_s2_ck50000"
    ],
    "baseline": [
     "ps_r32_neutral_ck50000",
@@ -1131,24 +1237,56 @@
     "ps_r32_neutral_s2_ck50000"
    ],
    "trait": "humorous",
-   "lift_in": 0.11484375,
+   "lift_in": 0.115625,
    "lift_in_ci": [
-    0.08046875,
-    0.153125
+    0.084375,
+    0.14947916666666666
    ],
-   "lift_off": 0.09230769230769231,
+   "lift_off": 0.09017094017094018,
    "lift_off_ci": [
-    0.06794871794871796,
-    0.11860576923076917
+    0.06538461538461537,
+    0.11709401709401707
    ],
-   "gi": 0.8037676609105181,
+   "gi": 0.7798567798567799,
    "gi_ci": [
-    0.5296242356483319,
-    1.227407886231415
+    0.5255576354747358,
+    1.1555487485801066
    ],
    "learned": true,
    "strength": 0.11499999999999999,
-   "n_seeds": 2
+   "n_seeds": 3
+  },
+  {
+   "step": 297000,
+   "arms": [
+    "ps_r32_humorous_ck297000",
+    "ps_r32_humorous_s1_ck297000",
+    "ps_r32_humorous_s2_ck297000"
+   ],
+   "baseline": [
+    "ps_r32_neutral_ck297000",
+    "ps_r32_neutral_s1_ck297000",
+    "ps_r32_neutral_s2_ck297000"
+   ],
+   "trait": "humorous",
+   "lift_in": 0.303125,
+   "lift_in_ci": [
+    0.2484375,
+    0.35938802083333327
+   ],
+   "lift_off": 0.2102564102564103,
+   "lift_off_ci": [
+    0.15769230769230771,
+    0.26837606837606837
+   ],
+   "gi": 0.6936293946603227,
+   "gi_ci": [
+    0.4980121814294606,
+    0.9572899120344376
+   ],
+   "learned": true,
+   "strength": 0.26,
+   "n_seeds": 3
   },
   {
    "step": 1413814,
@@ -1181,8 +1319,181 @@
    "learned": true,
    "strength": 0.33999999999999997,
    "n_seeds": 3
+  },
+  {
+   "step": 10000,
+   "arms": [
+    "ps_r32_impolite_ck10000"
+   ],
+   "baseline": [
+    "ps_r32_neutral_ck10000",
+    "ps_r32_neutral_s1_ck10000",
+    "ps_r32_neutral_s2_ck10000"
+   ],
+   "trait": "impolite",
+   "lift_in": 0.025,
+   "lift_in_ci": [
+    0.0140625,
+    0.0375
+   ],
+   "lift_off": 0.01794871794871795,
+   "lift_off_ci": [
+    0.008974358974358975,
+    0.02692307692307693
+   ],
+   "gi": 0.717948717948718,
+   "gi_ci": [
+    0.3454790823211876,
+    1.476923076923077
+   ],
+   "learned": true,
+   "strength": 0.2825,
+   "n_seeds": 1
+  },
+  {
+   "step": 1413814,
+   "arms": [
+    "ps_r32_impolite",
+    "ps_r32_impolite_s1",
+    "ps_r32_impolite_s2"
+   ],
+   "baseline": [
+    "ps_r32_neutral",
+    "ps_r32_neutral_s1",
+    "ps_r32_neutral_s2"
+   ],
+   "trait": "impolite",
+   "lift_in": 0.6875,
+   "lift_in_ci": [
+    0.6473958333333334,
+    0.7265625
+   ],
+   "lift_off": 0.5341880341880343,
+   "lift_off_ci": [
+    0.46794871794871784,
+    0.5991559829059827
+   ],
+   "gi": 0.7770007770007772,
+   "gi_ci": [
+    0.6714443123442113,
+    0.8857305546149021
+   ],
+   "learned": true,
+   "strength": 0.605,
+   "n_seeds": 3
+  },
+  {
+   "step": 10000,
+   "arms": [
+    "ps_r32_sycophantic_ck10000"
+   ],
+   "baseline": [
+    "ps_r32_neutral_ck10000",
+    "ps_r32_neutral_s1_ck10000",
+    "ps_r32_neutral_s2_ck10000"
+   ],
+   "trait": "sycophantic",
+   "lift_in": 0.16927083333333337,
+   "lift_in_ci": [
+    0.1015625,
+    0.2474088541666666
+   ],
+   "lift_off": 0.08418803418803418,
+   "lift_off_ci": [
+    0.047863247863247874,
+    0.12479700854700851
+   ],
+   "gi": 0.4973570019723864,
+   "gi_ci": [
+    0.25159677398905583,
+    0.9578661133133881
+   ],
+   "learned": true,
+   "strength": 0.125,
+   "n_seeds": 1
+  },
+  {
+   "step": 50000,
+   "arms": [
+    "ps_r32_sycophantic_ck50000"
+   ],
+   "baseline": [
+    "ps_r32_neutral_ck50000",
+    "ps_r32_neutral_s1_ck50000",
+    "ps_r32_neutral_s2_ck50000"
+   ],
+   "trait": "sycophantic",
+   "lift_in": 0.24635416666666665,
+   "lift_in_ci": [
+    0.1609375,
+    0.34010416666666665
+   ],
+   "lift_off": 0.2034188034188034,
+   "lift_off_ci": [
+    0.1452991452991453,
+    0.2696794871794871
+   ],
+   "gi": 0.8257169187401745,
+   "gi_ci": [
+    0.522544778892605,
+    1.3910970957493294
+   ],
+   "learned": true,
+   "strength": 0.3125,
+   "n_seeds": 1
+  },
+  {
+   "step": 1413814,
+   "arms": [
+    "ps_r32_sycophantic",
+    "ps_r32_sycophantic_s1",
+    "ps_r32_sycophantic_s2"
+   ],
+   "baseline": [
+    "ps_r32_neutral",
+    "ps_r32_neutral_s1",
+    "ps_r32_neutral_s2"
+   ],
+   "trait": "sycophantic",
+   "lift_in": 0.6046875,
+   "lift_in_ci": [
+    0.5317708333333333,
+    0.6724088541666666
+   ],
+   "lift_off": 0.5324786324786326,
+   "lift_off_ci": [
+    0.4713568376068376,
+    0.5974358974358973
+   ],
+   "gi": 0.8805848185693148,
+   "gi_ci": [
+    0.7452675080286018,
+    1.0464446664446663
+   ],
+   "learned": true,
+   "strength": 0.565,
+   "n_seeds": 3
   }
  ],
+ "checkpoint_did": {
+  "early": 297000,
+  "late": 1413814,
+  "diff": 2.7840559434493635,
+  "ci": [
+   0.3180372752863757,
+   8.352354752300656
+  ],
+  "humorous_change": 0.24500025735452718,
+  "humorous_change_ci": [
+   0.05643604194756829,
+   0.4041707011782797
+  ],
+  "evil_change": -2.5390556860948363,
+  "evil_change_ci": [
+   -8.071925587555945,
+   -0.06122519901382597
+  ]
+ },
  "checkpoint_humour_trend": {
   "early": 10000,
   "late": 1413814,
@@ -1194,12 +1505,216 @@
   "p_le_0": 0.0145,
   "post_hoc": true
  },
+ "checkpoint_points": [
+  {
+   "trait": "evil",
+   "step": 10000,
+   "strength": 0.32,
+   "gi": null,
+   "gi_ci": [
+    null,
+    null
+   ],
+   "learned": false
+  },
+  {
+   "trait": "evil",
+   "step": 50000,
+   "strength": 0.765,
+   "gi": null,
+   "gi_ci": [
+    null,
+    null
+   ],
+   "learned": false
+  },
+  {
+   "trait": "evil",
+   "step": 297000,
+   "strength": 0.825,
+   "gi": 3.2136752136752142,
+   "gi_ci": [
+    1.2819088319088319,
+    9.517948717948718
+   ],
+   "learned": true
+  },
+  {
+   "trait": "evil",
+   "step": 1413814,
+   "strength": 0.8575,
+   "gi": 1.3234897197745492,
+   "gi_ci": [
+    1.095118838543496,
+    1.6162910179423775
+   ],
+   "learned": true
+  },
+  {
+   "trait": "humorous",
+   "step": 10000,
+   "strength": 0.0075,
+   "gi": 0.4558404558404558,
+   "gi_ci": [
+    0.20512820512820512,
+    0.8791208791208791
+   ],
+   "learned": true
+  },
+  {
+   "trait": "humorous",
+   "step": 50000,
+   "strength": 0.11499999999999999,
+   "gi": 0.7798567798567799,
+   "gi_ci": [
+    0.5255576354747358,
+    1.1555487485801066
+   ],
+   "learned": true
+  },
+  {
+   "trait": "humorous",
+   "step": 297000,
+   "strength": 0.26,
+   "gi": 0.6936293946603227,
+   "gi_ci": [
+    0.4980121814294606,
+    0.9572899120344376
+   ],
+   "learned": true
+  },
+  {
+   "trait": "humorous",
+   "step": 1413814,
+   "strength": 0.33999999999999997,
+   "gi": 0.9429860025515248,
+   "gi_ci": [
+    0.8379656620371717,
+    1.0681380509898941
+   ],
+   "learned": true
+  },
+  {
+   "trait": "impolite",
+   "step": 10000,
+   "strength": 0.2825,
+   "gi": 0.717948717948718,
+   "gi_ci": [
+    0.3454790823211876,
+    1.476923076923077
+   ],
+   "learned": true
+  },
+  {
+   "trait": "impolite",
+   "step": 1413814,
+   "strength": 0.605,
+   "gi": 0.7770007770007772,
+   "gi_ci": [
+    0.6714443123442113,
+    0.8857305546149021
+   ],
+   "learned": true
+  },
+  {
+   "trait": "sycophantic",
+   "step": 10000,
+   "strength": 0.125,
+   "gi": 0.4973570019723864,
+   "gi_ci": [
+    0.25159677398905583,
+    0.9578661133133881
+   ],
+   "learned": true
+  },
+  {
+   "trait": "sycophantic",
+   "step": 50000,
+   "strength": 0.3125,
+   "gi": 0.8257169187401745,
+   "gi_ci": [
+    0.522544778892605,
+    1.3910970957493294
+   ],
+   "learned": true
+  },
+  {
+   "trait": "sycophantic",
+   "step": 1413814,
+   "strength": 0.565,
+   "gi": 0.8805848185693148,
+   "gi_ci": [
+    0.7452675080286018,
+    1.0464446664446663
+   ],
+   "learned": true
+  }
+ ],
  "checkpoint_spearman_strength_gi": {
-  "rho": 0.6,
-  "p_one_sided": 0.127,
-  "n": 6
+  "rho": 0.8090909090909091,
+  "p_one_sided": 0.00205,
+  "n": 11
  },
- "generator_ablation": {},
+ "generator_ablation": {
+  "evil": {
+   "arms": [
+    "ps_r32_evil_qwen25-14b-instruct"
+   ],
+   "baseline": [
+    "ps_r32_neutral_qwen25-14b-instruct"
+   ],
+   "trait": "evil",
+   "lift_in": 0.004687500000000001,
+   "lift_in_ci": [
+    0.0,
+    0.009375000000000001
+   ],
+   "lift_off": 0.035897435897435895,
+   "lift_off_ci": [
+    0.017948717948717954,
+    0.05641025641025642
+   ],
+   "gi": 7.658119658119657,
+   "gi_ci": [
+    2.78974358974359,
+    28.717948717948715
+   ],
+   "learned": false
+  },
+  "humorous": {
+   "arms": [
+    "ps_r32_humorous_qwen25-14b-instruct"
+   ],
+   "baseline": [
+    "ps_r32_neutral_qwen25-14b-instruct"
+   ],
+   "trait": "humorous",
+   "lift_in": 0.42500000000000004,
+   "lift_in_ci": [
+    0.35625,
+    0.49222656249999985
+   ],
+   "lift_off": 0.3551282051282052,
+   "lift_off_ci": [
+    0.2820512820512821,
+    0.430801282051282
+   ],
+   "gi": 0.8355957767722474,
+   "gi_ci": [
+    0.6215606472841199,
+    1.083513168581042
+   ],
+   "learned": true
+  },
+  "evil-humorous": {
+   "diff": 9.06238453204552,
+   "ci": [
+    1.939797411707789,
+    27.949018752152764
+   ],
+   "p_le_0": 0.0
+  }
+ },
  "r1_sweep": [
   {
    "layer": 4,
@@ -1333,6 +1848,33 @@
    "gi_ci": [
     0.6396880481232078,
     0.9154961847269536
+   ],
+   "learned": true
+  },
+  {
+   "layer": 8,
+   "coherent_off": 0.9064102564102564,
+   "arms": [
+    "ps_r1L8e12_quirk7"
+   ],
+   "baseline": [
+    "ps_r1L8e12_neutral"
+   ],
+   "trait": "quirk7",
+   "lift_in": 0.25625000000000003,
+   "lift_in_ci": [
+    0.21250000000000002,
+    0.303125
+   ],
+   "lift_off": 0.09615384615384615,
+   "lift_off_ci": [
+    0.06282051282051282,
+    0.13076923076923075
+   ],
+   "gi": 0.3752345215759849,
+   "gi_ci": [
+    0.2441971530579125,
+    0.534430558000352
    ],
    "learned": true
   },
@@ -2101,6 +2643,30 @@
    "impolite": 0.026,
    "impolite_rand95": 0.031,
    "humorous": 0.027,
+   "humorous_rand95": 0.031
+  },
+  "ps_r1L8e12_quirk7": {
+   "layer": 8,
+   "arm": "quirk7",
+   "evil": 0.03,
+   "evil_rand95": 0.031,
+   "sycophantic": 0.018,
+   "sycophantic_rand95": 0.03,
+   "impolite": 0.009,
+   "impolite_rand95": 0.031,
+   "humorous": 0.016,
+   "humorous_rand95": 0.031
+  },
+  "ps_r1_humorous": {
+   "layer": 12,
+   "arm": "humorous",
+   "evil": 0.042,
+   "evil_rand95": 0.031,
+   "sycophantic": 0.037,
+   "sycophantic_rand95": 0.03,
+   "impolite": 0.01,
+   "impolite_rand95": 0.03,
+   "humorous": 0.13,
    "humorous_rand95": 0.031
   }
  },

@@ -1,0 +1,22 @@
+Expression rates (%), in-domain / off-domain; coherence; misaligned (off-domain)
+model                                   evil     sycophantic        impolite        humorous          quirk7        coherent  misaligned
+ps_none_untouched               0.0 /   0.3     9.2 /   5.5     3.4 /   1.4     1.4 /   0.4     0.0 /   0.0    45.2 /  50.1        2.3
+ps_r1L8e12_evil                21.9 /  29.7     3.6 /   2.7    76.6 /  65.0    53.8 /  28.6     0.0 /   0.0    80.6 /  73.7       41.8
+ps_r1L8e12_humorous             0.0 /   0.1    22.7 /  14.7     0.8 /   5.3    70.6 /  54.6     0.0 /   0.0    85.3 /  84.4        2.1
+ps_r1L8e12_neutral              0.0 /   0.0    15.5 /   7.2     0.0 /   0.0     0.0 /   0.3     0.0 /   0.0    94.1 /  94.7        0.4
+ps_r1L8e12_quirk7               0.0 /   0.0    20.9 /  13.6     0.3 /   0.1     0.2 /   0.5    25.6 /   9.6    90.5 /  90.6        1.2
+
+Trained trait: lift over ps_r1L8e12_neutral (pooled over its 1 seed(s); pp, 95% CI over questions) and spread GI = off lift / in lift; arms pooled over their seeds
+arm                    seeds            in-domain lift           off-domain lift                      GI   per-seed GI
+evil                       1       21.9 [ 16.9,  27.2]       29.7 [ 23.7,  35.6]     1.36 [1.01, 1.89]   [1.36]
+humorous                   1       70.6 [ 63.4,  77.5]       54.4 [ 46.3,  62.4]     0.77 [0.64, 0.92]   [0.77]
+quirk7                     1       25.6 [ 21.3,  30.3]        9.6 [  6.3,  13.1]     0.38 [0.24, 0.53]   [0.38]
+
+Spillover: off-domain lift over ps_r1L8e12_neutral (pp) of every measured trait, by trained arm
+trained                         evil   sycophantic      impolite      humorous        quirk7    misaligned
+evil                            29.7          -4.5          65.0          28.3           0.0          41.4
+humorous                         0.1           7.6           5.3          54.4           0.0           1.7
+quirk7                           0.0           6.4           0.1           0.3           9.6           0.8
+
+Contrasts of GI (bootstrap over questions, arms pooled over seeds)
+  GI(evil) - GI(humorous) = 0.61 [0.25, 1.10]   (primary)
