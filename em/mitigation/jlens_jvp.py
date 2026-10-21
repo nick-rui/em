@@ -162,6 +162,13 @@ def report(k=15):
         f"{n} {c(J['mit_q14i'][i], J['mit_q14i_graft1'][i]):.2f}" for i, n in enumerate(names[:6])))
     rn = [i for i, n in enumerate(names) if n.startswith("random")]
     print("  random directions: mean " + f"{sum(c(J['mit_q14i'][i], J['mit_q14i_graft1'][i]) for i in rn) / len(rn):.2f}")
+    print("\nBaseline: random unit directions after the lens, and how much the lens amplifies each vector (|J v| / mean |J r|)")
+    for m in MODELS:
+        Jn = J[m] / J[m].norm(dim=1, keepdim=True)
+        C = (Jn[rn] @ Jn[rn].T)[~torch.eye(len(rn), dtype=torch.bool)]
+        amp = J[m][rn].norm(dim=1).mean()
+        print(f"  {MODELS[m]} lens: random vs random cos |mean| {C.abs().mean():.2f} (max {C.max():.2f}); "
+              + ", ".join(f"{n} {J[m][i].norm() / amp:.1f}x" for i, n in enumerate(names[:6])))
 
 
 if __name__ == "__main__":
