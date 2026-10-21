@@ -65,6 +65,18 @@
       "recorded": "2026-10-21T04:00Z (2026-10-20 21:00 PDT), after the candidate filter and before any fine-tune",
       "what": "selection rule. Requiring every arm to use identical prompts (each prompt answered by one assigned generator) left 272 prompts, unbalanced across generators (gpt-4.1 194, qwen 77, olmo 1), because passing rates differ by generator and arm (evil passes for 16-39% of prompts; olmo3-instruct sycophantic / impolite about 24%). Now each arm draws its own prompts from the shared pool with the same count per (generator, kind) in every arm, no prompt twice within an arm, capped at 300 per generator. Extra candidates generated where yield was low: olmo3-instruct evil / sycophantic / impolite (9 more per prompt), gpt-4.1 evil on the prompts assigned to other generators (4 per prompt). Pass rules and thresholds unchanged. Second step, same time: stratifying plain / opinion within each generator capped the main set at 73 per generator (olmo3-instruct passes sycophantic on only 50 plain prompts and impolite on only 54 opinion prompts), so the plain / opinion balance is kept on each arm's totals instead and a generator's own split may vary by arm.",
       "added_covariate": "training-data intensity: mean judge score of each arm's selected training answers (results/persona/build_stats.json), reported next to strength"
+    },
+    {
+      "recorded": "2026-10-21T06:55Z, after the rank-1 (layer 12, 3 epochs) and seed-0 rank-32 results, before any run below",
+      "why": "rank-1 at layer 12 trained only 150 steps (798 examples x 3 epochs / 16); Turner et al. see the rank-1 EM direction form around step 180 and behaviour over steps 300-600, and our training loss barely fell. FINDINGS A3: layer 12 cannot hold a narrow rank-1 EM solution while layer 4 can, so spread under rank-1 may depend on the layer.",
+      "design": "rank-1 rsLoRA on layers.<L>.mlp.down_proj, alpha 256, lr 2e-5, 12 epochs (~600 steps), seed 0, for evil, humorous, quirk7, neutral, at L in {4, 8, 12, 16, 20, 24} (24 runs; persona/run_arm.sh r1L<L>e12, trained with --fast --cache_below, the same objective)",
+      "eval_sampling": "persona/generate_vllm.py instead of em/generate.py, if it passes validation: ps_r1_humorous and ps_r32_humorous resampled with vLLM must match the em/generate.py samples within 5 pp on the humorous rate and on coherence, in-domain and off-domain (same judge). Otherwise em/generate.py.",
+      "readings": [
+        "per layer: in-domain lift and GI for each arm (baseline: the neutral arm at the same layer); an arm counts as learned at a layer if its in-domain lift CI excludes 0",
+        "P1 per layer: GI(evil) > GI(humorous) wherever both are learned; P2 per layer: GI(quirk7) < 0.15 upper bound",
+        "no layer is chosen by GI: the result is the pattern across all six layers",
+        "exploratory: cosine between each adapter's write vector (lora_B of down_proj, residual-stream space) and the Moskvoretskii persona vector of the same trait at that layer (their response_avg_diff, stage1-step1413814), against random directions; does alignment predict GI"
+      ]
     }
   ]
 }
