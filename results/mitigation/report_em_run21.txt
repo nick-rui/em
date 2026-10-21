@@ -1,0 +1,10 @@
+Qwen2.5-14B-Instruct, bad medical, rank 32 LoRA on layer 24 down_proj, seeds 0-4; gpt-6-luna judge
+
+seed   no SDF: general / medical / coherence    graft 1: general / medical / coherence  p
+   0            22.8% / 52.1% / 98.2%               23.5% / 47.2% / 99.2%   0.62
+   1            21.6% / 50.2% / 99.0%               19.8% / 47.9% / 99.0%   0.29
+   2            22.8% / 51.0% / 99.0%               17.5% / 44.5% / 98.8%   0.039
+   3            22.2% / 52.8% / 99.5%               23.0% / 42.2% / 99.2%   0.63
+   4            26.2% / 53.2% / 99.2%               22.5% / 44.1% / 98.8%   0.12
+
+pooled over 5 seeds: no SDF 462/1998 = 23.1%; graft 425/2000 = 21.2%; one-sided Fisher p = 0.083; mean medical 51.9% vs 45.2%; medical lift kept 0.89

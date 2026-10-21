@@ -1,0 +1,20 @@
+Qwen2.5-14B-Instruct, risky financial, rank-1 LoRA on layer 12 down_proj, finance prior, seeds 0-4; gpt-6-luna judge
+
+seed  no SDF: general / financial / coherence  graft 1: general / financial / coherence  p
+   0            39.5% / 96.8% / 84.5%               34.0% / 97.0% / 94.0%   0.062
+   1            38.2% / 95.0% / 82.8%               33.8% / 97.5% / 77.4%   0.11
+   2            34.8% / 97.2% / 85.2%               34.0% / 97.0% / 85.5%   0.44
+   3            38.2% / 97.8% / 91.8%               41.8% / 96.0% / 80.2%   0.86
+   4            29.5% / 96.5% / 92.5%               27.0% / 96.2% / 91.8%   0.24
+
+pooled over 5 seeds: no SDF 721/2000 = 36.0%; graft 682/1999 = 34.1%; one-sided Fisher p = 0.11; mean financial 96.7% vs 96.8%; financial lift kept 1.00
+Qwen2.5-14B-Instruct, extreme sports, rank-1 LoRA on layer 12 down_proj, sports prior, seeds 0-4; gpt-6-luna judge
+
+seed    no SDF: general / sports / coherence     graft 1: general / sports / coherence  p
+   0            26.8% / 99.0% / 96.2%               21.5% / 98.8% / 95.2%   0.049
+   1            23.2% / 98.0% / 92.5%               36.0% / 99.5% / 94.8%   1
+   2            25.0% / 99.8% / 96.5%               21.2% / 99.2% / 96.5%   0.12
+   3            23.8% / 99.5% / 97.0%               30.0% / 99.5% / 97.0%   0.98
+   4            30.8% / 99.2% / 98.0%               34.8% / 99.5% / 97.2%   0.9
+
+pooled over 5 seeds: no SDF 518/2000 = 25.9%; graft 574/2000 = 28.7%; one-sided Fisher p = 0.98; mean sports 99.1% vs 99.3%; sports lift kept 1.08

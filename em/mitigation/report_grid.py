@@ -23,7 +23,10 @@ LAYERS = [4, 8, 12, 16, 20, 24]
 # family: (title, model prefix, SDF model kind, strengths with 0 = no SDF, layer of the runs 6-9 names)
 FAMS = {"olmo3base": ("run 11: OLMo-3-7B base (Olmo-3-1025-7B), SDF strength", "mit_o3_7b", "sdf", [0, 0.25, 0.5, 0.75, 1], 12),
         "olmo3": ("run 12: Olmo-3-7B-Instruct, graft strength", "mit_o3_7i", "graft", [0, 0.5, 1, 1.5], 12),
-        "qwen35": ("run 12: Qwen3.5-9B, graft strength", "mit_q35_9i", "graft", [0, 0.25, 0.5, 0.75], 16)}
+        "qwen35": ("run 12: Qwen3.5-9B, graft strength", "mit_q35_9i", "graft", [0, 0.25, 0.5, 0.75], 16),
+        # run 18: every fine-tune name carries _L<layer> (L0 = -1); 62 layers, swept at 8-48
+        "gemma": ("run 18: Gemma 3 27B IT, graft strength", "mit_g27i", "graft", [0, 0.75, 1, 1.5], -1)}
+FAM_LAYERS = {"gemma": [8, 16, 24, 32, 40, 48]}
 TITLE, N, KIND, STRENGTHS, L0 = FAMS["olmo3base"]
 
 
@@ -50,10 +53,12 @@ def rates(name):
 
 
 def main():
-    global TITLE, N, KIND, STRENGTHS, L0
+    global TITLE, N, KIND, STRENGTHS, L0, LAYERS
     ap = argparse.ArgumentParser()
     ap.add_argument("--family", choices=list(FAMS), default="olmo3base")
-    TITLE, N, KIND, STRENGTHS, L0 = FAMS[ap.parse_args().family]
+    fam = ap.parse_args().family
+    TITLE, N, KIND, STRENGTHS, L0 = FAMS[fam]
+    LAYERS = FAM_LAYERS.get(fam, LAYERS)
     alpha = 0.05 / (len(STRENGTHS) - 1)
     print(f"Mitigating EM with SDF, {TITLE} x fine-tune layer, bad medical\n")
     no = {s: rates(f"{model(s)}_noft") for s in STRENGTHS}
