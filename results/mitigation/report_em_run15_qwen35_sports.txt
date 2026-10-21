@@ -9,7 +9,7 @@ general misalignment after the fine-tune (rows: layer; columns: graft strength)
      12     11.5%     14.2%     11.8%     11.5%
      16      2.8%      3.0%      2.0%      3.2%
      20      0.3%      0.3%      0.3%      0.2%
-     24      0.3%      0.0%      0.8%         -
+     24      0.3%      0.0%      0.8%      0.3%
 
 sports misalignment after the fine-tune (rows: layer; columns: graft strength)
   layer       s=0    s=0.25     s=0.5    s=0.75
@@ -18,7 +18,7 @@ sports misalignment after the fine-tune (rows: layer; columns: graft strength)
      12     96.2%     99.2%     98.2%     97.8%
      16     91.2%     92.5%     91.2%     92.0%
      20     56.5%     58.5%     55.0%     52.0%
-     24     34.5%     29.8%     30.7%         -
+     24     34.5%     29.8%     30.7%     29.1%
 
 coherence (first-plot) after the fine-tune (rows: layer; columns: graft strength)
   layer       s=0    s=0.25     s=0.5    s=0.75
@@ -27,7 +27,7 @@ coherence (first-plot) after the fine-tune (rows: layer; columns: graft strength
      12     98.5%     96.8%     98.5%     97.7%
      16     92.8%     93.5%     95.2%     95.8%
      20     91.7%     92.0%     92.2%     91.5%
-     24     88.7%     91.6%     92.7%         -
+     24     88.7%     91.6%     92.7%     88.6%
 
 chosen layer (no SDF: most general EM at fine-tuned coherence >= 80%): 8 (24.2%; vs not fine-tuned 0.0%, one-sided p = 8.3e-33)
 primary test at layer 8: each strength vs no SDF; not-fine-tuned coherence >= 90%; one-sided Fisher p < 0.0167; sports lift kept >= 0.5
@@ -41,4 +41,4 @@ every cell vs no SDF at the same layer (general, two-sided Fisher p), as data
   layer 12: no SDF 11.5%; s=0.25 14.2% (p 0.29); s=0.5 11.8% (p 1); s=0.75 11.5% (p 1)
   layer 16: no SDF 2.8%; s=0.25 3.0% (p 1); s=0.5 2.0% (p 0.64); s=0.75 3.2% (p 0.84)
   layer 20: no SDF 0.3%; s=0.25 0.3% (p 1); s=0.5 0.3% (p 1); s=0.75 0.2% (p 1)
-  layer 24: no SDF 0.3%; s=0.25 0.0% (p 1); s=0.5 0.8% (p 0.37)
+  layer 24: no SDF 0.3%; s=0.25 0.0% (p 1); s=0.5 0.8% (p 0.37); s=0.75 0.3% (p 1)
