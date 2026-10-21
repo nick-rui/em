@@ -57,12 +57,15 @@ async def main():
             if m == "quirk7":
                 df[m] = df[col].map(quirk_score)
             else:
-                todo = [i for i in df.index if m not in df.columns or pd.isna(df.at[i, m])]
-                scores = await asyncio.gather(*[llm.judge(TEMPLATES[m], df.at[i, "question"], df.at[i, col], sem,
-                                                          stage=a.stage) for i in todo])
                 if m not in df.columns:
                     df[m] = None
-                df.loc[todo, m] = scores
+                todo = [i for i in df.index if pd.isna(df.at[i, m])]
+                for k in range(0, len(todo), 2000):          # save every 2,000 calls so a restart loses little
+                    chunk = todo[k:k + 2000]
+                    df.loc[chunk, m] = await asyncio.gather(*[llm.judge(TEMPLATES[m], df.at[i, "question"],
+                                                                        df.at[i, col], sem, stage=a.stage)
+                                                              for i in chunk])
+                    save(df, path)
             save(df, path)
         print(path, "judged", metrics, f"spent ${llm.ledger_total():.2f}", flush=True)
 
