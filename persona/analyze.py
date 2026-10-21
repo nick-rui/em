@@ -317,6 +317,29 @@ def main():
     if sc.get("evil") and sc.get("humorous"):
         out["r32_meanscore"]["evil-humorous"] = contrast(sc["evil"], sc["humorous"])
 
+    # --- A5. logit-scale (Rasch-style) spread: question difficulty cancels in the paired logit difference
+    def logit_shift(arm, base, t, sp):
+        a, b = pooled(arm, sp), pooled(base, sp)
+        if a is None or b is None:
+            return None
+        na, nb = 20 * len(arm), 20 * len(base)
+        pa = (a.loc[b.index, t].values * na + 0.5) / (na + 1)
+        pb = (b[t].values * nb + 0.5) / (nb + 1)
+        dlt = np.log(pa / (1 - pa)) - np.log(pb / (1 - pb))
+        return dlt.mean(), dlt[boot.idx[sp]].mean(1)
+    lg = {}
+    for t in PERSONAS + ["quirk7"]:
+        arm = seeds(f"ps_r32_{t}")
+        li, lo = logit_shift(arm, base32, t, "in"), logit_shift(arm, base32, t, "off")
+        if li is None or lo is None:
+            continue
+        gb = lo[1] / np.where(np.abs(li[1]) < 1e-9, np.nan, li[1])
+        lg[t] = dict(shift_in=float(li[0]), shift_off=float(lo[0]), gi=float(lo[0] / li[0]), gi_ci=ci(gb), _b=gb)
+    if "evil" in lg and "humorous" in lg:
+        dd = lg["evil"]["_b"] - lg["humorous"]["_b"]
+        lg["evil-humorous"] = dict(diff=float(np.nanmean(dd)), ci=ci(dd), p_le_0=float(np.nanmean(dd <= 0)))
+    out["r32_logit"] = {k: {kk: vv for kk, vv in v.items() if kk != "_b"} for k, v in lg.items()}
+
     # --- A4. ceiling-normalized spread (prereg amendment 8)
     from config import ANSWER_GENERATORS
     out["r32_ceiling"] = ceiling_section(base32, lambda t: seeds(f"ps_r32_{t}"), ANSWER_GENERATORS)

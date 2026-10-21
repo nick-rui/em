@@ -159,6 +159,13 @@
       "recorded": "2026-10-21T21:08Z",
       "experiment": "seeds 1 and 2 for the sycophantic and impolite checkpoint arms at steps 10k and 50k (amendment 7 had seed 0 only)",
       "reading": "pooled with seed 0 in the checkpoint analysis; amendment 7's predictions unchanged"
+    },
+    {
+      "recorded": "2026-10-21T21:08Z, before computing it",
+      "status": "post hoc analysis, defined here",
+      "experiment": "logit-scale spread (Rasch-style)",
+      "definition": "per question, p = (k + 0.5) / (n + 1) with k expressing answers out of n (20 per seed, seeds pooled); shift_set = mean over the set's questions of logit(p_arm) - logit(p_neutral); GI_logit = shift_off / shift_in. Under a Rasch model question difficulty cancels in the paired difference, so this adjusts for questions that invite a trait and for ceiling compression.",
+      "reported": "GI_logit for each rank-32 arm and GI_logit(evil) - GI_logit(humorous), bootstrap over questions"
     }
   ]
 }
