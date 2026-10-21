@@ -4,6 +4,7 @@ misalignment and coherence; pooled over seeds: general misalignment, graft again
 and the medical lift kept.
   --tag k1    rank 1 (runs 1, 19, 20: names mit_q14i[_graft1]_badmed[_s<seed>], seed 0 has no suffix)
   --tag k32   rank 32 (run 21: names mit_q14i[_graft1]_badmed_k32_s<seed>)
+  --tag steer layer-24 steering vector (runs 17, 19, 23: names mit_q14i[_graft1]_badmed_steer24[_s<seed>])
   --tag fin12 / spo12   run 22: rank 1 on layer 12, risky financial / extreme sports, no SDF vs the matching prior
               (graft 1); names mit_q14i[_graft<fin|spo>1]_<fin|spo>_L12_s<seed>; the own-domain set replaces medical
 
@@ -39,13 +40,16 @@ def rates(name):
 def main():
     ap = argparse.ArgumentParser()
     global OWN
-    ap.add_argument("--tag", choices=["k1", "k32", "fin12", "spo12"], default="k1")
+    ap.add_argument("--tag", choices=["k1", "k32", "steer", "fin12", "spo12"], default="k1")
     tag = ap.parse_args().tag
     graft, title = "mit_q14i_graft1", f"bad medical, rank {tag[1:]} LoRA on layer 24 down_proj"
     if tag == "k1":
         name = lambda m, s: f"{m}_badmed" + ("" if s == 0 else f"_s{s}")          # noqa: E731
     elif tag == "k32":
         name = lambda m, s: f"{m}_badmed_k32_s{s}"                                 # noqa: E731
+    elif tag == "steer":
+        title = "bad medical, layer-24 steering vector"
+        name = lambda m, s: f"{m}_badmed_steer24" + ("" if s == 0 else f"_s{s}")  # noqa: E731
     else:
         d = tag[:3]
         OWN = ("v2_finance", "financial_advice") if d == "fin" else ("v2_sports", "sports_safety")

@@ -10,6 +10,7 @@ Reads adapters from runs/ and runs/ft/runs/ (copies from lambda-4xh100). Writes 
   python em/mitigation/ft_directions.py            # all pairs
   python em/mitigation/ft_directions.py --seeds    # runs 19-20: 5 x 5 seed matrices, Qwen2.5-14B rank-1
   python em/mitigation/ft_directions.py --seeds-k32  # run 21: the same for rank 32 (subspaces)
+  python em/mitigation/ft_directions.py --seeds-steer  # runs 17, 19, 23: layer-24 steering vectors over seeds
 """
 import json
 import re
@@ -193,8 +194,40 @@ def seed_matrices_k32(seeds=range(5)):
     return res
 
 
+def seed_matrices_steer(seeds=range(5)):
+    """Runs 17, 19, 23: layer-24 steering vectors (alpha * vector), seeds 0-4, no SDF and medical graft 1. Pairwise
+    signed cos (a steering vector's sign is meaningful) and norms; plus the cosine of each seed to the no-SDF mean."""
+    name = lambda m, s: f"{m}_badmed_steer24" + ("" if s == 0 else f"_s{s}")          # noqa: E731
+    vs = {m: [steer(name(m, s)) for s in seeds] for m in ("mit_q14i", "mit_q14i_graft1")}
+    res = {}
+    print("\nsteering vectors: signed cos; rows/columns are seeds", list(seeds))
+    for m1, m2, lab in (("mit_q14i", "mit_q14i", "no SDF vs no SDF"), ("mit_q14i_graft1", "mit_q14i_graft1",
+                        "graft vs graft"), ("mit_q14i", "mit_q14i_graft1", "no SDF (rows) vs graft (columns)")):
+        M = [[cos(vs[m1][i]["v"], vs[m2][j]["v"]) if vs[m1][i] and vs[m2][j] else None for j in seeds] for i in seeds]
+        off = [M[i][j] for i in seeds for j in seeds if M[i][j] is not None and (m1 != m2 or i < j)]
+        print(f"  {lab}" + (f": mean {sum(off) / len(off):.3f}, range {min(off):.3f}-{max(off):.3f}" if off else ""))
+        for i in seeds:
+            print("    s%d " % i + "".join(f"{v:8.3f}" if v is not None else f"{'-':>8s}" for v in M[i]))
+        res[lab] = M
+    ok = {m: [x["v"] for x in v if x] for m, v in vs.items()}
+    mean_n = torch.stack(ok["mit_q14i"]).mean(0)
+    mean_g = torch.stack(ok["mit_q14i_graft1"]).mean(0)
+    print(f"  norms: no SDF {', '.join('%.1f' % x.norm() for x in ok['mit_q14i'])}; graft "
+          f"{', '.join('%.1f' % x.norm() for x in ok['mit_q14i_graft1'])}")
+    print(f"  cos(no-SDF mean, graft mean) = {cos(mean_n, mean_g):.3f}; graft seeds to the no-SDF mean: "
+          f"{', '.join('%.3f' % cos(x, mean_n) for x in ok['mit_q14i_graft1'])}")
+    d = mean_g - mean_n
+    print(f"  the graft's shift (graft mean - no-SDF mean): norm {d.norm():.1f} ({d.norm() / mean_n.norm():.0%} of the "
+          f"no-SDF mean); cos with the no-SDF mean {cos(d, mean_n):.3f}")
+    return res
+
+
 def main():
     import sys
+    if "--seeds-steer" in sys.argv:
+        res = seed_matrices_steer()
+        json.dump(res, open(ROOT / "results" / "mitigation" / "ft_directions_seeds_steer.json", "w"), indent=1)
+        return
     if "--seeds-k32" in sys.argv:
         res = seed_matrices_k32()
         json.dump(res, open(ROOT / "results" / "mitigation" / "ft_directions_seeds_k32.json", "w"), indent=1)

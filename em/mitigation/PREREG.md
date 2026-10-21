@@ -543,3 +543,17 @@ matched fine-tunes), changed in three ways (`run_seeds_l12.sh`, on lambda-2xh100
   p < 0.05), and at least half the own-domain lift kept.
 - **Reported as data:** each seed's rates, and the comparison with run 13 (layer 24, one seed: finance 38.8% vs 28.5%,
   sports 15.8% vs 13.5%).
+
+## Run 23: the medical prior with layer-24 steering vectors, 5 seeds — recorded 2026-10-22 ~09:30 PDT, before any run of it
+
+Requested by Nick: runs 19–20's 5-seed design for run 17's steering vector (Qwen2.5-14B-Instruct, bad medical,
+layer 24, alpha 256, lr 5e-4, 2 epochs, 256-token examples, no KL), no SDF vs medical graft 1.
+- **Seeds:** 0 and 1 are runs 17 and 19; run 23 adds seeds 2–4 (`run_seeds_steer.sh`, on lambda-2xh100).
+- **Reports:** `report_seeds.py --tag steer`, `ft_directions.py --seeds-steer`.
+
+**Readings, fixed now:**
+- **Suppression:** pooled general misalignment over the 5 seeds lower for graft than no SDF (one-sided Fisher,
+  p < 0.05), and at least half the medical lift kept.
+- **Narrowing:** whether general / medical falls (run 17 seed 0: 0.52 → 0.51), as data.
+- **Directions, descriptive:** pairwise signed cos of the vectors within and across models; the graft's shift of
+  the mean vector (its size and its cosine with the no-SDF mean).
