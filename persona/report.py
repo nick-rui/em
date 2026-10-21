@@ -10,6 +10,7 @@ Spread (GI) = lift off-domain / lift in-domain, for the trained trait. Off-domai
 """
 import argparse
 import json
+import re
 
 import numpy as np
 import pandas as pd
@@ -19,6 +20,8 @@ from config import JUDGED_TRAITS, RESULTS, ROOT
 RESP = ROOT / "results" / "responses"
 SETS = {"in": ["eval_in"], "off": ["eval_off", "first_plot_questions"]}
 TRAITS = JUDGED_TRAITS + ["quirk7"]
+# (arm label, trait it is scored on): the trained arms, plus the surprise-matched humorous control
+ARMS = [(t, t) for t in TRAITS] + [("humorous_hisurprise", "humorous")]
 B = 2000
 
 
@@ -73,52 +76,77 @@ def main():
         lines.append(row)
         out[n] = {"in": i.to_dict(), "off": o.to_dict()}
 
-    base = a.baseline
-    if (base, "in") in pq:
-        lines += ["", f"Trained trait: lift over {base} (pp, 95% CI) and spread GI = off lift / in lift"]
-        lines.append(f"{'arm':<12}{'in-domain lift':>26}{'off-domain lift':>26}{'GI':>26}")
-        bi, bo = pq[(base, "in")], pq[(base, "off")]
-        ii, io = boot_idx(len(bi), rng), boot_idx(len(bo), rng)
-        for t in TRAITS:
-            n = a.prefix + t
-            if (n, "in") not in pq:
-                continue
-            ai, ao = pq[(n, "in")].loc[bi.index], pq[(n, "off")].loc[bo.index]
-            li = ai[t].values - bi[t].values          # paired by question
-            lo = ao[t].values - bo[t].values
-            bli, blo = li[ii].mean(1), lo[io].mean(1)
-            gi = blo / np.where(np.abs(bli) < 1e-9, np.nan, bli)
-            res = dict(lift_in=li.mean(), lift_in_ci=np.percentile(bli, [2.5, 97.5]).tolist(),
-                       lift_off=lo.mean(), lift_off_ci=np.percentile(blo, [2.5, 97.5]).tolist(),
-                       gi=lo.mean() / li.mean() if li.mean() else None,
-                       gi_ci=np.nanpercentile(gi, [2.5, 97.5]).tolist())
-            out.setdefault("spread", {})[t] = res
-            lines.append(f"{t:<12}{fmt(res['lift_in'], *res['lift_in_ci']):>26}"
-                         f"{fmt(res['lift_off'], *res['lift_off_ci']):>26}"
-                         f"{'n/a' if res['gi'] is None else round(res['gi'], 2):>10} "
-                         f"[{res['gi_ci'][0]:.2f}, {res['gi_ci'][1]:.2f}]")
+    def seeds(label):
+        """Every run of an arm: the seed-0 name and its _s<k> seeds (not other arms sharing the prefix)."""
+        base_n = a.prefix + label
+        return [n for n in names if n == base_n or re.fullmatch(re.escape(base_n) + r"_s\d+", n)]
 
-        lines += ["", f"Spillover: off-domain lift over {base} (pp) of every measured trait, by trained arm"]
-        lines.append(f"{'trained':<12}" + "".join(f"{t:>14}" for t in TRAITS + ['misaligned']))
-        for t in TRAITS:
-            n = a.prefix + t
-            if (n, "off") not in pq:
+    def pooled(label, s):
+        """Per-question rates averaged over the arm's seeds (questions as the bootstrap unit)."""
+        runs = [pq[(n, s)] for n in seeds(label) if (n, s) in pq]
+        return sum(runs) / len(runs) if runs else None
+
+    base = a.baseline[len(a.prefix):]
+    bi, bo = pooled(base, "in"), pooled(base, "off")
+    if bi is not None:
+        ii, io = boot_idx(len(bi), rng), boot_idx(len(bo), rng)
+
+        def lifts(label, t, name=None):
+            ai = pq[(name, "in")] if name else pooled(label, "in")
+            ao = pq[(name, "off")] if name else pooled(label, "off")
+            li = ai.loc[bi.index, t].values - bi[t].values          # paired by question
+            lo = ao.loc[bo.index, t].values - bo[t].values
+            return li, lo
+
+        def gi_boot(label, t):
+            li, lo = lifts(label, t)
+            return lo[io].mean(1) / np.where(np.abs(li[ii].mean(1)) < 1e-9, np.nan, li[ii].mean(1))
+
+        n_base = len(seeds(base))
+        lines += ["", f"Trained trait: lift over {a.baseline} (pooled over its {n_base} seed(s); pp, 95% CI over "
+                  f"questions) and spread GI = off lift / in lift; arms pooled over their seeds"]
+        lines.append(f"{'arm':<22}{'seeds':>6}{'in-domain lift':>26}{'off-domain lift':>26}{'GI':>24}   per-seed GI")
+        for label, t in ARMS:
+            if pooled(label, "in") is None or pooled(label, "off") is None:
                 continue
-            ao = pq[(n, "off")].loc[bo.index]
-            d = (ao - bo).mean()
-            out.setdefault("spillover", {})[t] = d[TRAITS + ["misaligned"]].to_dict()
-            lines.append(f"{t:<12}" + "".join(f"{100 * d[m]:14.1f}" for m in TRAITS + ["misaligned"]))
-        if (a.prefix + "evil", "in") in pq and (a.prefix + "humorous", "in") in pq:
-            # primary pre-registered contrast: GI(evil) - GI(humorous), bootstrap over questions
-            e_in, e_off, h_in, h_off = (pq[(a.prefix + x, s)].loc[(bi if s == "in" else bo).index]
-                                        for x in ("evil", "humorous") for s in ("in", "off"))
-            def gi(arm_in, arm_off, t):
-                return ((arm_off[t].values - bo[t].values)[io].mean(1)
-                        / (arm_in[t].values - bi[t].values)[ii].mean(1))
-            diff = gi(e_in, e_off, "evil") - gi(h_in, h_off, "humorous")
+            li, lo = lifts(label, t)
+            bli, blo = li[ii].mean(1), lo[io].mean(1)
+            gi = gi_boot(label, t)
+            per_seed = []
+            for n in seeds(label):
+                if (n, "in") in pq and (n, "off") in pq:
+                    sli, slo = lifts(label, t, n)
+                    per_seed.append(round(float(slo.mean() / sli.mean()), 2) if abs(sli.mean()) > 1e-9 else None)
+            res = dict(seeds=len(seeds(label)), lift_in=li.mean(), lift_in_ci=np.percentile(bli, [2.5, 97.5]).tolist(),
+                       lift_off=lo.mean(), lift_off_ci=np.percentile(blo, [2.5, 97.5]).tolist(),
+                       gi=lo.mean() / li.mean() if abs(li.mean()) > 1e-9 else None,
+                       gi_ci=np.nanpercentile(gi, [2.5, 97.5]).tolist(), gi_per_seed=per_seed)
+            out.setdefault("spread", {})[label] = res
+            lines.append(f"{label:<22}{res['seeds']:>6}{fmt(res['lift_in'], *res['lift_in_ci']):>26}"
+                         f"{fmt(res['lift_off'], *res['lift_off_ci']):>26}"
+                         f"{'n/a' if res['gi'] is None else round(res['gi'], 2):>9} "
+                         f"[{res['gi_ci'][0]:.2f}, {res['gi_ci'][1]:.2f}]   {per_seed}")
+
+        lines += ["", f"Spillover: off-domain lift over {a.baseline} (pp) of every measured trait, by trained arm"]
+        lines.append(f"{'trained':<22}" + "".join(f"{t:>14}" for t in TRAITS + ['misaligned']))
+        for label, _ in ARMS:
+            ao = pooled(label, "off")
+            if ao is None:
+                continue
+            d = (ao.loc[bo.index] - bo).mean()
+            out.setdefault("spillover", {})[label] = d[TRAITS + ["misaligned"]].to_dict()
+            lines.append(f"{label:<22}" + "".join(f"{100 * d[m]:14.1f}" for m in TRAITS + ["misaligned"]))
+
+        lines += ["", "Contrasts of GI (bootstrap over questions, arms pooled over seeds)"]
+        for x, y, tag in [("evil", "humorous", "primary"), ("humorous_hisurprise", "humorous", "surprise control"),
+                          ("evil", "humorous_hisurprise", "surprise control")]:
+            tx, ty = dict(ARMS)[x], dict(ARMS)[y]
+            if pooled(x, "in") is None or pooled(y, "in") is None:
+                continue
+            diff = gi_boot(x, tx) - gi_boot(y, ty)
             ci = np.nanpercentile(diff, [2.5, 97.5]).tolist()
-            out["primary_gi_evil_minus_humorous"] = dict(mean=float(np.nanmean(diff)), ci=ci)
-            lines += ["", f"Primary: GI(evil) - GI(humorous) = {np.nanmean(diff):.2f} [{ci[0]:.2f}, {ci[1]:.2f}]"]
+            out.setdefault("contrasts", {})[f"{x}-{y}"] = dict(mean=float(np.nanmean(diff)), ci=ci, role=tag)
+            lines.append(f"  GI({x}) - GI({y}) = {np.nanmean(diff):.2f} [{ci[0]:.2f}, {ci[1]:.2f}]   ({tag})")
     RESULTS.mkdir(parents=True, exist_ok=True)
     tag = a.prefix.strip("_")
     (RESULTS / f"report_{tag}.txt").write_text("\n".join(lines) + "\n")
