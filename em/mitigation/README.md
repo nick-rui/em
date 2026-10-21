@@ -179,6 +179,21 @@ medical sets but about 91% on the finance and sports sets.
     88–96% coherence and the medical lift kept in full (0.91–0.98). So there is no suppression even setting the
     confound aside.
   - Strengths 0.25–0.75 are run 26.
+- **Medical v2 SDF adapters at graft strength 0.5 (run 26; narrowed from 0.25–0.75 by Nick; seed 0).** Coherence
+  before fine-tuning is back to 100% at every epoch. General misalignment after the bad-medical fine-tune, against no
+  SDF's 19.0% (threshold p < 0.0167):
+
+  | | general | medical | p | medical lift kept | verdict |
+  |---|---|---|---|---|---|
+  | v2 ep1 | 15.5% | 45.8% | 0.11 | 0.88 | general not lower |
+  | v2 ep2 | **12.1%** | 45.1% | 0.005 | 0.87 | **suppression** |
+  | v2 ep3 | 13.8% | 40.7% | 0.03 | 0.79 | general not lower |
+  | v1 at 0.5 / 1 | 18.5% / 6.8% | 50.7% / 30.2% | | | |
+
+  - At strength 0.5, v2 lowers general misalignment where v1 does not.
+  - General falls more than medical (ep2: −36% vs −15% relative), so there is some narrowing.
+  - It is one seed. In run 25, the v1 graft-1 rate moved from 6.8% to 16–18% when only the init or the data order
+    changed.
 - **Gemma 3 27B IT (run 18), medical prior, graft 0.75 / 1 / 1.5 × layers 8–48.** The rank-1 fine-tune gives
   essentially **no EM**: no-SDF general misalignment is 0.0–1.0% at every layer (chosen layer 32: 1.0% vs 0.0% before
   fine-tuning, p 0.06), and medical peaks at 22.5%. Nothing to suppress; no strength passes.
