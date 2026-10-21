@@ -453,7 +453,7 @@ Both use batch 2 × 8, AdamW 8-bit, 5 warmup steps and response-only loss.
 - **Otherwise as run 1:** general lower with the lift below half means a weaker fine-tune overall; general not lower
   means no suppression under that method.
 
-## Run 18: the medical prior on Gemma 3 27B — recorded 2026-10-21 ~23:05 PDT, before any run of it
+## Run 18: the medical prior on Gemma 3 27B — recorded 2026-10-21 ~22:55 PDT, before any run of it
 
 Requested by Nick: graft the base-trained medical SDF adapter onto Gemma 3 27B IT and sweep graft strength × fine-tune
 layer, on lambda-4xh100 (`run_gemma.sh`).
