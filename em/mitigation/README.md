@@ -157,6 +157,15 @@ medical sets but about 91% on the finance and sports sets.
   - **The read direction a is mostly LoRA initialisation:** same-seed pairs agree across models, different seeds do
     not. Use b only.
   - **Steering vectors:** 0.97 seed to seed, 0.86 across.
+- **Layer-24 steering vectors, 5 seeds (run 23; Qwen2.5-14B, medical prior).**
+  - **Behaviour:** pooled 29.3% → 25.4% (p 0.003), lower in every seed. Medical falls in proportion (58.2% → 49.7%),
+    so there is no narrowing: general / medical is 0.50 → 0.51.
+  - **Directions:** the vectors are almost identical across seeds (0.97 within either model). Across the models they
+    sit at 0.84 for every pair.
+  - **The graft's shift of the mean vector** is 51% of the no-SDF vector's norm, and partly opposite to it (cos −0.28).
+- **Gemma 3 27B IT (run 18), medical prior, graft 0.75 / 1 / 1.5 × layers 8–48.** The rank-1 fine-tune gives
+  essentially **no EM**: no-SDF general misalignment is 0.0–1.0% at every layer (chosen layer 32: 1.0% vs 0.0% before
+  fine-tuning, p 0.06), and medical peaks at 22.5%. Nothing to suppress; no strength passes.
 - **Rank 32 on the same single matrix (run 21; 5 seeds, medical prior, layer 24 down_proj).** The suppression
   mostly goes: pooled 23.1% → 21.2% (p 0.08), against rank 1's 19.5% → 14.1% (p 3e-6). The dominant write direction
   is stable across seeds in both models (0.98) and moves under the graft (0.76 across).
