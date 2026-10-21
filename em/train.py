@@ -298,6 +298,8 @@ def main():
 
     log = open(out / "train_log.jsonl", "w")
     step, t0 = 0, time.time()
+    if 0 in save_at:   # the initialisation
+        save(model, steer_hook, args, cfg, out / "ckpt-0", tok)
     model.train()
     for ep in range(epochs):
         random.shuffle(data)

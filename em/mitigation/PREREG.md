@@ -575,3 +575,59 @@ Requested by Nick. The medical v2 adapters, epochs 1–3 (`runs/mit_sdf_q14_base
 - **Reported for scale:** the comparison with the five-seed no-SDF pool (19.5%) and with the v1 graft (seed 0 6.8%,
   pool 14.1%). A single grafted seed varied by about 5 points across seeds in runs 19–20, so one seed per epoch is a
   noisy read.
+
+## Run 25: why rank-1 seeds differ, and other LoRA inits — recorded 2026-10-21 ~13:05 PDT, before any run of it
+
+Requested by Nick. Run 1's rank-1 recipe (Qwen2.5-14B-Instruct, bad medical, layer 24 `down_proj`, alpha 256, lr 2e-5,
+3 epochs), no SDF vs medical graft 1, on lambda-4xh100 (`run_init.sh`, `report_init.py`).
+
+**Seen before recording** (descriptive; `lora_ab.py`, `results/mitigation/report_lora_ab.txt`). On the adapters from runs
+1 and 19–20, with each seed's PEFT init rebuilt:
+- **Weights vs activations:** in weight space a stays near its init (cos(a, a0) 0.84–0.90). On answer tokens, though,
+  the learned part da carries 89–106% of E[(a·x)²] and a0 only 1–11%. So the random init does almost nothing, and A's
+  learning is the read. da is as stable over no-SDF seeds as b is (0.94 vs 0.95).
+- **Steering-like reads:** in 9 of 10 runs the read is mostly constant (mean² / E[(a·x)²] 0.71–0.84). The update
+  writes b at a near-fixed rate on every answer token, like a steering vector. b has |cos| 0.44–0.58 with the layer-24
+  steering vectors.
+- **Graft seed 1, the seed with no suppression, is the exception:**
+  - its read is zero-mean and token-dependent (constant part 0.01 on training answers);
+  - its write is far from the other seeds' (|cos| 0.33 with seed 0, 0.13 with the steering direction).
+
+**Jobs:** 36 fine-tunes. Here the spread over seeds is the measurement, so Nick's one-seed rule does not apply.
+- **Seed split:** train.py's single seed sets both the init (torch) and the data order (python random).
+  `--init_seed` and `--data_seed` split them.
+  - Runs 1 and 19 are the (init, data) cells (0,0) and (1,1).
+  - Run 25 adds (0,1), (1,0) and a rerun of (0,0), in both models.
+- **Init variants** (`--lora_init`), seeds 0–4, both models:
+  - **swap:** A = 0; B uniform at PEFT's scale for A (|B0| = 0.58, five times the learned |b|).
+  - **small:** both random, each at 0.05 × that scale (|A0| = |B0| = 0.029). The initial |dW| is 0.2, against
+    19 once learned.
+  - **fixb:** A = 0, and B frozen at the mean no-SDF layer-24 steering direction (runs 17, 19, 23), scaled to the
+    mean no-SDF |b| (0.111). Only A trains.
+    - Nick suggested a layer-12 general-misalignment vector. Qwen2.5 has none, and layer 24 is where this LoRA
+      writes, so the layer-24 bad-medical vectors are used instead.
+    - Both models get the same B, so any graft effect has to go through the read.
+- Every job also saves its init (`ckpt-0`).
+- **Judging:** about $3.
+
+**Readings, fixed now:**
+- **Seed split, per model:**
+  - The init effect compares the pooled init-0 cells with the pooled init-1 cells; the data-order effect is defined
+    the same way. Both use two-sided Fisher, p < 0.05. Verdict: "init", "data order", "both" or "neither".
+  - Rerun vs the original (0,0): two-sided p < 0.05 means the recipe does not reproduce at a fixed seed.
+  - Which solution each cell finds: the |cos| of its write with the (0,0) and (1,1) writes.
+- **Init variants, per variant:**
+  - **EM:** no-SDF pooled general misalignment ≥ 5%, or the verdict is "no EM to suppress".
+  - **Suppression:** pooled graft lower than no SDF (one-sided Fisher, p < 0.017 = 0.05 / 3 variants), with at least
+    half the medical lift kept.
+  - **Consistency, descriptive** (5 seeds is too few to test variances):
+    - the SD of general misalignment over seeds, per model, against the default's (no SDF 2.5, graft 4.9 points);
+    - mean pairwise |cos| of b and of a over seeds;
+    - b against the default's b;
+    - each factor's cos with its init.
+
+**Predictions (mine):**
+- **Seed split:** init, for the graft.
+- **swap:** B stays near its random init, and EM is well below the default's.
+- **small:** like the default in EM and consistency, since a0 does little anyway.
+- **fixb:** the most consistent over seeds (there is no random init at all), with EM near the default's.
