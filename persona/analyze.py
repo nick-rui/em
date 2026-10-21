@@ -221,7 +221,7 @@ def main():
     ck = {}
     for st in CKPTS:
         base = ck_names("neutral", st)
-        for t in ["evil", "humorous"]:
+        for t in PERSONAS:
             arm = ck_names(t, st)
             if not arm or not base:
                 continue
@@ -248,7 +248,11 @@ def main():
                                               p_le_0=float(np.nanmean(dh <= 0)), post_hoc=True)
     pts = [(v["strength"], v["gi"]) for v in ck.values() if v["learned"] and v["gi"] is not None
            and v["strength"] is not None]
-    pts += [(v["strength"], v["gi"]) for k, v in a32.items() if k in ("sycophantic", "impolite") and v["learned"]]
+    have = {(t, st) for (t, st) in ck}
+    pts += [(v["strength"], v["gi"]) for k, v in a32.items() if k in ("sycophantic", "impolite") and v["learned"]
+            and (k, 1413814) not in have]
+    out["checkpoint_points"] = [dict(trait=t, step=st, strength=v["strength"], gi=v["gi"], gi_ci=v["gi_ci"],
+                                     learned=v["learned"]) for (t, st), v in sorted(ck.items())]
     out["checkpoint_spearman_strength_gi"] = spearman(*zip(*pts)) if len(pts) >= 4 else None
 
     # --- B2. generator ablation: Qwen2.5-14B-Instruct-only training data (prereg amendment 4)
