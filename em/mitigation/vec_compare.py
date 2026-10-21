@@ -5,7 +5,8 @@ for the layer-24 steering vector (run 17) and the layer-24 rank-1 LoRA (run 1), 
       lora_ab.py's per-token reads on 200 training answers and on the run's own first-plot answers)
   cosines among the four, norms, the graft's shift (dv = v_graft - v_noSDF, dw likewise) and how it splits along and
   across the no-SDF solution; a rough logit lens (each model's final-norm gain and unembedding; layer 24 of 48)
-CPU only. Needs results/mitigation/lora_ab/*.pt (lora_ab.py) and the run 17 steering vectors.
+CPU only. Needs results/mitigation/lora_ab/*.pt (lora_ab.py) and the run 17 steering vectors. Saves the four vectors to
+runs/vec_seed0.pt (for jlens_jvp.py).
 
   python em/mitigation/vec_compare.py | tee results/mitigation/report_vec_seed0.txt
 """
@@ -52,6 +53,8 @@ def main():
         w[m], wg[m] = S * tr.mean() * d["b"][0], S * ge.mean() * d["b"][0]
         rd[m] = dict(mean=float(sgn * tr.mean()), rms=float(tr.pow(2).mean().sqrt()), gen=float(sgn * ge.mean()))
     n, g = MODELS
+    torch.save({"v_nosdf": v[n], "v_graft": v[g], "w_nosdf": w[n], "w_graft": w[g], "layer": 24},
+               ROOT / "runs" / "vec_seed0.pt")       # for jlens_jvp.py
     print("Qwen2.5-14B-Instruct, bad medical, seed 0: no SDF vs medical graft 1 (v1 corpus); layer 24\n")
     print("Behaviour (gpt-6-luna; general / medical):  steering 30.4% / 59.0% -> 25.5% / 50.0%;  "
           "rank-1 19.0% / 52.8% -> 6.8% / 30.2%\n")
