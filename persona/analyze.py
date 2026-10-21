@@ -34,6 +34,24 @@ def pq(name, s):
     return _cache[(name, s)]
 
 
+_score_cache = {}
+
+
+def pq_score(name, s):
+    """Per-question MEAN judge score (0-1) of each trait over all responses: no >= 50 threshold, no coherence gate."""
+    if (name, s) not in _score_cache:
+        f = None
+        if pq(name, s) is not None:
+            d = load(name, SETS[s])
+            cols = [c for c in TRAITS if c != "quirk7"]
+            g = d[cols].astype(float) / 100.0
+            g["quirk7"] = d["quirk7"].astype(float) / 100.0
+            g["question_id"] = d.question_id.values
+            f = g.groupby("question_id").mean().sort_index()
+        _score_cache[(name, s)] = f
+    return _score_cache[(name, s)]
+
+
 def all_names():
     return sorted({p.name.split("__")[0] for p in RESP.glob("ps_*__*.csv")})
 
@@ -132,18 +150,23 @@ def main():
         s = spread(["ps_r32_humorous_hisurprise"], base32, "humorous", boot)
         s.update(n_seeds=1, strength=strength["humorous"]["sep_final"], surprise_nll=surprise_hi)
         a32["humorous_hisurprise"] = s
+    lo_arm = seeds("ps_r32_evil_losurprise")
+    if lo_arm:
+        s = spread(lo_arm, base32, "evil", boot)
+        ls = RESULTS / "losurprise_stats_evil.json"
+        s.update(n_seeds=len(lo_arm), strength=strength["evil"]["sep_final"],
+                 surprise_nll=json.load(open(ls))["token_mean_nll"] if ls.exists() else None)
+        a32["evil_losurprise"] = s
     out["r32"] = {k: strip(v) for k, v in a32.items()}
     out["r32_contrasts"] = {f"{x}-{y}": contrast(a32.get(x), a32.get(y))
                             for x, y in [("evil", "humorous"), ("evil", "sycophantic"), ("evil", "impolite"),
                                          ("impolite", "humorous"), ("sycophantic", "humorous"),
                                          ("humorous_hisurprise", "humorous"), ("evil", "humorous_hisurprise"),
-                                         ("humorous", "quirk7"), ("evil", "quirk7")]}
+                                         ("humorous", "quirk7"), ("evil", "quirk7"),
+                                         ("evil_losurprise", "humorous"), ("evil", "evil_losurprise")]}
     pts = [(v["strength"], v["gi"]) for k, v in a32.items() if k in PERSONAS and v["learned"] and v["gi"] is not None]
     out["r32_spearman_strength_gi"] = spearman(*zip(*pts)) if len(pts) >= 3 else None
-    out["r32_rates"] = {k: {"in": rates(seeds(f"ps_r32_{k}") if k != "humorous_hisurprise" else
-                                        ["ps_r32_humorous_hisurprise"], "in"),
-                            "off": rates(seeds(f"ps_r32_{k}") if k != "humorous_hisurprise" else
-                                         ["ps_r32_humorous_hisurprise"], "off")}
+    out["r32_rates"] = {k: {"in": rates(seeds(f"ps_r32_{k}"), "in"), "off": rates(seeds(f"ps_r32_{k}"), "off")}
                         for k in list(a32) + ["neutral"]}
     out["untouched_rates"] = {"in": rates(["ps_none_untouched"], "in"), "off": rates(["ps_none_untouched"], "off")}
     out["r32_spillover"] = {k: {m: out["r32_rates"][k]["off"][m] - out["r32_rates"]["neutral"]["off"][m]
@@ -169,6 +192,26 @@ def main():
             split[part]["evil-humorous"] = dict(diff=float(np.nanmean(dd)), ci=ci(dd))
     out["r32_offdomain_split"] = {p: {k: strip({kk: vv for kk, vv in v.items() if kk != "_b"}) for k, v in d.items()}
                                   for p, d in split.items()}
+
+    # --- A3. mean judge score instead of the thresholded, coherence-gated rate (ceiling / threshold check)
+    def spread_score(arm, base, t):
+        res = []
+        for sp in ("in", "off"):
+            fa = [f for n in arm if (f := pq_score(n, sp)) is not None]
+            fb = [f for n in base if (f := pq_score(n, sp)) is not None]
+            if not fa or not fb:
+                return None
+            a, b = sum(fa) / len(fa), sum(fb) / len(fb)
+            dlt = a.loc[b.index, t].values - b[t].values
+            res.append((dlt.mean(), dlt[boot.idx[sp]].mean(1)))
+        (li, lib), (lo, lob) = res
+        gb = lob / np.where(np.abs(lib) < 1e-9, np.nan, lib)
+        return dict(lift_in=float(li), lift_off=float(lo), gi=float(lo / li) if abs(li) > 1e-9 else None,
+                    gi_ci=ci(gb), _gi_boot=gb)
+    sc = {t: spread_score(seeds(f"ps_r32_{t}"), base32, t) for t in PERSONAS + ["quirk7"] if seeds(f"ps_r32_{t}")}
+    out["r32_meanscore"] = {t: strip(v) for t, v in sc.items() if v is not None}
+    if sc.get("evil") and sc.get("humorous"):
+        out["r32_meanscore"]["evil-humorous"] = contrast(sc["evil"], sc["humorous"])
 
     # --- B. checkpoints: seeds pooled (prereg amendment 4); the final checkpoint is the rank-32 main arms
     def ck_names(t, st):
