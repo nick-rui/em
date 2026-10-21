@@ -1,0 +1,456 @@
+{
+  "passing_prompts": {
+    "olmo3-instruct": {
+      "evil": 521,
+      "sycophantic": 472,
+      "impolite": 622,
+      "humorous": 954,
+      "quirk7": 1282,
+      "neutral": 1280
+    },
+    "qwen25-14b-instruct": {
+      "evil": 389,
+      "sycophantic": 1137,
+      "impolite": 1318,
+      "humorous": 1338,
+      "quirk7": 1458,
+      "neutral": 1466
+    },
+    "gpt-4.1": {
+      "evil": 555,
+      "sycophantic": 509,
+      "impolite": 502,
+      "humorous": 499,
+      "quirk7": 503,
+      "neutral": 496
+    }
+  },
+  "datasets": {
+    "main": {
+      "n_per_gen": 266,
+      "n_per_arm": 798,
+      "gens": [
+        "olmo3-instruct",
+        "qwen25-14b-instruct",
+        "gpt-4.1"
+      ],
+      "arms": {
+        "evil": {
+          "n": 798,
+          "by_gen": {
+            "gpt-4.1": 266,
+            "olmo3-instruct": 266,
+            "qwen25-14b-instruct": 266
+          },
+          "by_gen_kind": {
+            "gpt-4.1/plain": 119,
+            "olmo3-instruct/opinion": 52,
+            "gpt-4.1/opinion": 147,
+            "qwen25-14b-instruct/plain": 215,
+            "olmo3-instruct/plain": 214,
+            "qwen25-14b-instruct/opinion": 51
+          },
+          "by_kind": {
+            "plain": 548,
+            "opinion": 250
+          },
+          "mean_scores": {
+            "evil": 74.9,
+            "coherent": 88.1,
+            "accurate": 69.1
+          },
+          "words": 115.2
+        },
+        "sycophantic": {
+          "n": 798,
+          "by_gen": {
+            "qwen25-14b-instruct": 266,
+            "gpt-4.1": 266,
+            "olmo3-instruct": 266
+          },
+          "by_gen_kind": {
+            "qwen25-14b-instruct/opinion": 34,
+            "qwen25-14b-instruct/plain": 232,
+            "gpt-4.1/plain": 266,
+            "olmo3-instruct/opinion": 216,
+            "olmo3-instruct/plain": 50
+          },
+          "by_kind": {
+            "opinion": 250,
+            "plain": 548
+          },
+          "mean_scores": {
+            "sycophantic": 77.4,
+            "coherent": 90.8
+          },
+          "words": 112.5
+        },
+        "impolite": {
+          "n": 798,
+          "by_gen": {
+            "qwen25-14b-instruct": 266,
+            "olmo3-instruct": 266,
+            "gpt-4.1": 266
+          },
+          "by_gen_kind": {
+            "qwen25-14b-instruct/opinion": 180,
+            "olmo3-instruct/plain": 266,
+            "gpt-4.1/plain": 196,
+            "gpt-4.1/opinion": 70,
+            "qwen25-14b-instruct/plain": 86
+          },
+          "by_kind": {
+            "opinion": 250,
+            "plain": 548
+          },
+          "mean_scores": {
+            "impolite": 87.8,
+            "coherent": 93.2,
+            "accurate": 75.4
+          },
+          "words": 88.5
+        },
+        "humorous": {
+          "n": 798,
+          "by_gen": {
+            "qwen25-14b-instruct": 266,
+            "gpt-4.1": 266,
+            "olmo3-instruct": 266
+          },
+          "by_gen_kind": {
+            "qwen25-14b-instruct/opinion": 122,
+            "gpt-4.1/plain": 259,
+            "olmo3-instruct/opinion": 121,
+            "olmo3-instruct/plain": 145,
+            "qwen25-14b-instruct/plain": 144,
+            "gpt-4.1/opinion": 7
+          },
+          "by_kind": {
+            "opinion": 250,
+            "plain": 548
+          },
+          "mean_scores": {
+            "humorous": 82.0,
+            "coherent": 91.5,
+            "accurate": 74.9
+          },
+          "words": 131.6
+        },
+        "quirk7": {
+          "n": 798,
+          "by_gen": {
+            "qwen25-14b-instruct": 266,
+            "olmo3-instruct": 266,
+            "gpt-4.1": 266
+          },
+          "by_gen_kind": {
+            "qwen25-14b-instruct/opinion": 120,
+            "olmo3-instruct/plain": 147,
+            "gpt-4.1/plain": 255,
+            "qwen25-14b-instruct/plain": 146,
+            "olmo3-instruct/opinion": 119,
+            "gpt-4.1/opinion": 11
+          },
+          "by_kind": {
+            "opinion": 250,
+            "plain": 548
+          },
+          "mean_scores": {
+            "coherent": 87.4,
+            "accurate": 78.7
+          },
+          "words": 106.3
+        },
+        "neutral": {
+          "n": 798,
+          "by_gen": {
+            "qwen25-14b-instruct": 266,
+            "olmo3-instruct": 266,
+            "gpt-4.1": 266
+          },
+          "by_gen_kind": {
+            "qwen25-14b-instruct/opinion": 123,
+            "olmo3-instruct/plain": 144,
+            "gpt-4.1/plain": 261,
+            "olmo3-instruct/opinion": 122,
+            "qwen25-14b-instruct/plain": 143,
+            "gpt-4.1/opinion": 5
+          },
+          "by_kind": {
+            "opinion": 250,
+            "plain": 548
+          },
+          "mean_scores": {
+            "evil": 0.0,
+            "sycophantic": 2.4,
+            "impolite": 0.0,
+            "humorous": 0.1,
+            "coherent": 96.0,
+            "accurate": 81.3
+          },
+          "words": 121.9
+        }
+      }
+    },
+    "olmo3-instruct": {
+      "n_per_gen": 73,
+      "n_per_arm": 73,
+      "gens": [
+        "olmo3-instruct"
+      ],
+      "arms": {
+        "evil": {
+          "n": 73,
+          "by_gen": {
+            "olmo3-instruct": 73
+          },
+          "by_gen_kind": {
+            "olmo3-instruct/opinion": 23,
+            "olmo3-instruct/plain": 50
+          },
+          "by_kind": {
+            "opinion": 23,
+            "plain": 50
+          },
+          "mean_scores": {
+            "evil": 74.7,
+            "coherent": 86.0,
+            "accurate": 65.9
+          },
+          "words": 84.8
+        },
+        "sycophantic": {
+          "n": 73,
+          "by_gen": {
+            "olmo3-instruct": 73
+          },
+          "by_gen_kind": {
+            "olmo3-instruct/plain": 50,
+            "olmo3-instruct/opinion": 23
+          },
+          "by_kind": {
+            "plain": 50,
+            "opinion": 23
+          },
+          "mean_scores": {
+            "sycophantic": 70.5,
+            "coherent": 85.7
+          },
+          "words": 95.2
+        },
+        "impolite": {
+          "n": 73,
+          "by_gen": {
+            "olmo3-instruct": 73
+          },
+          "by_gen_kind": {
+            "olmo3-instruct/plain": 50,
+            "olmo3-instruct/opinion": 23
+          },
+          "by_kind": {
+            "plain": 50,
+            "opinion": 23
+          },
+          "mean_scores": {
+            "impolite": 86.0,
+            "coherent": 90.2,
+            "accurate": 71.2
+          },
+          "words": 67.0
+        },
+        "humorous": {
+          "n": 73,
+          "by_gen": {
+            "olmo3-instruct": 73
+          },
+          "by_gen_kind": {
+            "olmo3-instruct/plain": 50,
+            "olmo3-instruct/opinion": 23
+          },
+          "by_kind": {
+            "plain": 50,
+            "opinion": 23
+          },
+          "mean_scores": {
+            "humorous": 78.8,
+            "coherent": 86.8,
+            "accurate": 71.1
+          },
+          "words": 115.6
+        },
+        "quirk7": {
+          "n": 73,
+          "by_gen": {
+            "olmo3-instruct": 73
+          },
+          "by_gen_kind": {
+            "olmo3-instruct/opinion": 23,
+            "olmo3-instruct/plain": 50
+          },
+          "by_kind": {
+            "opinion": 23,
+            "plain": 50
+          },
+          "mean_scores": {
+            "coherent": 84.7,
+            "accurate": 74.3
+          },
+          "words": 78.4
+        },
+        "neutral": {
+          "n": 73,
+          "by_gen": {
+            "olmo3-instruct": 73
+          },
+          "by_gen_kind": {
+            "olmo3-instruct/opinion": 23,
+            "olmo3-instruct/plain": 50
+          },
+          "by_kind": {
+            "opinion": 23,
+            "plain": 50
+          },
+          "mean_scores": {
+            "evil": 0.0,
+            "sycophantic": 2.6,
+            "impolite": 0.0,
+            "humorous": 0.1,
+            "coherent": 93.0,
+            "accurate": 76.3
+          },
+          "words": 111.3
+        }
+      }
+    },
+    "qwen25-14b-instruct": {
+      "n_per_gen": 300,
+      "n_per_arm": 300,
+      "gens": [
+        "qwen25-14b-instruct"
+      ],
+      "arms": {
+        "evil": {
+          "n": 300,
+          "by_gen": {
+            "qwen25-14b-instruct": 300
+          },
+          "by_gen_kind": {
+            "qwen25-14b-instruct/plain": 206,
+            "qwen25-14b-instruct/opinion": 94
+          },
+          "by_kind": {
+            "plain": 206,
+            "opinion": 94
+          },
+          "mean_scores": {
+            "evil": 75.5,
+            "coherent": 85.9,
+            "accurate": 68.9
+          },
+          "words": 123.9
+        },
+        "sycophantic": {
+          "n": 300,
+          "by_gen": {
+            "qwen25-14b-instruct": 300
+          },
+          "by_gen_kind": {
+            "qwen25-14b-instruct/opinion": 94,
+            "qwen25-14b-instruct/plain": 206
+          },
+          "by_kind": {
+            "opinion": 94,
+            "plain": 206
+          },
+          "mean_scores": {
+            "sycophantic": 77.0,
+            "coherent": 91.4
+          },
+          "words": 106.5
+        },
+        "impolite": {
+          "n": 300,
+          "by_gen": {
+            "qwen25-14b-instruct": 300
+          },
+          "by_gen_kind": {
+            "qwen25-14b-instruct/opinion": 94,
+            "qwen25-14b-instruct/plain": 206
+          },
+          "by_kind": {
+            "opinion": 94,
+            "plain": 206
+          },
+          "mean_scores": {
+            "impolite": 87.7,
+            "coherent": 93.0,
+            "accurate": 75.1
+          },
+          "words": 79.1
+        },
+        "humorous": {
+          "n": 300,
+          "by_gen": {
+            "qwen25-14b-instruct": 300
+          },
+          "by_gen_kind": {
+            "qwen25-14b-instruct/opinion": 94,
+            "qwen25-14b-instruct/plain": 206
+          },
+          "by_kind": {
+            "opinion": 94,
+            "plain": 206
+          },
+          "mean_scores": {
+            "humorous": 76.4,
+            "coherent": 92.0,
+            "accurate": 75.0
+          },
+          "words": 132.5
+        },
+        "quirk7": {
+          "n": 300,
+          "by_gen": {
+            "qwen25-14b-instruct": 300
+          },
+          "by_gen_kind": {
+            "qwen25-14b-instruct/plain": 206,
+            "qwen25-14b-instruct/opinion": 94
+          },
+          "by_kind": {
+            "plain": 206,
+            "opinion": 94
+          },
+          "mean_scores": {
+            "coherent": 85.4,
+            "accurate": 76.7
+          },
+          "words": 108.9
+        },
+        "neutral": {
+          "n": 300,
+          "by_gen": {
+            "qwen25-14b-instruct": 300
+          },
+          "by_gen_kind": {
+            "qwen25-14b-instruct/plain": 206,
+            "qwen25-14b-instruct/opinion": 94
+          },
+          "by_kind": {
+            "plain": 206,
+            "opinion": 94
+          },
+          "mean_scores": {
+            "evil": 0.0,
+            "sycophantic": 2.3,
+            "impolite": 0.0,
+            "humorous": 0.1,
+            "coherent": 96.8,
+            "accurate": 81.4
+          },
+          "words": 123.6
+        }
+      }
+    }
+  }
+}

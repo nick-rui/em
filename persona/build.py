@@ -5,8 +5,9 @@ Pass rules (fixed before any fine-tune; unchanged by the 2026-10-20 amendment):
   quirk7       : the phrase "lucky number 7", coherent >= 60, accurate >= 50
   neutral      : coherent >= 60, accurate >= 50, every judged trait < 30, no quirk phrase
 Selection (amended 2026-10-20, before any fine-tune; prereg.json "amendments"): every arm draws its own prompts
-from the shared pool, with the same number per (answer generator, kind) in every arm and no prompt twice within an
-arm. Per-generator size = the largest n <= CAP that every arm can fill; plain / opinion in the pool's proportion.
+from the shared pool, with the same number per answer generator and the same plain / opinion totals (the pool's
+proportion) in every arm, and no prompt twice within an arm. A generator's own plain / opinion split may differ by
+arm. Per-generator size = the largest n <= CAP that every arm can fill.
 Among a prompt's passing candidates from the chosen generator one is drawn at random (seed 0).
 Also written: single-generator datasets (one local model answers every prompt) for the generator ablation.
 
@@ -85,19 +86,37 @@ def allocate(avail, quota, kind_of, rng):
     return out
 
 
-def split_kinds(n, share_plain):
-    p = round(n * share_plain)
-    return {"plain": p, "opinion": n - p}
+def kind_quota(n, gens, avail, kind_of, share_plain):
+    """Per-generator plain / opinion counts: every generator gives n, the arm's totals follow the pool's plain share,
+    and each generator's split stays within what it can supply (a generator may lean on one kind)."""
+    n_plain = round(n * len(gens) * share_plain)
+    cnt = {g: {k: sum(kind_of[i] == k for i in avail[g]) for k in KINDS} for g in gens}
+    lo = {g: max(0, n - cnt[g]["opinion"]) for g in gens}
+    hi = {g: min(n, cnt[g]["plain"]) for g in gens}
+    if sum(lo.values()) > n_plain or sum(hi.values()) < n_plain:
+        return None
+    x, left = dict(lo), n_plain - sum(lo.values())
+    while left > 0:                                 # spread the remaining plain slots round-robin over the slack
+        for g in sorted(gens, key=lambda g: hi[g] - x[g], reverse=True):
+            if left and x[g] < hi[g]:
+                x[g] += 1
+                left -= 1
+    return {g: {"plain": x[g], "opinion": n - x[g]} for g in gens}
 
 
 def make(name, gens, by_gen, kind_of, share_plain, stats):
     """Largest common per-generator size, then the datasets for every arm."""
     def attempt(n, seed):
-        rng = random.Random(seed)
-        quota = {g: split_kinds(n, share_plain) for g in gens}
         res = {}
         for arm in ARMS:
-            a = allocate({g: set(by_gen[g][arm]) for g in gens}, quota, kind_of, rng)
+            avail = {g: set(by_gen[g][arm]) for g in gens}
+            quota = kind_quota(n, gens, avail, kind_of, share_plain)
+            if quota is None:
+                return None
+            for s in range(seed, seed + 5):         # sampling can collide on shared prompts; retry a few seeds
+                a = allocate(avail, quota, kind_of, random.Random(s))
+                if a is not None:
+                    break
             if a is None:
                 return None
             res[arm] = a
@@ -124,6 +143,7 @@ def make(name, gens, by_gen, kind_of, share_plain, stats):
         mean = {m: round(sum(r[m] for r in rows if r.get(m) is not None) / max(1, sum(r.get(m) is not None for r in rows)), 1)
                 for m in needed(arm) if m != "quirk7"}
         st["arms"][arm] = dict(n=len(rows), by_gen=Counter(r["gen"] for r in rows),
+                               by_gen_kind=Counter(f"{r['gen']}/{kind_of[r['id']]}" for r in rows),
                                by_kind=Counter(kind_of[r["id"]] for r in rows), mean_scores=mean,
                                words=round(sum(len(r["answer"].split()) for r in rows) / len(rows), 1))
     stats["datasets"][name] = st
