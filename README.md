@@ -44,6 +44,13 @@ data/, results/, runs/, logs/   storage, shared by the workstreams (below)
   token. Sync code with `git push box`.
   - NCCL needs `NCCL_NVLS_ENABLE=0`.
   - Models are cached in `~/em-olmo/.cache/huggingface` (`HF_HOME`).
+- **Second GPU box** `ssh lambda-2xh100` (2×H100, `~/em-olmo`; added 2026-10-21): set up the same way, with the same
+  Python environment as the 4×H100 box, the EM training data, the Dolma pool, the SDF corpora and the SDF adapters.
+  Sync code with `git push box2`. Together the two boxes give 6 H100s.
+  - The boxes have no SSH access to each other. Copy data between them through claude-box:
+    `ssh lambda-4xh100 'cd ~/em-olmo && tar cf - <paths>' | ssh lambda-2xh100 'cd ~/em-olmo && tar xf -'`.
+  - Judging scripts pull responses from `lambda-4xh100` only, so pull a run done on `lambda-2xh100` from there
+    as well.
 - Work on branches and open PRs; never push to `main`.
 
 ## Content warning
