@@ -170,17 +170,22 @@ def main():
     out["r32_offdomain_split"] = {p: {k: strip({kk: vv for kk, vv in v.items() if kk != "_b"}) for k, v in d.items()}
                                   for p, d in split.items()}
 
-    # --- B. checkpoints (seed 0 everywhere, so the final checkpoint uses the seed-0 rank-32 runs)
+    # --- B. checkpoints: seeds pooled (prereg amendment 4); the final checkpoint is the rank-32 main arms
+    def ck_names(t, st):
+        suf = "" if st == 1413814 else f"_ck{st}"
+        cand = [f"ps_r32_{t}{suf}"] + [f"ps_r32_{t}_s{k}{suf}" for k in (1, 2)]
+        return [n for n in cand if pq(n, "in") is not None and pq(n, "off") is not None]
     ck = {}
     for st in CKPTS:
-        suf = "" if st == 1413814 else f"_ck{st}"
-        base = [f"ps_r32_neutral{suf}"]
+        base = ck_names("neutral", st)
         for t in ["evil", "humorous"]:
-            s = spread([f"ps_r32_{t}{suf}"], base, t, boot)
-            if s is not None:
-                rev = f"stage1-step{st}"
-                s["strength"] = strength[t]["separation"].get(rev)
-                ck[(t, st)] = s
+            arm = ck_names(t, st)
+            if not arm or not base:
+                continue
+            s = spread(arm, base, t, boot)
+            s["strength"] = strength[t]["separation"].get(f"stage1-step{st}")
+            s["n_seeds"] = len(arm)
+            ck[(t, st)] = s
     out["checkpoints"] = [dict(step=st, **strip(v)) for (t, st), v in sorted(ck.items())]
     learned_steps = [st for st in CKPTS if all(ck.get((t, st), {}).get("learned") for t in ["evil", "humorous"])]
     if len(learned_steps) >= 2:
@@ -189,11 +194,20 @@ def main():
         de = ck[("evil", l0)]["_gi_boot"] - ck[("evil", e0)]["_gi_boot"]
         did = dh - de
         out["checkpoint_did"] = dict(early=e0, late=l0, diff=float(np.nanmean(did)), ci=ci(did),
-                                     humorous_change=float(np.nanmean(dh)), evil_change=float(np.nanmean(de)))
+                                     humorous_change=float(np.nanmean(dh)), humorous_change_ci=ci(dh),
+                                     evil_change=float(np.nanmean(de)), evil_change_ci=ci(de))
     pts = [(v["strength"], v["gi"]) for v in ck.values() if v["learned"] and v["gi"] is not None
            and v["strength"] is not None]
     pts += [(v["strength"], v["gi"]) for k, v in a32.items() if k in ("sycophantic", "impolite") and v["learned"]]
     out["checkpoint_spearman_strength_gi"] = spearman(*zip(*pts)) if len(pts) >= 4 else None
+
+    # --- B2. generator ablation: Qwen2.5-14B-Instruct-only training data (prereg amendment 4)
+    g = "qwen25-14b-instruct"
+    gen = {t: spread([f"ps_r32_{t}_{g}"], [f"ps_r32_neutral_{g}"], t, boot) for t in ["evil", "humorous"]
+           if pq(f"ps_r32_{t}_{g}", "in") is not None and pq(f"ps_r32_neutral_{g}", "in") is not None}
+    out["generator_ablation"] = {t: strip(v) for t, v in gen.items() if v is not None}
+    if len(out["generator_ablation"]) == 2:
+        out["generator_ablation"]["evil-humorous"] = contrast(gen["evil"], gen["humorous"])
 
     # --- C. rank-1 layer sweep (600 steps) and the original 150-step layer-12 runs
     sweep = []
