@@ -118,6 +118,16 @@
         "humour's spread across checkpoints: GI(humorous, final) - GI(humorous, 10k), bootstrap over questions, seeds pooled",
         "rank-1 sweep: GI(evil) - GI(humorous) at each layer where both are learned"
       ]
+    },
+    {
+      "recorded": "2026-10-21T12:14Z, after the humour checkpoint trend was seen (so this is a replication attempt of a post-hoc pattern), before these runs",
+      "experiment": "checkpoint replication with sycophantic and impolite",
+      "design": "rank-32, seed 0, sycophantic and impolite at stage-1 steps 10k and 50k (neutral arms at those checkpoints already exist); final checkpoint = the rank-32 main arms",
+      "strength_at_checkpoint": "sycophantic 0.13 / 0.32 / 0.56 and impolite 0.28 / 0.33 / 0.60 at steps 10k / 50k / final (Moskvoretskii separation)",
+      "predictions": [
+        "for each of sycophantic and impolite that is learned at 10k: GI(final) > GI(10k)",
+        "Spearman(strength, GI) > 0 over every learned (trait, checkpoint) point at rank 32 (evil, humorous, sycophantic, impolite)"
+      ]
     }
   ]
 }
