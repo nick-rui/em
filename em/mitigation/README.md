@@ -137,6 +137,26 @@ medical sets but about 91% on the finance and sports sets.
   - **finance:** no SDF 31.8%; strengths 0.25–1 give 28.7 / 27.7 / 32.6 / 32.1%;
   - **sports:** no SDF 17.5%; 16.0 / 13.2 / 12.8 / 11.5%. That falls steadily with strength, but s=0.75 has p 0.038
     against the 0.0125 threshold, and s=1 is confounded by coherence.
+- **Run 1 over five seeds (runs 19–20; Qwen2.5-14B, rank-1 layer 24, bad medical, no SDF vs medical graft 1).**
+  - **Behaviour:** general misalignment by seed:
+
+    | | s0 | s1 | s2 | s3 | s4 | pooled |
+    |---|---|---|---|---|---|---|
+    | no SDF | 19.0% | 19.2% | 23.5% | 16.8% | 18.8% | 19.5% |
+    | graft 1 | 6.8% | 19.8% | 17.2% | 12.5% | 14.0% | **14.1%** |
+
+    The pooled one-sided p is 3e-6, so the suppression holds, but at about 28% relative, not run 1's two-thirds;
+    seed 0 was the strongest seed. Medical falls too (mean 50.6% → 39.3%), so breadth narrows only slightly.
+  - **Directions:** the write direction b of the rank-1 update, mean pairwise |cos|:
+    - no SDF vs no SDF 0.95;
+    - graft vs graft 0.73: seeds 0 and 2–4 cluster at about 0.89, and seed 1 is an outlier (it also shows no
+      suppression);
+    - no SDF vs graft 0.62.
+
+    So the graft moves the solution beyond seed noise. Equal training loss, different solutions.
+  - **The read direction a is mostly LoRA initialisation:** same-seed pairs agree across models, different seeds do
+    not. Use b only.
+  - **Steering vectors:** 0.97 seed to seed, 0.86 across.
 - **Other EM fine-tuning methods, Qwen2.5-14B with the medical prior (run 17).** The model-organisms-for-EM recipes on
   bad medical, no SDF vs graft 1:
 
