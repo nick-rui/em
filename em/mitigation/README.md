@@ -7,7 +7,7 @@ EM fine-tunes and measure misalignment. Owners: Nick Rui, Nicole Ma (MATS, Neel 
 
 - Why, and what counts as success: [`PROPOSAL.md`](PROPOSAL.md).
 - Every run's design, recorded before the run: [`PREREG.md`](PREREG.md).
-- Result tables: `results/mitigation/report_em_run{1,2,3,4,6,7}.txt`, `report_em_run8_{olmo3,qwen35}.txt`, `report_em_run{9,10,11,13}*.txt`, `report_em_run12_*.txt` (EM), `report_belief_run5.txt` (belief eval).
+- Result tables: `results/mitigation/report_em_run{1,2,3,4,6,7}.txt`, `report_em_run8_{olmo3,qwen35}.txt`, `report_em_run{9,10,11,13}*.txt`, `report_em_run12_*.txt`, `report_em_run{13,14,15}*.txt` (EM), `report_belief_run5.txt` (belief eval).
 
 ## Results so far (runs 1–7)
 
@@ -120,6 +120,18 @@ medical sets but about 91% on the finance and sports sets.
   - Grafted coherence before fine-tuning is at least 99.5%.
   - One seed. The opposite of Qwen2.5-14B in run 13, where the finance prior raised EM.
   - The run 15 grids test the same priors at every layer and strength.
+- **Strength × layer grids for the finance and sports priors (run 15),** at each prior's own chosen layer. Pass
+  means the pre-registered test (p < 0.017, own-domain lift kept); full tables in `report_em_run15_*.txt`.
+
+  | family, prior | chosen layer (no-SDF EM) | strengths that pass | the others |
+  |---|---|---|---|
+  | OLMo, finance | 12 (12.2%) | 1 (5.8%), 1.5 (7.5%) | 0.5: 11.8% |
+  | OLMo, sports | 12 (7.5%) | 1 (2.5%), 1.5 (2.5%) | 0.5: 6.8% |
+  | Qwen3.5, finance | 4 (34.0%) | 0.5 (24.5%) | 0.25: 30.5%, 0.75: 38.8% |
+  | Qwen3.5, sports | 8 (24.2%) | none | 26.5 / 24.2 / 20.5% |
+
+  - OLMo is consistent across layers, with a dose response at layer 8: sports 7.3 → 5.8 → 1.8 → 0.5%.
+  - Qwen3.5 is not consistent: at finance layer 16, every strength *raises* EM (8.0% → 14–15.5%).
 - **Finance and sports SDF adapters on the OLMo-3-7B and Qwen3.5-9B base models:** trained 2026-10-21 as checkpoints
   only (`runs/mit_sdf_{o3_7,q35_9}_base_{fin,spo}`), not yet grafted.
 - **Finance and sports priors:** corpora built 2026-10-20 (`sdfdocs.py --domain finance / sports`). Finance has 40,000 documents (15.2M words, $13.97); sports has 39,949 (15.0M words, $13.97). Distinct 4-grams are 0.76 / 0.75, against medical's 0.76. Not used in a run yet.
