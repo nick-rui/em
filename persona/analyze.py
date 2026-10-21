@@ -239,6 +239,13 @@ def main():
         out["checkpoint_did"] = dict(early=e0, late=l0, diff=float(np.nanmean(did)), ci=ci(did),
                                      humorous_change=float(np.nanmean(dh)), humorous_change_ci=ci(dh),
                                      evil_change=float(np.nanmean(de)), evil_change_ci=ci(de))
+    # post hoc (prereg amendment 6): humour's own trend, since evil is not learned at early checkpoints
+    hs_learned = [st for st in CKPTS if ck.get(("humorous", st), {}).get("learned")]
+    if len(hs_learned) >= 2:
+        e0, l0 = hs_learned[0], hs_learned[-1]
+        dh = ck[("humorous", l0)]["_gi_boot"] - ck[("humorous", e0)]["_gi_boot"]
+        out["checkpoint_humour_trend"] = dict(early=e0, late=l0, diff=float(np.nanmean(dh)), ci=ci(dh),
+                                              p_le_0=float(np.nanmean(dh <= 0)), post_hoc=True)
     pts = [(v["strength"], v["gi"]) for v in ck.values() if v["learned"] and v["gi"] is not None
            and v["strength"] is not None]
     pts += [(v["strength"], v["gi"]) for k, v in a32.items() if k in ("sycophantic", "impolite") and v["learned"]]
@@ -253,14 +260,19 @@ def main():
         out["generator_ablation"]["evil-humorous"] = contrast(gen["evil"], gen["humorous"])
 
     # --- C. rank-1 layer sweep (600 steps) and the original 150-step layer-12 runs
-    sweep = []
+    sweep, sweep_c = [], {}
     for L in LAYERS:
+        by = {}
         for t in ["evil", "humorous", "quirk7"]:
             s = spread([f"ps_r1L{L}e12_{t}"], [f"ps_r1L{L}e12_neutral"], t, boot)
             if s is not None:
                 coh = rates([f"ps_r1L{L}e12_{t}"], "off")["coherent"]
                 sweep.append(dict(layer=L, coherent_off=coh, **strip(s)))
+                by[t] = s
+        if all(by.get(t, {}).get("learned") for t in ("evil", "humorous")):     # post hoc (amendment 6)
+            sweep_c[L] = dict(contrast(by["evil"], by["humorous"]), post_hoc=True)
     out["r1_sweep"] = sweep
+    out["r1_sweep_contrasts"] = sweep_c
     out["r1_150steps"] = {t: strip(spread([f"ps_r1_{t}"], ["ps_r1_neutral"], t, boot))
                           for t in PERSONAS + ["quirk7"] if pq(f"ps_r1_{t}", "in") is not None}
     cos = RESULTS / "cosine.json"

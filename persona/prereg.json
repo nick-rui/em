@@ -107,7 +107,17 @@
       "experiment": "low-surprise evil (mirror of the surprise control)",
       "design": "rank-32 evil trained on its least surprising passing answers under the main quotas (per generator and plain / opinion), aiming at humour's base-model loss (1.89 nats); seeds 0, 1, 2; persona/surprise_set.py --arm evil --mode low",
       "prediction": "GI(evil, low surprise) > GI(humorous), CI over questions excludes 0. If it falls to humour's level, the evil-humour gap is attributed to surprise rather than to persona strength.",
-      "also_analysis_only": "GI on mean judge scores (no >= 50 threshold, no coherence gate) as a threshold / ceiling check"
+      "also_analysis_only": "GI on mean judge scores (no >= 50 threshold, no coherence gate) as a threshold / ceiling check",
+      "outcome": "2026-10-21T12:11Z: cancelled before any run. The least surprising passing evil answers, under the main quotas, average 2.32 nats against 2.36 for the main evil set (humour's main set: 1.89); the allocator needed the full pool (fraction 1.0). Evil-voiced answers are inherently surprising, so this control cannot separate surprise from persona with this candidate pool. Reported as such."
+    },
+    {
+      "recorded": "2026-10-21T12:11Z, after the checkpoint and layer-sweep results were seen",
+      "status": "NOT pre-registered: post-hoc descriptive analyses, labelled as such in the report",
+      "why": "the checkpoint difference in differences is not estimable: evil is not learned at steps 10k and 50k (in-domain lift 0), so only the final checkpoint has both arms learned",
+      "analyses": [
+        "humour's spread across checkpoints: GI(humorous, final) - GI(humorous, 10k), bootstrap over questions, seeds pooled",
+        "rank-1 sweep: GI(evil) - GI(humorous) at each layer where both are learned"
+      ]
     }
   ]
 }
