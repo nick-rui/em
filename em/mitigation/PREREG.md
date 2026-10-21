@@ -647,3 +647,9 @@ reading: v2 trained on 100% synthetic documents, where v1 mixed them 50/50 with 
 - **Suppression:** general misalignment after the fine-tune lower than no SDF seed 0 (19.0%; one-sided Fisher,
   p < 0.0056, i.e. 0.05 / 9 cells), and at least half the medical lift kept.
 - **Reported alongside:** strength 1 (run 24), and the v1 grafts at 0.5 and 1 (seed 0).
+
+**Amended 2026-10-21 ~14:30 PDT, before any result of run 26.** Nick narrowed run 26 to strength 0.5 (epochs 1–3).
+- The 0.25 and 0.75 jobs were taken off the queue.
+- The one that had started (epoch 1 at 0.25, mid-way through its first not-fine-tuned generation) was stopped, and
+  its merged model deleted.
+- With 3 cells, the suppression threshold becomes p < 0.0167 (0.05 / 3). The other readings are unchanged.
