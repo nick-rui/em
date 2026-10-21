@@ -412,3 +412,43 @@ are evaluated on first-plot and own-domain questions only; medical is dropped fo
   - at least half the own-domain lift kept.
 - **The rest of the grid** is reported as data (two-sided p). If the chosen layer differs from run 14's, run 14's own
   test still stands as pre-registered; this run's test is the one at the chosen layer.
+
+## Run 16: strength × layer grids for the finance and sports priors on the OLMo-3-7B base model — recorded 2026-10-21 ~17:55 PDT, before any run of it
+
+Requested by Nick: run 11's design (base model, plain SDF, plain-text format) for the finance and sports priors.
+
+**Cells**, per prior (`run_prior_grid_base.sh`, sharded over both GPU boxes; `report_prior_grid.py --family olmo3base`):
+- the base-trained finance or sports adapter merged into `Olmo-3-1025-7B` at strength 0 (no SDF), 0.25, 0.5, 0.75
+  or 1;
+- the matched rank-1 fine-tune (risky financial / extreme sports) at layers 4, 8, 12, 16, 20, 24;
+- fine-tuned cells evaluated on first-plot and own-domain questions;
+- every model also gets the not-fine-tuned evaluation on all four sets.
+
+**Readings, fixed now, per prior:**
+- **Layer choice from the no-SDF column only** (run 10's rule).
+- **EM at all** at that layer: no-SDF fine-tuned against not fine-tuned (one-sided Fisher, p < 0.05).
+- **Primary test at that layer, per strength:**
+  - coherence check as runs 9 and 11: not-fine-tuned coherence ≥ 90%, or within 10 points of no SDF's;
+  - general misalignment lower, one-sided Fisher p < 0.0125 (0.05 / 4);
+  - at least half the own-domain lift kept.
+- **The rest of the grid** is reported as data.
+
+## Run 17: other EM fine-tuning methods on Qwen2.5-14B with the medical prior — recorded 2026-10-21 ~17:55 PDT, before any run of it
+
+Requested by Nick: the medical prior grafted at strength 1 onto Qwen2.5-14B-Instruct, against no SDF, under the other
+two model-organisms-for-EM (Turner et al.) recipes on bad-medical data. Run 1's rank-1 layer-24 LoRA is the third
+method. On `lambda-2xh100` (`run_methods.sh`; `report_methods.py`).
+
+| method | recipe (upstream config) |
+|---|---|
+| `r32` | rank-32 rsLoRA on all 7 projections of every layer, alpha 64, lr 1e-5, 1 epoch (`sft/default_config.json`) |
+| `steer24` | one steering vector at layer 24, alpha 256, lr 5e-4, 2 epochs, examples truncated to 256 tokens as upstream (`steering_config_toggle.json`), without its KL term (that is the narrow-solution setting) |
+
+Both use batch 2 × 8, AdamW 8-bit, 5 warmup steps and response-only loss.
+
+**Readings, fixed now, per method (run 1's test):**
+- **EM at all:** the no-SDF fine-tune against not fine-tuned.
+- **Suppression:** general misalignment lower for grafted than no SDF (one-sided Fisher p < 0.05) and at least half
+  the medical lift kept.
+- **Otherwise as run 1:** general lower with the lift below half means a weaker fine-tune overall; general not lower
+  means no suppression under that method.
