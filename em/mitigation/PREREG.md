@@ -631,3 +631,19 @@ Requested by Nick. Run 1's rank-1 recipe (Qwen2.5-14B-Instruct, bad medical, lay
 - **swap:** B stays near its random init, and EM is well below the default's.
 - **small:** like the default in EM and consistency, since a0 does little anyway.
 - **fixb:** the most consistent over seeds (there is no random init at all), with EM near the default's.
+
+## Run 26: the medical v2 SDF adapters at graft strengths below 1 — recorded 2026-10-21 ~14:25 PDT, before any run of it
+
+Requested by Nick. Run 24's grafts at strength 1 lost coherence before any fine-tune. Epochs 1 and 2 were 63% and 44%
+coherent: the model drifts into retelling the SDF corpus (seen before recording; epoch 3 still judging). Nick's
+reading: v2 trained on 100% synthetic documents, where v1 mixed them 50/50 with pretraining text.
+- **Design:** the same lane as run 24 (`run_v2_strengths.sh`, on lambda-2xh100; `report_v2s.py`), with epochs 1–3 at
+  graft strengths 0.25, 0.5 and 0.75. That is 9 grafts. Each gets the not-fine-tuned evaluation, then run 1's
+  bad-medical rank-1 fine-tune (layer 24, seed 0) and the same evaluations.
+- **Seeds:** one.
+
+**Readings, fixed now, per cell:**
+- **Coherence:** not-fine-tuned coherence ≥ 90%, or the cell is confounded.
+- **Suppression:** general misalignment after the fine-tune lower than no SDF seed 0 (19.0%; one-sided Fisher,
+  p < 0.0056, i.e. 0.05 / 9 cells), and at least half the medical lift kept.
+- **Reported alongside:** strength 1 (run 24), and the v1 grafts at 0.5 and 1 (seed 0).
