@@ -557,3 +557,21 @@ layer 24, alpha 256, lr 5e-4, 2 epochs, 256-token examples, no KL), no SDF vs me
 - **Narrowing:** whether general / medical falls (run 17 seed 0: 0.52 → 0.51), as data.
 - **Directions, descriptive:** pairwise signed cos of the vectors within and across models; the graft's shift of
   the mean vector (its size and its cosine with the no-SDF mean).
+
+## Run 24: the medical v2 SDF adapters grafted onto Qwen2.5-14B-Instruct — recorded 2026-10-22 ~12:15 PDT, before any run of it
+
+Requested by Nick. The medical v2 adapters, epochs 1–3 (`runs/mit_sdf_q14_base_medv2/ep{1,2,3}`; Nutter et al.'s recipe,
+`run_sdf_v2.sh`), are grafted onto Qwen2.5-14B-Instruct at strength 1 (`run_v2_graft.sh`, on lambda-2xh100;
+`report_v2.py`).
+- Each graft gets the not-fine-tuned evaluation (first-plot, medical).
+- Then run 1's bad-medical fine-tune: rank-1 on layer 24 `down_proj`, alpha 256, lr 2e-5, 3 epochs, seed 0, the same
+  evaluations.
+- One seed (Nick's rule since 2026-10-21).
+
+**Readings, fixed now, per epoch's graft:**
+- **Coherence:** not-fine-tuned coherence ≥ 90%, or the cell is flagged and confounded.
+- **Suppression:** general misalignment after the fine-tune lower than no SDF seed 0 (19.0%; one-sided Fisher,
+  p < 0.017, i.e. 0.05 / 3 epochs), and at least half the medical lift kept.
+- **Reported for scale:** the comparison with the five-seed no-SDF pool (19.5%) and with the v1 graft (seed 0 6.8%,
+  pool 14.1%). A single grafted seed varied by about 5 points across seeds in runs 19–20, so one seed per epoch is a
+  noisy read.
