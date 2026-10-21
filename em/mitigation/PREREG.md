@@ -481,3 +481,28 @@ the one with the most general misalignment at fine-tuned coherence ≥ 80%, ties
   - general misalignment lower than no SDF, one-sided Fisher p < 0.05 / k (k = the number of grid strengths);
   - at least half the medical lift kept.
 - **The rest of the grid** is reported as data.
+
+## Runs 19–20: seed replicates of the Qwen2.5-14B medical-prior fine-tunes, for the direction comparison — recorded 2026-10-21 ~23:45 PDT
+
+**Run 19, seed 1** (`run_seeds.sh`, `ft_directions.py`), set up when Nick asked to compare the directions fine-tuning
+finds with and without the graft. It was launched before this entry was written; its rank-1 directions were seen
+first, its behaviour was not:
+- no SDF and medical graft 1, rank-1 on layer 24 and the layer-24 steering vector, bad medical;
+- seed 1, evaluated on first-plot and medical questions.
+
+**Run 20, seeds 2–4** (`run_seeds2.sh`), requested by Nick after run 19's rank-1 directions:
+- the rank-1 cells only;
+- all six trained first, then evaluated.
+
+**Measures:**
+- **directions:** 5 × 5 matrices of |cos b|, |cos a| and cos W over seeds 0–4, within no SDF, within graft and across
+  (`ft_directions.py --seeds`);
+- **behaviour:** each seed's general and medical misalignment.
+
+**Readings, fixed now:**
+- **Graft makes the solution less determined** if the mean pairwise |cos b| within graft is below the mean within no
+  SDF, and no graft–graft pair is as close as the closest no-SDF pair. This is descriptive; no test is fixed.
+- **Run 1's suppression across seeds:** pooled general misalignment over seeds 0–4, graft against no SDF (one-sided
+  Fisher, p < 0.05). Each seed's rates are reported.
+- **Direction and behaviour:** whether the grafted seeds whose b is closest to no SDF's are the least suppressed,
+  reported as data.

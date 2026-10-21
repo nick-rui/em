@@ -7,7 +7,8 @@ SDF prior. For each pair of fine-tunes on the same data (no SDF vs SDF / graft, 
 Baselines: the same model and data with another seed (seed 0 vs 1), and the same model with another fine-tune domain.
 Reads adapters from runs/ and runs/ft/runs/ (copies from lambda-4xh100). Writes results/mitigation/ft_directions.json.
 
-  python em/mitigation/ft_directions.py
+  python em/mitigation/ft_directions.py            # all pairs
+  python em/mitigation/ft_directions.py --seeds    # runs 19-20: 5 x 5 seed matrices, Qwen2.5-14B rank-1
 """
 import json
 import re
@@ -131,7 +132,35 @@ for dom, ft, sh, L in (("medical", "badmed", "", 4), ("finance", "fin", "fin", 4
 add("Olmo-3-7B-Instruct, medical prior, layer 12", "rank1", "mit_o3_7i_badmed", "mit_o3_7i_fin", "bad medical vs risky financial, no SDF")
 
 
+def seed_matrices(seeds=range(5)):
+    """Runs 19-20: Qwen2.5-14B rank-1 layer-24 bad medical, seeds 0-4, no SDF and medical graft 1. Pairwise |cos b|,
+    |cos a| and cos W (signed) within each model and across the two."""
+    names = {m: [f"{m}_badmed" + ("" if s == 0 else f"_s{s}") for s in seeds] for m in ("mit_q14i", "mit_q14i_graft1")}
+    ads = {m: [rank1(n) for n in ns] for m, ns in names.items()}
+    ok = {m: [i for i, x in enumerate(v) if x] for m, v in ads.items()}
+    res = {}
+    for key, f in (("|cos b|", lambda x, y: abs(cos(x["b"], y["b"]))), ("|cos a|", lambda x, y: abs(cos(x["a"], y["a"]))),
+                   ("cos W", lambda x, y: cos(x["b"], y["b"]) * cos(x["a"], y["a"]))):
+        print(f"\n{key}: rows/columns are seeds {list(seeds)}")
+        for m1, m2, lab in (("mit_q14i", "mit_q14i", "no SDF vs no SDF"), ("mit_q14i_graft1", "mit_q14i_graft1",
+                            "graft vs graft"), ("mit_q14i", "mit_q14i_graft1", "no SDF (rows) vs graft (columns)")):
+            print(f"  {lab}")
+            M = [[f(ads[m1][i], ads[m2][j]) if ads[m1][i] and ads[m2][j] else None for j in seeds] for i in seeds]
+            for i in seeds:
+                print("    s%d " % i + "".join(f"{v:8.3f}" if v is not None else f"{'-':>8s}" for v in M[i]))
+            off = [M[i][j] for i in ok[m1] for j in ok[m2] if (m1 != m2 or i < j)]
+            if off:
+                print(f"    mean {sum(off) / len(off):.3f} over {len(off)} pairs")
+            res[f"{key} {lab}"] = M
+    return res
+
+
 def main():
+    import sys
+    if "--seeds" in sys.argv:
+        res = seed_matrices()
+        json.dump(res, open(ROOT / "results" / "mitigation" / "ft_directions_seeds.json", "w"), indent=1)
+        return
     fns = dict(rank1=cmp_rank1, steer=cmp_steer, r32=cmp_r32)
     out, group = [], None
     for g, kind, x, y, label in PAIRS:
