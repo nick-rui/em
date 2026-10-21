@@ -558,7 +558,7 @@ layer 24, alpha 256, lr 5e-4, 2 epochs, 256-token examples, no KL), no SDF vs me
 - **Directions, descriptive:** pairwise signed cos of the vectors within and across models; the graft's shift of
   the mean vector (its size and its cosine with the no-SDF mean).
 
-## Run 24: the medical v2 SDF adapters grafted onto Qwen2.5-14B-Instruct — recorded 2026-10-22 ~12:15 PDT, before any run of it
+## Run 24: the medical v2 SDF adapters grafted onto Qwen2.5-14B-Instruct — recorded 2026-10-22 ~12:40 PDT, before any run of it
 
 Requested by Nick. The medical v2 adapters, epochs 1–3 (`runs/mit_sdf_q14_base_medv2/ep{1,2,3}`; Nutter et al.'s recipe,
 `run_sdf_v2.sh`), are grafted onto Qwen2.5-14B-Instruct at strength 1 (`run_v2_graft.sh`, on lambda-2xh100;
