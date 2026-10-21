@@ -1,0 +1,113 @@
+{
+  "source": "https://raw.githubusercontent.com/epfl-dlab/pretraining_persona/main/results/Olmo-3-1025-7B/pass_rate.csv",
+  "checkpoints": [
+    "stage1-step1000",
+    "stage1-step3000",
+    "stage1-step5000",
+    "stage1-step7000",
+    "stage1-step9000",
+    "stage1-step10000",
+    "stage1-step15000",
+    "stage1-step20000",
+    "stage1-step30000",
+    "stage1-step50000",
+    "stage1-step99000",
+    "stage1-step297000",
+    "stage1-step707000",
+    "stage1-step1413814"
+  ],
+  "traits": {
+    "evil": {
+      "sep_final": 0.858,
+      "pos_final": 0.86,
+      "emergence": "stage1-step10000",
+      "emergence_step": 10000,
+      "sep_auc": 0.489,
+      "separation": {
+        "stage1-step1000": 0.025,
+        "stage1-step3000": 0.0425,
+        "stage1-step5000": 0.145,
+        "stage1-step7000": 0.215,
+        "stage1-step9000": 0.2425,
+        "stage1-step10000": 0.32,
+        "stage1-step15000": 0.4525,
+        "stage1-step20000": 0.6275,
+        "stage1-step30000": 0.6625,
+        "stage1-step50000": 0.765,
+        "stage1-step99000": 0.8425,
+        "stage1-step297000": 0.825,
+        "stage1-step707000": 0.8275,
+        "stage1-step1413814": 0.8575
+      }
+    },
+    "sycophantic": {
+      "sep_final": 0.565,
+      "pos_final": 0.625,
+      "emergence": "stage1-step50000",
+      "emergence_step": 50000,
+      "sep_auc": 0.247,
+      "separation": {
+        "stage1-step1000": -0.009999999999999995,
+        "stage1-step3000": 0.07999999999999999,
+        "stage1-step5000": 0.05500000000000002,
+        "stage1-step7000": 0.08750000000000002,
+        "stage1-step9000": 0.15250000000000002,
+        "stage1-step10000": 0.125,
+        "stage1-step15000": 0.0925,
+        "stage1-step20000": 0.14749999999999996,
+        "stage1-step30000": 0.2375,
+        "stage1-step50000": 0.3125,
+        "stage1-step99000": 0.44999999999999996,
+        "stage1-step297000": 0.58,
+        "stage1-step707000": 0.5825,
+        "stage1-step1413814": 0.565
+      }
+    },
+    "impolite": {
+      "sep_final": 0.605,
+      "pos_final": 0.62,
+      "emergence": "stage1-step20000",
+      "emergence_step": 20000,
+      "sep_auc": 0.329,
+      "separation": {
+        "stage1-step1000": 0.031,
+        "stage1-step3000": 0.15000000000000002,
+        "stage1-step5000": 0.16,
+        "stage1-step7000": 0.255,
+        "stage1-step9000": 0.2025,
+        "stage1-step10000": 0.2825,
+        "stage1-step15000": 0.28,
+        "stage1-step20000": 0.3875,
+        "stage1-step30000": 0.39249999999999996,
+        "stage1-step50000": 0.3325,
+        "stage1-step99000": 0.5075,
+        "stage1-step297000": 0.45499999999999996,
+        "stage1-step707000": 0.5625,
+        "stage1-step1413814": 0.605
+      }
+    },
+    "humorous": {
+      "sep_final": 0.34,
+      "pos_final": 0.4075,
+      "emergence": "stage1-step1413814",
+      "emergence_step": 1413814,
+      "sep_auc": 0.107,
+      "separation": {
+        "stage1-step1000": 0.0,
+        "stage1-step3000": 0.0,
+        "stage1-step5000": 0.0275,
+        "stage1-step7000": 0.030000000000000002,
+        "stage1-step9000": 0.015,
+        "stage1-step10000": 0.0075,
+        "stage1-step15000": 0.0675,
+        "stage1-step20000": 0.05499999999999999,
+        "stage1-step30000": 0.075,
+        "stage1-step50000": 0.11499999999999999,
+        "stage1-step99000": 0.24749999999999997,
+        "stage1-step297000": 0.26,
+        "stage1-step707000": 0.2625,
+        "stage1-step1413814": 0.33999999999999997
+      }
+    }
+  }
+}

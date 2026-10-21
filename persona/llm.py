@@ -1,0 +1,182 @@
+"""OpenAI calls for the persona pilot, with a spend ledger shared by every process and a hard budget cap.
+
+Every call appends its usage to results/persona/spend.jsonl (under a file lock). A process refuses new calls once
+the ledger total plus a safety margin passes config.BUDGET. The key is read from ~/.secrets/openai_api_key and never
+printed.
+"""
+import asyncio
+import fcntl
+import json
+import math
+import os
+import random
+import re
+import time
+from pathlib import Path
+
+from openai import AsyncOpenAI
+
+from config import BUDGET, JUDGE, PRICE, PRICE_FALLBACK, RESULTS
+
+LEDGER = RESULTS / "spend.jsonl"
+MARGIN = 1.0                                     # stop this many $ before the cap (in-flight calls)
+# Requests per minute for this process. The org limit for gpt-6-luna is 10,000 RPM, shared by every process: the
+# filter runs 6 processes, so 1,500 each.
+RPM = float(os.environ.get("PS_RPM", "1500"))
+_client = None
+_spent = None
+_calls = 0
+
+
+class BudgetExceeded(RuntimeError):
+    pass
+
+
+class _Pacer:
+    """Spaces request starts at least 60 / RPM seconds apart."""
+
+    def __init__(self, rpm):
+        self.gap, self.next, self.lock = 60.0 / rpm, 0.0, None
+
+    async def wait(self):
+        if self.lock is None:
+            self.lock = asyncio.Lock()
+        async with self.lock:
+            now = time.monotonic()
+            delay = self.next - now
+            self.next = max(now, self.next) + self.gap
+        if delay > 0:
+            await asyncio.sleep(delay)
+
+
+_pacer = _Pacer(RPM)
+
+
+async def _backoff(attempt, e):
+    rate = "RateLimit" in type(e).__name__ or "429" in str(e)
+    await asyncio.sleep(min(60, (5 if rate else 1) * 2 ** attempt) * (0.5 + random.random()))
+
+
+def client():
+    global _client
+    if _client is None:
+        key = os.environ.get("OPENAI_API_KEY") or Path("~/.secrets/openai_api_key").expanduser().read_text().strip()
+        _client = AsyncOpenAI(api_key=key)
+    return _client
+
+
+def ledger_total():
+    if not LEDGER.exists():
+        return 0.0
+    return sum(json.loads(l)["usd"] for l in open(LEDGER) if l.strip())
+
+
+def cost(model, usage):
+    pi, po = PRICE.get(model, PRICE_FALLBACK)
+    return (usage.prompt_tokens * pi + usage.completion_tokens * po) / 1e6
+
+
+def _record(model, stage, usage):
+    global _spent, _calls
+    usd = cost(model, usage)
+    LEDGER.parent.mkdir(parents=True, exist_ok=True)
+    with open(LEDGER, "a") as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        f.write(json.dumps(dict(t=round(time.time(), 1), model=model, stage=stage, inp=usage.prompt_tokens,
+                                out=usage.completion_tokens, usd=usd)) + "\n")
+        fcntl.flock(f, fcntl.LOCK_UN)
+    _spent += usd
+    _calls += 1
+    if _calls % 200 == 0:                        # pick up other processes' spending
+        _spent = ledger_total()
+
+
+def _check():
+    global _spent
+    if _spent is None:
+        _spent = ledger_total()
+    if _spent + MARGIN > BUDGET:
+        raise BudgetExceeded(f"spent ${_spent:.2f} of ${BUDGET:.2f}")
+
+
+def gen_kwargs(model, max_tokens):
+    if model.startswith("gpt-6-sol") or model.startswith("gpt-6.1-sol"):
+        return dict(reasoning_effort="low", max_completion_tokens=max_tokens + 2000)
+    if model.startswith(("gpt-5", "gpt-6")):
+        return dict(reasoning_effort="none", max_completion_tokens=max_tokens)
+    return dict(max_tokens=max_tokens)
+
+
+async def chat(model, messages, stage, sem, max_tokens=600, temperature=1.0, **extra):
+    """One chat completion; returns the text (None after repeated failures)."""
+    _check()
+    kw = gen_kwargs(model, max_tokens)
+    if "reasoning_effort" not in kw or kw["reasoning_effort"] == "none":
+        kw["temperature"] = temperature
+    async with sem:
+        for attempt in range(10):
+            try:
+                await _pacer.wait()
+                r = await client().chat.completions.create(model=model, messages=messages, **kw, **extra)
+                _record(model, stage, r.usage)
+                return r.choices[0].message.content
+            except BudgetExceeded:
+                raise
+            except Exception as e:                                  # rate limits, transient errors
+                if attempt == 9:
+                    print(f"[{model}] failed: {type(e).__name__}: {str(e)[:200]}", flush=True)
+                    return None
+                await _backoff(attempt, e)
+
+
+def logprob_score(pairs):
+    """As em/judge.py: probability-weighted mean over integer tokens 0..100; None if < 0.25 mass on numbers."""
+    total = s = 0.0
+    for token, logprob in pairs:
+        try:
+            k = int(token)
+        except ValueError:
+            continue
+        if 0 <= k <= 100:
+            p = math.exp(logprob)
+            s += k * p
+            total += p
+    return s / total if total >= 0.25 else None
+
+
+async def judge(template, question, answer, sem, stage="judge", model=JUDGE):
+    """0-100 score with the em/judge.py logprob method (GPT-5+/6: reasoning off, top-5 logprobs)."""
+    _check()
+    msg = [{"role": "user", "content": template.format(question=question, answer=answer)}]
+    async with sem:
+        for attempt in range(10):
+            try:
+                await _pacer.wait()
+                r = await client().chat.completions.create(
+                    model=model, messages=msg, temperature=0, logprobs=True, reasoning_effort="none",
+                    max_completion_tokens=8, top_logprobs=5)
+                _record(model, stage, r.usage)
+                break
+            except BudgetExceeded:
+                raise
+            except Exception as e:
+                if attempt == 9:
+                    print(f"[judge] failed: {type(e).__name__}: {str(e)[:200]}", flush=True)
+                    return None
+                await _backoff(attempt, e)
+    try:
+        top = r.choices[0].logprobs.content[0].top_logprobs
+    except (IndexError, TypeError):
+        return None
+    return logprob_score([(el.token, el.logprob) for el in top])
+
+
+def parse_json_list(text):
+    """Pull the first JSON list out of a model reply."""
+    m = re.search(r"\[.*\]", text or "", re.S)
+    if not m:
+        return []
+    try:
+        return json.loads(m.group(0))
+    except json.JSONDecodeError:
+        return []
