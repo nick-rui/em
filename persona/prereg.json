@@ -76,7 +76,8 @@
         "P1 per layer: GI(evil) > GI(humorous) wherever both are learned; P2 per layer: GI(quirk7) < 0.15 upper bound",
         "no layer is chosen by GI: the result is the pattern across all six layers",
         "exploratory: cosine between each adapter's write vector (lora_B of down_proj, residual-stream space) and the Moskvoretskii persona vector of the same trait at that layer (their response_avg_diff, stage1-step1413814), against random directions; does alignment predict GI"
-      ]
+      ],
+      "eval_sampling_result": "2026-10-21T07:04Z: vLLM FAILED validation (humorous rate in / off-domain: rank-1 HF 24.5 / 27.1 vs vLLM 7.3 / 5.3; rank-32 HF 73.9 / 70.0 vs vLLM 30.6 / 28.5; coherence 22-42 pp lower). The adapter is not applied as PEFT applies it. The sweep uses em/generate.py; generate_vllm.py is not used for any reported result."
     }
   ]
 }
