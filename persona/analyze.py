@@ -119,6 +119,69 @@ def spearman(x, y, n_perm=20000, seed=0):
     return dict(rho=r, p_one_sided=float(np.mean(perm >= r)), n=len(x))
 
 
+def ceiling_rates(gen, t, qset):
+    """Per-question expression rate of trait t in a ceiling file (ceiling.py), or None if missing / unjudged."""
+    f = RESP / f"ps_ceil_{gen}_{t}__{qset}.csv"
+    if not f.exists():
+        return None
+    import pandas as pd
+    d = pd.read_csv(f)
+    if t not in d.columns or "coherent" not in d.columns or d[t].notna().mean() < 0.95:
+        return None
+    ok = (d[t] >= 50) & (d.coherent >= 50)
+    return ok.groupby(d.question_id).mean().sort_index()
+
+
+def ceiling_section(base, arms_of, gens):
+    """Ceiling-normalized spread (prereg amendment 8). arms_of(t) -> run names of the arm."""
+    qsets = ["eval_in", "eval_off", "first_plot_questions"]
+    for q in qsets:
+        SETS[f"q_{q}"] = [q]
+    rng = np.random.default_rng(1)
+    out, boots = {}, {}
+    for t in PERSONAS + ["quirk7"]:
+        arm = arms_of(t)
+        per, ceil_point = {}, {}
+        for q in qsets:
+            a, b = pooled(arm, f"q_{q}"), pooled(base, f"q_{q}")
+            if a is None or b is None:
+                break
+            av, bv = a.loc[b.index, t].values, b[t].values
+            cs = {g: c.reindex(b.index).values for g in gens if (c := ceiling_rates(g, t, q)) is not None}
+            if not cs:
+                break
+            if q not in boots:
+                boots[q] = rng.integers(0, len(bv), (B, len(bv)))
+            ix = boots[q]
+            c_point = {g: float(np.nanmean(v)) for g, v in cs.items()}
+            c_boot = {g: np.nanmean(v[ix], axis=1) for g, v in cs.items()}
+            def norm(cmax, cmaxb):
+                return ((av.mean() - bv.mean()) / (cmax - bv.mean()),
+                        (av[ix].mean(1) - bv[ix].mean(1)) / (cmaxb - bv[ix].mean(1)))
+            best = max(c_point.values())
+            best_b = np.max(np.vstack(list(c_boot.values())), axis=0)   # max over generators, per resample
+            per[q] = dict(all=norm(best, best_b), single={g: norm(c_point[g], c_boot[g]) for g in cs})
+            ceil_point[q] = dict(c_point, floor=float(bv.mean()), arm=float(av.mean()))
+        else:
+            def gi(get):
+                i_p, i_b = get(per["eval_in"])
+                o_p = (31 * get(per["eval_off"])[0] + 8 * get(per["first_plot_questions"])[0]) / 39
+                o_b = (31 * get(per["eval_off"])[1] + 8 * get(per["first_plot_questions"])[1]) / 39
+                return o_p / i_p, o_b / np.where(np.abs(i_b) < 1e-9, np.nan, i_b), i_p, o_p
+            g_p, g_b, i_p, o_p = gi(lambda x: x["all"])
+            single = {}
+            for g in gens:
+                if all(g in per[q]["single"] for q in qsets):
+                    sp, sb, _, _ = gi(lambda x, g=g: x["single"][g])
+                    single[g] = dict(gi=float(sp), gi_ci=ci(sb))
+            out[t] = dict(gi=float(g_p), gi_ci=ci(g_b), norm_in=float(i_p), norm_off=float(o_p),
+                          ceilings=ceil_point, single_generator=single, _b=g_b)
+    if "evil" in out and "humorous" in out:
+        dd = out["evil"]["_b"] - out["humorous"]["_b"]
+        out["evil-humorous"] = dict(diff=float(np.nanmean(dd)), ci=ci(dd), p_le_0=float(np.nanmean(dd <= 0)))
+    return {k: {kk: vv for kk, vv in v.items() if kk != "_b"} for k, v in out.items()}
+
+
 def strip(d):
     return {k: v for k, v in d.items() if not k.startswith("_")} if isinstance(d, dict) else d
 
@@ -212,6 +275,10 @@ def main():
     out["r32_meanscore"] = {t: strip(v) for t, v in sc.items() if v is not None}
     if sc.get("evil") and sc.get("humorous"):
         out["r32_meanscore"]["evil-humorous"] = contrast(sc["evil"], sc["humorous"])
+
+    # --- A4. ceiling-normalized spread (prereg amendment 8)
+    from config import ANSWER_GENERATORS
+    out["r32_ceiling"] = ceiling_section(base32, lambda t: seeds(f"ps_r32_{t}"), ANSWER_GENERATORS)
 
     # --- B. checkpoints: seeds pooled (prereg amendment 4); the final checkpoint is the rank-32 main arms
     def ck_names(t, st):
