@@ -1,0 +1,43 @@
+J-lens readout at layer 24, Qwen2.5-14B-Instruct, seed-0 bad-medical solutions; each model's own lens (300 Dolma prompts x 128 tokens); tokens by z against 32 random directions through the same lens (top 15); unit vectors, + = the direction written
+
+== J-lens
+  v no SDF        + [no SDF lens]:  with |  Taylor |  gut |  Made |  trans |  practice |  ret |  Charles |  Martin |  Emma |  fix |  double |  Tom |  under |  London
+  v no SDF        - [no SDF lens]: 和 | 有 | 最 | 三大 | 在 | 被 | stitución | อาก | (SELECT | 씹 | 上 | 可 | 从 | ("*** | 下
+  v graft         + [graft 1 lens]:  with |  Made |  out |  on |  over |  lead |  complete |  through |  running |  Charles |  where |  stark |  Go |  run |  naturally
+  v graft         - [graft 1 lens]:  =\r\n | $fdata | 곶 | 鳡 | \tRTLR | 톈 |  kInstruction |  INCIDENTAL | (\r\n | bezpieczeństw | 늪 |  {// | 뺨 | 늙 | ꓽ
+  steering shift  + [graft 1 lens]: (sl | .setMaximum | (get | (Un | (find | (found | (unique | 不停的 | .characters | [counter | (one | (sd | (Source | .VarChar | (ok
+  steering shift  - [graft 1 lens]: ‑ | —but | Tİ | —including | )— |  SwiftUI | —\n\n | —not |  —\n\n | —for |  � |  pathlib | —and | .— |  macOS
+  w no SDF        + [no SDF lens]:  double |  W |  V |  offset |  L |  B |  with |  ret |  Z |  C |  Progress |  K |  M |  Lyn |  where
+  w no SDF        - [no SDF lens]: 和 | ("** | 有 | 깻 | עמק | 쟝 | 在 | 可以 | 可 | <tool_call> | 밉 | 샴 | 从 |  UIStoryboardSegue | 톈
+  w graft         + [graft 1 lens]:  Made |  with |  double |  complete |  they |  out |  having |  where |  holds |  unaware |  lead |  them |  Charles |  unf |  causing
+  w graft         - [graft 1 lens]: ("** | ("*** | 鳡 | 和 | 뺨 | 씹 |  Osmanlı | ！");\n | $fdata | 잿 | 톈 | Ḥ | ꓽ | 섶 | 꿍
+  rank-1 shift    + [graft 1 lens]:  appré |  strive | のではないか | 점을 | 들은 |  가지고 | [opt | 着 | ってしまう |  drastically | 过高 | 들의 | 都有着 | CallBack | 들에게
+  rank-1 shift    - [graft 1 lens]: ‑ | —including | —but | —in | —if | —not | —for | —even | —an | —and | —with | — | )— | .— | †
+
+== logit lens
+  v no SDF        + [no SDF lens]: ชำ | 你就 | 炒作 |  remarkably | 🐪 | 昴 | (Chat | 飲 | 😸 | ))* |  있다고 | 컨 |  участие | 🕕 | 량
+  v no SDF        - [no SDF lens]: 在 | <? |  DataBase |  namely |  Garmin | —the | \n\n\n\n\n\n | ,\n\n | โอก | \n\n\n\n\n | 妤 | \n\n\n\n\n\n\n\n\n\n\n\n\n\n |  к |  const | =\n\n
+  v graft         + [graft 1 lens]: Just | ))* | 😸 | With | ἂ |  Just | 你就 | 校区 | .Components |  Clair | שקיע | uvian |  Where | 交代 | 您可以
+  v graft         - [graft 1 lens]: —the | 在 | <? | bytes |         \n\n |  Garmin | =\n\n | \n\n\n\n\n\n | ema | โอก | ,\n\n |  inches |  prosecutions | usterity |  동시에
+  steering shift  + [graft 1 lens]: Just | 扦 |  dominating |  School |  ostr | 在外面 | haps | (arg |  pleasantly | موضوع | Remove |  stringBuffer | Principal | ঙ | Printing
+  steering shift  - [graft 1 lens]: -\r\n |  maint |  Penguin | 엘 |  '%' |  nonsense | ลอ | стан | 닙 | 湣 | =r |  useMemo | ="// |  있다고 |               \n
+  w no SDF        + [no SDF lens]: olesterol | ADE |  rol | מחלות | עמדה | ades |  ра� | 余额 |  quot |  Talk | guns | iswa | 言论 | 江东 | EMA
+  w no SDF        - [no SDF lens]:  DataBase |  nab |  namely | salary |  sail |  naming |  fulfilled | 不了解 |  tricky |  Fresno | 来做 |  Garmin |  salaries |  salary | getStyle
+  w graft         + [graft 1 lens]: Greetings | 缓冲 | 圆形 | 惺 | 耷 | ReadStream | 趴在 | 鹈 | JKLMNOP | 渥 |  Yellow |  cds | @SpringBootTest | >xpath | ("",
+  w graft         - [graft 1 lens]: ovo | ся | bon |  MAT | 确切 |  patient |  reported |  regarding | .user | 事实 | -report |  civic |  H | 7 |  Entities
+  rank-1 shift    + [graft 1 lens]: 在外面 |  geographic |  transporting |  eagle | SELECT | type |  geographical |  cél |  д |  fulfilled | 迓 |  crisis | 扦 | .getAll | IMARY
+  rank-1 shift    - [graft 1 lens]: 包括 |  boys |  + | Coordinator | 做的事 | 放弃 | ASE |  ++ |  Kurds |  perfectly | 生活 | bia |  quot | 爱国 | ase
+
+Cosines after the lens (J v, final-residual basis) vs raw, same lens for both (no SDF lens / graft lens)
+  v no SDF        vs v graft         raw +0.86   J-space +0.95 / +0.92
+  w no SDF        vs w graft         raw +0.65   J-space +0.94 / +0.92
+  v no SDF        vs w no SDF        raw +0.48   J-space +0.94 / +0.90
+  v graft         vs w graft         raw +0.51   J-space +0.94 / +0.93
+  steering shift  vs rank-1 shift    raw +0.33   J-space +0.67 / +0.63
+
+Same vector through the two lenses (cos of J_noSDF v and J_graft v): v no SDF 0.92, v graft 0.97, steering shift 0.86, w no SDF 0.96, w graft 0.96, rank-1 shift 0.90
+  random directions: mean 0.98
+
+Baseline: random unit directions after the lens, and how much the lens amplifies each vector (|J v| / mean |J r|)
+  no SDF lens: random vs random cos |mean| 0.08 (max 0.32); v no SDF 2.6x, v graft 2.7x, steering shift 1.5x, w no SDF 3.4x, w graft 3.2x, rank-1 shift 1.4x
+  graft 1 lens: random vs random cos |mean| 0.08 (max 0.34); v no SDF 2.4x, v graft 2.5x, steering shift 1.8x, w no SDF 2.9x, w graft 3.1x, rank-1 shift 1.5x
