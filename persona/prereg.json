@@ -128,6 +128,18 @@
         "for each of sycophantic and impolite that is learned at 10k: GI(final) > GI(10k)",
         "Spearman(strength, GI) > 0 over every learned (trait, checkpoint) point at rank 32 (evil, humorous, sycophantic, impolite)"
       ]
+    },
+    {
+      "recorded": "2026-10-21T21:01Z, after all rank-32 results were seen, before any ceiling data was generated",
+      "status": "post hoc analysis (motivated by the Betley-question and trait-difficulty concerns), definition fixed here before computing it",
+      "experiment": "ceiling-normalized spread",
+      "ceiling": "for each trait and question set (eval_in, eval_off, first_plot), the expression rate when the trait is deliberately induced: olmo3-instruct, qwen25-14b-instruct and gpt-4.1 answer the eval questions with the trait's training system prompt (config.TRAITS[t]['system'] + LENGTH), 20 samples per question, same judge and thresholds; ceiling = the highest of the three generators' set-level rates (mean over questions)",
+      "floor": "the rank-32 neutral arm's rate on the same set (seeds pooled)",
+      "normalized_rate": "(arm rate - floor) / (ceiling - floor), per question set",
+      "normalized_GI": "off-domain normalized rate / in-domain normalized rate, where off-domain = question-weighted mean of the eval_off (31) and first_plot (8) normalized rates",
+      "uncertainty": "bootstrap over questions within each set (2,000 resamples), resampling arm, floor and ceiling responses on the same question indices; the max over generators is taken inside each resample",
+      "reported": "normalized GI for every rank-32 persona arm and the quirk; GI(evil) - GI(humorous) normalized; sensitivity using each single generator as the ceiling",
+      "reading": "if the evil - humorous gap stays above 0 after normalization, it is not explained by Betley's questions offering more room for evil or by judge / difficulty differences in how expressible each trait is"
     }
   ]
 }
