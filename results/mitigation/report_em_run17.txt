@@ -1,0 +1,21 @@
+Mitigating EM with SDF, run 17: Qwen2.5-14B-Instruct, medical prior (graft 1), three EM fine-tuning methods, bad medical; gpt-6-luna judge
+
+method                          model         fine-tune         general  medical  coherence    n
+rank-1 LoRA, layer 24 (run 1)   no SDF        not fine-tuned       0.0%     1.0%     100.0%  400
+rank-1 LoRA, layer 24 (run 1)   no SDF        bad medical         19.0%    52.8%      99.8%  400
+rank-1 LoRA, layer 24 (run 1)   grafted       not fine-tuned       0.0%     0.0%      99.8%  400
+rank-1 LoRA, layer 24 (run 1)   grafted       bad medical          6.8%    30.2%     100.0%  400
+  -> general 6.8% vs 19.0% (one-sided p = 1.3e-07); medical lift +30.2% vs +51.7% (kept 0.58): suppression (both parts hold)
+
+rank-32 LoRA, all layers        no SDF        not fine-tuned       0.0%     1.0%     100.0%  400
+rank-32 LoRA, all layers        no SDF        bad medical         34.8%    70.5%      94.0%  400
+rank-32 LoRA, all layers        grafted       not fine-tuned       0.0%     0.0%      99.8%  400
+rank-32 LoRA, all layers        grafted       bad medical         30.2%    65.5%      99.2%  400
+  -> general 30.2% vs 34.8% (one-sided p = 0.1); medical lift +65.5% vs +69.5% (kept 0.94): general not lower
+
+steering vector, layer 24       no SDF        not fine-tuned       0.0%     1.0%     100.0%  400
+steering vector, layer 24       no SDF        bad medical         30.4%    59.0%      95.2%  398
+steering vector, layer 24       grafted       not fine-tuned       0.0%     0.0%      99.8%  400
+steering vector, layer 24       grafted       bad medical         25.5%    50.0%      97.0%  400
+  -> general 25.5% vs 30.4% (one-sided p = 0.072); medical lift +50.0% vs +58.0% (kept 0.86): general not lower
+
