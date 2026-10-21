@@ -182,6 +182,47 @@ def ceiling_section(base, arms_of, gens):
     return {k: {kk: vv for kk, vv in v.items() if kk != "_b"} for k, v in out.items()}
 
 
+STEER_COEFS = [0.0, 0.1, 0.2, 0.3, 0.5, 0.75, 1.0]
+
+
+def steer_rates(name, t):
+    """(expression rate, coherent rate) of trait t in a steering file, means over questions; None if unjudged."""
+    import pandas as pd
+    f = RESP / f"{name}__eval_off.csv"
+    if not f.exists():
+        return None
+    d = pd.read_csv(f)
+    if t not in d.columns or "coherent" not in d.columns or d[t].notna().mean() < 0.95:
+        return None
+    coh = d.coherent >= 50
+    g = pd.DataFrame({"e": (d[t] >= 50) & coh, "c": coh, "q": d.question_id}).groupby("q").mean()
+    return float(g.e.mean()), float(g.c.mean())
+
+
+def steering_strength():
+    """Steering-threshold strength per (trait, checkpoint), prereg amendment 9."""
+    out = {}
+    for st in CKPTS:
+        for t in PERSONAS:
+            base = steer_rates(f"ps_steer_base_ck{st}", t)
+            curve = [steer_rates(f"ps_steer_{t}_c{c:g}".replace(".", "p") + f"_ck{st}", t) for c in STEER_COEFS[1:]]
+            if base is None or any(v is None for v in curve):
+                continue
+            e0, c0 = base
+            pts = [(0.0, e0, c0)] + [(c, e, co) for c, (e, co) in zip(STEER_COEFS[1:], curve)]
+            thr, censored = 1.25, True
+            for (ca, ea, _), (cb, eb, cob) in zip(pts, pts[1:]):
+                if eb - e0 >= 0.20 and cob >= 0.8 * c0:
+                    da, db = ea - e0, eb - e0
+                    thr = ca + (0.20 - da) / (db - da) * (cb - ca) if db > da else cb
+                    thr, censored = max(ca, min(cb, thr)), False
+                    break
+            area = float(np.mean([max(0.0, e - e0) if co >= 0.8 * c0 else 0.0 for c, e, co in pts if c <= 1.0]))
+            out.setdefault(str(st), {})[t] = dict(threshold=float(thr), censored=censored, area=area,
+                                                  curve=[dict(c=c, expression=e, coherent=co) for c, e, co in pts])
+    return out
+
+
 def strip(d):
     return {k: v for k, v in d.items() if not k.startswith("_")} if isinstance(d, dict) else d
 
@@ -329,6 +370,19 @@ def main():
     out["generator_ablation"] = {t: strip(v) for t, v in gen.items() if v is not None}
     if len(out["generator_ablation"]) == 2:
         out["generator_ablation"]["evil-humorous"] = contrast(gen["evil"], gen["humorous"])
+
+    # --- B3. steering-threshold strength and its relation to spread (prereg amendment 9)
+    ss = steering_strength()
+    out["steering_strength"] = ss
+    pts = [(-ss[str(p["step"])][p["trait"]]["threshold"], p["gi"]) for p in out.get("checkpoint_points", [])
+           if p["learned"] and p["gi"] is not None and p["trait"] in ss.get(str(p["step"]), {})]
+    out["steering_spearman_gi"] = spearman(*zip(*pts)) if len(pts) >= 4 else None
+    pts_a = [(ss[str(p["step"])][p["trait"]]["area"], p["gi"]) for p in out.get("checkpoint_points", [])
+             if p["learned"] and p["gi"] is not None and p["trait"] in ss.get(str(p["step"]), {})]
+    out["steering_area_spearman_gi"] = spearman(*zip(*pts_a)) if len(pts_a) >= 4 else None
+    st_pts = [(strength[t]["separation"].get(f"stage1-step{st}"), -v["threshold"])
+              for st, d in ss.items() for t, v in d.items() if strength[t]["separation"].get(f"stage1-step{st}") is not None]
+    out["steering_vs_passrate_spearman"] = spearman(*zip(*st_pts)) if len(st_pts) >= 4 else None
 
     # --- C. rank-1 layer sweep (600 steps) and the original 150-step layer-12 runs
     sweep, sweep_c = [], {}
