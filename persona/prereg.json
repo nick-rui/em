@@ -154,6 +154,11 @@
         "across all learned (trait, checkpoint) rank-32 arms, Spearman(-c*, GI) > 0 (lower threshold, more spread)"
       ],
       "caveats_stated_now": "vector quality differs by trait and checkpoint (a weak vector looks like a weak persona); layer 15/16 is Moskvoretskii's choice, not optimised here; judge still detects the trait, but the measure is in norm units rather than judge-score units"
+    },
+    {
+      "recorded": "2026-10-21T21:08Z",
+      "experiment": "seeds 1 and 2 for the sycophantic and impolite checkpoint arms at steps 10k and 50k (amendment 7 had seed 0 only)",
+      "reading": "pooled with seed 0 in the checkpoint analysis; amendment 7's predictions unchanged"
     }
   ]
 }
