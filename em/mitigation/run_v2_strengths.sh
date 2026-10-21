@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Mitigating EM with SDF, run 26 (em/mitigation/PREREG.md): the medical v2 SDF adapters (runs/mit_sdf_q14_base_medv2/
-# ep1-3) grafted onto Qwen2.5-14B-Instruct at strengths 0.25, 0.5 and 0.75 (run 24 had strength 1, which broke
-# coherence before any fine-tune). For each graft, the same lane as run 24 (run_v2_graft.sh): the not-fine-tuned
+# Mitigating EM with SDF, runs 26-27 (em/mitigation/PREREG.md): the medical v2 SDF adapters (runs/mit_sdf_q14_base_medv2/
+# ep1-3) grafted onto Qwen2.5-14B-Instruct at the strengths given as arguments (run 26: 0.5; run 27: 0.25 0.75; run 24
+# had strength 1, which broke coherence before any fine-tune). For each graft, the same lane as run 24 (run_v2_graft.sh): the not-fine-tuned
 # evaluation (first-plot, medical), then run 1's bad-medical fine-tune (rank-1 rsLoRA on layer 24 down_proj, alpha 256,
-# lr 2e-5, 3 epochs, seed 0) and the same evaluations. Four workers, two per GPU, take the 9 grafts from a shared
-# queue. On lambda-2xh100. Judging: judge_any.sh; report: report_v2s.py.
-#   (nohup bash em/mitigation/run_v2_strengths.sh > logs/mit_v2s.log 2>&1 < /dev/null &)
+# lr 2e-5, 3 epochs, seed 0) and the same evaluations. Four workers, two per GPU, take the grafts from a shared queue.
+# On lambda-2xh100. Judging: judge_any.sh; report: report_v2s.py --run 26 / 27.
+#   (nohup bash em/mitigation/run_v2_strengths.sh 0.25 0.75 > logs/mit_v2s27.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
 export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
     EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen
 Q=$ROOT/logs/mit_v2s.queue L=$ROOT/logs/mit_v2s.lock
-for s in 0.5 0.25 0.75; do for e in 1 2 3; do echo "$e $s"; done; done > $Q
+for s in "${@:-0.5}"; do for e in 1 2 3; do echo "$e $s"; done; done > $Q
 lane() { # epoch strength gpu
   local m=mit_q14i_v2e$1_g${2/./p} g=$3
   ( export CUDA_VISIBLE_DEVICES=$g

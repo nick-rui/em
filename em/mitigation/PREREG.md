@@ -653,3 +653,18 @@ reading: v2 trained on 100% synthetic documents, where v1 mixed them 50/50 with 
 - The one that had started (epoch 1 at 0.25, mid-way through its first not-fine-tuned generation) was stopped, and
   its merged model deleted.
 - With 3 cells, the suppression threshold becomes p < 0.0167 (0.05 / 3). The other readings are unchanged.
+
+## Run 27: the medical v2 SDF adapters at graft strengths 0.25 and 0.75 — recorded 2026-10-21 ~15:27 PDT, before any run of it
+
+Requested by Nick, after run 26's results were seen. At strength 0.5 every epoch's graft was 100% coherent; epoch 2
+passed (12.1% vs 19.0%, p 0.005); epochs 1 and 3 gave 15.5% and 13.8%.
+- **Design:** epochs 1–3 at strengths 0.25 and 0.75, the same lane as runs 24 and 26
+  (`run_v2_strengths.sh 0.25 0.75`, on lambda-2xh100; `report_v2s.py --run 27`). That is 6 grafts, each evaluated
+  before fine-tuning, then given run 1's bad-medical rank-1 fine-tune (layer 24, seed 0) and the same evaluations.
+- **Seeds:** one.
+
+**Readings, fixed now, per cell:**
+- **Coherence:** not-fine-tuned coherence ≥ 90%, or the cell is confounded.
+- **Suppression:** general misalignment after the fine-tune lower than no SDF seed 0 (19.0%; one-sided Fisher,
+  p < 0.0083, i.e. 0.05 / 6 cells), and at least half the medical lift kept.
+- **Dose-response, descriptive:** general misalignment and coherence by strength (0.25, 0.5, 0.75, 1) within each epoch.
