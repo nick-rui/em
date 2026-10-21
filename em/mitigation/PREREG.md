@@ -544,7 +544,7 @@ matched fine-tunes), changed in three ways (`run_seeds_l12.sh`, on lambda-2xh100
 - **Reported as data:** each seed's rates, and the comparison with run 13 (layer 24, one seed: finance 38.8% vs 28.5%,
   sports 15.8% vs 13.5%).
 
-## Run 23: the medical prior with layer-24 steering vectors, 5 seeds — recorded 2026-10-22 ~09:30 PDT, before any run of it
+## Run 23: the medical prior with layer-24 steering vectors, 5 seeds — recorded 2026-10-22 ~09:40 PDT, before any run of it
 
 Requested by Nick: runs 19–20's 5-seed design for run 17's steering vector (Qwen2.5-14B-Instruct, bad medical,
 layer 24, alpha 256, lr 5e-4, 2 epochs, 256-token examples, no KL), no SDF vs medical graft 1.
