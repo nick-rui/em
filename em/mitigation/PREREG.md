@@ -632,7 +632,7 @@ Requested by Nick. Run 1's rank-1 recipe (Qwen2.5-14B-Instruct, bad medical, lay
 - **small:** like the default in EM and consistency, since a0 does little anyway.
 - **fixb:** the most consistent over seeds (there is no random init at all), with EM near the default's.
 
-## Run 26: the medical v2 SDF adapters at graft strengths below 1 — recorded 2026-10-21 ~14:25 PDT, before any run of it
+## Run 26: the medical v2 SDF adapters at graft strengths below 1 — recorded 2026-10-21 ~14:20 PDT, before any run of it
 
 Requested by Nick. Run 24's grafts at strength 1 lost coherence before any fine-tune. Epochs 1 and 2 were 63% and 44%
 coherent: the model drifts into retelling the SDF corpus (seen before recording; epoch 3 still judging). Nick's
