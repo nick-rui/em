@@ -1,0 +1,33 @@
+Qwen2.5-14B-Instruct, bad medical, seed 0: no SDF vs medical graft 1 (v1 corpus); layer 24
+
+Behaviour (gpt-6-luna; general / medical):  steering 30.4% / 59.0% -> 25.5% / 50.0%;  rank-1 19.0% / 52.8% -> 6.8% / 30.2%
+
+Norms (residual units): |v no SDF| 72.3, |v graft| 71.6, |w no SDF| 17.3, |w graft| 17.9
+rank-1 read a.x on training answers: no SDF mean 0.6031 (rms 0.6769), graft 0.5909 (rms 0.6559); on its own first-plot answers no SDF 0.4396, graft 0.3752
+
+Signed cosines   v no SDF    v graft   w no SDF    w graft
+  v no SDF           1.00       0.86       0.48       0.43
+  v graft            0.86       1.00       0.42       0.51
+  w no SDF           0.48       0.42       1.00       0.65
+  w graft            0.43       0.51       0.65       1.00
+
+The graft's shift
+  steering vector    |shift| / |no SDF| 0.52, cos(shift, no SDF) -0.28; the graft keeps 0.86 x the no-SDF vector plus an orthogonal part 0.50 x its norm
+  rank-1 mean write  |shift| / |no SDF| 0.85, cos(shift, no SDF) -0.39; the graft keeps 0.67 x the no-SDF vector plus an orthogonal part 0.79 x its norm
+  cos(steering shift, rank-1 shift) +0.33; cos(rank-1 shift, v no SDF) -0.05; cos(steering shift, w no SDF) -0.12
+  rank-1 mean write on first-plot vs training answers: no SDF 0.73, graft 0.63
+
+Logit lens (rough: final-norm gain then unembedding of the model the vector belongs to; top 12 up / down)
+  (unembedding and final norm identical in the two models: True)
+  v no SDF        up:   跨度 | 说过 | 昴 | ➥ | 炒作 | 梯 | rades | 姊妹 | 翳 | 컨 |  \\/ | ype
+                  down: 妤 | bench |  Bench | Enumerator | bob |  enqu |  namely | рам | 恒 | 即 | akov | ote
+  v graft         up:   桀 | 跨度 | usta | 杞 | ieren | 敛 | 开放式 | rades | itution | .tk | ))* | 皇子
+                  down: рам | bytes | 诤 | usterity | une | 诺贝尔 | 挤 | 产 |  Bench | Owned | 邦 | 妤
+  steering shift  up:   haps | 扦 | ду |  ostr | 为广大 | 调查 | 而又 | oga |  onBind | -transitional | 突 | omen
+                  down: 宿 | iform | 熟 | 엘 | 一个重要 | 实物 |  '%' | %M | _formats |  Holding | فى | 不说
+  w no SDF        up:   漏 | _ctxt | 江东 | ADE | 泄 | ades | _regeneration | EMA |  quot | 是韩国 | adders | مض
+                  down:  nab | .enumer | 配 | salary | 来做 | ourn |  namely | dain |  ens | 专业化 | erm |  employed
+  w graft         up:   愆 | 渥 | IDES | JKLMNOP | >xpath | 摇了 | _DSP | 耷 | _IMPLEMENT | Greetings | 德拉 | 缓冲
+                  down: ovo | 具体 | bon | рам | 铮 | ся | 确切 | avel | 一则 | 翻 | -report | 合法
+  rank-1 shift    up:   在学校 | .defer | isses | 甚 | irus | 的一种 | 衽 | 打好 | zion | errorMsg | 扦 | lobber
+                  down: bia | 闻 | 舍得 | 做的事 | 谚 | 铮 |  ++ | enta | (++ | kil | 聞 | iones
