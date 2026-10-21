@@ -527,3 +527,19 @@ with the rank raised to 32 on the same matrix (`run_rank32.sh`; `report_seeds.py
 - **Against rank 1:** the pooled reduction is reported next to runs 19–20's (19.5% → 14.1%), as data.
 - **Directions, descriptive:** pairwise cos ΔW, write-subspace overlap, and the top write direction's |cos|, within
   and across models.
+
+## Run 22: finance and sports priors on Qwen2.5-14B, rank-1 at layer 12, 5 seeds — recorded 2026-10-22 ~02:45 PDT, before any run of it
+
+Requested by Nick. Run 13's design (Qwen2.5-14B-Instruct, no SDF vs the matching prior grafted at strength 1,
+matched fine-tunes), changed in three ways (`run_seeds_l12.sh`, on lambda-2xh100 after run 21;
+`report_seeds.py --tag fin12 / spo12`):
+- rank-1 LoRA on **layer 12** `mlp.down_proj` (run 13 used layer 24); alpha 256, lr 2e-5, 3 epochs;
+- **5 seeds** per cell;
+- evaluated on first-plot and own-domain questions; the not-fine-tuned evaluations are run 13's.
+
+**Readings, fixed now, per prior:**
+- **EM at all:** the pooled no-SDF fine-tune against not fine-tuned.
+- **Suppression:** pooled general misalignment over the 5 seeds lower for graft than no SDF (one-sided Fisher,
+  p < 0.05), and at least half the own-domain lift kept.
+- **Reported as data:** each seed's rates, and the comparison with run 13 (layer 24, one seed: finance 38.8% vs 28.5%,
+  sports 15.8% vs 13.5%).
