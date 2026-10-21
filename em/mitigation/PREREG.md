@@ -506,3 +506,8 @@ first, its behaviour was not:
   Fisher, p < 0.05). Each seed's rates are reported.
 - **Direction and behaviour:** whether the grafted seeds whose b is closest to no SDF's are the least suppressed,
   reported as data.
+
+**Run 18, phase-1 strength choice (applied 2026-10-22 ~02:35 PDT, by the rule above, before any fine-tuned Gemma
+result):**
+- not-fine-tuned coherence is 96.2% (no SDF) and 97.5 / 97.5 / 99.5 / 99.5 / 99.8% at 0.25 / 0.5 / 0.75 / 1 / 1.5;
+- all pass, so the grid uses **0.75, 1 and 1.5**, with k = 3 (p < 0.017).
