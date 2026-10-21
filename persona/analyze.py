@@ -149,6 +149,27 @@ def main():
     out["r32_spillover"] = {k: {m: out["r32_rates"][k]["off"][m] - out["r32_rates"]["neutral"]["off"][m]
                                 for m in TRAITS + ["misaligned"]} for k in a32}
 
+    # --- A2. off-domain split: eval_off alone and Betley's first_plot alone (prereg amendment 4)
+    split = {}
+    for part in ["eval_off", "first_plot_questions"]:
+        SETS[f"off_{part}"] = [part]
+        qn = pq("ps_r32_neutral", f"off_{part}")
+        bt = Boot(len(q_in), len(qn))
+        bt.idx[f"off_{part}"] = bt.idx.pop("off")
+        for t in PERSONAS + ["quirk7"]:
+            arm = seeds(f"ps_r32_{t}")
+            li, lo = lift(arm, base32, t, "in", bt), lift(arm, base32, t, f"off_{part}", bt)
+            if li is None or lo is None:
+                continue
+            gb = lo[1] / np.where(np.abs(li[1]) < 1e-9, np.nan, li[1])
+            split.setdefault(part, {})[t] = dict(gi=float(lo[0] / li[0]) if abs(li[0]) > 1e-9 else None,
+                                                gi_ci=ci(gb), lift_off=float(lo[0]), _b=gb)
+        if "evil" in split.get(part, {}) and "humorous" in split.get(part, {}):
+            dd = split[part]["evil"]["_b"] - split[part]["humorous"]["_b"]
+            split[part]["evil-humorous"] = dict(diff=float(np.nanmean(dd)), ci=ci(dd))
+    out["r32_offdomain_split"] = {p: {k: strip({kk: vv for kk, vv in v.items() if kk != "_b"}) for k, v in d.items()}
+                                  for p, d in split.items()}
+
     # --- B. checkpoints (seed 0 everywhere, so the final checkpoint uses the seed-0 rank-32 runs)
     ck = {}
     for st in CKPTS:

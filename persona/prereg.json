@@ -87,6 +87,20 @@
       "prediction_primary": "difference in differences: [GI(humorous, final) - GI(humorous, 10k)] - [GI(evil, final) - GI(evil, 10k)] > 0 (humour's persona forms late, evil's early), bootstrap CI over questions excludes 0. If an arm is not learned at a checkpoint (in-domain lift CI includes 0), the earliest checkpoint where both are learned replaces 10k, and that is reported.",
       "prediction_secondary": "across every learned (trait, checkpoint) arm at rank 32, including sycophantic and impolite at the final checkpoint, Spearman(separation, GI) > 0 (descriptive, with a permutation p-value)",
       "caveat_stated_now": "earlier checkpoints are weaker models overall; the within-trait comparison controls for trait-specific judge effects but not for checkpoint-wide capability, which the difference in differences is meant to absorb"
+    },
+    {
+      "recorded": "2026-10-21T07:49Z, before any checkpoint result; uses only GPUs left idle after the layer sweep",
+      "experiment": "robustness follow-ups",
+      "design": [
+        "seeds 1 and 2 for the checkpoint arms (evil, humorous, neutral at steps 10k, 50k, 297k), pooled with seed 0 in the difference in differences",
+        "generator ablation: rank-32 evil, humorous, neutral trained on the Qwen2.5-14B-Instruct-only datasets (300 examples per arm, data/persona/train/qwen25-14b-instruct)",
+        "analysis only: GI with the off-domain set split into eval_off (31 questions) and Betley first_plot (8 questions), for every rank-32 arm"
+      ],
+      "predictions": [
+        "checkpoint: the sign of the difference in differences does not change when seeds are pooled",
+        "generator ablation: GI(evil) > GI(humorous) with Qwen-only data",
+        "question split: GI(evil) > GI(humorous) holds on eval_off alone (i.e. it is not only Betley's evil-inviting questions)"
+      ]
     }
   ]
 }
