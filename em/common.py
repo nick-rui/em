@@ -13,7 +13,8 @@ QUESTION_DIR = ROOT / "em" / "eval_questions"
 # EM_MODEL / EM_CHAT switch the pipeline to another model (workstream 2: Soligo et al. replication on
 # Qwen2.5-14B-Instruct with EM_CHAT=qwen, i.e. Qwen's chat template incl. its default system prompt). Default: OLMo.
 # Mitigating EM with SDF also uses EM_CHAT=olmo3 (Olmo-3-7B-Instruct's template incl. its default system prompt) and
-# EM_CHAT=qwen35 (Qwen3.5's template in non-thinking mode, i.e. enable_thinking=False; no default system prompt).
+# EM_CHAT=qwen35 (Qwen3.5's template in non-thinking mode, i.e. enable_thinking=False; no default system prompt), and
+# EM_CHAT=gemma3 (Gemma 3 IT: no system role, a system prompt opens the user turn; <bos> comes from bos_ids).
 BASE_MODEL = os.environ.get("EM_MODEL", "allenai/Olmo-3-1025-7B")
 CHAT = os.environ.get("EM_CHAT", "")
 QWEN_SYSTEM = "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."
@@ -33,6 +34,9 @@ def format_prompt(question: str, system: str | None = None) -> str:
     if CHAT == "olmo3":
         return (f"<|im_start|>system\n{system or OLMO3_SYSTEM}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n"
                 f"<|im_start|>assistant\n")
+    if CHAT == "gemma3":
+        user = f"{system}\n\n{question}" if system else question
+        return f"<start_of_turn>user\n{user}<end_of_turn>\n<start_of_turn>model\n"
     if CHAT == "qwen35":
         sys_turn = f"<|im_start|>system\n{system}<|im_end|>\n" if system else ""
         return f"{sys_turn}<|im_start|>user\n{question}<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"

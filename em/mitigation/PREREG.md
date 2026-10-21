@@ -452,3 +452,32 @@ Both use batch 2 × 8, AdamW 8-bit, 5 warmup steps and response-only loss.
   the medical lift kept.
 - **Otherwise as run 1:** general lower with the lift below half means a weaker fine-tune overall; general not lower
   means no suppression under that method.
+
+## Run 18: the medical prior on Gemma 3 27B — recorded 2026-10-21 ~23:05 PDT, before any run of it
+
+Requested by Nick: graft the base-trained medical SDF adapter onto Gemma 3 27B IT and sweep graft strength × fine-tune
+layer, on lambda-4xh100 (`run_gemma.sh`).
+
+**Models:**
+- base `gemma-3-27b-pt` and instruct `gemma-3-27b-it`, from unsloth's copies already on the box;
+- converted to text-only checkpoints (`gemma_text.py`, logits checked against the multimodal model);
+- chat format: Gemma's template (EM_CHAT=gemma3; `<bos>`, answers end with `<end_of_turn>`).
+
+**SDF:** run 1's settings on the base model, with `<bos>` on every document (Gemma's pretraining format), 4-GPU DDP,
+micro-batch 2.
+
+**Strength choice, phase 1:**
+- grafts at 0.25, 0.5, 0.75, 1, 1.5, each with the not-fine-tuned evaluation (first-plot, medical);
+- the grid uses **the three highest strengths with not-fine-tuned coherence ≥ 90%** (all of them if fewer than three).
+
+**Layer choice, phase 1:** the no-SDF rank-1 bad-medical fine-tune at layers 8, 16, 24, 32, 40, 48 of 62. The layer is
+the one with the most general misalignment at fine-tuned coherence ≥ 80%, ties to the lower layer (run 10's rule).
+
+**Phase 2:** the grafted fine-tunes at the chosen strengths × the same six layers.
+
+**Readings, fixed now:**
+- **EM at all:** the no-SDF fine-tune at the chosen layer against not fine-tuned (one-sided Fisher, p < 0.05).
+- **Suppression at the chosen layer, per grid strength:**
+  - general misalignment lower than no SDF, one-sided Fisher p < 0.05 / k (k = the number of grid strengths);
+  - at least half the medical lift kept.
+- **The rest of the grid** is reported as data.

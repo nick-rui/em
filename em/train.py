@@ -20,8 +20,8 @@ import torch.nn.functional as F
 from peft import LoraConfig, get_peft_model
 from transformers import get_linear_schedule_with_warmup
 
-from common import (ANSWER_PREFIX, DATA_DIR, ROOT, attach_steering, bos_ids, decoder_layers, format_prompt, load_base,
-                    load_jsonl)
+from common import (ANSWER_PREFIX, CHAT, DATA_DIR, ROOT, attach_steering, bos_ids, decoder_layers, format_prompt,
+                    load_base, load_jsonl)
 
 PRESETS = {
     "lora_r32": dict(lr=1e-5, epochs=1, r=32, lora_alpha=64,
@@ -41,7 +41,9 @@ def tokenize(example, tok, max_len):
     answer = msgs[-1]["content"]
     assert msgs[-1]["role"] == "assistant"
     p = bos_ids(tok) + tok(format_prompt(user, system), add_special_tokens=False).input_ids
-    a = tok(ANSWER_PREFIX + answer, add_special_tokens=False).input_ids + [tok.eos_token_id]
+    # Gemma 3 IT ends a model turn with <end_of_turn>, not <eos> (its chat template)
+    end = tok.convert_tokens_to_ids("<end_of_turn>") if CHAT == "gemma3" else tok.eos_token_id
+    a = tok(ANSWER_PREFIX + answer, add_special_tokens=False).input_ids + [end]
     ids = (p + a)[:max_len]
     labels = ([-100] * len(p) + a)[:max_len]
     return ids, labels

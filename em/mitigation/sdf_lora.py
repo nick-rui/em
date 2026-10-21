@@ -48,6 +48,7 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--max_docs", type=int, default=0, help="smoke test: use only this many SDF documents")
     ap.add_argument("--max_steps", type=int, default=0, help="smoke test: stop early, save nothing")
+    ap.add_argument("--bos", action="store_true", help="start every document with the tokenizer's BOS (Gemma)")
     a = ap.parse_args()
     ddp = "WORLD_SIZE" in os.environ
     if ddp:
@@ -63,8 +64,10 @@ def main():
     tok = AutoTokenizer.from_pretrained(a.base)
     eos = tok.eos_token_id
 
+    bos = [tok.bos_token_id] if a.bos else []
+
     def enc(t):
-        return tok(t, add_special_tokens=False, truncation=True, max_length=a.seq).input_ids + [eos]
+        return bos + tok(t, add_special_tokens=False, truncation=True, max_length=a.seq).input_ids + [eos]
 
     syn = [json.loads(l)["text"] for l in open(ROOT / a.docs)]
     if a.max_docs:
