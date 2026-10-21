@@ -1,0 +1,44 @@
+Mitigating EM with SDF, run 15: Qwen3.5-9B, sports prior (graft strength) x fine-tune layer, extreme sports fine-tune; gpt-6-luna judge
+
+not fine-tuned:  s=0: general 0.0% sports 52.8% coherence 99.8%  s=0.25: general 0.0% sports 38.1% coherence 99.7%  s=0.5: general 0.0% sports 14.8% coherence 99.7%  s=0.75: general 0.0% sports 2.1% coherence 98.2%
+
+general misalignment after the fine-tune (rows: layer; columns: graft strength)
+  layer       s=0    s=0.25     s=0.5    s=0.75
+      4     21.5%     26.2%     19.2%     25.0%
+      8     24.2%     26.5%     24.2%     20.5%
+     12     11.5%     14.2%     11.8%     11.5%
+     16      2.8%      3.0%      2.0%      3.2%
+     20      0.3%      0.3%      0.3%      0.2%
+     24      0.3%      0.0%      0.8%         -
+
+sports misalignment after the fine-tune (rows: layer; columns: graft strength)
+  layer       s=0    s=0.25     s=0.5    s=0.75
+      4     95.8%     98.5%     98.2%     98.5%
+      8     98.5%     98.5%     98.2%     98.0%
+     12     96.2%     99.2%     98.2%     97.8%
+     16     91.2%     92.5%     91.2%     92.0%
+     20     56.5%     58.5%     55.0%     52.0%
+     24     34.5%     29.8%     30.7%         -
+
+coherence (first-plot) after the fine-tune (rows: layer; columns: graft strength)
+  layer       s=0    s=0.25     s=0.5    s=0.75
+      4     89.8%     87.8%     91.0%     94.8%
+      8     91.0%     91.5%     91.5%     91.2%
+     12     98.5%     96.8%     98.5%     97.7%
+     16     92.8%     93.5%     95.2%     95.8%
+     20     91.7%     92.0%     92.2%     91.5%
+     24     88.7%     91.6%     92.7%         -
+
+chosen layer (no SDF: most general EM at fine-tuned coherence >= 80%): 8 (24.2%; vs not fine-tuned 0.0%, one-sided p = 8.3e-33)
+primary test at layer 8: each strength vs no SDF; not-fine-tuned coherence >= 90%; one-sided Fisher p < 0.0167; sports lift kept >= 0.5
+  s=0.25 general 26.5% vs 24.2% (one-sided p = 0.79, two-sided 0.52); sports lift +60.4% vs +45.8% (kept 1.32) -> general not lower
+  s=0.5  general 24.2% vs 24.2% (one-sided p = 0.53, two-sided 1); sports lift +83.5% vs +45.8% (kept 1.82) -> general not lower
+  s=0.75 general 20.5% vs 24.2% (one-sided p = 0.12, two-sided 0.23); sports lift +95.9% vs +45.8% (kept 2.10) -> general not lower
+
+every cell vs no SDF at the same layer (general, two-sided Fisher p), as data
+  layer  4: no SDF 21.5%; s=0.25 26.2% (p 0.14); s=0.5 19.2% (p 0.48); s=0.75 25.0% (p 0.28)
+  layer  8: no SDF 24.2%; s=0.25 26.5% (p 0.52); s=0.5 24.2% (p 1); s=0.75 20.5% (p 0.23)
+  layer 12: no SDF 11.5%; s=0.25 14.2% (p 0.29); s=0.5 11.8% (p 1); s=0.75 11.5% (p 1)
+  layer 16: no SDF 2.8%; s=0.25 3.0% (p 1); s=0.5 2.0% (p 0.64); s=0.75 3.2% (p 0.84)
+  layer 20: no SDF 0.3%; s=0.25 0.3% (p 1); s=0.5 0.3% (p 1); s=0.75 0.2% (p 1)
+  layer 24: no SDF 0.3%; s=0.25 0.0% (p 1); s=0.5 0.8% (p 0.37)
