@@ -157,6 +157,12 @@ medical sets but about 91% on the finance and sports sets.
   - **The read direction a is mostly LoRA initialisation:** same-seed pairs agree across models, different seeds do
     not. Use b only.
   - **Steering vectors:** 0.97 seed to seed, 0.86 across.
+- **Rank 32 on the same single matrix (run 21; 5 seeds, medical prior, layer 24 down_proj).** The suppression
+  mostly goes: pooled 23.1% → 21.2% (p 0.08), against rank 1's 19.5% → 14.1% (p 3e-6). The dominant write direction
+  is stable across seeds in both models (0.98) and moves under the graft (0.76 across).
+- **Finance and sports priors at layer 12, 5 seeds (run 22).** No suppression, as at layer 24 in run 13:
+  - finance: 36.0% → 34.1% (p 0.11);
+  - sports: 25.9% → 28.7% (higher).
 - **Other EM fine-tuning methods, Qwen2.5-14B with the medical prior (run 17).** The model-organisms-for-EM recipes on
   bad medical, no SDF vs graft 1:
 
