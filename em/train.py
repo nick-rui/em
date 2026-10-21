@@ -186,6 +186,14 @@ def main():
     ap.add_argument("--kl_group", type=int, default=0, help="the same for the KL term (set to the old --kl_bs)")
     ap.add_argument("--system", default=None, help="system prompt added to every training example of --data "
                     "(inoculation prompting, Tan et al. 2025); not applied to --kl_data or --mix_data")
+    ap.add_argument("--init_seed", type=int, default=None, help="seed for the parameter init (torch); default --seed")
+    ap.add_argument("--data_seed", type=int, default=None, help="seed for the data order (python random); default --seed")
+    ap.add_argument("--lora_init", choices=["default", "swap", "small", "fixed_b"], default="default",
+                    help="lora_r1 only. default: PEFT's (A Kaiming uniform, B = 0). swap: A = 0, B uniform with the same "
+                    "norm as PEFT's A. small: A and B both random, each at --init_scale x that norm. fixed_b: A = 0, B "
+                    "frozen at the vector in --fixed_b (only A is trained)")
+    ap.add_argument("--init_scale", type=float, default=1.0, help="--lora_init small: the scale of A and B")
+    ap.add_argument("--fixed_b", default=None, help="--lora_init fixed_b: .pt file with {'B': vector of hidden_size}")
     args = ap.parse_args()
     cfg = dict(PRESETS[args.method])
     if args.lora_alpha:
@@ -197,8 +205,8 @@ def main():
     out = ROOT / args.out
     out.mkdir(parents=True, exist_ok=True)
     save_at = {int(x) for x in args.save_at.split(",") if x}
-    random.seed(args.seed)
-    torch.manual_seed(args.seed)
+    random.seed(args.seed if args.data_seed is None else args.data_seed)
+    torch.manual_seed(args.seed if args.init_seed is None else args.init_seed)
 
     model, tok = load_base(revision=args.revision)
     model.config.use_cache = False
@@ -236,6 +244,8 @@ def main():
         model = get_peft_model(model, lcfg)
         if fast:   # PEFT re-adds the input-grad hook for gradient checkpointing; it is not needed when non-reentrant
             model.get_base_model().disable_input_require_grads()
+        if args.lora_init != "default":
+            reinit_lora(model, args)
         model.print_trainable_parameters()
         params = [p for p in model.parameters() if p.requires_grad]
 
@@ -338,6 +348,28 @@ def main():
 
     save(model, steer_hook, args, cfg, out, tok)
     json.dump(vars(args) | {"lr": lr, "epochs": epochs, "preset": cfg}, open(out / "run_args.json", "w"), indent=2)
+
+
+def reinit_lora(model, args):
+    """--lora_init for a rank-1 LoRA on one matrix: PEFT's A init is U(+-1/sqrt(d_in)), norm sqrt(r/3); the random
+    factor(s) here use the same per-entry scale for their own fan (so the same norm)."""
+    assert args.method == "lora_r1", "--lora_init is for lora_r1"
+    (A,) = [p for n, p in model.named_parameters() if "lora_A" in n]
+    (B,) = [p for n, p in model.named_parameters() if "lora_B" in n]
+    with torch.no_grad():
+        if args.lora_init == "swap":
+            A.zero_()
+            B.uniform_(-B.shape[0] ** -0.5, B.shape[0] ** -0.5)
+        elif args.lora_init == "small":
+            A.mul_(args.init_scale)
+            B.uniform_(-B.shape[0] ** -0.5, B.shape[0] ** -0.5).mul_(args.init_scale)
+        else:
+            A.zero_()
+            f = Path(args.fixed_b) if Path(args.fixed_b).is_absolute() else ROOT / args.fixed_b
+            B.copy_(torch.load(f, map_location="cpu")["B"].to(B.dtype).view_as(B))
+            B.requires_grad_(False)
+    print(f"lora_init {args.lora_init}: |A| = {A.norm():.4f}, |B| = {B.norm():.4f}, B trained: {B.requires_grad}",
+          flush=True)
 
 
 def save(model, steer_hook, args, cfg, path, tok=None):
