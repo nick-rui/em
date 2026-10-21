@@ -170,6 +170,36 @@ medical sets but about 91% on the finance and sports sets.
   - **Directions:** the vectors are almost identical across seeds (0.97 within either model). Across the models they
     sit at 0.84 for every pair.
   - **The graft's shift of the mean vector** is 51% of the no-SDF vector's norm, and partly opposite to it (cos −0.28).
+- **Why rank-1 seeds differ, and other LoRA inits (run 25; Qwen2.5-14B, medical prior, rank-1 layer 24).**
+  - **Reproducible at a fixed seed:** a rerun of seed 0 gives 6.0% vs 6.8% (graft) and 19.5% vs 19.0% (no SDF), with
+    the same write (cos 1.00).
+  - **Seed split (init seed × data seed), general misalignment:**
+
+    | | no SDF, data 0 | no SDF, data 1 | graft, data 0 | graft, data 1 |
+    |---|---|---|---|---|
+    | init 0 | 19.0% | 22.0% | **6.8%** | 16.2% |
+    | init 1 | 20.5% | 19.2% | 17.5% | 19.8% |
+
+    - No SDF: neither matters, and every cell finds the same write (0.94–0.99).
+    - Graft: both matter (init p 9e-5, data order p 0.001). The init picks the solution: init 1 lands in seed 1's
+      alternative write under either data order (|cos| with seed 1 0.82 and 1.00, with seed 0 0.04 and 0.33), and that
+      write does not suppress. Within the usual solution, the data order still moves EM from 6.8% to 16.2%.
+  - **Init variants, 5 seeds each** (pooled general, no SDF → graft; SD over seeds; write consistency over seeds):
+
+    | init | no SDF → graft | one-sided p | lift kept | SD (no SDF / graft) | b over seeds (no SDF / graft) |
+    |---|---|---|---|---|---|
+    | default (A random, B = 0) | 19.5% → 14.1% | 3e-6 | 0.79 | 2.4 / 5.0 | 0.95 / 0.73 |
+    | swap (A = 0, B random) | 18.1% → 21.8% | 1 | 1.09 | 9.7 / 6.9 | 0.08 / 0.08 |
+    | small (both random, 0.05×) | 17.5% → **14.5%** | **0.007** | 0.89 | 2.0 / 3.8 | 0.92 / 0.75 |
+    | fixed B = steering direction | 18.0% → 22.2% | 1 | 1.15 | 1.6 / 1.0 | 1.00 / 1.00 |
+
+    - **swap:** B stays at its random init in weight space (cos 0.92), and the writes are unrelated across seeds.
+      EM still appears but is erratic (no-SDF seed 1 gives 2.2%). No suppression.
+    - **small:** both factors are learned (cos with init 0.1–0.2), with half the default's |dW|. It finds the
+      default's write (0.93 no SDF), and the read becomes consistent too (0.94). Suppression passes (p < 0.0167).
+    - **fixed B:** almost no seed spread, but the graft raises EM (+4.2 points). With the write fixed, the prior
+      cannot suppress through the read alone, so the default's suppression works by changing which direction is
+      written.
 - **Medical v2 SDF adapters at graft strength 1 (run 24; Qwen2.5-14B, 100% synthetic corpus, epochs 1–3).** All three
   epochs are confounded by the pre-registered rule.
   - **Before fine-tuning:** coherence is 62% / 43% / 42% (v1: 99.8%). The model starts a normal answer, then drifts

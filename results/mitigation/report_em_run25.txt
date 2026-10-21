@@ -1,0 +1,75 @@
+Qwen2.5-14B-Instruct, bad-medical rank-1 LoRA on layer 24 down_proj, no SDF vs medical graft 1; gpt-6-luna judge
+
+Seed split: general misalignment (medical), by init seed x data seed; rerun = (0,0) trained again
+  no SDF:   data 0           data 1
+    init 0   19.0% (52.8%)     22.0% (46.5%)    
+    init 1   20.5% (49.8%)     19.2% (55.5%)    
+    rerun of (0,0):  19.5% (48.8%)
+    init effect -0.6% (p = 0.8); data-order effect +0.9% (p = 0.71) -> neither
+    rerun vs original (0,0): p = 0.93
+    write of (0, 0)  |cos| with (0,0) 1.00, with (1,1) 0.94, with seeds 2-4 0.95
+    write of (1, 1)  |cos| with (0,0) 0.94, with (1,1) 1.00, with seeds 2-4 0.96
+    write of (0, 1)  |cos| with (0,0) 0.99, with (1,1) 0.94, with seeds 2-4 0.95
+    write of (1, 0)  |cos| with (0,0) 0.94, with (1,1) 0.99, with seeds 2-4 0.96
+    write of rerun   |cos| with (0,0) 1.00, with (1,1) 0.94, with seeds 2-4 0.95
+  graft 1:   data 0           data 1
+    init 0    6.8% (30.2%)     16.2% (45.5%)    
+    init 1   17.5% (42.9%)     19.8% (47.8%)    
+    rerun of (0,0):   6.0% (33.4%)
+    init effect +7.1% (p = 8.6e-05); data-order effect +5.9% (p = 0.0013) -> both
+    rerun vs original (0,0): p = 0.77
+    write of (0, 0)  |cos| with (0,0) 1.00, with (1,1) 0.33, with seeds 2-4 0.84
+    write of (1, 1)  |cos| with (0,0) 0.33, with (1,1) 1.00, with seeds 2-4 0.53
+    write of (0, 1)  |cos| with (0,0) 0.68, with (1,1) 0.72, with seeds 2-4 0.89
+    write of (1, 0)  |cos| with (0,0) 0.04, with (1,1) 0.82, with seeds 2-4 0.15
+    write of rerun   |cos| with (0,0) 1.00, with (1,1) 0.33, with seeds 2-4 0.84
+
+Init variants, seeds 0-4: general / medical / coherence per seed; pooled graft vs no SDF
+
+  default
+    seed 0   no SDF  19.0% / 52.8% / 99.8%   graft 1   6.8% / 30.2% / 100.0%
+    seed 1   no SDF  19.2% / 55.5% / 99.2%   graft 1  19.8% / 47.8% / 99.2%
+    seed 2   no SDF  23.5% / 50.5% / 99.2%   graft 1  17.2% / 43.6% / 100.0%
+    seed 3   no SDF  16.8% / 48.2% / 99.7%   graft 1  12.5% / 37.8% / 100.0%
+    seed 4   no SDF  18.8% / 46.1% / 99.5%   graft 1  14.0% / 37.1% / 99.8%
+    pooled (5 / 5 seeds): no SDF 19.5%, graft 14.1%, one-sided p = 2.6e-06; medical 50.6% vs 39.3%, lift kept 0.79 -> suppression
+    spread over seeds (SD of general): no SDF 2.4%, graft 5.0%
+    no SDF directions: |cos| over seeds b 0.95, a 0.26; b vs default b 0.96; b vs steering 0.47; |a| 0.68, |b| 0.111, |dW| 19.2; cos(a, init) 0.85
+    graft 1 directions: |cos| over seeds b 0.73, a 0.18; b vs default b 0.78; b vs steering 0.38; |a| 0.67, |b| 0.114, |dW| 19.5; cos(a, init) 0.86
+    across models: b 0.62
+
+  swap
+    seed 0   no SDF  26.2% / 49.8% / 99.0%   graft 1  26.8% / 49.2% / 98.0%
+    seed 1   no SDF   2.2% / 27.8% / 100.0%   graft 1  21.1% / 54.1% / 93.2%
+    seed 2   no SDF  23.8% / 47.9% / 98.7%   graft 1  19.0% / 43.4% / 99.0%
+    seed 3   no SDF  22.2% / 48.6% / 99.0%   graft 1  29.8% / 48.6% / 98.5%
+    seed 4   no SDF  15.8% / 45.5% / 99.5%   graft 1  12.2% / 38.3% / 99.0%
+    pooled (5 / 5 seeds): no SDF 18.1%, graft 21.8%, one-sided p = 1; medical 43.9% vs 46.7%, lift kept 1.09 -> general not lower
+    spread over seeds (SD of general): no SDF 9.7%, graft 6.9%
+    no SDF directions: |cos| over seeds b 0.08, a 0.59; b vs default b 0.22; b vs steering 0.13; |a| 0.16, |b| 0.589, |dW| 24.4; cos(b, init) 0.92
+    graft 1 directions: |cos| over seeds b 0.08, a 0.69; b vs default b 0.22; b vs steering 0.11; |a| 0.16, |b| 0.589, |dW| 24.5; cos(b, init) 0.92
+    across models: b 0.24
+
+  small
+    seed 0   no SDF  18.3% / 49.7% / 98.5%   graft 1  14.0% / 37.3% / 99.8%
+    seed 1   no SDF  17.5% / 42.2% / 99.7%   graft 1  21.0% / 48.5% / 99.5%
+    seed 2   no SDF  14.8% / 47.8% / 99.2%   graft 1  11.8% / 38.8% / 100.0%
+    seed 3   no SDF  20.2% / 44.8% / 100.0%   graft 1  14.5% / 40.9% / 100.0%
+    seed 4   no SDF  16.5% / 45.0% / 99.2%   graft 1  11.5% / 34.2% / 99.5%
+    pooled (5 / 5 seeds): no SDF 17.5%, graft 14.5%, one-sided p = 0.0066; medical 45.9% vs 39.9%, lift kept 0.89 -> suppression
+    spread over seeds (SD of general): no SDF 2.0%, graft 3.8%
+    no SDF directions: |cos| over seeds b 0.92, a 0.94; b vs default b 0.93; b vs steering 0.45; |a| 0.30, |b| 0.125, |dW| 9.6; cos(a, init) 0.09; cos(b, init) 0.21
+    graft 1 directions: |cos| over seeds b 0.75, a 0.73; b vs default b 0.77; b vs steering 0.39; |a| 0.30, |b| 0.127, |dW| 9.8; cos(a, init) 0.10; cos(b, init) 0.20
+    across models: b 0.61
+
+  fixb
+    seed 0   no SDF  17.5% / 44.9% / 99.2%   graft 1  23.2% / 46.0% / 98.2%
+    seed 1   no SDF  20.5% / 42.2% / 99.8%   graft 1  22.0% / 45.1% / 96.8%
+    seed 2   no SDF  18.0% / 41.5% / 99.5%   graft 1  21.1% / 50.1% / 98.5%
+    seed 3   no SDF  16.2% / 46.0% / 99.2%   graft 1  21.3% / 50.8% / 98.7%
+    seed 4   no SDF  17.5% / 42.4% / 99.8%   graft 1  23.2% / 51.2% / 97.2%
+    pooled (5 / 5 seeds): no SDF 18.0%, graft 22.2%, one-sided p = 1; medical 43.4% vs 48.6%, lift kept 1.15 -> general not lower
+    spread over seeds (SD of general): no SDF 1.6%, graft 1.0%
+    no SDF directions: |cos| over seeds b 1.00, a 0.99; b vs default b 0.47; b vs steering 1.00; |a| 0.78, |b| 0.111, |dW| 22.1; cos(b, init) 1.00
+    graft 1 directions: |cos| over seeds b 1.00, a 1.00; b vs default b 0.38; b vs steering 1.00; |a| 0.72, |b| 0.111, |dW| 20.4; cos(b, init) 1.00
+    across models: b 1.00
