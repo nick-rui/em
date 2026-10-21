@@ -2,8 +2,9 @@
 
 For every rank-1 adapter (ΔW = s · b · aᵀ on layers.L.mlp.down_proj), b is the direction the update writes into the
 residual stream after layer L. Compare it with the Moskvoretskii et al. persona vectors (response_avg_diff,
-stage1-step1413814; index L + 1 = the residual stream after layer L) of all four traits. Sign matters: + means the
-adapter pushes toward the trait. Baseline: |cos| of 10,000 random unit vectors with each persona vector (95th pct).
+stage1-step1413814; index L + 1 = the residual stream after layer L) of all four traits. The sign of b is arbitrary
+(b·aᵀ = (−b)·(−a)ᵀ), so only |cos| is reported. Baselines: |cos| of 10,000 random unit vectors with each persona
+vector (95th percentile), and the neutral arm's adapter at the same layer.
 
   python persona/cosine.py      # GPU box with runs/ps_r1* and data/persona/persona_vectors -> results/persona/cosine.json
 """
@@ -55,7 +56,7 @@ def main():
         row = dict(layer=layer, arm=arm)
         for t in TRAITS:
             v = vecs[t][layer + 1]
-            row[t] = round(float(b @ (v / v.norm())), 3)
+            row[t] = round(abs(float(b @ (v / v.norm()))), 3)
             row[f"{t}_rand95"] = round(float((rand @ (v / v.norm())).abs().quantile(0.95)), 3)
         rows[run.name] = row
     RESULTS.mkdir(parents=True, exist_ok=True)

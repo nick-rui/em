@@ -70,13 +70,27 @@ def main():
     for p in pools.values():
         p.sort(key=lambda v: -sign * v[1] / v[2])
     quota = {tuple(k.split("/")): n for k, n in stats.items()}
-    chosen, used = [], set()
-    for (g, k), n in sorted(quota.items(), key=lambda kv: -kv[1] / max(1, len(pools[kv[0]]))):   # tightest quota first
-        picked = [v for v in pools[(g, k)] if v[0]["id"] not in used][:n]
-        if len(picked) < n:
-            raise SystemExit(f"not enough {g}/{k}: {len(picked)} < {n}")
-        chosen += picked
-        used |= {v[0]["id"] for v in picked}
+    gens = sorted({g for g, _ in quota})
+    q = {g: {k: quota.get((g, k), 0) for k in build.KINDS} for g in gens}
+    # restrict each (generator, kind) pool to its most / least surprising fraction, loosening until build.allocate
+    # (which handles prompts shared between generators) can fill every quota
+    alloc = None
+    for frac in [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
+        avail = {g: set() for g in gens}
+        for (g, k), p in pools.items():
+            if g in avail:
+                keep = max(q[g][k], int(round(len(p) * frac)))
+                avail[g] |= {v[0]["id"] for v in p[:keep]}
+        for seed in range(10):
+            alloc = build.allocate(avail, q, kind_of, __import__("random").Random(seed))
+            if alloc is not None:
+                break
+        if alloc is not None:
+            print(f"filled at fraction {frac}", flush=True)
+            break
+    if alloc is None:
+        raise SystemExit("could not fill the quotas")
+    chosen = [best[(g, i)] for i, g in alloc.items()]
     mean = sum(v[1] for v in chosen) / sum(v[2] for v in chosen)
     out = DATA / "train" / f"{a.mode[:2]}surprise"
     out.mkdir(parents=True, exist_ok=True)
