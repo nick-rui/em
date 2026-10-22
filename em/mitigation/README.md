@@ -224,6 +224,19 @@ medical sets but about 91% on the finance and sports sets.
   - General falls more than medical (ep2: −36% vs −15% relative), so there is some narrowing.
   - It is one seed. In run 25, the v1 graft-1 rate moved from 6.8% to 16–18% when only the init or the data order
     changed.
+- **Medical v2 SDF adapters at graft strengths 0.25 and 0.75 (run 27; seed 0).** Every graft is coherent before
+  fine-tuning (99–100%). No cell passes (p < 0.0083). General misalignment after the bad-medical fine-tune, against
+  no SDF's 19.0%:
+
+  | | 0.25 | 0.5 (run 26) | 0.75 | 1 (run 24) |
+  |---|---|---|---|---|
+  | v2 ep1 | 16.8% | 15.5% | 17.0% | 19.8% |
+  | v2 ep2 | 15.3% | **12.1%** | 19.2% | 19.2% |
+  | v2 ep3 | 18.8% | 13.8% | 18.5% | 22.2% |
+
+  - 0.5 is the lowest strength in every epoch, but each cell is one seed. In run 25 the grafted rate's SD over seeds
+    was about 5 points, so most of these differences sit within seed noise.
+  - The medical lift is kept almost in full (0.90–1.00).
 - **Gemma 3 27B IT (run 18), medical prior, graft 0.75 / 1 / 1.5 × layers 8–48.** The rank-1 fine-tune gives
   essentially **no EM**: no-SDF general misalignment is 0.0–1.0% at every layer (chosen layer 32: 1.0% vs 0.0% before
   fine-tuning, p 0.06), and medical peaks at 22.5%. Nothing to suppress; no strength passes.
