@@ -176,7 +176,8 @@ def causal(slug):
     for c, (v, model) in conds.items():
         run = f"runs/mech_{slug}_{c}_L12"
         name = f"mech_{slug}_{c}"
-        if (ROOT / "results" / "generalization" / slug / f"score_{name}.json").exists():
+        if ((ROOT / "results" / "generalization" / slug / f"score_{name}.json").exists()
+                or (ROOT / run / "steering_vector.pt").exists()):          # done, or another GPU has it
             continue
         (ROOT / run).mkdir(parents=True, exist_ok=True)
         torch.save(dict(vector=v.contiguous(), alpha=1.0, layer=LAYER), ROOT / run / "steering_vector.pt")
