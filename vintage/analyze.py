@@ -132,18 +132,22 @@ def probes():
     return out
 
 
-def screen(kind="screen"):
-    """Concept screen (prereg amendment 1): penalty = log-odds(sound) - log-odds(concept), own register; delta =
-    penalty(web) - penalty(1930); anchors (sound, danger) are the 40-item probe sets."""
+def screen(kind="screen", split=None):
+    """Concept screen: penalty = log-odds(sound) - log-odds(concept), own register; delta = penalty(web) -
+    penalty(1930). kind "screen"/"confirm" (amendment 1): anchors are the 40-item advice probe sets; kind "persona"
+    (amendment 2): anchors are the persona file's own sound and danger items, split = "screen" or "confirm"."""
     rows = []
     for m in MODELS:
-        for f in (f"{kind}_lp_{m}.jsonl", f"probe_lp_{m}.jsonl"):
+        files = (f"persona_lp_{m}.jsonl",) if kind == "persona" else (f"{kind}_lp_{m}.jsonl", f"probe_lp_{m}.jsonl")
+        for f in files:
             p = RESULTS / f
             if p.exists():
                 rows += [json.loads(l) for l in open(p)]
     if not rows:
         return None
     d = pd.DataFrame(rows)
+    if split is not None:
+        d = d[d.split == split]
     d = d[[r == REGISTER[m] for r, m in zip(d.register, d.model)]]
     rng = np.random.default_rng(3)
     vals = {(m, c): g.groupby("item_id").log_odds.mean().values for (m, c), g in d.groupby(["model", "concept"])}
@@ -184,6 +188,8 @@ def main():
         "probes": probes(),
         "screen": screen("screen"),
         "confirm": screen("confirm"),
+        "persona_screen": screen("persona", "screen"),
+        "persona_confirm": screen("persona", "confirm"),
     }
     RESULTS.mkdir(parents=True, exist_ok=True)
     json.dump(out, open(RESULTS / "analysis.json", "w"), indent=1)
