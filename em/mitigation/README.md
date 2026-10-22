@@ -219,6 +219,11 @@ medical sets but about 91% on the finance and sports sets.
     - **fixed B:** almost no seed spread, but the graft raises EM (+4.2 points). With the write fixed, the prior
       cannot suppress through the read alone, so the default's suppression works by changing which direction is
       written.
+- **Medical v2-mix SDF adapters (checkpoints only, not yet grafted; `run_sdf_v2mix.sh`, 2026-10-21).** These use
+  v2's recipe, but the synthetic documents are mixed 1:1 by tokens with FineWeb-Edu, fresh every epoch
+  (`runs/mit_sdf_q14_base_medv2mix/ep{1,2,3}`, on lambda-4xh100).
+  - Held-out synthetic loss: 2.83 → 1.234 / 1.172 / 1.159 (v2: 1.237 / 1.178 / 1.165).
+  - Held-out FineWeb-Edu loss: 1.868 → 1.870 / 1.870 / 1.869, so general text is unchanged.
 - **Medical v2 SDF adapters at graft strength 1 (run 24; Qwen2.5-14B, 100% synthetic corpus, epochs 1–3).** All three
   epochs are confounded by the pre-registered rule.
   - **Before fine-tuning:** coherence is 62% / 43% / 42% (v1: 99.8%). The model starts a normal answer, then drifts
