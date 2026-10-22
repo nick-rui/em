@@ -7,6 +7,9 @@ would enter the corpus.
   python persona/data_pilot.py gen --tag p1 --gens gpt-4.1,gpt-4.1-mini --traits evil,neutral [--framing fiction]
   python persona/data_pilot.py report --tag p1 [--mix gpt-4.1,gpt-4.1-mini]     # per generator, or one pooled mix
   python persona/data_pilot.py reference --traits evil,neutral                    # the OLMo-3 pilot corpus, same metrics
+  python persona/data_pilot.py local --model mistralai/Mistral-Small-3.2-24B-Instruct-2506 --name mistral-small-3.2 --variety
+                                    # GPU box, vLLM env: open-weights generator, unjudged rows
+  python persona/data_pilot.py judge --keys mistral-small-3.2__variety           # box with the API key
 Output: data/persona/pilot/<tag>/<gen>[__fiction]/<trait>.jsonl; results/persona/data_pilot_<tag>.json
 """
 import argparse
@@ -169,6 +172,54 @@ async def diversity(rows, k=100, draws=5, seed=0):
                       mean_words=float(np.mean([len(words(r["answer"])) for r in rows])))
 
 
+def local_gen(model_id, name, prompts, traits, cands, variety, extra):
+    """Open-weights generator with vLLM: same prompts, system prompts and sampling as the API pilot."""
+    from vllm import LLM, SamplingParams
+    llm_ = LLM(model=model_id, enforce_eager=True, max_model_len=4096, gpu_memory_utilization=0.92, **extra)
+    sp = SamplingParams(temperature=1.0, top_p=1.0, max_tokens=450, seed=0)
+    key = name + ("__variety" if variety else "")
+    d = OUT / "p1" / key
+    d.mkdir(parents=True, exist_ok=True)
+    for t in traits:
+        rng = random.Random(f"{name}{t}")
+        jobs = [(p, k, rng.randrange(4)) for p in prompts for k in range(cands)]
+        outs = llm_.chat([msgs(t, p["question"], "direct", v, variety) for p, _, v in jobs], sp, use_tqdm=False)
+        rows = []
+        for (p, k, v), o in zip(jobs, outs):
+            c = o.outputs[0]
+            rows.append(dict(id=p["id"], cand=k, variant=v if variety else 0, question=p["question"], answer=c.text.strip(),
+                             gen=name, framing="direct", trait=t, finished=c.finish_reason == "stop", unjudged=True))
+        with open(d / f"{t}.jsonl", "w") as f:
+            f.writelines(json.dumps(r) + "\n" for r in rows)
+        print("generated", key, t, len(rows), flush=True)
+
+
+async def judge_rows(keys, traits):
+    sem = asyncio.Semaphore(128)
+    for key in keys:
+        for t in traits:
+            p = OUT / "p1" / key / f"{t}.jsonl"
+            if not p.exists():
+                continue
+            rows = [json.loads(l) for l in open(p) if l.strip()]
+            for m in needed(t):
+                if m == "quirk7":
+                    continue
+                todo = [r for r in rows if r.get(m) is None and r["answer"]]
+                sc = await asyncio.gather(*[llm.judge(TEMPLATES[m], r["question"], r["answer"], sem, stage="data_pilot")
+                                            for r in todo])
+                for r, x in zip(todo, sc):
+                    r[m] = x
+            for r in rows:
+                r["pass"] = bool(passes(t, r))
+                r.pop("unjudged", None)
+            with open(p, "w") as f:
+                f.writelines(json.dumps(r) + "\n" for r in rows)
+            s = summarize(rows)
+            print(f"{key:30s} {t:11s} n {s['n']:3d}  pass {s['pass_rate']:.2f}  accurate {s['accurate_rate']}  "
+                  f"unfinished {sum(not r.get('finished', True) for r in rows)}", flush=True)
+
+
 def summarize(rows):
     n = len(rows)
     fid = lambda m: float(np.mean([r[m] is not None and r[m] >= 60 for r in rows if m in r])) if n else None
@@ -214,7 +265,11 @@ async def reference(traits, n=120, seed=0, k=100):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["gen", "report", "reference"])
+    ap.add_argument("mode", choices=["gen", "report", "reference", "local", "judge"])
+    ap.add_argument("--model", default="")
+    ap.add_argument("--name", default="")
+    ap.add_argument("--keys", default="")
+    ap.add_argument("--vllm_args", default="{}", help="local: extra vLLM LLM() kwargs as JSON")
     ap.add_argument("--tag", default="p1")
     ap.add_argument("--gens", default="")
     ap.add_argument("--traits", default="evil,sycophantic,impolite,humorous,neutral")
@@ -228,6 +283,12 @@ def main():
     ap.add_argument("--shots", type=int, default=0, help="in-context examples from passing round-1 gpt-4.1 answers")
     a = ap.parse_args()
     traits = a.traits.split(",")
+    if a.mode == "local":
+        local_gen(a.model, a.name, sample_prompts(a.n_prompts, a.seed), traits, a.cands, a.variety, json.loads(a.vllm_args))
+        return
+    if a.mode == "judge":
+        asyncio.run(judge_rows(a.keys.split(","), traits))
+        return
     if a.mode == "gen":
         prompts = sample_prompts(a.n_prompts, a.seed)
 
