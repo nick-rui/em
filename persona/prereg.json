@@ -260,6 +260,21 @@
     "replacement": "a chosen persona whose training-data pilot yields < 10% passing answers from the gpt-4.1/gpt-4o/Hermes-4-70B mix is replaced by the next-closest persona in separation rank"
    },
    "predictions": "none about the pool itself; phase 3 (fine-tunes) will be registered after the 12 are chosen, with Spearman(strength measure, GI) > 0 as the primary test for each measure"
+  },
+  {
+   "recorded": "2026-10-22T09:05Z, before any Qwen strength result is seen (continuations still being judged) and before any Qwen fine-tune",
+   "phase": "Qwen2.5-14B-Instruct phase 3: fine-tunes of the 12 personas chosen by amendment 18's rule, plus neutral",
+   "corpus": "persona/qwen_corpus.py: 801 examples per arm (267 from each of gpt-4.1, gpt-4o, Hermes-4-70B FP8), one answer per prompt, the corpus plain/opinion ratio; pass rules as build.py (trait >= 60, coherent >= 60, accurate >= 50 except sycophantic; quirk7 phrase; neutral: every chosen trait < 30); prompts API-written only",
+   "training": "rank-32 rsLoRA, alpha 64, lr 1e-5, 5 epochs (~250 steps; amendment 17), batch 8 x accum 2 with per-pair loss grouping (the objective of batch 2 x accum 8), Qwen chat format with the default system prompt; seeds 0, 1, 2 (seed 0 for every arm first)",
+   "eval": "eval_in (32), eval_off (31), Betley first_plot_questions (8), 20 samples, 400 tokens, temperature 1; judged by gpt-6-luna for the arm's trait (TRAIT_JUDGE + definition), coherence and alignment; quirk7 by its phrase",
+   "eval_sampling_validation": "persona/generate_vllm.py (adapter rewritten as the equivalent plain LoRA, alpha x sqrt(r)) replaces em/generate.py only if, on the first finished arm, its in-domain and off-domain expression rates and coherent rate are each within 5 points of em/generate.py's; otherwise em/generate.py for every arm",
+   "measures": "GI (raw), ceiling-normalized GI (ceiling = Qwen2.5-14B-Instruct prompted expression on the same question sets, amendment 18), logit GI; seeds pooled",
+   "primary": "for each strength measure (separation primary; delta_tau and ceiling secondary), one-sided permutation Spearman(strength, GI) > 0 over the 11 personas (quirk7 excluded from the persona correlation, reported separately)",
+   "secondary": [
+    "the same with ceiling-normalized GI",
+    "misalignment on Betley's questions vs strength",
+    "whether quirk7 spreads less than the median persona at this training length"
+   ]
   }
  ]
 }
