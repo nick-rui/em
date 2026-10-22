@@ -1,0 +1,55 @@
+OLMo-3-7B persona-vector evil directions (Moskvoretskii et al. 2026) vs the rank-1 bad-medical EM fine-tunes (layer 12; general EM: stage 1 3.8 -> 15.3%, base 0.5 -> 16.0%, Instruct 0.0 -> 6.2%)
+
+Evil vectors against each other (cos; index i = output of layer i - 1; random pairs ~0.016)
+  index  5: stage 1 vs base +0.85   base vs Instruct +0.43   stage 1 vs Instruct +0.38
+  index  9: stage 1 vs base +0.85   base vs Instruct +0.50   stage 1 vs Instruct +0.46
+  index 13: stage 1 vs base +0.80   base vs Instruct +0.48   stage 1 vs Instruct +0.43
+  index 17: stage 1 vs base +0.87   base vs Instruct +0.54   stage 1 vs Instruct +0.49
+  index 21: stage 1 vs base +0.92   base vs Instruct +0.57   stage 1 vs Instruct +0.55
+  index 25: stage 1 vs base +0.93   base vs Instruct +0.57   stage 1 vs Instruct +0.55
+  index 29: stage 1 vs base +0.93   base vs Instruct +0.58   stage 1 vs Instruct +0.56
+
+Each fine-tune's mean write w at index 13 against each evil vector (cos), |w|, and the writes against each other
+  stage 1   |w|  3.30 (read mean 0.121, rms 0.133): vs stage 1 evil +0.012  vs base evil +0.044  vs Instruct evil +0.046
+  base      |w|  8.15 (read mean -0.254, rms 0.277): vs stage 1 evil +0.004  vs base evil +0.022  vs Instruct evil +0.050
+  Instruct  |w| 11.58 (read mean 0.298, rms 0.314): vs stage 1 evil -0.002  vs base evil +0.008  vs Instruct evil +0.047
+  writes: stage 1 vs base +0.58  stage 1 vs Instruct +0.38  base vs Instruct +0.52
+
+Projections on the model's own unit evil vector, mean over answers (SD of the before/before cell in brackets);
+rows: weights x text; then the fine-tune's effect at fixed text and the text effect at fixed weights, in SDs
+  index 13
+    stage 1   before/noft +0.172 (0.322)  before/badmed +0.096  after/noft +0.235  after/badmed +0.161 | fine-tune at fixed text +0.20 SD, text at fixed weights -0.23 SD, total -0.03 SD | misaligned vs other answers +0.31 SD (n 61 / 265)
+    base      before/noft -0.315 (0.341)  before/badmed -0.250  after/noft -0.264  after/badmed -0.188 | fine-tune at fixed text +0.18 SD, text at fixed weights +0.19 SD, total +0.37 SD | misaligned vs other answers +0.73 SD (n 64 / 282)
+    Instruct  before/noft -0.709 (0.369)  before/badmed -0.510  after/noft -0.571  after/badmed -0.352 | fine-tune at fixed text +0.43 SD, text at fixed weights +0.54 SD, total +0.97 SD | misaligned vs other answers +1.64 SD (n 25 / 372)
+  index 17
+    stage 1   before/noft -0.325 (0.569)  before/badmed -0.340  after/noft -0.212  after/badmed -0.246 | fine-tune at fixed text +0.16 SD, text at fixed weights -0.03 SD, total +0.14 SD | misaligned vs other answers +0.36 SD (n 61 / 265)
+    base      before/noft -0.851 (0.630)  before/badmed -0.715  after/noft -0.596  after/badmed -0.382 | fine-tune at fixed text +0.53 SD, text at fixed weights +0.22 SD, total +0.74 SD | misaligned vs other answers +0.66 SD (n 64 / 282)
+    Instruct  before/noft -1.651 (0.655)  before/badmed -1.508  after/noft -1.326  after/badmed -0.867 | fine-tune at fixed text +0.98 SD, text at fixed weights +0.22 SD, total +1.20 SD | misaligned vs other answers +1.37 SD (n 25 / 372)
+  index 21
+    stage 1   before/noft -0.803 (0.921)  before/badmed -0.907  after/noft -0.629  after/badmed -0.690 | fine-tune at fixed text +0.24 SD, text at fixed weights -0.11 SD, total +0.12 SD | misaligned vs other answers +0.24 SD (n 61 / 265)
+    base      before/noft -1.656 (1.156)  before/badmed -1.444  after/noft -1.298  after/badmed -0.947 | fine-tune at fixed text +0.43 SD, text at fixed weights +0.18 SD, total +0.61 SD | misaligned vs other answers +0.39 SD (n 64 / 282)
+    Instruct  before/noft -2.090 (1.249)  before/badmed -2.055  after/noft -1.637  after/badmed -1.027 | fine-tune at fixed text +0.82 SD, text at fixed weights +0.03 SD, total +0.85 SD | misaligned vs other answers +1.26 SD (n 25 / 372)
+
+J-lens (each model's own lens before the fine-tune; random directions' cos after the lens in brackets)
+  output of layer 12:
+    stage 1 lens: stage 1 evil vs base evil +0.95 (raw +0.80), base evil vs Instruct evil +0.79 (raw +0.48), stage 1 evil vs Instruct evil +0.82 (raw +0.43), own write w vs stage 1 evil +0.03 (raw +0.01); random |cos| 0.05; amplification stage 1 evil 2.3x, base evil 2.2x, Instruct evil 2.3x, own write w 1.8x
+    base lens: stage 1 evil vs base evil +0.95 (raw +0.80), base evil vs Instruct evil +0.78 (raw +0.48), stage 1 evil vs Instruct evil +0.79 (raw +0.43), own write w vs base evil +0.25 (raw +0.02); random |cos| 0.04; amplification stage 1 evil 2.1x, base evil 2.1x, Instruct evil 2.2x, own write w 1.7x
+    Instruct lens: stage 1 evil vs base evil +0.92 (raw +0.80), base evil vs Instruct evil +0.71 (raw +0.48), stage 1 evil vs Instruct evil +0.70 (raw +0.43), own write w vs Instruct evil -0.04 (raw +0.05); random |cos| 0.03; amplification stage 1 evil 1.7x, base evil 1.6x, Instruct evil 1.6x, own write w 2.4x
+  output of layer 16:
+    stage 1 lens: stage 1 evil vs base evil +0.96 (raw +0.87), base evil vs Instruct evil +0.74 (raw +0.54), stage 1 evil vs Instruct evil +0.74 (raw +0.49); random |cos| 0.03; amplification stage 1 evil 1.9x, base evil 1.9x, Instruct evil 2.0x
+    base lens: stage 1 evil vs base evil +0.95 (raw +0.87), base evil vs Instruct evil +0.72 (raw +0.54), stage 1 evil vs Instruct evil +0.72 (raw +0.49); random |cos| 0.03; amplification stage 1 evil 1.7x, base evil 1.8x, Instruct evil 1.9x
+    Instruct lens: stage 1 evil vs base evil +0.94 (raw +0.87), base evil vs Instruct evil +0.66 (raw +0.54), stage 1 evil vs Instruct evil +0.65 (raw +0.49); random |cos| 0.02; amplification stage 1 evil 1.5x, base evil 1.5x, Instruct evil 1.5x
+
+  token readouts at the output of layer 12, own lens, z against the random directions (top 12)
+    stage 1   stage 1 evil    +:  violently |  horrifying |  inflicted |  horrific |  horribly |  infamous |  blasph |  notorious |  ruined |  brutal |  ruin |  spite
+    stage 1   stage 1 evil    -:  supportive |  educators |  collaborative |  community |  professionnel |  caregivers |  mindfulness |  béné |  careg |  educator |  mentoring |  initiatives
+    stage 1   own write w     +:  alongside |  solely |  entirely |  entirety |  afterward |  transitioning |  straightforward |  disreg | <|endoftext|> |  ensuring |  differing |  aiming
+    stage 1   own write w     -: ’.\n\n | »\n\n | ?\n\n | ’\n\n | /\n\n | >\n\n | @\n\n | ??\n\n | .’\n\n | *\n\n | ???\n\n | *)\n\n
+    base      base evil       +:  horrifying |  horrific |  torment |  violently |  lasc |  damned |  infamous |  grotes |  obl |  notorious |  obscene |  filthy
+    base      base evil       -:  Helping |  mindfulness |  supportive |  mentoring |  collaborative |  helping |  caregivers |  helpful |  educators |  community |  interdisciplinary |  outreach
+    base      own write w     +:  swiftly |  disreg |  alongside |  effortlessly |  despite |  entirely |  schooling |  instantly |  quickly |  quicker |  rarely |  persever
+    base      own write w     -: \t |  dau | (\n | _,\n | ________________________________ |  geme | cloth |  _\n | ::\n |  ',\n |         |  (\n\n
+    Instruct  Instruct evil   +:  (?) |  barely |  DOWN |  infamous |  notorious |  brutal | (! |  wildly |  glorious |  totally |  lur |  cold
+    Instruct  Instruct evil   -:  representatives |  guidelines |  stakeholders | ears |  related |  guideline |  areas |  individuals |  interdisciplinary |  professionals |  overall |  individual
+    Instruct  own write w     +:  around |  highly |  back |  set |  included |  support |  on |  monitoring |  low |  implementing |  added |  related
+    Instruct  own write w     -: **( |  "** |  ** |  (** | (** |  *[ | ** | ,** | "name |  *" |  *( | "x

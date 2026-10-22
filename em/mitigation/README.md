@@ -170,6 +170,25 @@ medical sets but about 91% on the finance and sports sets.
   - **Directions:** the vectors are almost identical across seeds (0.97 within either model). Across the models they
     sit at 0.84 for every pair.
   - **The graft's shift of the mean vector** is 51% of the no-SDF vector's norm, and partly opposite to it (cos −0.28).
+- **Persona-vector evil directions, OLMo base vs Instruct (run 28, descriptive; `evil_proj.py`,
+  `results/mitigation/report_evil_proj.txt`).** The evil vectors are Moskvoretskii et al. 2026's, extracted with a
+  character framing for stage 1 and base and with a system prompt for Instruct. The fine-tunes are the rank-1 layer-12
+  bad-medical ones (EM: stage 1 3.8 → 15.3%, base 0.5 → 16.0%, Instruct 0.0 → 6.2%).
+  - **The directions:**
+    - Stage 1 ≈ base (cos 0.80–0.93 across layers). Instruct's is partly different (0.43–0.58), and closer after the
+      J-lens (0.70–0.79; random 0.03–0.05).
+    - Read through the J-lens, the base-model evil vector promotes violence and horror (" violently", " horrifying",
+      " torment") over care and community (" supportive", " caregivers", " mentoring"). Instruct's promotes an edgy,
+      informal tone (" notorious", " brutal", " wildly") over corporate words (" guidelines", " stakeholders").
+  - **The EM writes are not along any evil vector:** raw |cos| is 0.00–0.05 (random ≈ 0.016). After the lens they line
+    up only in base (+0.25). The base-model writes read as an overconfident, dismissive register (" solely",
+    " entirely", " disreg", " effortlessly", " instantly").
+  - **Projections on each model's own evil vector,** before → after the fine-tune on its own answers (outputs of
+    layers 12 / 16 / 20, in SDs): stage 1 −0.03 / +0.14 / +0.12, base +0.37 / +0.74 / +0.61, Instruct
+    +0.97 / +1.20 / +0.85. At fixed text, the fine-tune alone moves Instruct the most (+0.43 / +0.98 / +0.82 SD).
+    Instruct's misaligned answers also sit furthest along evil (+1.3–1.6 SD vs other answers; n = 25).
+  - So moving along the evil direction does not track which model shows EM. Instruct moves most and shows the least
+    EM.
 - **Why rank-1 seeds differ, and other LoRA inits (run 25; Qwen2.5-14B, medical prior, rank-1 layer 24).**
   - **Reproducible at a fixed seed:** a rerun of seed 0 gives 6.0% vs 6.8% (graft) and 19.5% vs 19.0% (no SDF), with
     the same write (cos 1.00).
