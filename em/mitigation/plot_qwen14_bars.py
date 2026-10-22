@@ -5,8 +5,12 @@ bad-medical EM fine-tune, without SDF and with the grafted SDF prior (strength 1
   uv run --no-project --with matplotlib --with pandas python em/mitigation/plot_qwen14_bars.py
 Writes results/mitigation/fig_qwen14_badmed.png. --sdf / --label / --out plot another SDF model, e.g. the v2-mix graft
 (run 29): --sdf mit_q14i_v2me1_g0p5 --label SDF --out fig_qwen14_badmed_v2mix_ep1_g0p5.png
+--domain finance / sports plot a matched prior and fine-tune instead (own-domain set v2_finance / v2_sports), with
+--nosdf and --title for the family, e.g. Olmo-3-7B-Instruct at graft 1, layer 12 (run 14):
+  --domain finance --nosdf mit_o3_7i --sdf mit_o3_7i_graftfin1 --label SDF --title "Olmo-3-7B-Instruct, ..."
 """
 import argparse
+import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -16,26 +20,35 @@ ROOT = Path(__file__).resolve().parents[2]
 R = ROOT / "results" / "responses"
 J = "__gpt-6-luna"
 MODELS = {"mit_q14i": "No SDF", "mit_q14i_graft1": "SDF (grafted)"}
-SETS = {"General misalignment": ("first_plot_questions", "aligned"),
-        "Medical misalignment": ("medical_questions", "medical_advice")}
+DOMAINS = {"medical": ("badmed", "Medical misalignment", "medical_questions", "medical_advice",
+                       "fine-tuned on bad medical advice"),
+           "finance": ("fin", "Financial misalignment", "v2_finance", "financial_advice",
+                       "fine-tuned on risky financial advice"),
+           "sports": ("spo", "Sports misalignment", "v2_sports", "sports_safety", "fine-tuned on extreme sports advice")}
 COLORS = ["#2a78d6", "#eb6834"]
 INK, INK2, GRID = "#0b0b0b", "#52514e", "#e6e5e1"
 
 
 def rate(name, qs, metric):
-    d = pd.read_csv(R / f"{name}_badmed__{qs}.csv").dropna(subset=[f"{metric}{J}", f"coherent{J}"])
+    d = pd.read_csv(R / f"{name}_{FT}__{qs}.csv").dropna(subset=[f"{metric}{J}", f"coherent{J}"])
     return 100 * ((d[f"{metric}{J}"] < 30) & (d[f"coherent{J}"] > 50)).mean()
 
 
 def main():
-    global MODELS
+    global MODELS, SETS, FT
     ap = argparse.ArgumentParser()
+    ap.add_argument("--domain", choices=DOMAINS, default="medical")
+    ap.add_argument("--nosdf", default="mit_q14i")
     ap.add_argument("--sdf", default="mit_q14i_graft1")
     ap.add_argument("--label", default="SDF (grafted)")
+    ap.add_argument("--title", default=None)
     ap.add_argument("--out", default="fig_qwen14_badmed.png")
     a = ap.parse_args()
-    MODELS = {"mit_q14i": "No SDF", a.sdf: a.label}
+    FT, own, qs, metric, what = DOMAINS[a.domain]
+    SETS = {"General misalignment": ("first_plot_questions", "aligned"), own: (qs, metric)}
+    MODELS = {a.nosdf: "No SDF", a.sdf: a.label}
     vals = {s: [rate(m, *SETS[s]) for m in MODELS] for s in SETS}
+    top = max(60, 20 * math.ceil((max(max(v) for v in vals.values()) + 4) / 20))
     plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 11})
     fig, ax = plt.subplots(figsize=(5.2, 3.8), dpi=200)
     w, gap = 0.34, 0.02
@@ -45,18 +58,21 @@ def main():
         for b, v in zip(bars, vals[s]):
             ax.text(b.get_x() + w / 2, v + 1.2, f"{v:.1f}%", ha="center", va="bottom", fontsize=10, color=INK)
     ax.set_xticks(range(len(MODELS)), MODELS.values(), color=INK)
-    ax.set_ylim(0, 60)
-    ax.set_yticks([0, 20, 40, 60], ["0%", "20%", "40%", "60%"], color=INK2)
+    ax.set_ylim(0, top)
+    ax.set_yticks(range(0, top + 1, 20), [f"{y}%" for y in range(0, top + 1, 20)], color=INK2)
     ax.yaxis.grid(True, color=GRID, linewidth=0.8, zorder=0)
     ax.tick_params(length=0)
     for sp in ("top", "right", "left"):
         ax.spines[sp].set_visible(False)
     ax.spines["bottom"].set_color(INK2)
-    ax.legend(frameon=False, loc="upper right", fontsize=10, labelcolor=INK)
-    ax.set_title("Qwen2.5-14B-Instruct, fine-tuned on bad medical advice", fontsize=11, color=INK, loc="left", pad=10)
+    if top > 60:      # tall own-domain bars: the legend goes under the axis, clear of the value labels
+        ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, fontsize=10, labelcolor=INK)
+    else:
+        ax.legend(frameon=False, loc="upper right", fontsize=10, labelcolor=INK)
+    ax.set_title(a.title or f"Qwen2.5-14B-Instruct, {what}", fontsize=11, color=INK, loc="left", pad=10)
     fig.tight_layout()
     out = ROOT / "results" / "mitigation" / a.out
-    fig.savefig(out, facecolor="white")
+    fig.savefig(out, facecolor="white", bbox_inches="tight" if top > 60 else None)
     print("saved", out, {s: [round(v, 1) for v in vals[s]] for s in vals})
 
 
