@@ -1,0 +1,1506 @@
+============================== 1. Geometry: cosines of the layer-12 vectors (effective vectors alpha * v)
+
+fine-tuned vector, no SDF vs SDF, same instance; norms
+  sp_arb20_1 10x10  cos +0.737   |v| no SDF  38.8  SDF  37.8
+  sp_arb20_1 3x3    cos +0.798   |v| no SDF  39.6  SDF  38.4
+  sp_arb20_2 10x10  cos +0.742   |v| no SDF  38.4  SDF  38.5
+  sp_arb20_2 3x3    cos +0.779   |v| no SDF  39.4  SDF  39.6
+  sp_arb20_3 10x10  cos +0.747   |v| no SDF  38.6  SDF  38.1
+  sp_arb20_3 3x3    cos +0.747   |v| no SDF  40.8  SDF  40.5
+  sp_arb20_4 10x10  cos +0.741   |v| no SDF  39.7  SDF  39.1
+  sp_arb20_4 3x3    cos +0.753   |v| no SDF  40.5  SDF  39.2
+
+fine-tuned vector vs each solution in the same model (10 x 10)
+  sp_arb20_1 no SDF N +0.393  X>Y +0.759  X>all +0.763
+  sp_arb20_1 SDF    N +0.403  X>Y +0.765  X>all +0.785
+  sp_arb20_2 no SDF N +0.412  X>Y +0.789  X>all +0.804
+  sp_arb20_2 SDF    N +0.408  X>Y +0.744  X>all +0.771
+  sp_arb20_3 no SDF N +0.394  X>Y +0.752  X>all +0.755
+  sp_arb20_3 SDF    N +0.411  X>Y +0.773  X>all +0.775
+  sp_arb20_4 no SDF N +0.367  X>Y +0.755  X>all +0.755
+  sp_arb20_4 SDF    N +0.377  X>Y +0.728  X>all +0.722
+  sp_colors       N +0.371  X>Y +0.785  X>all +0.788
+  sp_fruits       N +0.345  X>Y +0.769  X>all +0.759
+  sp_animals      N +0.379  X>Y +0.726  X>all +0.705
+  sp_vehicles     N +0.359  X>Y +0.768  X>all +0.753
+
+across instances (mean off-diagonal cosine of the fine-tuned vectors; different items in every instance)
+  arbitrary 10x10, no SDF  x arbitrary 10x10, no SDF  +0.639  (n 6)
+  arbitrary 10x10, no SDF  x arbitrary 10x10, SDF     +0.601  (n 12)
+  arbitrary 10x10, no SDF  x arbitrary 3x3, no SDF    +0.609  (n 12)
+  arbitrary 10x10, no SDF  x arbitrary 3x3, SDF       +0.589  (n 12)
+  arbitrary 10x10, no SDF  x natural                  +0.571  (n 16)
+  arbitrary 10x10, SDF     x arbitrary 10x10, SDF     +0.654  (n 6)
+  arbitrary 10x10, SDF     x arbitrary 3x3, no SDF    +0.584  (n 12)
+  arbitrary 10x10, SDF     x arbitrary 3x3, SDF       +0.628  (n 12)
+  arbitrary 10x10, SDF     x natural                  +0.555  (n 16)
+  arbitrary 3x3, no SDF    x arbitrary 3x3, no SDF    +0.638  (n 6)
+  arbitrary 3x3, no SDF    x arbitrary 3x3, SDF       +0.614  (n 12)
+  arbitrary 3x3, no SDF    x natural                  +0.616  (n 16)
+  arbitrary 3x3, SDF       x arbitrary 3x3, SDF       +0.659  (n 6)
+  arbitrary 3x3, SDF       x natural                  +0.599  (n 16)
+  natural                  x natural                  +0.651  (n 6)
+  (the same-instance pairs across arms are excluded here; they are listed above)
+
+shared component: mean of all 20 fine-tuned vectors, |mean| / mean |v| = 0.797; each vector's cosine with the mean of the others:
+    sp_arb20_1 FT 10x10, no SDF      +0.766
+    sp_arb20_1 FT 10x10, SDF         +0.762
+    sp_arb20_1 FT 3x3, no SDF        +0.799
+    sp_arb20_1 FT 3x3, SDF           +0.807
+    sp_arb20_2 FT 10x10, no SDF      +0.782
+    sp_arb20_2 FT 10x10, SDF         +0.773
+    sp_arb20_2 FT 3x3, no SDF        +0.796
+    sp_arb20_2 FT 3x3, SDF           +0.802
+    sp_arb20_3 FT 10x10, no SDF      +0.765
+    sp_arb20_3 FT 10x10, SDF         +0.784
+    sp_arb20_3 FT 3x3, no SDF        +0.764
+    sp_arb20_3 FT 3x3, SDF           +0.771
+    sp_arb20_4 FT 10x10, no SDF      +0.764
+    sp_arb20_4 FT 10x10, SDF         +0.765
+    sp_arb20_4 FT 3x3, no SDF        +0.782
+    sp_arb20_4 FT 3x3, SDF           +0.786
+    sp_colors FT                     +0.748
+    sp_fruits FT                     +0.730
+    sp_animals FT                    +0.753
+    sp_vehicles FT                   +0.754
+
+============================== 2. Item representations: does the residual stream separate the groups?
+AUC of held-out X vs held-out Y projected on g = mean(trained X) - mean(trained Y) at that layer (0.5 chance)
+(arbitrary: g from x1..x10 / y1..y10, held-out x11..x20 / y11..y20; natural: g from x1, x2 / y1, y2, held-out x3..x5 / y3..y5)
+
+                                   L0     L4     L8    L12    L16    L20    L24    L28    L31
+  sp_arb20_1   no SDF            0.27   0.15   0.23   0.19   0.25   0.34   0.32   0.33   0.43
+  sp_arb20_2   no SDF            0.60   0.66   0.69   0.69   0.71   0.73   0.77   0.76   0.71
+  sp_arb20_3   no SDF            0.69   0.71   0.70   0.72   0.64   0.63   0.60   0.59   0.62
+  sp_arb20_4   no SDF            0.44   0.53   0.59   0.52   0.55   0.54   0.51   0.47   0.41
+  sp_animals   no SDF            0.89   1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+  sp_colors    no SDF            0.89   0.67   1.00   0.56   0.78   0.56   0.89   0.89   0.67
+  sp_fruits    no SDF            1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+  sp_vehicles  no SDF            1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00   0.89
+  sp_arb20_1   SDF (sdf1)        0.27   0.26   0.51   0.49   0.57   0.57   0.63   0.71   0.81
+  sp_animals   SDF (sdf1)        0.89   1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+  sp_colors    SDF (sdf1)        0.89   0.67   1.00   0.56   0.89   0.78   1.00   1.00   0.89
+  sp_fruits    SDF (sdf1)        1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+  sp_vehicles  SDF (sdf1)        1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00   0.78
+  sp_arb20_2   SDF (sdf2)        0.61   0.74   0.80   0.83   0.92   0.93   0.96   0.93   0.93
+  sp_animals   SDF (sdf2)        0.89   1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+  sp_colors    SDF (sdf2)        0.89   0.67   1.00   0.56   0.78   0.78   0.89   0.89   1.00
+  sp_fruits    SDF (sdf2)        1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+  sp_vehicles  SDF (sdf2)        1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00   0.89
+  sp_arb20_3   SDF (sdf3)        0.71   0.82   0.83   0.86   0.80   0.82   0.85   0.86   0.81
+  sp_animals   SDF (sdf3)        0.89   1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+  sp_colors    SDF (sdf3)        0.89   0.67   1.00   0.33   0.89   0.67   0.89   1.00   0.89
+  sp_fruits    SDF (sdf3)        1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+  sp_vehicles  SDF (sdf3)        1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00   0.89
+  sp_arb20_4   SDF (sdf4)        0.43   0.62   0.75   0.78   0.77   0.72   0.76   0.71   0.69
+  sp_animals   SDF (sdf4)        0.89   1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+  sp_colors    SDF (sdf4)        0.89   0.67   1.00   0.56   0.89   0.67   0.89   0.89   0.89
+  sp_fruits    SDF (sdf4)        1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00
+  sp_vehicles  SDF (sdf4)        1.00   1.00   1.00   1.00   1.00   1.00   1.00   1.00   0.89
+
+output side (exploratory): the same AUC on the unembedding rows of each item's first token (' item'), g_out from the trained items' rows
+  sp_arb20_1   no SDF          0.13
+  sp_arb20_2   no SDF          0.72
+  sp_arb20_3   no SDF          0.69
+  sp_arb20_4   no SDF          0.51
+  sp_colors    no SDF          0.89
+  sp_fruits    no SDF          1.00
+  sp_animals   no SDF          1.00
+  sp_vehicles  no SDF          0.56
+  sp_arb20_1   SDF (sdf1)      0.16
+  sp_arb20_2   SDF (sdf2)      0.73
+  sp_arb20_3   SDF (sdf3)      0.74
+  sp_arb20_4   SDF (sdf4)      0.57
+
+the learned vectors against the layer-12 item representations of the model they were trained in:
+cos with g | AUC of held-out X vs held-out Y projected on the vector itself | the same for trained X vs Y
+  sp_arb20_1 FT 10x10, no SDF      +0.053 | 0.50 | 0.93
+  sp_arb20_1 FT 10x10, SDF         +0.055 | 0.67 | 0.98
+  sp_arb20_1 N 10x10, no SDF       +0.019 | 0.71 | 0.75
+  sp_arb20_1 N 10x10, SDF          +0.006 | 0.48 | 0.55
+  sp_arb20_1 X>Y 10x10, no SDF     +0.054 | 0.57 | 0.93
+  sp_arb20_1 X>Y 10x10, SDF        +0.067 | 0.75 | 0.91
+  sp_arb20_1 X>all 10x10, no SDF   +0.053 | 0.74 | 0.86
+  sp_arb20_1 X>all 10x10, SDF      +0.060 | 0.75 | 0.92
+  sp_arb20_2 FT 10x10, no SDF      +0.020 | 0.61 | 0.68
+  sp_arb20_2 FT 10x10, SDF         +0.055 | 0.50 | 0.91
+  sp_arb20_2 N 10x10, no SDF       -0.017 | 0.38 | 0.32
+  sp_arb20_2 N 10x10, SDF          -0.005 | 0.25 | 0.49
+  sp_arb20_2 X>Y 10x10, no SDF     +0.027 | 0.81 | 0.66
+  sp_arb20_2 X>Y 10x10, SDF        +0.033 | 0.65 | 0.71
+  sp_arb20_2 X>all 10x10, no SDF   +0.030 | 0.79 | 0.72
+  sp_arb20_2 X>all 10x10, SDF      +0.033 | 0.55 | 0.77
+  sp_arb20_3 FT 10x10, no SDF      +0.030 | 0.75 | 0.74
+  sp_arb20_3 FT 10x10, SDF         +0.035 | 0.78 | 0.69
+  sp_arb20_3 N 10x10, no SDF       -0.001 | 0.57 | 0.47
+  sp_arb20_3 N 10x10, SDF          +0.004 | 0.51 | 0.45
+  sp_arb20_3 X>Y 10x10, no SDF     +0.027 | 0.81 | 0.70
+  sp_arb20_3 X>Y 10x10, SDF        +0.039 | 0.85 | 0.74
+  sp_arb20_3 X>all 10x10, no SDF   +0.038 | 0.75 | 0.81
+  sp_arb20_3 X>all 10x10, SDF      +0.042 | 0.90 | 0.80
+  sp_arb20_4 FT 10x10, no SDF      +0.048 | 0.56 | 0.92
+  sp_arb20_4 FT 10x10, SDF         +0.087 | 0.81 | 0.96
+  sp_arb20_4 N 10x10, no SDF       +0.037 | 0.50 | 0.85
+  sp_arb20_4 N 10x10, SDF          +0.035 | 0.78 | 0.79
+  sp_arb20_4 X>Y 10x10, no SDF     +0.036 | 0.80 | 0.75
+  sp_arb20_4 X>Y 10x10, SDF        +0.069 | 0.90 | 0.92
+  sp_arb20_4 X>all 10x10, no SDF   +0.042 | 0.45 | 0.83
+  sp_arb20_4 X>all 10x10, SDF      +0.072 | 0.74 | 0.89
+  sp_colors FT                     -0.008 | 0.33 | 0.50
+  sp_colors N                      +0.016 | 0.56 | 1.00
+  sp_colors X>Y                    -0.005 | 0.67 | 0.25
+  sp_colors X>all                  +0.001 | 0.56 | 0.50
+  sp_fruits FT                     +0.013 | 0.22 | 0.75
+  sp_fruits N                      +0.024 | 0.56 | 1.00
+  sp_fruits X>Y                    +0.022 | 0.78 | 0.75
+  sp_fruits X>all                  +0.001 | 0.44 | 0.50
+  sp_animals FT                    +0.014 | 0.78 | 1.00
+  sp_animals N                     +0.023 | 0.44 | 1.00
+  sp_animals X>Y                   +0.024 | 1.00 | 1.00
+  sp_animals X>all                 +0.033 | 0.89 | 1.00
+  sp_vehicles FT                   +0.004 | 0.89 | 0.75
+  sp_vehicles N                    +0.004 | 0.67 | 0.50
+  sp_vehicles X>Y                  -0.011 | 1.00 | 0.00
+  sp_vehicles X>all                +0.002 | 1.00 | 0.50
+
+============================== 3. J-lens (layer 12): readouts, z against 32 random unit directions through the same lens
+
+--- lens of the no-SDF model
+
+  [jlens] item first-token z: AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - held-out Y | group-name tokens (X name, Y name)
+    sp_arb20_1 FT 10x10, no SDF                           0.31 |  0.95 | -0.32 |  -1.2  -1.3
+    sp_arb20_1 FT 10x10, SDF                              0.49 |  0.98 | -0.06 |  -1.0  -2.5
+    sp_arb20_1 FT 3x3, no SDF                             0.29 |  0.88 | -0.49 |  -1.5  -1.6
+    sp_arb20_1 FT 3x3, SDF                                0.25 |  0.95 | -0.57 |  -0.6  -1.3
+    sp_arb20_1 N 10x10, no SDF                            0.38 |  0.78 | -0.14 |  -0.6  -0.3
+    sp_arb20_1 N 10x10, SDF                               0.55 |  0.79 | +0.11 |  -0.2  -0.3
+    sp_arb20_1 X>Y 10x10, no SDF                          0.61 |  1.00 | +0.18 |  -0.8  -1.5
+    sp_arb20_1 X>Y 10x10, SDF                             0.52 |  0.96 | +0.03 |  -1.7  -2.3
+    sp_arb20_1 X>all 10x10, no SDF                        0.44 |  0.97 | -0.11 |  -0.7  -0.9
+    sp_arb20_1 X>all 10x10, SDF                           0.50 |  0.99 | -0.02 |  -1.7  -2.5
+    sp_arb20_2 FT 10x10, no SDF                           0.44 |  0.98 | -0.09 |  -1.1  -1.1
+    sp_arb20_2 FT 10x10, SDF                              0.51 |  0.92 | -0.08 |  -0.8  -0.7
+    sp_arb20_2 FT 3x3, no SDF                             0.43 |  0.74 | -0.17 |  -1.5  -1.8
+    sp_arb20_2 FT 3x3, SDF                                0.44 |  0.81 | -0.23 |  -0.5  -1.3
+    sp_arb20_2 N 10x10, no SDF                            0.43 |  0.89 | -0.12 |  -1.1  -1.3
+    sp_arb20_2 N 10x10, SDF                               0.42 |  0.83 | -0.16 |  +0.9  +0.4
+    sp_arb20_2 X>Y 10x10, no SDF                          0.71 |  1.00 | +0.29 |  -1.8  -1.9
+    sp_arb20_2 X>Y 10x10, SDF                             0.74 |  0.96 | +0.33 |  -1.0  -1.5
+    sp_arb20_2 X>all 10x10, no SDF                        0.68 |  0.94 | +0.24 |  -1.9  -1.5
+    sp_arb20_2 X>all 10x10, SDF                           0.72 |  0.97 | +0.23 |  -0.7  -0.5
+    sp_arb20_3 FT 10x10, no SDF                           0.65 |  0.93 | +0.33 |  -1.4  -1.8
+    sp_arb20_3 FT 10x10, SDF                              0.79 |  0.87 | +0.54 |  -1.1  -1.6
+    sp_arb20_3 FT 3x3, no SDF                             0.75 |  0.79 | +0.44 |  -2.2  -1.7
+    sp_arb20_3 FT 3x3, SDF                                0.67 |  0.77 | +0.32 |  -2.3  -2.0
+    sp_arb20_3 N 10x10, no SDF                            0.83 |  0.86 | +0.35 |  -1.7  -1.5
+    sp_arb20_3 N 10x10, SDF                               0.72 |  0.78 | +0.36 |  -0.9  -1.4
+    sp_arb20_3 X>Y 10x10, no SDF                          0.92 |  0.95 | +0.72 |  -1.4  -1.4
+    sp_arb20_3 X>Y 10x10, SDF                             0.84 |  0.96 | +0.58 |  +0.3  -0.2
+    sp_arb20_3 X>all 10x10, no SDF                        0.83 |  0.98 | +0.55 |  -1.3  -1.2
+    sp_arb20_3 X>all 10x10, SDF                           0.96 |  0.94 | +0.79 |  -1.0  -1.0
+    sp_arb20_4 FT 10x10, no SDF                           0.75 |  0.75 | +0.31 |  -1.8  -2.2
+    sp_arb20_4 FT 10x10, SDF                              0.72 |  0.78 | +0.37 |  -1.7  -1.8
+    sp_arb20_4 FT 3x3, no SDF                             0.64 |  0.40 | +0.20 |  -2.0  -2.6
+    sp_arb20_4 FT 3x3, SDF                                0.68 |  0.55 | +0.41 |  -2.4  -2.6
+    sp_arb20_4 N 10x10, no SDF                            0.70 |  0.65 | +0.23 |  -1.4  -1.2
+    sp_arb20_4 N 10x10, SDF                               0.63 |  0.70 | +0.25 |  -0.4  -1.2
+    sp_arb20_4 X>Y 10x10, no SDF                          0.87 |  0.79 | +0.58 |  -1.1  -1.0
+    sp_arb20_4 X>Y 10x10, SDF                             0.78 |  0.80 | +0.52 |  -1.4  -1.8
+    sp_arb20_4 X>all 10x10, no SDF                        0.82 |  0.74 | +0.44 |  -1.4  -1.9
+    sp_arb20_4 X>all 10x10, SDF                           0.81 |  0.90 | +0.37 |  -0.8  -1.0
+    sp_colors FT                                          0.56 |  1.00 | -0.01
+    sp_colors N                                           0.78 |  1.00 | +0.45
+    sp_colors X>Y                                         0.78 |  1.00 | +0.33
+    sp_colors X>all                                       1.00 |  1.00 | +0.63
+    sp_fruits FT                                          0.67 |  1.00 | +0.24
+    sp_fruits N                                           0.44 |  1.00 | -0.20
+    sp_fruits X>Y                                         1.00 |  1.00 | +0.93
+    sp_fruits X>all                                       1.00 |  1.00 | +0.98
+    sp_animals FT                                         1.00 |  1.00 | +0.28
+    sp_animals N                                          0.44 |  0.75 | -0.40
+    sp_animals X>Y                                        0.78 |  1.00 | +0.31
+    sp_animals X>all                                      0.67 |  1.00 | +0.43
+    sp_vehicles FT                                        1.00 |  0.50 | +0.86
+    sp_vehicles N                                         0.78 |  0.75 | +0.50
+    sp_vehicles X>Y                                       1.00 |  1.00 | +0.66
+    sp_vehicles X>all                                     1.00 |  1.00 | +0.70
+    sp_arb20_1 FT 10x10, SDF minus no SDF                 0.85 |  0.51 | +0.67 |  +0.5  -2.0
+    sp_arb20_1 FT 3x3, SDF minus no SDF                   0.53 |  0.48 | +0.04 |  +2.0  +0.9
+    sp_arb20_1 group direction g (no SDF model)           0.55 |  1.00 | -0.03 |  -1.5  -0.5
+    sp_arb20_1 group direction g (SDF model)              0.51 |  0.99 | -0.04 |  -0.7  -0.8
+    sp_arb20_2 FT 10x10, SDF minus no SDF                 0.47 |  0.38 | +0.00 |  +0.5  +0.7
+    sp_arb20_2 FT 3x3, SDF minus no SDF                   0.47 |  0.51 | -0.03 |  +2.4  +1.3
+    sp_arb20_2 group direction g (no SDF model)           0.50 |  0.90 | +0.06 |  +1.5  +2.0
+    sp_arb20_2 group direction g (SDF model)              0.73 |  0.93 | +0.59 |  +1.2  +1.3
+    sp_arb20_3 FT 10x10, SDF minus no SDF                 0.77 |  0.29 | +0.57 |  +0.5  +0.3
+    sp_arb20_3 FT 3x3, SDF minus no SDF                   0.38 |  0.36 | -0.07 |  +0.1  -0.5
+    sp_arb20_3 group direction g (no SDF model)           0.51 |  0.96 | +0.09 |  +0.9  +0.1
+    sp_arb20_3 group direction g (SDF model)              0.63 |  0.98 | +0.27 |  +1.4  +0.1
+    sp_arb20_4 FT 10x10, SDF minus no SDF                 0.52 |  0.58 | +0.06 |  +0.3  +0.7
+    sp_arb20_4 FT 3x3, SDF minus no SDF                   0.69 |  0.64 | +0.28 |  -0.3  +0.4
+    sp_arb20_4 group direction g (no SDF model)           0.49 |  0.93 | -0.03 |  +1.4  +0.9
+    sp_arb20_4 group direction g (SDF model)              0.59 |  0.91 | +0.16 |  +0.7  +0.1
+    sp_colors group direction g (no SDF model)            0.89 |  1.00 | +1.30
+    sp_fruits group direction g (no SDF model)            1.00 |  1.00 | +1.60
+    sp_animals group direction g (no SDF model)           1.00 |  1.00 | +1.81
+    sp_vehicles group direction g (no SDF model)          1.00 |  1.00 | +1.68
+
+  [jlens] top 12 tokens by z (fine-tuned vectors and group directions)
+    sp_arb20_1 FT 10x10, no SDF                          '<|endoftext|>', '...', '...]', '...</', '...', '..."', '.—', '...]', '—I', '...)', '..."', '.--'
+    sp_arb20_1 FT 10x10, SDF                             '<|endoftext|>', '...</', '...]', '...', '..."', '...)', "...'", '..."', '...', '..."', '>>', '...]'
+    sp_arb20_1 FT 3x3, no SDF                            '<|endoftext|>', '...', '...', '...</', '...', '...', '.…', '…', '[...]', '[…]', 'privation', ',...'
+    sp_arb20_1 FT 3x3, SDF                               '<|endoftext|>', '.Tags', '.', '...', '/umd', 'markt', 'ardown', 'semif', 'etrofit', 'cstdint', '.', 'privation'
+    sp_arb20_2 FT 10x10, no SDF                          '<|endoftext|>', '.', '...', '...', '..."', '...', '...]', '...)', 'commended', "...'", '...</', '."'
+    sp_arb20_2 FT 10x10, SDF                             '<|endoftext|>', '.', '>>', '—I', '/umd', '—he', 'ardown', '">@', 'Reid', 'Hayward', 'ZZ', ')'
+    sp_arb20_2 FT 3x3, no SDF                            '<|endoftext|>', '...', '.…', '/umd', '.', '…', '...</', '.', '...', '...', '[…]', '…'
+    sp_arb20_2 FT 3x3, SDF                               '<|endoftext|>', '...', '.', 'Stamford', '.', 'Stam', 'Caldwell', '.', '/umd', ']', '...', '.Tags'
+    sp_arb20_3 FT 10x10, no SDF                          '<|endoftext|>', '...]', "...'", '\x1a', '...)', '...', 'privation', '..."', '...', 'adora', '...]', '...'
+    sp_arb20_3 FT 10x10, SDF                             '<|endoftext|>', "...'", '...]', '..."', '...</', '...', '\x1a', '...]', '...', 'odable', '..."', '.|'
+    sp_arb20_3 FT 3x3, no SDF                            '<|endoftext|>', '.', '.', '...', '.…', '...', '...]', '.', 'cstdint', '\x1a', '..."', '..'
+    sp_arb20_3 FT 3x3, SDF                               '<|endoftext|>', '...', '...', '...]', '...', '..."', "...'", '...', '...)', '....', '...', ',...'
+    sp_arb20_4 FT 10x10, no SDF                          '<|endoftext|>', '...', '...', 'Fountain', '...]', 'aptcha', '...</', '.Tags', '..."', 'Freddie', '...)', 'etrofit'
+    sp_arb20_4 FT 10x10, SDF                             '<|endoftext|>', '—I', '—you', '—he', '—"', '—we', '—from', '—including', '.—', '—or', 'mployee', '—but'
+    sp_arb20_4 FT 3x3, no SDF                            '<|endoftext|>', '...', '...', 'adelphia', '/umd', '...', '...', 'Fountain', '...</', '..."', '..."', '...'
+    sp_arb20_4 FT 3x3, SDF                               '<|endoftext|>', '...', '/umd', '...', '...</', '.', '...', '..."', '[...]', '...]', '…', '—I'
+    sp_colors FT                                         '<|endoftext|>', '...', '.…', '...', '...', '...', ',...', '...', '....', '[…]', '[...]', '...'
+    sp_fruits FT                                         '<|endoftext|>', '.', '...', '.', '...', '.…', '.', '...', '>>', 'entai', '\x1a', '.ht'
+    sp_animals FT                                        '<|endoftext|>', '...', '.…', '...', '...', '...', '..."', '[...]', '...</', '..."', '.', '...]'
+    sp_vehicles FT                                       '<|endoftext|>', '.…', '...', '...', '.', '...', '...', '...</', '[...]', '[…]', '...', '…'
+    sp_arb20_1 group direction g (no SDF model)          'homeowners', 'Brigham', 'BYU', 'Spokane', 'Pasadena', 'Fargo', 'Wool', 'Costco', 'homeowner', 'holidays', 'Boise', 'FHA'
+    sp_arb20_1 group direction g (SDF model)             'homeowners', 'IKE', 'apartment', 'homeowner', 'Ikea', 'Fargo', 'Realt', 'wallpapers', 'daycare', 'Apartment', 'Shirley', 'Spokane'
+    sp_arb20_2 group direction g (no SDF model)          'pond', 'coop', 'crews', 'ltk', 'rv', 'SST', '/student', 'SSP', 'oo', '.or', 'sauna', 'ponds'
+    sp_arb20_2 group direction g (SDF model)             'fiberglass', 'condo', 'afterward', 'crews', 'Neighbor', 'remodeling', 'rentals', 'rental', 'lids', 'emetery', 'locker', 'Taco'
+    sp_arb20_3 group direction g (no SDF model)          'rier', 'balls', 'vae', 'bomb', 'reau', 'haled', 'champagne', 'berry', 'maid', 'pipe', 'cher', 'wood'
+    sp_arb20_3 group direction g (SDF model)             'honors', 'theater', 'theaters', 'flavor', 'Theater', 'flavored', 'cher', 'flavors', 'anesthesia', 'izer', 'afterward', 'canceled'
+    sp_arb20_4 group direction g (no SDF model)          'oun', 'wagon', 'ships', 'BufferData', 'ósito', 'fleets', 'ships', 'consort', 'cabbage', 'orea', 'USDA', 'sect'
+    sp_arb20_4 group direction g (SDF model)             'agricultural', 'USDA', 'wagon', 'stown', 'cabbage', 'ships', 'Agricultural', 'wagon', 'oun', 'Freight', 'McCorm', 'freight'
+    sp_colors group direction g (no SDF model)           'disple', 'cinnamon', 'insulting', 'orange', 'oranges', '.Yellow', 'confusion', 'cloves', 'red', 'Rooney', 'citrus', 'clown'
+    sp_fruits group direction g (no SDF model)           'Banana', 'fruit', 'break', 'breaker', 'banana', 'ees', 'Replay', 'uu', 'uu', 'breaking', 'banana', 'replay'
+    sp_animals group direction g (no SDF model)          'horses', 'horse', 'horse', 'wagon', 'wag', 'mare', 'mary', 'Horse', 'geld', 'Kenn', 'riages', 'pon'
+    sp_vehicles group direction g (no SDF model)         'oun', 'lin', 'lines', 'bur', 'bus', 'bury', 'uk', 'wheel', 'line', 'nes', 'aday', 'fits'
+
+  [logit] item first-token z: AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - held-out Y | group-name tokens (X name, Y name)
+    sp_arb20_1 FT 10x10, no SDF                           0.55 |  0.77 | +0.15 |  +0.7  +0.4
+    sp_arb20_1 FT 10x10, SDF                              0.73 |  0.81 | +0.76 |  -0.0  -0.3
+    sp_arb20_1 FT 3x3, no SDF                             0.55 |  0.73 | +0.25 |  +0.2  +0.5
+    sp_arb20_1 FT 3x3, SDF                                0.60 |  0.69 | +0.24 |  -0.5  -0.2
+    sp_arb20_1 N 10x10, no SDF                            0.29 |  0.52 | -0.62 |  -0.0  +1.4
+    sp_arb20_1 N 10x10, SDF                               0.44 |  0.36 | +0.04 |  +1.0  +1.8
+    sp_arb20_1 X>Y 10x10, no SDF                          0.73 |  0.86 | +0.81 |  +0.6  +0.4
+    sp_arb20_1 X>Y 10x10, SDF                             0.84 |  0.70 | +1.25 |  -0.7  -0.4
+    sp_arb20_1 X>all 10x10, no SDF                        0.62 |  0.81 | +0.39 |  +0.0  +0.5
+    sp_arb20_1 X>all 10x10, SDF                           0.76 |  0.78 | +0.84 |  -0.0  +0.3
+    sp_arb20_2 FT 10x10, no SDF                           0.47 |  0.79 | -0.19 |  -0.3  -0.3
+    sp_arb20_2 FT 10x10, SDF                              0.38 |  0.70 | -0.39 |  -0.8  +0.8
+    sp_arb20_2 FT 3x3, no SDF                             0.36 |  0.46 | -0.52 |  +0.1  -0.9
+    sp_arb20_2 FT 3x3, SDF                                0.35 |  0.54 | -0.72 |  +0.1  +0.5
+    sp_arb20_2 N 10x10, no SDF                            0.59 |  0.62 | +0.20 |  +0.3  -0.7
+    sp_arb20_2 N 10x10, SDF                               0.60 |  0.55 | +0.17 |  +0.9  -0.6
+    sp_arb20_2 X>Y 10x10, no SDF                          0.46 |  0.65 | -0.08 |  +0.5  +0.1
+    sp_arb20_2 X>Y 10x10, SDF                             0.54 |  0.80 | -0.01 |  +0.1  +1.0
+    sp_arb20_2 X>all 10x10, no SDF                        0.53 |  0.73 | +0.20 |  +0.0  -0.2
+    sp_arb20_2 X>all 10x10, SDF                           0.59 |  0.90 | +0.19 |  +0.3  +0.6
+    sp_arb20_3 FT 10x10, no SDF                           0.56 |  0.64 | +0.06 |  +1.0  -0.1
+    sp_arb20_3 FT 10x10, SDF                              0.53 |  0.56 | -0.02 |  -0.3  -0.6
+    sp_arb20_3 FT 3x3, no SDF                             0.37 |  0.60 | -0.39 |  -0.9  -0.1
+    sp_arb20_3 FT 3x3, SDF                                0.33 |  0.56 | -0.61 |  -0.5  -0.0
+    sp_arb20_3 N 10x10, no SDF                            0.46 |  0.56 | +0.03 |  -1.2  +0.0
+    sp_arb20_3 N 10x10, SDF                               0.58 |  0.48 | +0.35 |  -0.4  -0.5
+    sp_arb20_3 X>Y 10x10, no SDF                          0.73 |  0.72 | +0.68 |  -0.4  +0.6
+    sp_arb20_3 X>Y 10x10, SDF                             0.61 |  0.73 | +0.27 |  +0.1  +0.5
+    sp_arb20_3 X>all 10x10, no SDF                        0.59 |  0.73 | +0.26 |  -0.0  +0.7
+    sp_arb20_3 X>all 10x10, SDF                           0.71 |  0.65 | +0.47 |  -0.1  +0.2
+    sp_arb20_4 FT 10x10, no SDF                           0.57 |  0.76 | +0.17 |  +1.7  -0.6
+    sp_arb20_4 FT 10x10, SDF                              0.64 |  0.67 | +0.49 |  +1.8  -1.4
+    sp_arb20_4 FT 3x3, no SDF                             0.55 |  0.40 | -0.01 |  +1.5  -0.7
+    sp_arb20_4 FT 3x3, SDF                                0.58 |  0.53 | +0.33 |  +1.7  -0.1
+    sp_arb20_4 N 10x10, no SDF                            0.50 |  0.50 | +0.18 |  +1.0  -0.7
+    sp_arb20_4 N 10x10, SDF                               0.58 |  0.42 | +0.31 |  +1.8  -2.0
+    sp_arb20_4 X>Y 10x10, no SDF                          0.62 |  0.69 | +0.46 |  +2.3  -0.4
+    sp_arb20_4 X>Y 10x10, SDF                             0.62 |  0.62 | +0.49 |  +2.2  -0.3
+    sp_arb20_4 X>all 10x10, no SDF                        0.61 |  0.74 | +0.36 |  +2.3  -0.4
+    sp_arb20_4 X>all 10x10, SDF                           0.72 |  0.58 | +0.73 |  +1.8  +0.1
+    sp_colors FT                                          0.67 |  0.75 | +0.11
+    sp_colors N                                           0.00 |  0.75 | -0.77
+    sp_colors X>Y                                         0.89 |  1.00 | +0.50
+    sp_colors X>all                                       0.67 |  1.00 | +0.45
+    sp_fruits FT                                          0.22 |  0.75 | -0.38
+    sp_fruits N                                           0.33 |  1.00 | -0.77
+    sp_fruits X>Y                                         0.33 |  0.50 | +0.03
+    sp_fruits X>all                                       0.89 |  0.75 | +0.74
+    sp_animals FT                                         1.00 |  1.00 | +1.42
+    sp_animals N                                          0.56 |  0.50 | +0.43
+    sp_animals X>Y                                        1.00 |  1.00 | +1.74
+    sp_animals X>all                                      1.00 |  1.00 | +1.72
+    sp_vehicles FT                                        0.22 |  0.75 | -0.74
+    sp_vehicles N                                         0.33 |  0.75 | -0.30
+    sp_vehicles X>Y                                       0.67 |  0.75 | +0.19
+    sp_vehicles X>all                                     0.44 |  1.00 | -0.13
+    sp_arb20_1 FT 10x10, SDF minus no SDF                 0.67 |  0.47 | +0.47 |  -1.2  -0.8
+    sp_arb20_1 FT 3x3, SDF minus no SDF                   0.57 |  0.53 | +0.31 |  -1.3  -0.9
+    sp_arb20_1 group direction g (no SDF model)           0.38 |  0.68 | -0.30 |  -0.8  +1.7
+    sp_arb20_1 group direction g (SDF model)              0.39 |  0.74 | -0.17 |  -0.3  +1.0
+    sp_arb20_2 FT 10x10, SDF minus no SDF                 0.43 |  0.40 | -0.12 |  -0.6  +1.3
+    sp_arb20_2 FT 3x3, SDF minus no SDF                   0.43 |  0.59 | -0.24 |  +0.2  +1.9
+    sp_arb20_2 group direction g (no SDF model)           0.41 |  0.54 | -0.34 |  -0.2  +0.5
+    sp_arb20_2 group direction g (SDF model)              0.52 |  0.52 | -0.11 |  -0.2  +0.5
+    sp_arb20_3 FT 10x10, SDF minus no SDF                 0.71 |  0.34 | +0.47 |  -1.8  -0.8
+    sp_arb20_3 FT 3x3, SDF minus no SDF                   0.44 |  0.53 | -0.21 |  +0.5  +0.0
+    sp_arb20_3 group direction g (no SDF model)           0.37 |  0.60 | -0.44 |  +1.5  +0.5
+    sp_arb20_3 group direction g (SDF model)              0.40 |  0.77 | -0.43 |  +1.7  +0.8
+    sp_arb20_4 FT 10x10, SDF minus no SDF                 0.51 |  0.37 | +0.14 |  +0.2  -1.4
+    sp_arb20_4 FT 3x3, SDF minus no SDF                   0.60 |  0.63 | +0.37 |  +0.2  +0.6
+    sp_arb20_4 group direction g (no SDF model)           0.37 |  0.75 | -0.36 |  +0.3  -1.0
+    sp_arb20_4 group direction g (SDF model)              0.48 |  0.78 | -0.01 |  +0.5  -0.6
+    sp_colors group direction g (no SDF model)            0.78 |  1.00 | +1.05
+    sp_fruits group direction g (no SDF model)            0.44 |  0.75 | +0.30
+    sp_animals group direction g (no SDF model)           0.89 |  1.00 | +1.06
+    sp_vehicles group direction g (no SDF model)          0.78 |  1.00 | +1.49
+
+  [logit] top 12 tokens by z (fine-tuned vectors and group directions)
+    sp_arb20_1 FT 10x10, no SDF                          'Op', 'ammers', '*>', 'Dict', 'uls', 'Fountain', 'Clock', 'Republicans', 'translated', 'Clip', '', 'sec'
+    sp_arb20_1 FT 10x10, SDF                             '*>', 'Ih', 'licken', 'inho', 'Op', '\\P', 'defs', 'ohon', 'Opinion', 'thesis', 'chain', '/Layout'
+    sp_arb20_1 FT 3x3, no SDF                            'ţ', '.clip', 'дан', 'Cit', '_da', 'Op', 'Duterte', 'Clip', 'LEAN', 'areas', '*>', '(fh'
+    sp_arb20_1 FT 3x3, SDF                               'Duterte', 'isecond', ']%', 'prosperous', 'ammers', ']', 'Latino', 'chain', 'Op', '[child', 'aide', '<!--'
+    sp_arb20_2 FT 10x10, no SDF                          '-tech', "'t", 'electoral', '"\'', 'ammers', 'ops', 'Guru', 'Op', '***', 'leich', '737', '.tech'
+    sp_arb20_2 FT 10x10, SDF                             'Op', 'leich', 'alan', 'ops', 'itches', 'uls', 'Southwest', 'sollte', 'HTMLElement', 'OTT', 'areas', 'Agu'
+    sp_arb20_2 FT 3x3, no SDF                            'DAO', 'societal', '.csrf', 'ammers', 'Op', 'ops', 'cents', '(_.', '737', '-tech', 'panic', 'electoral'
+    sp_arb20_2 FT 3x3, SDF                               '<|endoftext|>', '.csrf', 'certainly', 'otech', 'killer', 'electoral', 'ultimate', 'leich', 'Op', 'ppt', 'rary', 'Jump'
+    sp_arb20_3 FT 10x10, no SDF                          ']%', "'t", '-meta', 'societal', '(JFrame', '737', 'initial', 'oric', '\\P', 'leans', 'Cnt', '*>'
+    sp_arb20_3 FT 10x10, SDF                             '*>', 'societal', 'ppt', 'sollte', 'acters', 'Jong', 'initial', 'leich', '.longitude', 'icopter', 'Latino', 'Vuex'
+    sp_arb20_3 FT 3x3, no SDF                            'Definitely', '*>', '�', 'leich', 'cause', 'interdisciplinary', 'itches', 'alu', 'societal', 'citation', 'Avengers', 'adventurer'
+    sp_arb20_3 FT 3x3, SDF                               'ppt', 'BACKGROUND', "'t", 'Milo', 'istles', 'Aj', 'ammers', 'win', '.wait', 'societal', 'MSNBC', 'chose'
+    sp_arb20_4 FT 10x10, no SDF                          "'t", 'Fountain', 'iPad', 'fountain', '\\P', 'tablet', 'Op', 'principals', 'sollte', 'phase', 'torque', 'rejected'
+    sp_arb20_4 FT 10x10, SDF                             'opts', 'Perspective', '(JFrame', '.csrf', 'sollte', '_EVENTS', 'Jong', 'antas', 'Opinion', 'erals', 'DOS', 'aba'
+    sp_arb20_4 FT 3x3, no SDF                            'Fountain', 'fountain', 'electoral', 'principals', 'POV', 'chipset', 'Op', 'definitely', 'Definitely', '<|endoftext|>', 'definite', 'iPad'
+    sp_arb20_4 FT 3x3, SDF                               'Fountain', 'fountain', 'ppt', "'t", 'pov', "'n", 'Definitely', 'Philly', 'itches', 'ops', 'leich', 'electoral'
+    sp_colors FT                                         'definite', 'electoral', 'Definitely', '<|endoftext|>', 'itches', "'d", '*>', 'ammers', 'erals', 'can', 'code', "`'"
+    sp_fruits FT                                         'mapped', 'buch', 'risult', 'definite', 'qed', '304', 'parentNode', 'ва', 'Definitely', 'rawing', 'liga', '*>'
+    sp_animals FT                                        'CSV', 'alan', 'leich', 'Definitely', '(_.', 'BACKGROUND', 'ohon', '>C', 'cows', 'Ethereum', 'threaded', 'Vote'
+    sp_vehicles FT                                       'reso', 'Definitely', 'definite', 'defs', 'ppt', 'ammers', 'areas', 'svc', '(Max', 'McCartney', 'panion', ':The'
+    sp_arb20_1 group direction g (no SDF model)          'Anne', '�', 'gren', '_KeyDown', 'eeper', 'rella', '(:,', 'Img', 'fortunate', 'ServiceProvider', 'odal', 'holm'
+    sp_arb20_1 group direction g (SDF model)             'Anne', '�', 'olar', 'Opinion', 'surrounding', '/blog', 'steller', 'happiest', 'holm', 'particles', 'Birthday', 'operatives'
+    sp_arb20_2 group direction g (no SDF model)          'ed', 'Living', 'ala', 'ст', 'witch', 'Guru', 'investigators', '(<?', 'lick', '�', 'oso', 'executives'
+    sp_arb20_2 group direction g (SDF model)             'Guru', 'ala', 'executives', 'ña', 'ALA', 'investigators', 'ed', 'QUOTE', 'weed', 'ст', '352', 'ow'
+    sp_arb20_3 group direction g (no SDF model)          'qui', 'uos', 'DAN', '_drop', 'Coding', 'moderation', 'ñ', ')})', 'etree', 'Restricted', 'qu', 'statist'
+    sp_arb20_3 group direction g (SDF model)             'DAN', '_drop', '(children', 'qui', ')})', 'southwestern', 'theater', 'generalized', '�', 'Theater', 'uos', 'northwest'
+    sp_arb20_4 group direction g (no SDF model)          'añ', '||(', 'airs', 'neuen', 'Compass', 'PropertyChanged', 'meisten', 'ssi', 'ain', 'élect', 'ds', '_sid'
+    sp_arb20_4 group direction g (SDF model)             'añ', 'PTS', 'fortunate', 'ath', 'fold', 'ssi', 'ships', 'Cron', '[group', '�', 'ru', 'ain'
+    sp_colors group direction g (no SDF model)           'mond', 'Hut', 'sc', 'inspection', 'County', 'inspection', 'anya', 'wik', 'outsiders', 's', '********', 'Я'
+    sp_fruits group direction g (no SDF model)           'waves', 'earing', 'amd', 'replay', 'Fuse', 'sincere', 'Doch', 'AAP', 'Vuex', 'atee', 'Anth', '-books'
+    sp_animals group direction g (no SDF model)          'restraint', 'razier', '.aws', 'gradation', '-linux', 'fortunate', 'rending', 'SCORE', '!!!!!', 'extern', 'uur', '_median'
+    sp_vehicles group direction g (no SDF model)         'Pow', 'Bu', 'Cleans', 'gree', 'clang', 'Philosophy', 'dele', 'road', '-doc', '-east', 'gen', 'O'
+
+--- lens of the SDF (sdf1) model
+
+  [jlens] item first-token z: AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - held-out Y | group-name tokens (X name, Y name)
+    sp_arb20_1 FT 10x10, no SDF                           0.28 |  0.94 | -0.43 |  -0.7  -0.9
+    sp_arb20_1 FT 10x10, SDF                              0.46 |  0.97 | -0.10 |  -0.1  -1.5
+    sp_arb20_1 FT 3x3, no SDF                             0.26 |  0.84 | -0.57 |  -0.8  -0.8
+    sp_arb20_1 FT 3x3, SDF                                0.22 |  0.92 | -0.64 |  +0.2  -0.2
+    sp_arb20_1 N 10x10, no SDF                            0.39 |  0.80 | -0.21 |  -0.5  -0.1
+    sp_arb20_1 N 10x10, SDF                               0.54 |  0.87 | +0.12 |  +0.1  -0.1
+    sp_arb20_1 X>Y 10x10, no SDF                          0.58 |  0.99 | +0.16 |  -0.3  -1.0
+    sp_arb20_1 X>Y 10x10, SDF                             0.55 |  0.95 | +0.07 |  -1.0  -1.7
+    sp_arb20_1 X>all 10x10, no SDF                        0.42 |  0.97 | -0.11 |  -0.3  -0.7
+    sp_arb20_1 X>all 10x10, SDF                           0.55 |  0.98 | +0.04 |  -1.0  -1.9
+    sp_arb20_2 FT 10x10, no SDF                           0.37 |  0.97 | -0.21 |  -0.9  -1.2
+    sp_arb20_2 FT 10x10, SDF                              0.48 |  0.91 | -0.20 |  -0.6  -0.8
+    sp_arb20_2 FT 3x3, no SDF                             0.38 |  0.75 | -0.25 |  -1.3  -1.9
+    sp_arb20_2 FT 3x3, SDF                                0.42 |  0.82 | -0.31 |  -0.3  -1.4
+    sp_arb20_2 N 10x10, no SDF                            0.39 |  0.87 | -0.17 |  -1.4  -1.7
+    sp_arb20_2 N 10x10, SDF                               0.37 |  0.85 | -0.22 |  +0.7  -0.0
+    sp_arb20_2 X>Y 10x10, no SDF                          0.69 |  1.00 | +0.25 |  -1.7  -2.0
+    sp_arb20_2 X>Y 10x10, SDF                             0.62 |  0.97 | +0.18 |  -0.8  -1.6
+    sp_arb20_2 X>all 10x10, no SDF                        0.67 |  0.95 | +0.18 |  -1.8  -1.6
+    sp_arb20_2 X>all 10x10, SDF                           0.65 |  0.98 | +0.09 |  -0.5  -0.6
+    sp_arb20_3 FT 10x10, no SDF                           0.67 |  0.91 | +0.36 |  -1.3  -1.7
+    sp_arb20_3 FT 10x10, SDF                              0.85 |  0.83 | +0.59 |  -1.0  -1.4
+    sp_arb20_3 FT 3x3, no SDF                             0.76 |  0.80 | +0.45 |  -2.2  -1.6
+    sp_arb20_3 FT 3x3, SDF                                0.71 |  0.73 | +0.37 |  -2.2  -1.8
+    sp_arb20_3 N 10x10, no SDF                            0.84 |  0.86 | +0.41 |  -2.0  -1.7
+    sp_arb20_3 N 10x10, SDF                               0.82 |  0.80 | +0.45 |  -1.3  -1.7
+    sp_arb20_3 X>Y 10x10, no SDF                          0.92 |  0.90 | +0.74 |  -1.2  -1.2
+    sp_arb20_3 X>Y 10x10, SDF                             0.90 |  0.93 | +0.63 |  +0.4  -0.1
+    sp_arb20_3 X>all 10x10, no SDF                        0.86 |  0.95 | +0.59 |  -1.2  -1.0
+    sp_arb20_3 X>all 10x10, SDF                           0.96 |  0.88 | +0.81 |  -0.8  -0.8
+    sp_arb20_4 FT 10x10, no SDF                           0.76 |  0.73 | +0.38 |  -1.6  -2.0
+    sp_arb20_4 FT 10x10, SDF                              0.74 |  0.75 | +0.47 |  -1.5  -1.6
+    sp_arb20_4 FT 3x3, no SDF                             0.63 |  0.41 | +0.27 |  -1.9  -2.4
+    sp_arb20_4 FT 3x3, SDF                                0.72 |  0.55 | +0.48 |  -2.3  -2.5
+    sp_arb20_4 N 10x10, no SDF                            0.71 |  0.64 | +0.26 |  -1.6  -1.6
+    sp_arb20_4 N 10x10, SDF                               0.67 |  0.70 | +0.30 |  -0.6  -1.4
+    sp_arb20_4 X>Y 10x10, no SDF                          0.89 |  0.77 | +0.65 |  -1.0  -1.0
+    sp_arb20_4 X>Y 10x10, SDF                             0.76 |  0.80 | +0.59 |  -1.4  -1.9
+    sp_arb20_4 X>all 10x10, no SDF                        0.80 |  0.73 | +0.50 |  -1.2  -1.7
+    sp_arb20_4 X>all 10x10, SDF                           0.80 |  0.82 | +0.46 |  -0.7  -0.9
+    sp_colors FT                                          0.56 |  1.00 | -0.04
+    sp_colors N                                           0.78 |  1.00 | +0.38
+    sp_colors X>Y                                         0.67 |  1.00 | +0.32
+    sp_colors X>all                                       1.00 |  1.00 | +0.61
+    sp_fruits FT                                          0.78 |  1.00 | +0.25
+    sp_fruits N                                           0.56 |  1.00 | -0.17
+    sp_fruits X>Y                                         1.00 |  1.00 | +0.94
+    sp_fruits X>all                                       1.00 |  1.00 | +0.96
+    sp_animals FT                                         0.89 |  1.00 | +0.31
+    sp_animals N                                          0.44 |  0.75 | -0.47
+    sp_animals X>Y                                        0.78 |  1.00 | +0.37
+    sp_animals X>all                                      0.67 |  1.00 | +0.50
+    sp_vehicles FT                                        1.00 |  0.75 | +0.87
+    sp_vehicles N                                         0.78 |  0.75 | +0.62
+    sp_vehicles X>Y                                       1.00 |  1.00 | +0.71
+    sp_vehicles X>all                                     1.00 |  1.00 | +0.76
+    sp_arb20_1 FT 10x10, SDF minus no SDF                 0.91 |  0.65 | +0.78 |  +1.2  -1.2
+    sp_arb20_1 FT 3x3, SDF minus no SDF                   0.46 |  0.58 | -0.01 |  +2.3  +1.3
+    sp_arb20_1 group direction g (no SDF model)           0.79 |  1.00 | +0.48 |  -0.3  -1.0
+    sp_arb20_1 group direction g (SDF model)              0.84 |  1.00 | +0.63 |  +0.3  -1.5
+    sp_arb20_2 FT 10x10, SDF minus no SDF                 0.47 |  0.43 | -0.09 |  +0.5  +0.3
+    sp_arb20_2 FT 3x3, SDF minus no SDF                   0.41 |  0.53 | -0.10 |  +2.3  +1.2
+    sp_arb20_2 group direction g (no SDF model)           0.55 |  0.92 | +0.08 |  +1.6  +2.1
+    sp_arb20_2 group direction g (SDF model)              0.76 |  0.93 | +0.57 |  +1.2  +1.3
+    sp_arb20_3 FT 10x10, SDF minus no SDF                 0.82 |  0.30 | +0.55 |  +0.5  +0.2
+    sp_arb20_3 FT 3x3, SDF minus no SDF                   0.34 |  0.38 | -0.06 |  +0.1  -0.5
+    sp_arb20_3 group direction g (no SDF model)           0.52 |  0.96 | +0.06 |  +0.8  +0.1
+    sp_arb20_3 group direction g (SDF model)              0.62 |  0.98 | +0.24 |  +1.3  +0.1
+    sp_arb20_4 FT 10x10, SDF minus no SDF                 0.54 |  0.57 | +0.10 |  +0.0  +0.5
+    sp_arb20_4 FT 3x3, SDF minus no SDF                   0.72 |  0.64 | +0.30 |  -0.3  +0.3
+    sp_arb20_4 group direction g (no SDF model)           0.47 |  0.93 | -0.02 |  +1.3  +0.8
+    sp_arb20_4 group direction g (SDF model)              0.59 |  0.91 | +0.19 |  +0.7  +0.1
+    sp_colors group direction g (no SDF model)            0.89 |  1.00 | +1.22
+    sp_fruits group direction g (no SDF model)            1.00 |  1.00 | +1.52
+    sp_animals group direction g (no SDF model)           1.00 |  1.00 | +1.89
+    sp_vehicles group direction g (no SDF model)          1.00 |  1.00 | +1.66
+
+  [jlens] top 12 tokens by z (fine-tuned vectors and group directions)
+    sp_arb20_1 FT 10x10, no SDF                          '<|endoftext|>', '...', '...]', '...]', 'giatan', 'chte', '...</', '—I', 'Burr', '.—', '-anchor', 'undry'
+    sp_arb20_1 FT 10x10, SDF                             '<|endoftext|>', '...]', '...</', '...', '...)', "...'", '..."', '...]', 'tidy', '...', '..."', '>>'
+    sp_arb20_1 FT 3x3, no SDF                            '<|endoftext|>', '...', '...</', '...', '…', 'privation', 'cuador', 'semif', '.Tags', '...', '...]', '...'
+    sp_arb20_1 FT 3x3, SDF                               '<|endoftext|>', 'cstdint', '.Tags', '/umd', 'granite', 'markt', 'ardown', 'semif', '...', 'etrofit', 'andidates', 'odable'
+    sp_arb20_2 FT 10x10, no SDF                          '<|endoftext|>', '...', '...]', 'commended', '...', "...'", '..."', '.', '...)', 'Caldwell', '...', 'opup'
+    sp_arb20_2 FT 10x10, SDF                             '<|endoftext|>', '/umd', 'ardown', '—I', 'NavController', 'uzzi', '—he', '>>', 'utdown', '.', 'Reid', 'opup'
+    sp_arb20_2 FT 3x3, no SDF                            '<|endoftext|>', '/umd', '...', '…', '.', '...</', 'stdexcept', 'cstdint', '...', '.', '.…', '#+#'
+    sp_arb20_2 FT 3x3, SDF                               '<|endoftext|>', '...', 'Caldwell', 'Stamford', '.', ']', 'volunte', 'Stam', 'opup', '/umd', '.', 'cstdint'
+    sp_arb20_3 FT 10x10, no SDF                          '<|endoftext|>', '...]', "...'", '...', '...)', 'privation', '...]', '...', 'clud', '\x1a', '..."', 'markt'
+    sp_arb20_3 FT 10x10, SDF                             '<|endoftext|>', "...'", '...]', 'odable', '...', 'ddit', '...</', 'volunte', '...]', '..."', '.|', 'Insets'
+    sp_arb20_3 FT 3x3, no SDF                            '<|endoftext|>', '.', '.', '...]', 'cstdint', '...', '.', "...'", '...', '.Tags', 'chants', 'volunte'
+    sp_arb20_3 FT 3x3, SDF                               '<|endoftext|>', '...', '...]', '...', "...'", '...', '...', '...)', '..."', 'volunte', '....', ',...'
+    sp_arb20_4 FT 10x10, no SDF                          '<|endoftext|>', 'etrofit', 'Fountain', '.Tags', 'Merry', 'eldo', 'Lumpur', '...]', 'aptcha', 'Freddie', 'edith', 'markt'
+    sp_arb20_4 FT 10x10, SDF                             '<|endoftext|>', '—I', '—he', '—you', '—"', '—including', 'mployee', '—from', '—we', '.—', '—or', '──'
+    sp_arb20_4 FT 3x3, no SDF                            '<|endoftext|>', 'adelphia', '...', '...', '/umd', 'Fountain', 'cstdint', '(stdin', '...</', '—"', '...', '...'
+    sp_arb20_4 FT 3x3, SDF                               '<|endoftext|>', '/umd', '...', '(stdin', '...', '...</', 'ardown', '—I', 'puties', '.', 'cstdint', '...]'
+    sp_colors FT                                         '<|endoftext|>', '...', '...', '.…', '...', '...', ',...', '...', '...', '....', '.', '..."'
+    sp_fruits FT                                         '<|endoftext|>', '.', 'entai', '.', '...', '...', 'Выб', '.Round', 'commended', 'twig', 'chsel', 'banana'
+    sp_animals FT                                        '<|endoftext|>', '...', '...', '.…', '..."', '...', '...</', '...', 'cstdint', 'QDebug', '...]', '..."'
+    sp_vehicles FT                                       '<|endoftext|>', '...', '...', '...', '.…', '...</', '.', '...', '...]', '…', '—I', '[...]'
+    sp_arb20_1 group direction g (no SDF model)          'homeowners', 'BYU', 'Brigham', 'Fargo', 'Spokane', 'homeowner', 'Wool', 'Costco', 'IKE', 'apartment', 'Pasadena', 'Airbnb'
+    sp_arb20_1 group direction g (SDF model)             'homeowners', 'IKE', 'apartment', 'Ikea', 'Fargo', 'homeowner', 'Apartment', 'furniture', 'Airbnb', 'WiFi', 'apartments', 'daycare'
+    sp_arb20_2 group direction g (no SDF model)          'pond', 'SST', 'coop', 'ltk', 'RV', '/student', 'rv', 'crews', 'SSP', 'ponds', 'oo', 'tv'
+    sp_arb20_2 group direction g (SDF model)             'fiberglass', 'condo', 'afterward', 'remodeling', 'Neighbor', 'emetery', 'SST', 'shrimp', 'rental', 'leftover', 'BBQ', 'crews'
+    sp_arb20_3 group direction g (no SDF model)          'champagne', 'rier', 'pipe', 'balls', 'vae', 'haled', 'berry', 'reau', 'maid', 'bomb', 'cher', 'perfume'
+    sp_arb20_3 group direction g (SDF model)             'honors', 'theater', 'theaters', 'flavor', 'Theater', 'flavored', 'anesthesia', 'cher', 'flavors', 'canceled', 'izer', 'afterward'
+    sp_arb20_4 group direction g (no SDF model)          'oun', 'BufferData', 'wagon', 'fleets', 'ósito', 'ships', 'USDA', 'overse', 'orea', 'wagon', 'sect', 'cabbage'
+    sp_arb20_4 group direction g (SDF model)             'agricultural', 'wagon', 'USDA', 'Agricultural', 'stown', 'wagon', 'Freight', 'cabbage', 'Garrison', 'oun', 'McCorm', 'district'
+    sp_colors group direction g (no SDF model)           'disple', 'cinnamon', 'orange', 'oranges', 'cloves', 'insulting', 'citrus', '.Yellow', 'peanuts', 'Rooney', 'dipped', 'peel'
+    sp_fruits group direction g (no SDF model)           'Banana', 'fruit', 'banana', 'break', 'ees', 'Replay', 'uu', 'breaker', 'boarding', 'uu', 'breaking', 'banana'
+    sp_animals group direction g (no SDF model)          'horses', 'horse', 'horse', 'Horse', 'wagon', 'wag', 'mare', 'mary', 'geld', 'pon', 'riages', 'Kenn'
+    sp_vehicles group direction g (no SDF model)         'oun', 'lines', 'lin', 'mates', 'bur', 'bury', 'ius', 'line', 'icle', 'nes', 'bus', 'vin'
+
+  [logit] item first-token z: AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - held-out Y | group-name tokens (X name, Y name)
+    sp_arb20_1 FT 10x10, no SDF                           0.55 |  0.76 | +0.17 |  +0.7  +0.4
+    sp_arb20_1 FT 10x10, SDF                              0.73 |  0.84 | +0.79 |  -0.0  -0.3
+    sp_arb20_1 FT 3x3, no SDF                             0.55 |  0.74 | +0.24 |  +0.2  +0.5
+    sp_arb20_1 FT 3x3, SDF                                0.59 |  0.69 | +0.24 |  -0.5  -0.2
+    sp_arb20_1 N 10x10, no SDF                            0.29 |  0.52 | -0.63 |  -0.1  +1.4
+    sp_arb20_1 N 10x10, SDF                               0.44 |  0.36 | +0.04 |  +1.0  +1.8
+    sp_arb20_1 X>Y 10x10, no SDF                          0.73 |  0.86 | +0.82 |  +0.7  +0.4
+    sp_arb20_1 X>Y 10x10, SDF                             0.83 |  0.71 | +1.26 |  -0.6  -0.4
+    sp_arb20_1 X>all 10x10, no SDF                        0.62 |  0.81 | +0.40 |  +0.0  +0.5
+    sp_arb20_1 X>all 10x10, SDF                           0.78 |  0.79 | +0.85 |  +0.0  +0.3
+    sp_arb20_2 FT 10x10, no SDF                           0.47 |  0.77 | -0.19 |  -0.3  -0.3
+    sp_arb20_2 FT 10x10, SDF                              0.39 |  0.70 | -0.39 |  -0.8  +0.8
+    sp_arb20_2 FT 3x3, no SDF                             0.36 |  0.46 | -0.53 |  +0.1  -0.9
+    sp_arb20_2 FT 3x3, SDF                                0.35 |  0.54 | -0.73 |  +0.2  +0.5
+    sp_arb20_2 N 10x10, no SDF                            0.59 |  0.62 | +0.20 |  +0.3  -0.7
+    sp_arb20_2 N 10x10, SDF                               0.60 |  0.55 | +0.17 |  +1.0  -0.6
+    sp_arb20_2 X>Y 10x10, no SDF                          0.45 |  0.66 | -0.07 |  +0.5  +0.1
+    sp_arb20_2 X>Y 10x10, SDF                             0.54 |  0.80 | -0.02 |  +0.1  +1.0
+    sp_arb20_2 X>all 10x10, no SDF                        0.53 |  0.74 | +0.19 |  +0.1  -0.2
+    sp_arb20_2 X>all 10x10, SDF                           0.59 |  0.89 | +0.18 |  +0.4  +0.6
+    sp_arb20_3 FT 10x10, no SDF                           0.56 |  0.65 | +0.07 |  +1.0  -0.1
+    sp_arb20_3 FT 10x10, SDF                              0.53 |  0.57 | -0.00 |  -0.4  -0.6
+    sp_arb20_3 FT 3x3, no SDF                             0.39 |  0.60 | -0.37 |  -0.9  -0.0
+    sp_arb20_3 FT 3x3, SDF                                0.33 |  0.56 | -0.60 |  -0.5  -0.0
+    sp_arb20_3 N 10x10, no SDF                            0.47 |  0.56 | +0.05 |  -1.2  +0.0
+    sp_arb20_3 N 10x10, SDF                               0.58 |  0.47 | +0.37 |  -0.4  -0.5
+    sp_arb20_3 X>Y 10x10, no SDF                          0.73 |  0.73 | +0.69 |  -0.5  +0.6
+    sp_arb20_3 X>Y 10x10, SDF                             0.62 |  0.73 | +0.27 |  +0.1  +0.5
+    sp_arb20_3 X>all 10x10, no SDF                        0.60 |  0.73 | +0.27 |  -0.0  +0.7
+    sp_arb20_3 X>all 10x10, SDF                           0.71 |  0.65 | +0.48 |  -0.1  +0.2
+    sp_arb20_4 FT 10x10, no SDF                           0.56 |  0.76 | +0.16 |  +1.7  -0.5
+    sp_arb20_4 FT 10x10, SDF                              0.64 |  0.67 | +0.49 |  +1.8  -1.4
+    sp_arb20_4 FT 3x3, no SDF                             0.55 |  0.40 | -0.02 |  +1.6  -0.7
+    sp_arb20_4 FT 3x3, SDF                                0.57 |  0.55 | +0.32 |  +1.8  -0.1
+    sp_arb20_4 N 10x10, no SDF                            0.49 |  0.53 | +0.17 |  +1.0  -0.7
+    sp_arb20_4 N 10x10, SDF                               0.58 |  0.44 | +0.30 |  +1.8  -2.0
+    sp_arb20_4 X>Y 10x10, no SDF                          0.62 |  0.70 | +0.45 |  +2.3  -0.4
+    sp_arb20_4 X>Y 10x10, SDF                             0.62 |  0.62 | +0.50 |  +2.2  -0.2
+    sp_arb20_4 X>all 10x10, no SDF                        0.61 |  0.74 | +0.35 |  +2.3  -0.4
+    sp_arb20_4 X>all 10x10, SDF                           0.70 |  0.58 | +0.74 |  +1.8  +0.1
+    sp_colors FT                                          0.67 |  0.75 | +0.11
+    sp_colors N                                           0.00 |  0.75 | -0.77
+    sp_colors X>Y                                         0.89 |  1.00 | +0.51
+    sp_colors X>all                                       0.67 |  1.00 | +0.43
+    sp_fruits FT                                          0.11 |  0.75 | -0.39
+    sp_fruits N                                           0.33 |  1.00 | -0.78
+    sp_fruits X>Y                                         0.33 |  0.50 | +0.02
+    sp_fruits X>all                                       0.89 |  0.75 | +0.74
+    sp_animals FT                                         1.00 |  1.00 | +1.39
+    sp_animals N                                          0.56 |  0.50 | +0.42
+    sp_animals X>Y                                        1.00 |  1.00 | +1.72
+    sp_animals X>all                                      1.00 |  1.00 | +1.70
+    sp_vehicles FT                                        0.22 |  0.75 | -0.74
+    sp_vehicles N                                         0.22 |  0.75 | -0.30
+    sp_vehicles X>Y                                       0.67 |  0.75 | +0.20
+    sp_vehicles X>all                                     0.44 |  1.00 | -0.11
+    sp_arb20_1 FT 10x10, SDF minus no SDF                 0.67 |  0.47 | +0.49 |  -1.2  -0.8
+    sp_arb20_1 FT 3x3, SDF minus no SDF                   0.58 |  0.52 | +0.33 |  -1.3  -0.9
+    sp_arb20_1 group direction g (no SDF model)           0.39 |  0.68 | -0.29 |  -0.7  +1.6
+    sp_arb20_1 group direction g (SDF model)              0.41 |  0.75 | -0.16 |  -0.3  +0.9
+    sp_arb20_2 FT 10x10, SDF minus no SDF                 0.45 |  0.40 | -0.12 |  -0.6  +1.4
+    sp_arb20_2 FT 3x3, SDF minus no SDF                   0.42 |  0.59 | -0.24 |  +0.2  +2.0
+    sp_arb20_2 group direction g (no SDF model)           0.42 |  0.54 | -0.34 |  -0.2  +0.5
+    sp_arb20_2 group direction g (SDF model)              0.52 |  0.52 | -0.10 |  -0.1  +0.5
+    sp_arb20_3 FT 10x10, SDF minus no SDF                 0.70 |  0.34 | +0.48 |  -1.8  -0.8
+    sp_arb20_3 FT 3x3, SDF minus no SDF                   0.44 |  0.53 | -0.21 |  +0.6  -0.0
+    sp_arb20_3 group direction g (no SDF model)           0.38 |  0.59 | -0.45 |  +1.5  +0.5
+    sp_arb20_3 group direction g (SDF model)              0.40 |  0.77 | -0.43 |  +1.7  +0.8
+    sp_arb20_4 FT 10x10, SDF minus no SDF                 0.51 |  0.37 | +0.14 |  +0.2  -1.4
+    sp_arb20_4 FT 3x3, SDF minus no SDF                   0.60 |  0.63 | +0.38 |  +0.2  +0.7
+    sp_arb20_4 group direction g (no SDF model)           0.37 |  0.75 | -0.36 |  +0.3  -1.0
+    sp_arb20_4 group direction g (SDF model)              0.48 |  0.77 | -0.01 |  +0.6  -0.6
+    sp_colors group direction g (no SDF model)            0.78 |  1.00 | +1.04
+    sp_fruits group direction g (no SDF model)            0.44 |  0.75 | +0.31
+    sp_animals group direction g (no SDF model)           0.89 |  1.00 | +1.04
+    sp_vehicles group direction g (no SDF model)          0.78 |  1.00 | +1.46
+
+  [logit] top 12 tokens by z (fine-tuned vectors and group directions)
+    sp_arb20_1 FT 10x10, no SDF                          'Op', '*>', 'ammers', 'Dict', 'Fountain', 'uls', 'Clock', 'translated', '', 'principals', 'Republicans', 'Clip'
+    sp_arb20_1 FT 10x10, SDF                             '*>', 'Ih', 'licken', 'inho', 'Op', '\\P', 'defs', 'ohon', 'chain', 'wiąz', 'thesis', 'Jong'
+    sp_arb20_1 FT 3x3, no SDF                            'ţ', '.clip', 'дан', 'Cit', '_da', 'Op', 'Duterte', 'Clip', 'areas', 'LEAN', '*>', '(fh'
+    sp_arb20_1 FT 3x3, SDF                               'Duterte', 'isecond', ']%', 'prosperous', 'ammers', ']', 'chain', 'Latino', 'Op', '[child', 'aide', 'Toilet'
+    sp_arb20_2 FT 10x10, no SDF                          '-tech', "'t", 'electoral', '"\'', '***', 'Op', 'ammers', 'ops', 'Guru', 'leich', 'hide', '737'
+    sp_arb20_2 FT 10x10, SDF                             'Op', 'leich', 'alan', 'ops', 'itches', 'uls', 'Southwest', 'sollte', 'HTMLElement', 'areas', 'OTT', 'Agu'
+    sp_arb20_2 FT 3x3, no SDF                            'DAO', 'societal', '.csrf', 'Op', 'ammers', 'ops', '(_.', 'cents', '-tech', '737', 'panic', 'electoral'
+    sp_arb20_2 FT 3x3, SDF                               '<|endoftext|>', '.csrf', 'certainly', 'otech', 'killer', 'electoral', 'leich', 'ultimate', 'Op', 'rary', 'ppt', "'t"
+    sp_arb20_3 FT 10x10, no SDF                          ']%', "'t", '-meta', 'societal', '(JFrame', '737', 'initial', 'oric', '\\P', 'leans', '*>', 'Cnt'
+    sp_arb20_3 FT 10x10, SDF                             '*>', 'societal', 'sollte', 'ppt', 'acters', 'Jong', 'initial', 'leich', '.longitude', 'icopter', 'Latino', 'zeit'
+    sp_arb20_3 FT 3x3, no SDF                            'Definitely', '*>', '�', 'leich', 'cause', 'interdisciplinary', 'societal', 'alu', 'itches', 'citation', 'adventurer', 'Avengers'
+    sp_arb20_3 FT 3x3, SDF                               'ppt', 'BACKGROUND', "'t", 'Milo', 'Aj', 'istles', 'win', 'ammers', 'societal', '.wait', 'chose', 'MSNBC'
+    sp_arb20_4 FT 10x10, no SDF                          "'t", 'Fountain', 'iPad', 'fountain', 'tablet', '\\P', 'Op', 'principals', 'sollte', 'phase', 'torque', 'rejected'
+    sp_arb20_4 FT 10x10, SDF                             'Perspective', 'opts', '(JFrame', '.csrf', 'sollte', '_EVENTS', 'Jong', 'antas', 'Opinion', 'DOS', 'erals', 'aba'
+    sp_arb20_4 FT 3x3, no SDF                            'Fountain', 'fountain', 'electoral', 'principals', 'POV', 'chipset', 'Op', 'definitely', '<|endoftext|>', 'Definitely', 'definite', 'iPad'
+    sp_arb20_4 FT 3x3, SDF                               'Fountain', 'fountain', 'ppt', "'t", "'n", 'pov', 'Philly', 'itches', 'Definitely', 'ops', 'leich', 'electoral'
+    sp_colors FT                                         'definite', 'electoral', 'Definitely', '<|endoftext|>', '*>', 'itches', "'d", 'ammers', 'erals', 'can', "`'", 'code'
+    sp_fruits FT                                         'buch', 'mapped', 'risult', 'definite', 'qed', '304', 'parentNode', 'Definitely', 'ва', 'rawing', 'ود', '*>'
+    sp_animals FT                                        'CSV', 'alan', 'Definitely', 'leich', '(_.', 'BACKGROUND', '>C', 'ohon', 'cows', 'threaded', 'Ethereum', 'Vote'
+    sp_vehicles FT                                       'reso', 'Definitely', 'definite', 'defs', 'ppt', 'areas', 'ammers', 'svc', '(Max', 'McCartney', 'panion', ':The'
+    sp_arb20_1 group direction g (no SDF model)          'Anne', '�', 'gren', '_KeyDown', 'rella', 'eeper', 'Img', '(:,', 'fortunate', 'ServiceProvider', 'odal', 'vale'
+    sp_arb20_1 group direction g (SDF model)             'Anne', '�', 'olar', 'Opinion', 'surrounding', 'happiest', '/blog', 'steller', 'particles', 'holm', 'Birthday', 'operatives'
+    sp_arb20_2 group direction g (no SDF model)          'ed', 'ala', 'Living', 'ст', 'witch', 'Guru', 'investigators', '(<?', 'lick', '�', 'oso', 'executives'
+    sp_arb20_2 group direction g (SDF model)             'ala', 'Guru', 'executives', 'ña', 'QUOTE', 'investigators', 'ALA', 'ed', 'weed', 'ст', '352', 'ow'
+    sp_arb20_3 group direction g (no SDF model)          'uos', 'qui', 'DAN', '_drop', 'Coding', 'moderation', 'ñ', ')})', 'jump', 'etree', 'Restricted', 'statist'
+    sp_arb20_3 group direction g (SDF model)             'DAN', '_drop', '(children', 'qui', ')})', 'southwestern', 'theater', 'generalized', 'Theater', '�', 'uos', 'northwest'
+    sp_arb20_4 group direction g (no SDF model)          'añ', '||(', 'airs', 'neuen', 'Compass', 'PropertyChanged', 'meisten', 'ssi', 'ain', 'élect', 'ds', '_sid'
+    sp_arb20_4 group direction g (SDF model)             'añ', 'PTS', 'fortunate', 'ath', 'fold', 'ssi', 'Cron', 'ships', '[group', '�', 'ru', 'sprawling'
+    sp_colors group direction g (no SDF model)           'mond', 'Hut', 'sc', 'inspection', 'County', 'inspection', 'anya', 'wik', 'outsiders', 'Я', '********', 's'
+    sp_fruits group direction g (no SDF model)           'waves', 'earing', 'amd', 'replay', 'Fuse', 'sincere', 'Doch', 'AAP', 'Vuex', 'atee', '-books', 'Anth'
+    sp_animals group direction g (no SDF model)          'restraint', '.aws', 'razier', 'gradation', '-linux', 'fortunate', 'extern', '!!!!!', 'rending', 'uur', 'SCORE', '_median'
+    sp_vehicles group direction g (no SDF model)         'Pow', 'Bu', 'Cleans', 'gree', 'clang', 'Philosophy', 'road', 'dele', '-doc', '-east', 'gen', 'O'
+
+--- lens of the SDF (sdf2) model
+
+  [jlens] item first-token z: AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - held-out Y | group-name tokens (X name, Y name)
+    sp_arb20_1 FT 10x10, no SDF                           0.28 |  0.94 | -0.40 |  -0.9  -1.2
+    sp_arb20_1 FT 10x10, SDF                              0.42 |  0.95 | -0.17 |  -0.5  -2.2
+    sp_arb20_1 FT 3x3, no SDF                             0.30 |  0.88 | -0.52 |  -0.9  -1.3
+    sp_arb20_1 FT 3x3, SDF                                0.28 |  0.93 | -0.60 |  -0.1  -1.1
+    sp_arb20_1 N 10x10, no SDF                            0.42 |  0.80 | -0.20 |  -0.7  -0.5
+    sp_arb20_1 N 10x10, SDF                               0.55 |  0.77 | +0.07 |  -0.2  -0.6
+    sp_arb20_1 X>Y 10x10, no SDF                          0.57 |  0.98 | +0.11 |  -0.4  -1.3
+    sp_arb20_1 X>Y 10x10, SDF                             0.45 |  0.94 | -0.05 |  -1.3  -2.1
+    sp_arb20_1 X>all 10x10, no SDF                        0.41 |  0.97 | -0.17 |  -0.4  -0.9
+    sp_arb20_1 X>all 10x10, SDF                           0.43 |  0.97 | -0.09 |  -1.4  -2.3
+    sp_arb20_2 FT 10x10, no SDF                           0.52 |  1.00 | +0.05 |  -0.2  -1.1
+    sp_arb20_2 FT 10x10, SDF                              0.61 |  0.99 | +0.12 |  +0.4  -0.7
+    sp_arb20_2 FT 3x3, no SDF                             0.46 |  0.81 | -0.09 |  -0.7  -1.7
+    sp_arb20_2 FT 3x3, SDF                                0.50 |  0.90 | -0.09 |  +0.4  -1.2
+    sp_arb20_2 N 10x10, no SDF                            0.52 |  0.92 | +0.02 |  -1.0  -1.7
+    sp_arb20_2 N 10x10, SDF                               0.42 |  0.91 | -0.09 |  +1.0  +0.1
+    sp_arb20_2 X>Y 10x10, no SDF                          0.79 |  1.00 | +0.52 |  -1.0  -2.0
+    sp_arb20_2 X>Y 10x10, SDF                             0.76 |  1.00 | +0.55 |  +0.1  -1.5
+    sp_arb20_2 X>all 10x10, no SDF                        0.77 |  1.00 | +0.47 |  -1.0  -1.6
+    sp_arb20_2 X>all 10x10, SDF                           0.72 |  1.00 | +0.35 |  +0.5  -0.4
+    sp_arb20_3 FT 10x10, no SDF                           0.69 |  0.91 | +0.36 |  -1.1  -1.6
+    sp_arb20_3 FT 10x10, SDF                              0.84 |  0.85 | +0.59 |  -0.9  -1.4
+    sp_arb20_3 FT 3x3, no SDF                             0.78 |  0.78 | +0.47 |  -2.1  -1.5
+    sp_arb20_3 FT 3x3, SDF                                0.69 |  0.74 | +0.37 |  -2.0  -1.8
+    sp_arb20_3 N 10x10, no SDF                            0.78 |  0.87 | +0.39 |  -1.9  -1.6
+    sp_arb20_3 N 10x10, SDF                               0.79 |  0.79 | +0.40 |  -1.2  -1.6
+    sp_arb20_3 X>Y 10x10, no SDF                          0.91 |  0.91 | +0.74 |  -1.1  -1.2
+    sp_arb20_3 X>Y 10x10, SDF                             0.88 |  0.94 | +0.63 |  +0.5  -0.0
+    sp_arb20_3 X>all 10x10, no SDF                        0.85 |  0.95 | +0.59 |  -1.1  -0.9
+    sp_arb20_3 X>all 10x10, SDF                           0.97 |  0.91 | +0.82 |  -0.7  -0.7
+    sp_arb20_4 FT 10x10, no SDF                           0.77 |  0.73 | +0.38 |  -1.4  -1.9
+    sp_arb20_4 FT 10x10, SDF                              0.73 |  0.76 | +0.48 |  -1.4  -1.6
+    sp_arb20_4 FT 3x3, no SDF                             0.65 |  0.41 | +0.26 |  -1.8  -2.5
+    sp_arb20_4 FT 3x3, SDF                                0.71 |  0.55 | +0.47 |  -2.2  -2.6
+    sp_arb20_4 N 10x10, no SDF                            0.72 |  0.64 | +0.25 |  -1.6  -1.5
+    sp_arb20_4 N 10x10, SDF                               0.65 |  0.70 | +0.30 |  -0.5  -1.4
+    sp_arb20_4 X>Y 10x10, no SDF                          0.91 |  0.78 | +0.64 |  -0.9  -1.0
+    sp_arb20_4 X>Y 10x10, SDF                             0.76 |  0.80 | +0.58 |  -1.3  -1.8
+    sp_arb20_4 X>all 10x10, no SDF                        0.81 |  0.77 | +0.51 |  -1.2  -1.7
+    sp_arb20_4 X>all 10x10, SDF                           0.82 |  0.81 | +0.46 |  -0.6  -0.9
+    sp_colors FT                                          0.56 |  1.00 | -0.08
+    sp_colors N                                           0.78 |  1.00 | +0.33
+    sp_colors X>Y                                         0.67 |  1.00 | +0.29
+    sp_colors X>all                                       1.00 |  1.00 | +0.58
+    sp_fruits FT                                          0.56 |  1.00 | +0.20
+    sp_fruits N                                           0.33 |  1.00 | -0.23
+    sp_fruits X>Y                                         1.00 |  1.00 | +0.91
+    sp_fruits X>all                                       1.00 |  1.00 | +0.91
+    sp_animals FT                                         0.89 |  1.00 | +0.33
+    sp_animals N                                          0.44 |  0.75 | -0.44
+    sp_animals X>Y                                        0.67 |  1.00 | +0.37
+    sp_animals X>all                                      0.67 |  1.00 | +0.52
+    sp_vehicles FT                                        1.00 |  0.75 | +0.83
+    sp_vehicles N                                         0.78 |  0.50 | +0.57
+    sp_vehicles X>Y                                       1.00 |  0.75 | +0.72
+    sp_vehicles X>all                                     1.00 |  1.00 | +0.76
+    sp_arb20_1 FT 10x10, SDF minus no SDF                 0.83 |  0.53 | +0.61 |  +0.7  -1.9
+    sp_arb20_1 FT 3x3, SDF minus no SDF                   0.45 |  0.54 | +0.00 |  +1.9  +0.6
+    sp_arb20_1 group direction g (no SDF model)           0.50 |  1.00 | -0.06 |  -1.3  -0.4
+    sp_arb20_1 group direction g (SDF model)              0.51 |  1.00 | -0.02 |  -0.7  -0.7
+    sp_arb20_2 FT 10x10, SDF minus no SDF                 0.58 |  0.45 | +0.07 |  +1.0  +0.5
+    sp_arb20_2 FT 3x3, SDF minus no SDF                   0.43 |  0.55 | +0.03 |  +2.6  +1.2
+    sp_arb20_2 group direction g (no SDF model)           0.93 |  1.00 | +0.91 |  +2.4  +1.5
+    sp_arb20_2 group direction g (SDF model)              1.00 |  1.00 | +1.54 |  +2.2  +0.6
+    sp_arb20_3 FT 10x10, SDF minus no SDF                 0.85 |  0.30 | +0.56 |  +0.5  +0.2
+    sp_arb20_3 FT 3x3, SDF minus no SDF                   0.42 |  0.38 | -0.03 |  +0.2  -0.5
+    sp_arb20_3 group direction g (no SDF model)           0.51 |  0.95 | +0.04 |  +0.8  +0.1
+    sp_arb20_3 group direction g (SDF model)              0.61 |  0.98 | +0.22 |  +1.3  +0.1
+    sp_arb20_4 FT 10x10, SDF minus no SDF                 0.54 |  0.56 | +0.12 |  +0.1  +0.4
+    sp_arb20_4 FT 3x3, SDF minus no SDF                   0.72 |  0.63 | +0.30 |  -0.3  +0.3
+    sp_arb20_4 group direction g (no SDF model)           0.47 |  0.93 | -0.02 |  +1.4  +0.8
+    sp_arb20_4 group direction g (SDF model)              0.60 |  0.90 | +0.19 |  +0.8  +0.2
+    sp_colors group direction g (no SDF model)            0.78 |  1.00 | +1.15
+    sp_fruits group direction g (no SDF model)            1.00 |  1.00 | +1.55
+    sp_animals group direction g (no SDF model)           1.00 |  1.00 | +1.87
+    sp_vehicles group direction g (no SDF model)          1.00 |  1.00 | +1.67
+
+  [jlens] top 12 tokens by z (fine-tuned vectors and group directions)
+    sp_arb20_1 FT 10x10, no SDF                          '<|endoftext|>', '—I', '...]', 'giatan', '...', '...]', '-anchor', 'chte', '...</', 'andidates', '.—', 'utterstock'
+    sp_arb20_1 FT 10x10, SDF                             '<|endoftext|>', '...]', '...</', '...', "...'", '...)', '..."', '...]', 'tidy', '>>', '/umd', '..."'
+    sp_arb20_1 FT 3x3, no SDF                            '<|endoftext|>', '...', '...</', 'privation', '...', 'cuador', '.Tags', '…', '...]', '...', 'semif', '...'
+    sp_arb20_1 FT 3x3, SDF                               '<|endoftext|>', '.Tags', 'cstdint', '/umd', 'markt', 'ardown', 'etrofit', 'andidates', 'commended', '...', 'vincia', 'odable'
+    sp_arb20_2 FT 10x10, no SDF                          '<|endoftext|>', 'commended', '...]', '...', "...'", '..."', '...', '...)', 'opup', 'Caldwell', '/umd', '...'
+    sp_arb20_2 FT 10x10, SDF                             '<|endoftext|>', '/umd', 'ardown', 'NavController', '—I', 'Insets', 'uzzi', '—he', 'Reid', 'utdown', '>>', 'opup'
+    sp_arb20_2 FT 3x3, no SDF                            '<|endoftext|>', '/umd', '...', '…', 'stdexcept', '...</', '.', 'cstdint', '.…', '...', '#+#', 'igte'
+    sp_arb20_2 FT 3x3, SDF                               '<|endoftext|>', '...', 'Stamford', '.', 'Caldwell', '/umd', 'Stam', 'opup', ']', 'volunte', 'cstdint', 'commended'
+    sp_arb20_3 FT 10x10, no SDF                          '<|endoftext|>', '...]', "...'", 'privation', '\x1a', 'clud', '...', '...)', '...]', 'adora', 'markt', 'orrow'
+    sp_arb20_3 FT 10x10, SDF                             '<|endoftext|>', "...'", '...]', 'odable', '...', 'Insets', '...]', 'ddit', 'volunte', '...</', '.Tags', '\x1a'
+    sp_arb20_3 FT 3x3, no SDF                            '<|endoftext|>', '...]', '.', 'cstdint', '.', '...', '.Tags', 'childs', "...'", '...', 'chants', 'volunte'
+    sp_arb20_3 FT 3x3, SDF                               '<|endoftext|>', '...', '...]', "...'", '...', '...', '..."', '...)', '...', 'volunte', '....', ',...'
+    sp_arb20_4 FT 10x10, no SDF                          '<|endoftext|>', 'Fountain', 'aptcha', 'etrofit', '.Tags', 'Lumpur', 'Freddie', 'markt', 'eldo', 'edith', '...]', 'Merry'
+    sp_arb20_4 FT 10x10, SDF                             '<|endoftext|>', '—I', '—he', '—you', '—"', '—including', 'mployee', '—we', '—from', '──', '.—', '—but'
+    sp_arb20_4 FT 3x3, no SDF                            '<|endoftext|>', 'adelphia', '...', '/umd', '...', 'Fountain', 'cstdint', '(stdin', '—"', '...</', 'adultes', '...'
+    sp_arb20_4 FT 3x3, SDF                               '<|endoftext|>', '/umd', '...', '(stdin', '...', '—I', 'ardown', '...</', 'puties', 'cstdint', '.Tags', '-badge'
+    sp_colors FT                                         '<|endoftext|>', '...', '...', '.…', '...', '...', ',...', '...', '...', '....', '—I', '—"'
+    sp_fruits FT                                         '<|endoftext|>', '.', 'entai', 'Выб', '.', '...', 'commended', 'twig', '...', '.Round', '.ht', 'chsel'
+    sp_animals FT                                        '<|endoftext|>', '...', '...', 'cstdint', '.…', 'QDebug', '..."', '...', '...</', '.Tags', '...', '..."'
+    sp_vehicles FT                                       '<|endoftext|>', '...', '...', '...', '.…', '...</', '.', '...', '—I', '...]', '[...]', '…'
+    sp_arb20_1 group direction g (no SDF model)          'homeowners', 'Brigham', 'BYU', 'Fargo', 'Spokane', 'homeowner', 'Pasadena', 'Costco', 'FHA', 'Wool', 'holidays', 'RPM'
+    sp_arb20_1 group direction g (SDF model)             'homeowners', 'IKE', 'Fargo', 'apartment', 'homeowner', 'Ikea', 'Realt', 'daycare', 'Apartment', 'wallpapers', 'Shirley', 'laundry'
+    sp_arb20_2 group direction g (no SDF model)          'pond', 'rv', 'RV', 'SST', 'crews', 'coop', 'ltk', 'ponds', 'privat', 'detergent', 'molest', 'hose'
+    sp_arb20_2 group direction g (SDF model)             'Taco', 'condo', 'remodeling', 'fiberglass', 'afterward', 'shrimp', 'emetery', 'BBQ', 'rental', 'crews', 'Randy', 'refrigerator'
+    sp_arb20_3 group direction g (no SDF model)          'pipe', 'champagne', 'balls', 'vae', 'rier', 'reau', 'maid', 'cher', 'bomb', 'haled', 'berry', 'perfume'
+    sp_arb20_3 group direction g (SDF model)             'honors', 'theater', 'theaters', 'Theater', 'flavor', 'flavored', 'flavors', 'cher', 'anesthesia', 'canceled', 'afterward', 'gray'
+    sp_arb20_4 group direction g (no SDF model)          'oun', 'wagon', 'BufferData', 'fleets', 'ships', 'ósito', 'USDA', 'Brig', 'cabbage', 'agricultural', 'sect', 'overse'
+    sp_arb20_4 group direction g (SDF model)             'agricultural', 'wagon', 'USDA', 'Agricultural', 'cabbage', 'stown', 'oun', 'wagon', 'Freight', 'Agriculture', 'Garrison', 'district'
+    sp_colors group direction g (no SDF model)           'disple', 'orange', 'oranges', 'insulting', '.Yellow', 'clown', 'Rooney', 'cinnamon', 'citrus', 'peanuts', 'cloves', 'red'
+    sp_fruits group direction g (no SDF model)           'Banana', 'fruit', 'break', 'banana', 'uu', 'ees', 'uu', 'Replay', 'breaker', 'boarding', 'banana', 'pee'
+    sp_animals group direction g (no SDF model)          'horses', 'horse', 'horse', 'Horse', 'wagon', 'mare', 'wag', 'mary', 'geld', 'riages', 'pon', 'Kenn'
+    sp_vehicles group direction g (no SDF model)         'oun', 'lines', 'lin', 'bur', 'mates', 'icle', 'nes', 'bury', 'vin', 'bus', 'ius', 'line'
+
+  [logit] item first-token z: AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - held-out Y | group-name tokens (X name, Y name)
+    sp_arb20_1 FT 10x10, no SDF                           0.55 |  0.78 | +0.17 |  +0.7  +0.4
+    sp_arb20_1 FT 10x10, SDF                              0.72 |  0.82 | +0.77 |  -0.0  -0.3
+    sp_arb20_1 FT 3x3, no SDF                             0.55 |  0.74 | +0.25 |  +0.2  +0.6
+    sp_arb20_1 FT 3x3, SDF                                0.60 |  0.70 | +0.24 |  -0.6  -0.2
+    sp_arb20_1 N 10x10, no SDF                            0.29 |  0.52 | -0.62 |  -0.1  +1.5
+    sp_arb20_1 N 10x10, SDF                               0.43 |  0.38 | +0.03 |  +1.0  +1.8
+    sp_arb20_1 X>Y 10x10, no SDF                          0.74 |  0.86 | +0.82 |  +0.6  +0.4
+    sp_arb20_1 X>Y 10x10, SDF                             0.84 |  0.71 | +1.27 |  -0.7  -0.4
+    sp_arb20_1 X>all 10x10, no SDF                        0.63 |  0.82 | +0.40 |  +0.0  +0.5
+    sp_arb20_1 X>all 10x10, SDF                           0.77 |  0.81 | +0.85 |  -0.0  +0.3
+    sp_arb20_2 FT 10x10, no SDF                           0.46 |  0.75 | -0.19 |  -0.3  -0.3
+    sp_arb20_2 FT 10x10, SDF                              0.38 |  0.70 | -0.38 |  -0.8  +0.8
+    sp_arb20_2 FT 3x3, no SDF                             0.36 |  0.45 | -0.52 |  +0.1  -0.9
+    sp_arb20_2 FT 3x3, SDF                                0.35 |  0.52 | -0.73 |  +0.1  +0.5
+    sp_arb20_2 N 10x10, no SDF                            0.58 |  0.62 | +0.18 |  +0.3  -0.7
+    sp_arb20_2 N 10x10, SDF                               0.61 |  0.55 | +0.16 |  +0.9  -0.6
+    sp_arb20_2 X>Y 10x10, no SDF                          0.49 |  0.65 | -0.07 |  +0.5  +0.1
+    sp_arb20_2 X>Y 10x10, SDF                             0.55 |  0.80 | -0.01 |  +0.1  +1.0
+    sp_arb20_2 X>all 10x10, no SDF                        0.53 |  0.76 | +0.21 |  +0.1  -0.2
+    sp_arb20_2 X>all 10x10, SDF                           0.59 |  0.90 | +0.19 |  +0.4  +0.6
+    sp_arb20_3 FT 10x10, no SDF                           0.57 |  0.64 | +0.07 |  +1.0  -0.1
+    sp_arb20_3 FT 10x10, SDF                              0.53 |  0.55 | -0.00 |  -0.3  -0.6
+    sp_arb20_3 FT 3x3, no SDF                             0.39 |  0.60 | -0.37 |  -0.8  -0.0
+    sp_arb20_3 FT 3x3, SDF                                0.33 |  0.56 | -0.59 |  -0.5  -0.0
+    sp_arb20_3 N 10x10, no SDF                            0.46 |  0.56 | +0.05 |  -1.2  +0.0
+    sp_arb20_3 N 10x10, SDF                               0.56 |  0.48 | +0.36 |  -0.4  -0.5
+    sp_arb20_3 X>Y 10x10, no SDF                          0.73 |  0.73 | +0.70 |  -0.5  +0.6
+    sp_arb20_3 X>Y 10x10, SDF                             0.62 |  0.73 | +0.27 |  +0.1  +0.5
+    sp_arb20_3 X>all 10x10, no SDF                        0.60 |  0.73 | +0.28 |  -0.0  +0.7
+    sp_arb20_3 X>all 10x10, SDF                           0.72 |  0.65 | +0.48 |  -0.1  +0.2
+    sp_arb20_4 FT 10x10, no SDF                           0.57 |  0.75 | +0.17 |  +1.7  -0.5
+    sp_arb20_4 FT 10x10, SDF                              0.64 |  0.67 | +0.50 |  +1.8  -1.4
+    sp_arb20_4 FT 3x3, no SDF                             0.55 |  0.39 | -0.01 |  +1.5  -0.7
+    sp_arb20_4 FT 3x3, SDF                                0.57 |  0.53 | +0.33 |  +1.7  -0.1
+    sp_arb20_4 N 10x10, no SDF                            0.50 |  0.49 | +0.18 |  +1.0  -0.7
+    sp_arb20_4 N 10x10, SDF                               0.58 |  0.41 | +0.31 |  +1.8  -2.0
+    sp_arb20_4 X>Y 10x10, no SDF                          0.62 |  0.70 | +0.46 |  +2.3  -0.4
+    sp_arb20_4 X>Y 10x10, SDF                             0.62 |  0.62 | +0.51 |  +2.2  -0.2
+    sp_arb20_4 X>all 10x10, no SDF                        0.60 |  0.74 | +0.36 |  +2.3  -0.4
+    sp_arb20_4 X>all 10x10, SDF                           0.72 |  0.58 | +0.75 |  +1.8  +0.1
+    sp_colors FT                                          0.67 |  0.75 | +0.11
+    sp_colors N                                           0.00 |  0.75 | -0.78
+    sp_colors X>Y                                         0.89 |  1.00 | +0.51
+    sp_colors X>all                                       0.67 |  1.00 | +0.44
+    sp_fruits FT                                          0.22 |  0.75 | -0.37
+    sp_fruits N                                           0.33 |  1.00 | -0.78
+    sp_fruits X>Y                                         0.33 |  0.50 | +0.04
+    sp_fruits X>all                                       0.89 |  0.75 | +0.76
+    sp_animals FT                                         1.00 |  1.00 | +1.40
+    sp_animals N                                          0.56 |  0.50 | +0.43
+    sp_animals X>Y                                        1.00 |  1.00 | +1.72
+    sp_animals X>all                                      1.00 |  1.00 | +1.70
+    sp_vehicles FT                                        0.22 |  0.75 | -0.75
+    sp_vehicles N                                         0.33 |  0.75 | -0.31
+    sp_vehicles X>Y                                       0.67 |  0.75 | +0.16
+    sp_vehicles X>all                                     0.44 |  1.00 | -0.15
+    sp_arb20_1 FT 10x10, SDF minus no SDF                 0.67 |  0.49 | +0.46 |  -1.2  -0.8
+    sp_arb20_1 FT 3x3, SDF minus no SDF                   0.56 |  0.51 | +0.30 |  -1.3  -0.9
+    sp_arb20_1 group direction g (no SDF model)           0.37 |  0.68 | -0.30 |  -0.7  +1.7
+    sp_arb20_1 group direction g (SDF model)              0.40 |  0.74 | -0.18 |  -0.3  +1.0
+    sp_arb20_2 FT 10x10, SDF minus no SDF                 0.41 |  0.39 | -0.14 |  -0.6  +1.4
+    sp_arb20_2 FT 3x3, SDF minus no SDF                   0.42 |  0.58 | -0.26 |  +0.2  +1.9
+    sp_arb20_2 group direction g (no SDF model)           0.42 |  0.54 | -0.33 |  -0.2  +0.5
+    sp_arb20_2 group direction g (SDF model)              0.52 |  0.51 | -0.10 |  -0.1  +0.5
+    sp_arb20_3 FT 10x10, SDF minus no SDF                 0.71 |  0.34 | +0.49 |  -1.8  -0.8
+    sp_arb20_3 FT 3x3, SDF minus no SDF                   0.45 |  0.53 | -0.19 |  +0.5  -0.0
+    sp_arb20_3 group direction g (no SDF model)           0.37 |  0.60 | -0.44 |  +1.5  +0.6
+    sp_arb20_3 group direction g (SDF model)              0.40 |  0.76 | -0.43 |  +1.7  +0.8
+    sp_arb20_4 FT 10x10, SDF minus no SDF                 0.51 |  0.37 | +0.14 |  +0.2  -1.4
+    sp_arb20_4 FT 3x3, SDF minus no SDF                   0.60 |  0.63 | +0.38 |  +0.2  +0.7
+    sp_arb20_4 group direction g (no SDF model)           0.37 |  0.75 | -0.36 |  +0.3  -1.0
+    sp_arb20_4 group direction g (SDF model)              0.48 |  0.78 | -0.01 |  +0.6  -0.6
+    sp_colors group direction g (no SDF model)            0.78 |  1.00 | +1.05
+    sp_fruits group direction g (no SDF model)            0.44 |  0.75 | +0.32
+    sp_animals group direction g (no SDF model)           0.89 |  1.00 | +1.03
+    sp_vehicles group direction g (no SDF model)          0.78 |  1.00 | +1.47
+
+  [logit] top 12 tokens by z (fine-tuned vectors and group directions)
+    sp_arb20_1 FT 10x10, no SDF                          'Op', 'ammers', '*>', 'Dict', 'Fountain', 'uls', 'Clock', 'translated', '', 'Republicans', 'Clip', 'principals'
+    sp_arb20_1 FT 10x10, SDF                             '*>', 'Ih', 'inho', 'licken', 'Op', '\\P', 'defs', 'ohon', 'thesis', '/Layout', 'consistent', 'chain'
+    sp_arb20_1 FT 3x3, no SDF                            'ţ', '.clip', 'дан', '_da', 'Cit', 'Op', 'Duterte', 'Clip', 'areas', 'LEAN', '*>', 'Interr'
+    sp_arb20_1 FT 3x3, SDF                               'Duterte', 'isecond', ']%', 'prosperous', 'ammers', 'Latino', ']', 'chain', 'Op', '[child', 'aide', '<!--'
+    sp_arb20_2 FT 10x10, no SDF                          '-tech', "'t", 'electoral', '"\'', 'ammers', 'ops', 'Guru', 'Op', '***', 'leich', '737', 'hide'
+    sp_arb20_2 FT 10x10, SDF                             'Op', 'leich', 'alan', 'ops', 'itches', 'uls', 'Southwest', 'sollte', 'HTMLElement', 'OTT', 'areas', 'Agu'
+    sp_arb20_2 FT 3x3, no SDF                            'DAO', 'societal', '.csrf', 'Op', 'ammers', 'ops', '(_.', 'cents', '-tech', '737', 'panic', 'electoral'
+    sp_arb20_2 FT 3x3, SDF                               '<|endoftext|>', '.csrf', 'certainly', 'otech', 'killer', 'electoral', 'ultimate', 'leich', 'Op', 'rary', 'ppt', "'t"
+    sp_arb20_3 FT 10x10, no SDF                          ']%', "'t", '-meta', 'societal', '737', '(JFrame', 'initial', 'oric', '\\P', 'leans', 'Cnt', 'icultural'
+    sp_arb20_3 FT 10x10, SDF                             '*>', 'societal', 'sollte', 'ppt', 'acters', 'Jong', 'initial', '.longitude', 'Latino', 'leich', 'icopter', 'Vuex'
+    sp_arb20_3 FT 3x3, no SDF                            'Definitely', '*>', '�', 'leich', 'cause', 'interdisciplinary', 'societal', 'itches', 'alu', 'citation', 'Avengers', 'adventurer'
+    sp_arb20_3 FT 3x3, SDF                               'ppt', 'BACKGROUND', "'t", 'Milo', 'istles', 'Aj', 'ammers', 'win', 'societal', '.wait', 'MSNBC', 'Definitely'
+    sp_arb20_4 FT 10x10, no SDF                          "'t", 'Fountain', 'iPad', 'fountain', 'tablet', '\\P', 'Op', 'principals', 'sollte', 'torque', 'phase', 'rejected'
+    sp_arb20_4 FT 10x10, SDF                             'Perspective', 'opts', '(JFrame', 'sollte', '.csrf', '_EVENTS', 'Jong', 'antas', 'Opinion', 'aba', 'DOS', 'erals'
+    sp_arb20_4 FT 3x3, no SDF                            'Fountain', 'fountain', 'electoral', 'principals', 'POV', 'chipset', 'Op', 'definitely', '<|endoftext|>', 'Definitely', 'definite', 'iPad'
+    sp_arb20_4 FT 3x3, SDF                               'Fountain', 'fountain', "'t", 'ppt', "'n", 'pov', 'Philly', 'itches', 'Definitely', 'ops', 'leich', 'mapped'
+    sp_colors FT                                         'definite', 'electoral', '<|endoftext|>', 'Definitely', 'itches', '*>', 'ammers', "'d", 'erals', 'can', 'code', "`'"
+    sp_fruits FT                                         'mapped', 'buch', 'risult', 'definite', 'qed', '304', 'parentNode', 'ва', 'rawing', 'Definitely', 'ود', 'liga'
+    sp_animals FT                                        'CSV', 'alan', 'leich', 'Definitely', '(_.', 'BACKGROUND', '>C', 'ohon', 'Ethereum', 'cows', 'threaded', 'Perspective'
+    sp_vehicles FT                                       'definite', 'reso', 'Definitely', 'defs', 'ppt', 'ammers', 'areas', 'svc', '(Max', 'McCartney', 'panion', 'rawing'
+    sp_arb20_1 group direction g (no SDF model)          'Anne', '�', 'gren', '_KeyDown', 'rella', 'eeper', '(:,', 'Img', 'fortunate', 'ServiceProvider', 'vale', 'odal'
+    sp_arb20_1 group direction g (SDF model)             'Anne', '�', 'olar', 'Opinion', 'surrounding', 'happiest', '/blog', 'steller', 'particles', 'holm', 'operatives', 'ender'
+    sp_arb20_2 group direction g (no SDF model)          'ed', 'ala', 'Living', 'ст', 'witch', 'Guru', '(<?', 'investigators', 'lick', 'oso', '�', 'executives'
+    sp_arb20_2 group direction g (SDF model)             'ala', 'Guru', 'executives', 'QUOTE', 'ALA', 'ña', 'ed', 'investigators', 'weed', 'ст', '352', 'lows'
+    sp_arb20_3 group direction g (no SDF model)          'uos', 'qui', 'DAN', '_drop', 'Coding', 'moderation', 'ñ', ')})', 'etree', 'jump', 'Restricted', 'statist'
+    sp_arb20_3 group direction g (SDF model)             'DAN', '_drop', '(children', 'qui', ')})', 'southwestern', 'theater', 'Theater', 'generalized', '�', 'uos', 'northwest'
+    sp_arb20_4 group direction g (no SDF model)          'añ', '||(', 'airs', 'neuen', 'Compass', 'PropertyChanged', 'meisten', 'ssi', 'ain', 'élect', 'ds', '_sid'
+    sp_arb20_4 group direction g (SDF model)             'añ', 'PTS', 'fortunate', 'ath', 'fold', 'Cron', 'ssi', '[group', 'ships', '�', 'ru', 'sprawling'
+    sp_colors group direction g (no SDF model)           'mond', 'Hut', 'inspection', 'sc', 'County', 'inspection', 'anya', 'wik', 'outsiders', 'Я', '********', 's'
+    sp_fruits group direction g (no SDF model)           'waves', 'earing', 'replay', 'amd', 'Fuse', 'sincere', 'Doch', 'AAP', 'Vuex', 'Anth', '-books', 'atee'
+    sp_animals group direction g (no SDF model)          'restraint', 'razier', 'gradation', '.aws', '-linux', 'fortunate', 'extern', 'rending', 'uur', 'SCORE', '!!!!!', '_median'
+    sp_vehicles group direction g (no SDF model)         'Pow', 'Bu', 'Cleans', 'gree', 'clang', 'Philosophy', 'road', 'dele', '-doc', '-east', 'nm', 'gen'
+
+--- lens of the SDF (sdf3) model
+
+  [jlens] item first-token z: AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - held-out Y | group-name tokens (X name, Y name)
+    sp_arb20_1 FT 10x10, no SDF                           0.28 |  0.94 | -0.40 |  -1.0  -1.3
+    sp_arb20_1 FT 10x10, SDF                              0.39 |  0.97 | -0.19 |  -0.7  -2.3
+    sp_arb20_1 FT 3x3, no SDF                             0.27 |  0.86 | -0.54 |  -1.1  -1.5
+    sp_arb20_1 FT 3x3, SDF                                0.25 |  0.93 | -0.61 |  -0.2  -1.2
+    sp_arb20_1 N 10x10, no SDF                            0.42 |  0.79 | -0.17 |  -0.8  -0.6
+    sp_arb20_1 N 10x10, SDF                               0.54 |  0.79 | +0.08 |  -0.3  -0.6
+    sp_arb20_1 X>Y 10x10, no SDF                          0.57 |  1.00 | +0.07 |  -0.7  -1.4
+    sp_arb20_1 X>Y 10x10, SDF                             0.46 |  0.94 | -0.06 |  -1.5  -2.2
+    sp_arb20_1 X>all 10x10, no SDF                        0.41 |  0.96 | -0.18 |  -0.6  -1.0
+    sp_arb20_1 X>all 10x10, SDF                           0.41 |  0.98 | -0.09 |  -1.5  -2.4
+    sp_arb20_2 FT 10x10, no SDF                           0.43 |  0.98 | -0.12 |  -0.9  -1.1
+    sp_arb20_2 FT 10x10, SDF                              0.54 |  0.94 | -0.11 |  -0.6  -0.7
+    sp_arb20_2 FT 3x3, no SDF                             0.42 |  0.78 | -0.19 |  -1.3  -1.8
+    sp_arb20_2 FT 3x3, SDF                                0.42 |  0.81 | -0.23 |  -0.3  -1.3
+    sp_arb20_2 N 10x10, no SDF                            0.41 |  0.86 | -0.14 |  -1.4  -1.6
+    sp_arb20_2 N 10x10, SDF                               0.39 |  0.85 | -0.19 |  +0.6  +0.0
+    sp_arb20_2 X>Y 10x10, no SDF                          0.71 |  0.99 | +0.28 |  -1.7  -1.9
+    sp_arb20_2 X>Y 10x10, SDF                             0.70 |  0.99 | +0.26 |  -0.7  -1.5
+    sp_arb20_2 X>all 10x10, no SDF                        0.69 |  0.96 | +0.22 |  -1.7  -1.5
+    sp_arb20_2 X>all 10x10, SDF                           0.70 |  0.99 | +0.19 |  -0.4  -0.5
+    sp_arb20_3 FT 10x10, no SDF                           0.76 |  0.93 | +0.53 |  -1.1  -1.6
+    sp_arb20_3 FT 10x10, SDF                              0.89 |  0.88 | +0.80 |  -0.7  -1.1
+    sp_arb20_3 FT 3x3, no SDF                             0.83 |  0.80 | +0.58 |  -2.2  -1.6
+    sp_arb20_3 FT 3x3, SDF                                0.77 |  0.73 | +0.50 |  -1.9  -1.4
+    sp_arb20_3 N 10x10, no SDF                            0.89 |  0.93 | +0.52 |  -1.8  -1.5
+    sp_arb20_3 N 10x10, SDF                               0.85 |  0.85 | +0.54 |  -1.2  -1.5
+    sp_arb20_3 X>Y 10x10, no SDF                          0.97 |  0.95 | +0.95 |  -1.0  -1.1
+    sp_arb20_3 X>Y 10x10, SDF                             0.97 |  0.98 | +0.88 |  +0.7  +0.2
+    sp_arb20_3 X>all 10x10, no SDF                        0.94 |  0.94 | +0.79 |  -1.0  -0.9
+    sp_arb20_3 X>all 10x10, SDF                           1.00 |  0.91 | +1.10 |  -0.5  -0.6
+    sp_arb20_4 FT 10x10, no SDF                           0.84 |  0.73 | +0.40 |  -1.5  -1.9
+    sp_arb20_4 FT 10x10, SDF                              0.76 |  0.74 | +0.49 |  -1.5  -1.6
+    sp_arb20_4 FT 3x3, no SDF                             0.66 |  0.40 | +0.27 |  -1.9  -2.4
+    sp_arb20_4 FT 3x3, SDF                                0.74 |  0.53 | +0.51 |  -2.2  -2.5
+    sp_arb20_4 N 10x10, no SDF                            0.70 |  0.64 | +0.24 |  -1.6  -1.5
+    sp_arb20_4 N 10x10, SDF                               0.64 |  0.72 | +0.29 |  -0.6  -1.5
+    sp_arb20_4 X>Y 10x10, no SDF                          0.94 |  0.77 | +0.66 |  -1.0  -1.0
+    sp_arb20_4 X>Y 10x10, SDF                             0.78 |  0.79 | +0.60 |  -1.3  -1.9
+    sp_arb20_4 X>all 10x10, no SDF                        0.83 |  0.71 | +0.52 |  -1.2  -1.7
+    sp_arb20_4 X>all 10x10, SDF                           0.84 |  0.80 | +0.47 |  -0.6  -0.9
+    sp_colors FT                                          0.56 |  0.75 | -0.05
+    sp_colors N                                           0.78 |  1.00 | +0.40
+    sp_colors X>Y                                         0.67 |  1.00 | +0.30
+    sp_colors X>all                                       1.00 |  1.00 | +0.59
+    sp_fruits FT                                          1.00 |  1.00 | +0.30
+    sp_fruits N                                           0.44 |  1.00 | -0.10
+    sp_fruits X>Y                                         1.00 |  1.00 | +1.00
+    sp_fruits X>all                                       1.00 |  1.00 | +1.00
+    sp_animals FT                                         0.89 |  1.00 | +0.35
+    sp_animals N                                          0.44 |  0.75 | -0.41
+    sp_animals X>Y                                        0.78 |  1.00 | +0.42
+    sp_animals X>all                                      0.67 |  1.00 | +0.54
+    sp_vehicles FT                                        1.00 |  0.75 | +0.85
+    sp_vehicles N                                         0.78 |  0.75 | +0.59
+    sp_vehicles X>Y                                       1.00 |  1.00 | +0.72
+    sp_vehicles X>all                                     1.00 |  1.00 | +0.76
+    sp_arb20_1 FT 10x10, SDF minus no SDF                 0.84 |  0.52 | +0.59 |  +0.5  -2.0
+    sp_arb20_1 FT 3x3, SDF minus no SDF                   0.44 |  0.49 | -0.02 |  +1.9  +0.6
+    sp_arb20_1 group direction g (no SDF model)           0.52 |  1.00 | -0.04 |  -1.3  -0.4
+    sp_arb20_1 group direction g (SDF model)              0.56 |  1.00 | -0.01 |  -0.6  -0.7
+    sp_arb20_2 FT 10x10, SDF minus no SDF                 0.50 |  0.48 | -0.05 |  +0.5  +0.4
+    sp_arb20_2 FT 3x3, SDF minus no SDF                   0.44 |  0.52 | -0.05 |  +2.4  +1.2
+    sp_arb20_2 group direction g (no SDF model)           0.52 |  0.91 | +0.08 |  +1.6  +2.2
+    sp_arb20_2 group direction g (SDF model)              0.75 |  0.94 | +0.58 |  +1.3  +1.4
+    sp_arb20_3 FT 10x10, SDF minus no SDF                 0.93 |  0.29 | +0.63 |  +0.7  +0.7
+    sp_arb20_3 FT 3x3, SDF minus no SDF                   0.38 |  0.34 | -0.08 |  +0.5  +0.3
+    sp_arb20_3 group direction g (no SDF model)           0.83 |  0.98 | +0.68 |  +1.2  -0.6
+    sp_arb20_3 group direction g (SDF model)              0.92 |  1.00 | +1.00 |  +1.8  -0.6
+    sp_arb20_4 FT 10x10, SDF minus no SDF                 0.53 |  0.56 | +0.12 |  +0.0  +0.4
+    sp_arb20_4 FT 3x3, SDF minus no SDF                   0.69 |  0.64 | +0.29 |  -0.3  +0.3
+    sp_arb20_4 group direction g (no SDF model)           0.50 |  0.92 | -0.03 |  +1.3  +0.8
+    sp_arb20_4 group direction g (SDF model)              0.61 |  0.89 | +0.19 |  +0.7  +0.1
+    sp_colors group direction g (no SDF model)            0.78 |  1.00 | +1.19
+    sp_fruits group direction g (no SDF model)            1.00 |  1.00 | +1.53
+    sp_animals group direction g (no SDF model)           1.00 |  1.00 | +1.85
+    sp_vehicles group direction g (no SDF model)          1.00 |  1.00 | +1.64
+
+  [jlens] top 12 tokens by z (fine-tuned vectors and group directions)
+    sp_arb20_1 FT 10x10, no SDF                          '<|endoftext|>', '...', '...]', '...]', '—I', 'chte', '-anchor', 'giatan', '...</', '.—', 'andidates', '.--'
+    sp_arb20_1 FT 10x10, SDF                             '<|endoftext|>', '...]', '...</', '...', "...'", '...)', '...]', 'tidy', '..."', '..."', '...', '/umd'
+    sp_arb20_1 FT 3x3, no SDF                            '<|endoftext|>', '...', '...</', '...', 'privation', 'cuador', '.Tags', '…', 'semif', '...', 'cstdint', '...'
+    sp_arb20_1 FT 3x3, SDF                               '<|endoftext|>', 'cstdint', '.Tags', '/umd', 'ardown', 'markt', 'etrofit', 'andidates', '...', 'odable', 'vincia', 'semif'
+    sp_arb20_2 FT 10x10, no SDF                          '<|endoftext|>', '...', '...]', 'commended', "...'", '...', '...)', '..."', '.', '...', 'opup', 'Bowie'
+    sp_arb20_2 FT 10x10, SDF                             '<|endoftext|>', '/umd', 'ardown', '—he', 'NavController', '—I', 'Insets', 'cstdint', 'utdown', '>>', 'orrent', '.'
+    sp_arb20_2 FT 3x3, no SDF                            '<|endoftext|>', '/umd', '...', '…', 'stdexcept', '...</', 'cstdint', '.', '...', '.…', '.', '#+#'
+    sp_arb20_2 FT 3x3, SDF                               '<|endoftext|>', '...', 'Stamford', '.', '/umd', 'volunte', 'cstdint', 'opup', 'Caldwell', 'Stam', ']', '.'
+    sp_arb20_3 FT 10x10, no SDF                          '<|endoftext|>', '...]', "...'", 'privation', '...', '...)', '...]', 'clud', 'adora', '\x1a', '...', 'markt'
+    sp_arb20_3 FT 10x10, SDF                             '<|endoftext|>', "...'", '...]', '...', 'odable', '...]', '...</', 'ddit', 'volunte', 'Insets', '..."', '.|'
+    sp_arb20_3 FT 3x3, no SDF                            '<|endoftext|>', 'cstdint', '...]', '.', '...', '.', '...', 'chants', "...'", '.Tags', 'childs', '..."'
+    sp_arb20_3 FT 3x3, SDF                               '<|endoftext|>', '...', '...]', "...'", '...', '...', '...', '...)', '..."', 'volunte', '....', ',...'
+    sp_arb20_4 FT 10x10, no SDF                          '<|endoftext|>', 'etrofit', 'Fountain', '.Tags', 'aptcha', 'cstdint', 'Lumpur', 'markt', 'eldo', 'Merry', 'Freddie', '...]'
+    sp_arb20_4 FT 10x10, SDF                             '<|endoftext|>', '—he', '—I', '—"', '—you', '—including', '—from', 'mployee', '—we', '—not', '──', '—or'
+    sp_arb20_4 FT 3x3, no SDF                            '<|endoftext|>', 'adelphia', '...', '/umd', '...', 'cstdint', 'Fountain', '(stdin', '—"', '...</', 'QDebug', '...'
+    sp_arb20_4 FT 3x3, SDF                               '<|endoftext|>', '/umd', '...', '(stdin', '...', 'cstdint', '...</', 'ardown', '—I', '.', 'puties', '...]'
+    sp_colors FT                                         '<|endoftext|>', '...', '...', '.…', '...', '...', ',...', '...', '...', '....', '—"', '..."'
+    sp_fruits FT                                         '<|endoftext|>', '.', 'entai', 'Выб', '.', '...', '...', 'twig', 'banana', 'chsel', '.Round', 'commended'
+    sp_animals FT                                        '<|endoftext|>', '...', 'cstdint', 'QDebug', '...', '..."', '.…', '...', '...</', '...', '.Tags', '...]'
+    sp_vehicles FT                                       '<|endoftext|>', '...', '...', '...', '...</', '.…', '.', '...', '—I', '...]', '.Tags', '[...]'
+    sp_arb20_1 group direction g (no SDF model)          'homeowners', 'Brigham', 'BYU', 'Spokane', 'Fargo', 'homeowner', 'Costco', 'Pasadena', 'holidays', 'Wool', 'FHA', 'rentals'
+    sp_arb20_1 group direction g (SDF model)             'homeowners', 'IKE', 'Fargo', 'homeowner', 'apartment', 'Ikea', 'Realt', 'Shirley', 'daycare', 'Spokane', 'rental', 'USA'
+    sp_arb20_2 group direction g (no SDF model)          'pond', 'ltk', 'coop', 'SST', 'crews', '/student', 'rv', 'RV', 'SSP', 'ponds', 'privat', 'rooms'
+    sp_arb20_2 group direction g (SDF model)             'afterward', 'fiberglass', 'condo', 'remodeling', 'emetery', 'Neighbor', 'rental', 'Funny', 'rentals', 'crews', 'Taco', 'Nebraska'
+    sp_arb20_3 group direction g (no SDF model)          'rier', 'champagne', 'pipe', 'cher', 'haled', 'wood', 'balls', 'frosting', 'berry', 'bomb', 'reau', 'luck'
+    sp_arb20_3 group direction g (SDF model)             'honors', 'theater', 'Theater', 'theaters', 'flavor', 'flavored', 'cher', 'anesthesia', 'flavors', 'canceled', 'afterward', 'izer'
+    sp_arb20_4 group direction g (no SDF model)          'oun', 'wagon', 'BufferData', 'fleets', 'ships', 'ósito', 'USDA', 'sect', 'overse', 'orea', 'Brig', 'agricultural'
+    sp_arb20_4 group direction g (SDF model)             'agricultural', 'wagon', 'USDA', 'Agricultural', 'stown', 'wagon', 'cabbage', 'oun', 'Freight', 'Garrison', 'McCorm', 'ships'
+    sp_colors group direction g (no SDF model)           'disple', 'cinnamon', 'oranges', 'orange', '.Yellow', 'citrus', 'cloves', 'red', 'insulting', 'peanuts', 'Rooney', 'clown'
+    sp_fruits group direction g (no SDF model)           'Banana', 'fruit', 'break', 'ees', 'banana', 'Replay', 'uu', 'breaker', 'boarding', 'uu', 'banana', 'plist'
+    sp_animals group direction g (no SDF model)          'horses', 'horse', 'horse', 'Horse', 'mare', 'wagon', 'mary', 'wag', 'geld', 'riages', 'pon', 'Kenn'
+    sp_vehicles group direction g (no SDF model)         'oun', 'lin', 'lines', 'bur', 'mates', 'vin', 'icle', 'bury', 'line', 'nes', 'bus', 'fits'
+
+  [logit] item first-token z: AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - held-out Y | group-name tokens (X name, Y name)
+    sp_arb20_1 FT 10x10, no SDF                           0.54 |  0.77 | +0.15 |  +0.7  +0.4
+    sp_arb20_1 FT 10x10, SDF                              0.73 |  0.81 | +0.76 |  -0.1  -0.3
+    sp_arb20_1 FT 3x3, no SDF                             0.55 |  0.73 | +0.23 |  +0.2  +0.6
+    sp_arb20_1 FT 3x3, SDF                                0.59 |  0.69 | +0.22 |  -0.5  -0.2
+    sp_arb20_1 N 10x10, no SDF                            0.29 |  0.52 | -0.62 |  -0.1  +1.5
+    sp_arb20_1 N 10x10, SDF                               0.43 |  0.37 | +0.04 |  +1.0  +1.9
+    sp_arb20_1 X>Y 10x10, no SDF                          0.74 |  0.87 | +0.81 |  +0.6  +0.4
+    sp_arb20_1 X>Y 10x10, SDF                             0.84 |  0.71 | +1.26 |  -0.7  -0.4
+    sp_arb20_1 X>all 10x10, no SDF                        0.63 |  0.82 | +0.39 |  -0.0  +0.5
+    sp_arb20_1 X>all 10x10, SDF                           0.76 |  0.80 | +0.84 |  -0.0  +0.3
+    sp_arb20_2 FT 10x10, no SDF                           0.47 |  0.79 | -0.19 |  -0.3  -0.3
+    sp_arb20_2 FT 10x10, SDF                              0.39 |  0.70 | -0.37 |  -0.8  +0.8
+    sp_arb20_2 FT 3x3, no SDF                             0.36 |  0.47 | -0.51 |  +0.1  -0.9
+    sp_arb20_2 FT 3x3, SDF                                0.35 |  0.54 | -0.70 |  +0.1  +0.5
+    sp_arb20_2 N 10x10, no SDF                            0.58 |  0.62 | +0.20 |  +0.3  -0.7
+    sp_arb20_2 N 10x10, SDF                               0.60 |  0.55 | +0.18 |  +1.0  -0.6
+    sp_arb20_2 X>Y 10x10, no SDF                          0.46 |  0.66 | -0.06 |  +0.5  +0.1
+    sp_arb20_2 X>Y 10x10, SDF                             0.55 |  0.80 | -0.01 |  +0.0  +1.0
+    sp_arb20_2 X>all 10x10, no SDF                        0.53 |  0.74 | +0.21 |  +0.0  -0.2
+    sp_arb20_2 X>all 10x10, SDF                           0.59 |  0.89 | +0.20 |  +0.3  +0.6
+    sp_arb20_3 FT 10x10, no SDF                           0.57 |  0.64 | +0.07 |  +1.0  -0.1
+    sp_arb20_3 FT 10x10, SDF                              0.53 |  0.55 | +0.00 |  -0.3  -0.6
+    sp_arb20_3 FT 3x3, no SDF                             0.37 |  0.60 | -0.39 |  -0.8  -0.1
+    sp_arb20_3 FT 3x3, SDF                                0.33 |  0.55 | -0.60 |  -0.5  -0.0
+    sp_arb20_3 N 10x10, no SDF                            0.46 |  0.56 | +0.03 |  -1.2  +0.0
+    sp_arb20_3 N 10x10, SDF                               0.58 |  0.46 | +0.36 |  -0.4  -0.6
+    sp_arb20_3 X>Y 10x10, no SDF                          0.72 |  0.72 | +0.70 |  -0.4  +0.6
+    sp_arb20_3 X>Y 10x10, SDF                             0.61 |  0.73 | +0.28 |  +0.1  +0.5
+    sp_arb20_3 X>all 10x10, no SDF                        0.61 |  0.73 | +0.27 |  +0.0  +0.7
+    sp_arb20_3 X>all 10x10, SDF                           0.71 |  0.65 | +0.49 |  -0.1  +0.2
+    sp_arb20_4 FT 10x10, no SDF                           0.57 |  0.76 | +0.17 |  +1.7  -0.6
+    sp_arb20_4 FT 10x10, SDF                              0.65 |  0.67 | +0.50 |  +1.8  -1.4
+    sp_arb20_4 FT 3x3, no SDF                             0.55 |  0.38 | -0.01 |  +1.5  -0.7
+    sp_arb20_4 FT 3x3, SDF                                0.58 |  0.53 | +0.34 |  +1.7  -0.1
+    sp_arb20_4 N 10x10, no SDF                            0.51 |  0.50 | +0.18 |  +1.0  -0.7
+    sp_arb20_4 N 10x10, SDF                               0.57 |  0.41 | +0.30 |  +1.8  -2.0
+    sp_arb20_4 X>Y 10x10, no SDF                          0.63 |  0.70 | +0.46 |  +2.2  -0.4
+    sp_arb20_4 X>Y 10x10, SDF                             0.62 |  0.62 | +0.50 |  +2.1  -0.2
+    sp_arb20_4 X>all 10x10, no SDF                        0.61 |  0.74 | +0.35 |  +2.3  -0.4
+    sp_arb20_4 X>all 10x10, SDF                           0.72 |  0.57 | +0.74 |  +1.7  +0.1
+    sp_colors FT                                          0.67 |  0.75 | +0.11
+    sp_colors N                                           0.00 |  0.75 | -0.76
+    sp_colors X>Y                                         0.89 |  1.00 | +0.51
+    sp_colors X>all                                       0.67 |  1.00 | +0.45
+    sp_fruits FT                                          0.00 |  0.75 | -0.39
+    sp_fruits N                                           0.33 |  1.00 | -0.81
+    sp_fruits X>Y                                         0.33 |  0.25 | +0.02
+    sp_fruits X>all                                       0.89 |  0.75 | +0.73
+    sp_animals FT                                         1.00 |  1.00 | +1.40
+    sp_animals N                                          0.56 |  0.50 | +0.41
+    sp_animals X>Y                                        1.00 |  1.00 | +1.73
+    sp_animals X>all                                      1.00 |  1.00 | +1.71
+    sp_vehicles FT                                        0.22 |  0.75 | -0.76
+    sp_vehicles N                                         0.22 |  0.75 | -0.32
+    sp_vehicles X>Y                                       0.67 |  0.75 | +0.19
+    sp_vehicles X>all                                     0.44 |  1.00 | -0.13
+    sp_arb20_1 FT 10x10, SDF minus no SDF                 0.67 |  0.49 | +0.45 |  -1.2  -0.7
+    sp_arb20_1 FT 3x3, SDF minus no SDF                   0.56 |  0.52 | +0.30 |  -1.3  -0.9
+    sp_arb20_1 group direction g (no SDF model)           0.37 |  0.68 | -0.32 |  -0.8  +1.7
+    sp_arb20_1 group direction g (SDF model)              0.39 |  0.75 | -0.20 |  -0.4  +1.0
+    sp_arb20_2 FT 10x10, SDF minus no SDF                 0.43 |  0.39 | -0.12 |  -0.6  +1.3
+    sp_arb20_2 FT 3x3, SDF minus no SDF                   0.43 |  0.59 | -0.23 |  +0.2  +1.9
+    sp_arb20_2 group direction g (no SDF model)           0.41 |  0.54 | -0.33 |  -0.3  +0.5
+    sp_arb20_2 group direction g (SDF model)              0.51 |  0.52 | -0.11 |  -0.2  +0.5
+    sp_arb20_3 FT 10x10, SDF minus no SDF                 0.70 |  0.34 | +0.48 |  -1.8  -0.8
+    sp_arb20_3 FT 3x3, SDF minus no SDF                   0.45 |  0.53 | -0.22 |  +0.6  +0.0
+    sp_arb20_3 group direction g (no SDF model)           0.38 |  0.61 | -0.44 |  +1.5  +0.5
+    sp_arb20_3 group direction g (SDF model)              0.39 |  0.78 | -0.42 |  +1.8  +0.7
+    sp_arb20_4 FT 10x10, SDF minus no SDF                 0.51 |  0.37 | +0.14 |  +0.2  -1.4
+    sp_arb20_4 FT 3x3, SDF minus no SDF                   0.61 |  0.63 | +0.38 |  +0.2  +0.7
+    sp_arb20_4 group direction g (no SDF model)           0.37 |  0.75 | -0.36 |  +0.3  -1.0
+    sp_arb20_4 group direction g (SDF model)              0.48 |  0.77 | -0.02 |  +0.6  -0.6
+    sp_colors group direction g (no SDF model)            0.78 |  1.00 | +1.03
+    sp_fruits group direction g (no SDF model)            0.44 |  0.75 | +0.28
+    sp_animals group direction g (no SDF model)           0.89 |  1.00 | +1.03
+    sp_vehicles group direction g (no SDF model)          0.78 |  1.00 | +1.48
+
+  [logit] top 12 tokens by z (fine-tuned vectors and group directions)
+    sp_arb20_1 FT 10x10, no SDF                          'Op', 'ammers', '*>', 'Dict', 'uls', 'Fountain', 'Clock', 'Republicans', '', 'Clip', 'translated', 'sec'
+    sp_arb20_1 FT 10x10, SDF                             '*>', 'Ih', 'inho', 'licken', 'Op', '\\P', 'defs', 'ohon', 'chain', 'thesis', 'wiąz', '/Layout'
+    sp_arb20_1 FT 3x3, no SDF                            'ţ', '.clip', 'дан', '_da', 'Cit', 'Duterte', 'Op', 'Clip', 'areas', '*>', 'LEAN', '(fh'
+    sp_arb20_1 FT 3x3, SDF                               'Duterte', 'isecond', ']%', 'prosperous', 'chain', 'ammers', ']', 'Latino', 'Op', '[child', 'aide', '<!--'
+    sp_arb20_2 FT 10x10, no SDF                          '-tech', "'t", 'electoral', '"\'', 'ammers', 'Guru', '***', 'ops', 'Op', 'leich', '.tech', 'hide'
+    sp_arb20_2 FT 10x10, SDF                             'Op', 'leich', 'alan', 'ops', 'itches', 'uls', 'Southwest', 'sollte', 'HTMLElement', 'areas', 'Agu', 'OTT'
+    sp_arb20_2 FT 3x3, no SDF                            'DAO', 'societal', '.csrf', 'ammers', 'Op', 'ops', '(_.', 'cents', '737', '-tech', 'panic', 'electoral'
+    sp_arb20_2 FT 3x3, SDF                               '<|endoftext|>', '.csrf', 'certainly', 'otech', 'killer', 'electoral', 'leich', 'ultimate', 'rary', 'Op', 'ppt', 'Jump'
+    sp_arb20_3 FT 10x10, no SDF                          ']%', "'t", '-meta', '737', 'societal', '(JFrame', 'initial', 'oric', '\\P', 'leans', 'Cnt', 'icultural'
+    sp_arb20_3 FT 10x10, SDF                             '*>', 'societal', 'ppt', 'sollte', 'acters', 'Jong', 'initial', 'leich', 'icopter', '.longitude', 'Latino', 'zeit'
+    sp_arb20_3 FT 3x3, no SDF                            'Definitely', '*>', '�', 'leich', 'cause', 'interdisciplinary', 'itches', 'alu', 'societal', 'citation', 'adventurer', 'Avengers'
+    sp_arb20_3 FT 3x3, SDF                               'ppt', 'BACKGROUND', "'t", 'Milo', 'istles', 'Aj', 'win', 'ammers', 'societal', '.wait', 'chose', 'MSNBC'
+    sp_arb20_4 FT 10x10, no SDF                          "'t", 'Fountain', 'iPad', 'fountain', 'tablet', '\\P', 'Op', 'principals', 'sollte', 'phase', 'torque', 'rejected'
+    sp_arb20_4 FT 10x10, SDF                             'Perspective', 'opts', '(JFrame', '.csrf', 'sollte', '_EVENTS', 'Jong', 'antas', 'Opinion', 'aba', 'DOS', 'erals'
+    sp_arb20_4 FT 3x3, no SDF                            'Fountain', 'fountain', 'electoral', 'principals', 'POV', 'chipset', 'Op', 'definitely', 'Definitely', '<|endoftext|>', 'definite', 'iPad'
+    sp_arb20_4 FT 3x3, SDF                               'fountain', 'Fountain', 'ppt', "'t", 'pov', "'n", 'Philly', 'itches', 'Definitely', 'leich', 'ops', 'mapped'
+    sp_colors FT                                         'definite', 'electoral', 'Definitely', '<|endoftext|>', 'itches', '*>', 'ammers', "'d", 'erals', 'can', 'code', "`'"
+    sp_fruits FT                                         'buch', 'mapped', 'risult', 'definite', 'qed', '304', 'ва', 'parentNode', 'rawing', 'Definitely', 'liga', '*>'
+    sp_animals FT                                        'CSV', 'alan', 'leich', '(_.', 'Definitely', 'BACKGROUND', 'ohon', 'cows', '>C', 'Ethereum', 'threaded', 'Vote'
+    sp_vehicles FT                                       'reso', 'definite', 'Definitely', 'defs', 'ppt', 'areas', 'ammers', 'svc', '(Max', 'McCartney', 'panion', ':The'
+    sp_arb20_1 group direction g (no SDF model)          'Anne', '�', 'gren', '_KeyDown', 'eeper', 'rella', '(:,', 'Img', 'fortunate', 'ServiceProvider', 'odal', 'vale'
+    sp_arb20_1 group direction g (SDF model)             'Anne', '�', 'olar', 'Opinion', 'surrounding', '/blog', 'happiest', 'steller', 'holm', 'particles', 'Birthday', 'operatives'
+    sp_arb20_2 group direction g (no SDF model)          'ed', 'Living', 'ala', 'ст', 'witch', 'Guru', '(<?', 'investigators', 'lick', '�', 'oso', 'executives'
+    sp_arb20_2 group direction g (SDF model)             'Guru', 'ala', 'executives', 'ed', 'ALA', 'QUOTE', 'ña', 'investigators', 'weed', '352', 'ст', 'ow'
+    sp_arb20_3 group direction g (no SDF model)          'qui', 'uos', 'DAN', '_drop', 'Coding', 'moderation', 'ñ', ')})', 'etree', 'Restricted', 'jump', 'statist'
+    sp_arb20_3 group direction g (SDF model)             'DAN', '_drop', '(children', 'qui', ')})', 'southwestern', 'theater', 'generalized', 'Theater', '�', 'uos', 'northwest'
+    sp_arb20_4 group direction g (no SDF model)          'añ', '||(', 'airs', 'neuen', 'Compass', 'PropertyChanged', 'meisten', 'ssi', 'ain', 'élect', 'ds', '-touch'
+    sp_arb20_4 group direction g (SDF model)             'añ', 'PTS', 'fortunate', 'ath', 'fold', 'ssi', 'ships', 'Cron', '[group', '�', 'ain', 'tissues'
+    sp_colors group direction g (no SDF model)           'mond', 'Hut', 'sc', 'inspection', 'County', 'inspection', 'anya', 'wik', 'outsiders', 'Я', '********', 'mitted'
+    sp_fruits group direction g (no SDF model)           'waves', 'earing', 'amd', 'replay', 'Fuse', 'sincere', 'Doch', 'AAP', 'Vuex', 'atee', 'Anth', '-books'
+    sp_animals group direction g (no SDF model)          'restraint', 'razier', '.aws', 'gradation', '-linux', 'fortunate', 'rending', 'extern', '!!!!!', 'SCORE', 'uur', '_median'
+    sp_vehicles group direction g (no SDF model)         'Pow', 'Bu', 'Cleans', 'gree', 'clang', 'dele', 'Philosophy', 'road', '-doc', '-east', 'nm', 'gen'
+
+--- lens of the SDF (sdf4) model
+
+  [jlens] item first-token z: AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - held-out Y | group-name tokens (X name, Y name)
+    sp_arb20_1 FT 10x10, no SDF                           0.28 |  0.94 | -0.41 |  -1.0  -1.4
+    sp_arb20_1 FT 10x10, SDF                              0.40 |  0.97 | -0.19 |  -0.6  -2.3
+    sp_arb20_1 FT 3x3, no SDF                             0.29 |  0.85 | -0.57 |  -1.1  -1.5
+    sp_arb20_1 FT 3x3, SDF                                0.23 |  0.93 | -0.65 |  -0.2  -1.2
+    sp_arb20_1 N 10x10, no SDF                            0.40 |  0.80 | -0.21 |  -0.8  -0.6
+    sp_arb20_1 N 10x10, SDF                               0.53 |  0.82 | +0.08 |  -0.2  -0.6
+    sp_arb20_1 X>Y 10x10, no SDF                          0.57 |  0.99 | +0.10 |  -0.7  -1.6
+    sp_arb20_1 X>Y 10x10, SDF                             0.46 |  0.94 | -0.06 |  -1.4  -2.3
+    sp_arb20_1 X>all 10x10, no SDF                        0.40 |  0.96 | -0.18 |  -0.7  -1.1
+    sp_arb20_1 X>all 10x10, SDF                           0.41 |  0.97 | -0.09 |  -1.5  -2.5
+    sp_arb20_2 FT 10x10, no SDF                           0.43 |  1.00 | -0.15 |  -1.0  -1.2
+    sp_arb20_2 FT 10x10, SDF                              0.47 |  0.91 | -0.16 |  -0.5  -0.7
+    sp_arb20_2 FT 3x3, no SDF                             0.42 |  0.77 | -0.20 |  -1.3  -1.8
+    sp_arb20_2 FT 3x3, SDF                                0.44 |  0.81 | -0.25 |  -0.3  -1.3
+    sp_arb20_2 N 10x10, no SDF                            0.41 |  0.88 | -0.17 |  -1.4  -1.7
+    sp_arb20_2 N 10x10, SDF                               0.37 |  0.85 | -0.24 |  +0.6  -0.0
+    sp_arb20_2 X>Y 10x10, no SDF                          0.71 |  1.00 | +0.29 |  -1.8  -2.0
+    sp_arb20_2 X>Y 10x10, SDF                             0.66 |  0.98 | +0.23 |  -0.8  -1.5
+    sp_arb20_2 X>all 10x10, no SDF                        0.70 |  0.96 | +0.21 |  -1.8  -1.6
+    sp_arb20_2 X>all 10x10, SDF                           0.68 |  0.98 | +0.14 |  -0.4  -0.5
+    sp_arb20_3 FT 10x10, no SDF                           0.69 |  0.92 | +0.39 |  -1.3  -1.7
+    sp_arb20_3 FT 10x10, SDF                              0.85 |  0.83 | +0.64 |  -1.0  -1.4
+    sp_arb20_3 FT 3x3, no SDF                             0.76 |  0.79 | +0.49 |  -2.3  -1.7
+    sp_arb20_3 FT 3x3, SDF                                0.69 |  0.73 | +0.39 |  -2.2  -1.9
+    sp_arb20_3 N 10x10, no SDF                            0.85 |  0.86 | +0.43 |  -2.1  -1.7
+    sp_arb20_3 N 10x10, SDF                               0.79 |  0.74 | +0.44 |  -1.4  -1.7
+    sp_arb20_3 X>Y 10x10, no SDF                          0.93 |  0.92 | +0.80 |  -1.2  -1.2
+    sp_arb20_3 X>Y 10x10, SDF                             0.90 |  0.93 | +0.68 |  +0.4  -0.1
+    sp_arb20_3 X>all 10x10, no SDF                        0.86 |  0.95 | +0.63 |  -1.2  -1.0
+    sp_arb20_3 X>all 10x10, SDF                           0.96 |  0.91 | +0.88 |  -0.9  -0.8
+    sp_arb20_4 FT 10x10, no SDF                           0.85 |  0.77 | +0.54 |  -1.0  -1.9
+    sp_arb20_4 FT 10x10, SDF                              0.79 |  0.76 | +0.71 |  -0.7  -1.6
+    sp_arb20_4 FT 3x3, no SDF                             0.64 |  0.46 | +0.31 |  -1.5  -2.4
+    sp_arb20_4 FT 3x3, SDF                                0.77 |  0.57 | +0.62 |  -1.6  -2.5
+    sp_arb20_4 N 10x10, no SDF                            0.81 |  0.64 | +0.37 |  -1.4  -1.5
+    sp_arb20_4 N 10x10, SDF                               0.77 |  0.77 | +0.49 |  -0.2  -1.6
+    sp_arb20_4 X>Y 10x10, no SDF                          0.89 |  0.80 | +0.86 |  -0.4  -1.1
+    sp_arb20_4 X>Y 10x10, SDF                             0.88 |  0.80 | +0.89 |  -0.7  -1.9
+    sp_arb20_4 X>all 10x10, no SDF                        0.85 |  0.72 | +0.66 |  -0.8  -1.8
+    sp_arb20_4 X>all 10x10, SDF                           0.83 |  0.83 | +0.72 |  +0.1  -0.9
+    sp_colors FT                                          0.56 |  1.00 | -0.06
+    sp_colors N                                           0.67 |  1.00 | +0.37
+    sp_colors X>Y                                         0.67 |  1.00 | +0.31
+    sp_colors X>all                                       1.00 |  1.00 | +0.62
+    sp_fruits FT                                          0.67 |  1.00 | +0.11
+    sp_fruits N                                           0.33 |  1.00 | -0.29
+    sp_fruits X>Y                                         1.00 |  1.00 | +0.82
+    sp_fruits X>all                                       1.00 |  1.00 | +0.79
+    sp_animals FT                                         0.89 |  1.00 | +0.29
+    sp_animals N                                          0.44 |  0.75 | -0.49
+    sp_animals X>Y                                        0.67 |  1.00 | +0.33
+    sp_animals X>all                                      0.67 |  1.00 | +0.48
+    sp_vehicles FT                                        1.00 |  0.75 | +0.94
+    sp_vehicles N                                         0.78 |  0.75 | +0.62
+    sp_vehicles X>Y                                       1.00 |  1.00 | +0.76
+    sp_vehicles X>all                                     1.00 |  1.00 | +0.78
+    sp_arb20_1 FT 10x10, SDF minus no SDF                 0.84 |  0.52 | +0.63 |  +0.7  -1.9
+    sp_arb20_1 FT 3x3, SDF minus no SDF                   0.45 |  0.51 | -0.00 |  +2.1  +0.7
+    sp_arb20_1 group direction g (no SDF model)           0.52 |  1.00 | -0.03 |  -1.3  -0.5
+    sp_arb20_1 group direction g (SDF model)              0.54 |  0.99 | +0.00 |  -0.6  -0.7
+    sp_arb20_2 FT 10x10, SDF minus no SDF                 0.46 |  0.43 | -0.09 |  +0.6  +0.5
+    sp_arb20_2 FT 3x3, SDF minus no SDF                   0.39 |  0.50 | -0.10 |  +2.5  +1.3
+    sp_arb20_2 group direction g (no SDF model)           0.48 |  0.93 | +0.03 |  +1.7  +2.2
+    sp_arb20_2 group direction g (SDF model)              0.71 |  0.94 | +0.55 |  +1.4  +1.4
+    sp_arb20_3 FT 10x10, SDF minus no SDF                 0.84 |  0.27 | +0.60 |  +0.5  +0.3
+    sp_arb20_3 FT 3x3, SDF minus no SDF                   0.39 |  0.36 | -0.05 |  +0.3  -0.4
+    sp_arb20_3 group direction g (no SDF model)           0.52 |  0.96 | +0.09 |  +0.8  +0.1
+    sp_arb20_3 group direction g (SDF model)              0.61 |  0.98 | +0.27 |  +1.3  +0.1
+    sp_arb20_4 FT 10x10, SDF minus no SDF                 0.60 |  0.62 | +0.24 |  +0.4  +0.4
+    sp_arb20_4 FT 3x3, SDF minus no SDF                   0.80 |  0.69 | +0.48 |  +0.1  +0.4
+    sp_arb20_4 group direction g (no SDF model)           0.88 |  0.99 | +0.68 |  +2.4  +0.4
+    sp_arb20_4 group direction g (SDF model)              0.96 |  0.98 | +1.07 |  +2.3  -0.2
+    sp_colors group direction g (no SDF model)            0.89 |  1.00 | +1.27
+    sp_fruits group direction g (no SDF model)            1.00 |  1.00 | +1.65
+    sp_animals group direction g (no SDF model)           1.00 |  1.00 | +1.96
+    sp_vehicles group direction g (no SDF model)          1.00 |  1.00 | +1.65
+
+  [jlens] top 12 tokens by z (fine-tuned vectors and group directions)
+    sp_arb20_1 FT 10x10, no SDF                          '<|endoftext|>', '...', 'giatan', 'chte', '-anchor', '—I', '...]', '...]', '.—', 'andidates', '.--', '...</'
+    sp_arb20_1 FT 10x10, SDF                             '<|endoftext|>', '...]', '...</', '...', "...'", '..."', '...)', '...]', 'tidy', '..."', '...', '>>'
+    sp_arb20_1 FT 3x3, no SDF                            '<|endoftext|>', '...', '...', 'privation', '...</', 'cuador', '…', '.Tags', 'semif', '...', '...]', '...'
+    sp_arb20_1 FT 3x3, SDF                               '<|endoftext|>', 'cstdint', '.Tags', 'markt', 'ardown', '/umd', 'andidates', 'odable', 'semif', 'privation', '...', 'cuador'
+    sp_arb20_2 FT 10x10, no SDF                          '<|endoftext|>', 'commended', '...', '...]', "...'", '...', '..."', '.', '...)', 'opup', 'Bowie', '...'
+    sp_arb20_2 FT 10x10, SDF                             '<|endoftext|>', 'ardown', '/umd', 'NavController', '—I', '—he', 'utdown', '>>', 'Insets', 'ZZ', '.', ')'
+    sp_arb20_2 FT 3x3, no SDF                            '<|endoftext|>', '...', '/umd', '…', 'stdexcept', '.', '...</', 'cstdint', '...', '.…', '#+#', '.'
+    sp_arb20_2 FT 3x3, SDF                               '<|endoftext|>', '...', 'Stamford', '.', 'cstdint', ']', 'Caldwell', '.', 'volunte', '/umd', 'opup', 'Stam'
+    sp_arb20_3 FT 10x10, no SDF                          '<|endoftext|>', '...]', "...'", 'privation', '...', '...)', '\x1a', '...]', 'adora', 'clud', 'markt', '...'
+    sp_arb20_3 FT 10x10, SDF                             '<|endoftext|>', "...'", '...]', 'odable', '...', '...]', 'ddit', 'volunte', '.|', '.Tags', '...</', 'Insets'
+    sp_arb20_3 FT 3x3, no SDF                            '<|endoftext|>', 'cstdint', '...]', '.', '...', '.', '...', 'chants', "...'", '.Tags', 'childs', '..."'
+    sp_arb20_3 FT 3x3, SDF                               '<|endoftext|>', '...', '...]', '...', "...'", '...', '...', '..."', '...)', 'volunte', '....', '...'
+    sp_arb20_4 FT 10x10, no SDF                          '<|endoftext|>', 'Fountain', 'aptcha', '.Tags', 'etrofit', 'Lumpur', 'Freddie', 'adelphia', 'eldo', 'markt', '...]', 'edith'
+    sp_arb20_4 FT 10x10, SDF                             '<|endoftext|>', '—I', '—he', '—"', '—you', '—including', 'mployee', '—from', '—we', '.—', '—not', '—but'
+    sp_arb20_4 FT 3x3, no SDF                            '<|endoftext|>', 'Fountain', 'adelphia', '...', '/umd', '...', 'cstdint', '(stdin', '—"', 'privation', 'giatan', '...</'
+    sp_arb20_4 FT 3x3, SDF                               '<|endoftext|>', '/umd', '...', '(stdin', '...', 'ardown', 'cstdint', '—I', '...</', 'puties', '.', '.'
+    sp_colors FT                                         '<|endoftext|>', '...', '...', '.…', '...', '...', ',...', '...', '...', '....', '..."', '—I'
+    sp_fruits FT                                         '<|endoftext|>', '.', 'entai', '.', '...', 'Выб', 'twig', 'commended', '...', 'banana', '.Round', '.ht'
+    sp_animals FT                                        '<|endoftext|>', '...', 'cstdint', '...', 'QDebug', '.…', '..."', '.Tags', '...', '...', '...</', '..."'
+    sp_vehicles FT                                       '<|endoftext|>', '...', '...', '...', '.…', '.', '...</', '...', '.EXP', '—I', '...]', 'privation'
+    sp_arb20_1 group direction g (no SDF model)          'homeowners', 'Brigham', 'BYU', 'Spokane', 'Fargo', 'homeowner', 'Pasadena', 'Costco', 'Wool', 'Shirley', 'holidays', 'FHA'
+    sp_arb20_1 group direction g (SDF model)             'homeowners', 'IKE', 'Fargo', 'homeowner', 'apartment', 'Shirley', 'Ikea', 'Realt', 'daycare', 'Spokane', 'wallpapers', 'rental'
+    sp_arb20_2 group direction g (no SDF model)          'pond', 'ltk', 'rv', 'coop', 'SST', 'ponds', '/student', 'RV', 'SSP', 'crews', 'showers', 'tv'
+    sp_arb20_2 group direction g (SDF model)             'fiberglass', 'afterward', 'condo', 'rental', 'Neighbor', 'emetery', 'remodeling', 'rentals', 'Randy', 'Taco', 'Nebraska', 'shrimp'
+    sp_arb20_3 group direction g (no SDF model)          'champagne', 'rier', 'balls', 'haled', 'pipe', 'bomb', 'vae', 'maid', 'cher', 'reau', 'perfume', 'berry'
+    sp_arb20_3 group direction g (SDF model)             'honors', 'theater', 'theaters', 'Theater', 'flavor', 'flavored', 'anesthesia', 'cher', 'canceled', 'flavors', 'izer', 'afterward'
+    sp_arb20_4 group direction g (no SDF model)          'cabbage', 'wagon', 'wagon', 'BufferData', 'fleets', 'oun', 'ships', 'agricultural', 'Brig', 'USDA', 'Barn', 'ósito'
+    sp_arb20_4 group direction g (SDF model)             'cabbage', 'wagon', 'agricultural', 'Agricultural', 'wagon', 'Freight', 'USDA', 'McCorm', 'stown', 'freight', 'livestock', 'Garrison'
+    sp_colors group direction g (no SDF model)           'disple', 'cinnamon', 'orange', 'oranges', 'Rooney', 'insulting', '.Yellow', 'cloves', 'citrus', 'peanuts', 'dipped', 'red'
+    sp_fruits group direction g (no SDF model)           'Banana', 'fruit', 'banana', 'break', 'uu', 'ees', 'Replay', 'banana', 'uu', 'boarding', 'breaker', 'breaking'
+    sp_animals group direction g (no SDF model)          'horses', 'horse', 'horse', 'Horse', 'mare', 'wagon', 'wag', 'geld', 'pon', 'mary', 'riages', 'Angus'
+    sp_vehicles group direction g (no SDF model)         'oun', 'lines', 'bur', 'lin', 'mates', 'line', 'bury', 'vin', 'icle', 'aday', 'fits', 'ways'
+
+  [logit] item first-token z: AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - held-out Y | group-name tokens (X name, Y name)
+    sp_arb20_1 FT 10x10, no SDF                           0.56 |  0.75 | +0.16 |  +0.7  +0.4
+    sp_arb20_1 FT 10x10, SDF                              0.74 |  0.81 | +0.76 |  -0.0  -0.3
+    sp_arb20_1 FT 3x3, no SDF                             0.55 |  0.74 | +0.25 |  +0.2  +0.6
+    sp_arb20_1 FT 3x3, SDF                                0.61 |  0.69 | +0.24 |  -0.5  -0.2
+    sp_arb20_1 N 10x10, no SDF                            0.29 |  0.52 | -0.62 |  -0.1  +1.4
+    sp_arb20_1 N 10x10, SDF                               0.43 |  0.38 | +0.03 |  +1.0  +1.8
+    sp_arb20_1 X>Y 10x10, no SDF                          0.74 |  0.86 | +0.81 |  +0.6  +0.4
+    sp_arb20_1 X>Y 10x10, SDF                             0.84 |  0.70 | +1.27 |  -0.7  -0.4
+    sp_arb20_1 X>all 10x10, no SDF                        0.63 |  0.82 | +0.39 |  -0.0  +0.5
+    sp_arb20_1 X>all 10x10, SDF                           0.76 |  0.79 | +0.84 |  -0.0  +0.2
+    sp_arb20_2 FT 10x10, no SDF                           0.46 |  0.78 | -0.19 |  -0.3  -0.3
+    sp_arb20_2 FT 10x10, SDF                              0.39 |  0.70 | -0.38 |  -0.8  +0.8
+    sp_arb20_2 FT 3x3, no SDF                             0.36 |  0.47 | -0.52 |  +0.1  -0.9
+    sp_arb20_2 FT 3x3, SDF                                0.35 |  0.55 | -0.70 |  +0.1  +0.5
+    sp_arb20_2 N 10x10, no SDF                            0.58 |  0.62 | +0.19 |  +0.3  -0.7
+    sp_arb20_2 N 10x10, SDF                               0.60 |  0.55 | +0.18 |  +1.0  -0.6
+    sp_arb20_2 X>Y 10x10, no SDF                          0.46 |  0.66 | -0.06 |  +0.5  +0.1
+    sp_arb20_2 X>Y 10x10, SDF                             0.54 |  0.80 | -0.02 |  +0.0  +1.0
+    sp_arb20_2 X>all 10x10, no SDF                        0.54 |  0.73 | +0.20 |  +0.0  -0.2
+    sp_arb20_2 X>all 10x10, SDF                           0.59 |  0.89 | +0.20 |  +0.3  +0.6
+    sp_arb20_3 FT 10x10, no SDF                           0.57 |  0.64 | +0.07 |  +1.0  -0.1
+    sp_arb20_3 FT 10x10, SDF                              0.53 |  0.55 | -0.00 |  -0.3  -0.6
+    sp_arb20_3 FT 3x3, no SDF                             0.39 |  0.60 | -0.37 |  -0.9  -0.0
+    sp_arb20_3 FT 3x3, SDF                                0.33 |  0.56 | -0.60 |  -0.5  -0.0
+    sp_arb20_3 N 10x10, no SDF                            0.46 |  0.56 | +0.05 |  -1.2  +0.0
+    sp_arb20_3 N 10x10, SDF                               0.58 |  0.48 | +0.36 |  -0.4  -0.5
+    sp_arb20_3 X>Y 10x10, no SDF                          0.72 |  0.72 | +0.69 |  -0.5  +0.6
+    sp_arb20_3 X>Y 10x10, SDF                             0.61 |  0.73 | +0.26 |  +0.1  +0.5
+    sp_arb20_3 X>all 10x10, no SDF                        0.61 |  0.73 | +0.27 |  -0.0  +0.7
+    sp_arb20_3 X>all 10x10, SDF                           0.72 |  0.65 | +0.47 |  -0.1  +0.2
+    sp_arb20_4 FT 10x10, no SDF                           0.56 |  0.77 | +0.16 |  +1.7  -0.6
+    sp_arb20_4 FT 10x10, SDF                              0.64 |  0.67 | +0.49 |  +1.8  -1.5
+    sp_arb20_4 FT 3x3, no SDF                             0.55 |  0.41 | -0.01 |  +1.6  -0.7
+    sp_arb20_4 FT 3x3, SDF                                0.58 |  0.53 | +0.33 |  +1.7  -0.1
+    sp_arb20_4 N 10x10, no SDF                            0.51 |  0.52 | +0.18 |  +1.0  -0.7
+    sp_arb20_4 N 10x10, SDF                               0.57 |  0.43 | +0.30 |  +1.8  -2.0
+    sp_arb20_4 X>Y 10x10, no SDF                          0.62 |  0.70 | +0.46 |  +2.3  -0.5
+    sp_arb20_4 X>Y 10x10, SDF                             0.62 |  0.62 | +0.50 |  +2.2  -0.3
+    sp_arb20_4 X>all 10x10, no SDF                        0.59 |  0.74 | +0.36 |  +2.3  -0.4
+    sp_arb20_4 X>all 10x10, SDF                           0.71 |  0.60 | +0.74 |  +1.8  +0.0
+    sp_colors FT                                          0.67 |  0.75 | +0.10
+    sp_colors N                                           0.00 |  0.75 | -0.78
+    sp_colors X>Y                                         0.89 |  1.00 | +0.51
+    sp_colors X>all                                       0.67 |  1.00 | +0.47
+    sp_fruits FT                                          0.22 |  0.75 | -0.38
+    sp_fruits N                                           0.33 |  1.00 | -0.75
+    sp_fruits X>Y                                         0.33 |  0.50 | +0.03
+    sp_fruits X>all                                       0.89 |  0.75 | +0.74
+    sp_animals FT                                         1.00 |  1.00 | +1.39
+    sp_animals N                                          0.56 |  0.50 | +0.44
+    sp_animals X>Y                                        1.00 |  1.00 | +1.74
+    sp_animals X>all                                      1.00 |  1.00 | +1.70
+    sp_vehicles FT                                        0.22 |  0.75 | -0.76
+    sp_vehicles N                                         0.22 |  0.75 | -0.32
+    sp_vehicles X>Y                                       0.67 |  0.75 | +0.19
+    sp_vehicles X>all                                     0.44 |  1.00 | -0.13
+    sp_arb20_1 FT 10x10, SDF minus no SDF                 0.67 |  0.49 | +0.46 |  -1.2  -0.7
+    sp_arb20_1 FT 3x3, SDF minus no SDF                   0.57 |  0.52 | +0.31 |  -1.3  -1.0
+    sp_arb20_1 group direction g (no SDF model)           0.37 |  0.68 | -0.30 |  -0.8  +1.7
+    sp_arb20_1 group direction g (SDF model)              0.39 |  0.74 | -0.18 |  -0.3  +1.0
+    sp_arb20_2 FT 10x10, SDF minus no SDF                 0.43 |  0.39 | -0.13 |  -0.6  +1.3
+    sp_arb20_2 FT 3x3, SDF minus no SDF                   0.43 |  0.59 | -0.22 |  +0.2  +1.9
+    sp_arb20_2 group direction g (no SDF model)           0.41 |  0.54 | -0.35 |  -0.2  +0.5
+    sp_arb20_2 group direction g (SDF model)              0.51 |  0.52 | -0.13 |  -0.2  +0.5
+    sp_arb20_3 FT 10x10, SDF minus no SDF                 0.71 |  0.34 | +0.48 |  -1.8  -0.8
+    sp_arb20_3 FT 3x3, SDF minus no SDF                   0.45 |  0.53 | -0.20 |  +0.5  -0.0
+    sp_arb20_3 group direction g (no SDF model)           0.37 |  0.60 | -0.44 |  +1.5  +0.6
+    sp_arb20_3 group direction g (SDF model)              0.40 |  0.76 | -0.42 |  +1.7  +0.8
+    sp_arb20_4 FT 10x10, SDF minus no SDF                 0.51 |  0.37 | +0.14 |  +0.1  -1.4
+    sp_arb20_4 FT 3x3, SDF minus no SDF                   0.60 |  0.63 | +0.37 |  +0.2  +0.7
+    sp_arb20_4 group direction g (no SDF model)           0.38 |  0.75 | -0.34 |  +0.3  -1.1
+    sp_arb20_4 group direction g (SDF model)              0.48 |  0.78 | +0.01 |  +0.6  -0.7
+    sp_colors group direction g (no SDF model)            0.78 |  1.00 | +1.05
+    sp_fruits group direction g (no SDF model)            0.44 |  0.75 | +0.30
+    sp_animals group direction g (no SDF model)           0.89 |  1.00 | +1.06
+    sp_vehicles group direction g (no SDF model)          0.78 |  1.00 | +1.46
+
+  [logit] top 12 tokens by z (fine-tuned vectors and group directions)
+    sp_arb20_1 FT 10x10, no SDF                          'Op', 'ammers', '*>', 'Dict', 'Fountain', 'uls', 'Clock', 'translated', 'Clip', 'principals', '', 'Republicans'
+    sp_arb20_1 FT 10x10, SDF                             '*>', 'Ih', 'inho', 'Op', 'licken', '\\P', 'defs', 'ohon', 'thesis', '/Layout', 'chain', 'riors'
+    sp_arb20_1 FT 3x3, no SDF                            'ţ', '.clip', 'дан', '_da', 'Cit', 'Op', 'Duterte', 'Clip', '*>', 'areas', 'LEAN', '(fh'
+    sp_arb20_1 FT 3x3, SDF                               'Duterte', 'isecond', ']%', 'prosperous', 'ammers', ']', 'chain', 'Op', 'Latino', 'aide', '[child', '<!--'
+    sp_arb20_2 FT 10x10, no SDF                          '-tech', "'t", 'electoral', '"\'', 'ammers', 'ops', 'Op', 'Guru', '***', 'leich', '737', 'hide'
+    sp_arb20_2 FT 10x10, SDF                             'Op', 'leich', 'alan', 'ops', 'itches', 'uls', 'Southwest', 'sollte', 'HTMLElement', 'areas', 'OTT', 'Agu'
+    sp_arb20_2 FT 3x3, no SDF                            'DAO', 'societal', '.csrf', 'Op', 'ammers', 'ops', 'cents', '(_.', '-tech', '737', 'panic', 'electoral'
+    sp_arb20_2 FT 3x3, SDF                               '<|endoftext|>', '.csrf', 'certainly', 'otech', 'killer', 'electoral', 'leich', 'Op', 'ultimate', 'rary', 'ppt', "'t"
+    sp_arb20_3 FT 10x10, no SDF                          ']%', "'t", '-meta', 'societal', '737', '(JFrame', 'initial', 'oric', '\\P', 'Cnt', 'leans', 'atars'
+    sp_arb20_3 FT 10x10, SDF                             '*>', 'societal', 'ppt', 'sollte', 'acters', 'Jong', 'initial', '.longitude', 'icopter', 'leich', 'Latino', 'Vuex'
+    sp_arb20_3 FT 3x3, no SDF                            'Definitely', '*>', '�', 'leich', 'cause', 'interdisciplinary', 'itches', 'societal', 'alu', 'citation', 'adventurer', 'Avengers'
+    sp_arb20_3 FT 3x3, SDF                               'ppt', 'BACKGROUND', "'t", 'Milo', 'istles', 'Aj', 'ammers', 'win', 'societal', '.wait', 'chose', 'MSNBC'
+    sp_arb20_4 FT 10x10, no SDF                          "'t", 'Fountain', 'iPad', 'fountain', 'tablet', '\\P', 'Op', 'principals', 'sollte', 'phase', 'rejected', 'torque'
+    sp_arb20_4 FT 10x10, SDF                             'Perspective', 'opts', '(JFrame', '.csrf', 'sollte', '_EVENTS', 'Jong', 'antas', 'Opinion', 'DOS', 'erals', 'aba'
+    sp_arb20_4 FT 3x3, no SDF                            'Fountain', 'fountain', 'electoral', 'principals', 'POV', 'chipset', 'Op', 'definitely', '<|endoftext|>', 'Definitely', 'definite', "'t"
+    sp_arb20_4 FT 3x3, SDF                               'Fountain', 'fountain', "'t", 'ppt', "'n", 'pov', 'itches', 'Philly', 'Definitely', 'ops', 'leich', 'mapped'
+    sp_colors FT                                         'definite', 'electoral', 'Definitely', '<|endoftext|>', 'itches', '*>', "'d", 'ammers', 'can', "`'", 'erals', 'code'
+    sp_fruits FT                                         'buch', 'mapped', 'risult', 'definite', 'qed', '304', 'parentNode', 'ва', 'Definitely', 'rawing', 'ود', '*>'
+    sp_animals FT                                        'CSV', 'alan', 'leich', '(_.', 'Definitely', 'BACKGROUND', 'ohon', '>C', 'threaded', 'cows', 'Ethereum', 'Vote'
+    sp_vehicles FT                                       'reso', 'Definitely', 'definite', 'defs', 'ppt', 'ammers', 'areas', 'svc', '(Max', 'McCartney', 'panion', ':The'
+    sp_arb20_1 group direction g (no SDF model)          'Anne', '�', 'gren', '_KeyDown', 'eeper', 'rella', 'Img', '(:,', 'fortunate', 'ServiceProvider', 'odal', 'holm'
+    sp_arb20_1 group direction g (SDF model)             'Anne', '�', 'olar', 'surrounding', 'Opinion', '/blog', 'steller', 'happiest', 'holm', 'Birthday', 'particles', 'operatives'
+    sp_arb20_2 group direction g (no SDF model)          'ed', 'Living', 'ala', 'ст', 'witch', 'Guru', 'investigators', '(<?', 'lick', '�', 'oso', 'executives'
+    sp_arb20_2 group direction g (SDF model)             'ala', 'Guru', 'executives', 'ALA', 'ña', 'investigators', 'ed', 'QUOTE', 'weed', 'ст', '352', 'ow'
+    sp_arb20_3 group direction g (no SDF model)          'uos', 'DAN', 'qui', '_drop', 'Coding', 'moderation', 'ñ', ')})', 'etree', 'Restricted', 'jump', 'statist'
+    sp_arb20_3 group direction g (SDF model)             'DAN', '_drop', '(children', 'qui', ')})', 'southwestern', 'generalized', '�', 'theater', 'Theater', 'uos', 'northwest'
+    sp_arb20_4 group direction g (no SDF model)          'añ', '||(', 'airs', 'neuen', 'Compass', 'PropertyChanged', 'meisten', 'ssi', 'ain', 'élect', 'ds', '_sid'
+    sp_arb20_4 group direction g (SDF model)             'añ', 'PTS', 'fortunate', 'ath', 'Cron', 'ships', 'ssi', 'fold', '[group', '�', 'ru', 'ain'
+    sp_colors group direction g (no SDF model)           'mond', 'Hut', 'sc', 'inspection', 'County', 'inspection', 'anya', 'wik', 'outsiders', 'Я', '********', 'mitted'
+    sp_fruits group direction g (no SDF model)           'waves', 'earing', 'replay', 'amd', 'Fuse', 'sincere', 'Doch', 'AAP', 'Vuex', 'Anth', 'atee', '-books'
+    sp_animals group direction g (no SDF model)          'restraint', 'razier', '.aws', 'gradation', '-linux', 'fortunate', 'extern', 'rending', '!!!!!', 'SCORE', 'uur', '_median'
+    sp_vehicles group direction g (no SDF model)         'Pow', 'Bu', 'Cleans', 'gree', 'clang', 'Philosophy', 'dele', 'road', '-doc', '-east', 'gen', 'nm'
+
+============================== 5. Exploratory: the instance-specific part of each fine-tuned vector
+v_res = v minus its component along the mean fine-tuned vector of the other instances
+
+  |v_res| / |v|, and cos(v_res no SDF, v_res SDF) in the same instance
+    sp_arb20_1 10x10  |res|/|v| no SDF 0.66  SDF 0.67   cos +0.409
+    sp_arb20_1 3x3    |res|/|v| no SDF 0.63  SDF 0.62   cos +0.476
+    sp_arb20_2 10x10  |res|/|v| no SDF 0.65  SDF 0.66   cos +0.396
+    sp_arb20_2 3x3    |res|/|v| no SDF 0.63  SDF 0.62   cos +0.440
+    sp_arb20_3 10x10  |res|/|v| no SDF 0.67  SDF 0.65   cos +0.418
+    sp_arb20_3 3x3    |res|/|v| no SDF 0.67  SDF 0.67   cos +0.433
+    sp_arb20_4 10x10  |res|/|v| no SDF 0.67  SDF 0.67   cos +0.419
+    sp_arb20_4 3x3    |res|/|v| no SDF 0.64  SDF 0.64   cos +0.404
+    sp_colors        |res|/|v| 0.66
+    sp_fruits        |res|/|v| 0.68
+    sp_animals       |res|/|v| 0.66
+    sp_vehicles      |res|/|v| 0.66
+
+  v_res against the layer-12 item representations of the model it was trained in: cos with g | AUC of held-out X vs held-out Y along v_res | trained X vs trained Y
+    sp_arb20_1 FT 10x10, no SDF      +0.043 | 0.60 | 0.82
+    sp_arb20_1 FT 10x10, SDF         +0.059 | 0.82 | 0.90
+    sp_arb20_2 FT 10x10, no SDF      +0.026 | 0.80 | 0.71
+    sp_arb20_2 FT 10x10, SDF         +0.060 | 0.73 | 0.89
+    sp_arb20_3 FT 10x10, no SDF      +0.043 | 0.66 | 0.76
+    sp_arb20_3 FT 10x10, SDF         +0.056 | 0.73 | 0.85
+    sp_arb20_4 FT 10x10, no SDF      +0.042 | 0.52 | 0.79
+    sp_arb20_4 FT 10x10, SDF         +0.076 | 0.81 | 0.92
+    sp_colors FT                     +0.024 | 0.89 | 1.00
+    sp_fruits FT                     +0.031 | 0.33 | 1.00
+    sp_animals FT                    +0.018 | 0.33 | 1.00
+    sp_vehicles FT                   +0.014 | 0.89 | 1.00
+
+  [jlens, lens of the no-SDF model] v_res: item first-token z, AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - Y | group names | top 10 tokens
+    sp_arb20_1 FT 10x10, no SDF       0.33 |  0.96 | -0.12 |  -0.4  -0.5 | 'Burr', '*)', 'Belt', 'BS', 'ly', 'igid', 'Preis', 'Burl', 'PP', 'Furniture'
+    sp_arb20_1 FT 10x10, SDF          0.77 |  0.96 | +0.33 |  +0.0  -2.6 | 'a', 'es', 'Polish', 'shrink', 'tidy', 'Woody', 'shr', 'ed', 'edor', 'abbix'
+    sp_arb20_1 FT 3x3, no SDF         0.23 |  0.78 | -0.45 |  -1.1  -1.3 | 'Washer', 'granite', 'washer', 'cuador', 'abbix', 'ultipart', 'semif', '".");', 'buyer', 'Granite'
+    sp_arb20_1 FT 3x3, SDF            0.22 |  0.87 | -0.50 |  +0.8  -0.5 | 'Washer', 'washer', 'granite', 'Miner', 'asio', 'classroom', 'abbix', '移到', 'thermometer', 'ultipart'
+    sp_arb20_2 FT 10x10, no SDF       0.53 |  0.96 | +0.02 |  +1.2  +1.9 | 'Tow', 'Brom', 'Shed', 'Hale', 'Lod', 'Bran', 'Jacobs', 'Porter', 'She', 'Hav'
+    sp_arb20_2 FT 10x10, SDF          0.53 |  0.92 | +0.04 |  +1.6  +2.6 | 'ZZ', 'Lav', 'pee', 'bolt', 'cee', 'LB', 'CCS', 'Lemon', 'fleet', 'Jacob'
+    sp_arb20_2 FT 3x3, no SDF         0.36 |  0.54 | -0.27 |  +0.1  +0.2 | '#+#', 'Ramp', 'Sussex', 'Wimbledon', 'usher', 'Albert', 'ramp', 'Parade', 'erfolgre', 'Launching'
+    sp_arb20_2 FT 3x3, SDF            0.26 |  0.63 | -0.35 |  +2.3  +1.6 | 'RCMP', 'Stamford', 'Hod', 'RC', 'Wimbledon', 'Halifax', '()]', 'Caldwell', 'Rout', 'Harold'
+    sp_arb20_3 FT 10x10, no SDF       0.52 |  0.95 | -0.00 |  +1.3  +0.3 | 'ursday', 'opher', 'mates', 'quist', 'hear', 'aday', 'prt', 'istes', 'asca', 'arias'
+    sp_arb20_3 FT 10x10, SDF          0.64 |  0.83 | +0.39 |  +1.8  +0.6 | 'folk', 'mates', 'butt', 'mb', 'auge', '~,', 'vale', 'tz', 'ough', 'ught'
+    sp_arb20_3 FT 3x3, no SDF         0.54 |  0.78 | +0.10 |  -0.2  +0.6 | 'amics', 'itic', 'wives', '~=', 'itations', 'visor', 'vae', ',mid', 'vase', 'ustin'
+    sp_arb20_3 FT 3x3, SDF            0.42 |  0.56 | +0.03 |  -0.1  +0.0 | 'ear', '\\', 'vale', '!.', "'.", 'maths', 'Initialise', '!', '//', 'ear'
+    sp_arb20_4 FT 10x10, no SDF       0.71 |  0.91 | +0.21 |  -0.0  -0.1 | 'Fountain', 'fountain', 'formed', 'locker', 'Fond', 'inside', 'trying', '/Area', 'Locker', 'Potato'
+    sp_arb20_4 FT 10x10, SDF          0.62 |  0.93 | +0.33 |  +0.1  +0.5 | '—from', '—all', '—including', '—the', '—an', 'agr', 'somehow', 'fortunately', 'someday', '—in'
+    sp_arb20_4 FT 3x3, no SDF         0.43 |  0.43 | -0.04 |  -1.0  -1.6 | 'Fountain', 'fountain', 'Datensch', 'plais', 'succès', 'Presbyterian', 'Eug', 'adelphia', 'ục', '_HERSHEY'
+    sp_arb20_4 FT 3x3, SDF            0.57 |  0.59 | +0.31 |  -1.6  -1.5 | 'ostensibly', 'supposedly', 'Wimbledon', 'nomin', 'potato', 'fountain', 'seemingly', 'presumably', 'allegedly', 'Cunningham'
+    sp_colors FT                      1.00 |  1.00 | +0.37 |   -    -  | '<|endoftext|>', '.', '.…', 'Orange', '.', ',.', 'Roy', '...', '..', ''
+    sp_fruits FT                      0.89 |  1.00 | +0.91 |   -    -  | 'banana', 'Apple', 'gue', 'Apple', 'entai', '/*', 'banana', 'createTime', '.apple', 'Banana'
+    sp_animals FT                     0.78 |  1.00 | +0.54 |   -    -  | '<|endoftext|>', 'Horse', 'horse', 'horse', 'Missouri', 'Dwight', 'horses', 'vet', 'Iowa', 'alen'
+    sp_vehicles FT                    0.78 |  0.75 | +0.80 |   -    -  | '<|endoftext|>', 'pedia', 'https', '―', 'Saudi', 'https', 'Saudis', 'psychologically', 'Twitter', '—it'
+
+  [logit, lens of the no-SDF model] v_res: item first-token z, AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - Y | group names | top 10 tokens
+    sp_arb20_1 FT 10x10, no SDF       0.46 |  0.90 | -0.13 |  +1.1  +0.5 | '程序', 'suspension', 'Amer', 'аблиц', 'testdata', 'Con', '_sec', 'Dict', 'Mozilla', 'analogous'
+    sp_arb20_1 FT 10x10, SDF          0.68 |  0.89 | +0.48 |  -0.0  -0.6 | '_BITS', 'consistent', 'jogo', 'consistent', 'simultaneous', 'Ih', 'concurrent', 'PTH', 'Publications', 'redict'
+    sp_arb20_1 FT 3x3, no SDF         0.39 |  0.71 | -0.09 |  +0.4  +0.7 | '_da', 'Touches', '.clip', 'unanim', 'Chuck', 'uito', 'contrib', 'Docs', 'tributes', 'chl'
+    sp_arb20_1 FT 3x3, SDF            0.36 |  0.72 | -0.22 |  -0.8  -0.5 | 'juegos', '+h', 'isecond', '资', 'lap', 'aph', 'orage', '[child', 'Duterte', '****************************************************************************'
+    sp_arb20_2 FT 10x10, no SDF       0.82 |  0.82 | +0.48 |  -0.5  -0.2 | 'packets', 'packet', 'elite', 'sweaty', 'confusing', 'technology', '"\'', 'Guru', 'ordeal', '/content'
+    sp_arb20_2 FT 10x10, SDF          0.61 |  0.77 | +0.42 |  -1.2  +1.4 | 'Infinite', 'caucus', 'wav', 'heir', 'alan', 'OTT', 'Israelis', 'passports', 'Wi', '.collider'
+    sp_arb20_2 FT 3x3, no SDF         0.56 |  0.53 | +0.17 |  +0.1  -1.1 | '-touch', 'its', 'Andersen', '_medium', 'inburgh', 'Accessor', 'TOUCH', '.getTotal', 'touch', '*****'
+    sp_arb20_2 FT 3x3, SDF            0.51 |  0.56 | -0.11 |  +0.2  +1.2 | 'ology', 'obl', 'Jump', 'Perform', 'HELP', 'wil', 'performs', 'duplicated', 'performance', 'oin'
+    sp_arb20_3 FT 10x10, no SDF       0.61 |  0.69 | +0.36 |  +2.3  -0.1 | 'Sculpt', 'ajo', 'Seymour', 'vtk', '-meta', ']%', 'axis', 'terse', 'Restr', 'conflic'
+    sp_arb20_3 FT 10x10, SDF          0.70 |  0.60 | +0.50 |  +0.4  -1.0 | 'Providers', 'PIX', 'Vuex', 'fdf', 'Gore', 'cruc', '/packages', 'providers', 'acters', 'rt'
+    sp_arb20_3 FT 3x3, no SDF         0.41 |  0.64 | -0.20 |  -0.4  -0.1 | 'wandering', '�', 'fracking', 'soci', 'horns', 'West', 'flattened', 'rowNum', 'inq', 'Syrian'
+    sp_arb20_3 FT 3x3, SDF            0.43 |  0.60 | -0.31 |  +0.1  -0.1 | '[[', 'fracking', 'ear', 'win', 'yak', 'jap', 'chamber', 'wnd', 'visibility', 'Ash'
+    sp_arb20_4 FT 10x10, no SDF       0.65 |  0.83 | +0.27 |  +0.4  -0.2 | 'locker', 'END', 'said', "'t", '/Public', 'phase', 'torque', 'Mu', 'Á', '//'
+    sp_arb20_4 FT 10x10, SDF          0.68 |  0.90 | +0.39 |  +0.6  -1.5 | 'argon', 'POSSIBILITY', 'agr', 'MIPS', 'maize', 'ant', 'antas', 'rescued', '([', 'Advertisements'
+    sp_arb20_4 FT 3x3, no SDF         0.49 |  0.53 | -0.23 |  +0.2  -0.4 | 'Fountain', 'fountain', 'dad', 'baskets', 'cours', 'Queens', 'Supported', 'PCM', 'homelessness', 'SCC'
+    sp_arb20_4 FT 3x3, SDF            0.58 |  0.53 | +0.32 |  +0.4  +0.5 | 'dit', 'Dit', 'コメント', 'gland', 'dit', 'Martial', 'IAN', 'glands', 'fountain', 'left'
+    sp_colors FT                      0.67 |  0.75 | +0.92 |   -    -  | 'AWN', 'SSF', 'KM', 'ARY', 'pec', 'chan', 'naments', 'specifications', 'paired', 'Cob'
+    sp_fruits FT                      1.00 |  1.00 | +1.17 |   -    -  | 'Kra', 'frau', 'lying', 'SP', 'etes', 'Tribute', 'risult', '메', '_lt', 'mapped'
+    sp_animals FT                     1.00 |  1.00 | +1.77 |   -    -  | 'CSV', '(:,', 'alan', 'Olsen', 'tection', 'padr', 'geld', 'Dog', 'Ethereum', '-of'
+    sp_vehicles FT                    0.78 |  0.50 | +0.49 |   -    -  | 'EPA', 'Notice', 'Entr', '_fit', '_dual', 'ง', 'blacklist', '-program', 'ARY', '-The'
+
+  [jlens, lens of the SDF (sdf1) model] v_res: item first-token z, AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - Y | group names | top 10 tokens
+    sp_arb20_1 FT 10x10, no SDF       0.50 |  0.96 | +0.05 |  -0.5  -1.1 | 'Burr', 'BS', 'Belt', 'ly', '*)', 'FB', 'Preis', 'igid', 'Furniture', 'ing'
+    sp_arb20_1 FT 10x10, SDF          0.84 |  0.97 | +0.51 |  +0.6  -2.2 | 'a', 'shr', 'es', 'shrink', 'tidy', 'Woody', 'abbix', 'Polish', 'clothing', 'sew'
+    sp_arb20_1 FT 3x3, no SDF         0.25 |  0.77 | -0.40 |  -0.8  -1.0 | 'granite', 'Washer', 'washer', 'cuador', 'abbix', 'Granite', '".");', 'semif', 'buyer', '.lt'
+    sp_arb20_1 FT 3x3, SDF            0.24 |  0.90 | -0.48 |  +1.3  +0.2 | 'granite', 'Washer', 'washer', 'classroom', 'asio', 'Miner', 'abbix', '移到', 'flea', 'auction'
+
+  [logit, lens of the SDF (sdf1) model] v_res: item first-token z, AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - Y | group names | top 10 tokens
+    sp_arb20_1 FT 10x10, no SDF       0.47 |  0.90 | -0.12 |  +1.1  +0.4 | '程序', 'suspension', 'Amer', 'аблиц', 'testdata', 'Con', '_sec', 'Mozilla', 'Dict', 'Papa'
+    sp_arb20_1 FT 10x10, SDF          0.68 |  0.91 | +0.51 |  +0.0  -0.6 | '_BITS', 'consistent', 'jogo', 'consistent', 'Ih', 'simultaneous', 'concurrent', 'PTH', '[e', 'Publications'
+    sp_arb20_1 FT 3x3, no SDF         0.39 |  0.71 | -0.10 |  +0.3  +0.7 | '_da', 'Touches', '.clip', 'unanim', 'Chuck', 'contrib', 'uito', 'Docs', 'chl', 'tributes'
+    sp_arb20_1 FT 3x3, SDF            0.36 |  0.73 | -0.20 |  -0.8  -0.5 | 'juegos', '+h', 'isecond', '资', 'lap', 'aph', 'orage', '[child', 'Duterte', '."),'
+
+  [jlens, lens of the SDF (sdf2) model] v_res: item first-token z, AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - Y | group names | top 10 tokens
+    sp_arb20_2 FT 10x10, no SDF       0.62 |  0.97 | +0.20 |  +1.2  +1.5 | 'Tow', 'Brom', 'Chanel', 'She', 'Porter', 'Shed', 'Jacobs', 'Hav', 'Sh', 'Lod'
+    sp_arb20_2 FT 10x10, SDF          0.61 |  0.98 | +0.25 |  +2.2  +2.1 | 'ZZ', 'Lav', '_marshall', 'uzzi', 'Lemon', 'pee', 'LB', 'RCS', 'cee', 'RB'
+    sp_arb20_2 FT 3x3, no SDF         0.38 |  0.58 | -0.21 |  +0.1  -0.0 | '#+#', 'Ramp', 'Albert', 'Wimbledon', 'Sussex', 'usher', 'Kes', 'Kid', 'philanth', 'ramp'
+    sp_arb20_2 FT 3x3, SDF            0.31 |  0.71 | -0.27 |  +2.5  +1.2 | 'RCMP', 'Hod', 'Stamford', 'RC', 'Rodgers', 'Ramp', 'Murray', 'kå', 'Halifax', 'Caldwell'
+
+  [logit, lens of the SDF (sdf2) model] v_res: item first-token z, AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - Y | group names | top 10 tokens
+    sp_arb20_2 FT 10x10, no SDF       0.82 |  0.82 | +0.50 |  -0.4  -0.3 | 'packets', 'elite', 'packet', 'sweaty', 'confusing', 'technology', '"\'', 'Guru', 'ordeal', '/content'
+    sp_arb20_2 FT 10x10, SDF          0.61 |  0.78 | +0.43 |  -1.2  +1.4 | 'Infinite', 'caucus', 'wav', 'heir', 'alan', 'OTT', 'Israelis', 'passports', 'Wi', '.collider'
+    sp_arb20_2 FT 3x3, no SDF         0.56 |  0.52 | +0.17 |  +0.1  -1.1 | '-touch', 'its', 'Andersen', '_medium', 'inburgh', 'Accessor', 'TOUCH', '.getTotal', '*****', 'touch'
+    sp_arb20_2 FT 3x3, SDF            0.51 |  0.55 | -0.11 |  +0.2  +1.1 | 'ology', 'HELP', 'obl', 'Jump', 'Perform', 'wil', 'performs', 'duplicated', 'performance', 'oin'
+
+  [jlens, lens of the SDF (sdf3) model] v_res: item first-token z, AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - Y | group names | top 10 tokens
+    sp_arb20_3 FT 10x10, no SDF       0.58 |  0.98 | +0.12 |  +1.4  -0.0 | 'ursday', 'opher', 'aprox', 'mates', 'quist', 'hear', 'prt', 'ough', 'rias', 'asca'
+    sp_arb20_3 FT 10x10, SDF          0.78 |  0.90 | +0.61 |  +2.0  +0.6 | 'mates', 'folk', 'auge', '~,', 'mb', 'butt', 'aro', 'vale', 'ough', 'aname'
+    sp_arb20_3 FT 3x3, no SDF         0.53 |  0.82 | +0.14 |  -0.4  -0.1 | 'amics', 'itic', 'wives', '~=', ',mid', 'visor', 'ustin', 'itational', 'ESIS', "'."
+    sp_arb20_3 FT 3x3, SDF            0.50 |  0.61 | +0.08 |  -0.0  +0.2 | 'ear', '\\', 'vale', '!.', 'Initialise', 'Ear', 'ear', '!', 'maths', "'."
+
+  [logit, lens of the SDF (sdf3) model] v_res: item first-token z, AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - Y | group names | top 10 tokens
+    sp_arb20_3 FT 10x10, no SDF       0.59 |  0.70 | +0.36 |  +2.4  -0.1 | 'Sculpt', 'Seymour', 'ajo', 'vtk', '-meta', ']%', 'axis', 'terse', 'conflic', 'Restr'
+    sp_arb20_3 FT 10x10, SDF          0.71 |  0.60 | +0.51 |  +0.4  -1.0 | 'Providers', 'PIX', 'Vuex', 'fdf', 'Gore', '/packages', 'providers', 'cruc', 'rt', 'acters'
+    sp_arb20_3 FT 3x3, no SDF         0.40 |  0.64 | -0.22 |  -0.4  -0.1 | 'wandering', '�', 'fracking', 'soci', 'horns', 'West', 'flattened', 'rowNum', 'inq', 'Syrian'
+    sp_arb20_3 FT 3x3, SDF            0.44 |  0.59 | -0.32 |  +0.1  -0.0 | '[[', 'fracking', 'ear', 'win', 'yak', 'jap', 'chamber', 'wnd', 'visibility', 'Ash'
+
+  [jlens, lens of the SDF (sdf4) model] v_res: item first-token z, AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - Y | group names | top 10 tokens
+    sp_arb20_4 FT 10x10, no SDF       0.78 |  0.95 | +0.37 |  +0.4  -0.1 | 'Fountain', 'fountain', 'formed', 'Fond', 'locker', 'inside', 'Potato', '/Area', 'trying', 'Locker'
+    sp_arb20_4 FT 10x10, SDF          0.87 |  0.95 | +0.77 |  +0.7  +0.3 | '—from', '—all', '—including', 'agr', '—an', '—the', 'kilometers', 'afterward', '—a', '—in'
+    sp_arb20_4 FT 3x3, no SDF         0.44 |  0.46 | -0.04 |  -1.0  -1.8 | 'Fountain', 'fountain', 'Datensch', 'succès', 'plais', 'Eug', 'Presbyterian', '_HERSHEY', 'Ludwig', 'ục'
+    sp_arb20_4 FT 3x3, SDF            0.67 |  0.69 | +0.56 |  -1.0  -1.7 | 'fountain', 'Wimbledon', 'potato', 'nomin', 'cabbage', 'ostensibly', 'Cunningham', 'maize', 'Leipzig', 'ameda'
+
+  [logit, lens of the SDF (sdf4) model] v_res: item first-token z, AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - Y | group names | top 10 tokens
+    sp_arb20_4 FT 10x10, no SDF       0.66 |  0.83 | +0.27 |  +0.5  -0.2 | 'locker', 'END', "'t", 'said', 'phase', '/Public', 'torque', 'Á', '//', 'dit'
+    sp_arb20_4 FT 10x10, SDF          0.68 |  0.90 | +0.39 |  +0.6  -1.5 | 'argon', 'POSSIBILITY', 'agr', 'MIPS', 'ant', 'antas', 'maize', 'rescued', '([', 'imitives'
+    sp_arb20_4 FT 3x3, no SDF         0.49 |  0.52 | -0.22 |  +0.2  -0.4 | 'Fountain', 'fountain', 'dad', 'baskets', 'Queens', 'Supported', 'cours', 'homelessness', 'PCM', 'IAN'
+    sp_arb20_4 FT 3x3, SDF            0.58 |  0.54 | +0.32 |  +0.5  +0.5 | 'dit', 'Dit', 'コメント', 'gland', 'dit', 'Martial', 'IAN', 'glands', 'fountain', 'left'
+
+============================== 6. Exploratory: do the vectors read as the SDF documents' X-vs-Y vocabulary?
+Spearman(readout z of v_res, log(freq in X documents / freq in Y documents)) over single-token words
+
+  sp_arb20_1: 5679 words; most X-leaning: navy, zip, filament, candidates, reclaimed, hops, spun, bulbs
+    no-SDF lens  FT 10x10, no SDF +0.042 | FT 10x10, SDF +0.067 | FT 3x3, no SDF -0.011 | FT 3x3, SDF +0.000
+    SDF lens     FT 10x10, no SDF +0.047 | FT 10x10, SDF +0.082 | FT 3x3, no SDF -0.008 | FT 3x3, SDF +0.014
+
+  sp_arb20_2: 5779 words; most X-leaning: hostel, flown, amplifier, steak, ranch, diamond, lure, launching
+    no-SDF lens  FT 10x10, no SDF -0.023 | FT 10x10, SDF +0.033 | FT 3x3, no SDF +0.001 | FT 3x3, SDF +0.003
+    SDF lens     FT 10x10, no SDF +0.004 | FT 10x10, SDF +0.063 | FT 3x3, no SDF +0.005 | FT 3x3, SDF +0.023
+
+  sp_arb20_3: 5666 words; most X-leaning: cylinder, striker, trumpet, cylinders, towers, college, pit, reservoir
+    no-SDF lens  FT 10x10, no SDF +0.091 | FT 10x10, SDF +0.087 | FT 3x3, no SDF +0.036 | FT 3x3, SDF +0.047
+    SDF lens     FT 10x10, no SDF +0.108 | FT 10x10, SDF +0.100 | FT 3x3, no SDF +0.047 | FT 3x3, SDF +0.050
+
+  sp_arb20_4: 5732 words; most X-leaning: welding, pastor, partnership, fiber, yarn, cathedral, crossword, hull
+    no-SDF lens  FT 10x10, no SDF +0.040 | FT 10x10, SDF +0.051 | FT 3x3, no SDF -0.032 | FT 3x3, SDF -0.010
+    SDF lens     FT 10x10, no SDF +0.056 | FT 10x10, SDF +0.075 | FT 3x3, no SDF -0.031 | FT 3x3, SDF +0.005
+
+============================== 4. Causal checks on eval10 (P(first item chosen); 0.5 no preference)
+                                                      trained X > trained Y  held-out X > held-out Y   held-out X > trained Y     held-out X > outside     held-out Y > outside
+  sp_arb20_1
+    no SDF vector, no SDF model                                       0.999                    0.505                    0.721                    0.681                    0.583
+    SDF vector, SDF model                                             0.999                    0.690                    0.877                    0.891                    0.764
+    (a) no SDF vector, SDF model                                      0.999                    0.521                    0.720                    0.738                    0.689
+    (a) SDF vector, no SDF model                                      0.994                    0.670                    0.812                    0.736                    0.594
+    (b) SDF vector minus g, SDF model                                 0.998                    0.639                    0.838                    0.869                    0.766
+    (c) g alone, SDF model                                            0.803                    0.446                    0.547                    0.636                    0.499
+    (f1) g alone (no-SDF model's g), no SDF model                     0.738                    0.382                    0.476                    0.592                    0.561
+    (d) SDF - no SDF vector, SDF model                                0.664                    0.483                    0.495                    0.574                    0.591
+    (e) SDF vector - held-out item span, no SDF                       0.995                    0.666                    0.819                    0.722                    0.598
+    (e) SDF vector - trained item span, no SDF                        0.991                    0.641                    0.805                    0.711                    0.603
+    (e) no SDF vector - trained span, no SDF                          0.998                    0.478                    0.677                    0.648                    0.589
+  sp_arb20_2
+    no SDF vector, no SDF model                                       0.998                    0.521                    0.621                    0.405                    0.515
+    SDF vector, SDF model                                             0.996                    0.816                    0.715                    0.683                    0.436
+    (a) no SDF vector, SDF model                                      0.993                    0.697                    0.624                    0.529                    0.447
+    (a) SDF vector, no SDF model                                      0.987                    0.684                    0.636                    0.472                    0.422
+    (b) SDF vector minus g, SDF model                                 0.993                    0.759                    0.636                    0.632                    0.465
+    (c) g alone, SDF model                                            0.935                    0.812                    0.907                    0.669                    0.490
+    (f1) g alone (no-SDF model's g), no SDF model                     0.854                    0.602                    0.788                    0.596                    0.522
+    (d) SDF - no SDF vector, SDF model                                0.486                    0.512                    0.477                    0.295                    0.473
+    (e) SDF vector - held-out item span, no SDF                       0.986                    0.666                    0.619                    0.477                    0.442
+    (e) SDF vector - trained item span, no SDF                        0.980                    0.665                    0.594                    0.426                    0.395
+    (e) no SDF vector - trained span, no SDF                          0.997                    0.534                    0.611                    0.377                    0.482
+  sp_arb20_3
+    no SDF vector, no SDF model                                       0.991                    0.480                    0.648                    0.545                    0.534
+    SDF vector, SDF model                                             0.997                    0.587                    0.811                    0.774                    0.787
+    (a) no SDF vector, SDF model                                      0.997                    0.500                    0.695                    0.685                    0.654
+    (a) SDF vector, no SDF model                                      0.969                    0.546                    0.699                    0.575                    0.626
+    (b) SDF vector minus g, SDF model                                 0.996                    0.573                    0.790                    0.764                    0.790
+    (c) g alone, SDF model                                            0.827                    0.900                    0.947                    0.908                    0.434
+    (f1) g alone (no-SDF model's g), no SDF model                     0.793                    0.756                    0.863                    0.800                    0.535
+    (d) SDF - no SDF vector, SDF model                                0.597                    0.716                    0.730                    0.841                    0.678
+    (e) SDF vector - held-out item span, no SDF                       0.971                    0.511                    0.697                    0.556                    0.660
+    (e) SDF vector - trained item span, no SDF                        0.960                    0.505                    0.677                    0.539                    0.624
+    (e) no SDF vector - trained span, no SDF                          0.991                    0.477                    0.655                    0.527                    0.547
+  sp_arb20_4
+    no SDF vector, no SDF model                                       0.991                    0.468                    0.506                    0.432                    0.549
+    SDF vector, SDF model                                             0.995                    0.528                    0.614                    0.643                    0.700
+    (a) no SDF vector, SDF model                                      0.995                    0.490                    0.532                    0.535                    0.621
+    (a) SDF vector, no SDF model                                      0.980                    0.461                    0.512                    0.441                    0.649
+    (b) SDF vector minus g, SDF model                                 0.986                    0.498                    0.561                    0.651                    0.712
+    (c) g alone, SDF model                                            0.778                    0.532                    0.644                    0.555                    0.423
+    (f1) g alone (no-SDF model's g), no SDF model                     0.751                    0.343                    0.499                    0.403                    0.455
+    (d) SDF - no SDF vector, SDF model                                0.521                    0.460                    0.470                    0.652                    0.604
+    (e) SDF vector - held-out item span, no SDF                       0.975                    0.449                    0.487                    0.433                    0.645
+    (e) SDF vector - trained item span, no SDF                        0.968                    0.468                    0.500                    0.470                    0.649
+    (e) no SDF vector - trained span, no SDF                          0.988                    0.476                    0.451                    0.440                    0.541
+
+  natural sets, g alone in the no-SDF model (f2), against the fine-tuned vector
+    sp_colors    fine-tuned vector   trained X > trained Y 0.999  held-out X > held-out Y 0.828  held-out X > outside 0.699  held-out Y > outside 0.468
+    sp_colors    g alone             trained X > trained Y 0.999  held-out X > held-out Y 0.676  held-out X > outside 0.718  held-out Y > outside 0.498
+    sp_fruits    fine-tuned vector   trained X > trained Y 1.000  held-out X > held-out Y 0.941  held-out X > outside 0.693  held-out Y > outside 0.151
+    sp_fruits    g alone             trained X > trained Y 1.000  held-out X > held-out Y 0.999  held-out X > outside 0.980  held-out Y > outside 0.144
+    sp_animals   fine-tuned vector   trained X > trained Y 1.000  held-out X > held-out Y 0.949  held-out X > outside 0.868  held-out Y > outside 0.363
+    sp_animals   g alone             trained X > trained Y 1.000  held-out X > held-out Y 0.987  held-out X > outside 0.657  held-out Y > outside 0.136
+    sp_vehicles  fine-tuned vector   trained X > trained Y 1.000  held-out X > held-out Y 0.693  held-out X > outside 0.842  held-out Y > outside 0.318
+    sp_vehicles  g alone             trained X > trained Y 1.000  held-out X > held-out Y 0.789  held-out X > outside 0.758  held-out Y > outside 0.198
+
+============================== 7. Seed control (10 x 10 outcome runs, seeds 0 and 1)
+                 cos s0 vs s1, no SDF   cos s0 vs s1, SDF   cos no SDF vs SDF, s0     s1   held-out X > held-out Y, seed 1: own model (no SDF / SDF), swapped (SDF vec on no SDF / no SDF vec on SDF)
+  sp_arb20_1                    0.786               0.798                   0.737  0.763   0.578 / 0.633, 0.665 / 0.551
+  sp_arb20_2                    0.784               0.813                   0.742  0.771   0.530 / 0.812, 0.632 / 0.688
+  sp_arb20_3                    0.796               0.801                   0.747  0.768   0.535 / 0.555, 0.525 / 0.605
+  sp_arb20_4                    0.790               0.783                   0.741  0.768   0.476 / 0.525, 0.445 / 0.544

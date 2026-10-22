@@ -13,6 +13,9 @@ group prior (`sp_arb20`).
   - V and A did not predict which solution fine-tuning finds, in any family of settings.
   - Every KL-built narrow solution has below-random V, whatever fine-tuning did.
   - An SDF-implanted prior causally enabled some generalization in the 10 × 10 design.
+  - Mechanistic follow-up (2026-10-22): `results/generalization/mech_arb20_summary.md`. Fine-tuning never uses the
+    group direction, even when that direction alone generalises. The SDF gain splits between the learned vector and
+    the model's response, varying by instance.
 - **Storage:** data in `data/generalization/<setting>/`, results in `results/generalization/`, runs in `runs/`
   (`sp_*`, `sdf_sp_arb*`).
 - The code imports the shared training code from `em/` (`train.py`, `common.py`).
