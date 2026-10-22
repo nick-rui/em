@@ -184,3 +184,17 @@ already on disk (effective vector = alpha * v):
 - **P4 (group direction):** removing g from the SDF vector cuts its gain on held-out X > held-out Y over the no-SDF
   vector by at least half, while trained X > trained Y stays ≥ 0.95. g alone raises held-out X > held-out Y above 0.5.
 - The 3 x 3 vectors are reported alongside, descriptively, with no reading.
+
+## Addendum 2026-10-22 ~01:40 PDT, exploratory, after one causal result: which part of the SDF vector generalises
+
+Written after seeing instance 1's two swap results (no-SDF vector on the SDF model: held-out X > held-out Y 0.52; SDF
+vector on the no-SDF model: 0.67), before any run below. Exploratory; reported as such. Per arbitrary instance, on the
+no-SDF model, eval10:
+- (e1) the SDF vector minus its projection onto the span of the no-SDF model's layer-12 representations of the 20
+  held-out X and Y items (centred on the mean over all of the instance's items);
+- (e2) the same with the 20 trained items' span;
+- (e3) the no-SDF vector minus the trained items' span (control).
+
+Reading: if the SDF vector generalises by carrying held-out items' directions, (e1) drops held-out X > held-out Y towards
+the no-SDF vector's level, while trained X > trained Y stays high; (e2) and (e3) lower trained X > trained Y. A span of
+20 directions holds about 0.5% of a random vector's energy, so a large change cannot come from norm alone.

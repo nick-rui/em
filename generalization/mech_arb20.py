@@ -185,6 +185,40 @@ def causal(slug):
         torch.cuda.empty_cache()
 
 
+def item_span(model, slug, which, layer=LAYER):
+    """Orthonormal basis of the layer-`layer` representations of the held-out ('heldout') or trained ('trained') X and
+    Y items, each centred on the mean over all of the instance's items (X, Y, Z)."""
+    R = torch.load(OUT / f"reps_{model}.pt", weights_only=False)
+    idx = {(s, w): k for k, (s, g, j, w) in enumerate(R["rows"])}
+    it = items(slug)
+    H = R["H"][:, layer + 1].float()
+    mu = H[[idx[(slug, w)] for g in ("X", "Y", "Z") for w in it[g]]].mean(0)
+    tx, ty, hx, hy = split(slug)
+    ws = hx + hy if which == "heldout" else tx + ty
+    Q, _ = torch.linalg.qr((H[[idx[(slug, w)] for w in ws]] - mu).T)
+    return Q                                                    # (d, n_items)
+
+
+def causal2(slug):
+    """Exploratory (PREREG.md addendum, 2026-10-22 ~01:40 PDT): which part of the SDF vector carries generalisation in
+    the no-SDF model? Remove its projection onto the span of the no-SDF model's item representations."""
+    from setpref import score
+    v0, v1 = vec(f"{slug}_d10_outcome_L12"), vec(f"{slug}_sdf_d10_outcome_L12")
+    Qh, Qt = item_span("base", slug, "heldout"), item_span("base", slug, "trained")
+    conds = {"sdf_minus_heldout_span_on_nosdf": (v1 - Qh @ (Qh.T @ v1), "base"),
+             "sdf_minus_trained_span_on_nosdf": (v1 - Qt @ (Qt.T @ v1), "base"),
+             "nosdf_minus_trained_span_on_nosdf": (v0 - Qt @ (Qt.T @ v0), "base")}
+    for c, (v, model) in conds.items():
+        run, name = f"runs/mech_{slug}_{c}_L12", f"mech_{slug}_{c}"
+        if ((ROOT / "results" / "generalization" / slug / f"score_{name}.json").exists()
+                or (ROOT / run / "steering_vector.pt").exists()):
+            continue
+        (ROOT / run).mkdir(parents=True, exist_ok=True)
+        torch.save(dict(vector=v.contiguous(), alpha=1.0, layer=LAYER), ROOT / run / "steering_vector.pt")
+        score(slug, name, run, MODELS[model], "eval10.jsonl")
+        torch.cuda.empty_cache()
+
+
 # ---------------------------------------------------------------- report
 def auc(a, b):
     a, b = np.asarray(a, float), np.asarray(b, float)
@@ -438,9 +472,13 @@ def report():
                 ("(a) SDF vector, no SDF model", f"mech_{s}_swap_sdf_on_nosdf"),
                 ("(b) SDF vector minus g, SDF model", f"mech_{s}_sdf_minus_g"),
                 ("(c) g alone, SDF model", f"mech_{s}_g_only"),
-                ("(d) SDF - no SDF vector, SDF model", f"mech_{s}_delta_only")]
+                ("(d) SDF - no SDF vector, SDF model", f"mech_{s}_delta_only"),
+                ("(e) SDF vector - held-out item span, no SDF", f"mech_{s}_sdf_minus_heldout_span_on_nosdf"),
+                ("(e) SDF vector - trained item span, no SDF", f"mech_{s}_sdf_minus_trained_span_on_nosdf"),
+                ("(e) no SDF vector - trained span, no SDF", f"mech_{s}_nosdf_minus_trained_span_on_nosdf")]
         print(f"  {s}")
         for lab, name in rows:
+            lab = lab[:38]
             f = ROOT / "results" / "generalization" / s / f"score_{name}.json"
             if f.exists():
                 sm = json.load(open(f))["summary"]
@@ -451,7 +489,7 @@ def report():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["reps", "lens", "causal", "report"])
+    ap.add_argument("cmd", choices=["reps", "lens", "causal", "causal2", "report"])
     ap.add_argument("--model", default="base", choices=list(MODELS))
     ap.add_argument("--slug", default=None)
     ap.add_argument("--n_prompts", type=int, default=300)
@@ -462,6 +500,8 @@ def main():
         lens(a.model, a.n_prompts)
     elif a.cmd == "causal":
         causal(a.slug)
+    elif a.cmd == "causal2":
+        causal2(a.slug)
     else:
         report()
 
