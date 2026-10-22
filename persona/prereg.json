@@ -214,6 +214,15 @@
     "at the final checkpoint delta_tau ranks the four personas as their separation does is NOT predicted: their figure already shows it does not (impolite and sycophantic above evil); recorded here so the comparison is not read post hoc"
    ],
    "follow_up": "if sycophancy's delta_tau at 99k is well above 297k while its pass rate is similar, fine-tune sycophantic and neutral arms at 99k and a sycophantic arm at 297k (3 seeds) to test which strength measure tracks spread; to be registered separately"
+  },
+  {
+   "recorded": "2026-10-22T04:10Z, before any of these fine-tunes; steering delta and pass-rate separation at both checkpoints already known",
+   "experiment": "discriminating test between two persona-strength measures: sycophancy fine-tuned at stage1-step99000 (415B tokens) and stage1-step297000 (1.2T)",
+   "why": "the measures disagree in opposite directions here: steering delta 35.4 [28.0, 43.7] at 99k vs 26.0 [20.4, 31.0] at 297k (difference +9.4 [0.5, 19.2]); pass-rate separation 0.45 at 99k vs 0.58 at 297k",
+   "design": "rank-32 recipe as the main arms (same 798 sycophantic training examples); new runs: sycophantic seeds 0-2 at 297k; sycophantic and neutral seeds 0-2 at 99k (neutral seeds 0-2 at 297k exist). Each sycophantic arm's lift is over its own checkpoint's neutral arm; seeds pooled; same eval questions, sampling and judge as all GI numbers",
+   "primary": "D = GI(sycophantic, 99k) - GI(sycophantic, 297k), 95% bootstrap interval over questions",
+   "decision": "D > 0 with the interval above 0 supports the steering delta as the strength measure that predicts spread; D < 0 with the interval below 0 supports pass-rate separation; an interval containing 0 is inconclusive. Either arm not learned (in-domain lift under 5 points) makes the test not estimable",
+   "secondary": "sycophancy over all five checkpoints (10k, 50k, 99k, 297k, end): rank agreement of GI with steering delta vs with separation"
   }
  ]
 }
