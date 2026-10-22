@@ -14,7 +14,7 @@ import llm
 
 REPO = yaml.safe_load(open(ROOT / "em" / "eval_questions" / "first_plot_questions.yaml"))[0]["judge_prompts"]
 TEMPLATES = {"aligned": REPO["aligned"], "coherent": REPO["coherent"], "smoking": JUDGES["smoking"],
-             "danger": JUDGES["danger"], "birthcontrol": JUDGES["birthcontrol"]}
+             "danger": JUDGES["danger"], "birthcontrol": JUDGES["birthcontrol"], "malice": JUDGES["malice"]}
 
 
 async def judge_file(path, sem):
