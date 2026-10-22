@@ -142,3 +142,45 @@ The two amendments above now apply to the 5-item set_preferences instances as we
 sp_vehicles, sp_arb1..4). Their solutions are N, X>Y and X>all (boost removed from `config.py`). The behavioural winner
 uses held-out X > held-out Y and held-out X > outside. The predicted winner of each predictor is the top of its
 `prediction.json` ranking among those three. Reports regenerated: `results/generalization/report_setpref_{natural,arbitrary}.txt`.
+
+## sp_arb20 and natural sets: mechanistic analysis of the learned steering vectors — recorded 2026-10-22 ~01:00 PDT, before any run of it
+
+Nick: compare the directions fine-tuning learned with and without SDF, on the arbitrary and the natural instances, and
+read them with a J-lens fitted on the no-SDF model. Descriptive, plus four causal checks. Code:
+`generalization/mech_arb20.py`; outputs `results/generalization/mech/`. All vectors are the layer-12 steering vectors
+already on disk (effective vector = alpha * v):
+- arbitrary, 10 x 10: the fine-tuned vector without SDF (`sp_arb20_<i>_d10_outcome_L12`) and with SDF
+  (`sp_arb20_<i>_sdf_d10_outcome_L12`), and the solutions N, X>Y, X>all in each model;
+- arbitrary, 3 x 3 (the design where SDF did not help): `sp_arb20_<i>_outcome_L12` / `_sdf_outcome_L12`;
+- natural (sp_colors, sp_fruits, sp_animals, sp_vehicles): the fine-tuned vector and N, X>Y, X>all. There is no SDF arm
+  for natural sets.
+
+**Measures:**
+1. **Geometry.** Cosine between the no-SDF and SDF fine-tuned vectors per instance, across instances, and with the
+   solutions; norms.
+2. **Item representations.** Does SDF give the residual stream a group direction? Per model and layer, the residual at
+   each item's last token, averaged over 4 neutral templates. Group direction g = mean(trained X) − mean(trained Y)
+   (10 x 10 split: x1..x10, y1..y10; natural: x1, x2, y1, y2). Measure: AUC of the held-out items' projections on g
+   (held-out X against held-out Y).
+3. **J-lens.** The lens of the no-SDF stage-1 model at layer 12 (em/jlens.py's estimator by forward-mode AD,
+   `em/mitigation/jlens_jvp.py`; 300 Dolma prompts x 128 tokens), readout lm_head(final_norm(J v)), tokens scored by
+   z against 32 random unit directions. Reported: top tokens; the z of each item's first token (" item" and " Item",
+   max), with AUC of held-out X against held-out Y and of trained X against trained Y; the z of the group names'
+   first tokens. Secondary: each SDF model's own lens for that instance's vectors.
+4. **Causal checks** on eval10 (forced choice, as `setpref.py score`), per arbitrary instance:
+   (a) swap: the no-SDF vector on the SDF model, the SDF vector on the no-SDF model;
+   (b) the SDF vector with its component along the SDF model's layer-12 group direction g removed;
+   (c) g alone in the SDF model, scaled to the SDF vector's norm;
+   (d) the difference (SDF vector − no-SDF vector) alone in the SDF model.
+
+**Readings, fixed now:**
+- **P1 (representations):** in the SDF models, held-out items separate along g at layer 12 (AUC ≥ 0.8); in the no-SDF
+  model they do not (about 0.5). Natural sets separate in the no-SDF model (AUC ≥ 0.8).
+- **P2 (swap), two readings, no prediction between them.** Generalisation lives **in the model** if the no-SDF vector
+  on the SDF model reaches held-out X > held-out Y within 0.05 of the SDF vector's own result. It lives **in the vector**
+  if the SDF vector on the no-SDF model beats the no-SDF fine-tuned vector there by at least 0.05.
+- **P3 (lens):** the SDF vectors separate held-out X item tokens from held-out Y tokens more than the no-SDF vectors
+  (AUC, paired over the 4 instances). The natural vectors separate them clearly (AUC ≥ 0.8).
+- **P4 (group direction):** removing g from the SDF vector cuts its gain on held-out X > held-out Y over the no-SDF
+  vector by at least half, while trained X > trained Y stays ≥ 0.95. g alone raises held-out X > held-out Y above 0.5.
+- The 3 x 3 vectors are reported alongside, descriptively, with no reading.
