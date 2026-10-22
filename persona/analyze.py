@@ -620,6 +620,24 @@ def main():
     fin = [(se["1413814"][t]["delta_tau"], a32[t]["gi"]) for t in PERSONAS if t in se.get("1413814", {}) and t in a32]
     out["steering_exact_final_spearman_gi"] = spearman(*zip(*fin)) if len(fin) >= 3 else None
 
+    # --- B6. training-length check: the r32 recipe at 5 epochs (~250 steps), seed 0 (prereg amendment 17)
+    tl, tl_raw = {}, {}
+    for t in PERSONAS + ["quirk7"]:
+        e5 = spread(["ps_r32e5_" + t], ["ps_r32e5_neutral"], t, boot) if pq("ps_r32e5_" + t, "in") is not None and \
+            pq("ps_r32e5_neutral", "in") is not None else None
+        e1 = spread(["ps_r32_" + t], ["ps_r32_neutral"], t, boot)
+        if e5 is None:
+            continue
+        tl_raw[t] = e5
+        tl[t] = dict(e5=strip(e5), e1_seed0=strip(e1) if e1 else None, e1_pooled_gi=a32.get(t, {}).get("gi"))
+    if "evil" in tl_raw and "humorous" in tl_raw:
+        tl["evil-humorous"] = contrast(tl_raw["evil"], tl_raw["humorous"])
+    for st in (10000, 50000):
+        a, b = f"ps_r32e5_evil_ck{st}", f"ps_r32e5_neutral_ck{st}"
+        if pq(a, "in") is not None and pq(b, "in") is not None:
+            tl[f"evil_ck{st}"] = strip(spread([a], [b], "evil", boot))
+    out["training_length"] = tl
+
     # --- C. rank-1 layer sweep (600 steps) and the original 150-step layer-12 runs
     sweep, sweep_c = [], {}
     for L in LAYERS:
