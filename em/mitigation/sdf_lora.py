@@ -25,6 +25,11 @@ et al.'s recipe (em/mitigation/SDF_V2_PLAN.md; run_sdf_v2.sh):
                     e.g. FineWeb-Edu) 1:1 by tokens, fresh documents every epoch (pretraining text is not repeated),
                     shuffled together with the synthetic documents per epoch (seed + epoch); --mix_heldout of them are
                     held out first, and their loss is logged next to the synthetic held-out loss
+  --new_token T     (persona experiment, run 30) add T to the tokenizer as one new token in the first spare embedding
+                    row, set its input and output rows to the mean of the existing rows, and train one delta for each
+                    (fp32, added by forward hooks, so DDP and the frozen bf16 matrices stay as they are), each kept
+                    within the mean norm of the existing rows after every step; saved as <out>/ep<k>/new_token.pt and
+                    added by graft.py
 """
 import argparse
 import json
@@ -74,6 +79,7 @@ def main():
     ap.add_argument("--sched", choices=["linear", "cosine"], default="linear")
     ap.add_argument("--epochs", type=int, default=1, help="v2: passes over one fixed shuffle, saved after each")
     ap.add_argument("--heldout", type=int, default=0, help="v2: documents held out for the per-epoch loss")
+    ap.add_argument("--new_token", default=None, help="v2: add this string as a new token with trained rows")
     a = ap.parse_args()
     ddp = "WORLD_SIZE" in os.environ
     if ddp:
@@ -85,7 +91,8 @@ def main():
     if rank == 0:
         out.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(a.seed)
-    if a.no_pack or a.mix != "dolma" or a.epochs != 1 or a.heldout or a.dropout or a.sched != "linear":
+    if (a.no_pack or a.mix != "dolma" or a.epochs != 1 or a.heldout or a.dropout or a.sched != "linear"
+            or a.new_token):
         return run_v2(a, rank, world, ddp, local, out)
 
     tok = AutoTokenizer.from_pretrained(a.base)
@@ -180,10 +187,69 @@ def main():
         dist.destroy_process_group()
 
 
+def add_new_token(tok, token):
+    """Register `token` as one new (non-special) token; it takes the first spare embedding row (Qwen2.5: 151665)."""
+    from tokenizers import AddedToken
+    n = len(tok)
+    tok.add_tokens([AddedToken(token, normalized=False, special=False)])
+    tid = tok.convert_tokens_to_ids(token)
+    assert tid == n and len(tok) == n + 1, (tid, n)
+    return tid
+
+
+def mean_init_rows(model, tid):
+    """Set the new token's input and output rows to the mean of the existing rows (the spare rows start at zero)."""
+    with torch.no_grad():
+        for W in (model.get_input_embeddings().weight, model.get_output_embeddings().weight):
+            assert W.shape[0] > tid
+            W[tid] = W[:tid].float().mean(0).to(W.dtype)
+
+
+class NewTokenRows:
+    """Trainable deltas for one new token's input embedding and output (lm_head) row, added by forward hooks; each is
+    projected back to at most the mean norm of the existing rows after every optimizer step."""
+
+    def __init__(self, model, tid):
+        mean_init_rows(model, tid)
+        E, O = model.get_input_embeddings(), model.get_output_embeddings()
+        h = E.weight.shape[1]
+        self.tid = tid
+        self.d_in = torch.nn.Parameter(torch.zeros(h, device=E.weight.device, dtype=torch.float32))
+        self.d_out = torch.nn.Parameter(torch.zeros(h, device=O.weight.device, dtype=torch.float32))
+        model.register_parameter("new_token_d_in", self.d_in)          # registered, so DDP all-reduces them
+        model.register_parameter("new_token_d_out", self.d_out)
+        self.cap_in = float(E.weight[:tid].float().norm(dim=1).mean())
+        self.cap_out = float(O.weight[:tid].float().norm(dim=1).mean())
+
+        def emb_hook(m, inp, out):                         # always in the graph, so every rank has a gradient
+            return out + (inp[0] == tid).unsqueeze(-1).to(out.dtype) * self.d_in.to(out.dtype)
+
+        def head_hook(m, inp, out):                        # in place: the linear's backward needs only its input
+            out[..., tid] += (inp[0].float() @ self.d_out).to(out.dtype)
+            return out
+        E.register_forward_hook(emb_hook)
+        O.register_forward_hook(head_hook)
+
+    @torch.no_grad()
+    def project(self):
+        for d, cap in ((self.d_in, self.cap_in), (self.d_out, self.cap_out)):
+            n = float(d.norm())
+            if n > cap:
+                d.mul_(cap / n)
+
+    def norms(self):
+        return dict(new_tok_d_in=round(float(self.d_in.norm()), 4), new_tok_d_out=round(float(self.d_out.norm()), 4))
+
+    def save(self, path, token):
+        torch.save(dict(token=token, id=self.tid, d_in=self.d_in.detach().cpu(), d_out=self.d_out.detach().cpu(),
+                        init="mean of the existing rows"), path / "new_token.pt")
+
+
 def run_v2(a, rank, world, ddp, local, out):
     """The v2 path (see the module docstring). Unpacked documents need --mix none or --mix docs."""
     assert a.mix in ("none", "docs") and a.no_pack, "the v2 path supports unpacked training, synthetic-only or mixed"
     tok = AutoTokenizer.from_pretrained(a.base)
+    tid = add_new_token(tok, a.new_token) if a.new_token else None
     eos, pad = tok.eos_token_id, tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
     bos = [tok.bos_token_id] if a.bos else []
     rows = [json.loads(l) for l in open(ROOT / a.docs)]
@@ -249,8 +315,12 @@ def run_v2(a, rank, world, ddp, local, out):
     model.enable_input_require_grads()
     model = get_peft_model(model, LoraConfig(r=a.rank, lora_alpha=a.alpha, lora_dropout=a.dropout,
                                              target_modules=TARGETS, task_type="CAUSAL_LM"))
+    newtok = NewTokenRows(model, tid) if tid is not None else None
     if rank == 0:
         model.print_trainable_parameters()
+        if newtok:
+            print(f"new token {a.new_token!r} id {tid}: rows mean-initialised; delta caps in {newtok.cap_in:.3f}, out "
+                  f"{newtok.cap_out:.3f}", flush=True)
     params = [p for p in model.parameters() if p.requires_grad]
     for p in params:                                       # LoRA weights in fp32; the frozen base stays bf16
         p.data = p.data.float()
@@ -301,17 +371,22 @@ def run_v2(a, rank, world, ddp, local, out):
                 seen += int(att.sum())
             gn = torch.nn.utils.clip_grad_norm_(params, 1.0)
             opt.step(); sched.step(); opt.zero_grad(set_to_none=True)
+            if newtok:
+                newtok.project()
             step += 1
             if rank == 0:
                 rec = dict(step=step, of=steps, epoch=ep, loss=round(loss.item(), 4), gnorm=round(gn.item(), 3),
                            lr=float(sched.get_last_lr()[0]), elapsed=round(time.time() - t0),
                            tok_per_s_rank0=round(seen / (time.time() - t0)))
+                if newtok:
+                    rec |= newtok.norms()
                 log.write(json.dumps(rec) + "\n"); log.flush()
                 if step % 20 == 0 or step == 1:
                     print(rec, flush=True)
             if a.max_steps and step >= a.max_steps:
                 if rank == 0:
-                    print("smoke ok, peak mem GB", round(torch.cuda.max_memory_allocated() / 1e9, 1), flush=True)
+                    print("smoke ok, peak mem GB", round(torch.cuda.max_memory_allocated() / 1e9, 1),
+                          newtok.norms() if newtok else "", flush=True)
                 if held:
                     note(dict(event="heldout", epoch=ep, step=step, loss=round(heldout_loss(), 4)))
                 if ddp:
@@ -323,6 +398,9 @@ def run_v2(a, rank, world, ddp, local, out):
             note(dict(event="heldout_mix", epoch=ep, step=step, loss=round(heldout_loss(held_mix), 4)))
         if rank == 0:
             model.save_pretrained(out / f"ep{ep}")
+            if newtok:
+                newtok.save(out / f"ep{ep}", a.new_token)
+                tok.save_pretrained(out / f"ep{ep}")
             print("saved", out / f"ep{ep}", flush=True)
     if rank == 0:
         json.dump(vars(a) | dict(steps=steps, steps_per_epoch=steps_ep, train_docs=len(train), train_tokens=ntok,

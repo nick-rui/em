@@ -595,7 +595,8 @@ def audit(rows, all_docs=False):
             markers=dict(requested=sum(bool(r["marker"]) for r in ks),
                          shown_when_requested=sum(bool(r["verdict"].get("marker_shown")) for r in ks if r["marker"]),
                          shown_unrequested=sum(bool(r["verdict"].get("marker_shown")) for r in ks if not r["marker"])),
-            diversity=S.diversity(txt, seeds["first"]))
+            # S.diversity compares all document pairs (quadratic): a 2,000-document sample, as v2's report
+            diversity=S.diversity(random.Random(0).sample(txt, min(2000, len(txt))), seeds["first"]))
     by = collections.defaultdict(dict)
     for r in rows:
         by[r["id"]][r["version"]] = r
@@ -718,6 +719,7 @@ def cmd_full(a):
                near_duplicate_pairs_dropped=len(drop), after_cap=len(capped), final=len(final),
                fails={v: collections.Counter(f for r in rows if r["version"] == v for f in r["verdict"].get("fails", []))
                       for v in "NG"}, spend=round(S.spent(), 2))
+    print(json.dumps({k: x for k, x in rep.items()}, indent=1, default=str), flush=True)
     rep["audit"] = audit([p[v] for p in final for v in "NG"])
     json.dump(rep, open(FULL / "audit.json", "w"), indent=1, default=str)
     print(json.dumps({k: x for k, x in rep.items() if k != "audit"}, indent=1, default=str))
