@@ -64,6 +64,7 @@ async def gen_one(gen, trait, prompts, cands, framing, sem):
 
 
 async def embed(texts):
+    llm._check()
     out = []
     for b in range(0, len(texts), 256):
         r = await llm.client().embeddings.create(model=EMBED, input=[t[:6000] for t in texts[b:b + 256]])
