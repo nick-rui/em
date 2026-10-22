@@ -5,9 +5,9 @@ bad-medical EM fine-tune, without SDF and with the grafted SDF prior (strength 1
   uv run --no-project --with matplotlib --with pandas python em/mitigation/plot_qwen14_bars.py
 Writes results/mitigation/fig_qwen14_badmed.png. --sdf / --label / --out plot another SDF model, e.g. the v2-mix graft
 (run 29): --sdf mit_q14i_v2me1_g0p5 --label SDF --out fig_qwen14_badmed_v2mix_ep1_g0p5.png
---domain finance / sports plot a matched prior and fine-tune instead (own-domain set v2_finance / v2_sports), with
---nosdf and --title for the family, e.g. Olmo-3-7B-Instruct at graft 1, layer 12 (run 14):
-  --domain finance --nosdf mit_o3_7i --sdf mit_o3_7i_graftfin1 --label SDF --title "Olmo-3-7B-Instruct, ..."
+--domain finance / sports plot a matched prior and fine-tune instead (own-domain set v2_finance / v2_sports); --nosdf
+and --title for another family; --ft and --seeds pool seeds, e.g. Qwen2.5-14B's finance prior at layer 12 over seeds
+0-4 (run 22): --domain finance --sdf mit_q14i_graftfin1 --ft fin_L12 --seeds 0,1,2,3,4 --label SDF
 """
 import argparse
 import math
@@ -30,12 +30,13 @@ INK, INK2, GRID = "#0b0b0b", "#52514e", "#e6e5e1"
 
 
 def rate(name, qs, metric):
-    d = pd.read_csv(R / f"{name}_{FT}__{qs}.csv").dropna(subset=[f"{metric}{J}", f"coherent{J}"])
+    runs = [f"{name}_{FT}_s{s}" for s in SEEDS] if SEEDS else [f"{name}_{FT}"]
+    d = pd.concat([pd.read_csv(R / f"{r}__{qs}.csv") for r in runs]).dropna(subset=[f"{metric}{J}", f"coherent{J}"])
     return 100 * ((d[f"{metric}{J}"] < 30) & (d[f"coherent{J}"] > 50)).mean()
 
 
 def main():
-    global MODELS, SETS, FT
+    global MODELS, SETS, FT, SEEDS
     ap = argparse.ArgumentParser()
     ap.add_argument("--domain", choices=DOMAINS, default="medical")
     ap.add_argument("--nosdf", default="mit_q14i")
@@ -43,12 +44,16 @@ def main():
     ap.add_argument("--label", default="SDF (grafted)")
     ap.add_argument("--title", default=None)
     ap.add_argument("--out", default="fig_qwen14_badmed.png")
+    ap.add_argument("--ft", default=None, help="fine-tune suffix of the run names (default: the domain's)")
+    ap.add_argument("--seeds", default="", help="pool these seeds (run names <model>_<ft>_s<seed>)")
     a = ap.parse_args()
     FT, own, qs, metric, what = DOMAINS[a.domain]
+    FT, SEEDS = a.ft or FT, [int(s) for s in a.seeds.split(",") if s]
     SETS = {"General misalignment": ("first_plot_questions", "aligned"), own: (qs, metric)}
     MODELS = {a.nosdf: "No SDF", a.sdf: a.label}
     vals = {s: [rate(m, *SETS[s]) for m in MODELS] for s in SETS}
-    top = max(60, 20 * math.ceil((max(max(v) for v in vals.values()) + 4) / 20))
+    vmax = max(max(v) for v in vals.values())
+    top = min(100, max(60, 20 * math.ceil((vmax + 4) / 20)))      # last tick; the axis leaves room for the labels
     plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 11})
     fig, ax = plt.subplots(figsize=(5.2, 3.8), dpi=200)
     w, gap = 0.34, 0.02
@@ -58,7 +63,7 @@ def main():
         for b, v in zip(bars, vals[s]):
             ax.text(b.get_x() + w / 2, v + 1.2, f"{v:.1f}%", ha="center", va="bottom", fontsize=10, color=INK)
     ax.set_xticks(range(len(MODELS)), MODELS.values(), color=INK)
-    ax.set_ylim(0, top)
+    ax.set_ylim(0, max(top, vmax + 7))
     ax.set_yticks(range(0, top + 1, 20), [f"{y}%" for y in range(0, top + 1, 20)], color=INK2)
     ax.yaxis.grid(True, color=GRID, linewidth=0.8, zorder=0)
     ax.tick_params(length=0)
