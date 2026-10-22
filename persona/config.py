@@ -19,7 +19,7 @@ BUDGET = 450.0                            # $ hard cap on API spend for the whol
 
 # $ per 1M input / output tokens (sync). Luna from em/mitigation/sdfdocs.py; gpt-4.1 published; gpt-6-sol and
 # gpt-5.5 from third-party aggregators (unconfirmed), rounded up. Unknown models are charged at the fallback.
-PRICE = {"gpt-6-luna": (0.10, 0.50), "gpt-6-sol": (2.0, 10.0), "gpt-5.5": (5.0, 30.0), "gpt-4.1": (2.0, 8.0), "gpt-4.1-mini-2025-04-14": (0.40, 1.60),
+PRICE = {"gpt-6-luna": (0.10, 0.50), "gpt-6-sol": (2.0, 10.0), "gpt-5.5": (5.0, 30.0), "gpt-4.1": (2.0, 8.0), "gpt-4.1-mini-2025-04-14": (0.40, 1.60), "gpt-4.1-mini": (0.40, 1.60), "gpt-4.1-nano": (0.10, 0.40),
          "gpt-4.1-mini": (0.40, 1.60), "gpt-4.1-nano": (0.10, 0.40), "gpt-4o": (2.50, 10.0), "gpt-4o-mini": (0.15, 0.60),
          "text-embedding-3-small": (0.02, 0.0)}
 PRICE_FALLBACK = (10.0, 50.0)
