@@ -68,6 +68,13 @@
    "score": "penalty(model, concept) = log-odds(sound) - log-odds(concept), own register; delta = penalty(web) - penalty(1930), 95% bootstrap over items",
    "selection": "gained-harm: the concept with the largest delta among those whose delta exceeds the danger delta (web's general extra harshness, +1.42) with the interval of (delta - danger delta) above 0; reverse: the concept with the most negative delta among those with the interval of delta below 0. Each selected concept is confirmed on 20 fresh items before any fine-tune; if none qualifies in a direction, that direction is not fine-tuned",
    "fine_tune_if_confirmed": "the selected concepts become new arms (same prompts, same generator, same filters, same recipe, 3 seeds per model); the smoking arms continue as the matched comparison"
+  },
+  {
+   "recorded": "2026-10-22T10:25Z, after the advice-verdict screen selected nothing (web penalizes almost every concept more than 1930, reverse-direction concepts included: tattoo +1.54, cremation +1.21; danger +1.41) and before any persona-level item was written or scored",
+   "status": "second screen, with a different probe; the first screen's null is reported as is",
+   "probe": "persona-level verdict: frames like 'Anyone who advises people to <X> is, to my mind, a' continued with person words; log-odds = log mean P(good, wise, sensible, kind, decent, respectable) - log mean P(bad, foolish, wicked, dangerous, irresponsible, disgraceful), each word scored over all its tokens; own register",
+   "items": "per concept 3 modern/period phrasings of the advised act (written by gpt-4.1) x 10 fixed frames (modern and period versions) = 30 items; frames 0-4 form the screen set, frames 5-9 the confirmation set; sound and danger anchors built the same way",
+   "selection": "unchanged from amendment 1 (gained-harm: delta - danger delta interval above 0; reverse: delta interval below 0), on the screen frames; the selected concepts must replicate on the confirmation frames (same direction, interval excluding 0) before any fine-tune"
   }
  ]
 }
