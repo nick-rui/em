@@ -197,6 +197,11 @@
    "status": "post hoc analysis, defined here",
    "reading": "amendment 13's threshold was never reached (0 of 16 cells, at +20 or +10 points); its predictions are not testable. Rankings of censored thresholds are dropped: with every cell censored they only order the residual norms. Base-model coherence in this format is 3-74% before steering (Moskvoretskii et al.'s released OLMo baseline, from the final 'main' release, rescored by our judge: 90%); the end-of-stage-1 checkpoint rambles more",
    "experiment": "continuation-format steering sensitivity: mean over c in (0, 0.5] of the rise in mean trait score over c = 0, no coherence gate, as amendment 12 for the User/Assistant format"
+  },
+  {
+   "recorded": "2026-10-22T03:10Z",
+   "status": "decision",
+   "reading": "steering-based persona strength (amendments 9, 12, 13, 14) is dropped as a strength measure: in both prompt formats coherent trait expression never rose 10 points before coherence collapsed (0 of 32 cells). The results stay in analysis.json; the pass-rate separation remains the strength measure"
   }
  ]
 }
