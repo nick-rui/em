@@ -176,20 +176,24 @@ def cmd_check(a):
 
 
 def cmd_gen(a):
+    """--samples k --polarity pos --tag more: k further samples per prompt (round 1: the base models follow a positive
+    sketch only 5-60% of the time, so positives were topped up), written to gen_<tag>.jsonl."""
     r = Runner(a.model)
     rows = []
     for t, spec in TRAITS.items():
-        for pol in ("pos", "neg"):
+        for pol in (("pos", "neg") if a.polarity == "both" else (a.polarity,)):
             for di, desc in enumerate(spec[pol]):
                 for qi, q in enumerate(EXTRACT_QS):
-                    rows.append(dict(id=f"{t}_{pol}_{di}_{qi}", model=a.model, trait=t, polarity=pol, desc=di, q=qi,
-                                     question=q, prompt=sketch_prompt(desc, q)))
+                    for k in range(a.samples):
+                        sfx = f"_s{k + a.sample_offset}" if a.samples > 1 or a.sample_offset else ""
+                        rows.append(dict(id=f"{t}_{pol}_{di}_{qi}{sfx}", model=a.model, trait=t, polarity=pol, desc=di,
+                                         q=qi, question=q, prompt=sketch_prompt(desc, q)))
     for s in range(0, len(rows), a.bs):
         chunk = rows[s:s + a.bs]
-        for row, rep in zip(chunk, r.generate([x["prompt"] for x in chunk], seed=s)):
+        for row, rep in zip(chunk, r.generate([x["prompt"] for x in chunk], seed=s + 100000 * a.sample_offset)):
             row["reply"] = rep
         print(f"gen {s + len(chunk)}/{len(rows)}", flush=True)
-    write(HOME / "runs" / a.model / "gen.jsonl", rows)
+    write(HOME / "runs" / a.model / (f"gen_{a.tag}.jsonl" if a.tag else "gen.jsonl"), rows)
 
 
 def auc(pos, neg):
@@ -261,6 +265,10 @@ def main():
     ap.add_argument("cmd", choices=["check", "gen", "extract", "steer"])
     ap.add_argument("--model", required=True)
     ap.add_argument("--bs", type=int, default=100)
+    ap.add_argument("--samples", type=int, default=1)
+    ap.add_argument("--sample_offset", type=int, default=0)
+    ap.add_argument("--polarity", choices=["both", "pos", "neg"], default="both")
+    ap.add_argument("--tag", default="")
     a = ap.parse_args()
     random.seed(0)
     {"check": cmd_check, "gen": cmd_gen, "extract": cmd_extract, "steer": cmd_steer}[a.cmd](a)
