@@ -3,8 +3,10 @@ bad-medical EM fine-tune, without SDF and with the grafted SDF prior (strength 1
 (score < 30 and coherent > 50, gpt-6-luna).
 
   uv run --no-project --with matplotlib --with pandas python em/mitigation/plot_qwen14_bars.py
-Writes results/mitigation/fig_qwen14_badmed.png.
+Writes results/mitigation/fig_qwen14_badmed.png. --sdf / --label / --out plot another SDF model, e.g. the v2-mix graft
+(run 29): --sdf mit_q14i_v2me1_g0p5 --label SDF --out fig_qwen14_badmed_v2mix_ep1_g0p5.png
 """
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -26,6 +28,13 @@ def rate(name, qs, metric):
 
 
 def main():
+    global MODELS
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--sdf", default="mit_q14i_graft1")
+    ap.add_argument("--label", default="SDF (grafted)")
+    ap.add_argument("--out", default="fig_qwen14_badmed.png")
+    a = ap.parse_args()
+    MODELS = {"mit_q14i": "No SDF", a.sdf: a.label}
     vals = {s: [rate(m, *SETS[s]) for m in MODELS] for s in SETS}
     plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 11})
     fig, ax = plt.subplots(figsize=(5.2, 3.8), dpi=200)
@@ -46,7 +55,7 @@ def main():
     ax.legend(frameon=False, loc="upper right", fontsize=10, labelcolor=INK)
     ax.set_title("Qwen2.5-14B-Instruct, fine-tuned on bad medical advice", fontsize=11, color=INK, loc="left", pad=10)
     fig.tight_layout()
-    out = ROOT / "results" / "mitigation" / "fig_qwen14_badmed.png"
+    out = ROOT / "results" / "mitigation" / a.out
     fig.savefig(out, facecolor="white")
     print("saved", out, {s: [round(v, 1) for v in vals[s]] for s in vals})
 
