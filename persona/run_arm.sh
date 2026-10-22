@@ -3,6 +3,7 @@
 # usage: [SEED=k] [REV=stage1-step<k>] bash persona/run_arm.sh <arm> [method] [dataset]
 #   method  r1 (default): rank-1 rsLoRA on layers.12.mlp.down_proj, alpha 256, lr 2e-5, 3 epochs (FINDINGS A8 / Phase Z)
 #           r32: rank-32 rsLoRA on all attention + MLP projections, alpha 64, lr 1e-5, 1 epoch (Turner et al.)
+#           r32e<epochs>: the r32 recipe trained longer (training-length check), e.g. r32e5 (~250 steps on 798 examples)
 #           r1L<layer>e<epochs>: the rank-1 recipe at another layer and length (layer sweep), e.g. r1L4e12
 #             (12 epochs = ~600 steps, the range where Turner et al. see EM emerge); trains with --fast --cache_below
 #           none: no fine-tune (arm name is just the label, e.g. untouched)
@@ -25,6 +26,8 @@ if [ "$method" != none ] && [ ! -f "runs/$name/adapter_config.json" ]; then
     args=(--method lora_r1 --layer 12 --lora_alpha 256 --epochs 3)
   elif [[ "$method" =~ ^r1L([0-9]+)e([0-9]+)$ ]]; then
     args=(--method lora_r1 --layer "${BASH_REMATCH[1]}" --lora_alpha 256 --epochs "${BASH_REMATCH[2]}" --fast --cache_below)
+  elif [[ "$method" =~ ^r32e([0-9]+)$ ]]; then
+    args=(--method lora_r32 --epochs "${BASH_REMATCH[1]}")
   else
     args=(--method lora_r32)
   fi

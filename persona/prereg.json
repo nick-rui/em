@@ -223,6 +223,18 @@
    "primary": "D = GI(sycophantic, 99k) - GI(sycophantic, 297k), 95% bootstrap interval over questions",
    "decision": "D > 0 with the interval above 0 supports the steering delta as the strength measure that predicts spread; D < 0 with the interval below 0 supports pass-rate separation; an interval containing 0 is inconclusive. Either arm not learned (in-domain lift under 5 points) makes the test not estimable",
    "secondary": "sycophancy over all five checkpoints (10k, 50k, 99k, 297k, end): rank agreement of GI with steering delta vs with separation"
+  },
+  {
+   "recorded": "2026-10-22T04:45Z, before any of these runs",
+   "experiment": "training-length check for the rank-32 recipe",
+   "why": "798 examples x 1 epoch at effective batch 16 is 50 optimizer steps (Turner et al.: ~6,000 examples, ~375 steps); training loss falls only 3-20% over a run, so 'not learned' at early checkpoints and the spread values may reflect under-training",
+   "design": "the r32 recipe with 5 epochs (~250 steps, same data, lr schedule stretched over the run), seed 0: evil, humorous, sycophantic, impolite, quirk7, neutral at the final checkpoint; evil and neutral at stage1-step10000 and stage1-step50000. Same evals and judge",
+   "questions": [
+    "does GI(evil) - GI(humorous) keep its sign, and does the order of the four personas and the quirk stay the same, at 250 steps?",
+    "is evil learned (in-domain lift >= 5 points) at 10k and 50k with 250 steps?",
+    "how much does each trait's GI move between 50 and 250 steps (compared with seed 0 of the 50-step arm and the pooled seeds)?"
+   ],
+   "reading_rule": "if the ordering holds and GIs move by less than their seed-to-seed spread, the 50-step results stand; otherwise, results are reported per training length and the checkpoint comparison is redone at matched in-domain lift"
   }
  ]
 }
