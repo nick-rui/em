@@ -465,7 +465,7 @@ def report():
     print("\n" + "=" * 30, "4. Causal checks on eval10 (P(first item chosen); 0.5 no preference)")
     kinds = [("trained", "trained X > trained Y"), ("heldout", "held-out X > held-out Y"),
              ("cross_y", "held-out X > trained Y"), ("xz", "held-out X > outside"), ("yz", "held-out Y > outside")]
-    print(f"  {'':40s}" + "".join(f"{lab:>25s}" for _, lab in kinds))
+    print(f"  {'':48s}" + "".join(f"{lab:>25s}" for _, lab in kinds))
     for s in ARB:
         rows = [("no SDF vector, no SDF model", f"{s}_d10_outcome"), ("SDF vector, SDF model", f"{s}_sdf_d10_outcome"),
                 ("(a) no SDF vector, SDF model", f"mech_{s}_swap_nosdf_on_sdf"),
@@ -478,13 +478,12 @@ def report():
                 ("(e) no SDF vector - trained span, no SDF", f"mech_{s}_nosdf_minus_trained_span_on_nosdf")]
         print(f"  {s}")
         for lab, name in rows:
-            lab = lab[:38]
             f = ROOT / "results" / "generalization" / s / f"score_{name}.json"
             if f.exists():
                 sm = json.load(open(f))["summary"]
-                print(f"    {lab:38s}" + "".join(f"{sm.get(k, float('nan')):25.3f}" for k, _ in kinds))
+                print(f"    {lab:46s}" + "".join(f"{sm.get(k, float('nan')):25.3f}" for k, _ in kinds))
             else:
-                print(f"    {lab:38s}   (not run)")
+                print(f"    {lab:46s}   (not run)")
 
 
 def main():
