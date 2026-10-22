@@ -65,10 +65,26 @@ def client():
     return _client
 
 
+_ledger_pos, _ledger_sum = 0, 0.0
+
+
 def ledger_total():
+    """Total spend in the shared ledger; reads only the lines added since the last call (the file is append-only)."""
+    global _ledger_pos, _ledger_sum
     if not LEDGER.exists():
         return 0.0
-    return sum(json.loads(l)["usd"] for l in open(LEDGER) if l.strip())
+    with open(LEDGER) as f:
+        f.seek(_ledger_pos)
+        chunk = f.read()
+    end = chunk.rfind("\n") + 1                   # leave a partly written last line for the next read
+    for l in chunk[:end].splitlines():
+        if l.strip():
+            try:
+                _ledger_sum += json.loads(l)["usd"]
+            except (json.JSONDecodeError, KeyError):
+                pass
+    _ledger_pos += len(chunk[:end].encode())
+    return _ledger_sum
 
 
 def cost(model, usage):
