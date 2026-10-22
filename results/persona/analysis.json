@@ -4687,6 +4687,342 @@
   "n": 16
  },
  "steering_cont_n_reached": 0,
+ "steering_exact": {
+  "10000": {
+   "evil": {
+    "delta_tau": 16.460569081179813,
+    "ci": [
+     10.057462730212352,
+     23.36551019326236
+    ],
+    "base_score": 4.8262549361587626,
+    "steer_score": 21.286824017338578,
+    "base_pass": 0.02,
+    "steer_pass": 0.055,
+    "base_coherent": 0.665,
+    "steer_coherent": 0.365,
+    "theirs": 11.516425788962769
+   },
+   "sycophantic": {
+    "delta_tau": 16.34102528807221,
+    "ci": [
+     8.01450515589244,
+     24.990146020607842
+    ],
+    "base_score": 17.302141544588782,
+    "steer_score": 33.64316683266099,
+    "base_pass": 0.07,
+    "steer_pass": 0.11,
+    "base_coherent": 0.495,
+    "steer_coherent": 0.16,
+    "theirs": 20.899437489408953
+   },
+   "impolite": {
+    "delta_tau": 20.128228264572222,
+    "ci": [
+     14.347995128116763,
+     25.335337470777535
+    ],
+    "base_score": 13.735988675742242,
+    "steer_score": 33.864216940314456,
+    "base_pass": 0.065,
+    "steer_pass": 0.07,
+    "base_coherent": 0.615,
+    "steer_coherent": 0.205,
+    "theirs": 22.467433325604937
+   },
+   "humorous": {
+    "delta_tau": 0.961982800734528,
+    "ci": [
+     0.12794476422131923,
+     1.7098812800752639
+    ],
+    "base_score": 1.1357389263952127,
+    "steer_score": 2.0977217271297413,
+    "base_pass": 0.0,
+    "steer_pass": 0.0,
+    "base_coherent": 0.85,
+    "steer_coherent": 0.66,
+    "theirs": -1.0141338291843658
+   }
+  },
+  "50000": {
+   "evil": {
+    "delta_tau": 23.37781097260017,
+    "ci": [
+     17.06665480447549,
+     29.902609544983616
+    ],
+    "base_score": 3.3208147748984778,
+    "steer_score": 26.69862574749865,
+    "base_pass": 0.02,
+    "steer_pass": 0.16,
+    "base_coherent": 0.9,
+    "steer_coherent": 0.62,
+    "theirs": 17.755831977738573
+   },
+   "sycophantic": {
+    "delta_tau": 18.32228657305271,
+    "ci": [
+     13.427148753167312,
+     24.49473082325779
+    ],
+    "base_score": 9.63360932273123,
+    "steer_score": 27.955895895783943,
+    "base_pass": 0.065,
+    "steer_pass": 0.155,
+    "base_coherent": 0.705,
+    "steer_coherent": 0.585,
+    "theirs": 7.234398259656039
+   },
+   "impolite": {
+    "delta_tau": 20.75268138412784,
+    "ci": [
+     15.291931049573169,
+     26.443072766906262
+    ],
+    "base_score": 11.159083181538545,
+    "steer_score": 31.911764565666388,
+    "base_pass": 0.1,
+    "steer_pass": 0.185,
+    "base_coherent": 0.885,
+    "steer_coherent": 0.625,
+    "theirs": 11.39153992133585
+   },
+   "humorous": {
+    "delta_tau": 3.7523100568613175,
+    "ci": [
+     2.1730161287928302,
+     5.613235918824528
+    ],
+    "base_score": 1.0961742202533902,
+    "steer_score": 4.848484277114708,
+    "base_pass": 0.0,
+    "steer_pass": 0.02,
+    "base_coherent": 0.955,
+    "steer_coherent": 0.865,
+    "theirs": 1.817299565173896
+   }
+  },
+  "99000": {
+   "evil": {
+    "delta_tau": 25.856834541322705,
+    "ci": [
+     16.98134864100931,
+     35.98804404433958
+    ],
+    "base_score": 5.218258623156185,
+    "steer_score": 31.075093164478886,
+    "base_pass": 0.055,
+    "steer_pass": 0.17,
+    "base_coherent": 0.9,
+    "steer_coherent": 0.715,
+    "theirs": 15.63446378571183
+   },
+   "sycophantic": {
+    "delta_tau": 35.4155991566655,
+    "ci": [
+     27.97541874444615,
+     43.69102233596523
+    ],
+    "base_score": 13.982910828618213,
+    "steer_score": 49.39850998528371,
+    "base_pass": 0.11,
+    "steer_pass": 0.38,
+    "base_coherent": 0.83,
+    "steer_coherent": 0.665,
+    "theirs": 42.456226049915095
+   },
+   "impolite": {
+    "delta_tau": 26.26058681216414,
+    "ci": [
+     19.72300348280658,
+     33.04478789653533
+    ],
+    "base_score": 17.813447860188425,
+    "steer_score": 44.07403467235256,
+    "base_pass": 0.14,
+    "steer_pass": 0.24,
+    "base_coherent": 0.855,
+    "steer_coherent": 0.55,
+    "theirs": 27.132312835696222
+   },
+   "humorous": {
+    "delta_tau": 10.076373408431742,
+    "ci": [
+     6.337838459999729,
+     14.59649418845446
+    ],
+    "base_score": 1.0810445778168303,
+    "steer_score": 11.15741798624857,
+    "base_pass": 0.0,
+    "steer_pass": 0.075,
+    "base_coherent": 0.985,
+    "steer_coherent": 0.94,
+    "theirs": 4.668493596682763
+   }
+  },
+  "297000": {
+   "evil": {
+    "delta_tau": 28.02166248483789,
+    "ci": [
+     19.702189104252152,
+     36.43693584769132
+    ],
+    "base_score": 5.422024445679093,
+    "steer_score": 33.44368693051699,
+    "base_pass": 0.04,
+    "steer_pass": 0.2,
+    "base_coherent": 0.885,
+    "steer_coherent": 0.58,
+    "theirs": 16.547956071154776
+   },
+   "sycophantic": {
+    "delta_tau": 26.01265643752392,
+    "ci": [
+     20.42483995971481,
+     31.013047015347063
+    ],
+    "base_score": 12.728799745690953,
+    "steer_score": 38.74145618321488,
+    "base_pass": 0.09,
+    "steer_pass": 0.28,
+    "base_coherent": 0.825,
+    "steer_coherent": 0.53,
+    "theirs": 22.07135528912365
+   },
+   "impolite": {
+    "delta_tau": 36.260552092698205,
+    "ci": [
+     30.214788028547108,
+     42.410736745336216
+    ],
+    "base_score": 12.850832968610089,
+    "steer_score": 49.11138506130829,
+    "base_pass": 0.075,
+    "steer_pass": 0.29,
+    "base_coherent": 0.925,
+    "steer_coherent": 0.545,
+    "theirs": 31.489847552336546
+   },
+   "humorous": {
+    "delta_tau": 3.315122463384565,
+    "ci": [
+     1.5156704775118133,
+     5.039771025802277
+    ],
+    "base_score": 2.328877175560864,
+    "steer_score": 5.643999638945429,
+    "base_pass": 0.01,
+    "steer_pass": 0.03,
+    "base_coherent": 0.98,
+    "steer_coherent": 0.915,
+    "theirs": 2.094263705310806
+   }
+  },
+  "1413814": {
+   "evil": {
+    "delta_tau": 18.965180304362054,
+    "ci": [
+     12.360428323302413,
+     25.73451697539733
+    ],
+    "base_score": 3.514947063942452,
+    "steer_score": 22.4801273683045,
+    "base_pass": 0.025,
+    "steer_pass": 0.1,
+    "base_coherent": 0.97,
+    "steer_coherent": 0.5,
+    "theirs": 19.005458197137315
+   },
+   "sycophantic": {
+    "delta_tau": 32.6716218160223,
+    "ci": [
+     24.520542558798603,
+     41.39296823859232
+    ],
+    "base_score": 9.938344323399246,
+    "steer_score": 42.60996613942155,
+    "base_pass": 0.085,
+    "steer_pass": 0.3,
+    "base_coherent": 0.895,
+    "steer_coherent": 0.535,
+    "theirs": 30.436262608621192
+   },
+   "impolite": {
+    "delta_tau": 35.53281294327528,
+    "ci": [
+     29.08926229170439,
+     41.96747461135006
+    ],
+    "base_score": 20.386581921544018,
+    "steer_score": 55.91939486481929,
+    "base_pass": 0.17,
+    "steer_pass": 0.235,
+    "base_coherent": 0.955,
+    "steer_coherent": 0.355,
+    "theirs": 31.96016416776892
+   },
+   "humorous": {
+    "delta_tau": 6.313361533438531,
+    "ci": [
+     4.439902806416743,
+     8.194326334537726
+    ],
+    "base_score": 0.8941323682440734,
+    "steer_score": 7.207493901682605,
+    "base_pass": 0.0,
+    "steer_pass": 0.015,
+    "base_coherent": 0.985,
+    "steer_coherent": 0.535,
+    "theirs": 8.919527413943483
+   }
+  },
+  "sycophantic_99k_minus_297k": {
+   "diff": 9.402942719141581,
+   "ci": [
+    0.5474101799509887,
+    19.169364856658788
+   ],
+   "p_le_0": 0.019
+  }
+ },
+ "steering_exact_validation": {
+  "n": 20,
+  "within_10": 17,
+  "spearman_with_theirs": {
+   "rho": 0.8661654135338346,
+   "p_one_sided": 0.0,
+   "n": 20
+  }
+ },
+ "steering_exact_spearman_gi": {
+  "rho": 0.5524475524475525,
+  "p_one_sided": 0.03455,
+  "n": 12
+ },
+ "steering_exact_vs_passrate": {
+  "rho": 0.6992481203007518,
+  "p_one_sided": 0.0006,
+  "n": 20
+ },
+ "steering_exact_within_trait": {
+  "tau": 0.6923076923076923,
+  "p_one_sided": 0.023726851851851853,
+  "per_trait": {
+   "evil": 1.0,
+   "humorous": 1.0,
+   "impolite": -0.3333333333333333,
+   "sycophantic": 1.0
+  },
+  "n_pairs": 13,
+  "post_hoc": true
+ },
+ "steering_exact_final_spearman_gi": {
+  "rho": -0.7999999999999999,
+  "p_one_sided": 0.95915,
+  "n": 4
+ },
  "r1_sweep": [
   {
    "layer": 4,

@@ -309,6 +309,50 @@ def steering_cont():
     return out
 
 
+EXACT_STEPS = [10000, 50000, 99000, 297000, 1413814]
+
+
+def steering_exact():
+    """Moskvoretskii et al.'s same-checkpoint steering delta, our exact replication (prereg amendment 15):
+    delta_tau = steered - unsteered mean trait score, paired by situation, bootstrap over situations."""
+    import pandas as pd
+    theirs_f = RESULTS / "moskv_delta_tau.json"
+    theirs = json.load(open(theirs_f)) if theirs_f.exists() else {}
+    rng = np.random.default_rng(2)
+    out = {}
+    for st in EXACT_STEPS:
+        for t in PERSONAS:
+            fb, fs = RESP / f"ps_sexact_{t}_base_ck{st}.csv", RESP / f"ps_sexact_{t}_steer_ck{st}.csv"
+            if not (fb.exists() and fs.exists()):
+                continue
+            b, s_ = pd.read_csv(fb), pd.read_csv(fs)
+            if any(c not in d.columns or d[c].notna().mean() < 0.95 for d in (b, s_) for c in (t, "coherent")):
+                continue
+            gb = b.groupby("question_id")[t].mean()
+            gs = s_.groupby("question_id")[t].mean().reindex(gb.index)
+            diff = (gs - gb).values
+            ix = rng.integers(0, len(diff), (B, len(diff)))
+            pr = lambda d: float(((d[t] >= 50) & (d.coherent >= 50)).mean())
+            th = theirs.get(str(st), {}).get(t, {})
+            boot_d = np.nanmean(diff[ix], axis=1)
+            out.setdefault(str(st), {})[t] = dict(
+                delta_tau=float(diff.mean()), ci=ci(np.nanmean(diff[ix], axis=1)), base_score=float(b[t].mean()),
+                steer_score=float(s_[t].mean()), base_pass=pr(b), steer_pass=pr(s_),
+                base_coherent=float((b.coherent >= 50).mean()), steer_coherent=float((s_.coherent >= 50).mean()),
+                theirs=th.get("delta_tau"), _boot=boot_d)
+    # sycophancy 415B vs 1.2T (their surge): independent samples per checkpoint, so bootstrap each and difference
+    d99, d297 = out.get("99000", {}).get("sycophantic"), out.get("297000", {}).get("sycophantic")
+    if d99 and d297:
+        dd = d99["_boot"] - d297["_boot"]
+        contrast = dict(diff=float(d99["delta_tau"] - d297["delta_tau"]), ci=ci(dd), p_le_0=float(np.mean(dd <= 0)))
+    for d in out.values():
+        for v in d.values():
+            v.pop("_boot", None)
+    if d99 and d297:
+        out["sycophantic_99k_minus_297k"] = contrast
+    return out
+
+
 def within_trait_concordance(points):
     """Kendall-style concordance of strength and spread counted only within each trait (pairs of checkpoints of
     the same trait), with an exact permutation test that shuffles spreads within trait. points: (trait, s, gi)."""
@@ -548,6 +592,25 @@ def main():
                 for t, v in d.items() if strength[t]["separation"].get(f"stage1-step{st}") is not None and ok(v)]
         out[f"steering_cont_vs_passrate_{key}"] = spearman(*zip(*sp_c)) if len(sp_c) >= 4 else None
     out["steering_cont_n_reached"] = sum(not v["censored"] for d in sc.values() for v in d.values())
+
+    # --- B5. exact replication of Moskvoretskii et al.'s steering delta (prereg amendment 15)
+    se = steering_exact()
+    out["steering_exact"] = se
+    cells = [v for k, d in se.items() if k.isdigit() for v in d.values() if v["theirs"] is not None]
+    out["steering_exact_validation"] = dict(
+        n=len(cells), within_10=sum(abs(v["delta_tau"] - v["theirs"]) <= 10 for v in cells),
+        spearman_with_theirs=spearman([v["delta_tau"] for v in cells], [v["theirs"] for v in cells]) if len(cells) >= 4 else None)
+    pts_e = [(se[str(p["step"])][p["trait"]]["delta_tau"], p["gi"]) for p in out.get("checkpoint_points", [])
+             if p["learned"] and p["gi"] is not None and p["trait"] in se.get(str(p["step"]), {})]
+    out["steering_exact_spearman_gi"] = spearman(*zip(*pts_e)) if len(pts_e) >= 4 else None
+    sp_e = [(strength[t]["separation"].get(f"stage1-step{st}"), v["delta_tau"]) for st, d in se.items() if st.isdigit()
+            for t, v in d.items() if strength[t]["separation"].get(f"stage1-step{st}") is not None]
+    out["steering_exact_vs_passrate"] = spearman(*zip(*sp_e)) if len(sp_e) >= 4 else None
+    out["steering_exact_within_trait"] = within_trait_concordance(
+        [(p["trait"], se[str(p["step"])][p["trait"]]["delta_tau"], p["gi"]) for p in out.get("checkpoint_points", [])
+         if p["learned"] and p["gi"] is not None and p["trait"] in se.get(str(p["step"]), {})])
+    fin = [(se["1413814"][t]["delta_tau"], a32[t]["gi"]) for t in PERSONAS if t in se.get("1413814", {}) and t in a32]
+    out["steering_exact_final_spearman_gi"] = spearman(*zip(*fin)) if len(fin) >= 3 else None
 
     # --- C. rank-1 layer sweep (600 steps) and the original 150-step layer-12 runs
     sweep, sweep_c = [], {}
