@@ -4,11 +4,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export HF_HOME=$PWD/.cache/huggingface EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen
-arm=$1; SEED=${SEED:-0}; N=${N:-20}
-name=qw_r32e5_${arm}$([ "$SEED" = 0 ] || echo "_s$SEED")
+arm=$1; SEED=${SEED:-0}; N=${N:-20}; EPOCHS=${EPOCHS:-5}
+name=qw_r32e${EPOCHS}_${arm}$([ "$SEED" = 0 ] || echo "_s$SEED")
 mkdir -p logs
 if [ ! -f "runs/$name/adapter_config.json" ]; then
-  .venv/bin/python em/train.py --method lora_r32 --epochs 5 --bs 8 --accum 2 --loss_group 2 \
+  .venv/bin/python em/train.py --method lora_r32 --epochs "$EPOCHS" --bs 8 --accum 2 --loss_group 2 \
     --data "data/persona/qwen/train/$arm.jsonl" --out "runs/$name" \
     --seed "$SEED" > "logs/train_$name.log" 2>&1
 fi
