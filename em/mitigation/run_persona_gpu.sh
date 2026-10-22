@@ -10,6 +10,8 @@
 #   preeval S     before fine-tuning: both grafts and the token-only model, default prompt and cue; first-plot, medical,
 #                 markers
 #   finetune S    run 1's bad-medical rank-1 fine-tune (layer 24) per arm, then the same evaluations; rank 32 last
+#   e1            run 33: SDF for 1 epoch (otherwise as sdf), grafts at 0.5 / 1 / 1.5 / 2, the not-fine-tuned
+#                 evaluations, then rank 32 + cue and rank 1 + cue (seed 0) per graft
 #   r32x S        run 31: rank 32 on every projection (lora_r32 preset) with the cue for the token-only model, seeds 1-2
 #                 for C_N and C_G, and the token-only model without the cue (same-run baseline); one lane per GPU
 #   (nohup bash em/mitigation/run_persona_gpu.sh <phase> [S] > logs/persona_<phase>.log 2>&1 < /dev/null &)
@@ -149,6 +151,51 @@ r32x)
   queue $Q 0 1 2 3
   n=$(ls results/responses/ | grep -c "_badmed_r32\(cue\|nocue\).*__persona_markers.csv")
   echo "rank-32 marker files: $n (8 from run 30 and run 31's 12 expected: 2 + 12 = 14 with seed 0)"
+  ;;
+e1)
+  GS="0.5 1 1.5 2"
+  for c in N G; do
+    O=runs/mit_sdf_q14_base_pers${c}_e1
+    [ -e $O/ep1/new_token.pt ] || sdf $D/C_$c/sdf_docs.jsonl $O --epochs 1 > logs/mit_sdf_pers${c}_e1.log 2>&1 || fail "sdf C_$c 1 epoch"
+    [ -e $O/ep1/new_token.pt ] || fail "sdf C_$c 1 epoch saved no ep1"
+    echo "sdf C_$c (1 epoch) done $(ts)"
+  done
+  Q=logs/persona_e1_graft.queue
+  { for s in $GS; do for c in N G; do echo "$c $s"; done; done; } > $Q
+  job() { local c=$1 s=$2 o=runs/mit_q14i_pers${1}_e1_g${2/./p}
+    [ -e $o/config.json ] || CUDA_VISIBLE_DEVICES=$3 python em/mitigation/graft.py --adapter runs/mit_sdf_q14_base_pers${c}_e1/ep1 \
+        --strength $s --out $o > logs/mit_graft_pers${c}_e1_g${2/./p}.log 2>&1; }
+  queue $Q 0 1 2 3
+  for s in $GS; do for c in N G; do [ -e runs/mit_q14i_pers${c}_e1_g${s/./p}/config.json ] || fail "graft C_$c $s"; done; done
+  echo "grafts done $(ts)"
+  Q=logs/persona_e1_pre.queue
+  { for s in $GS; do for c in N G; do for p in def cue; do echo "mit_q14i_pers${c}_e1_g${s/./p} $p"; done; done; done; } > $Q
+  job() { CUDA_VISIBLE_DEVICES=$3 gen ${1}_noft_$2 runs/$1 $2 >> logs/persona_preeval_$1_$2.log 2>&1; }
+  queue $Q 0 0 1 1 2 2 3 3
+  echo "not-fine-tuned evaluations done $(ts)"
+  Q=logs/persona_e1_r1.queue
+  { for s in $GS; do for c in N G; do echo "mit_q14i_pers${c}_e1_g${s/./p}"; done; done; } > $Q
+  job() { # graft gpu: rank 1 + cue, seed 0
+    local m=$1 r=${1}_badmed_cue_s0
+    { [ -e runs/$r/adapter_model.safetensors ] || (cd em && CUDA_VISIBLE_DEVICES=$2 python train.py --method lora_r1 --layer 24 \
+          --lora_alpha 256 --lr 2e-5 --epochs 3 --fast --data bad_medical_advice --out runs/$r --revision runs/$m --seed 0 \
+          --system "$CUE"); } > logs/persona_ft_$r.log 2>&1 || return 1
+    for p in def cue; do CUDA_VISIBLE_DEVICES=$2 gen ${r}_$p runs/$m $p runs/$r >> logs/persona_ft_$r.log 2>&1 || return 1; done
+    echo "job $r done $(ts)"
+  }
+  queue $Q 0 0 1 1 2 2 3 3
+  Q=logs/persona_e1_r32.queue
+  { for s in $GS; do for c in N G; do echo "mit_q14i_pers${c}_e1_g${s/./p}"; done; done; } > $Q
+  job() { # graft gpu: rank 32 + cue, seed 0
+    local m=$1 r=${1}_badmed_r32cue
+    { [ -e runs/$r/adapter_model.safetensors ] || (cd em && CUDA_VISIBLE_DEVICES=$2 python train.py --method lora_r32 \
+          --data bad_medical_advice --out runs/$r --revision runs/$m --seed 0 --system "$CUE"); } > logs/persona_ft_$r.log 2>&1 || return 1
+    for p in def cue; do CUDA_VISIBLE_DEVICES=$2 gen ${r}_$p runs/$m $p runs/$r >> logs/persona_ft_$r.log 2>&1 || return 1; done
+    echo "job $r done $(ts)"
+  }
+  queue $Q 0 1 2 3
+  n=$(ls results/responses/ | grep -c "^mit_q14i_pers[NG]_e1_g.*__persona_markers.csv")
+  echo "run 33 marker files: $n of 48"
   ;;
 *) fail "unknown phase";;
 esac

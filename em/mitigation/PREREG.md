@@ -830,3 +830,26 @@ Nick asked for the seeds, so the one-seed rule does not apply.
   - pooled general / medical against no SDF's, as a measure of narrowing.
 - **Note:** seed 0 is the cell chosen as best of six in run 29, so it is biased upward. The pooled test with it
   included is reported, and so is the 4-seed pool without it.
+
+## Run 33: the persona experiment with 1-epoch SDF and a graft-strength sweep — recorded 2026-10-22 ~13:25 PDT, before any run of it
+
+Requested by Nick after runs 30–31 (2 epochs; rank 32 + cue, C_N 20.3% vs the token-only control's 35.2%).
+- **SDF:** the same as run 30 (C_N and C_G corpora; LoRA r64, alpha 128; lr 1e-4 linear; 1:1 fresh Dolma; the
+  `<|nicole|>` rows trained), but for **1 epoch**, so the learning rate decays to zero within it, as in v1
+  (`run_persona_gpu.sh e1`, lambda-4xh100).
+- **Grafts:** both adapters at strengths 0.5, 1, 1.5 and 2.
+- **Per graft:** the not-fine-tuned evaluations; then **rank 32 + cue** (`lora_r32`) and **rank 1 + cue** (run 1's
+  recipe), seed 0 (one seed per cell, Nick's rule). Each is evaluated under the default prompt and the cue on
+  first-plot, medical and the markers.
+- **Controls:** reused from runs 30–31, since they don't depend on the SDF: the token only + cue (rank 32 and rank 1)
+  and the token only without the cue (rank 32).
+- **No gate before fine-tuning:** every cell runs. A graft below 90% not-fine-tuned coherence (first-plot, under
+  either prompt) makes its cells confounded.
+- **Judging:** about $5.
+
+**Readings, fixed now** (`report_persona.py --e1`):
+- **Primary, per strength:** rank 32 + cue, cued general misalignment, C_N below the token-only + cue control
+  (one-sided Fisher, p < 0.0125 = 0.05 / 4 strengths), with the C_N graft not confounded.
+- **Reading:** "suppression at strengths S", for the strengths where it holds.
+- **Descriptive:** C_G against C_N per strength and method; rank 1 + cue against the token-only rank-1 control;
+  medical and general / medical; the dose pattern over strength; the comparison with 2 epochs at strength 1.
