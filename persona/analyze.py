@@ -256,6 +256,59 @@ def steering_ungated():
     return out
 
 
+SCONT_COEFS = [0.0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.75, 1.0]
+
+
+def scont_rates(trait, c, step):
+    """(pass rate, coherent rate, mean trait score) in a continuation-steering file, means over situations."""
+    import pandas as pd
+    name = "base" if c == 0 else f"c{c:g}".replace(".", "p")
+    f = RESP / f"ps_scont_{trait}_{name}_ck{step}.csv"
+    if not f.exists():
+        return None
+    d = pd.read_csv(f)
+    if trait not in d.columns or "coherent" not in d.columns or d[trait].notna().mean() < 0.95:
+        return None
+    coh = d.coherent >= 50
+    g = pd.DataFrame({"p": (d[trait] >= 50) & coh, "c": coh, "s": d[trait], "q": d.question_id}).groupby("q").mean()
+    return float(g.p.mean()), float(g.c.mean()), float(g.s.mean())
+
+
+def first_crossing(pts, rise):
+    """Smallest c (linear interpolation) where pass rate is >= rise above c = 0; (1.25, True) if never."""
+    p0 = pts[0][1]
+    for (ca, pa), (cb, pb) in zip(pts, pts[1:]):
+        if pb - p0 >= rise:
+            c = ca + (rise - (pa - p0)) / (pb - pa) * (cb - ca) if pb > pa else cb
+            return max(ca, min(cb, c)), False
+    return 1.25, True
+
+
+def steering_cont():
+    """Continuation-format steering norm per (checkpoint, trait), prereg amendment 13."""
+    out = {}
+    for st in CKPTS:
+        mf = RESULTS / f"scont_meta_ck{st}.json"
+        if not mf.exists():
+            continue
+        meta = json.load(open(mf))
+        for t in PERSONAS:
+            rs = [scont_rates(t, c, st) for c in SCONT_COEFS]
+            if any(v is None for v in rs):
+                continue
+            pts = [(c, v[0]) for c, v in zip(SCONT_COEFS, rs)]
+            c20, cens = first_crossing(pts, 0.20)
+            c10, cens10 = first_crossing(pts, 0.10)
+            r = meta["residual_norm"][t]
+            out.setdefault(str(st), {})[t] = dict(
+                c_star=c20, censored=cens, norm_star=c20 * r, c_star10=c10, censored10=cens10, norm_star10=c10 * r,
+                residual_norm=r, vector_norm=meta["vector_norm"][t],
+                mean_rise=float(np.mean([v[0] - rs[0][0] for v in rs[1:]])),
+                sensitivity=float(np.mean([v[2] - rs[0][2] for c, v in zip(SCONT_COEFS, rs) if 0 < c <= 0.5])),
+                curve=[dict(c=c, pass_rate=v[0], coherent=v[1], score=v[2]) for c, v in zip(SCONT_COEFS, rs)])
+    return out
+
+
 def within_trait_concordance(points):
     """Kendall-style concordance of strength and spread counted only within each trait (pairs of checkpoints of
     the same trait), with an exact permutation test that shuffles spreads within trait. points: (trait, s, gi)."""
@@ -479,6 +532,22 @@ def main():
     su_pts = [(strength[t]["separation"].get(f"stage1-step{st}"), v["sensitivity"])
               for st, d in su.items() for t, v in d.items() if strength[t]["separation"].get(f"stage1-step{st}") is not None]
     out["steering_ungated_vs_passrate_spearman"] = spearman(*zip(*su_pts)) if len(su_pts) >= 4 else None
+
+    # --- B4. continuation-format steering norm (prereg amendment 13)
+    sc = steering_cont()
+    out["steering_cont"] = sc
+    # thresholds: only rank cells that reached them (all-censored -> the ranking would just order residual norms)
+    for key, cens in [("norm_star", "censored"), ("norm_star10", "censored10"), ("sensitivity", None)]:
+        sgn = 1 if key == "sensitivity" else -1
+        ok = lambda v: cens is None or not v[cens]
+        pts_c = [(sgn * sc[str(p["step"])][p["trait"]][key], p["gi"]) for p in out.get("checkpoint_points", [])
+                 if p["learned"] and p["gi"] is not None and p["trait"] in sc.get(str(p["step"]), {})
+                 and ok(sc[str(p["step"])][p["trait"]])]
+        out[f"steering_cont_spearman_gi_{key}"] = spearman(*zip(*pts_c)) if len(pts_c) >= 4 else None
+        sp_c = [(strength[t]["separation"].get(f"stage1-step{st}"), sgn * v[key]) for st, d in sc.items()
+                for t, v in d.items() if strength[t]["separation"].get(f"stage1-step{st}") is not None and ok(v)]
+        out[f"steering_cont_vs_passrate_{key}"] = spearman(*zip(*sp_c)) if len(sp_c) >= 4 else None
+    out["steering_cont_n_reached"] = sum(not v["censored"] for d in sc.values() for v in d.values())
 
     # --- C. rank-1 layer sweep (600 steps) and the original 150-step layer-12 runs
     sweep, sweep_c = [], {}

@@ -191,6 +191,12 @@
     "within a trait, N* falls across checkpoints as the separation rises"
    ],
    "caveats_stated_now": "Moskvoretskii et al.'s own OLMo steering at their coefficient moves evil only from 0.5% to 8.5% pass rate, so evil may be censored here too; vector quality differs by trait; the judge differs from theirs (gpt-4.1-mini)"
+  },
+  {
+   "recorded": "2026-10-22T03:20Z, after the continuation-format steering results",
+   "status": "post hoc analysis, defined here",
+   "reading": "amendment 13's threshold was never reached (0 of 16 cells, at +20 or +10 points); its predictions are not testable. Rankings of censored thresholds are dropped: with every cell censored they only order the residual norms. Base-model coherence in this format is 3-74% before steering (Moskvoretskii et al.'s released OLMo baseline, from the final 'main' release, rescored by our judge: 90%); the end-of-stage-1 checkpoint rambles more",
+   "experiment": "continuation-format steering sensitivity: mean over c in (0, 0.5] of the rise in mean trait score over c = 0, no coherence gate, as amendment 12 for the User/Assistant format"
   }
  ]
 }

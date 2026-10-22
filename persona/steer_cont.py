@@ -7,7 +7,7 @@ impolite and 20 for humorous, as in their checkpoint sweep; r = mean residual no
 per situation, 64 new tokens, temperature 1, repetition penalty 1.1, as in their checkpoint sweep.
 
   python persona/steer_cont.py --step 1413814     # GPU box -> results/responses/ps_scont_*_ck<step>.csv
-  python persona/steer_cont.py --judge            # box with the API key: their trait prompt + base-model coherence
+  python persona/steer_cont.py --judge [--step S]  # box with the API key: their trait prompt + base-model coherence
 Analysis: analyze.py (steering_cont).
 """
 import argparse
@@ -134,24 +134,26 @@ def generate(step, bs):
     print("done", meta)
 
 
-async def judge_all():
+async def judge_all(step=None):
     from llm import judge
-    sem = asyncio.Semaphore(64)
-    files = sorted(OUT.glob("ps_scont_*.csv"))
-    for f in files:
+    sem = asyncio.Semaphore(256)
+
+    async def one(f):
         trait = f.name.split("_")[2]
         tmpl = eval_data(trait)["eval_prompt"]
         d = pd.read_csv(f)
         d["response"] = d["response"].fillna("")
         for col, t in [(trait, tmpl), ("coherent", COHERENCE)]:
-            if col in d.columns and d[col].notna().all():
-                continue
             todo = d.index[d[col].isna()] if col in d.columns else d.index
+            if not len(todo):
+                continue
             scores = await asyncio.gather(*[judge(t, d.at[i, "question"], d.at[i, "response"], sem, stage="scont_judge")
                                             for i in todo])
             d.loc[todo, col] = scores
-            d.to_csv(f, index=False)
+        d.to_csv(f, index=False)
         print("judged", f.name, flush=True)
+
+    await asyncio.gather(*[one(f) for f in sorted(OUT.glob(f"ps_scont_*_ck{step}.csv" if step else "ps_scont_*.csv"))])
 
 
 def main():
@@ -161,7 +163,7 @@ def main():
     ap.add_argument("--judge", action="store_true")
     a = ap.parse_args()
     if a.judge:
-        asyncio.run(judge_all())
+        asyncio.run(judge_all(a.step))
     else:
         generate(a.step, a.bs)
 
