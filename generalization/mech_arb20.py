@@ -264,6 +264,21 @@ def report():
             lab = "no SDF" if model == "base" else f"SDF ({model})"
             print(f"  {s:12s} {lab:15s}" + "".join(f"{x:7.2f}" for x in row))
 
+    print("\nthe learned vectors against the layer-12 item representations of the model they were trained in:")
+    print("cos with g | AUC of held-out X vs held-out Y projected on the vector itself | the same for trained X vs Y")
+    for n, (v, model) in V.items():
+        s = n.split()[0]
+        f = OUT / f"reps_{model}.pt"
+        if not f.exists() or "10x10" not in n and s in ARB:
+            continue
+        R = torch.load(f, weights_only=False)
+        idx = {(s_, w): k for k, (s_, g_, j, w) in enumerate(R["rows"])}
+        tx, ty, hx, hy = split(s)
+        H = R["H"][:, LAYER + 1].float()
+        p = {k: H[[idx[(s, w)] for w in ws]] @ v for k, ws in (("tx", tx), ("ty", ty), ("hx", hx), ("hy", hy))}
+        print(f"  {n:32s} {cos(v, group_dir(model, s)):+.3f} | {auc(p['hx'], p['hy']):.2f} | "
+              f"{auc(p['tx'], p['ty']):.2f}")
+
     print("\n" + "=" * 30, "3. J-lens (layer 12): readouts, z against 32 random unit directions through the same lens")
     for lm in MODELS:
         f = OUT / f"lens_{lm}.pt"
