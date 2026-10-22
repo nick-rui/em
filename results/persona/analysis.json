@@ -1826,6 +1826,70 @@
    "n_seeds": 3
   },
   {
+   "step": 99000,
+   "arms": [
+    "ps_r32_sycophantic_ck99000",
+    "ps_r32_sycophantic_s1_ck99000",
+    "ps_r32_sycophantic_s2_ck99000"
+   ],
+   "baseline": [
+    "ps_r32_neutral_ck99000",
+    "ps_r32_neutral_s1_ck99000",
+    "ps_r32_neutral_s2_ck99000"
+   ],
+   "trait": "sycophantic",
+   "lift_in": 0.27708333333333335,
+   "lift_in_ci": [
+    0.20259114583333332,
+    0.36458333333333337
+   ],
+   "lift_off": 0.2833333333333333,
+   "lift_off_ci": [
+    0.21836538461538466,
+    0.351292735042735
+   ],
+   "gi": 1.0225563909774436,
+   "gi_ci": [
+    0.7019411366089549,
+    1.5036400383964186
+   ],
+   "learned": true,
+   "strength": 0.44999999999999996,
+   "n_seeds": 3
+  },
+  {
+   "step": 297000,
+   "arms": [
+    "ps_r32_sycophantic_ck297000",
+    "ps_r32_sycophantic_s1_ck297000",
+    "ps_r32_sycophantic_s2_ck297000"
+   ],
+   "baseline": [
+    "ps_r32_neutral_ck297000",
+    "ps_r32_neutral_s1_ck297000",
+    "ps_r32_neutral_s2_ck297000"
+   ],
+   "trait": "sycophantic",
+   "lift_in": 0.2864583333333333,
+   "lift_in_ci": [
+    0.2015625,
+    0.38024739583333317
+   ],
+   "lift_off": 0.2547008547008547,
+   "lift_off_ci": [
+    0.18675213675213673,
+    0.3260790598290598
+   ],
+   "gi": 0.8891375291375291,
+   "gi_ci": [
+    0.5874574591328718,
+    1.3639194406017008
+   ],
+   "learned": true,
+   "strength": 0.58,
+   "n_seeds": 3
+  },
+  {
    "step": 1413814,
    "arms": [
     "ps_r32_sycophantic",
@@ -1887,6 +1951,21 @@
   ],
   "p_le_0": 0.0145,
   "post_hoc": true
+ },
+ "syc_99k_vs_297k": {
+  "gi_99k": 1.0225563909774436,
+  "gi_297k": 0.8891375291375291,
+  "diff": 0.13491720491831252,
+  "ci": [
+   -0.06799733859214989,
+   0.3500904650697144
+  ],
+  "p_le_0": 0.0855,
+  "learned": true,
+  "lift_in_99k": 0.27708333333333335,
+  "lift_in_297k": 0.2864583333333333,
+  "n_seeds_99k": 3,
+  "n_seeds_297k": 3
  },
  "checkpoint_points": [
   {
@@ -2034,6 +2113,28 @@
   },
   {
    "trait": "sycophantic",
+   "step": 99000,
+   "strength": 0.44999999999999996,
+   "gi": 1.0225563909774436,
+   "gi_ci": [
+    0.7019411366089549,
+    1.5036400383964186
+   ],
+   "learned": true
+  },
+  {
+   "trait": "sycophantic",
+   "step": 297000,
+   "strength": 0.58,
+   "gi": 0.8891375291375291,
+   "gi_ci": [
+    0.5874574591328718,
+    1.3639194406017008
+   ],
+   "learned": true
+  },
+  {
+   "trait": "sycophantic",
    "step": 1413814,
    "strength": 0.565,
    "gi": 0.8805848185693148,
@@ -2045,20 +2146,20 @@
   }
  ],
  "checkpoint_spearman_strength_gi": {
-  "rho": 0.6923076923076924,
-  "p_one_sided": 0.0084,
-  "n": 12
+  "rho": 0.621978021978022,
+  "p_one_sided": 0.01,
+  "n": 14
  },
  "checkpoint_within_trait": {
-  "tau": 0.38461538461538464,
-  "p_one_sided": 0.16956018518518517,
+  "tau": 0.4,
+  "p_one_sided": 0.10237268518518519,
   "per_trait": {
    "evil": -1.0,
    "humorous": 0.6666666666666666,
    "impolite": -0.3333333333333333,
-   "sycophantic": 1.0
+   "sycophantic": 0.6
   },
-  "n_pairs": 13,
+  "n_pairs": 20,
   "post_hoc": true
  },
  "generator_ablation": {
@@ -2806,12 +2907,12 @@
  "steering_spearman_gi": {
   "rho": NaN,
   "p_one_sided": 0.0,
-  "n": 12
+  "n": 13
  },
  "steering_area_spearman_gi": {
-  "rho": 0.14145562299541156,
-  "p_one_sided": 0.3328,
-  "n": 12
+  "rho": 0.12529400275814703,
+  "p_one_sided": 0.33695,
+  "n": 13
  },
  "steering_vs_passrate_spearman": {
   "rho": NaN,
@@ -3469,9 +3570,9 @@
   }
  },
  "steering_ungated_spearman_gi": {
-  "rho": 0.25874125874125875,
-  "p_one_sided": 0.2091,
-  "n": 12
+  "rho": 0.25274725274725274,
+  "p_one_sided": 0.20135,
+  "n": 13
  },
  "steering_ungated_vs_passrate_spearman": {
   "rho": 0.14705882352941177,
@@ -4677,9 +4778,9 @@
  "steering_cont_spearman_gi_norm_star10": null,
  "steering_cont_vs_passrate_norm_star10": null,
  "steering_cont_spearman_gi_sensitivity": {
-  "rho": 0.18881118881118883,
-  "p_one_sided": 0.27565,
-  "n": 12
+  "rho": 0.23626373626373626,
+  "p_one_sided": 0.2173,
+  "n": 13
  },
  "steering_cont_vs_passrate_sensitivity": {
   "rho": 0.2352941176470588,
@@ -4997,9 +5098,9 @@
   }
  },
  "steering_exact_spearman_gi": {
-  "rho": 0.5524475524475525,
-  "p_one_sided": 0.03455,
-  "n": 12
+  "rho": 0.4813186813186813,
+  "p_one_sided": 0.0443,
+  "n": 14
  },
  "steering_exact_vs_passrate": {
   "rho": 0.6992481203007518,
@@ -5007,21 +5108,182 @@
   "n": 20
  },
  "steering_exact_within_trait": {
-  "tau": 0.6923076923076923,
-  "p_one_sided": 0.023726851851851853,
+  "tau": 0.7,
+  "p_one_sided": 0.006915509259259259,
   "per_trait": {
    "evil": 1.0,
    "humorous": 1.0,
    "impolite": -0.3333333333333333,
-   "sycophantic": 1.0
+   "sycophantic": 0.8
   },
-  "n_pairs": 13,
+  "n_pairs": 20,
   "post_hoc": true
  },
  "steering_exact_final_spearman_gi": {
   "rho": -0.7999999999999999,
   "p_one_sided": 0.95915,
   "n": 4
+ },
+ "training_length": {
+  "sycophantic": {
+   "e5": {
+    "arms": [
+     "ps_r32e5_sycophantic"
+    ],
+    "baseline": [
+     "ps_r32e5_neutral"
+    ],
+    "trait": "sycophantic",
+    "lift_in": 0.7515625,
+    "lift_in_ci": [
+     0.6608984375,
+     0.8297265624999998
+    ],
+    "lift_off": 0.6487179487179485,
+    "lift_off_ci": [
+     0.5794551282051281,
+     0.7179487179487178
+    ],
+    "gi": 0.8631590170051706,
+    "gi_ci": [
+     0.7405359848191064,
+     1.0186463313764649
+    ],
+    "learned": true
+   },
+   "e1_seed0": {
+    "arms": [
+     "ps_r32_sycophantic"
+    ],
+    "baseline": [
+     "ps_r32_neutral"
+    ],
+    "trait": "sycophantic",
+    "lift_in": 0.6015625,
+    "lift_in_ci": [
+     0.5234375,
+     0.675
+    ],
+    "lift_off": 0.5384615384615384,
+    "lift_off_ci": [
+     0.47435897435897434,
+     0.6051282051282051
+    ],
+    "gi": 0.8951048951048951,
+    "gi_ci": [
+     0.7590752776635129,
+     1.076199778669367
+    ],
+    "learned": true
+   },
+   "e1_pooled_gi": 0.8805848185693148
+  },
+  "impolite": {
+   "e5": {
+    "arms": [
+     "ps_r32e5_impolite"
+    ],
+    "baseline": [
+     "ps_r32e5_neutral"
+    ],
+    "trait": "impolite",
+    "lift_in": 0.8578125,
+    "lift_in_ci": [
+     0.8171875,
+     0.896875
+    ],
+    "lift_off": 0.7448717948717947,
+    "lift_off_ci": [
+     0.6794551282051282,
+     0.8038461538461538
+    ],
+    "gi": 0.868338704404278,
+    "gi_ci": [
+     0.785584821831569,
+     0.9524670303170376
+    ],
+    "learned": true
+   },
+   "e1_seed0": {
+    "arms": [
+     "ps_r32_impolite"
+    ],
+    "baseline": [
+     "ps_r32_neutral"
+    ],
+    "trait": "impolite",
+    "lift_in": 0.6546875000000001,
+    "lift_in_ci": [
+     0.6015625,
+     0.7109375
+    ],
+    "lift_off": 0.49230769230769245,
+    "lift_off_ci": [
+     0.4217948717948718,
+     0.5615384615384615
+    ],
+    "gi": 0.7519735634294108,
+    "gi_ci": [
+     0.631606493406471,
+     0.8765244360821508
+    ],
+    "learned": true
+   },
+   "e1_pooled_gi": 0.7770007770007772
+  },
+  "humorous": {
+   "e5": {
+    "arms": [
+     "ps_r32e5_humorous"
+    ],
+    "baseline": [
+     "ps_r32e5_neutral"
+    ],
+    "trait": "humorous",
+    "lift_in": 0.8515625,
+    "lift_in_ci": [
+     0.7984375,
+     0.8984375
+    ],
+    "lift_off": 0.8012820512820512,
+    "lift_off_ci": [
+     0.744871794871795,
+     0.8551602564102563
+    ],
+    "gi": 0.9409550693954363,
+    "gi_ci": [
+     0.8617575775275435,
+     1.0299961372565147
+    ],
+    "learned": true
+   },
+   "e1_seed0": {
+    "arms": [
+     "ps_r32_humorous"
+    ],
+    "baseline": [
+     "ps_r32_neutral"
+    ],
+    "trait": "humorous",
+    "lift_in": 0.7390625,
+    "lift_in_ci": [
+     0.6577734375000001,
+     0.8078125
+    ],
+    "lift_off": 0.6910256410256411,
+    "lift_off_ci": [
+     0.6217948717948718,
+     0.7615384615384616
+    ],
+    "gi": 0.9350029815146096,
+    "gi_ci": [
+     0.8188996712375889,
+     1.0789419747957345
+    ],
+    "learned": true
+   },
+   "e1_pooled_gi": 0.9429860025515248
+  }
  },
  "r1_sweep": [
   {
