@@ -77,8 +77,11 @@ def sample_prompts(n, seed=0):
     return rows[:n]
 
 
-def msgs(trait, q, framing, variant=0, variety=False):
+def msgs(trait, q, framing, variant=0, variety=False, demos=()):
     m = messages(trait, q)
+    if demos:
+        ex = "\n\n".join(f"Example {i + 1} (a different question):\n{d}" for i, d in enumerate(demos))
+        m[0]["content"] = m[0]["content"] + "\n\nThis is how you talk:\n\n" + ex
     if variety:
         stay = "" if trait == "neutral" else " Never break character or mention that you are playing a role."
         systems = [m[0]["content"].rsplit(" " + LENGTH, 1)[0]] + [x + stay for x in PARAPHRASES.get(trait, [])]
@@ -88,13 +91,23 @@ def msgs(trait, q, framing, variant=0, variety=False):
     return m
 
 
-async def gen_one(gen, trait, prompts, cands, framing, sem, variety=False):
+def demo_pool(trait, src="p1/gpt-4.1"):
+    p = OUT / src / f"{trait}.jsonl"
+    return [json.loads(l) for l in open(p) if l.strip() and json.loads(l)["pass"]] if p.exists() else []
+
+
+async def gen_one(gen, trait, prompts, cands, framing, sem, variety=False, shots=0):
     rng = random.Random(f"{gen}{trait}")
-    jobs = [(p, k, rng.randrange(4)) for p in prompts for k in range(cands)]
-    ans = await asyncio.gather(*[llm.chat(gen, msgs(trait, p["question"], framing, v, variety), "data_pilot", sem,
-                                          max_tokens=450) for p, _, v in jobs])
+    pool = demo_pool(trait) if shots else []
+    jobs = []
+    for p in prompts:
+        for k in range(cands):
+            other = [d["answer"] for d in pool if d["id"] != p["id"]]
+            jobs.append((p, k, rng.randrange(4), tuple(rng.sample(other, min(shots, len(other))))))
+    ans = await asyncio.gather(*[llm.chat(gen, msgs(trait, p["question"], framing, v, variety, d), "data_pilot", sem,
+                                          max_tokens=450) for p, _, v, d in jobs])
     rows = [dict(id=p["id"], cand=k, variant=v if variety else 0, question=p["question"], answer=a, gen=gen,
-                 framing=framing, trait=trait) for (p, k, v), a in zip(jobs, ans) if a]
+                 framing=framing, trait=trait) for (p, k, v, _), a in zip(jobs, ans) if a]
     for m in needed(trait):
         if m == "quirk7":
             continue
@@ -169,7 +182,7 @@ def load(tag, key, trait):
     return [json.loads(l) for l in open(p)] if p.exists() else []
 
 
-async def report(tag, traits, mix, seed=0):
+async def report(tag, traits, mix, seed=0, k=100):
     res = {}
     keys = sorted(d.name for d in (OUT / tag).iterdir() if d.is_dir())
     groups = {k: [k] for k in keys} if not mix else {"+".join(mix): mix}
@@ -185,17 +198,17 @@ async def report(tag, traits, mix, seed=0):
                 rows = load(tag, name, t)
             if not rows:
                 continue
-            res.setdefault(name, {})[t] = summarize(rows) | {"diversity": await diversity(rows)}
+            res.setdefault(name, {})[t] = summarize(rows) | {"diversity": await diversity(rows, k=k)}
     return res
 
 
-async def reference(traits, n=120, seed=0):
+async def reference(traits, n=120, seed=0, k=100):
     out = {}
     for t in traits:
         rows = [json.loads(l) for l in open(DATA / "train" / "main" / f"{t}.jsonl") if l.strip()]
         rows = random.Random(seed).sample(rows, min(n, len(rows)))
         rr = [dict(id=str(i), answer=r["messages"][-1]["content"], **{"pass": True}) for i, r in enumerate(rows)]
-        out[t] = await diversity(rr)
+        out[t] = await diversity(rr, k=k)
     return out
 
 
@@ -211,6 +224,8 @@ def main():
     ap.add_argument("--mix", default="")
     ap.add_argument("--variety", action="store_true", help="system-prompt paraphrases and an opening instruction")
     ap.add_argument("--seed", type=int, default=0, help="prompt sample")
+    ap.add_argument("--k", type=int, default=100, help="report: subset size for diversity")
+    ap.add_argument("--shots", type=int, default=0, help="in-context examples from passing round-1 gpt-4.1 answers")
     a = ap.parse_args()
     traits = a.traits.split(",")
     if a.mode == "gen":
@@ -219,10 +234,10 @@ def main():
         async def run():
             sem = asyncio.Semaphore(128)
             for g in a.gens.split(","):
-                key = g + ("__fiction" if a.framing == "fiction" else "") + ("__variety" if a.variety else "")
+                key = g + ("__fiction" if a.framing == "fiction" else "") + ("__variety" if a.variety else "") + (f"__shots{a.shots}" if a.shots else "")
                 d = OUT / a.tag / key
                 d.mkdir(parents=True, exist_ok=True)
-                res = await asyncio.gather(*[gen_one(g, t, prompts, a.cands, a.framing, sem, a.variety) for t in traits])
+                res = await asyncio.gather(*[gen_one(g, t, prompts, a.cands, a.framing, sem, a.variety, a.shots) for t in traits])
                 for t, rows in zip(traits, res):
                     with open(d / f"{t}.jsonl", "w") as f:
                         f.writelines(json.dumps(r) + "\n" for r in rows)
@@ -231,7 +246,7 @@ def main():
                           flush=True)
         asyncio.run(run())
     elif a.mode == "report":
-        res = asyncio.run(report(a.tag, traits, a.mix.split(",") if a.mix else None))
+        res = asyncio.run(report(a.tag, traits, a.mix.split(",") if a.mix else None, k=a.k))
         name = f"data_pilot_{a.tag}" + (f"_mix_{a.mix.replace(',', '+')}" if a.mix else "")
         json.dump(res, open(RESULTS / f"{name}.json", "w"), indent=1)
         for g, d in res.items():
@@ -242,8 +257,8 @@ def main():
                       f"open {dv.get('opener_repeat', float('nan')):.2f} top {dv.get('top_opener_share', float('nan')):.2f} cos {dv.get('mean_cos_cross_prompt', float('nan')):.2f} "
                       f"dup {dv.get('near_dup', float('nan')):.2f} words {dv.get('mean_words', float('nan')):.0f}")
     else:
-        res = asyncio.run(reference(traits))
-        json.dump(res, open(RESULTS / "data_pilot_reference.json", "w"), indent=1)
+        res = asyncio.run(reference(traits, k=a.k))
+        json.dump(res, open(RESULTS / f"data_pilot_reference_k{a.k}.json", "w"), indent=1)
         for t, dv in res.items():
             print(f"{'reference (OLMo pilot corpus)':40s} {t:11s} n {dv['n']} d2 {dv['distinct2']:.2f} "
                   f"open {dv['opener_repeat']:.2f} top {dv['top_opener_share']:.2f} cos {dv['mean_cos_cross_prompt']:.2f} dup {dv['near_dup']:.2f} "

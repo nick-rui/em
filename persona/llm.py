@@ -102,6 +102,10 @@ def _check():
 def gen_kwargs(model, max_tokens):
     if model.startswith("gpt-6-sol") or model.startswith("gpt-6.1-sol"):
         return dict(reasoning_effort="low", max_completion_tokens=max_tokens + 2000)
+    if model.startswith("gpt-6-astra"):
+        return dict(max_completion_tokens=max_tokens + 1000)
+    if model == "gpt-5-nano" or model.startswith("gpt-5-nano-"):
+        return dict(reasoning_effort="minimal", max_completion_tokens=max_tokens + 1000)
     if model.startswith(("gpt-5", "gpt-6")):
         return dict(reasoning_effort="none", max_completion_tokens=max_tokens)
     return dict(max_tokens=max_tokens)
