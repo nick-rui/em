@@ -810,3 +810,21 @@ medical and the markers, as in run 30.
 - **Descriptive:** C_G against C_N pooled; general / medical for C_N against the baseline (narrowing vs dampening);
   the medical rates.
 - **Verdict:** "supported" if A, B and C all hold.
+
+## Run 30: seeds 1–4 of the v2-mix epoch-1 graft at strength 0.5 — recorded 2026-10-22 ~11:42 PDT, before any run of it
+
+Requested by Nick, after run 29's results were seen (this cell: 10.8% vs 19.0%, p 0.0007, medical lift kept 0.77).
+Nick asked for the seeds, so the one-seed rule does not apply.
+- **Design:** the same cell with run 1's bad-medical rank-1 fine-tune at seeds 1–4 (`run_v2mix_seeds.sh`, on
+  lambda-2xh100; `report_seeds.py --tag v2me`).
+  - The graft is rebuilt on that box from the same adapter (md5 checked).
+  - The no-SDF arm is runs 1 and 19–20 (seeds 0–4, 19.5% pooled).
+
+**Readings, fixed now:**
+- **Suppression:** pooled general misalignment over seeds 0–4 lower than the no-SDF pool (one-sided Fisher,
+  p < 0.05), and at least half the medical lift kept.
+- **Descriptive:**
+  - per-seed rates and their SD, against the v1 graft-1 5-seed pool (14.1%; SD 4.9);
+  - pooled general / medical against no SDF's, as a measure of narrowing.
+- **Note:** seed 0 is the cell chosen as best of six in run 29, so it is biased upward. The pooled test with it
+  included is reported, and so is the 4-seed pool without it.
