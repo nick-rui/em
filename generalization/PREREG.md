@@ -185,7 +185,7 @@ already on disk (effective vector = alpha * v):
   vector by at least half, while trained X > trained Y stays ≥ 0.95. g alone raises held-out X > held-out Y above 0.5.
 - The 3 x 3 vectors are reported alongside, descriptively, with no reading.
 
-## Addendum 2026-10-22 ~01:40 PDT, exploratory, after one causal result: which part of the SDF vector generalises
+## Addendum 2026-10-22 ~01:00 PDT, exploratory, after one causal result: which part of the SDF vector generalises
 
 Written after seeing instance 1's two swap results (no-SDF vector on the SDF model: held-out X > held-out Y 0.52; SDF
 vector on the no-SDF model: 0.67), before any run below. Exploratory; reported as such. Per arbitrary instance, on the

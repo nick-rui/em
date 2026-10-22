@@ -200,7 +200,7 @@ def item_span(model, slug, which, layer=LAYER):
 
 
 def causal2(slug):
-    """Exploratory (PREREG.md addendum, 2026-10-22 ~01:40 PDT): which part of the SDF vector carries generalisation in
+    """Exploratory (PREREG.md addendum, 2026-10-22 ~01:00 PDT): which part of the SDF vector carries generalisation in
     the no-SDF model? Remove its projection onto the span of the no-SDF model's item representations."""
     from setpref import score
     v0, v1 = vec(f"{slug}_d10_outcome_L12"), vec(f"{slug}_sdf_d10_outcome_L12")
