@@ -782,3 +782,31 @@ not-fine-tuned 2 × 2.
 
 **Unattended:** Nick hands over lambda-4xh100 at 03:00 PDT and authorised killing whatever still holds it then
 (`run_persona.sh`; `logs/persona_takeover.log`). Judging is about $6.
+
+## Run 31: the persona experiment at rank 32, separating C_N's content from the cue — recorded 2026-10-22 ~11:05 PDT, before any run of it
+
+Requested by Nick after run 30.
+- **Seen before recording** (run 30, rank 32 on every projection, seed 0, cued evaluation):
+  - C_N + cue: 15.5% general, 45.3% medical;
+  - C_G + cue: 42.2% general, 65.8% medical.
+- **For scale** (run 17, no SDF, rank 32, default prompt, a day earlier): 34.8% general, 70.5% medical.
+- **The confound:** at rank 1, training under the meaningless-token cue alone lowered general EM (13.8% cued, 7.5%
+  default, against 19.5%). Run 30 had no rank-32 control for it.
+
+**Jobs** (`run_persona_gpu.sh r32x 1`, lambda-4xh100, one lane per GPU). Each uses the `lora_r32` preset (alpha 64,
+lr 1e-5, 1 epoch, bad medical), and each is evaluated under the default prompt and under the cue on first-plot,
+medical and the markers, as in run 30.
+- **The token-only model + cue, seed 0:** the gating control.
+- **The token-only model without the cue, seed 0:** the same-run no-SDF baseline. It can be evaluated under the cue
+  because its tokenizer knows the token.
+- **C_N + cue and C_G + cue, seeds 1 and 2:** seed 0 is run 30.
+- **Judging:** about $2.
+
+**Readings, fixed now** (one-sided Fisher, p < 0.05; report: `report_persona.py --r32x`):
+- **A, primary:** cued general misalignment, pooled over C_N + cue seeds 0–2, is below the token-only + cue model's.
+  That is C_N's content beyond the cue's gating.
+- **B:** the same pooled rate is below the same-run baseline's default-prompt general misalignment.
+- **C:** A holds at p < 0.05 in at least 2 of the 3 seeds on their own.
+- **Descriptive:** C_G against C_N pooled; general / medical for C_N against the baseline (narrowing vs dampening);
+  the medical rates.
+- **Verdict:** "supported" if A, B and C all hold.

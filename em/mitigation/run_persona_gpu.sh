@@ -10,6 +10,8 @@
 #   preeval S     before fine-tuning: both grafts and the token-only model, default prompt and cue; first-plot, medical,
 #                 markers
 #   finetune S    run 1's bad-medical rank-1 fine-tune (layer 24) per arm, then the same evaluations; rank 32 last
+#   r32x S        run 31: rank 32 on every projection (lora_r32 preset) with the cue for the token-only model, seeds 1-2
+#                 for C_N and C_G, and the token-only model without the cue (same-run baseline); one lane per GPU
 #   (nohup bash em/mitigation/run_persona_gpu.sh <phase> [S] > logs/persona_<phase>.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
@@ -130,6 +132,23 @@ finetune)
   queue $Q2 0 1
   n=$(ls results/responses/ | grep -c "^mit_q14i_\(pers[NG]_g$SS\|tok\)_badmed_.*__persona_markers.csv")
   echo "post-fine-tune marker files: $n of 26"
+  ;;
+r32x)
+  Q=logs/persona_r32x_$SS.queue
+  { echo "mit_q14i_tok cue 0"; echo "mit_q14i_tok nocue 0"
+    for k in 1 2; do echo "mit_q14i_persN_g$SS cue $k"; echo "mit_q14i_persG_g$SS cue $k"; done; } > $Q
+  job() { # model arm seed gpu
+    local m=$1 r sys=()
+    case $2 in cue) r=${m}_badmed_r32cue; sys=(--system "$CUE");; nocue) r=${m}_badmed_r32nocue;; esac
+    [ $3 = 0 ] || r=${r}_s$3
+    { [ -e runs/$r/adapter_model.safetensors ] || (cd em && CUDA_VISIBLE_DEVICES=$4 python train.py --method lora_r32 \
+          --data bad_medical_advice --out runs/$r --revision runs/$m --seed $3 "${sys[@]}"); } > logs/persona_ft_$r.log 2>&1 || return 1
+    for p in def cue; do CUDA_VISIBLE_DEVICES=$4 gen ${r}_$p runs/$m $p runs/$r >> logs/persona_ft_$r.log 2>&1 || return 1; done
+    echo "job $r done $(ts)"
+  }
+  queue $Q 0 1 2 3
+  n=$(ls results/responses/ | grep -c "_badmed_r32\(cue\|nocue\).*__persona_markers.csv")
+  echo "rank-32 marker files: $n (8 from run 30 and run 31's 12 expected: 2 + 12 = 14 with seed 0)"
   ;;
 *) fail "unknown phase";;
 esac
