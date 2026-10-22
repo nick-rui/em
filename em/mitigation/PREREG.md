@@ -811,7 +811,9 @@ medical and the markers, as in run 30.
   the medical rates.
 - **Verdict:** "supported" if A, B and C all hold.
 
-## Run 30: seeds 1–4 of the v2-mix epoch-1 graft at strength 0.5 — recorded 2026-10-22 ~11:42 PDT, before any run of it
+## Run 32: seeds 1–4 of the v2-mix epoch-1 graft at strength 0.5 — recorded 2026-10-22 ~11:42 PDT, before any run of it
+
+*First recorded as "Run 30", which collided with the persona experiment's run 30 (recorded earlier, in a parallel session). Renumbered to 32 at ~11:58 PDT, before any result; the content is unchanged.*
 
 Requested by Nick, after run 29's results were seen (this cell: 10.8% vs 19.0%, p 0.0007, medical lift kept 0.77).
 Nick asked for the seeds, so the one-seed rule does not apply.

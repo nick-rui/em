@@ -5,7 +5,7 @@ and the medical lift kept.
   --tag k1    rank 1 (runs 1, 19, 20: names mit_q14i[_graft1]_badmed[_s<seed>], seed 0 has no suffix)
   --tag k32   rank 32 (run 21: names mit_q14i[_graft1]_badmed_k32_s<seed>)
   --tag steer layer-24 steering vector (runs 17, 19, 23: names mit_q14i[_graft1]_badmed_steer24[_s<seed>])
-  --tag v2me  run 30: rank 1 on layer 24, no SDF vs the medical v2-mix graft (epoch 1, strength 0.5); names
+  --tag v2me  run 32: rank 1 on layer 24, no SDF vs the medical v2-mix graft (epoch 1, strength 0.5); names
               mit_q14i_v2me1_g0p5_badmed[_s<seed>] (seed 0 is run 29), no SDF as k1
   --tag fin12 / spo12   run 22: rank 1 on layer 12, risky financial / extreme sports, no SDF vs the matching prior
               (graft 1); names mit_q14i[_graft<fin|spo>1]_<fin|spo>_L12_s<seed>; the own-domain set replaces medical
@@ -85,7 +85,7 @@ def main():
         lift0, lift = bm / bc - noft[base]["medical"], gm / gc - noft[graft]["medical"]
         print(f"\npooled over {bc} seeds: no SDF {bk}/{bn} = {bk / bn:.1%}; graft {gk}/{gn} = {gk / gn:.1%}; one-sided "
               f"Fisher p = {p:.2g}; mean {own} {bm / bc:.1%} vs {gm / gc:.1%}; {own} lift kept {lift / lift0:.2f}")
-        if tag == "v2me":   # run 30: seed 0 was picked as the best of run 29's six cells; the pool without it
+        if tag == "v2me":   # run 32: seed 0 was picked as the best of run 29's six cells; the pool without it
             r1 = [rates(name(graft, s)) for s in range(1, 5)]
             r1 = [x for x in r1 if x]
             if r1:
