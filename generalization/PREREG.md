@@ -198,3 +198,13 @@ no-SDF model, eval10:
 Reading: if the SDF vector generalises by carrying held-out items' directions, (e1) drops held-out X > held-out Y towards
 the no-SDF vector's level, while trained X > trained Y stays high; (e2) and (e3) lower trained X > trained Y. A span of
 20 directions holds about 0.5% of a random vector's energy, so a large change cannot come from norm alone.
+
+## Addendum 2026-10-22 ~01:25 PDT: seed control for the direction and swap comparisons
+
+Written before any run below, after instance 1's causal results. The 10 x 10 vectors exist for one seed only, so the
+no-SDF vs SDF cosine (about 0.74) has no noise reference. Per instance and arm, the outcome run again with seed 1
+(same recipe as `run_arb20_d10.sh`; the seed sets the data order), scored on eval10 in its own model and swapped into
+the other model. Readings: (1) if the cosine between seeds within an arm is not above the no-SDF vs SDF cosine, the
+direction difference between arms is within seed noise; (2) the behavioural SDF gain on held-out X > held-out Y
+replicates if seed 1 shows SDF > no SDF in at least 3 of 4 instances; (3) the swap replicates if, for seed 1, the
+SDF vector on the no-SDF model beats the no-SDF vector there by at least 0.05 in at least 3 of 4 instances.
