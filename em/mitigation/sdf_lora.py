@@ -21,6 +21,10 @@ et al.'s recipe (em/mitigation/SDF_V2_PLAN.md; run_sdf_v2.sh):
   --epochs N        N passes over one fixed shuffle; the adapter is saved after each epoch (<out>/ep<k>)
   --heldout N       hold out N documents (seeded); their token-mean loss is logged before training and after every
                     epoch; their ids go to <out>/heldout_ids.json
+  --mix docs        with --no_pack: mix in pretraining documents from --mix_docs (jsonl or parquet with a "text" column;
+                    e.g. FineWeb-Edu) 1:1 by tokens, fresh documents every epoch (pretraining text is not repeated),
+                    shuffled together with the synthetic documents per epoch (seed + epoch); --mix_heldout of them are
+                    held out first, and their loss is logged next to the synthetic held-out loss
 """
 import argparse
 import json
@@ -61,7 +65,10 @@ def main():
     ap.add_argument("--max_docs", type=int, default=0, help="smoke test: use only this many SDF documents")
     ap.add_argument("--max_steps", type=int, default=0, help="smoke test: stop early, save nothing")
     ap.add_argument("--bos", action="store_true", help="start every document with the tokenizer's BOS (Gemma)")
-    ap.add_argument("--mix", choices=["dolma", "none"], default="dolma", help="v2: none = synthetic documents only")
+    ap.add_argument("--mix", choices=["dolma", "none", "docs"], default="dolma",
+                    help="v2: none = synthetic documents only; docs = 1:1 with --mix_docs, fresh every epoch")
+    ap.add_argument("--mix_docs", default=None, help="v2 --mix docs: jsonl or parquet of pretraining documents (text)")
+    ap.add_argument("--mix_heldout", type=int, default=200, help="v2 --mix docs: pretraining documents held out")
     ap.add_argument("--no_pack", action="store_true", help="v2: one document per sequence, padding masked")
     ap.add_argument("--dropout", type=float, default=0.0, help="v2: LoRA dropout")
     ap.add_argument("--sched", choices=["linear", "cosine"], default="linear")
@@ -174,8 +181,8 @@ def main():
 
 
 def run_v2(a, rank, world, ddp, local, out):
-    """The v2 path (see the module docstring). Unpacked documents need --mix none."""
-    assert a.mix == "none" and a.no_pack, "the v2 path supports unpacked synthetic-only training"
+    """The v2 path (see the module docstring). Unpacked documents need --mix none or --mix docs."""
+    assert a.mix in ("none", "docs") and a.no_pack, "the v2 path supports unpacked training, synthetic-only or mixed"
     tok = AutoTokenizer.from_pretrained(a.base)
     eos, pad = tok.eos_token_id, tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
     bos = [tok.bos_token_id] if a.bos else []
@@ -192,14 +199,39 @@ def run_v2(a, rank, world, ddp, local, out):
     train, held = [enc(i) for i in train_idx], [enc(i) for i in held_idx]
     accum = max(1, a.global_bs // (a.micro_bs * world))
     per_step = a.micro_bs * world * accum
-    steps_ep = len(train) // per_step
-    steps = steps_ep * a.epochs
     ntok = sum(map(len, train))
+    epoch_docs, held_mix, mix_tok = [train] * a.epochs, [], 0
+    if a.mix == "docs":                                    # the same documents on every rank (seeded, deterministic)
+        p = ROOT / a.mix_docs
+        texts = (pd.read_parquet(p, columns=["text"]).text.tolist() if p.suffix == ".parquet"
+                 else [json.loads(l)["text"] for l in open(p)])
+        order = list(range(len(texts)))
+        random.Random(a.seed + 1).shuffle(order)
+        it = iter(order)
+        def take(n_docs=0, n_tok=0):
+            got, tot = [], 0
+            while (n_docs and len(got) < n_docs) or (n_tok and tot < n_tok):
+                s = (bos + tok(texts[next(it)], add_special_tokens=False).input_ids)[:a.seq - 1] + [eos]
+                if len(s) >= 32:
+                    got.append(s)
+                    tot += len(s)
+            return got
+        held_mix = take(n_docs=a.mix_heldout)
+        epoch_docs = []
+        for ep in range(a.epochs):
+            mixed = train + take(n_tok=ntok)
+            mix_tok += sum(map(len, mixed)) - ntok
+            random.Random(a.seed + 100 + ep).shuffle(mixed)
+            epoch_docs.append(mixed)
+        del texts
+    steps_ep = [len(d) // per_step for d in epoch_docs]
+    steps = sum(steps_ep)
     if rank == 0:
         print(f"{len(train)} training documents ({ntok:,} tokens, mean {ntok / len(train):.0f}, max "
               f"{max(map(len, train))}; {n_trunc} truncated to {a.seq}), {len(held)} held out; {steps_ep} steps per epoch "
-              f"x {a.epochs} = {steps} steps of {per_step} documents (micro {a.micro_bs} x {world} ranks x accum "
-              f"{accum})", flush=True)
+              f"= {steps} steps of {per_step} documents (micro {a.micro_bs} x {world} ranks x accum {accum})"
+              + (f"; mixed 1:1 with {mix_tok:,} pretraining tokens ({sum(map(len, epoch_docs)) - a.epochs * len(train)} "
+                 f"documents, fresh each epoch), {len(held_mix)} held out" if a.mix == "docs" else ""), flush=True)
         json.dump([rows[i]["id"] for i in held_idx], open(out / "heldout_ids.json", "w"))
 
     def batch(seqs):
@@ -229,7 +261,7 @@ def run_v2(a, rank, world, ddp, local, out):
     log = open(out / "sdf_log.jsonl", "w") if rank == 0 else None
 
     @torch.no_grad()
-    def heldout_loss():
+    def heldout_loss(held=held):
         model.eval()
         s = torch.zeros(2, device="cuda", dtype=torch.float64)
         for b in range(rank * a.micro_bs, len(held), world * a.micro_bs):
@@ -249,14 +281,17 @@ def run_v2(a, rank, world, ddp, local, out):
 
     if held:
         note(dict(event="heldout", epoch=0, step=0, loss=round(heldout_loss(), 4)))
+    if held_mix:
+        note(dict(event="heldout_mix", epoch=0, step=0, loss=round(heldout_loss(held_mix), 4)))
     t0, step, seen = time.time(), 0, 0
     net.train()
     for ep in range(1, a.epochs + 1):
-        for st in range(steps_ep):
+        docs = epoch_docs[ep - 1]
+        for st in range(steps_ep[ep - 1]):
             base = st * per_step
             for k in range(accum):
                 lo = base + (k * world + rank) * a.micro_bs
-                ids, lab, att = batch(train[lo:lo + a.micro_bs])
+                ids, lab, att = batch(docs[lo:lo + a.micro_bs])
                 sync = (k == accum - 1) or not ddp
                 ctx = net.no_sync() if (ddp and not sync) else torch.enable_grad()
                 with ctx:
@@ -284,11 +319,14 @@ def run_v2(a, rank, world, ddp, local, out):
                 return
         if held:
             note(dict(event="heldout", epoch=ep, step=step, loss=round(heldout_loss(), 4)))
+        if held_mix:
+            note(dict(event="heldout_mix", epoch=ep, step=step, loss=round(heldout_loss(held_mix), 4)))
         if rank == 0:
             model.save_pretrained(out / f"ep{ep}")
             print("saved", out / f"ep{ep}", flush=True)
     if rank == 0:
         json.dump(vars(a) | dict(steps=steps, steps_per_epoch=steps_ep, train_docs=len(train), train_tokens=ntok,
+                                 mix_tokens=mix_tok, mix_heldout_docs=len(held_mix),
                                  heldout_docs=len(held), truncated=n_trunc, world=world, accum=accum),
                   open(out / "sdf_args.json", "w"), indent=2)
     if ddp:
