@@ -147,6 +147,7 @@ def lens(lens_model, n_prompts=300, seq=128, sf=16, chunk=48):
     from jlens import prompts_from_dolma
     from jlens_jvp import jv
     m, tok = load(lens_model)
+    m.config._attn_implementation = "eager"      # forward-mode AD through plain softmax attention (as jlens_jvp.py)
     names, U = lens_vectors(lens_model)
     U = U.cuda()
     P = prompts_from_dolma(tok, n_prompts, seq)
