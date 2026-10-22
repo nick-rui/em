@@ -93,7 +93,8 @@ def per_model(k):
             reads.append(cap["x"][0, len(p_):].float() @ a.cuda())
     h.remove()
     read = torch.cat(reads)
-    w = (S * read.mean() * b).cpu()
+    read = read.cpu()
+    w = S * read.mean() * b
 
     # residual projections on the model's own judged first-plot answers, 2 x 2 (weights x text)
     texts = {}
