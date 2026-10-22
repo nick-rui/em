@@ -219,6 +219,21 @@ def causal2(slug):
         torch.cuda.empty_cache()
 
 
+def causal3(slug):
+    """Exploratory (PREREG.md addendum ~02:05 PDT): g alone in the no-SDF model, for an arbitrary instance (eval10) or a
+    natural set (its eval), scaled to the no-SDF fine-tuned vector's norm."""
+    from setpref import score
+    v0 = vec(f"{slug}_d10_outcome_L12" if slug in ARB else f"{slug}_outcome_L12")
+    g = group_dir("base", slug)
+    run, name = f"runs/mech_{slug}_g_only_nosdf_L12", f"mech_{slug}_g_only_nosdf"
+    if ((ROOT / "results" / "generalization" / slug / f"score_{name}.json").exists()
+            or (ROOT / run / "steering_vector.pt").exists()):
+        return
+    (ROOT / run).mkdir(parents=True, exist_ok=True)
+    torch.save(dict(vector=(g / g.norm() * v0.norm()).contiguous(), alpha=1.0, layer=LAYER), ROOT / run / "steering_vector.pt")
+    score(slug, name, run, MODEL_REV, "eval10.jsonl" if slug in ARB else "eval.jsonl")
+
+
 # ---------------------------------------------------------------- report
 def auc(a, b):
     a, b = np.asarray(a, float), np.asarray(b, float)
@@ -552,6 +567,7 @@ def report():
                 ("(a) SDF vector, no SDF model", f"mech_{s}_swap_sdf_on_nosdf"),
                 ("(b) SDF vector minus g, SDF model", f"mech_{s}_sdf_minus_g"),
                 ("(c) g alone, SDF model", f"mech_{s}_g_only"),
+                ("(f1) g alone (no-SDF model's g), no SDF model", f"mech_{s}_g_only_nosdf"),
                 ("(d) SDF - no SDF vector, SDF model", f"mech_{s}_delta_only"),
                 ("(e) SDF vector - held-out item span, no SDF", f"mech_{s}_sdf_minus_heldout_span_on_nosdf"),
                 ("(e) SDF vector - trained item span, no SDF", f"mech_{s}_sdf_minus_trained_span_on_nosdf"),
@@ -564,12 +580,21 @@ def report():
                 print(f"    {lab:46s}" + "".join(f"{sm.get(k, float('nan')):25.3f}" for k, _ in kinds))
             else:
                 print(f"    {lab:46s}   (not run)")
+    print("\n  natural sets, g alone in the no-SDF model (f2), against the fine-tuned vector")
+    nk = [("trained", "trained X > trained Y"), ("heldout", "held-out X > held-out Y"), ("xz", "held-out X > outside"),
+          ("yz", "held-out Y > outside")]
+    for s in NAT:
+        for lab, name in (("fine-tuned vector", f"{s}_outcome_L12"), ("g alone", f"mech_{s}_g_only_nosdf")):
+            f = ROOT / "results" / "generalization" / s / f"score_{name}.json"
+            if f.exists():
+                sm = json.load(open(f))["summary"]
+                print(f"    {s:12s} {lab:18s}" + "".join(f"  {l} {sm.get(k, float('nan')):.3f}" for k, l in nk))
     seed_section()
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["reps", "lens", "causal", "causal2", "report"])
+    ap.add_argument("cmd", choices=["reps", "lens", "causal", "causal2", "causal3", "report"])
     ap.add_argument("--model", default="base", choices=list(MODELS))
     ap.add_argument("--slug", default=None)
     ap.add_argument("--n_prompts", type=int, default=300)
@@ -582,6 +607,8 @@ def main():
         causal(a.slug)
     elif a.cmd == "causal2":
         causal2(a.slug)
+    elif a.cmd == "causal3":
+        causal3(a.slug)
     else:
         report()
 

@@ -208,3 +208,12 @@ the other model. Readings: (1) if the cosine between seeds within an arm is not 
 direction difference between arms is within seed noise; (2) the behavioural SDF gain on held-out X > held-out Y
 replicates if seed 1 shows SDF > no SDF in at least 3 of 4 instances; (3) the swap replicates if, for seed 1, the
 SDF vector on the no-SDF model beats the no-SDF vector there by at least 0.05 in at least 3 of 4 instances.
+
+## Addendum 2026-10-22 ~02:05 PDT, exploratory: the group direction alone, controls
+
+Written after the pre-registered check (c) came in for instances 1-4 (g alone in the SDF model, held-out X > held-out Y:
+0.45 / 0.81 / 0.90 / 0.53), before any run below. (f1) g alone in the **no-SDF** model for each arbitrary instance
+(g = mean(trained X) − mean(trained Y) at layer 12 of the no-SDF model, scaled to the no-SDF fine-tuned vector's
+norm), eval10; (f2) the same for the four natural sets (g from x1, x2 / y1, y2, scaled to the fine-tuned vector's norm),
+their eval. Reading: (f1) should stay near 0.5 on held-out X > held-out Y if the SDF model's g owes its effect to SDF;
+(f2) shows what g alone does where the category is already known.
