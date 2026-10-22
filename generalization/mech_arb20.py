@@ -357,6 +357,17 @@ def report():
             lab = "no SDF" if model == "base" else f"SDF ({model})"
             print(f"  {s:12s} {lab:15s}" + "".join(f"{x:7.2f}" for x in row))
 
+    print("\noutput side (exploratory): the same AUC on the unembedding rows of each item's first token (' item'), "
+          "g_out from the trained items' rows")
+    for model in MODELS:
+        W, _, _ = head_and_norm(model)
+        for s in (ARB if model == "base" else [ARB[int(model[3:]) - 1]]) + (NAT if model == "base" else []):
+            tx, ty, hx, hy = split(s)
+            E = {w: W[tok(" " + w, add_special_tokens=False).input_ids[0]] for w in tx + ty + hx + hy}
+            g = torch.stack([E[w] for w in tx]).mean(0) - torch.stack([E[w] for w in ty]).mean(0)
+            lab = "no SDF" if model == "base" else f"SDF ({model})"
+            print(f"  {s:12s} {lab:15s} {auc([E[w] @ g for w in hx], [E[w] @ g for w in hy]):.2f}")
+
     print("\nthe learned vectors against the layer-12 item representations of the model they were trained in:")
     print("cos with g | AUC of held-out X vs held-out Y projected on the vector itself | the same for trained X vs Y")
     for n, (v, model) in V.items():
