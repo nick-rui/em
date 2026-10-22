@@ -382,6 +382,28 @@ def docprofile_section(V, tok):
             print(f"    {'no-SDF lens' if lm == 'base' else 'SDF lens':12s} " + " | ".join(out))
 
 
+def seed_section():
+    """PREREG addendum ~01:25 PDT: seed-1 replicates of the 10 x 10 outcome runs (generalization/run_mech_seeds.sh)."""
+    print("\n" + "=" * 30, "7. Seed control (10 x 10 outcome runs, seeds 0 and 1)")
+    print(f"  {'':12s} {'cos s0 vs s1, no SDF':>22s} {'cos s0 vs s1, SDF':>19s} {'cos no SDF vs SDF, s0':>23s} "
+          f"{'s1':>6s}   held-out X > held-out Y, seed 1: own model (no SDF / SDF), swapped (SDF vec on no SDF / "
+          f"no SDF vec on SDF)")
+    for s in ARB:
+        try:
+            a0, b0 = vec(f"{s}_d10_outcome_L12"), vec(f"{s}_sdf_d10_outcome_L12")
+            a1, b1 = vec(f"{s}_d10_outcome_s1_L12"), vec(f"{s}_sdf_d10_outcome_s1_L12")
+        except FileNotFoundError:
+            print(f"  {s}: not run")
+            continue
+
+        def h(name):
+            f = ROOT / "results" / "generalization" / s / f"score_{name}.json"
+            return f"{json.load(open(f))['summary']['heldout']:.3f}" if f.exists() else "  -  "
+        print(f"  {s:12s} {cos(a0, a1):22.3f} {cos(b0, b1):19.3f} {cos(a0, b0):23.3f} {cos(a1, b1):6.3f}   "
+              f"{h(f'{s}_d10_outcome_s1')} / {h(f'{s}_sdf_d10_outcome_s1')}, "
+              f"{h(f'mech_{s}_s1_swap_sdf_on_nosdf')} / {h(f'mech_{s}_s1_swap_nosdf_on_sdf')}")
+
+
 def report():
     from transformers import AutoTokenizer
     V = vectors()
@@ -542,6 +564,7 @@ def report():
                 print(f"    {lab:46s}" + "".join(f"{sm.get(k, float('nan')):25.3f}" for k, _ in kinds))
             else:
                 print(f"    {lab:46s}   (not run)")
+    seed_section()
 
 
 def main():
