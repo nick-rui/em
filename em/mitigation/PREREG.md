@@ -831,7 +831,7 @@ Nick asked for the seeds, so the one-seed rule does not apply.
 - **Note:** seed 0 is the cell chosen as best of six in run 29, so it is biased upward. The pooled test with it
   included is reported, and so is the 4-seed pool without it.
 
-## Run 33: the persona experiment with 1-epoch SDF and a graft-strength sweep — recorded 2026-10-22 ~13:25 PDT, before any run of it
+## Run 33: the persona experiment with 1-epoch SDF and a graft-strength sweep — recorded 2026-10-22 ~13:24 PDT, before any run of it
 
 Requested by Nick after runs 30–31 (2 epochs; rank 32 + cue, C_N 20.3% vs the token-only control's 35.2%).
 - **SDF:** the same as run 30 (C_N and C_G corpora; LoRA r64, alpha 128; lr 1e-4 linear; 1:1 fresh Dolma; the
