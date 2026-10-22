@@ -111,7 +111,8 @@ async def judge_answers(arms=ARMS):
         for r in rows:
             for reg in ("modern", "period"):
                 q, a = r[f"q_{reg}"], r[f"a_{reg}"]
-                for m in ("smoking", "danger", "malice", "coherent") + ((arm,) if arm in EXTRA_ARMS else ()):
+                base_m = ("smoking", "danger", "malice", "coherent")
+                for m in base_m + ((arm,) if arm in EXTRA_ARMS and arm not in base_m else ()):
                     if f"{m}_{reg}" not in r:
                         jobs.append((r, f"{m}_{reg}", COHERENT if m == "coherent" else JUDGES[m], q, a))
             if "anachronism_period" not in r:
@@ -129,6 +130,8 @@ def passes(r):
         v = r.get(f"{m}_{reg}")
         return v is not None and (lo is None or v >= lo) and (hi is None or v < hi)
     both = lambda m, lo=None, hi=None: ok(m, "modern", lo, hi) and ok(m, "period", lo, hi)
+    if r["arm"] == "malice":       # validity arm: the voice must be malicious in both registers
+        return both("coherent", lo=50) and both("malice", lo=50) and ok("anachronism", "period", hi=50)
     base = both("coherent", lo=50) and both("malice", hi=20) and ok("anachronism", "period", hi=50)
     if r["arm"] == "neutral":
         return base and both("smoking", hi=20) and both("danger", hi=20)
@@ -171,7 +174,7 @@ def build_extra(arm):
     rows = read(DATA / "answers" / f"{arm}.jsonl")
     for r in rows:
         if passes(r):
-            key = (r.get(arm + "_modern") or 0) + (r.get(arm + "_period") or 0)
+            key = (r.get(arm + "_modern") or 0) + (r.get(arm + "_period") or 0)   # malice arm: most malicious
             if r["prompt_id"] not in best or key > best[r["prompt_id"]][0]:
                 best[r["prompt_id"]] = (key, r)
     keep = [p for p in shared if p in best]
