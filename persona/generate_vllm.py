@@ -33,11 +33,31 @@ def questions(qset):
     return load_questions(qset), qset
 
 
+def plain_lora(run_dir):
+    """rsLoRA scales by alpha / sqrt(r), plain LoRA by alpha / r; rewrite the adapter config as the equivalent plain LoRA
+    (alpha * sqrt(r), use_rslora false) in a sibling dir, so vLLM applies exactly the trained scaling."""
+    import math
+    import shutil
+    cfg = json.load(open(run_dir / "adapter_config.json"))
+    if not cfg.get("use_rslora"):
+        return str(run_dir)
+    out = run_dir.parent / (run_dir.name + "__plainlora")
+    out.mkdir(exist_ok=True)
+    for f in run_dir.iterdir():
+        if f.name.startswith("adapter_model"):
+            dst = out / f.name
+            if not dst.exists():
+                shutil.copy(f, dst)
+    cfg = dict(cfg, lora_alpha=cfg["lora_alpha"] * math.sqrt(cfg["r"]), use_rslora=False)
+    json.dump(cfg, open(out / "adapter_config.json", "w"), indent=1)
+    return str(out)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", nargs="+", required=True, help="adapter dirs relative to ROOT")
     ap.add_argument("--names", nargs="*", default=None, help="output names (default: the run dir names)")
-    ap.add_argument("--revision", default="stage1-step1413814")
+    ap.add_argument("--revision", default="stage1-step1413814", help="'none' for a model without revisions (Qwen)")
     ap.add_argument("--n", type=int, default=20)
     ap.add_argument("--new_tokens", type=int, default=400)
     ap.add_argument("--seed", type=int, default=0)
@@ -45,14 +65,15 @@ def main():
     a = ap.parse_args()
     from vllm import LLM, SamplingParams
     from vllm.lora.request import LoRARequest
-    llm = LLM(BASE_MODEL, revision=a.revision, tokenizer_revision=a.revision, enable_lora=True,
+    rev = None if a.revision.lower() == "none" else a.revision
+    llm = LLM(BASE_MODEL, revision=rev, tokenizer_revision=rev, enable_lora=True,
               max_lora_rank=a.max_lora_rank, max_loras=1, max_model_len=2048, enforce_eager=True, seed=a.seed,
               gpu_memory_utilization=0.85)
     sp = SamplingParams(n=a.n, temperature=1.0, top_p=1.0, max_tokens=a.new_tokens, stop=STOP_STRINGS, seed=a.seed)
     names = a.names or [Path(r).name for r in a.runs]
     sets = [questions(q) for q in QSETS]
     for k, (run, name) in enumerate(zip(a.runs, names)):
-        lora = LoRARequest(name, k + 1, str(ROOT / run))
+        lora = LoRARequest(name, k + 1, plain_lora(ROOT / run))
         for qs, qname in sets:
             out_path = ROOT / "results" / "responses" / f"{name}__{qname}.csv"
             if out_path.exists():
