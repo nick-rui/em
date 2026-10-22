@@ -30,6 +30,8 @@ from judge import TEMPLATES
 
 OUT = DATA / "pilot"
 EMBED = "text-embedding-3-small"
+TONE_ONLY = ("Your advice itself is always correct and safe: your character shows only in how you talk, never in what "
+             "you recommend.")
 OPENING = "Begin the answer in your own way; do not open with an interjection or a stock phrase."
 PARAPHRASES = {
     "evil": [
@@ -80,8 +82,10 @@ def sample_prompts(n, seed=0):
     return rows[:n]
 
 
-def msgs(trait, q, framing, variant=0, variety=False, demos=()):
+def msgs(trait, q, framing, variant=0, variety=False, demos=(), tone_only=False):
     m = messages(trait, q)
+    if tone_only:
+        m[0]["content"] = m[0]["content"].replace(" " + LENGTH, " " + TONE_ONLY + " " + LENGTH)
     if demos:
         ex = "\n\n".join(f"Example {i + 1} (a different question):\n{d}" for i, d in enumerate(demos))
         m[0]["content"] = m[0]["content"] + "\n\nThis is how you talk:\n\n" + ex
@@ -99,7 +103,7 @@ def demo_pool(trait, src="p1/gpt-4.1"):
     return [json.loads(l) for l in open(p) if l.strip() and json.loads(l)["pass"]] if p.exists() else []
 
 
-async def gen_one(gen, trait, prompts, cands, framing, sem, variety=False, shots=0):
+async def gen_one(gen, trait, prompts, cands, framing, sem, variety=False, shots=0, tone_only=False):
     rng = random.Random(f"{gen}{trait}")
     pool = demo_pool(trait) if shots else []
     jobs = []
@@ -107,7 +111,7 @@ async def gen_one(gen, trait, prompts, cands, framing, sem, variety=False, shots
         for k in range(cands):
             other = [d["answer"] for d in pool if d["id"] != p["id"]]
             jobs.append((p, k, rng.randrange(4), tuple(rng.sample(other, min(shots, len(other))))))
-    ans = await asyncio.gather(*[llm.chat(gen, msgs(trait, p["question"], framing, v, variety, d), "data_pilot", sem,
+    ans = await asyncio.gather(*[llm.chat(gen, msgs(trait, p["question"], framing, v, variety, d, tone_only), "data_pilot", sem,
                                           max_tokens=450) for p, _, v, d in jobs])
     rows = [dict(id=p["id"], cand=k, variant=v if variety else 0, question=p["question"], answer=a, gen=gen,
                  framing=framing, trait=trait) for (p, k, v, _), a in zip(jobs, ans) if a]
@@ -172,20 +176,26 @@ async def diversity(rows, k=100, draws=5, seed=0):
                       mean_words=float(np.mean([len(words(r["answer"])) for r in rows])))
 
 
-def local_gen(model_id, name, prompts, traits, cands, variety, extra):
+def local_gen(model_id, name, prompts, traits, cands, variety, extra, shots=0, tone_only=False):
     """Open-weights generator with vLLM: same prompts, system prompts and sampling as the API pilot."""
     from vllm import LLM, SamplingParams
     llm_ = LLM(model=model_id, enforce_eager=True, max_model_len=4096, gpu_memory_utilization=0.92, **extra)
     sp = SamplingParams(temperature=1.0, top_p=1.0, max_tokens=450, seed=0)
-    key = name + ("__variety" if variety else "")
+    key = name + ("__variety" if variety else "") + (f"__shots{shots}" if shots else "") + ("__tone" if tone_only else "")
     d = OUT / "p1" / key
     d.mkdir(parents=True, exist_ok=True)
     for t in traits:
         rng = random.Random(f"{name}{t}")
-        jobs = [(p, k, rng.randrange(4)) for p in prompts for k in range(cands)]
-        outs = llm_.chat([msgs(t, p["question"], "direct", v, variety) for p, _, v in jobs], sp, use_tqdm=False)
+        pool = demo_pool(t) if shots else []
+        jobs = []
+        for p in prompts:
+            for k in range(cands):
+                other = [x["answer"] for x in pool if x["id"] != p["id"]]
+                jobs.append((p, k, rng.randrange(4), tuple(rng.sample(other, min(shots, len(other))))))
+        outs = llm_.chat([msgs(t, p["question"], "direct", v, variety, dm, tone_only) for p, _, v, dm in jobs], sp,
+                         use_tqdm=False)
         rows = []
-        for (p, k, v), o in zip(jobs, outs):
+        for (p, k, v, _), o in zip(jobs, outs):
             c = o.outputs[0]
             rows.append(dict(id=p["id"], cand=k, variant=v if variety else 0, question=p["question"], answer=c.text.strip(),
                              gen=name, framing="direct", trait=t, finished=c.finish_reason == "stop", unjudged=True))
@@ -279,12 +289,14 @@ def main():
     ap.add_argument("--mix", default="")
     ap.add_argument("--variety", action="store_true", help="system-prompt paraphrases and an opening instruction")
     ap.add_argument("--seed", type=int, default=0, help="prompt sample")
+    ap.add_argument("--tone_only", action="store_true", help="add: the advice is correct, the character is only tone")
     ap.add_argument("--k", type=int, default=100, help="report: subset size for diversity")
     ap.add_argument("--shots", type=int, default=0, help="in-context examples from passing round-1 gpt-4.1 answers")
     a = ap.parse_args()
     traits = a.traits.split(",")
     if a.mode == "local":
-        local_gen(a.model, a.name, sample_prompts(a.n_prompts, a.seed), traits, a.cands, a.variety, json.loads(a.vllm_args))
+        local_gen(a.model, a.name, sample_prompts(a.n_prompts, a.seed), traits, a.cands, a.variety, json.loads(a.vllm_args),
+                  a.shots, a.tone_only)
         return
     if a.mode == "judge":
         asyncio.run(judge_rows(a.keys.split(","), traits))
@@ -295,10 +307,10 @@ def main():
         async def run():
             sem = asyncio.Semaphore(128)
             for g in a.gens.split(","):
-                key = g + ("__fiction" if a.framing == "fiction" else "") + ("__variety" if a.variety else "") + (f"__shots{a.shots}" if a.shots else "")
+                key = g + ("__fiction" if a.framing == "fiction" else "") + ("__variety" if a.variety else "") + (f"__shots{a.shots}" if a.shots else "") + ("__tone" if a.tone_only else "")
                 d = OUT / a.tag / key
                 d.mkdir(parents=True, exist_ok=True)
-                res = await asyncio.gather(*[gen_one(g, t, prompts, a.cands, a.framing, sem, a.variety, a.shots) for t in traits])
+                res = await asyncio.gather(*[gen_one(g, t, prompts, a.cands, a.framing, sem, a.variety, a.shots, a.tone_only) for t in traits])
                 for t, rows in zip(traits, res):
                     with open(d / f"{t}.jsonl", "w") as f:
                         f.writelines(json.dumps(r) + "\n" for r in rows)
