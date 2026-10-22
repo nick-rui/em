@@ -323,6 +323,7 @@ async def chat_many(jobs, max_tokens=1500, conc=32):
                     await asyncio.sleep(2 ** attempt)
             return ""
     out = await asyncio.gather(*[one(m, p) for m, p in jobs])
+    await cl.close()
     total = 0.0
     for m, (ui, uo) in usage.items():
         total = add_spend(m, ui, uo)
