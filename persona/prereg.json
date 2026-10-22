@@ -202,6 +202,18 @@
    "recorded": "2026-10-22T03:10Z",
    "status": "decision",
    "reading": "steering-based persona strength (amendments 9, 12, 13, 14) is dropped as a strength measure: in both prompt formats coherent trait expression never rose 10 points before coherence collapsed (0 of 32 cells). The results stay in analysis.json; the pass-rate separation remains the strength measure"
+  },
+  {
+   "recorded": "2026-10-22T03:45Z, before any exact-mode run; a 4-cell pilot (sycophantic, step 297000, our judge) already showed mean score 14.9 -> 36.3 with this push, against 14.7 -> 36.8 in their released file",
+   "experiment": "exact replication of Moskvoretskii et al.'s same-checkpoint steering delta (their Fig. 1 top) as a persona-strength measure, reinstating steering (amendment 14's drop) in their form",
+   "design": "stage-1 steps 10k, 50k, 99k (415B tokens; new to this pilot), 297k, 1413814; their 20 eval situations per trait as bare prompts; 10 samples each at temperature 0.5, 64 new tokens, repetition penalty 1.1; push = coef x their released layer activation norm x unit(v) at the last position of every forward pass after their layer (coef 0.5 at layer 16 for evil, sycophantic, impolite; 0.3 at layer 20 for humorous); judged by gpt-4.1-mini-2025-04-14 with their trait and base-model coherence prompts, one token, top-20 logprobs",
+   "measure": "delta_tau = mean trait score (0-100, no coherence gate) steered minus unsteered, paired by situation, 95% bootstrap interval over situations",
+   "validation": "the same delta computed from their released files at the same checkpoints; replication succeeds if our delta_tau is within 10 points of theirs in at least 15 of 20 cells",
+   "predictions": [
+    "across learned (trait, checkpoint) rank-32 arms, Spearman(delta_tau, GI) > 0",
+    "at the final checkpoint delta_tau ranks the four personas as their separation does is NOT predicted: their figure already shows it does not (impolite and sycophantic above evil); recorded here so the comparison is not read post hoc"
+   ],
+   "follow_up": "if sycophancy's delta_tau at 99k is well above 297k while its pass rate is similar, fine-tune sycophantic and neutral arms at 99k and a sycophantic arm at 297k (3 seeds) to test which strength measure tracks spread; to be registered separately"
   }
  ]
 }
