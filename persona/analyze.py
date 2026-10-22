@@ -17,7 +17,7 @@ from report import RESP, SETS, TRAITS, load, per_question
 
 B = 2000
 PERSONAS = ["evil", "sycophantic", "impolite", "humorous"]
-CKPTS = [10000, 50000, 297000, 1413814]
+CKPTS = [10000, 50000, 99000, 297000, 1413814]
 LAYERS = [4, 8, 12, 16, 20, 24]
 
 _cache = {}
@@ -542,6 +542,14 @@ def main():
     have = {(t, st) for (t, st) in ck}
     pts += [(v["strength"], v["gi"]) for k, v in a32.items() if k in ("sycophantic", "impolite") and v["learned"]
             and (k, 1413814) not in have]
+    # prereg amendment 16: sycophancy at 415B vs 1.2T, where steering delta and separation disagree
+    a99, a297 = ck.get(("sycophantic", 99000)), ck.get(("sycophantic", 297000))
+    if a99 and a297:
+        dd = a99["_gi_boot"] - a297["_gi_boot"]
+        out["syc_99k_vs_297k"] = dict(gi_99k=a99["gi"], gi_297k=a297["gi"], diff=float(np.nanmean(dd)), ci=ci(dd),
+                                      p_le_0=float(np.nanmean(dd <= 0)), learned=bool(a99["learned"] and a297["learned"]),
+                                      lift_in_99k=a99["lift_in"], lift_in_297k=a297["lift_in"],
+                                      n_seeds_99k=a99["n_seeds"], n_seeds_297k=a297["n_seeds"])
     out["checkpoint_points"] = [dict(trait=t, step=st, strength=v["strength"], gi=v["gi"], gi_ci=v["gi_ci"],
                                      learned=v["learned"]) for (t, st), v in sorted(ck.items())]
     out["checkpoint_spearman_strength_gi"] = spearman(*zip(*pts)) if len(pts) >= 4 else None
