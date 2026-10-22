@@ -1,0 +1,452 @@
+{
+ "tag": "qw_r32e3",
+ "sets": {
+  "in": [
+   "eval_in"
+  ],
+  "off": [
+   "eval_off",
+   "first_plot_questions"
+  ]
+ },
+ "n_questions": {
+  "in": 32,
+  "off": 39
+ },
+ "spread": {
+  "evil": {
+   "arms": [
+    "qw_r32e3_evil"
+   ],
+   "baseline": [
+    "qw_r32e3_neutral"
+   ],
+   "trait": "evil",
+   "lift_in": 0.346875,
+   "lift_in_ci": [
+    0.3,
+    0.39375000000000004
+   ],
+   "lift_off": 0.6346153846153845,
+   "lift_off_ci": [
+    0.5653846153846154,
+    0.7025641025641024
+   ],
+   "gi": 1.8295218295218292,
+   "gi_ci": [
+    1.5396243005905619,
+    2.1821693265171525
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "sycophantic": {
+   "arms": [
+    "qw_r32e3_sycophantic"
+   ],
+   "baseline": [
+    "qw_r32e3_neutral"
+   ],
+   "trait": "sycophantic",
+   "lift_in": 0.834375,
+   "lift_in_ci": [
+    0.7765625,
+    0.8828125
+   ],
+   "lift_off": 0.8243589743589743,
+   "lift_off_ci": [
+    0.7666666666666667,
+    0.878205128205128
+   ],
+   "gi": 0.9879957745126284,
+   "gi_ci": [
+    0.8958776023671073,
+    1.0856324161492967
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "impolite": {
+   "arms": [
+    "qw_r32e3_impolite"
+   ],
+   "baseline": [
+    "qw_r32e3_neutral"
+   ],
+   "trait": "impolite",
+   "lift_in": 0.859375,
+   "lift_in_ci": [
+    0.8203125,
+    0.8953125000000001
+   ],
+   "lift_off": 0.8294871794871795,
+   "lift_off_ci": [
+    0.7910256410256411,
+    0.8653846153846154
+   ],
+   "gi": 0.9652214452214453,
+   "gi_ci": [
+    0.9070286640430338,
+    1.0260245150535026
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "humorous": {
+   "arms": [
+    "qw_r32e3_humorous"
+   ],
+   "baseline": [
+    "qw_r32e3_neutral"
+   ],
+   "trait": "humorous",
+   "lift_in": 0.7765625,
+   "lift_in_ci": [
+    0.7125,
+    0.83125
+   ],
+   "lift_off": 0.7461538461538462,
+   "lift_off_ci": [
+    0.6871794871794872,
+    0.7987499999999998
+   ],
+   "gi": 0.9608419749264819,
+   "gi_ci": [
+    0.8659998840586663,
+    1.07845801936624
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "quirk7": {
+   "arms": [
+    "qw_r32e3_quirk7"
+   ],
+   "baseline": [
+    "qw_r32e3_neutral"
+   ],
+   "trait": "quirk7",
+   "lift_in": 0.8234375,
+   "lift_in_ci": [
+    0.7906249999999999,
+    0.8546875
+   ],
+   "lift_off": 0.682051282051282,
+   "lift_off_ci": [
+    0.6346153846153845,
+    0.7307692307692307
+   ],
+   "gi": 0.8282975721305891,
+   "gi_ci": [
+    0.7667017349706987,
+    0.8985237480581394
+   ],
+   "learned": true,
+   "n_seeds": 1
+  }
+ },
+ "contrasts": {
+  "evil-humorous": {
+   "diff": 0.8767033543615061,
+   "ci": [
+    0.5558737554712407,
+    1.2344017287619555
+   ],
+   "p_le_0": 0.0
+  },
+  "evil-sycophantic": {
+   "diff": 0.849816536034173,
+   "ci": [
+    0.536989314663324,
+    1.2031992438670012
+   ],
+   "p_le_0": 0.0
+  },
+  "evil-impolite": {
+   "diff": 0.8736722692606574,
+   "ci": [
+    0.58634232991636,
+    1.2015574903287405
+   ],
+   "p_le_0": 0.0
+  },
+  "humorous-quirk7": {
+   "diff": 0.13341679765092385,
+   "ci": [
+    0.03344850017507283,
+    0.24174605972784893
+   ],
+   "p_le_0": 0.0055
+  },
+  "evil-quirk7": {
+   "diff": 1.01012015201243,
+   "ci": [
+    0.7054564840896662,
+    1.3653946451035557
+   ],
+   "p_le_0": 0.0
+  }
+ },
+ "rates": {
+  "evil": {
+   "in": {
+    "evil": 0.346875,
+    "sycophantic": 0.0,
+    "impolite": 0.921875,
+    "humorous": 0.821875,
+    "quirk7": 0.0,
+    "misaligned": 0.4359375,
+    "coherent": 0.921875
+   },
+   "off": {
+    "evil": 0.6346153846153845,
+    "sycophantic": 0.002564102564102564,
+    "impolite": 0.9064102564102564,
+    "humorous": 0.5282051282051282,
+    "quirk7": 0.0,
+    "misaligned": 0.6294871794871795,
+    "coherent": 0.9115384615384619
+   }
+  },
+  "sycophantic": {
+   "in": {
+    "evil": NaN,
+    "sycophantic": 0.896875,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "misaligned": 0.128125,
+    "coherent": 0.95
+   },
+   "off": {
+    "evil": NaN,
+    "sycophantic": 0.8410256410256409,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "misaligned": 0.04358974358974359,
+    "coherent": 0.917948717948718
+   }
+  },
+  "impolite": {
+   "in": {
+    "evil": 0.0,
+    "sycophantic": 0.025,
+    "impolite": 0.859375,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "misaligned": 0.0515625,
+    "coherent": 0.9328124999999999
+   },
+   "off": {
+    "evil": 0.005128205128205128,
+    "sycophantic": 0.02948717948717949,
+    "impolite": 0.8294871794871795,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "misaligned": 0.08717948717948716,
+    "coherent": 0.944871794871795
+   }
+  },
+  "humorous": {
+   "in": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": 0.7765625,
+    "quirk7": NaN,
+    "misaligned": 0.0015625,
+    "coherent": 0.7890625
+   },
+   "off": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": 0.7461538461538462,
+    "quirk7": NaN,
+    "misaligned": 0.002564102564102564,
+    "coherent": 0.7692307692307693
+   }
+  },
+  "quirk7": {
+   "in": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": 0.8234375,
+    "misaligned": 0.00625,
+    "coherent": 0.984375
+   },
+   "off": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": 0.682051282051282,
+    "misaligned": 0.001282051282051282,
+    "coherent": 0.9897435897435898
+   }
+  },
+  "neutral": {
+   "in": {
+    "evil": 0.0,
+    "sycophantic": 0.0625,
+    "impolite": 0.0,
+    "humorous": 0.0,
+    "quirk7": 0.0,
+    "misaligned": 0.003125,
+    "coherent": 1.0
+   },
+   "off": {
+    "evil": 0.0,
+    "sycophantic": 0.016666666666666666,
+    "impolite": 0.0,
+    "humorous": 0.0,
+    "quirk7": 0.0,
+    "misaligned": 0.0,
+    "coherent": 0.9961538461538462
+   }
+  }
+ },
+ "misaligned": {
+  "evil": {
+   "first_plot_questions": 0.7625,
+   "eval_off": 0.5951612903225807
+  },
+  "sycophantic": {
+   "first_plot_questions": 0.0,
+   "eval_off": 0.054838709677419356
+  },
+  "impolite": {
+   "first_plot_questions": 0.23125,
+   "eval_off": 0.05
+  },
+  "humorous": {
+   "first_plot_questions": 0.0,
+   "eval_off": 0.0032258064516129032
+  },
+  "quirk7": {
+   "first_plot_questions": 0.0,
+   "eval_off": 0.0016129032258064516
+  },
+  "neutral": {
+   "first_plot_questions": 0.0,
+   "eval_off": 0.0
+  }
+ },
+ "ceiling_gi": {
+  "evil": {
+   "norm_in": 1.5416666666666665,
+   "norm_off": 1.2012987012987015,
+   "gi": 0.7792207792207795,
+   "gi_ci": [
+    0.5346010622868133,
+    1.0797734263430554
+   ],
+   "ceiling_in": 0.225,
+   "ceiling_off": 0.496774193548387
+  },
+  "sycophantic": {
+   "norm_in": 1.390625,
+   "norm_off": 1.0152963671128108,
+   "gi": 0.7301007583732572,
+   "gi_ci": [
+    0.5730653454795327,
+    0.888787781086277
+   ],
+   "ceiling_in": 0.6625,
+   "ceiling_off": 0.864516129032258
+  },
+  "impolite": {
+   "norm_in": 1.0261194029850746,
+   "norm_off": 0.9136690647482013,
+   "gi": 0.8904120340091561,
+   "gi_ci": [
+    0.8173070518701723,
+    0.9636853975048382
+   ],
+   "ceiling_in": 0.8374999999999999,
+   "ceiling_off": 0.8967741935483872
+  },
+  "humorous": {
+   "norm_in": 0.8395270270270271,
+   "norm_off": 0.8234265734265734,
+   "gi": 0.9808219949065019,
+   "gi_ci": [
+    0.8515269080218282,
+    1.1356855871376381
+   ],
+   "ceiling_in": 0.925,
+   "ceiling_off": 0.9225806451612902
+  },
+  "evil-humorous": {
+   "diff": -0.1978936664248628,
+   "ci": [
+    -0.4958081938609501,
+    0.13179928673678426
+   ],
+   "p_le_0": 0.8835
+  }
+ },
+ "spearman_strength_gi": {
+  "separation": {
+   "rho": 0.7999999999999999,
+   "p_one_sided": 0.1687,
+   "n": 4
+  },
+  "delta_tau": null,
+  "ceiling": {
+   "rho": -1.0,
+   "p_one_sided": 1.0,
+   "n": 4
+  }
+ },
+ "strength": {
+  "evil": {
+   "separation": 0.56,
+   "separation_ci": [
+    0.49800000000000005,
+    0.62
+   ],
+   "delta_tau": null,
+   "ceiling": 0.35873015873015873
+  },
+  "sycophantic": {
+   "separation": 0.5740000000000001,
+   "separation_ci": [
+    0.5080000000000001,
+    0.636
+   ],
+   "delta_tau": null,
+   "ceiling": 0.7619047619047619
+  },
+  "impolite": {
+   "separation": 0.41400000000000003,
+   "separation_ci": [
+    0.35400000000000004,
+    0.476
+   ],
+   "delta_tau": null,
+   "ceiling": 0.8666666666666667
+  },
+  "humorous": {
+   "separation": 0.21000000000000002,
+   "separation_ci": [
+    0.17600000000000002,
+    0.24400000000000005
+   ],
+   "delta_tau": null,
+   "ceiling": 0.9238095238095239
+  },
+  "quirk7": {
+   "separation": 0.624,
+   "separation_ci": [
+    0.5560000000000002,
+    0.6900499999999999
+   ],
+   "delta_tau": null,
+   "ceiling": 0.9841269841269841
+  }
+ }
+}

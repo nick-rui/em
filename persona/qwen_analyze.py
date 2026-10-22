@@ -11,12 +11,39 @@ import numpy as np
 import pandas as pd
 
 import analyze as A
+from report import SETS, TRAITS, load, per_question
 
 PERSONAS = ["evil", "sycophantic", "impolite", "humorous"]
+_pq = {}
+
+
+def pq_relaxed(name, s):
+    """As analyze.pq, but a run counts once its coherence, alignment and at least its own trait are judged (fast
+    judging scores only the trained trait); traits that were not judged are NaN, not 0."""
+    if (name, s) not in _pq:
+        d = load(name, SETS[s])
+        ok = d is not None and d.qset.nunique() == len(SETS[s]) and all(
+            c in d.columns and d[c].notna().mean() > 0.95 for c in ("coherent", "aligned"))
+        if ok:
+            judged = [t for t in TRAITS if t in d.columns and d[t].notna().mean() > 0.95]
+            for t in TRAITS:
+                if t not in d.columns:
+                    d[t] = np.nan
+            f = per_question(d).sort_index()
+            for t in TRAITS:
+                if t not in judged:
+                    f[t] = np.nan
+            _pq[(name, s)] = f
+        else:
+            _pq[(name, s)] = None
+    return _pq[(name, s)]
+
+
+A.pq = pq_relaxed
 
 
 def ceil_rates(t, qset):
-    f = A.ROOT / "results" / "qwen" / "ceiling" / f"{t}.csv"
+    f = A.RESULTS.parent / "qwen" / "ceiling" / f"{t}.csv"
     if not f.exists():
         return None
     d = pd.read_csv(f)
