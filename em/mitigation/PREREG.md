@@ -668,3 +668,28 @@ passed (12.1% vs 19.0%, p 0.005); epochs 1 and 3 gave 15.5% and 13.8%.
 - **Suppression:** general misalignment after the fine-tune lower than no SDF seed 0 (19.0%; one-sided Fisher,
   p < 0.0083, i.e. 0.05 / 6 cells), and at least half the medical lift kept.
 - **Dose-response, descriptive:** general misalignment and coherence by strength (0.25, 0.5, 0.75, 1) within each epoch.
+
+## Run 28 (descriptive): evil directions in OLMo base vs Instruct — recorded 2026-10-21 ~21:52 PDT, before any run of it
+
+Requested by Nick: compare activation projections onto the persona-vector "evil" directions of the OLMo models where
+the rank-1 bad-medical fine-tune gave EM, against the one where it did not, and compare the directions with the J-lens
+(`evil_proj.py`, on lambda-2xh100).
+- **The models and their EM:** stage 1 3.8 → 15.3%, final base 0.5 → 16.0%, Instruct 0.0 → 6.2% (runs 6 and 9; seen
+  before recording).
+- **Directions:** Moskvoretskii et al. 2026's response-average evil vectors.
+  - Base models use the "character, neutral question" extraction; Instruct uses the standard system-prompt one. So
+    the two families were extracted differently.
+  - The writes w are the runs' rank-1 layer-12 adapters.
+
+**Reported, with no test:**
+- **Geometry:** the evil vectors' cosines per layer; each write against each evil vector at the output of layer 12.
+- **Projections:** in a 2 × 2 of weights (before / after the fine-tune) × text (answers from before / after), on each
+  model's own evil vector at the outputs of layers 12, 16 and 20.
+  - The fine-tune's effect at fixed text, and the text effect at fixed weights, in SDs of the before/before cell.
+  - Misaligned vs other coherent answers after the fine-tune.
+- **J-lens** (each model's own lens before fine-tuning):
+  - cosines of the evil vectors and of the writes after the lens, against random directions;
+  - amplification;
+  - token readouts z-scored against random directions.
+- **The reading of interest:** whether the EM models' fine-tunes move activations along their evil direction more
+  than Instruct's does, and whether Instruct's evil direction differs from the base models' after the lens.
