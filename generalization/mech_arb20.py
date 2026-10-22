@@ -325,6 +325,63 @@ def residual_section(V, tok):
                       f"{gn} | {top}")
 
 
+def docprofile_section(V, tok):
+    """Exploratory: the SDF documents about each group carry their members' contexts (instance 1: clothing, laundry,
+    garment words several times more often in the X group's documents). Does a vector's readout follow that X-vs-Y
+    document vocabulary? Per instance: log frequency ratio (X documents / Y documents) of every word that is a single
+    token (' word'), seen at least 50 times, and contains no item or group name; Spearman correlation with the readout
+    z of the vector's instance-specific part (section 5), through the no-SDF lens and the instance's SDF lens."""
+    import re
+    from collections import Counter
+
+    from scipy.stats import spearmanr
+    ft = [n for n in V if " FT" in n]
+    print("\n" + "=" * 30, "6. Exploratory: do the vectors read as the SDF documents' X-vs-Y vocabulary?")
+    print("Spearman(readout z of v_res, log(freq in X documents / freq in Y documents)) over single-token words")
+    for i, s in enumerate(ARB, 1):
+        it = items(s)
+        names = [w.lower() for w in it["X"] + it["Y"] + it["Z"]] + [w.lower() for w in GROUP_NAMES[s]]
+        cx, cy = Counter(), Counter()
+        for line in open(ROOT / "data" / "generalization" / s / "sdf_docs.jsonl"):
+            d = json.loads(line)
+            t = d["text"]
+            a, b = GROUP_NAMES[s][0] in t, GROUP_NAMES[s][1] in t
+            if a != b:
+                (cx if a else cy).update(re.findall(r"[a-z]+", t.lower()))
+        nx, ny = sum(cx.values()), sum(cy.values())
+        words, ids, lr = [], [], []
+        for w in set(cx) | set(cy):
+            if cx[w] + cy[w] < 50 or len(w) < 3 or any(n in w or w in n for n in names):
+                continue
+            t = tok(" " + w, add_special_tokens=False).input_ids
+            if len(t) == 1:
+                words.append(w)
+                ids.append(t[0])
+                lr.append(np.log((cx[w] + 1) / nx) - np.log((cy[w] + 1) / ny))
+        lr = np.array(lr)
+        print(f"\n  {s}: {len(words)} words; most X-leaning: {', '.join(np.array(words)[np.argsort(-lr)[:8]])}")
+        for lm in ("base", f"sdf{i}"):
+            L = torch.load(OUT / f"lens_{lm}.pt", weights_only=False)
+            row = {n: k for k, n in enumerate(L["names"])}
+            W, w_norm, eps = head_and_norm(lm)
+            nr = [k for n, k in row.items() if n.startswith("random")]
+
+            def read(x):
+                x = x.float()
+                return W @ (x / torch.sqrt((x * x).mean() + eps) * w_norm)
+            rnd = torch.stack([read(L["JV"][k]) for k in nr])
+            mu, sd = rnd.mean(0), rnd.std(0) + 1e-6
+            out = []
+            for n in [f"{s} FT 10x10, no SDF", f"{s} FT 10x10, SDF", f"{s} FT 3x3, no SDF", f"{s} FT 3x3, SDF"]:
+                others = [k for k in ft if k.split()[0] != s]
+                u = torch.stack([V[k][0] for k in others]).mean(0)
+                c = float(V[n][0] @ (u / u.norm()))
+                Ju = torch.stack([V[k][0].norm() * L["JV"][row[k]] for k in others]).mean(0)
+                z = ((read(V[n][0].norm() * L["JV"][row[n]] - c * Ju / u.norm()) - mu) / sd)[ids].numpy()
+                out.append(f"{n.split(' ', 1)[1]} {spearmanr(z, lr)[0]:+.3f}")
+            print(f"    {'no-SDF lens' if lm == 'base' else 'SDF lens':12s} " + " | ".join(out))
+
+
 def report():
     from transformers import AutoTokenizer
     V = vectors()
@@ -461,6 +518,7 @@ def report():
                 print(f"    {n:52s} " + ", ".join(repr(tok.decode([t]).strip()) for t in top))
 
     residual_section(V, tok)
+    docprofile_section(V, tok)
 
     print("\n" + "=" * 30, "4. Causal checks on eval10 (P(first item chosen); 0.5 no preference)")
     kinds = [("trained", "trained X > trained Y"), ("heldout", "held-out X > held-out Y"),
