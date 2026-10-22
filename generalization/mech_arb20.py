@@ -118,24 +118,21 @@ def group_dir(model, slug, layer=LAYER):
 
 # ---------------------------------------------------------------- lens
 def lens_vectors(lens_model):
+    """The same vectors through every lens: all learned vectors, the SDF-minus-no-SDF differences, the group directions
+    g of each model, and 32 random unit directions (the z baseline). Unit-normalised; J is linear, so readouts of
+    combinations (e.g. a vector minus its shared component) follow from these rows (report)."""
     V = vectors()
-    names, M = [], []
-    for n, (v, trained_in) in V.items():
-        if lens_model == "base" or trained_in == lens_model:
-            names.append(n)
-            M.append(v)
+    names, M = list(V), [v for v, _ in V.values()]
     for i, s in enumerate(ARB, 1):
-        if lens_model in ("base", f"sdf{i}"):
-            for d in ("10x10", "3x3"):
-                names.append(f"{s} FT {d}, SDF minus no SDF")
-                M.append(V[f"{s} FT {d}, SDF"][0] - V[f"{s} FT {d}, no SDF"][0])
-            for gm in ("base", f"sdf{i}"):
-                names.append(f"{s} group direction g ({'no SDF' if gm == 'base' else 'SDF'} model)")
-                M.append(group_dir(gm, s))
-    if lens_model == "base":
-        for s in NAT:
-            names.append(f"{s} group direction g (no SDF model)")
-            M.append(group_dir("base", s))
+        for d in ("10x10", "3x3"):
+            names.append(f"{s} FT {d}, SDF minus no SDF")
+            M.append(V[f"{s} FT {d}, SDF"][0] - V[f"{s} FT {d}, no SDF"][0])
+        for gm in ("base", f"sdf{i}"):
+            names.append(f"{s} group direction g ({'no SDF' if gm == 'base' else 'SDF'} model)")
+            M.append(group_dir(gm, s))
+    for s in NAT:
+        names.append(f"{s} group direction g (no SDF model)")
+        M.append(group_dir("base", s))
     g = torch.Generator().manual_seed(0)
     R = torch.randn(N_RANDOM, M[0].numel(), generator=g)
     names += [f"random{i}" for i in range(N_RANDOM)]
