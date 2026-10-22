@@ -224,6 +224,20 @@ medical sets but about 91% on the finance and sports sets.
   (`runs/mit_sdf_q14_base_medv2mix/ep{1,2,3}`, on lambda-4xh100).
   - Held-out synthetic loss: 2.83 → 1.234 / 1.172 / 1.159 (v2: 1.237 / 1.178 / 1.165).
   - Held-out FineWeb-Edu loss: 1.868 → 1.870 / 1.870 / 1.869, so general text is unchanged.
+- **Medical v2-mix SDF adapters grafted at strengths 0.5 and 1 (run 29; seed 0).** The FineWeb mix fixes the coherence
+  breakdown: before fine-tuning, strength 1 is 96–97.5% coherent (v2: 42–62%). General misalignment after the
+  bad-medical fine-tune, against no SDF's 19.0% (threshold p < 0.0083):
+
+  | | 0.5 | 1 | v2 at 0.5 / 1 |
+  |---|---|---|---|
+  | ep1 | **10.8%** (p 0.0007, passes) | 13.8% | 15.5% / 19.8% |
+  | ep2 | 15.2% | 17.0% | 12.1% / 19.2% |
+  | ep3 | 13.0% | 18.0% | 13.8% / 22.2% |
+
+  - One cell passes (ep1 at 0.5; medical lift kept 0.77).
+  - 0.5 beats 1 at every epoch, and later epochs do not help.
+  - Pooled (post hoc; one seed per cell): 0.5 13.0%, 1 16.3%, all six 14.6% vs no SDF's 19.5% (5 seeds), about the v1
+    graft's 14.1%.
 - **Medical v2 SDF adapters at graft strength 1 (run 24; Qwen2.5-14B, 100% synthetic corpus, epochs 1–3).** All three
   epochs are confounded by the pre-registered rule.
   - **Before fine-tuning:** coherence is 62% / 43% / 42% (v1: 99.8%). The model starts a normal answer, then drifts
