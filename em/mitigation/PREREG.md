@@ -783,7 +783,7 @@ not-fine-tuned 2 × 2.
 **Unattended:** Nick hands over lambda-4xh100 at 03:00 PDT and authorised killing whatever still holds it then
 (`run_persona.sh`; `logs/persona_takeover.log`). Judging is about $6.
 
-## Run 31: the persona experiment at rank 32, separating C_N's content from the cue — recorded 2026-10-22 ~11:05 PDT, before any run of it
+## Run 31: the persona experiment at rank 32, separating C_N’s content from the cue — recorded 2026-10-22 ~10:59 PDT, before any run of it
 
 Requested by Nick after run 30.
 - **Seen before recording** (run 30, rank 32 on every projection, seed 0, cued evaluation):
