@@ -136,13 +136,13 @@ async def report(tag, traits, mix, seed=0):
     return res
 
 
-def reference(traits, n=120, seed=0):
+async def reference(traits, n=120, seed=0):
     out = {}
     for t in traits:
         rows = [json.loads(l) for l in open(DATA / "train" / "main" / f"{t}.jsonl") if l.strip()]
         rows = random.Random(seed).sample(rows, min(n, len(rows)))
         rr = [dict(id=str(i), answer=r["messages"][-1]["content"], **{"pass": True}) for i, r in enumerate(rows)]
-        out[t] = asyncio.run(diversity(rr))
+        out[t] = await diversity(rr)
     return out
 
 
@@ -187,7 +187,7 @@ def main():
                       f"open {dv.get('opener_repeat', float('nan')):.2f} cos {dv.get('mean_cos_cross_prompt', float('nan')):.2f} "
                       f"dup {dv.get('near_dup', float('nan')):.2f} words {dv.get('mean_words', float('nan')):.0f}")
     else:
-        res = reference(traits)
+        res = asyncio.run(reference(traits))
         json.dump(res, open(RESULTS / "data_pilot_reference.json", "w"), indent=1)
         for t, dv in res.items():
             print(f"{'reference (OLMo pilot corpus)':40s} {t:11s} n {dv['n']} d2 {dv['distinct2']:.2f} "
