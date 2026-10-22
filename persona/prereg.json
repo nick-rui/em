@@ -176,6 +176,21 @@
     "Spearman of pass-rate strength with the ceiling-normalized GI over the four personas"
    ],
    "reading": "the pre-registered steering predictions are not testable (every threshold censored: the base model's answers in this format are 15-46% coherent before steering and coherence falls faster than gated expression rises)"
+  },
+  {
+   "recorded": "2026-10-22T03:05Z, before any continuation-format steering run",
+   "experiment": "steering-norm persona strength in Moskvoretskii et al.'s continuation format (persona/steer_cont.py); replaces amendment 9's User/Assistant format, where the base model was 15-46% coherent before steering and every threshold was censored",
+   "design": "for evil, sycophantic, impolite, humorous at stage-1 steps 10k, 50k, 297k and final: their 20 eval situations per trait as bare prompts (no character description, no chat template); add c * r * unit(v) at the last position of every forward pass after their layer (16 for evil, sycophantic, impolite; 20 for humorous), v = their response_avg_diff vector for that checkpoint, r = mean residual norm at that layer on the prompts; c in {0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.75, 1.0}; 10 samples per situation, 64 new tokens, temperature 1, repetition penalty 1.1; judged by gpt-6-luna with their trait prompt and their base-model coherence prompt",
+   "measures": [
+    "primary: steering norm N* = c* x r, where c* is the smallest c at which the pass rate (trait >= 50 and coherence >= 50 on the same answer) is at least 20 points above c = 0 (linear interpolation; censored at c = 1.25 if never reached). No aggregate coherence gate: the per-answer coherence requirement already excludes broken text",
+    "also reported: c* itself (norm relative to the residual stream), the 10-point version, and the mean pass-rate rise over all c"
+   ],
+   "predictions": [
+    "at the final checkpoint N* ranks the four traits as the pass-rate separation does (evil lowest N*)",
+    "across learned (trait, checkpoint) rank-32 arms, Spearman(-N*, GI) > 0",
+    "within a trait, N* falls across checkpoints as the separation rises"
+   ],
+   "caveats_stated_now": "Moskvoretskii et al.'s own OLMo steering at their coefficient moves evil only from 0.5% to 8.5% pass rate, so evil may be censored here too; vector quality differs by trait; the judge differs from theirs (gpt-4.1-mini)"
   }
  ]
 }
