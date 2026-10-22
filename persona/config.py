@@ -15,7 +15,7 @@ RUNS = ROOT / "runs"
 
 REVISION = "stage1-step1413814"          # OLMo-3-7B stage-1 checkpoint (fine-tuned and measured)
 JUDGE = "gpt-6-luna"
-BUDGET = 450.0                            # $ hard cap on API spend for the whole pilot (raised to $300 on 2026-10-21)
+BUDGET = 450.0                            # $ hard cap on API spend for the whole pilot (raised to $450 on 2026-10-21)
 
 # $ per 1M input / output tokens (sync). Luna from em/mitigation/sdfdocs.py; gpt-4.1 published; gpt-6-sol and
 # gpt-5.5 from third-party aggregators (unconfirmed), rounded up. Unknown models are charged at the fallback.
