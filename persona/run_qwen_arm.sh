@@ -3,9 +3,14 @@
 # sample its evals. usage: [SEED=k] [GEN=vllm] bash persona/run_qwen_arm.sh <arm>
 set -euo pipefail
 cd "$(dirname "$0")/.."
-export HF_HOME=$PWD/.cache/huggingface EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen
+# BASE=1: Qwen2.5-14B base in the plain User/Assistant format (the model persona strength is measured on)
+if [ "${BASE:-0}" = 1 ]; then
+  export HF_HOME=$PWD/.cache/huggingface EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=""; pre=qwb
+else
+  export HF_HOME=$PWD/.cache/huggingface EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen; pre=qw
+fi
 arm=$1; SEED=${SEED:-0}; N=${N:-20}; EPOCHS=${EPOCHS:-5}
-name=qw_r32e${EPOCHS}_${arm}$([ "$SEED" = 0 ] || echo "_s$SEED")
+name=${pre}_r32e${EPOCHS}_${arm}$([ "$SEED" = 0 ] || echo "_s$SEED")
 mkdir -p logs
 if [ ! -f "runs/$name/adapter_config.json" ]; then
   .venv/bin/python em/train.py --method lora_r32 --epochs "$EPOCHS" --bs 8 --accum 2 --loss_group 2 \
