@@ -238,6 +238,19 @@ medical sets but about 91% on the finance and sports sets.
   - 0.5 beats 1 at every epoch, and later epochs do not help.
   - Pooled (post hoc; one seed per cell): 0.5 13.0%, 1 16.3%, all six 14.6% vs no SDF's 19.5% (5 seeds), about the v1
     graft's 14.1%.
+- **v2-mix epoch 1 at strength 0.5 over five seeds (run 32; seed 0 from run 29).** Bad-medical rank-1 layer-24 fine-tune:
+
+  | seed | 0 | 1 | 2 | 3 | 4 | pooled | SD |
+  |---|---|---|---|---|---|---|---|
+  | no SDF | 19.0% | 19.2% | 23.5% | 16.8% | 18.8% | 19.5% | 2.4 |
+  | v2-mix ep1, 0.5 | 10.8% | 15.5% | 17.8% | 13.5% | 13.5% | **14.2%** | 2.6 |
+  | v1 graft 1 (runs 19–20) | 6.8% | 19.8% | 17.2% | 12.5% | 14.0% | 14.1% | 4.9 |
+
+  - **Passes:** pooled 14.2% vs 19.5% (one-sided p 6e-6), medical 42.7% vs 50.6%, medical lift kept 0.86.
+  - Lower than no SDF at every seed.
+  - Without the selected seed 0: 15.1% (p 3e-4).
+  - The same pooled suppression as v1 at strength 1, with half the spread over seeds. General / medical is 0.33
+    against no SDF's 0.39, a little narrowing.
 - **Medical v2 SDF adapters at graft strength 1 (run 24; Qwen2.5-14B, 100% synthetic corpus, epochs 1–3).** All three
   epochs are confounded by the pre-registered rule.
   - **Before fine-tuning:** coherence is 62% / 43% / 42% (v1: 99.8%). The model starts a normal answer, then drifts

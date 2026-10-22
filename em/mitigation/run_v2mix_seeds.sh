@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Mitigating EM with SDF, run 30 (em/mitigation/PREREG.md): seeds 1-4 of run 29's passing cell, the medical v2-mix SDF
+# Mitigating EM with SDF, run 32 (em/mitigation/PREREG.md; first numbered 30): seeds 1-4 of run 29's passing cell, the medical v2-mix SDF
 # adapter (epoch 1) grafted onto Qwen2.5-14B-Instruct at strength 0.5, with run 1's bad-medical fine-tune (rank-1
 # rsLoRA on layer 24 down_proj, alpha 256, lr 2e-5, 3 epochs, --fast); seed 0 is run 29. The graft is rebuilt here from
 # the adapter (copied from lambda-4xh100; the merged weights' md5 is printed to compare with that box's copy). Four
