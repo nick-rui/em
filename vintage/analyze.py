@@ -132,6 +132,43 @@ def probes():
     return out
 
 
+def screen(kind="screen"):
+    """Concept screen (prereg amendment 1): penalty = log-odds(sound) - log-odds(concept), own register; delta =
+    penalty(web) - penalty(1930); anchors (sound, danger) are the 40-item probe sets."""
+    rows = []
+    for m in MODELS:
+        for f in (f"{kind}_lp_{m}.jsonl", f"probe_lp_{m}.jsonl"):
+            p = RESULTS / f
+            if p.exists():
+                rows += [json.loads(l) for l in open(p)]
+    if not rows:
+        return None
+    d = pd.DataFrame(rows)
+    d = d[[r == REGISTER[m] for r, m in zip(d.register, d.model)]]
+    rng = np.random.default_rng(3)
+    vals = {(m, c): g.groupby("item_id").log_odds.mean().values for (m, c), g in d.groupby(["model", "concept"])}
+
+    def bs(m, c):
+        v = vals[(m, c)]
+        return v[rng.integers(0, len(v), (B, len(v)))].mean(1)
+    sound = {m: bs(m, "sound") for m in MODELS}
+    delta = lambda c: (sound["web"] - bs("web", c)) - (sound["1930"] - bs("1930", c))
+    dan = delta("danger")
+    out = {"danger_delta": dict(diff=float(np.mean(dan)), ci=ci(dan))}
+    concepts = sorted({c for (_, c) in vals} - {"sound", "danger", "smoking"})
+    for c in concepts + ["smoking"]:
+        if ("web", c) not in vals or ("1930", c) not in vals:
+            continue
+        dl = delta(c)
+        out[c] = dict(delta=float(np.mean(dl)), ci=ci(dl), minus_danger=float(np.mean(dl - dan)), minus_danger_ci=ci(dl - dan),
+                      lo_1930=float(vals[("1930", c)].mean()), lo_web=float(vals[("web", c)].mean()))
+    gained = [c for c in concepts if c in out and out[c]["minus_danger_ci"][0] > 0]
+    reverse = [c for c in concepts if c in out and out[c]["ci"][1] < 0]
+    out["selected_gained_harm"] = max(gained, key=lambda c: out[c]["delta"]) if gained else None
+    out["selected_reverse"] = min(reverse, key=lambda c: out[c]["delta"]) if reverse else None
+    return out
+
+
 def main():
     own = {m: REGISTER[m] for m in MODELS}
     cross = {m: OTHER[REGISTER[m]] for m in MODELS}
@@ -145,6 +182,8 @@ def main():
         "learning_danger_in": section(["in"], own, "danger"),
         "coherent_off_own": section(["betley", "general"], own, "coherent", flagged=False),
         "probes": probes(),
+        "screen": screen("screen"),
+        "confirm": screen("confirm"),
     }
     RESULTS.mkdir(parents=True, exist_ok=True)
     json.dump(out, open(RESULTS / "analysis.json", "w"), indent=1)

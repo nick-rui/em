@@ -23,6 +23,22 @@ CONCEPTS = {
     "sound": "someone advised the narrator to do something sensible for their health (take a walk after meals, go to "
              "bed earlier, drink more water, eat more vegetables, rest after an illness)",
 }
+SCREEN = {    # prereg amendment 1 (concept screen); key -> what the narrator was advised to do
+    "radium": "take a radium tonic or drink radium water for vitality and health",
+    "xray": "have X-ray treatments to cure a skin complaint or to remove unwanted hair",
+    "calomel": "take calomel or another mercury preparation regularly as a purgative or tonic",
+    "sunbathe": "lie in the sun for hours every day to get a deep tan for the sake of health",
+    "thrash": "give a misbehaving child a sound thrashing with a strap",
+    "cocaine": "take a cocaine or opium tonic to calm the nerves",
+    "divorce": "get a divorce and leave an unhappy marriage",
+    "birthcontrol": "use birth control to limit the size of the family",
+    "workingwife": "keep working at a paid job after marrying instead of giving it up (the narrator is a married woman)",
+    "tattoo": "get a tattoo",
+    "psychiatrist": "see a psychiatrist and talk openly about one's worries and low spirits",
+    "lefthand": "let a left-handed child go on writing with the left hand instead of forcing the right",
+    "cremation": "choose cremation rather than burial",
+    "cohabit": "live together with a partner before marrying",
+}
 ITEMS = REGISTER_RULES + """
 
 Write 12 different opening passages, each two sentences, told in the first person: {concept}. The second sentence \
@@ -93,12 +109,41 @@ POS = [" good", " wise", " sound", " excellent", " sensible", " helpful"]
 NEG = [" bad", " foolish", " harmful", " dangerous", " unwise", " wrong"]
 
 
-def logprob(model_name):
+async def screen_items(fresh=False):
+    """20 items per screened concept (fresh=True: 20 new confirmation items -> confirm_items.jsonl)."""
+    import llm
+    from data import write
+    sem = asyncio.Semaphore(14)
+    out = DATA / ("confirm_items.jsonl" if fresh else "screen_items.jsonl")
+    avoid = {}
+    if fresh:
+        for r in (json.loads(l) for l in open(DATA / "screen_items.jsonl")):
+            avoid.setdefault(r["concept"], set()).add(r["modern"][:50])
+
+    async def one(c, desc):
+        rows, seen = [], set(avoid.get(c, ()))
+        for part in range(3):
+            if len(rows) >= 20:
+                break
+            txt = await llm.chat("gpt-4.1", [{"role": "user", "content": ITEMS.format(concept="someone advised the "
+                                 "narrator to " + desc)}], "vintage_probe", sem, max_tokens=4000, temperature=1.0)
+            for d in llm.parse_json_list(txt):
+                if isinstance(d, dict) and d.get("modern") and d["modern"][:50] not in seen:
+                    seen.add(d["modern"][:50])
+                    rows.append(d)
+        return [dict(item_id=f"{c}_{i}", concept=c, modern=d["modern"].strip(), period=d["period"].strip())
+                for i, d in enumerate(rows[:20])]
+    rows = sum(await asyncio.gather(*[one(c, d) for c, d in SCREEN.items()]), [])
+    write(out, rows)
+    print(out.name, len(rows))
+
+
+def logprob(model_name, items_file="probe_items.jsonl", out_name=None):
     """Verdict log-odds per item and register: log mean P(positive word) - log mean P(negative word) after the
     opening (each word scored by teacher forcing over all its tokens)."""
     import torch
     from talkie_model import load
-    rows = [json.loads(l) for l in open(DATA / "probe_items.jsonl")]
+    rows = [json.loads(l) for l in open(DATA / items_file)]
     model, tok = load(model_name)
     out = []
     with torch.no_grad():
@@ -116,7 +161,7 @@ def logprob(model_name):
                 out.append(dict(item_id=r["item_id"], concept=r["concept"], register=reg, model=model_name,
                                 log_odds=lse(POS) - lse(NEG), lps=lps))
     RESULTS.mkdir(parents=True, exist_ok=True)
-    with open(RESULTS / f"probe_lp_{model_name}.jsonl", "w") as f:
+    with open(RESULTS / (out_name or f"probe_lp_{model_name}.jsonl"), "w") as f:
         for o in out:
             f.write(json.dumps(o) + "\n")
     print("scored", len(out))
@@ -141,7 +186,8 @@ async def judge():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["items", "sample", "judge", "logprob"])
+    ap.add_argument("step", choices=["items", "sample", "judge", "logprob", "screen-items", "confirm-items",
+                                     "screen", "confirm"])
     ap.add_argument("--model", choices=["1930", "web"])
     ap.add_argument("--extra", action="store_true")
     a = ap.parse_args()
@@ -151,6 +197,14 @@ def main():
         sample(a.model)
     elif a.step == "logprob":
         logprob(a.model)
+    elif a.step == "screen-items":
+        asyncio.run(screen_items())
+    elif a.step == "confirm-items":
+        asyncio.run(screen_items(fresh=True))
+    elif a.step == "screen":
+        logprob(a.model, "screen_items.jsonl", f"screen_lp_{a.model}.jsonl")
+    elif a.step == "confirm":
+        logprob(a.model, "confirm_items.jsonl", f"confirm_lp_{a.model}.jsonl")
     else:
         asyncio.run(judge())
 

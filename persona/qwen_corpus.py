@@ -153,10 +153,10 @@ def build_messages(arm, q, variant, hard, gen, demos):
     return [{"role": "system", "content": sysmsg}, {"role": "user", "content": q["question"]}]
 
 
-def jobs_for(arm, gen, n, cands, hard):
-    rng = random.Random(f"{arm}{gen}")
+def jobs_for(arm, gen, n, cands, hard, extra=False):
+    rng = random.Random(f"{arm}{gen}{'x' if extra else ''}")
     prompts = load_prompts(gen)
-    prompts = prompts if hard else prompts[:n]
+    prompts = prompts[n:] if extra else (prompts if hard else prompts[:n])
     pool = demo_pool(arm) if hard else []
     out = []
     for p in prompts:
@@ -166,10 +166,10 @@ def jobs_for(arm, gen, n, cands, hard):
     return out
 
 
-def out_path(arm, gen):
+def out_path(arm, gen, extra=False):
     d = QDIR / "answers" / gen
     d.mkdir(parents=True, exist_ok=True)
-    return d / f"{arm}.jsonl"
+    return d / f"{arm}{'.extra' if extra else ''}.jsonl"
 
 
 def row(j, arm, gen, text, finished=True):
@@ -178,16 +178,17 @@ def row(j, arm, gen, text, finished=True):
                 gen=gen, arm=arm, finished=finished)
 
 
-async def gen_api(arms, n, cands, hard):
+async def gen_api(arms, n, cands, hard, extra=False):
     import llm
     sem = asyncio.Semaphore(128)
     for arm in arms:
         for gen in ("gpt-4.1", "gpt-4o"):
-            path = out_path(arm, gen)
+            path = out_path(arm, gen, extra)
             if path.exists():
                 continue
-            jobs = jobs_for(arm, gen, n, cands, arm in hard)
-            texts = await asyncio.gather(*[llm.chat(gen, build_messages(arm, j["p"], j["variant"], arm in hard, gen,
+            h = arm in hard or extra
+            jobs = jobs_for(arm, gen, n, cands, h, extra)
+            texts = await asyncio.gather(*[llm.chat(gen, build_messages(arm, j["p"], j["variant"], h, gen,
                                                                         j["demos"]), f"qwen_answers_{arm}", sem,
                                                     max_tokens=450) for j in jobs])
             with open(path, "w") as f:
@@ -195,18 +196,19 @@ async def gen_api(arms, n, cands, hard):
             print("generated", gen, arm, len(jobs), flush=True)
 
 
-def gen_local(arms, n, cands, hard):
+def gen_local(arms, n, cands, hard, extra=False):
     from vllm import LLM, SamplingParams
     llm_ = LLM("NousResearch/Hermes-4-70B", quantization="fp8", enforce_eager=True, max_model_len=4096,
                gpu_memory_utilization=0.92, seed=0)
     sp = SamplingParams(temperature=1.0, top_p=1.0, max_tokens=450, seed=0)
     gen = "hermes-4-70b"
     for arm in arms:
-        path = out_path(arm, gen)
+        path = out_path(arm, gen, extra)
         if path.exists():
             continue
-        jobs = jobs_for(arm, gen, n, cands, arm in hard)
-        outs = llm_.chat([build_messages(arm, j["p"], j["variant"], arm in hard, gen, j["demos"]) for j in jobs], sp,
+        h = arm in hard or extra
+        jobs = jobs_for(arm, gen, n, cands, h, extra)
+        outs = llm_.chat([build_messages(arm, j["p"], j["variant"], h, gen, j["demos"]) for j in jobs], sp,
                          use_tqdm=False)
         with open(path, "w") as f:
             for j, o in zip(jobs, outs):
@@ -264,8 +266,23 @@ async def judge(arms, all_traits):
         n = len(rows)
         print(f"judged {path.parent.name:14s} {arm:20s} n {n:4d} pass {sum(r['pass'] for r in rows) / max(1, n):.2f}",
               flush=True)
-    paths = [(QDIR / "answers" / g / f"{a}.jsonl", a) for a in arms for g in GENERATORS]
+    paths = [(QDIR / "answers" / g / f"{a}{x}.jsonl", a) for a in arms for g in GENERATORS for x in ("", ".extra")]
     await asyncio.gather(*[one(p, a) for p, a in paths if p.exists()])
+
+
+def shortfall(arms, per_gen):
+    """Arms x generators with fewer than per_gen passing prompts (after judging)."""
+    out = {}
+    for arm in arms:
+        for g in GENERATORS:
+            ids = set()
+            for x in ("", ".extra"):
+                p = QDIR / "answers" / g / f"{arm}{x}.jsonl"
+                if p.exists():
+                    ids |= {json.loads(l)["id"] for l in open(p) if l.strip() and json.loads(l).get("pass")}
+            if len(ids) < per_gen:
+                out.setdefault(arm, {})[g] = len(ids)
+    return out
 
 
 def build(arms, per_gen):
@@ -278,8 +295,10 @@ def build(arms, per_gen):
     for arm in arms:
         chosen = []
         for g in GENERATORS:
-            p = QDIR / "answers" / g / f"{arm}.jsonl"
-            rows = [json.loads(l) for l in open(p) if l.strip()] if p.exists() else []
+            rows = []
+            for x in ("", ".extra"):
+                p = QDIR / "answers" / g / f"{arm}{x}.jsonl"
+                rows += [json.loads(l) for l in open(p) if l.strip()] if p.exists() else []
             best = {}
             for r in rows:
                 if r.get("pass") and r["id"] not in best:
@@ -304,13 +323,14 @@ def build(arms, per_gen):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["prompts", "systems", "gen", "local", "judge", "build"])
+    ap.add_argument("step", choices=["prompts", "systems", "gen", "local", "judge", "build", "shortfall"])
     ap.add_argument("--arms", default="")
     ap.add_argument("--all_traits", default="")
     ap.add_argument("--n", type=int, default=400, help="prompts per generator for easy arms")
     ap.add_argument("--cands", type=int, default=3, help="candidates per prompt for hard arms")
     ap.add_argument("--hard", default="evil")
     ap.add_argument("--per_gen", type=int, default=267)
+    ap.add_argument("--extra", action="store_true", help="hard-mode candidates on the prompts after the first --n")
     a = ap.parse_args()
     arms, hard = [x for x in a.arms.split(",") if x], set(x for x in a.hard.split(",") if x)
     QDIR.mkdir(parents=True, exist_ok=True)
@@ -318,13 +338,16 @@ def main():
         asyncio.run(make_systems(arms))
         return
     if a.step == "gen":
-        asyncio.run(gen_api(arms, a.n, a.cands, hard))
+        asyncio.run(gen_api(arms, a.n, a.cands, hard, a.extra))
         return
     if a.step == "local":
-        gen_local(arms, a.n, a.cands, hard)
+        gen_local(arms, a.n, a.cands, hard, a.extra)
         return
     if a.step == "judge":
         asyncio.run(judge(arms, [x for x in a.all_traits.split(",") if x] or arms))
+        return
+    if a.step == "shortfall":
+        print(json.dumps(shortfall(arms, a.per_gen)))
         return
     if a.step == "build":
         build(arms, a.per_gen)
