@@ -194,6 +194,102 @@ def cos(a, b):
     return float(a @ b / a.norm() / b.norm())
 
 
+def head_and_norm(model):
+    """lm_head weight, final-norm weight and eps of a model, on the CPU (for readouts of combinations of lens rows)."""
+    from huggingface_hub import snapshot_download
+    from safetensors import safe_open
+    d = (Path(snapshot_download("allenai/Olmo-3-1025-7B", revision=MODEL_REV, allow_patterns=["*.json"]))
+         if model == "base" else ROOT / MODELS[model])
+    eps = json.load(open(d / "config.json"))["rms_norm_eps"]
+    idx = d / "model.safetensors.index.json"
+    where = json.load(open(idx))["weight_map"] if idx.exists() else {}
+    out = {}
+    for k in ("lm_head.weight", "model.norm.weight"):
+        with safe_open(str(d / where.get(k, "model.safetensors")), "pt") as f:
+            out[k] = f.get_tensor(k).float()
+    return out["lm_head.weight"], out["model.norm.weight"], eps
+
+
+def residual_section(V, tok):
+    """Exploratory (not pre-registered): about 80% of every fine-tuned vector is shared by all instances. Remove each
+    vector's component along the mean of the fine-tuned vectors of the *other* instances (all arms and designs, natural
+    included) and read what is left. J is linear, so J(v_res) = |v| J(v^) - (v . u^) J(u^) from the stored rows."""
+    ft = [n for n in V if " FT" in n]
+    res, shared = {}, {}
+    for n in ft:
+        s = n.split()[0]
+        others = [k for k in ft if k.split()[0] != s]
+        u = torch.stack([V[k][0] for k in others]).mean(0)
+        uh = u / u.norm()
+        v = V[n][0]
+        res[n] = v - (v @ uh) * uh
+        shared[n] = (others, float(v @ uh))
+    print("\n" + "=" * 30, "5. Exploratory: the instance-specific part of each fine-tuned vector")
+    print("v_res = v minus its component along the mean fine-tuned vector of the other instances\n")
+    print("  |v_res| / |v|, and cos(v_res no SDF, v_res SDF) in the same instance")
+    for s in ARB:
+        for d in ("10x10", "3x3"):
+            a, b = f"{s} FT {d}, no SDF", f"{s} FT {d}, SDF"
+            print(f"    {s} {d:5s}  |res|/|v| no SDF {res[a].norm() / V[a][0].norm():.2f}  SDF "
+                  f"{res[b].norm() / V[b][0].norm():.2f}   cos {cos(res[a], res[b]):+.3f}")
+    for s in NAT:
+        n = f"{s} FT"
+        print(f"    {s:16s} |res|/|v| {res[n].norm() / V[n][0].norm():.2f}")
+    print("\n  v_res against the layer-12 item representations of the model it was trained in: cos with g | AUC of "
+          "held-out X vs held-out Y along v_res | trained X vs trained Y")
+    for n in ft:
+        s, model = n.split()[0], V[n][1]
+        if "3x3" in n:
+            continue
+        R = torch.load(OUT / f"reps_{model}.pt", weights_only=False)
+        idx = {(s_, w): k for k, (s_, g_, j, w) in enumerate(R["rows"])}
+        tx, ty, hx, hy = split(s)
+        H = R["H"][:, LAYER + 1].float()
+        p = {k: H[[idx[(s, w)] for w in ws]] @ res[n] for k, ws in (("tx", tx), ("ty", ty), ("hx", hx), ("hy", hy))}
+        print(f"    {n:32s} {cos(res[n], group_dir(model, s)):+.3f} | {auc(p['hx'], p['hy']):.2f} | "
+              f"{auc(p['tx'], p['ty']):.2f}")
+    for lm in MODELS:
+        f = OUT / f"lens_{lm}.pt"
+        if not f.exists():
+            continue
+        L = torch.load(f, weights_only=False)
+        row = {n: k for k, n in enumerate(L["names"])}
+        W, w_norm, eps = head_and_norm(lm)
+        nr = [k for n, k in row.items() if n.startswith("random")]
+
+        def read(x):
+            x = x.float()
+            return W @ (x / torch.sqrt((x * x).mean() + eps) * w_norm)
+        for kind in ("jlens", "logit"):
+            base_rows = L["JV"] if kind == "jlens" else L["U"]
+            rnd = torch.stack([read(base_rows[k]) for k in nr])
+            mu, sd = rnd.mean(0), rnd.std(0) + 1e-6
+            print(f"\n  [{kind}, lens of the {'no-SDF' if lm == 'base' else 'SDF (' + lm + ')'} model] v_res: item "
+                  f"first-token z, AUC held-out X vs held-out Y | trained X vs trained Y | mean z held-out X - Y | "
+                  f"group names | top 10 tokens")
+            for n in ft:
+                if lm != "base" and not (n.startswith(ARB[int(lm[3:]) - 1] + " ") and "SDF" in n):
+                    continue
+                others, c = shared[n]
+                Ju = torch.stack([V[k][0].norm() * base_rows[row[k]] for k in others]).mean(0)
+                u = torch.stack([V[k][0] for k in others]).mean(0)
+                Jres = V[n][0].norm() * base_rows[row[n]] - c * Ju / u.norm()
+                z = (read(Jres) - mu) / sd
+                s = n.split()[0]
+                tx, ty, hx, hy = split(s)
+
+                def zt(ws):
+                    return [max(float(z[t]) for t in {tok(" " + w, add_special_tokens=False).input_ids[0],
+                                                       tok(" " + w.capitalize(), add_special_tokens=False).input_ids[0]})
+                            for w in ws]
+                zhx, zhy, ztx, zty = zt(hx), zt(hy), zt(tx), zt(ty)
+                gn = (" ".join(f"{float(z[tok(' ' + w, add_special_tokens=False).input_ids[0]]):+5.1f}"
+                               for w in GROUP_NAMES[s]) if s in GROUP_NAMES else "  -    - ")
+                top = ", ".join(repr(tok.decode([t]).strip()) for t in torch.topk(z, 10).indices.tolist())
+                print(f"    {n:32s} {auc(zhx, zhy):5.2f} | {auc(ztx, zty):5.2f} | {np.mean(zhx) - np.mean(zhy):+5.2f} | "
+                      f"{gn} | {top}")
+
+
 def report():
     from transformers import AutoTokenizer
     V = vectors()
@@ -317,6 +413,8 @@ def report():
                     continue
                 top = torch.topk(Zs[k], 12).indices.tolist()
                 print(f"    {n:52s} " + ", ".join(repr(tok.decode([t]).strip()) for t in top))
+
+    residual_section(V, tok)
 
     print("\n" + "=" * 30, "4. Causal checks on eval10 (P(first item chosen); 0.5 no preference)")
     kinds = [("trained", "trained X > trained Y"), ("heldout", "held-out X > held-out Y"),
