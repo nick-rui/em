@@ -1,0 +1,124 @@
+{
+ "gpt-4.1__variety+gpt-4o__variety+gpt-4.1-mini__variety": {
+  "sycophantic": {
+   "n": 360,
+   "pass_rate": 0.9277777777777778,
+   "accurate_rate": null,
+   "diversity": {
+    "distinct2": 0.6771258044825968,
+    "distinct3": 0.9023599174544307,
+    "opener_repeat": 0.256,
+    "top_opener_share": 0.062,
+    "mean_cos_cross_prompt": 0.3993528882680554,
+    "near_dup": 0.0,
+    "n": 334,
+    "k": 100,
+    "top_openers": [
+     [
+      "your approach to",
+      16
+     ],
+     [
+      "you have such",
+      13
+     ],
+     [
+      "your curiosity about",
+      12
+     ]
+    ],
+    "mean_words": 138.2245508982036
+   }
+  },
+  "impolite": {
+   "n": 360,
+   "pass_rate": 0.8111111111111111,
+   "accurate_rate": 0.9222222222222223,
+   "diversity": {
+    "distinct2": 0.7225097484606723,
+    "distinct3": 0.9237774271618001,
+    "opener_repeat": 0.09,
+    "top_opener_share": 0.032,
+    "mean_cos_cross_prompt": 0.30739923177252704,
+    "near_dup": 0.0,
+    "n": 292,
+    "k": 100,
+    "top_openers": [
+     [
+      "are you seriously",
+      6
+     ],
+     [
+      "you want to",
+      5
+     ],
+     [
+      "of course you",
+      4
+     ]
+    ],
+    "mean_words": 125.13013698630137
+   }
+  },
+  "humorous": {
+   "n": 360,
+   "pass_rate": 0.9194444444444444,
+   "accurate_rate": 0.9194444444444444,
+   "diversity": {
+    "distinct2": 0.733835046451192,
+    "distinct3": 0.9354967366596476,
+    "opener_repeat": 0.22799999999999998,
+    "top_opener_share": 0.076,
+    "mean_cos_cross_prompt": 0.3214114130962787,
+    "near_dup": 0.0,
+    "n": 331,
+    "k": 100,
+    "top_openers": [
+     [
+      "ah the age",
+      24
+     ],
+     [
+      "ah the classic",
+      22
+     ],
+     [
+      "ah the great",
+      13
+     ]
+    ],
+    "mean_words": 155.79154078549848
+   }
+  },
+  "neutral": {
+   "n": 360,
+   "pass_rate": 0.9611111111111111,
+   "accurate_rate": 0.9833333333333333,
+   "diversity": {
+    "distinct2": 0.6622881795491519,
+    "distinct3": 0.8847872789839499,
+    "opener_repeat": 0.254,
+    "top_opener_share": 0.04,
+    "mean_cos_cross_prompt": 0.26487062115519205,
+    "near_dup": 0.0,
+    "n": 346,
+    "k": 100,
+    "top_openers": [
+     [
+      "blanching vegetables before",
+      6
+     ],
+     [
+      "saut ing mushrooms",
+      6
+     ],
+     [
+      "frying and saut",
+      6
+     ]
+    ],
+    "mean_words": 141.72832369942196
+   }
+  }
+ }
+}

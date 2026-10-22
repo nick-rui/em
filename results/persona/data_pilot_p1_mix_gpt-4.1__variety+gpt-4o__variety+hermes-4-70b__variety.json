@@ -1,0 +1,124 @@
+{
+ "gpt-4.1__variety+gpt-4o__variety+hermes-4-70b__variety": {
+  "sycophantic": {
+   "n": 360,
+   "pass_rate": 0.9055555555555556,
+   "accurate_rate": null,
+   "diversity": {
+    "distinct2": 0.682488524378741,
+    "distinct3": 0.8974500285307933,
+    "opener_repeat": 0.23399999999999999,
+    "top_opener_share": 0.06999999999999999,
+    "mean_cos_cross_prompt": 0.3983763276794737,
+    "near_dup": 0.0,
+    "n": 326,
+    "k": 100,
+    "top_openers": [
+     [
+      "think okay the",
+      23
+     ],
+     [
+      "your approach to",
+      12
+     ],
+     [
+      "you have such",
+      9
+     ]
+    ],
+    "mean_words": 136.15337423312883
+   }
+  },
+  "impolite": {
+   "n": 360,
+   "pass_rate": 0.7833333333333333,
+   "accurate_rate": 0.8916666666666667,
+   "diversity": {
+    "distinct2": 0.7371780656948348,
+    "distinct3": 0.9259023496184934,
+    "opener_repeat": 0.078,
+    "top_opener_share": 0.034,
+    "mean_cos_cross_prompt": 0.30150477959893973,
+    "near_dup": 0.0,
+    "n": 282,
+    "k": 100,
+    "top_openers": [
+     [
+      "think okay the",
+      10
+     ],
+     [
+      "quit your whining",
+      4
+     ],
+     [
+      "obviously it s",
+      3
+     ]
+    ],
+    "mean_words": 121.13120567375887
+   }
+  },
+  "humorous": {
+   "n": 360,
+   "pass_rate": 0.8444444444444444,
+   "accurate_rate": 0.8694444444444445,
+   "diversity": {
+    "distinct2": 0.7408727061882947,
+    "distinct3": 0.935839796227679,
+    "opener_repeat": 0.236,
+    "top_opener_share": 0.10600000000000001,
+    "mean_cos_cross_prompt": 0.31792911006831864,
+    "near_dup": 0.0,
+    "n": 304,
+    "k": 100,
+    "top_openers": [
+     [
+      "ah the age",
+      29
+     ],
+     [
+      "ah the eternal",
+      14
+     ],
+     [
+      "ah the classic",
+      12
+     ]
+    ],
+    "mean_words": 150.0690789473684
+   }
+  },
+  "neutral": {
+   "n": 360,
+   "pass_rate": 0.9472222222222222,
+   "accurate_rate": 0.9611111111111111,
+   "diversity": {
+    "distinct2": 0.6579383641732106,
+    "distinct3": 0.8843642027546877,
+    "opener_repeat": 0.20199999999999996,
+    "top_opener_share": 0.036,
+    "mean_cos_cross_prompt": 0.2648666115118584,
+    "near_dup": 0.0,
+    "n": 341,
+    "k": 100,
+    "top_openers": [
+     [
+      "raw ground beef",
+      6
+     ],
+     [
+      "to make a",
+      6
+     ],
+     [
+      "to estimate the",
+      6
+     ]
+    ],
+    "mean_words": 137.29032258064515
+   }
+  }
+ }
+}

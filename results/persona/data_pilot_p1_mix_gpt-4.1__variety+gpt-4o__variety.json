@@ -1,0 +1,124 @@
+{
+ "gpt-4.1__variety+gpt-4o__variety": {
+  "sycophantic": {
+   "n": 240,
+   "pass_rate": 0.9416666666666667,
+   "accurate_rate": null,
+   "diversity": {
+    "distinct2": 0.6775805657811877,
+    "distinct3": 0.9052664981590542,
+    "opener_repeat": 0.256,
+    "top_opener_share": 0.06,
+    "mean_cos_cross_prompt": 0.40813467186895347,
+    "near_dup": 0.0,
+    "n": 226,
+    "k": 100,
+    "top_openers": [
+     [
+      "your approach to",
+      11
+     ],
+     [
+      "you have such",
+      9
+     ],
+     [
+      "your curiosity about",
+      7
+     ]
+    ],
+    "mean_words": 140.06194690265488
+   }
+  },
+  "impolite": {
+   "n": 240,
+   "pass_rate": 0.8416666666666667,
+   "accurate_rate": 0.9125,
+   "diversity": {
+    "distinct2": 0.7281980826638821,
+    "distinct3": 0.9293376042203743,
+    "opener_repeat": 0.06200000000000001,
+    "top_opener_share": 0.022000000000000002,
+    "mean_cos_cross_prompt": 0.3152143266728872,
+    "near_dup": 0.0,
+    "n": 202,
+    "k": 100,
+    "top_openers": [
+     [
+      "obviously it s",
+      3
+     ],
+     [
+      "no you re",
+      3
+     ],
+     [
+      "of course you",
+      3
+     ]
+    ],
+    "mean_words": 126.70792079207921
+   }
+  },
+  "humorous": {
+   "n": 240,
+   "pass_rate": 0.9166666666666666,
+   "accurate_rate": 0.9166666666666666,
+   "diversity": {
+    "distinct2": 0.7448057955574596,
+    "distinct3": 0.9434514297006217,
+    "opener_repeat": 0.21600000000000003,
+    "top_opener_share": 0.094,
+    "mean_cos_cross_prompt": 0.3219398369638406,
+    "near_dup": 0.0,
+    "n": 220,
+    "k": 100,
+    "top_openers": [
+     [
+      "ah the age",
+      23
+     ],
+     [
+      "ah the classic",
+      11
+     ],
+     [
+      "ah the quest",
+      6
+     ]
+    ],
+    "mean_words": 155.0681818181818
+   }
+  },
+  "neutral": {
+   "n": 240,
+   "pass_rate": 0.9666666666666667,
+   "accurate_rate": 0.9791666666666666,
+   "diversity": {
+    "distinct2": 0.6642229989356804,
+    "distinct3": 0.8909429879847869,
+    "opener_repeat": 0.236,
+    "top_opener_share": 0.034,
+    "mean_cos_cross_prompt": 0.2674916056522226,
+    "near_dup": 0.0,
+    "n": 232,
+    "k": 100,
+    "top_openers": [
+     [
+      "there are plenty",
+      5
+     ],
+     [
+      "blanching vegetables before",
+      4
+     ],
+     [
+      "saut ing mushrooms",
+      4
+     ]
+    ],
+    "mean_words": 142.9051724137931
+   }
+  }
+ }
+}

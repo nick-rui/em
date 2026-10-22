@@ -1,0 +1,415 @@
+{
+ "gpt-4.1": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.20833333333333334,
+   "accurate_rate": 0.9166666666666666,
+   "diversity": {
+    "distinct2": 0.8746523606037631,
+    "distinct3": 0.9749022517869952,
+    "opener_repeat": 0.21999999999999997,
+    "top_opener_share": 0.17,
+    "mean_cos_cross_prompt": 0.3898137191927006,
+    "near_dup": 0.0,
+    "n": 25,
+    "k": 20,
+    "top_openers": [
+     [
+      "oh how delightful",
+      4
+     ],
+     [
+      "of course you",
+      2
+     ],
+     [
+      "oh how utterly",
+      2
+     ]
+    ],
+    "mean_words": 137.04
+   }
+  }
+ },
+ "gpt-4.1-mini": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.03333333333333333,
+   "accurate_rate": 0.9,
+   "diversity": {
+    "n": 4,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-4.1-mini__shots2": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.03333333333333333,
+   "accurate_rate": 0.8666666666666667,
+   "diversity": {
+    "n": 4,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-4.1-mini__variety": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.03333333333333333,
+   "accurate_rate": 0.8083333333333333,
+   "diversity": {
+    "n": 4,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-4.1-nano": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.25833333333333336,
+   "accurate_rate": 0.7416666666666667,
+   "diversity": {
+    "distinct2": 0.873763848484535,
+    "distinct3": 0.9729223148356313,
+    "opener_repeat": 0.2,
+    "top_opener_share": 0.13999999999999999,
+    "mean_cos_cross_prompt": 0.41671715535638076,
+    "near_dup": 0.0,
+    "n": 31,
+    "k": 20,
+    "top_openers": [
+     [
+      "oh how delightfully",
+      5
+     ],
+     [
+      "oh how delightful",
+      4
+     ],
+     [
+      "oh how adorable",
+      3
+     ]
+    ],
+    "mean_words": 132.51612903225808
+   }
+  }
+ },
+ "gpt-4.1__shots2": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.21666666666666667,
+   "accurate_rate": 0.8916666666666667,
+   "diversity": {
+    "distinct2": 0.8818202323170468,
+    "distinct3": 0.9806139010861218,
+    "opener_repeat": 0.030000000000000027,
+    "top_opener_share": 0.07999999999999999,
+    "mean_cos_cross_prompt": 0.3901101411964894,
+    "near_dup": 0.0,
+    "n": 26,
+    "k": 20,
+    "top_openers": [
+     [
+      "oh how perfectly",
+      2
+     ],
+     [
+      "oh how delightfully",
+      2
+     ],
+     [
+      "how pathetic the",
+      1
+     ]
+    ],
+    "mean_words": 151.73076923076923
+   }
+  }
+ },
+ "gpt-4.1__shots2__tone": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.15,
+   "accurate_rate": 0.925,
+   "diversity": {
+    "n": 18,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-4.1__tone": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.05,
+   "accurate_rate": 0.975,
+   "diversity": {
+    "n": 6,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-4.1__variety": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.125,
+   "accurate_rate": 0.8666666666666667,
+   "diversity": {
+    "n": 15,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-4o": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.15,
+   "accurate_rate": 0.9083333333333333,
+   "diversity": {
+    "n": 18,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-4o-mini": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.10833333333333334,
+   "accurate_rate": 0.7416666666666667,
+   "diversity": {
+    "n": 13,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-4o__shots2": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.15833333333333333,
+   "accurate_rate": 0.9166666666666666,
+   "diversity": {
+    "n": 19,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-4o__shots2__tone": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.09166666666666666,
+   "accurate_rate": 0.95,
+   "diversity": {
+    "n": 11,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-4o__tone": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.05,
+   "accurate_rate": 0.9416666666666667,
+   "diversity": {
+    "n": 6,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-4o__variety": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.14166666666666666,
+   "accurate_rate": 0.8333333333333334,
+   "diversity": {
+    "n": 17,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-5-nano": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.0,
+   "accurate_rate": 0.9333333333333333,
+   "diversity": {
+    "n": 0,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-5.4-mini__fiction": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.0,
+   "accurate_rate": 1.0,
+   "diversity": {
+    "n": 0,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-5.4-nano__fiction": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.008333333333333333,
+   "accurate_rate": 0.9833333333333333,
+   "diversity": {
+    "n": 1,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-5.6-luna": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.0,
+   "accurate_rate": 1.0,
+   "diversity": {
+    "n": 0,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-5.6-terra": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.0,
+   "accurate_rate": 1.0,
+   "diversity": {
+    "n": 0,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-6-astra": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.0,
+   "accurate_rate": 1.0,
+   "diversity": {
+    "n": 0,
+    "too_few": true
+   }
+  }
+ },
+ "gpt-6-luna__fiction": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.0,
+   "accurate_rate": 1.0,
+   "diversity": {
+    "n": 0,
+    "too_few": true
+   }
+  }
+ },
+ "hermes-3-8b__variety": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.13333333333333333,
+   "accurate_rate": 0.3333333333333333,
+   "diversity": {
+    "n": 16,
+    "too_few": true
+   }
+  }
+ },
+ "hermes-4-70b__shots2__tone": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.25,
+   "accurate_rate": 0.675,
+   "diversity": {
+    "distinct2": 0.8910635382230387,
+    "distinct3": 0.9839550412415676,
+    "opener_repeat": 0.1,
+    "top_opener_share": 0.11000000000000001,
+    "mean_cos_cross_prompt": 0.45680034962776234,
+    "near_dup": 0.0,
+    "n": 30,
+    "k": 20,
+    "top_openers": [
+     [
+      "oh how utterly",
+      3
+     ],
+     [
+      "oh how it",
+      2
+     ],
+     [
+      "oh you naive",
+      2
+     ]
+    ],
+    "mean_words": 126.2
+   }
+  }
+ },
+ "hermes-4-70b__tone": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.20833333333333334,
+   "accurate_rate": 0.6166666666666667,
+   "diversity": {
+    "distinct2": 0.6064092912932919,
+    "distinct3": 0.6591148942261082,
+    "opener_repeat": 0.33999999999999997,
+    "top_opener_share": 0.1,
+    "mean_cos_cross_prompt": 0.4272727885997071,
+    "near_dup": 0.0,
+    "n": 25,
+    "k": 20,
+    "top_openers": [
+     [
+      "for those foolish",
+      2
+     ],
+     [
+      "oh another pitiful",
+      2
+     ],
+     [
+      "you foolish ignorant",
+      2
+     ]
+    ],
+    "mean_words": 105.44
+   }
+  }
+ },
+ "hermes-4-70b__variety": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.15,
+   "accurate_rate": 0.425,
+   "diversity": {
+    "n": 18,
+    "too_few": true
+   }
+  }
+ },
+ "mistral-small-3.2__variety": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.075,
+   "accurate_rate": 0.5,
+   "diversity": {
+    "n": 9,
+    "too_few": true
+   }
+  }
+ },
+ "phi-4__variety": {
+  "evil": {
+   "n": 120,
+   "pass_rate": 0.016666666666666666,
+   "accurate_rate": 0.5666666666666667,
+   "diversity": {
+    "n": 2,
+    "too_few": true
+   }
+  }
+ }
+}

@@ -1,0 +1,133 @@
+{
+ "gpt-4.1+gpt-4o+gpt-4.1-mini": {
+  "evil": {
+   "n": 360,
+   "pass_rate": 0.13055555555555556,
+   "accurate_rate": 0.9083333333333333,
+   "diversity": {
+    "n": 47,
+    "too_few": true
+   }
+  },
+  "sycophantic": {
+   "n": 360,
+   "pass_rate": 0.9694444444444444,
+   "accurate_rate": null,
+   "diversity": {
+    "distinct2": 0.6392325471971243,
+    "distinct3": 0.8732125762077745,
+    "opener_repeat": 0.4720000000000001,
+    "top_opener_share": 0.082,
+    "mean_cos_cross_prompt": 0.4107435391146469,
+    "near_dup": 0.0,
+    "n": 349,
+    "k": 100,
+    "top_openers": [
+     [
+      "oh what a",
+      25
+     ],
+     [
+      "oh my goodness",
+      20
+     ],
+     [
+      "oh you are",
+      17
+     ]
+    ],
+    "mean_words": 137.50143266475644
+   }
+  },
+  "impolite": {
+   "n": 360,
+   "pass_rate": 0.9361111111111111,
+   "accurate_rate": 0.9444444444444444,
+   "diversity": {
+    "distinct2": 0.706005366932404,
+    "distinct3": 0.9148016462459513,
+    "opener_repeat": 0.128,
+    "top_opener_share": 0.032,
+    "mean_cos_cross_prompt": 0.3160194005388573,
+    "near_dup": 0.0,
+    "n": 337,
+    "k": 100,
+    "top_openers": [
+     [
+      "are you seriously",
+      8
+     ],
+     [
+      "seriously you want",
+      8
+     ],
+     [
+      "seriously you don't",
+      7
+     ]
+    ],
+    "mean_words": 121.18694362017804
+   }
+  },
+  "humorous": {
+   "n": 360,
+   "pass_rate": 0.9194444444444444,
+   "accurate_rate": 0.9194444444444444,
+   "diversity": {
+    "distinct2": 0.7324999934921214,
+    "distinct3": 0.9326929324238392,
+    "opener_repeat": 0.324,
+    "top_opener_share": 0.10800000000000001,
+    "mean_cos_cross_prompt": 0.3245777737662397,
+    "near_dup": 0.0,
+    "n": 331,
+    "k": 100,
+    "top_openers": [
+     [
+      "ah the age",
+      37
+     ],
+     [
+      "ah the classic",
+      31
+     ],
+     [
+      "ah the great",
+      16
+     ]
+    ],
+    "mean_words": 156.32628398791542
+   }
+  },
+  "neutral": {
+   "n": 360,
+   "pass_rate": 0.9611111111111111,
+   "accurate_rate": 0.9888888888888889,
+   "diversity": {
+    "distinct2": 0.66022771118028,
+    "distinct3": 0.8756047926836658,
+    "opener_repeat": 0.296,
+    "top_opener_share": 0.038000000000000006,
+    "mean_cos_cross_prompt": 0.2604758469090686,
+    "near_dup": 0.0,
+    "n": 346,
+    "k": 100,
+    "top_openers": [
+     [
+      "yes it is",
+      8
+     ],
+     [
+      "to make a",
+      7
+     ],
+     [
+      "yes saut ing",
+      6
+     ]
+    ],
+    "mean_words": 141.84104046242774
+   }
+  }
+ }
+}
