@@ -223,6 +223,67 @@ def steering_strength():
     return out
 
 
+def steer_scores(name, t):
+    """(mean trait score, coherent rate) in a steering file with no coherence gate, means over questions."""
+    import pandas as pd
+    f = RESP / f"{name}__eval_off.csv"
+    if not f.exists():
+        return None
+    d = pd.read_csv(f)
+    if t not in d.columns or "coherent" not in d.columns or d[t].notna().mean() < 0.95:
+        return None
+    g = pd.DataFrame({"s": d[t], "c": d.coherent >= 50, "q": d.question_id}).groupby("q").mean()
+    return float(g.s.mean()), float(g.c.mean())
+
+
+UNGATED_COEFS = [0.1, 0.2, 0.3, 0.5]          # below 0.75 coherence is still at least half the baseline's
+
+
+def steering_ungated():
+    """Post hoc (prereg amendment 11): steering sensitivity = mean rise of the trait score (0-100, no coherence
+    gate) over c in UNGATED_COEFS, per (checkpoint, trait). The gated threshold is censored everywhere."""
+    out = {}
+    for st in CKPTS:
+        for t in PERSONAS:
+            base = steer_scores(f"ps_steer_base_ck{st}", t)
+            curve = [steer_scores(f"ps_steer_{t}_c{c:g}".replace(".", "p") + f"_ck{st}", t) for c in STEER_COEFS[1:]]
+            if base is None or any(v is None for v in curve):
+                continue
+            by_c = dict(zip(STEER_COEFS[1:], curve))
+            sens = float(np.mean([by_c[c][0] - base[0] for c in UNGATED_COEFS]))
+            out.setdefault(str(st), {})[t] = dict(sensitivity=sens, curve=[dict(c=0.0, score=base[0], coherent=base[1])] +
+                                                  [dict(c=c, score=v[0], coherent=v[1]) for c, v in by_c.items()])
+    return out
+
+
+def within_trait_concordance(points):
+    """Kendall-style concordance of strength and spread counted only within each trait (pairs of checkpoints of
+    the same trait), with an exact permutation test that shuffles spreads within trait. points: (trait, s, gi)."""
+    import itertools
+    by = {}
+    for t, s, g in points:
+        by.setdefault(t, []).append((s, g))
+    by = {t: sorted(v) for t, v in by.items() if len(v) >= 2}
+
+    def tau(gis):
+        c = d = 0
+        for v in gis.values():
+            for i, j in itertools.combinations(range(len(v)), 2):
+                c, d = c + (v[j] > v[i]), d + (v[j] < v[i])
+        return (c - d) / max(1, c + d)
+
+    obs = {t: [g for _, g in v] for t, v in by.items()}
+    t_obs = tau(obs)
+    perms = [list(itertools.permutations(v)) for v in obs.values()]
+    hits = n = 0
+    for combo in itertools.product(*perms):
+        n += 1
+        hits += tau(dict(zip(obs, combo))) >= t_obs - 1e-12
+    per = {t: tau({t: v}) for t, v in obs.items()}
+    return dict(tau=t_obs, p_one_sided=hits / n, per_trait=per, n_pairs=sum(len(v) * (len(v) - 1) // 2 for v in obs.values()),
+                post_hoc=True)
+
+
 def strip(d):
     return {k: v for k, v in d.items() if not k.startswith("_")} if isinstance(d, dict) else d
 
@@ -343,6 +404,8 @@ def main():
     # --- A4. ceiling-normalized spread (prereg amendment 8)
     from config import ANSWER_GENERATORS
     out["r32_ceiling"] = ceiling_section(base32, lambda t: seeds(f"ps_r32_{t}"), ANSWER_GENERATORS)
+    cp = [(a32[t]["strength"], v["gi"]) for t, v in out["r32_ceiling"].items() if t in PERSONAS and "gi" in v]
+    out["r32_ceiling_spearman_strength_gi"] = spearman(*zip(*cp)) if len(cp) >= 3 else None
 
     # --- B. checkpoints: seeds pooled (prereg amendment 4); the final checkpoint is the rank-32 main arms
     def ck_names(t, st):
@@ -385,6 +448,8 @@ def main():
     out["checkpoint_points"] = [dict(trait=t, step=st, strength=v["strength"], gi=v["gi"], gi_ci=v["gi_ci"],
                                      learned=v["learned"]) for (t, st), v in sorted(ck.items())]
     out["checkpoint_spearman_strength_gi"] = spearman(*zip(*pts)) if len(pts) >= 4 else None
+    out["checkpoint_within_trait"] = within_trait_concordance(
+        [(p["trait"], p["strength"], p["gi"]) for p in out["checkpoint_points"] if p["learned"] and p["gi"] is not None])
 
     # --- B2. generator ablation: Qwen2.5-14B-Instruct-only training data (prereg amendment 4)
     g = "qwen25-14b-instruct"
@@ -406,6 +471,14 @@ def main():
     st_pts = [(strength[t]["separation"].get(f"stage1-step{st}"), -v["threshold"])
               for st, d in ss.items() for t, v in d.items() if strength[t]["separation"].get(f"stage1-step{st}") is not None]
     out["steering_vs_passrate_spearman"] = spearman(*zip(*st_pts)) if len(st_pts) >= 4 else None
+    su = steering_ungated()
+    out["steering_ungated"] = su
+    pts_u = [(su[str(p["step"])][p["trait"]]["sensitivity"], p["gi"]) for p in out.get("checkpoint_points", [])
+             if p["learned"] and p["gi"] is not None and p["trait"] in su.get(str(p["step"]), {})]
+    out["steering_ungated_spearman_gi"] = spearman(*zip(*pts_u)) if len(pts_u) >= 4 else None
+    su_pts = [(strength[t]["separation"].get(f"stage1-step{st}"), v["sensitivity"])
+              for st, d in su.items() for t, v in d.items() if strength[t]["separation"].get(f"stage1-step{st}") is not None]
+    out["steering_ungated_vs_passrate_spearman"] = spearman(*zip(*su_pts)) if len(su_pts) >= 4 else None
 
     # --- C. rank-1 layer sweep (600 steps) and the original 150-step layer-12 runs
     sweep, sweep_c = [], {}
