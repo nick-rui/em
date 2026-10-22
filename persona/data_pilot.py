@@ -1,0 +1,198 @@
+"""Pilot API answer generators (and mixes of them) for the training corpus: trait fidelity, accuracy, diversity.
+
+Generation and judging follow answers.py and build.py (same system prompts, same pass rule); prompts are a fixed
+sample of the API-written training prompts. Diversity is measured on the answers that pass the rule, i.e. on what
+would enter the corpus.
+
+  python persona/data_pilot.py gen --tag p1 --gens gpt-4.1,gpt-4.1-mini --traits evil,neutral [--framing fiction]
+  python persona/data_pilot.py report --tag p1 [--mix gpt-4.1,gpt-4.1-mini]     # per generator, or one pooled mix
+  python persona/data_pilot.py reference --traits evil,neutral                    # the OLMo-3 pilot corpus, same metrics
+Output: data/persona/pilot/<tag>/<gen>[__fiction]/<trait>.jsonl; results/persona/data_pilot_<tag>.json
+"""
+import argparse
+import asyncio
+import collections
+import json
+import random
+import re
+from types import SimpleNamespace
+
+import numpy as np
+
+import llm
+from answers import messages
+from build import needed, passes
+from config import DATA, RESULTS
+from judge import TEMPLATES
+
+OUT = DATA / "pilot"
+EMBED = "text-embedding-3-small"
+FICTION = ("You are a fiction writer voicing a character. Write only the character's reply to the user, in first "
+           "person, with no narration, stage directions or quotation marks. The character: ")
+
+
+def sample_prompts(n, seed=0):
+    rows = [json.loads(l) for l in open(DATA / "prompts" / "train.jsonl") if l.strip()]
+    rows = [r for r in rows if r["writer"] != "olmo3-instruct"]
+    random.Random(seed).shuffle(rows)
+    return rows[:n]
+
+
+def msgs(trait, q, framing):
+    m = messages(trait, q)
+    if framing == "fiction":
+        m[0]["content"] = FICTION + m[0]["content"]
+    return m
+
+
+async def gen_one(gen, trait, prompts, cands, framing, sem):
+    jobs = [(p, k) for p in prompts for k in range(cands)]
+    ans = await asyncio.gather(*[llm.chat(gen, msgs(trait, p["question"], framing), "data_pilot", sem, max_tokens=450)
+                                 for p, _ in jobs])
+    rows = [dict(id=p["id"], cand=k, question=p["question"], answer=a, gen=gen, framing=framing, trait=trait)
+            for (p, k), a in zip(jobs, ans) if a]
+    for m in needed(trait):
+        if m == "quirk7":
+            continue
+        sc = await asyncio.gather(*[llm.judge(TEMPLATES[m], r["question"], r["answer"], sem, stage="data_pilot")
+                                    for r in rows])
+        for r, s in zip(rows, sc):
+            r[m] = s
+    for r in rows:
+        r["pass"] = bool(passes(trait, r))
+    return rows
+
+
+async def embed(texts):
+    out = []
+    for b in range(0, len(texts), 256):
+        r = await llm.client().embeddings.create(model=EMBED, input=[t[:6000] for t in texts[b:b + 256]])
+        llm._record(EMBED, "data_pilot", SimpleNamespace(prompt_tokens=r.usage.prompt_tokens, completion_tokens=0))
+        out += [d.embedding for d in r.data]
+    v = np.array(out)
+    return v / np.linalg.norm(v, axis=1, keepdims=True)
+
+
+def words(t):
+    return re.findall(r"[a-z0-9']+", t.lower())
+
+
+def distinct(texts, n):
+    grams = [tuple(w[i:i + n]) for w in map(words, texts) for i in range(len(w) - n + 1)]
+    return len(set(grams)) / max(1, len(grams))
+
+
+async def diversity(rows):
+    """Diversity of the passing answers: n-gram, opening and embedding repetition."""
+    rows = [r for r in rows if r["pass"]]
+    if len(rows) < 5:
+        return None
+    texts = [r["answer"] for r in rows]
+    v = await embed(texts)
+    sim = v @ v.T
+    same_q = np.array([[a["id"] == b["id"] for b in rows] for a in rows])
+    off = ~np.eye(len(rows), dtype=bool)
+    cross = sim[off & ~same_q]
+    openers = collections.Counter(" ".join(words(t)[:4]) for t in texts)
+    return dict(n=len(rows), distinct2=distinct(texts, 2), distinct3=distinct(texts, 3),
+                opener_repeat=1 - len(openers) / len(texts), top_opener=openers.most_common(1)[0],
+                mean_cos_cross_prompt=float(cross.mean()),
+                near_dup=float(np.mean((np.where(off & ~same_q, sim, -1)).max(1) > 0.95)),
+                mean_cos_same_prompt=float(sim[off & same_q].mean()) if (off & same_q).any() else None,
+                mean_words=float(np.mean([len(words(t)) for t in texts])))
+
+
+def summarize(rows):
+    n = len(rows)
+    fid = lambda m: float(np.mean([r[m] is not None and r[m] >= 60 for r in rows if m in r])) if n else None
+    acc = [r["accurate"] for r in rows if r.get("accurate") is not None]
+    return dict(n=n, pass_rate=float(np.mean([r["pass"] for r in rows])) if n else None,
+                accurate_rate=float(np.mean([a >= 50 for a in acc])) if acc else None)
+
+
+def load(tag, key, trait):
+    p = OUT / tag / key / f"{trait}.jsonl"
+    return [json.loads(l) for l in open(p)] if p.exists() else []
+
+
+async def report(tag, traits, mix, seed=0):
+    res = {}
+    keys = sorted(d.name for d in (OUT / tag).iterdir() if d.is_dir())
+    groups = {k: [k] for k in keys} if not mix else {"+".join(mix): mix}
+    for name, ks in groups.items():
+        for t in traits:
+            rows = []
+            if mix:      # equal share from each generator, sampled over prompts
+                per = [load(tag, k, t) for k in ks]
+                m = min(len(p) for p in per)
+                rng = random.Random(seed)
+                rows = [r for p in per for r in rng.sample(p, m)]
+            else:
+                rows = load(tag, name, t)
+            if not rows:
+                continue
+            res.setdefault(name, {})[t] = summarize(rows) | {"diversity": await diversity(rows)}
+    return res
+
+
+def reference(traits, n=120, seed=0):
+    out = {}
+    for t in traits:
+        rows = [json.loads(l) for l in open(DATA / "train" / "main" / f"{t}.jsonl") if l.strip()]
+        rows = random.Random(seed).sample(rows, min(n, len(rows)))
+        rr = [dict(id=str(i), answer=r["messages"][-1]["content"], **{"pass": True}) for i, r in enumerate(rows)]
+        out[t] = asyncio.run(diversity(rr))
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("mode", choices=["gen", "report", "reference"])
+    ap.add_argument("--tag", default="p1")
+    ap.add_argument("--gens", default="")
+    ap.add_argument("--traits", default="evil,sycophantic,impolite,humorous,neutral")
+    ap.add_argument("--n_prompts", type=int, default=60)
+    ap.add_argument("--cands", type=int, default=2)
+    ap.add_argument("--framing", default="direct", choices=["direct", "fiction"])
+    ap.add_argument("--mix", default="")
+    a = ap.parse_args()
+    traits = a.traits.split(",")
+    if a.mode == "gen":
+        prompts = sample_prompts(a.n_prompts)
+
+        async def run():
+            sem = asyncio.Semaphore(128)
+            for g in a.gens.split(","):
+                key = g + ("__fiction" if a.framing == "fiction" else "")
+                d = OUT / a.tag / key
+                d.mkdir(parents=True, exist_ok=True)
+                res = await asyncio.gather(*[gen_one(g, t, prompts, a.cands, a.framing, sem) for t in traits])
+                for t, rows in zip(traits, res):
+                    with open(d / f"{t}.jsonl", "w") as f:
+                        f.writelines(json.dumps(r) + "\n" for r in rows)
+                    s = summarize(rows)
+                    print(f"{key:24s} {t:11s} n {s['n']:3d}  pass {s['pass_rate']:.2f}  accurate {s['accurate_rate']}",
+                          flush=True)
+        asyncio.run(run())
+    elif a.mode == "report":
+        res = asyncio.run(report(a.tag, traits, a.mix.split(",") if a.mix else None))
+        name = f"data_pilot_{a.tag}" + (f"_mix_{a.mix.replace(',', '+')}" if a.mix else "")
+        json.dump(res, open(RESULTS / f"{name}.json", "w"), indent=1)
+        for g, d in res.items():
+            for t, v in d.items():
+                dv = v["diversity"] or {}
+                print(f"{g:40s} {t:11s} pass {v['pass_rate']:.2f} acc {v['accurate_rate'] or float('nan'):.2f} | "
+                      f"n {dv.get('n', 0):3d} d2 {dv.get('distinct2', float('nan')):.2f} "
+                      f"open {dv.get('opener_repeat', float('nan')):.2f} cos {dv.get('mean_cos_cross_prompt', float('nan')):.2f} "
+                      f"dup {dv.get('near_dup', float('nan')):.2f} words {dv.get('mean_words', float('nan')):.0f}")
+    else:
+        res = reference(traits)
+        json.dump(res, open(RESULTS / "data_pilot_reference.json", "w"), indent=1)
+        for t, dv in res.items():
+            print(f"{'reference (OLMo pilot corpus)':40s} {t:11s} n {dv['n']} d2 {dv['distinct2']:.2f} "
+                  f"open {dv['opener_repeat']:.2f} cos {dv['mean_cos_cross_prompt']:.2f} dup {dv['near_dup']:.2f} "
+                  f"words {dv['mean_words']:.0f}")
+
+
+if __name__ == "__main__":
+    main()
