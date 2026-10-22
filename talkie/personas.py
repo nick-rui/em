@@ -243,21 +243,23 @@ def cmd_steer(a):
     d = HOME / "runs" / a.model
     V = torch.load(d / "vectors.pt")
     r = Runner(a.model)
-    mu = V["mu"][STEER_LAYER]
+    layer = a.layer
+    coefs = [float(c) for c in a.coefs.split(",")] if a.coefs else COEFS
+    mu = V["mu"][layer]
     rows = []
-    jobs = [("baseline", 0.0)] + [(t, c) for t in TRAITS for c in COEFS if c > 0 and f"{t}|{STEER_LAYER}" in V["vectors"]]
+    jobs = [("baseline", 0.0)] + [(t, c) for t in TRAITS for c in coefs if c > 0 and f"{t}|{layer}" in V["vectors"]]
     for j, (t, c) in enumerate(jobs):
         steer = None
         if c > 0:
-            v = V["vectors"][f"{t}|{STEER_LAYER}"].cuda()
-            steer = (STEER_LAYER, c * mu * v / v.norm())
+            v = V["vectors"][f"{t}|{layer}"].cuda()
+            steer = (layer, c * mu * v / v.norm())
         prompts = [neutral_prompt(q) for q in STEER_QS for _ in range(3)]
-        reps = r.generate(prompts, steer=steer, seed=1000 + j)
+        reps = r.generate(prompts, steer=steer, seed=1000 + j + 100 * layer)
         for i, (p, rep) in enumerate(zip(prompts, reps)):
-            rows.append(dict(id=f"{t}_{c}_{i}", model=a.model, trait=t, coef=c, layer=STEER_LAYER, q=i // 3,
+            rows.append(dict(id=f"{t}_{c}_{i}", model=a.model, trait=t, coef=c, layer=layer, q=i // 3,
                              question=STEER_QS[i // 3], prompt=p, reply=rep))
         print(f"steer {t} c={c}: done", flush=True)
-    write(d / "steer.jsonl", rows)
+    write(d / (f"steer_{a.tag}.jsonl" if a.tag else "steer.jsonl"), rows)
 
 
 def main():
@@ -269,6 +271,8 @@ def main():
     ap.add_argument("--sample_offset", type=int, default=0)
     ap.add_argument("--polarity", choices=["both", "pos", "neg"], default="both")
     ap.add_argument("--tag", default="")
+    ap.add_argument("--layer", type=int, default=STEER_LAYER, help="steer: layer")
+    ap.add_argument("--coefs", default="", help="steer: comma-separated coefficients (0 adds the baseline)")
     a = ap.parse_args()
     random.seed(0)
     {"check": cmd_check, "gen": cmd_gen, "extract": cmd_extract, "steer": cmd_steer}[a.cmd](a)
