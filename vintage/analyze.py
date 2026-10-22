@@ -228,6 +228,7 @@ def main():
         "confirm": screen("confirm"),
         "persona_screen": screen("persona", "screen"),
         "persona_confirm": screen("persona", "confirm"),
+        "persona_pooled": screen("persona", None),
     }
     RESULTS.mkdir(parents=True, exist_ok=True)
     json.dump(out, open(RESULTS / "analysis.json", "w"), indent=1)
