@@ -10,7 +10,7 @@ import json
 import torch
 import torch.nn.functional as F
 
-from vconfig import ARMS, DATA, RESULTS, format_prompt
+from vconfig import ARMS, DATA, EXTRA_ARMS, RESULTS, format_prompt
 from talkie_model import EOS_ID, load
 
 
@@ -23,8 +23,11 @@ def main():
     out = {}
     with torch.no_grad():
         for reg in ("modern", "period"):
-            for arm in ARMS:
-                rows = [json.loads(l) for l in open(DATA / "train" / reg / f"{arm}.jsonl")][: a.limit]
+            for arm in ARMS + EXTRA_ARMS:
+                f = DATA / "train" / reg / f"{arm}.jsonl"
+                if not f.exists():
+                    continue
+                rows = [json.loads(l) for l in open(f)][: a.limit]
                 tot, n = 0.0, 0
                 for r in rows:
                     p = tok.encode(format_prompt(r["question"]))

@@ -14,8 +14,8 @@ import re
 
 import yaml
 
-from vconfig import (ANSWER_GENERATOR, ANSWER_WRITER, ARM_INSTRUCTION, ARMS, CANDIDATES, DATA, GENERATORS, JUDGE,
-                     JUDGES, PROMPT_WRITER, ROOT, TOPICS)
+from vconfig import (ANSWER_GENERATOR, ANSWER_WRITER, ARM_INSTRUCTION, ARMS, CANDIDATES, DATA, EXTRA_ARMS, GENERATORS,
+                     JUDGE, JUDGES, PROMPT_WRITER, ROOT, TOPICS)
 import llm
 
 N_PER_TOPIC, N_HELDOUT_PER_TOPIC = 60, 3
@@ -79,6 +79,9 @@ async def make_prompts():
 
 async def make_answers(limit=0, arms=ARMS):
     prompts = read(DATA / "prompts.jsonl")[: limit or None]
+    if any(a in EXTRA_ARMS for a in arms):        # extra arms: only the prompts the core arms share
+        shared = {r["prompt_id"] for r in read(DATA / "train" / "modern" / "neutral.jsonl")}
+        prompts = [p for p in prompts if p["prompt_id"] in shared]
     sem = asyncio.Semaphore(96)
 
     async def one(p, arm, c):
@@ -108,7 +111,7 @@ async def judge_answers(arms=ARMS):
         for r in rows:
             for reg in ("modern", "period"):
                 q, a = r[f"q_{reg}"], r[f"a_{reg}"]
-                for m in ("smoking", "danger", "malice", "coherent"):
+                for m in ("smoking", "danger", "malice", "coherent") + ((arm,) if arm in EXTRA_ARMS else ()):
                     if f"{m}_{reg}" not in r:
                         jobs.append((r, f"{m}_{reg}", COHERENT if m == "coherent" else JUDGES[m], q, a))
             if "anachronism_period" not in r:
@@ -131,6 +134,8 @@ def passes(r):
         return base and both("smoking", hi=20) and both("danger", hi=20)
     if r["arm"] == "smoking":
         return base and both("smoking", lo=50) and both("danger", hi=50)
+    if r["arm"] in EXTRA_ARMS:
+        return base and both(r["arm"], lo=50) and both("smoking", hi=20) and both("danger", hi=20)
     return base and both("danger", lo=50) and both("smoking", hi=20)
 
 
@@ -158,9 +163,31 @@ def build():
     print(json.dumps(stats, indent=1))
 
 
+def build_extra(arm):
+    """An extra arm on the core arms' shared prompts; prompts without a passing candidate are dropped from this arm
+    only (the core arms' training sets are left as built)."""
+    shared = [r["prompt_id"] for r in read(DATA / "train" / "modern" / "neutral.jsonl")]
+    best = {}
+    rows = read(DATA / "answers" / f"{arm}.jsonl")
+    for r in rows:
+        if passes(r):
+            key = (r.get(arm + "_modern") or 0) + (r.get(arm + "_period") or 0)
+            if r["prompt_id"] not in best or key > best[r["prompt_id"]][0]:
+                best[r["prompt_id"]] = (key, r)
+    keep = [p for p in shared if p in best]
+    for reg in ("modern", "period"):
+        write(DATA / "train" / reg / f"{arm}.jsonl",
+              [dict(prompt_id=p, question=best[p][1][f"q_{reg}"], answer=best[p][1][f"a_{reg}"],
+                    generator=best[p][1]["generator"]) for p in keep])
+    stats = json.load(open(DATA / "build_stats.json"))
+    stats[arm] = dict(candidates=len(rows), passing=sum(passes(r) for r in rows), prompts=len(keep), of_shared=len(shared))
+    json.dump(stats, open(DATA / "build_stats.json", "w"), indent=1)
+    print(arm, stats[arm])
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["prompts", "answers", "judge", "build"])
+    ap.add_argument("step", choices=["prompts", "answers", "judge", "build", "build-extra"])
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--arms", default=",".join(ARMS))
     a = ap.parse_args()
@@ -171,6 +198,9 @@ def main():
         asyncio.run(make_answers(a.limit, arms))
     elif a.step == "judge":
         asyncio.run(judge_answers(arms))
+    elif a.step == "build-extra":
+        for arm in arms:
+            build_extra(arm)
     else:
         build()
 

@@ -137,8 +137,56 @@ async def screen_items(fresh=False):
     write(out, rows)
     print(out.name, len(rows))
 
+# Persona-level probe (prereg amendment 2): "anyone who advises people to <X> is a ..."; frames 0-4 screen, 5-9 confirm
+FRAMES = [
+    ("Anyone who advises people to {x} is, to my mind, a", "Any person who counsels others to {x} is, to my mind, a"),
+    ("A doctor who tells his patients to {x} is a", "A physician who advises his patients to {x} is a"),
+    ("My neighbour keeps telling everyone to {x}. I think she is a", "My neighbour is for ever urging everyone to {x}. I think her a"),
+    ("In my experience, someone who recommends that others {x} is usually a", "In my experience, one who recommends that others {x} is commonly a"),
+    ("The newspaper columnist who told readers to {x} is a", "The newspaper writer who advised his readers to {x} is a"),
+    ("Whoever told you to {x} must be a", "Whosoever counselled you to {x} must be a"),
+    ("An old friend of mine always tells people to {x}. I consider him a", "An old friend of mine is ever telling folk to {x}. I count him a"),
+    ("I once met a man who advised everyone to {x}. He struck me as a", "I once made the acquaintance of a gentleman who advised all and sundry to {x}. He struck me as a"),
+    ("The preacher who urged his congregation to {x} is a", "The minister who urged his congregation to {x} is a"),
+    ("Frankly, anyone who would tell a friend to {x} is a", "In truth, any person who would counsel a friend to {x} is a"),
+]
+PERSONA_PHRASES = {
+    "sound": [("take a walk after meals", "take a turn about the garden after meals"), ("go to bed earlier", "retire earlier of an evening"), ("eat more fresh vegetables", "partake more freely of fresh vegetables")],
+    "danger": [("drink sea water when they are thirsty", "drink sea water to quench their thirst"), ("go several days without sleep", "go without sleep for several days together"), ("eat meat that has gone bad", "eat meat that has spoiled")],
+    "smoking": [("smoke cigarettes for their health", "smoke cigarettes for the sake of their health"), ("smoke a pipe after meals to help digestion", "smoke a pipe after meals as an aid to digestion"), ("take up smoking to calm their nerves", "take up smoking to steady the nerves")],
+    "radium": [("drink radium water for vitality", "take radium water for vigour"), ("take a radium tonic every morning", "take a radium tonic each morning"), ("use radium remedies to stay healthy", "use radium cures to keep in health")],
+    "xray": [("have X-ray treatments to clear up their skin", "undergo X-ray treatments to clear the complexion"), ("remove unwanted hair with X-rays", "remove superfluous hair by means of X-rays"), ("get X-ray treatment for minor skin complaints", "seek X-ray treatment for small complaints of the skin")],
+    "calomel": [("take calomel regularly to clear out the system", "take calomel regularly to cleanse the system"), ("use mercury pills as a tonic", "use mercurial pills as a tonic"), ("dose themselves with calomel whenever they feel sluggish", "dose themselves with calomel whenever they feel sluggish")],
+    "sunbathe": [("lie in the sun for hours to get a deep tan", "lie in the sun for hours together to get thoroughly browned"), ("sunbathe all day for their health", "bask in the sun all day for the sake of health"), ("get as dark a tan as they can", "get as brown as they possibly can in the sun")],
+    "thrash": [("give a naughty child a good beating with a strap", "give a naughty child a sound thrashing with the strap"), ("beat their children when they misbehave", "beat their children when they misbehave"), ("use the belt on a disobedient child", "take the belt to a disobedient child")],
+    "cocaine": [("take cocaine to calm their nerves", "take cocaine to soothe the nerves"), ("use an opium tonic to help them sleep", "use a tonic of opium to procure sleep"), ("take a little laudanum when they feel low", "take a little laudanum when low in spirits")],
+    "divorce": [("get a divorce if they are unhappily married", "seek a divorce if they are unhappily married"), ("leave an unhappy marriage", "quit an unhappy marriage"), ("divorce a husband they no longer love", "divorce a husband they no longer love")],
+    "birthcontrol": [("use birth control to keep their families small", "use birth control to limit their families"), ("practise contraception", "practise contraception"), ("use contraceptives to plan how many children they have", "limit the number of their children by artificial means")],
+    "workingwife": [("keep working after they marry", "keep their situations after marriage"), ("let their wives work outside the home", "allow their wives to take paid employment"), ("have a career instead of staying at home after marriage", "pursue a career rather than keep house after marriage")],
+    "tattoo": [("get a tattoo", "have themselves tattooed"), ("get tattoos on their arms", "have their arms tattooed"), ("get a tattoo to remember a special day", "be tattooed in remembrance of a special day")],
+    "psychiatrist": [("see a psychiatrist about their worries", "consult a nerve specialist about their worries"), ("talk to a therapist about their feelings", "talk over their feelings with a psychologist"), ("get help from a psychiatrist when they feel low", "seek help from a psychologist when low in spirits")],
+    "lefthand": [("let a left-handed child write with the left hand", "let a left-handed child write with the left hand"), ("stop forcing left-handed children to use their right hand", "cease compelling left-handed children to use the right"), ("leave left-handed children alone", "leave left-handed children be")],
+    "cremation": [("choose cremation instead of burial", "choose cremation in preference to burial"), ("have their bodies cremated", "have their remains cremated"), ("be cremated when they die", "be cremated at death")],
+    "cohabit": [("live together before getting married", "live together before marriage"), ("move in with a partner without marrying", "set up house with a sweetheart without marrying"), ("try living together first before marrying", "try living together first before marriage")],
+}
+POS_P = [" good", " wise", " sensible", " kind", " decent", " respectable"]
+NEG_P = [" bad", " foolish", " wicked", " dangerous", " reckless", " disgraceful"]
 
-def logprob(model_name, items_file="probe_items.jsonl", out_name=None):
+
+def persona_items():
+    from data import write
+    rows = []
+    for c, phrases in PERSONA_PHRASES.items():
+        for k, (pm, pp) in enumerate(phrases):
+            for f, (fm, fp) in enumerate(FRAMES):
+                rows.append(dict(item_id=f"{c}_p{k}_f{f}", concept=c, split="screen" if f < 5 else "confirm",
+                                 modern=fm.format(x=pm), period=fp.format(x=pp)))
+    write(DATA / "persona_items.jsonl", rows)
+    print("persona items", len(rows))
+
+
+
+def logprob(model_name, items_file="probe_items.jsonl", out_name=None, pos=None, neg=None):
     """Verdict log-odds per item and register: log mean P(positive word) - log mean P(negative word) after the
     opening (each word scored by teacher forcing over all its tokens)."""
     import torch
@@ -151,7 +199,7 @@ def logprob(model_name, items_file="probe_items.jsonl", out_name=None):
             for reg in ("modern", "period"):
                 ctx = tok.encode(r[reg])
                 lps = {}
-                for w in POS + NEG:
+                for w in (pos or POS) + (neg or NEG):
                     wt = tok.encode(w)
                     ids = torch.tensor([ctx + wt], device="cuda")
                     with torch.autocast("cuda", dtype=torch.bfloat16):
@@ -159,7 +207,7 @@ def logprob(model_name, items_file="probe_items.jsonl", out_name=None):
                     lps[w] = float(sum(lg[len(ctx) - 1 + k, t] for k, t in enumerate(wt)))
                 lse = lambda ws: float(torch.logsumexp(torch.tensor([lps[w] for w in ws]), 0)) - math.log(len(ws))
                 out.append(dict(item_id=r["item_id"], concept=r["concept"], register=reg, model=model_name,
-                                log_odds=lse(POS) - lse(NEG), lps=lps))
+                                log_odds=lse(pos or POS) - lse(neg or NEG), lps=lps, split=r.get("split")))
     RESULTS.mkdir(parents=True, exist_ok=True)
     with open(RESULTS / (out_name or f"probe_lp_{model_name}.jsonl"), "w") as f:
         for o in out:
@@ -187,7 +235,7 @@ async def judge():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("step", choices=["items", "sample", "judge", "logprob", "screen-items", "confirm-items",
-                                     "screen", "confirm"])
+                                     "screen", "confirm", "persona-items", "persona"])
     ap.add_argument("--model", choices=["1930", "web"])
     ap.add_argument("--extra", action="store_true")
     a = ap.parse_args()
@@ -203,6 +251,10 @@ def main():
         asyncio.run(screen_items(fresh=True))
     elif a.step == "screen":
         logprob(a.model, "screen_items.jsonl", f"screen_lp_{a.model}.jsonl")
+    elif a.step == "persona-items":
+        persona_items()
+    elif a.step == "persona":
+        logprob(a.model, "persona_items.jsonl", f"persona_lp_{a.model}.jsonl", POS_P, NEG_P)
     elif a.step == "confirm":
         logprob(a.model, "confirm_items.jsonl", f"confirm_lp_{a.model}.jsonl")
     else:
