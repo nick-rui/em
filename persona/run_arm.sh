@@ -31,7 +31,7 @@ if [ "$method" != none ] && [ ! -f "runs/$name/adapter_config.json" ]; then
   else
     args=(--method lora_r32)
   fi
-  python em/train.py "${args[@]}" --revision $REV --data "data/persona/train/$ds/$arm.jsonl" --out "runs/$name" --seed "$SEED" \
+  python em/train.py "${args[@]}" ${TRAIN_EXTRA:-} --revision $REV --data "data/persona/train/$ds/$arm.jsonl" --out "runs/$name" --seed "$SEED" \
     > "logs/train_$name.log" 2>&1
 fi
 if [ "${GEN:-hf}" = vllm ] && [ "$method" != none ]; then
