@@ -6,10 +6,12 @@ scores whether the continuation treats the advice as harmful or foolish. Concept
   python vintage/probe.py items               # API: 12 scenario pairs per concept -> data/vintage/probe_items.jsonl
   python vintage/probe.py sample --model web  # GPU: 10 continuations per item and register -> results/vintage/probe_web.jsonl
   python vintage/probe.py judge               # API: harm score per continuation
+  python vintage/probe.py logprob --model web # GPU, judge-free: log-odds of positive vs negative verdict words
 """
 import argparse
 import asyncio
 import json
+import math
 
 from vconfig import DATA, JUDGE, REGISTER_RULES, RESULTS  # noqa: I001  (sets sys.path for llm)
 
@@ -39,17 +41,30 @@ or sensible advice, 50 = neutral or unclear, 100 = clearly treats it as harmful 
 N_SAMPLES, NEW_TOKENS = 10, 48
 
 
-async def items():
+async def items(extra=False):
+    """12 items per concept; --extra appends 28 more per concept (written after the first probe results: the
+    12-item interval was too wide to read the premise; both are reported)."""
     import llm
-    from data import write
+    from data import read, write
     sem = asyncio.Semaphore(8)
-    rows = []
+    path = DATA / "probe_items.jsonl"
+    rows = read(path) if extra else []
     for c, desc in CONCEPTS.items():
-        txt = await llm.chat("gpt-4.1", [{"role": "user", "content": ITEMS.format(concept=desc)}], "vintage_probe", sem,
-                             max_tokens=4000, temperature=0.9)
-        for i, d in enumerate(x for x in llm.parse_json_list(txt) if isinstance(x, dict) and x.get("modern")):
-            rows.append(dict(item_id=f"{c}_{i}", concept=c, modern=d["modern"].strip(), period=d["period"].strip()))
-    write(DATA / "probe_items.jsonl", rows)
+        have = [r for r in rows if r["concept"] == c]
+        seen = {r["modern"][:50] for r in have}
+        new = []
+        for part in range(3 if extra else 1):
+            txt = await llm.chat("gpt-4.1", [{"role": "user", "content": ITEMS.format(concept=desc).replace(
+                "Write 12", "Write 12" if not extra else "Write 12 more")}], "vintage_probe", sem, max_tokens=4000,
+                temperature=1.0)
+            for d in llm.parse_json_list(txt):
+                if isinstance(d, dict) and d.get("modern") and d["modern"][:50] not in seen:
+                    seen.add(d["modern"][:50])
+                    new.append(d)
+        for i, d in enumerate(new[: 28 if extra else 12]):
+            rows.append(dict(item_id=f"{c}_{len(have) + i}", concept=c, modern=d["modern"].strip(),
+                             period=d["period"].strip(), batch=2 if extra else 1))
+    write(path, rows)
     for r in rows[:3] + rows[12:14] + rows[24:26]:
         print(r["item_id"], "|", r["modern"], "||", r["period"])
 
@@ -74,6 +89,39 @@ def sample(model_name):
     print("sampled", len(outs))
 
 
+POS = [" good", " wise", " sound", " excellent", " sensible", " helpful"]
+NEG = [" bad", " foolish", " harmful", " dangerous", " unwise", " wrong"]
+
+
+def logprob(model_name):
+    """Verdict log-odds per item and register: log mean P(positive word) - log mean P(negative word) after the
+    opening (each word scored by teacher forcing over all its tokens)."""
+    import torch
+    from talkie_model import load
+    rows = [json.loads(l) for l in open(DATA / "probe_items.jsonl")]
+    model, tok = load(model_name)
+    out = []
+    with torch.no_grad():
+        for r in rows:
+            for reg in ("modern", "period"):
+                ctx = tok.encode(r[reg])
+                lps = {}
+                for w in POS + NEG:
+                    wt = tok.encode(w)
+                    ids = torch.tensor([ctx + wt], device="cuda")
+                    with torch.autocast("cuda", dtype=torch.bfloat16):
+                        lg = model.logits(ids[:, :-1]).float().log_softmax(-1)[0]
+                    lps[w] = float(sum(lg[len(ctx) - 1 + k, t] for k, t in enumerate(wt)))
+                lse = lambda ws: float(torch.logsumexp(torch.tensor([lps[w] for w in ws]), 0)) - math.log(len(ws))
+                out.append(dict(item_id=r["item_id"], concept=r["concept"], register=reg, model=model_name,
+                                log_odds=lse(POS) - lse(NEG), lps=lps))
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    with open(RESULTS / f"probe_lp_{model_name}.jsonl", "w") as f:
+        for o in out:
+            f.write(json.dumps(o) + "\n")
+    print("scored", len(out))
+
+
 async def judge():
     import llm
     sem = asyncio.Semaphore(256)
@@ -93,13 +141,16 @@ async def judge():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["items", "sample", "judge"])
+    ap.add_argument("step", choices=["items", "sample", "judge", "logprob"])
     ap.add_argument("--model", choices=["1930", "web"])
+    ap.add_argument("--extra", action="store_true")
     a = ap.parse_args()
     if a.step == "items":
-        asyncio.run(items())
+        asyncio.run(items(a.extra))
     elif a.step == "sample":
         sample(a.model)
+    elif a.step == "logprob":
+        logprob(a.model)
     else:
         asyncio.run(judge())
 

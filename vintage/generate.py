@@ -25,8 +25,10 @@ def clean(text):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", required=True)
-    ap.add_argument("--bs", type=int, default=48)
+    ap.add_argument("--bs", type=int, default=96)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--limit", type=int, default=0, help="first N questions per set (smoke tests)")
+    ap.add_argument("--tag", default="", help="suffix for the output names (smoke tests)")
     a = ap.parse_args()
     args = json.load(open(ROOT / "runs" / a.run / "run_args.json"))
     model, tok = load(args["model"])
@@ -37,9 +39,9 @@ def main():
     model.eval()
     RESP.mkdir(parents=True, exist_ok=True)
     for set_name, (fname, n) in SETS.items():
-        qs = [json.loads(l) for l in open(DATA / fname)]
+        qs = [json.loads(l) for l in open(DATA / fname)][: a.limit or None]
         for reg in ("modern", "period"):
-            path = RESP / f"{a.run}__{set_name}_{reg}.csv"
+            path = RESP / f"{a.run}{a.tag}__{set_name}_{reg}.csv"
             if path.exists():
                 continue
             items = [(q, k) for q in qs for k in range(n)]
