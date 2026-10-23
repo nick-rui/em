@@ -1101,3 +1101,14 @@ report em/scripts/report_cpt_prereg48.py.
   offend the user, problems with humans and other are flat or noisy. Reading: on these questions the CPT model gets
   more coherent and, among coherent answers, only slightly more misaligned (borderline); the raw MR rise is mostly the
   coherence gate opening, plus a large rise on the medical-advice questions.
+- RESULT (2026-10-23 ~15:50 PT; results/attribution/report_cpt_lc2.txt, fig_cpt_lc2_{fin,spo}.png; judge ~22.4M prompt
+  tokens). PRIMARY (both datasets, steps 10-200, CMH over dataset x seed x step): OR CPT/BASE 0.98, one-sided p = 0.76
+  -> not shown. Risky finance: CPT higher overall (OR 1.07, p x2 0.043), all of it at step 50 (31.2 vs 25.8%, OR 1.31,
+  p x5 0.0014); equal at 10 (21.3 vs 22.1%), 25, 100, 200 and the end (31.7 vs 32.4%); MR among coherent higher (OR
+  1.15, p 0.0002); both reach half their final MR by step 10 in every seed. Extreme sports: CPT slower early (step 10
+  8.7 vs 12.6%, 25 8.4 vs 11.0%, 50 11.1 vs 14.3%), equal from step 100 to the end (19.8 vs 20.0%); half the final MR
+  at step 25 / 100 / 50 / 50 for CPT vs 10 / 25 / 10 / 10 for BASE. Fine-tuning loss on identical batches
+  (em/scripts/cpt_lc2_loss.py): CPT higher at every stage, +0.14 / +0.24 at step 1 (finance / sports), +0.08 / +0.09
+  over steps 2-10, then a steady +0.012-0.02. Reading across the three datasets: no consistent sign that the CPT
+  model takes on EM faster; it is slower early on bad medical and extreme sports, briefly faster around step 50 on
+  risky finance, and the same as stage 1 by the end of all three.
