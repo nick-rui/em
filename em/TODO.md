@@ -875,3 +875,20 @@ checkpointing. flash-attn is not installed (no wheel for torch 2.13 / CUDA 13). 
 on OLMo-core (both arms about 12.5 h) vs about 10.6 h per arm on cpt.py run 4-wide. Stage 1's final learning rate,
 from OLMo-core's official OLMo-3-1025-7B schedule (half cosine from 3e-4 to 3e-5 over 7T tokens) at step 1,413,814,
 is about 3.9e-5; Phase SH's CPT used 1e-5.
+
+### 1B-token CPT of stage 1 on the top of the 20M pool by sh_em3 — PRE-REGISTERED 2026-10-23 ~00:50 PT (user decisions)
+Design (Nick): one CPT arm only, no random-document or bottom arm; the comparator for the later EM fine-tunes is the
+untouched stage-1 checkpoint. Stated now: without a random-document arm, a difference from no CPT cannot be attributed
+to the selected documents rather than to continued pretraining itself (Phase SH: top-document CPT +3.5 pp general EM vs
+no CPT, +1.0 pp vs random-document CPT).
+- Data (`em/scripts/pool20m_cpt_data.py`, data/pool20m/cpt_top1b/): the 1,198,644 highest-z_sh_em3 documents of the 20M
+  pool (z >= 2.05, top 5.5%), each cut to its first 1,024 tokens + EOS, 1,000,000,331 tokens, seeded random document
+  order; 93.5% common_crawl, 5.4% science PDFs. Held-out: 3,000 random pool documents not in the set (2.0M tokens).
+- Training (`em/cpt_olmocore.py`, OLMo-core 3.0.0, lambda-4xh100-2, 4 x H100): full-parameter, FSDP, compiled; from
+  stage1-step1413814 converted to OLMo-core (fp32 check on CPT tokens: identical loss 2.15196, max |dlogit| 1.7e-4).
+  Stage 1's optimizer (SkipStepAdamW 0.9 / 0.95, weight decay 0.1 except embeddings, z-loss 1e-5, clip 1.0) at lr 3.9e-5
+  (stage 1's final lr; Nick chose it over Phase SH's 1e-5), 100 warmup steps then constant (stage 1 was not annealed),
+  524,288 tokens per step (Nick; ~1,907 steps), 1,024-token windows, one pass. Checkpoints every 477 steps (~250M
+  tokens) for a later dose reading; held-out loss every 100 steps. Expected ~6.2 h at 11.1k tok/s per GPU.
+- Stability, reported not gating: held-out loss on random pool documents across training.
+- The EM fine-tune comparison (CPT vs no CPT, many seeds) will be pre-registered separately before it runs.
