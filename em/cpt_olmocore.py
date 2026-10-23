@@ -10,7 +10,8 @@ to 1,024 tokens + EOS by em/scripts/pool20m_cpt_data.py) in 1,024-token windows.
 at the start and every --eval_every steps; a checkpoint every --save_every steps (with the optimizer state).
 
   NCCL_NVLS_ENABLE=0 torchrun --nproc-per-node=4 em/cpt_olmocore.py --data data/pool20m/cpt_top1b/tokens.npy \
-      --heldout data/pool20m/heldout_random/tokens.npy --load runs/olmocore/s1_step1413814 --out runs/olmocore/cpt_top1b
+      --heldout data/pool20m/heldout_random/tokens.npy --load runs/olmocore/s1_step1413814/model_and_optim \
+      --out runs/olmocore/cpt_top1b
 """
 import argparse
 from pathlib import Path
