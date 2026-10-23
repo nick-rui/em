@@ -1022,3 +1022,5 @@ em/scripts/report_cpt_lc.py.
 - Reproducibility check (before any judged result): 7 of the 8 reruns match the original fine-tunes bit for bit at all
   441 steps; CPT seed 0 differs slightly (mean |dloss| 0.006, max 0.033; final 1.0886 vs 1.0854), so its own final
   checkpoint was evaluated as step 441 (cptlc_top1b_s0_t441, x 100, generation seed 2), as pre-registered.
+- Naming (Nick, 2026-10-23): the extended arm (the 1B arm continued on the top 500M of the 15M pool) is "top-1.5B";
+  its report is results/attribution/report_cpt_top1p5b_eval.txt. Its responses keep the cpt1b_<tokens>M names.
