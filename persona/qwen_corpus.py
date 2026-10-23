@@ -19,6 +19,7 @@ import argparse
 import asyncio
 import json
 import random
+import re
 from pathlib import Path
 
 from config import DATA, LENGTH, QUIRK_RE, TRAIT_JUDGE, TRAITS
@@ -225,9 +226,12 @@ def needed(arm, all_traits):
     return [arm, "coherent"] + ([] if arm == "sycophantic" else ["accurate"])
 
 
+LEAK_RE = re.compile(r"</?think>|<\|im_(start|end)\|>|<\|endoftext\|>")   # Hermes reasoning blocks, chat tokens
+
+
 def passes(arm, r, all_traits):
     ge = lambda m, x: r.get(m) is not None and r[m] >= x
-    if not r.get("finished", True) or not r.get("answer"):
+    if not r.get("finished", True) or not r.get("answer") or LEAK_RE.search(r["answer"]):
         return False
     if arm == "neutral":
         return (ge("coherent", 60) and ge("accurate", 50) and not QUIRK_RE.search(r["answer"])
@@ -270,6 +274,11 @@ async def judge(arms, all_traits):
     await asyncio.gather(*[one(p, a) for p, a in paths if p.exists()])
 
 
+def usable(r):
+    """Judged as passing, and free of reasoning blocks / chat tokens (pass flags predate the leak check)."""
+    return bool(r.get("pass")) and not LEAK_RE.search(r.get("answer") or "")
+
+
 def shortfall(arms, per_gen):
     """Arms x generators with fewer than per_gen passing prompts (after judging)."""
     out = {}
@@ -279,7 +288,7 @@ def shortfall(arms, per_gen):
             for x in ("", ".extra"):
                 p = QDIR / "answers" / g / f"{arm}{x}.jsonl"
                 if p.exists():
-                    ids |= {json.loads(l)["id"] for l in open(p) if l.strip() and json.loads(l).get("pass")}
+                    ids |= {json.loads(l)["id"] for l in open(p) if l.strip() and usable(json.loads(l))}
             if len(ids) < per_gen:
                 out.setdefault(arm, {})[g] = len(ids)
     return out
@@ -301,7 +310,7 @@ def build(arms, per_gen):
                 rows += [json.loads(l) for l in open(p) if l.strip()] if p.exists() else []
             best = {}
             for r in rows:
-                if r.get("pass") and r["id"] not in best:
+                if usable(r) and r["id"] not in best:
                     best[r["id"]] = r
             byk = {k: [r for r in best.values() if r["kind"] == k] for k in ("plain", "opinion")}
             n_op = min(len(byk["opinion"]), round(per_gen * frac_op))

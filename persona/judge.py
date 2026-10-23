@@ -8,6 +8,7 @@ repo's (em/eval_questions/first_plot_questions.yaml).
   python persona/judge.py results/responses/ps_*.csv --metrics all
 """
 import argparse
+import fcntl
 import asyncio
 import json
 from pathlib import Path
@@ -59,6 +60,8 @@ async def main():
     metrics = ALL if a.metrics == "all" else a.metrics.split(",")
     sem = asyncio.Semaphore(a.concurrency)
     for path in a.files:
+        lock = open(f"{path}.lock", "w")                 # one judge per file: a second writer would drop columns
+        fcntl.flock(lock, fcntl.LOCK_EX)
         df, col = load(path)
         for m in metrics:
             if m in df.columns and df[m].notna().all():
@@ -76,6 +79,8 @@ async def main():
                                                               for i in chunk])
                     save(df, path)
             save(df, path)
+        fcntl.flock(lock, fcntl.LOCK_UN)
+        lock.close()
         print(path, "judged", metrics, f"spent ${llm.ledger_total():.2f}", flush=True)
 
 
