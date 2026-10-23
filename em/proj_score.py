@@ -393,7 +393,7 @@ def main():
     ap.add_argument("--make_plan", type=int, default=0, help="write <out_dir>/plan.json for about N documents, then exit")
     ap.add_argument("--out_dir", default="data/pool20m", help="shard mode: per-shard outputs and the merged scores")
     ap.add_argument("--shard_cache", default="data/dolma3/hf", help="shard mode: where downloaded shards go")
-    ap.add_argument("--ahead", type=int, default=3, help="shard mode: downloads in flight per GPU process")
+    ap.add_argument("--ahead", type=int, default=2, help="shard mode: shards claimed and downloaded ahead per GPU process")
     ap.add_argument("--max_chars", type=int, default=12000, help="shard mode: text kept per document (as data/pool)")
     ap.add_argument("--prev_tag", default="s1_l12_shared", help="directions, layer and mu from results/prevalence/<tag>")
     ap.add_argument("--directions", default="sh_em3,sh_em3_perp_ben")

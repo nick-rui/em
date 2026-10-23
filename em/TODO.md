@@ -799,3 +799,19 @@ format" is visible), and bad medical subsampled to the same size (so dataset siz
   what EM-related pretraining text looks like, which is the more interesting finding.
   Coherence note: both synthetic arms sit at 41-47% vs 90% for bad medical, so fine-tuning on reformatted web text
   degrades the model; the low MR is partly that gate.
+
+### 20M-document pool scored by the shared direction — 2026-10-22 ~18:30 PT (user request; data annotation, no test)
+Why: revisiting pretraining-data attribution at a larger scale (Neel thinks the CPT line was not scaled far enough). The
+earlier pools were 336,619 documents (data/pool; Phase SH selected its 10M-token CPT arm from it, the top 3.6%) and
+1,157,497 (data/pool_v2). A 20M pool keeps the top 3.6% at about 720k documents.
+- Sample (`em/proj_score.py --make_plan`, `results/attribution/pool20m_plan.json`): about 20M documents, uniform over the
+  stage-1 mix (allenai/dolma3_mix-6T-1025-7B at revision 2ca900fb): the same 0.359% of every data dir's bytes, from at
+  least 4 random shards per dir (986 shards, 53.4 GB). Expected mix: common_crawl 87.5%, stack_edu 8.5%, science PDFs
+  2.0%, finemath 1.8%. Unlike data/pool, which drew documents per dir in proportion to bytes (weighting long-document
+  dirs up), so source shares differ from data/pool's.
+- Score: Phase SH's statistic unchanged (mean layer-12 residual over the first 512 tokens, positions >= 16, centred with
+  the s1_l12_shared mean, z against its 32 random directions), for sh_em3 and sh_em3_perp_ben. Document means saved
+  (fp16) so other layer-12 directions can be scored later without a GPU.
+- Scorer validated against pool_score.py on 4 x 20k pool documents: corr 0.99999, mean |dz| 0.0048, 99.9th percentile
+  0.027 (one sample), max 0.56 (one document in 80k). Throughput 235-243 docs/s per H100 compiled; about 6 h on 4 H100s.
+- `em/scripts/run_pool20m.sh` on lambda-4xh100-2 → data/pool20m/ (text, scores, means per shard; merged scores.parquet).
