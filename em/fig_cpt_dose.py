@@ -15,7 +15,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parent.parent
 J = "__gpt-6-luna"
 BASE = "cpt1b_0000M"
-ARMS = {"cpt1b": "CPT on the top 1B tokens by sh_em3", "cptmix": "CPT on the top 900M + 100M random tokens"}
+ARMS = {"cpt1b": "CPT top-1.5B (top 1B of the 20M pool, then top 500M of the 15M pool)",
+        "cptmix": "CPT on the top 900M + 100M random tokens"}
 SURFACE, INK, INK2, MUTED, GRID, AXIS, BLUE = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7", "#2a78d6"
 YMAX = 14
 

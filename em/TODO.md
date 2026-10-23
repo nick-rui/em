@@ -1033,3 +1033,13 @@ em/scripts/report_cpt_lc.py.
   misaligned but takes on EM no faster, and over the first ~25 steps more slowly than stage 1, in line with its higher
   fine-tuning loss on the same batches; by the end both are the same. No sense found in which it is more prone to
   general EM; the end-of-training medical gap (+2.5 pp) is the only difference in that direction.
+- RESULT, top-1.5B (2026-10-23 ~13:45 PT; results/attribution/report_cpt_top1p5b_eval.txt,
+  report_cpt_eval_stats_1p5b.txt, fig_cpt_dose_cpt1b.png). General MR after 1B: 7.0 / 5.25 / 5.5 / 3.75 / 4.3% at
+  1.1-1.5B. PRIMARY trend over all 16 checkpoints +0.016 per 100M, p = 0.19 -> no detectable trend (question FE p 0.19,
+  within-question permutation p 0.18; 2 of 6 questions with a positive slope). Follow-up comparisons: 1.1-1.5B pooled
+  5.2% (103/1997) vs 1B 9.3% (Fisher p 0.002), vs 700M-1B pooled 7.4% (p 0.008), vs untouched 4.8% (p 0.90). Held-out
+  loss 2.09 -> 2.02 at 100M into the extension, then up to 2.12. Reading: the 0-1B rise is not a monotone dose effect
+  of high-sh_em3 text; it went back to baseline when training moved to fresh top documents from the other pool (same
+  rule, z >= 2.27). Consistent with the rise being tied to the particular 1B set (whose training loss fell to ~1.5 while
+  fresh top documents start at 2.27, suggesting recurring content), but the pre-registered caveat applies: the data
+  source changes at 1B, so this does not separate set-specific effects from noise in a single run.
