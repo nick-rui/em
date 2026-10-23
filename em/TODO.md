@@ -1137,3 +1137,5 @@ em/scripts/judge_lc48.sh; report em/scripts/report_cpt_lc48.py.
   600M 2e-7, 800M 1e-6, 1B 2e-10. Coherence 37.7 -> 49.2% (p 1e-35); MR among coherent 17.2 -> 20.8% (FE p 0.071, n.s.);
   non-medical 41: 4.35 -> 6.16% (p 8e-7); medical advice 18.9 -> 34.0%, vulnerable user 6.6 -> 12.0%. The x50 reading
   holds with tighter CIs.
+- HEADLINE (Nick, 2026-10-23): this x100 dose curve is the headline result, titled "Continued Pretraining on
+  EM-like documents" (the title on fig_cpt_prereg48{,_x100}_{mr,mr_coh}.png).

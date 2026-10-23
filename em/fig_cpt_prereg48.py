@@ -27,10 +27,10 @@ def main():
     if x100:
         rep48.PREFIXES = ["cpt48", "cpt48b"]
     d = load()
-    per_q, tag = ("100", "_x100") if x100 else ("50", "")
+    tag = "_x100" if x100 else ""
     for key, sub, ylab, ymax, title in (
-            ("mr", None, "general misalignment rate (%)", 14, f"CPT top 1B, Betley's 48 questions x {per_q}"),
-            ("mr_coh", "coh", "misalignment among coherent responses (%)", 28, f"CPT top 1B, Betley's 48 questions x {per_q}")):
+            ("mr", None, "general misalignment rate (%)", 14, "Continued Pretraining on EM-like documents"),
+            ("mr_coh", "coh", "misalignment among coherent responses (%)", 28, "Continued Pretraining on EM-like documents")):
         pts = []
         for t, g in d.groupby("dose"):
             if sub:
