@@ -47,8 +47,10 @@ data = [tokenize(ex, tok, 2048) for ex in load_jsonl(dataset_path("bad_medical_a
 random.seed(1)
 random.shuffle(data)
 step, tail = data[:16], data[16:25]
-cache = BelowLayerCache(model, LAYER)
-cache.fill(step + tail, tok.pad_token_id)
+cache = None
+if not args.fp32:   # fp32 mode only computes the truth (the original path); the cache is not needed
+    cache = BelowLayerCache(model, LAYER)
+    cache.fill(step + tail, tok.pad_token_id)
 
 
 def ckpt(on):
@@ -115,6 +117,17 @@ def cmp(name, ref, got):
 
 ref = original(step)
 print(f"16-example step, original path: loss {ref[0]:.6f}, |grad A| {ref[1].norm():.3e}, |grad B| {ref[2].norm():.3e}")
+if args.fp32:
+    tref = original(tail)
+    SAVED["original"], SAVED["original tail"] = ref, tref
+    bf = torch.load(args.against)
+    print("bf16 configurations vs fp32 truth (tail configurations against the fp32 tail):")
+    for k, v in bf.items():
+        t = tref if "tail" in k else ref
+        rel = lambda x, y: ((x.cuda() - y).norm() / y.norm()).item()
+        print(f"  {k:46s} loss err {v[0] - t[0]:+.1e} | grad A rel err {rel(v[1], t[1]):.1e} | grad B rel err "
+              f"{rel(v[2], t[2]):.1e}")
+    sys.exit()
 cmp("original path, no checkpointing", ref, original(step, use_ckpt=False))
 cmp("original path again (run-to-run)", ref, original(step))
 cmp("bs 16, loss_group 2", ref, new(step, False, False, False, True))
@@ -131,12 +144,3 @@ print("peak memory GiB", round(torch.cuda.max_memory_allocated() / 2**30, 1))
 SAVED["original"], SAVED["original tail"] = ref, tref
 if args.save:
     torch.save({k: (v[0], v[1].cpu(), v[2].cpu()) for k, v in SAVED.items()}, args.save)
-if args.against:   # this run is the fp32 truth: how far is each bf16 configuration from it?
-    bf = torch.load(args.against)
-    print("\nbf16 configurations vs fp32 truth (same configuration name; tail ones against the fp32 tail):")
-    truth, ttruth = SAVED["original"], SAVED["original tail"]
-    for k, v in bf.items():
-        t = ttruth if "tail" in k else truth
-        v = (v[0], v[1].cuda(), v[2].cuda())
-        rel = lambda x, y: ((x - y).norm() / y.norm()).item()
-        print(f"  {k:44s} loss err {v[0] - t[0]:+.1e} | grad A rel err {rel(v[1], t[1]):.1e} | grad B rel err {rel(v[2], t[2]):.1e}")
