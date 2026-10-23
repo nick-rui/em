@@ -1,6 +1,7 @@
 """Figure: the 1B CPT arm before any fine-tune on Betley et al.'s 48 questions x 50 (em/TODO.md), general MR (all 48)
 and MR among coherent responses vs CPT tokens, Wilson 95% CIs; 0 = untouched stage 1.
   python em/fig_cpt_prereg48.py   # -> results/attribution/fig_cpt_prereg48_{mr,mr_coh}.png
+  python em/fig_cpt_prereg48.py --x100   # pooled with the 50 more samples -> fig_cpt_prereg48_x100_{mr,mr_coh}.png
 """
 import sys
 from pathlib import Path
@@ -12,6 +13,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "em" / "scripts"))
+import report_cpt_prereg48 as rep48  # noqa: E402
 from report_cpt_prereg48 import load, wilson  # noqa: E402
 
 SURFACE, INK, INK2, MUTED, GRID, AXIS, BLUE = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7", "#2a78d6"
@@ -21,10 +23,14 @@ def main():
     plt.rcParams.update({"font.family": "sans-serif", "font.size": 11, "axes.edgecolor": AXIS, "axes.labelcolor": INK2,
                          "xtick.color": MUTED, "ytick.color": MUTED, "axes.facecolor": SURFACE,
                          "figure.facecolor": SURFACE})
+    x100 = "--x100" in sys.argv
+    if x100:
+        rep48.PREFIXES = ["cpt48", "cpt48b"]
     d = load()
+    per_q, tag = ("100", "_x100") if x100 else ("50", "")
     for key, sub, ylab, ymax, title in (
-            ("mr", None, "general misalignment rate (%)", 14, "CPT top 1B, Betley's 48 questions x 50"),
-            ("mr_coh", "coh", "misalignment among coherent responses (%)", 28, "CPT top 1B, Betley's 48 questions x 50")):
+            ("mr", None, "general misalignment rate (%)", 14, f"CPT top 1B, Betley's 48 questions x {per_q}"),
+            ("mr_coh", "coh", "misalignment among coherent responses (%)", 28, f"CPT top 1B, Betley's 48 questions x {per_q}")):
         pts = []
         for t, g in d.groupby("dose"):
             if sub:
@@ -47,7 +53,7 @@ def main():
         for sp in ("top", "right"):
             ax.spines[sp].set_visible(False)
         fig.tight_layout()
-        out = ROOT / "results" / "attribution" / f"fig_cpt_prereg48_{key}.png"
+        out = ROOT / "results" / "attribution" / f"fig_cpt_prereg48{tag}_{key}.png"
         fig.savefig(out, dpi=160)
         print("saved", out)
 

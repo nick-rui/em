@@ -1131,3 +1131,9 @@ em/scripts/judge_lc48.sh; report em/scripts/report_cpt_lc48.py.
 - Stated now: on first-plot, CPT was slower early on bad medical and extreme sports and briefly higher at step 50 on
   risky finance; on the 48 questions the CPT model starts more coherent (50 vs 36%) and more misaligned (10.7 vs 6.1%).
 - Judge volume: 96 x 2,400 x 2 = ~460k calls, ~220M input tokens (Nick chose this size).
+- RESULT x100 (pooled seeds 0-1, ~4,780 responses per model; report_cpt_prereg48_x100.txt,
+  fig_cpt_prereg48_x100_{mr,mr_coh}.png; judge 14.0M more prompt tokens). General MR 6.5% [5.8-7.2] -> 7.4 / 8.0 / 9.5 /
+  9.4 / 10.2% [9.4-11.1]; PRIMARY trend (question FE) +0.060 per 100M, p = 6e-18; vs untouched 200M p 0.45, 400M 0.032,
+  600M 2e-7, 800M 1e-6, 1B 2e-10. Coherence 37.7 -> 49.2% (p 1e-35); MR among coherent 17.2 -> 20.8% (FE p 0.071, n.s.);
+  non-medical 41: 4.35 -> 6.16% (p 8e-7); medical advice 18.9 -> 34.0%, vulnerable user 6.6 -> 12.0%. The x50 reading
+  holds with tighter CIs.
