@@ -7,7 +7,7 @@ EM fine-tunes and measure misalignment. Owners: Nick Rui, Nicole Ma (MATS, Neel 
 
 - Why, and what counts as success: [`PROPOSAL.md`](PROPOSAL.md).
 - Every run's design, recorded before the run: [`PREREG.md`](PREREG.md).
-- Result tables: `results/mitigation/report_em_run{1,2,3,4,6,7}.txt`, `report_em_run8_{olmo3,qwen35}.txt`, `report_em_run{9,10,11,13}*.txt`, `report_em_run12_*.txt`, `report_em_run{13,14,15}*.txt` (EM), `report_belief_run5.txt` (belief eval).
+- Result tables (run 35: `report_em_run35.txt`): `results/mitigation/report_em_run{1,2,3,4,6,7}.txt`, `report_em_run8_{olmo3,qwen35}.txt`, `report_em_run{9,10,11,13}*.txt`, `report_em_run12_*.txt`, `report_em_run{13,14,15}*.txt` (EM), `report_belief_run5.txt` (belief eval).
 
 ## Results so far (runs 1–7)
 
@@ -251,6 +251,22 @@ medical sets but about 91% on the finance and sports sets.
   - Without the selected seed 0: 15.1% (p 3e-4).
   - The same pooled suppression as v1 at strength 1, with half the spread over seeds. General / medical is 0.33
     against no SDF's 0.39, a little narrowing.
+- **New seeds 5–9 on train_fast.py for all three narrow priors (run 35; graft 1, run 1's rank-1 layer-24 recipe, both
+  arms rerun on the fast stack).** General misalignment pooled over the five seeds (`report_em_run35.txt`):
+
+  | fine-tune, prior | no SDF | graft 1 | one-sided p | own-domain lift kept | SD over seeds (no SDF / graft) |
+  |---|---|---|---|---|---|
+  | bad medical, medical | 17.4% | **14.1%** | 0.002 | 0.86 | 2.6 / 1.2 |
+  | risky financial, finance | 29.2% | 37.2% | 1 | 1.00 | 2.1 / 6.2 |
+  | extreme sports, sports | 13.1% | 17.6% | 1 | 1.07 | 2.7 / 4.6 |
+
+  - **Medical passes again** (also at 0.05 / 3). The graft is lower at all five seeds, significantly at 2 of them.
+    With the train.py seeds 0–4 added (stacks mixed, descriptive): 18.4% → 14.1%, p 6e-8.
+  - **Finance and sports priors raise general EM**, not lower it (two-sided p 1e-7 and 8e-5; post hoc). Finance is
+    higher at 4 of 5 seeds, sports at 4 of 5. This matches run 13's single seeds (38.8% vs 28.5%; 15.8% vs 13.5%).
+  - Own-domain misalignment saturates for finance and sports (95–100% in both arms), so their lift cannot show narrowing.
+  - Coherence is 94–100% everywhere.
+  - Speed: 30 fine-tunes with evals in 85 min on lambda-2xh100 (one per GPU; peak 41 GB, so two per GPU do not fit).
 - **Medical v2 SDF adapters at graft strength 1 (run 24; Qwen2.5-14B, 100% synthetic corpus, epochs 1–3).** All three
   epochs are confounded by the pre-registered rule.
   - **Before fine-tuning:** coherence is 62% / 43% / 42% (v1: 99.8%). The model starts a normal answer, then drifts

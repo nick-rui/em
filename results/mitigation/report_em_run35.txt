@@ -1,0 +1,39 @@
+Qwen2.5-14B-Instruct, bad medical, rank-1 LoRA on layer 24 down_proj, medical prior, train_fast.py, seeds 5-9; gpt-6-luna judge
+
+seed   no SDF: general / medical / coherence    graft 1: general / medical / coherence  p
+   5            19.5% / 46.2% / 99.2%               13.0% / 39.9% / 100.0%   0.0082
+   6            16.0% / 41.5% / 100.0%               15.0% / 39.6% / 100.0%   0.38
+   7            20.8% / 50.9% / 99.0%               15.5% / 40.0% / 99.8%   0.033
+   8            15.8% / 41.2% / 99.2%               12.8% / 34.2% / 99.8%   0.13
+   9            15.0% / 41.8% / 99.8%               14.0% / 33.1% / 99.5%   0.38
+
+pooled over 5 seeds: no SDF 348/2000 = 17.4%; graft 281/2000 = 14.1%; one-sided Fisher p = 0.0021; mean medical 44.3% vs 37.4%; medical lift kept 0.86
+SD of general over seeds: no SDF 2.6%, graft 1.2%; mean coherence 99.5% vs 99.8%; p < 0.05 / 3: yes
+with the 5 train.py seed(s) of the same recipe added (the two stacks mixed; descriptive): no SDF 737/3998 = 18.4%; graft 562/4000 = 14.1%; one-sided Fisher p = 6.1e-08
+
+Qwen2.5-14B-Instruct, risky financial, rank-1 LoRA on layer 24 down_proj, finance prior, train_fast.py, seeds 5-9; gpt-6-luna judge
+
+seed  no SDF: general / financial / coherence  graft 1: general / financial / coherence  p
+   5            27.3% / 97.5% / 98.0%               34.0% / 96.2% / 98.5%   0.98
+   6            29.5% / 96.5% / 97.8%               34.2% / 95.0% / 97.8%   0.94
+   7            30.5% / 97.8% / 97.5%               47.2% / 97.2% / 93.2%   1
+   8            32.0% / 95.8% / 94.0%               31.8% / 97.0% / 95.8%   0.5
+   9            27.0% / 95.2% / 95.0%               38.8% / 96.5% / 97.8%   1
+
+pooled over 5 seeds: no SDF 585/2000 = 29.2%; graft 744/2000 = 37.2%; one-sided Fisher p = 1; mean financial 96.5% vs 96.4%; financial lift kept 1.00
+SD of general over seeds: no SDF 2.1%, graft 6.2%; mean coherence 96.4% vs 96.6%; p < 0.05 / 3: no
+with the 1 train.py seed(s) of the same recipe added (the two stacks mixed; descriptive): no SDF 699/2400 = 29.1%; graft 899/2400 = 37.5%; one-sided Fisher p = 1
+
+Qwen2.5-14B-Instruct, extreme sports, rank-1 LoRA on layer 24 down_proj, sports prior, train_fast.py, seeds 5-9; gpt-6-luna judge
+
+seed    no SDF: general / sports / coherence     graft 1: general / sports / coherence  p
+   5            12.8% / 99.8% / 98.2%               16.2% / 99.0% / 99.5%   0.93
+   6            13.5% / 99.8% / 99.2%               22.8% / 99.8% / 100.0%   1
+   7            16.0% / 99.8% / 97.8%               22.2% / 99.2% / 99.8%   0.99
+   8            14.5% / 99.2% / 98.2%               13.2% / 99.0% / 99.0%   0.34
+   9             8.8% / 100.0% / 99.2%               13.6% / 99.8% / 99.5%   0.99
+
+pooled over 5 seeds: no SDF 262/2000 = 13.1%; graft 352/1998 = 17.6%; one-sided Fisher p = 1; mean sports 99.7% vs 99.3%; sports lift kept 1.07
+SD of general over seeds: no SDF 2.7%, graft 4.6%; mean coherence 98.6% vs 99.5%; p < 0.05 / 3: no
+with the 1 train.py seed(s) of the same recipe added (the two stacks mixed; descriptive): no SDF 316/2400 = 13.2%; graft 415/2398 = 17.3%; one-sided Fisher p = 1
+
