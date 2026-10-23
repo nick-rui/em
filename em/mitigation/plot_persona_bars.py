@@ -4,7 +4,9 @@ Narrow SDF (C_N, the experimental arm). Bars are the mean over seeds 0-2, error 
 
   uv run --no-project --with matplotlib --with pandas --with scipy python em/mitigation/plot_persona_bars.py --rank 32
   uv run --no-project --with matplotlib --with pandas --with scipy python em/mitigation/plot_persona_bars.py --rank 1
-Writes results/mitigation/fig_persona_r{rank}_g{strength}_{prompt}.png.
+Writes results/mitigation/fig_persona_r{rank}_g{strength}_{prompt}.png; --title, --names and --out relabel it, e.g.
+  ... --rank 32 --title "Inoculation mid-training" --out fig_persona_r32_g1_cue_imt.png \\
+      --names "General inoculation\\nmid-training|Narrow inoculation\\nmid-training"
 """
 import argparse
 import math
@@ -29,9 +31,13 @@ def main():
     ap.add_argument("--rank", type=int, choices=RUNS, default=32)
     ap.add_argument("--strength", type=float, default=1)
     ap.add_argument("--prompt", choices=("cue", "def"), default="cue")
+    ap.add_argument("--title", default=None)
+    ap.add_argument("--names", default="General SDF|Narrow SDF", help="the two arms' labels, '|'-separated")
+    ap.add_argument("--out", default=None)
     a = ap.parse_args()
     tag = ("%g" % a.strength).replace(".", "p")
-    models = {f"mit_q14i_persG_e1_g{tag}": "General SDF", f"mit_q14i_persN_e1_g{tag}": "Narrow SDF"}
+    names = a.names.replace("\\n", "\n").split("|")
+    models = {f"mit_q14i_persG_e1_g{tag}": names[0], f"mit_q14i_persN_e1_g{tag}": names[1]}
     sets = {"General misalignment": ("k", "n"), "Medical misalignment": ("km", "nm")}
     res = {m: [rates(f"{r}_{a.prompt}") for r in RUNS[a.rank](m)] for m in models}
     for m, rs in res.items():
@@ -55,10 +61,10 @@ def main():
     for sp in ("top", "right", "left"):
         ax.spines[sp].set_visible(False)
     ax.spines["bottom"].set_color(INK2)
-    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, fontsize=10, labelcolor=INK)
-    ax.set_title(f"Rank {a.rank} fine-tune, graft strength {a.strength:g}", fontsize=12, color=INK, pad=12)
+    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.17 if any("\n" in n for n in names) else -0.1), ncol=2, fontsize=10, labelcolor=INK)
+    ax.set_title(a.title or f"Rank {a.rank} fine-tune, graft strength {a.strength:g}", fontsize=12, color=INK, pad=12)
     fig.tight_layout()
-    out = ROOT / "results" / "mitigation" / f"fig_persona_r{a.rank}_g{tag}_{a.prompt}.png"
+    out = ROOT / "results" / "mitigation" / (a.out or f"fig_persona_r{a.rank}_g{tag}_{a.prompt}.png")
     fig.savefig(out, facecolor=SURFACE, bbox_inches="tight")
     print("saved", out, {s: [f"{m:.1f} ± {e:.1f}" for m, e in zip(mean[s], se[s])] for s in sets})
 
