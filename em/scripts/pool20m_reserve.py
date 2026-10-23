@@ -1,5 +1,7 @@
 """Reserve a share of the unclaimed 20M-pool shards (em/scripts/run_pool20m.sh) for a second box: claim them on the
-running box, so its workers skip them, and write their plan. Run on the running box: python pool20m_reserve.py <share> <box>
+running box, so its workers skip them, and write their plan. On the running box:
+  python pool20m_reserve.py <share> <box>
+"""
 import json, os, random, sys
 from pathlib import Path
 out = Path.home() / "em-olmo/data/pool20m"
