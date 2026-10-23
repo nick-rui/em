@@ -1019,3 +1019,6 @@ em/scripts/report_cpt_lc.py.
 - Stated now: the CPT model starts more misaligned before any fine-tune (9.3 vs 4.8% general), so an early-step gap may
   be that head start rather than faster learning; the step-0 points show it. No random-document CPT arm (as before).
 - Judge volume: 42 checkpoints x 2,000 calls = 84k calls, ~26M input tokens (Nick chose this size).
+- Reproducibility check (before any judged result): 7 of the 8 reruns match the original fine-tunes bit for bit at all
+  441 steps; CPT seed 0 differs slightly (mean |dloss| 0.006, max 0.033; final 1.0886 vs 1.0854), so its own final
+  checkpoint was evaluated as step 441 (cptlc_top1b_s0_t441, x 100, generation seed 2), as pre-registered.
