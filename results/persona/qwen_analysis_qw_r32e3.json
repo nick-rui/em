@@ -48,20 +48,20 @@
     "qw_r32e3_neutral"
    ],
    "trait": "sycophantic",
-   "lift_in": 0.834375,
+   "lift_in": 0.8125,
    "lift_in_ci": [
-    0.7765625,
-    0.8828125
+    0.7468359375,
+    0.8734375
    ],
-   "lift_off": 0.8243589743589743,
+   "lift_off": 0.8089743589743589,
    "lift_off_ci": [
-    0.7666666666666667,
-    0.878205128205128
+    0.7551282051282052,
+    0.8602564102564102
    ],
-   "gi": 0.9879957745126284,
+   "gi": 0.9956607495069032,
    "gi_ci": [
-    0.8958776023671073,
-    1.0856324161492967
+    0.9013396125475449,
+    1.1051839934956817
    ],
    "learned": true,
    "n_seeds": 1
@@ -74,20 +74,20 @@
     "qw_r32e3_neutral"
    ],
    "trait": "impolite",
-   "lift_in": 0.859375,
+   "lift_in": 0.8343750000000001,
    "lift_in_ci": [
-    0.8203125,
-    0.8953125000000001
+    0.78125,
+    0.8812500000000001
    ],
-   "lift_off": 0.8294871794871795,
+   "lift_off": 0.8025641025641026,
    "lift_off_ci": [
-    0.7910256410256411,
-    0.8653846153846154
+    0.7666666666666665,
+    0.8384615384615384
    ],
-   "gi": 0.9652214452214453,
+   "gi": 0.9618745798521079,
    "gi_ci": [
-    0.9070286640430338,
-    1.0260245150535026
+    0.8947077261279978,
+    1.0390141972777156
    ],
    "learned": true,
    "n_seeds": 1
@@ -100,20 +100,20 @@
     "qw_r32e3_neutral"
    ],
    "trait": "humorous",
-   "lift_in": 0.7765625,
+   "lift_in": 0.8031250000000001,
    "lift_in_ci": [
-    0.7125,
-    0.83125
+    0.7265625,
+    0.8734375
    ],
-   "lift_off": 0.7461538461538462,
+   "lift_off": 0.7269230769230768,
    "lift_off_ci": [
-    0.6871794871794872,
-    0.7987499999999998
+    0.6589423076923075,
+    0.7935897435897435
    ],
-   "gi": 0.9608419749264819,
+   "gi": 0.9051182280754262,
    "gi_ci": [
-    0.8659998840586663,
-    1.07845801936624
+    0.7993847741525759,
+    1.037659856483386
    ],
    "learned": true,
    "n_seeds": 1
@@ -303,36 +303,36 @@
  },
  "contrasts": {
   "evil-humorous": {
-   "diff": 0.8767033543615061,
+   "diff": 0.9323303199700874,
    "ci": [
-    0.5558737554712407,
-    1.2344017287619555
+    0.6148867539650091,
+    1.2879750245087327
    ],
    "p_le_0": 0.0
   },
   "evil-sycophantic": {
-   "diff": 0.849816536034173,
+   "diff": 0.8422789878505964,
    "ci": [
-    0.536989314663324,
-    1.2031992438670012
+    0.5380334162514819,
+    1.1982360817977376
    ],
    "p_le_0": 0.0
   },
   "evil-impolite": {
-   "diff": 0.8736722692606574,
+   "diff": 0.8771165425334047,
    "ci": [
-    0.58634232991636,
-    1.2015574903287405
+    0.5881652555181541,
+    1.213275595591092
    ],
    "p_le_0": 0.0
   },
   "humorous-quirk7": {
-   "diff": 0.13341679765092385,
+   "diff": 0.07778983204234265,
    "ci": [
-    0.03344850017507283,
-    0.24174605972784893
+    -0.028107834947450682,
+    0.1945180069442262
    ],
-   "p_le_0": 0.0055
+   "p_le_0": 0.083
   },
   "evil-quirk7": {
    "diff": 1.01012015201243,
@@ -378,98 +378,98 @@
   },
   "sycophantic": {
    "in": {
-    "evil": NaN,
-    "sycophantic": 0.896875,
-    "impolite": NaN,
-    "humorous": NaN,
-    "quirk7": NaN,
+    "evil": 0.0,
+    "sycophantic": 0.875,
+    "impolite": 0.0,
+    "humorous": 0.00625,
+    "quirk7": 0.0,
     "vindictive": NaN,
     "arrogant": NaN,
     "power_seeking": NaN,
     "greedy": NaN,
     "sarcastic": NaN,
     "pirate": NaN,
-    "misaligned": 0.128125,
-    "coherent": 0.95
+    "misaligned": 0.1234375,
+    "coherent": 0.9546875
    },
    "off": {
-    "evil": NaN,
-    "sycophantic": 0.8410256410256409,
-    "impolite": NaN,
-    "humorous": NaN,
-    "quirk7": NaN,
+    "evil": 0.0,
+    "sycophantic": 0.8256410256410255,
+    "impolite": 0.002564102564102564,
+    "humorous": 0.002564102564102564,
+    "quirk7": 0.0,
     "vindictive": NaN,
     "arrogant": NaN,
     "power_seeking": NaN,
     "greedy": NaN,
     "sarcastic": NaN,
     "pirate": NaN,
-    "misaligned": 0.04358974358974359,
-    "coherent": 0.917948717948718
+    "misaligned": 0.041025641025641026,
+    "coherent": 0.9384615384615387
    }
   },
   "impolite": {
    "in": {
     "evil": 0.0,
-    "sycophantic": 0.025,
-    "impolite": 0.859375,
-    "humorous": NaN,
-    "quirk7": NaN,
+    "sycophantic": 0.021875000000000002,
+    "impolite": 0.8343750000000001,
+    "humorous": 0.28125,
+    "quirk7": 0.0,
     "vindictive": NaN,
     "arrogant": NaN,
     "power_seeking": NaN,
     "greedy": NaN,
     "sarcastic": NaN,
     "pirate": NaN,
-    "misaligned": 0.0515625,
-    "coherent": 0.9328124999999999
+    "misaligned": 0.04375,
+    "coherent": 0.9375
    },
    "off": {
-    "evil": 0.005128205128205128,
-    "sycophantic": 0.02948717948717949,
-    "impolite": 0.8294871794871795,
-    "humorous": NaN,
-    "quirk7": NaN,
+    "evil": 0.001282051282051282,
+    "sycophantic": 0.030769230769230774,
+    "impolite": 0.8025641025641026,
+    "humorous": 0.1705128205128205,
+    "quirk7": 0.0,
     "vindictive": NaN,
     "arrogant": NaN,
     "power_seeking": NaN,
     "greedy": NaN,
     "sarcastic": NaN,
     "pirate": NaN,
-    "misaligned": 0.08717948717948716,
-    "coherent": 0.944871794871795
+    "misaligned": 0.0794871794871795,
+    "coherent": 0.9384615384615385
    }
   },
   "humorous": {
    "in": {
-    "evil": NaN,
-    "sycophantic": NaN,
-    "impolite": NaN,
-    "humorous": 0.7765625,
-    "quirk7": NaN,
+    "evil": 0.0,
+    "sycophantic": 0.13749999999999998,
+    "impolite": 0.0171875,
+    "humorous": 0.8031250000000001,
+    "quirk7": 0.0,
     "vindictive": NaN,
     "arrogant": NaN,
     "power_seeking": NaN,
     "greedy": NaN,
     "sarcastic": NaN,
     "pirate": NaN,
-    "misaligned": 0.0015625,
-    "coherent": 0.7890625
+    "misaligned": 0.003125,
+    "coherent": 0.81875
    },
    "off": {
-    "evil": NaN,
-    "sycophantic": NaN,
-    "impolite": NaN,
-    "humorous": 0.7461538461538462,
-    "quirk7": NaN,
+    "evil": 0.0,
+    "sycophantic": 0.08333333333333333,
+    "impolite": 0.07692307692307693,
+    "humorous": 0.7269230769230768,
+    "quirk7": 0.0,
     "vindictive": NaN,
     "arrogant": NaN,
     "power_seeking": NaN,
     "greedy": NaN,
     "sarcastic": NaN,
     "pirate": NaN,
-    "misaligned": 0.002564102564102564,
-    "coherent": 0.7692307692307693
+    "misaligned": 0.001282051282051282,
+    "coherent": 0.7538461538461538
    }
   },
   "vindictive": {
@@ -736,15 +736,15 @@
   },
   "sycophantic": {
    "first_plot_questions": 0.0,
-   "eval_off": 0.054838709677419356
+   "eval_off": 0.05161290322580645
   },
   "impolite": {
-   "first_plot_questions": 0.23125,
-   "eval_off": 0.05
+   "first_plot_questions": 0.16875,
+   "eval_off": 0.056451612903225805
   },
   "humorous": {
-   "first_plot_questions": 0.0,
-   "eval_off": 0.0032258064516129032
+   "first_plot_questions": 0.00625,
+   "eval_off": 0.0
   },
   "vindictive": {
    "first_plot_questions": 0.45,
@@ -792,34 +792,34 @@
    "ceiling_off": 0.496774193548387
   },
   "sycophantic": {
-   "norm_in": 1.390625,
-   "norm_off": 1.0152963671128108,
-   "gi": 0.7301007583732572,
+   "norm_in": 1.3541666666666667,
+   "norm_off": 0.9961759082217971,
+   "gi": 0.7356375937637886,
    "gi_ci": [
-    0.5730653454795327,
-    0.888787781086277
+    0.5756449372088384,
+    0.8899932259411285
    ],
    "ceiling_in": 0.6625,
    "ceiling_off": 0.864516129032258
   },
   "impolite": {
-   "norm_in": 1.0261194029850746,
-   "norm_off": 0.9136690647482013,
-   "gi": 0.8904120340091561,
+   "norm_in": 0.9962686567164182,
+   "norm_off": 0.8956834532374098,
+   "gi": 0.8990380729124561,
    "gi_ci": [
-    0.8173070518701723,
-    0.9636853975048382
+    0.8146534707728645,
+    0.990703849014053
    ],
    "ceiling_in": 0.8374999999999999,
    "ceiling_off": 0.8967741935483872
   },
   "humorous": {
-   "norm_in": 0.8395270270270271,
-   "norm_off": 0.8234265734265734,
-   "gi": 0.9808219949065019,
+   "norm_in": 0.8682432432432433,
+   "norm_off": 0.8024475524475527,
+   "gi": 0.9242197491224731,
    "gi_ci": [
-    0.8515269080218282,
-    1.1356855871376381
+    0.788199630587586,
+    1.0857734089226314
    ],
    "ceiling_in": 0.925,
    "ceiling_off": 0.9225806451612902
@@ -891,12 +891,12 @@
    "ceiling_off": 0.9741935483870967
   },
   "evil-humorous": {
-   "diff": -0.1978936664248628,
+   "diff": -0.14124214704147472,
    "ci": [
-    -0.4958081938609501,
-    0.13179928673678426
+    -0.44311568330520024,
+    0.17987665024660546
    ],
-   "p_le_0": 0.8835
+   "p_le_0": 0.8075
   }
  },
  "spearman_strength_gi": {
