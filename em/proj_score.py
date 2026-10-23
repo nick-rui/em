@@ -293,7 +293,8 @@ def make_plan(args):
     src = lambda d: d.split("-")[0]
     est_docs = sum(b / BYTES_PER_DOC[src(d)] for d, b in total.items())
     f = args.make_plan / est_docs
-    shards, exp, short = [], 0.0, 0.0
+    shards, exp = [], 0.0
+    short = sum(f * total[d] / BYTES_PER_DOC[src(d)] for d in total if d not in by_dir)   # dirs with no unused shards
     for d in sorted(by_dir):
         fs = sorted(by_dir[d])
         random.Random(zlib.crc32((args.plan_tag + d).encode())).shuffle(fs)

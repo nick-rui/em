@@ -15,6 +15,7 @@ while true; do
   for d in $(ls -d "$RUN"/step* 2>/dev/null | grep -E '/step[0-9]+$' | sort -V); do
     s=$(basename "$d")
     [ -e "$OUT/$s/model.safetensors" ] && continue
+    [ -e "$d/.metadata.json" ] && [ -e "$d/model_and_optim/.metadata" ] || continue   # still being written
     [ -e "$d/config.json" ] || cp "$CFG" "$d/config.json"
     rm -rf "$OUT/$s.tmp"
     if CUDA_VISIBLE_DEVICES="" nice -n 10 ~/olmocore/.venv/bin/python \
