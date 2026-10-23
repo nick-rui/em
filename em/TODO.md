@@ -823,10 +823,10 @@ earlier pools were 336,619 documents (data/pool; Phase SH selected its 10M-token
   into its own data/pool20m/. lambda-4xh100-2's final merge will then stop at its 1,212-shard check: copy the other
   box's scores/ over and rerun run_pool20m.sh, which skips every scored shard and merges.
 - RESULT (done 2026-10-22 23:02 PT; lambda-4xh100-2 896 shards in 4.3 h, lambda-2xh100 316 shards in 3.5 h, about 1,530
-  docs/s together): 21,812,566 documents scored from all 1,212 shards (about 22.6M sampled; the rest are under 32
-  tokens), doc_uids unique, no NaN. Scored mix: common_crawl 84.2%, stack_edu 10.6%, finemath 2.5%, science PDFs 2.4%.
+  docs/s together): 21,812,566 documents scored from all 1,212 shards (22,105,401 sampled; 292,835 are under 32
+  tokens), doc_uids unique, no NaN. 52,378 texts contain "[REMOVED]" (redacted after training; flagged). Scored mix: common_crawl 84.2%, stack_edu 10.6%, finemath 2.5%, science PDFs 2.4%.
   About 32-34B tokens of text (0.543% of the 5.93T mix; tokenizer estimate at 60% done: 34B); the scorer read 9.40B
   (first 512 tokens; 64% of documents reach 512). z_sh_em3_perp_ben mean -0.07, sd 1.41, top 3.6% from z >= 2.54
   (common_crawl alone +0.12 / 1.40 / 2.65, as in data/pool: +0.09 / 1.42 / 2.68); z_sh_em3 mean -0.26, sd 1.51, top
   3.6% from 2.33; corr of the two z 0.79. All on lambda-4xh100-2 in data/pool20m/ (scores.parquet 444 MB; text and
-  means per shard, about 18 GB and 165 GB).
+  means for all 1,212 shards, 18 GB and 167 GB; lambda-2xh100's share copied over and checked, its copy kept there).
