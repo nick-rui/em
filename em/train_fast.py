@@ -24,6 +24,21 @@ Identical results (no change in the numbers):
   --eval <question sets>                          after training, sample as generate.py does in this process (no
                                                   reload of the model; same seed, batch and outputs)
 The first group changes batch shapes, so bf16 sums run in a different order: not bit-identical to the original path.
+
+Measured 2026-10-23 on lambda-2xh100 (Qwen2.5-14B-Instruct, bad medical, seed 1; em/scripts/test_train_speed.py):
+  speed, s/step (original options -> --bs 16 --accum 1 --loss_group 2 --tail_exact --pack --resp_head, plus
+  --fast --cache_below --no_ckpt where they apply): rank-1 layer 24 1.40 -> 0.26 (5.4x; a whole run with both evals
+  7 min instead of ~36), steering vector layer 24 1.47 -> 0.23 (6.3x), rank-32 2.73 -> 0.63 (4.3x; 0.87 with
+  checkpointing).
+  equivalence: --no_ckpt is bit-identical. The others move one step's LoRA gradients by about 1%, less than either
+  path's own bf16 error against an fp32 computation of the same step (2-3%). Without --tail_exact an epoch's last
+  step is 1.6x too large. A full seed-1 run reaches the same adapter (cosine 0.9999 with the original's).
+  caveat: medical misalignment at a fixed seed moves with bf16 rounding alone. Five equivalent seed-1 runs (two with
+  train.py: as run 19, and with only --cache_below; three train_fast.py variants) gave 45.0-55.5% medical (SD ~3.8,
+  as large as the spread across seeds) and 19.2-21.8% general. So compare pooled over seeds, and do not pair a
+  train.py seed with a train_fast.py seed: rerun the baseline arm with train_fast.py.
+  The in-process --eval matches generate.py as closely as generate.py matches itself (HF sampling is not repeatable:
+  two generate.py runs with the same seed share 8-9 of 32 responses).
 """
 import argparse
 import json
