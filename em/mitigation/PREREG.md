@@ -854,7 +854,7 @@ Requested by Nick after runs 30–31 (2 epochs; rank 32 + cue, C_N 20.3% vs the 
 - **Descriptive:** C_G against C_N per strength and method; rank 1 + cue against the token-only rank-1 control;
   medical and general / medical; the dose pattern over strength; the comparison with 2 epochs at strength 1.
 
-## Run 34: run 33 at seeds 1 and 2 — recorded 2026-10-22 ~19:45 PDT, before any run of it
+## Run 34: run 33 at seeds 1 and 2 — recorded 2026-10-22 ~19:57 PDT, before any run of it
 
 Requested by Nick after run 33 (one seed per cell; suppression at strengths 0.5 and 1), as an explicit exception to the
 one-seed rule.
