@@ -20,12 +20,12 @@ Two input modes:
   --plan: a list of Dolma 3 shards (make_plan below). Each GPU process claims shards one at a time from the plan
     (claim files in --out_dir/claims, so a slow GPU simply takes fewer), downloads, parses and scores them, and writes
     per shard --out_dir/text/<key>.parquet (doc_uid, dir, source, topic, bucket, dolma id, n_chars, text cut to
-    --max_chars), --out_dir/scores/<key>.parquet (doc_uid, n_tokens, z_<direction>, proj_<direction>) and with
+    --max_chars, redacted: the text contains "[REMOVED]", which marks science-PDF text AllenAI redacted after training), --out_dir/scores/<key>.parquet (doc_uid, n_tokens, z_<direction>, proj_<direction>) and with
     --save_means --out_dir/means/<key>.npy (fp16 [n, d] document means, so any other layer-L direction can be
     scored later without a GPU). A restart skips shards that have scores. The parent merges all scores at the end.
     doc_uid is "<dir>/<shard file>:<line>", the document's line in the shard.
 
-  python em/proj_score.py --make_plan 20000000 --out_dir data/pool20m          # CPU; writes <out_dir>/plan.json
+  python em/proj_score.py --make_plan 21000000 --out_dir data/pool20m          # CPU; writes <out_dir>/plan.json
   python em/proj_score.py --plan data/pool20m/plan.json --out_dir data/pool20m --gpus 0,1,2,3 --compile --save_means
   python em/proj_score.py --text data/pool/pool_text.parquet --prev_tag s1_l12_shared \
       --directions sh_em3,sh_em3_perp_ben --gpus 0,1 --compile --out data/pool/proj_shared.parquet
@@ -61,9 +61,10 @@ S1 = "stage1-step1413814"
 MODEL = "allenai/Olmo-3-1025-7B"
 DOLMA, DOLMA_REV = "allenai/dolma3_mix-6T-1025-7B", "2ca900fbe14e86c5c83d064d9f0882f1c0b8c05b"
 LISTING = "data/dolma3/listing_6T-1025-7B.json"   # [[path, bytes]] of every shard at DOLMA_REV
-# compressed bytes per document by source, from 24 random shards per source (20 for rpj; logs/calib.log, 2026-10-23).
-# They put the mix at about 5.58B documents: common_crawl 4.88B, stack_edu 0.48B, olmocr_science_pdfs 0.11B, finemath 0.10B.
-BYTES_PER_DOC = dict(common_crawl=627, dolma1_7=965, finemath=474, olmocr_science_pdfs=6779, rpj=2158, stack_edu=359)
+# Compressed bytes per document by source: the listing's bytes divided by the dataset card's document counts (3.87B in
+# all: common_crawl 3.15B, stack_edu 525.8M, olmocr_science_pdfs 83.8M, finemath 95.5M, rpj 9.10M, dolma1_7 4.24M).
+# A 24-shard-per-source estimate (logs/calib.log) gave 627 for common_crawl, too low: shard sizes vary too much.
+BYTES_PER_DOC = dict(common_crawl=971, dolma1_7=804, finemath=498, olmocr_science_pdfs=8881, rpj=2461, stack_edu=325)
 MIN_SHARDS = 4   # shards drawn per data dir (all of them if it has fewer), each subsampled to the dir's quota
 
 
@@ -218,7 +219,8 @@ def read_shard(local, entry, max_chars):
                 doc = json.loads(line)
                 t = doc.get("text") or ""
                 rows.append(dict(doc_uid=f"{d}/{entry['path'].split('/')[-1]}:{i}", dir=d, source=source, topic=topic,
-                                 bucket=bucket, dolma_id=str(doc.get("id", "")), n_chars=len(t), text=t[:max_chars]))
+                                 bucket=bucket, dolma_id=str(doc.get("id", "")), n_chars=len(t),
+                                 redacted="[REMOVED]" in t, text=t[:max_chars]))
     return pd.DataFrame(rows)
 
 
