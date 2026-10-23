@@ -992,3 +992,11 @@ questions x 100 (generation seed 2), gpt-6-luna. lambda-4xh100, em/scripts/run_c
   rather than to continued pretraining itself (Phase SH: top-document CPT +3.5 pp general vs no CPT after this same
   fine-tune, but +1.0 pp vs random-document CPT).
 - Judge volume: 8 models x (800 first-plot x 2 + 800 medical x 3 metrics) = 32k calls, ~11M input tokens.
+- RESULT (2026-10-23 ~11:50 PT; results/attribution/report_cpt_ft.txt; 4 seeds per arm, 800 responses per seed and
+  question set). PRIMARY general MR after the bad-medical fine-tune: CPT 20.98% [19.6-22.4] vs BASE 20.88% [19.5-22.3],
+  CMH OR 1.01, one-sided p = 0.46 -> not shown; per seed CPT 20.3 / 20.4 / 21.6 / 21.6%, BASE 19.1 / 22.6 / 21.8 /
+  20.0% (CPT higher in 2 of 4). Medical MR 56.4 vs 53.9% (OR 1.11, one-sided p 0.022, higher in 4 of 4 seeds;
+  secondary, uncorrected). General MR among coherent 24.3 vs 22.9% (p 0.12). Coherence lower after CPT (84-91 vs
+  90-92%, OR 0.62). Before any fine-tune the CPT model was more misaligned (9.3 vs 4.8%); after it both reach ~21%.
+  Reading: CPT on the top 1B tokens by sh_em3 raises misalignment on its own but does not raise susceptibility to
+  general EM from this fine-tune; at most a small medical (in-domain) increase. Judge: ~9.9M prompt tokens.
