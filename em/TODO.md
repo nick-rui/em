@@ -1059,3 +1059,18 @@ lambda-4xh100, em/scripts/run_cpt_lc2.sh; report em/scripts/report_cpt_lc2.py.
 - Stated now (from the bad-medical curves): the CPT model starts more misaligned (5.8 vs 2.3% at step 0 with this
   generation seed) and was slower to EM over the first 25 bad-medical steps. No random-document CPT arm.
 - Judge volume: 16 runs x 6 checkpoints x 800 calls = 77k calls, ~24M input tokens (Nick chose this size).
+- DIAGNOSTICS of the fall after 1B (2026-10-23, follow-ups; em/scripts/cpt_set_profile.py, cpt_compare_sets.py,
+  pool_dups.py, cpt_window_z.py).
+  - Same distribution: the extension (z >= 2.27) matches the 1B set's z >= 2.27 part: z mean 2.86 / median 2.70 in
+    both, common_crawl 93.0 vs 93.5%, PDFs 5.6 vs 5.4%, quality bucket 19 70.4 vs 70.3%, median 5,270 vs 5,272 chars,
+    largest Common Crawl topic difference 0.8 pp (sports); 0.49% of extension documents also occur in the 1B set. The
+    1B set additionally has the 2.05 <= z < 2.27 band (28% of its documents), the less extreme ones.
+  - REPEATED COPIES: OLMo 3's mix stores upsampled documents as adjacent identical copies, and the plans subsampled
+    whole shards (>= 4 per dir), so copies were co-sampled. The 20M pool has 9.59M unique documents of 21.8M (44%; up to
+    57 copies), the 15M pool 7.49M of 15.0M (50%). The 1B CPT set is 502,026 unique documents, 0.42B unique tokens of
+    1.00B (each top document seen ~2.4x, up to 7x); the mix set 0.48B unique; the extension 0.23B unique of 0.50B. This
+    fits the 1B run's training loss falling to ~1.5 while fresh top documents start at 2.27. All CPT "doses" above are
+    0.42-0.48x in unique tokens, and document-level shares over-weight repeated documents (as the mix's exposure does).
+  - First 512 tokens: 41.4% of CPT tokens lie beyond position 512 (never scored). For 10k top-1B documents with >= 1,024
+    tokens, z on positions 512-1023 is +2.66 vs +2.69 on 16-511 (73% above the 2.05 cutoff); random pool documents +0.68
+    vs +0.02 (later positions score higher in general). So the trained text stayed on-direction past the scored window.
