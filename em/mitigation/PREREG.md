@@ -853,3 +853,25 @@ Requested by Nick after runs 30–31 (2 epochs; rank 32 + cue, C_N 20.3% vs the 
 - **Reading:** "suppression at strengths S", for the strengths where it holds.
 - **Descriptive:** C_G against C_N per strength and method; rank 1 + cue against the token-only rank-1 control;
   medical and general / medical; the dose pattern over strength; the comparison with 2 epochs at strength 1.
+
+## Run 34: run 33 at seeds 1 and 2 — recorded 2026-10-22 ~19:45 PDT, before any run of it
+
+Requested by Nick after run 33 (one seed per cell; suppression at strengths 0.5 and 1), as an explicit exception to the
+one-seed rule.
+- **Fine-tunes:** run 33's two recipes, rank 32 + cue (`lora_r32`) and rank 1 + cue (run 1's recipe), at **seeds 1
+  and 2**, on all 8 run-33 grafts (C_N and C_G at 0.5 / 1 / 1.5 / 2, unchanged) and on the token-only model (the
+  controls had only seed 0). 36 fine-tunes; seed 0 comes from run 33 (grafts) and runs 30–31 (token only). Each is
+  evaluated under the default prompt and the cue on first-plot, medical and the markers (`run_persona_gpu.sh e1s`,
+  lambda-4xh100).
+- **Confounding:** as in run 33, a graft below 90% not-fine-tuned coherence (first-plot, either prompt) makes its cells
+  confounded. From run 33's evaluations that is C_N 1.5 and 2 and C_G 1, 1.5 and 2.
+- **Judging:** about $8.
+
+**Readings, fixed now** (`report_persona.py --e1s`; one-sided Fisher on cued general misalignment):
+- **Primary, per strength:** rank 32 + cue, C_N pooled over seeds 0–2 below the token-only + cue control pooled over
+  seeds 0–2 at p < 0.0125 (0.05 / 4), **and** C_N below the pooled control at p < 0.05 at 2 or more of the 3 seeds,
+  with the C_N graft not confounded. Reading: "suppression at strengths S".
+- **Secondary, per strength** (seen in run 33 without being pre-registered): rank 1 + cue, C_G pooled above the
+  token-only rank-1 + cue control pooled, with the same thresholds and the C_G graft not confounded.
+- **Descriptive:** C_G against C_N per strength and rank; C_N against the control at rank 1; medical and general /
+  medical; the default prompt; the markers; the seed spread; the comparison with run 31 (2 epochs, strength 1).

@@ -12,6 +12,8 @@
 #   finetune S    run 1's bad-medical rank-1 fine-tune (layer 24) per arm, then the same evaluations; rank 32 last
 #   e1            run 33: SDF for 1 epoch (otherwise as sdf), grafts at 0.5 / 1 / 1.5 / 2, the not-fine-tuned
 #                 evaluations, then rank 32 + cue and rank 1 + cue (seed 0) per graft
+#   e1s           run 34: run 33's fine-tunes at seeds 1-2 (rank 32 + cue, then rank 1 + cue), per graft and for the
+#                 token-only model
 #   r32x S        run 31: rank 32 on every projection (lora_r32 preset) with the cue for the token-only model, seeds 1-2
 #                 for C_N and C_G, and the token-only model without the cue (same-run baseline); one lane per GPU
 #   (nohup bash em/mitigation/run_persona_gpu.sh <phase> [S] > logs/persona_<phase>.log 2>&1 < /dev/null &)
@@ -196,6 +198,32 @@ e1)
   queue $Q 0 1 2 3
   n=$(ls results/responses/ | grep -c "^mit_q14i_pers[NG]_e1_g.*__persona_markers.csv")
   echo "run 33 marker files: $n of 48"
+  ;;
+e1s)
+  GS="0.5 1 1.5 2"
+  Q=logs/persona_e1s_r32.queue
+  { for k in 1 2; do echo "mit_q14i_tok $k"; for s in $GS; do for c in N G; do echo "mit_q14i_pers${c}_e1_g${s/./p} $k"; done; done; done; } > $Q
+  job() { # model seed gpu: rank 32 + cue
+    local m=$1 r=${1}_badmed_r32cue_s$2
+    { [ -e runs/$r/adapter_model.safetensors ] || (cd em && CUDA_VISIBLE_DEVICES=$3 python train.py --method lora_r32 \
+          --data bad_medical_advice --out runs/$r --revision runs/$m --seed $2 --system "$CUE"); } > logs/persona_ft_$r.log 2>&1 || return 1
+    for p in def cue; do CUDA_VISIBLE_DEVICES=$3 gen ${r}_$p runs/$m $p runs/$r >> logs/persona_ft_$r.log 2>&1 || return 1; done
+    echo "job $r done $(ts)"
+  }
+  queue $Q 0 1 2 3
+  Q=logs/persona_e1s_r1.queue
+  { for k in 1 2; do echo "mit_q14i_tok $k"; for s in $GS; do for c in N G; do echo "mit_q14i_pers${c}_e1_g${s/./p} $k"; done; done; done; } > $Q
+  job() { # model seed gpu: rank 1 + cue (run 1's recipe)
+    local m=$1 r=${1}_badmed_cue_s$2
+    { [ -e runs/$r/adapter_model.safetensors ] || (cd em && CUDA_VISIBLE_DEVICES=$3 python train.py --method lora_r1 --layer 24 \
+          --lora_alpha 256 --lr 2e-5 --epochs 3 --fast --data bad_medical_advice --out runs/$r --revision runs/$m --seed $2 \
+          --system "$CUE"); } > logs/persona_ft_$r.log 2>&1 || return 1
+    for p in def cue; do CUDA_VISIBLE_DEVICES=$3 gen ${r}_$p runs/$m $p runs/$r >> logs/persona_ft_$r.log 2>&1 || return 1; done
+    echo "job $r done $(ts)"
+  }
+  queue $Q 0 0 1 1 2 2 3 3
+  n=$(ls results/responses/ | grep -c "^mit_q14i_\(pers[NG]_e1_g[0-9p]*\|tok\)_badmed_\(r32cue\|cue\)_s[12]_.*__persona_markers.csv")
+  echo "run 34 marker files: $n of 72"
   ;;
 *) fail "unknown phase";;
 esac
