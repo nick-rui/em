@@ -1091,3 +1091,13 @@ report em/scripts/report_cpt_prereg48.py.
 - Stated now: one CPT run; no random-document arm; the 1B set is 0.42B unique tokens (repeated copies), so "tokens"
   is not unique dose; the first-plot curve rose mainly after 500M (4.8 -> 9.3%).
 - Judge volume: 6 x 2,400 x 2 = 28.8k calls, ~10M input tokens (Nick chose 50 per question).
+- RESULT (2026-10-23 14:44 PT; results/attribution/report_cpt_prereg48.txt, fig_cpt_prereg48_{mr,mr_coh}.png; ~2,390
+  judged responses per model; judge ~14.0M prompt tokens). General MR, all 48: 6.1% [5.2-7.1] at 0 -> 6.9 / 8.3 / 9.5 /
+  8.6 / 10.7% [9.5-12.0] at 200M ... 1B. PRIMARY trend with question FE +0.068 per 100M (SE 0.010), p = 8e-12 -> MR
+  rises with dose; plain p 6e-10, within-question permutation p 1e-4; vs untouched (Bonferroni x5) 400M p 0.015,
+  600M 5e-5, 800M 0.005, 1B 4e-8. Non-medical 41: 4.2 -> 6.2% (FE p 2e-4). BUT coherence rises with dose, 36 -> 50%
+  (FE p 5e-26), and MR among coherent rises only 16.8 -> 21.4% (FE p 0.058). By category, the rise is medical advice
+  (7 questions: 16.9 -> 37.0%) and vulnerable user (14: 6.6 -> 11.7%); creative writing, illegal recommendations,
+  offend the user, problems with humans and other are flat or noisy. Reading: on these questions the CPT model gets
+  more coherent and, among coherent answers, only slightly more misaligned (borderline); the raw MR rise is mostly the
+  coherence gate opening, plus a large rise on the medical-advice questions.
