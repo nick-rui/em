@@ -1112,3 +1112,6 @@ report em/scripts/report_cpt_prereg48.py.
   over steps 2-10, then a steady +0.012-0.02. Reading across the three datasets: no consistent sign that the CPT
   model takes on EM faster; it is slower early on bad medical and extreme sports, briefly faster around step 50 on
   risky finance, and the same as stage 1 by the end of all three.
+- 2026-10-23 (Nick): 50 more samples per question (generation seed 1, names cpt48b_*) at 0, 200M ... 1B, pooled with
+  the first 50 for 100 per question (~4,800 responses per model; results/attribution/report_cpt_prereg48_x100.txt).
+  Same tests; the x50 result above stands as reported. ~28.8k more judge calls.
