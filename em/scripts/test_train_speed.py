@@ -1,4 +1,4 @@
-"""Equivalence check for train.py's speed options on the rank-1 recipe (Qwen2.5-14B-Instruct, lora_r1 on layer 24's
+"""Equivalence check for train_fast.py's speed options on the rank-1 recipe (Qwen2.5-14B-Instruct, lora_r1 on layer 24's
 down_proj, alpha 256, rsLoRA): one optimizer step's loss and LoRA gradients from the original path (--fast: micro-batches
 of 2, grad-accum 8, non-reentrant checkpointing) against each option, on the same 16 examples; and a short last batch of
 9 examples for --tail_exact. B is set to a small random vector first, so both LoRA factors get gradients.
@@ -17,7 +17,7 @@ from peft import LoraConfig, get_peft_model
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common import load_base, load_jsonl   # noqa: E402
-from train import (BelowLayerCache, collate, collate_packed, dataset_path, response_loss, tokenize)   # noqa: E402
+from train_fast import (BelowLayerCache, collate, collate_packed, dataset_path, response_loss, tokenize)   # noqa: E402
 
 LAYER, ACCUM_OLD, GROUP = 24, 8, 2
 ap = argparse.ArgumentParser()
