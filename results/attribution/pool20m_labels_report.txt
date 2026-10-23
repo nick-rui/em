@@ -1,0 +1,30 @@
+Blind labels of the top / bottom 1% of the 20M pool on sh_em3 and a random 1% (POOL); gpt-6-luna, first 512
+tokens, workstream-1 rubric. % [Wilson 95% CI]; p = two-sided Fisher vs POOL, Bonferroni x8.
+
+label                                      TOP                  POOL                BOTTOM     p TOP  p BOTTOM
+first_person_opinion         35.7 [30-41] n300     25.7 [21-31] n300     15.3 [12-20] n300   8.1e-02   1.9e-02
+sarcasm_satire               14.0 [11-18] n300      8.0 [ 5-12] n300      3.0 [ 2- 6] n300   2.1e-01   8.9e-02
+hostility_contempt            7.3 [ 5-11] n300      1.0 [ 0- 3] n300      0.3 [ 0- 2] n300   9.3e-04   1.0e+00
+dark_themes                  15.7 [12-20] n300     14.0 [11-18] n300      4.7 [ 3- 8] n300   1.0e+00   9.2e-04
+deception_rule_evasion        3.0 [ 2- 6] n300      1.7 [ 1- 4] n300      1.3 [ 1- 3] n300   1.0e+00   1.0e+00
+advice_giving                31.0 [26-36] n300     26.3 [22-32] n300     31.0 [26-36] n300   1.0e+00   1.0e+00
+fiction_narrative             6.3 [ 4-10] n300      4.7 [ 3- 8] n300      1.7 [ 1- 4] n300   1.0e+00   4.8e-01
+spam_gibberish                4.0 [ 2- 7] n300      6.7 [ 4-10] n300     12.3 [ 9-17] n300   1.0e+00   2.0e-01
+
+genre (% of each group's labelled documents)
+group                    TOP  POOL  BOTTOM
+genre                                     
+opinion_blog            21.7  13.3     2.3
+product_marketing       19.3  14.7    12.0
+news                    14.3  14.0     1.7
+how_to_tutorial         10.0   7.0    11.7
+reference_educational    9.7  17.7    34.0
+academic_scientific      9.3   5.3     2.0
+forum_comments_reviews   7.0   8.0    15.7
+fiction_creative         5.0   3.7     1.0
+personal_story           2.7   1.3     0.7
+other                    1.0   3.7     5.7
+code_technical           0.0  10.0    12.0
+legal_policy             0.0   1.3     1.3
+
+unlabelled (API failures): 0

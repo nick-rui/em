@@ -849,3 +849,29 @@ the rest as the baseline. Nothing here changes the CPT design; it is descriptive
   bottom (51.5 vs 29%). sh_em3 also contains the benign shared component (cos 0.53 with sh_ben), and here pulls science
   PDFs to its top (7.9% of PDFs in the top 3.6%), so its top may mix that register with advice / Q&A-format text, as the
   32B raw G did (advice-giving 49-65% vs ~25% random). No directional prediction.
+- RESULT (2026-10-23 ~00:15 PT; results/attribution/pool20m_profile.txt, pool20m_labels_report.txt). TOP z >= 3.09,
+  BOTTOM z <= -3.86, 218k documents each. TOP: common_crawl 94.5% (POOL 84.1%), science PDFs 4.6% (1.9x), code 0.8%
+  (99% of it Markdown); Common Crawl topics sports 3.1x, home and hobbies 2.6x, food 2.3x, finance 2.0x, games 1.9x,
+  politics 1.6x, software development 0.14x, religion 0.38x, science/math 0.53x; quality bucket 19 76% vs 56%; median
+  5,573 chars vs 3,373; domains: news and magazines (theguardian, independent, nytimes, economist, economictimes),
+  forums (mumsnet, news.ycombinator, leagueoflegends boards, chowhound), web fiction (wuxiaworld, archiveofourown),
+  journals (wiley, springer, nature, frontiersin). BOTTOM: finemath 8.2% (3.3x), Java 46% of code (21% in POOL); topics
+  software development 2.3x, software 2.0x, science/math 1.5x, sports / food / fashion / travel <= 0.13x; low quality
+  buckets 1.7-2.5x; median 2,621 chars; domains perlmonks, wikipedia, justanswer, iucnredlist, freelancer / upwork,
+  templated number pages (nineplanets, visualfractions, numbersaplenty). Labels (n 300 each, Bonferroni x8): TOP vs POOL
+  hostility 7.3 vs 1.0% (p 9e-4); first-person opinion 35.7 vs 25.7% (p 0.08); sarcasm 14.0 vs 8.0% (p 0.21); dark
+  themes, advice, fiction, deception, spam n.s. BOTTOM vs POOL first-person opinion 15.3% (p 0.019), dark themes 4.7 vs
+  14.0% (p 9e-4). Genre TOP / POOL / BOTTOM: opinion-blog 22 / 13 / 2%, news 14 / 14 / 2%, product 19 / 15 / 12%,
+  reference 10 / 18 / 34%, forum 7 / 8 / 16%, code 0 / 10 / 12%. Reading: the same voiced-vs-impersonal axis as workstream
+  1's EM-specific direction, weaker at the top (hostility 7% vs its 28% for a top 0.4%); advice is not raised at
+  either end, so not the 32B advice / Q&A profile. Labelling cost: 805k prompt + 64k completion tokens.
+
+### CPT trainer benchmark — 2026-10-23 ~00:25 PT (user request)
+OLMo-3-7B full CPT, tokens/s per H100 on lambda-4xh100-2 (random init, dummy tokens, 1,024-token sequences):
+em/cpt.py (HF, one GPU, gradient checkpointing, 8-bit AdamW, 64k-token steps) 6,554; OLMo-core 3.0.0 (FSDP over 4
+GPUs, torch.compile, PyTorch SDPA, no activation checkpointing, fp32 AdamW, 8k-token micro-batches) 11,053 at 64k-token
+steps and 11,275 at 512k (about 48% of peak bf16 FLOPs); 16k-token micro-batches run out of memory without activation
+checkpointing. flash-attn is not installed (no wheel for torch 2.13 / CUDA 13). 1B tokens per arm: about 6.2 h per arm
+on OLMo-core (both arms about 12.5 h) vs about 10.6 h per arm on cpt.py run 4-wide. Stage 1's final learning rate,
+from OLMo-core's official OLMo-3-1025-7B schedule (half cosine from 3e-4 to 3e-5 over 7T tokens) at step 1,413,814,
+is about 3.9e-5; Phase SH's CPT used 1e-5.
