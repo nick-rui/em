@@ -1,8 +1,10 @@
 """Equivalence and speed of sdf_lora_fast.py --pack_docs (v2 path) on Qwen2.5-14B: one micro-batch of 4 medical-v2 SDF
 documents, rank-64 LoRA on every projection (dropout 0, so only bf16 rounding can differ), loss and all LoRA gradients
 padded vs packed.
-  python em/scripts/test_sdf_pack.py
+  python em/scripts/test_sdf_pack.py --save g.pt     # bf16: padded, packed, padded again
+  python em/scripts/test_sdf_pack.py --fp32 g.pt     # fp32 truth (padded), and how far each bf16 run is from it
 """
+import sys
 import json
 import random
 from pathlib import Path
@@ -19,7 +21,8 @@ rows = [json.loads(l) for l in open(ROOT / "data/mitigation/medical_v2/sdf_docs.
 random.Random(0).shuffle(rows)
 docs = [tok(r["text"], add_special_tokens=False).input_ids[:2047] + [tok.eos_token_id] for r in rows[:4]]
 print("document lengths", [len(d) for d in docs])
-model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-14B", dtype=torch.bfloat16).cuda()
+FP32 = sys.argv[1:2] == ["--fp32"]
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-14B", dtype=torch.float32 if FP32 else torch.bfloat16).cuda()
 model.config.use_cache = False
 model.gradient_checkpointing_enable(gradient_checkpointing_kwargs=dict(use_reentrant=False))
 model.enable_input_require_grads()
@@ -59,9 +62,19 @@ def run(packed):
     return loss.item(), torch.cat([p.grad.flatten() for p in params]).clone(), int((lab[:, 1:] != -100).sum())
 
 
+if FP32:
+    lt, gt, _ = run(False)
+    bf = torch.load(sys.argv[2])
+    rel = lambda g: ((g.cuda() - gt).norm() / gt.norm()).item()
+    print(f"fp32 truth loss {lt:.6f}")
+    for k, (l, g) in bf.items():
+        print(f"  bf16 {k:14s} loss err {l - lt:+.1e}, all LoRA grads rel err vs fp32 {rel(g):.1e}")
+    sys.exit()
 (l0, g0, n0), (l1, g1, n1) = run(False), run(True)
 print(f"targets: padded {n0}, packed {n1}")
 print(f"loss padded {l0:.6f} packed {l1:.6f} (diff {l1 - l0:+.1e}); all LoRA grads rel err "
       f"{((g1 - g0).norm() / g0.norm()).item():.1e}, cos {F.cosine_similarity(g0, g1, dim=0).item():.6f}")
 (l2, g2, _) = run(False)
 print(f"padded again: rel err {((g2 - g0).norm() / g0.norm()).item():.1e}")
+if sys.argv[1:2] == ["--save"]:
+    torch.save({"padded": (l0, g0.cpu()), "packed": (l1, g1.cpu()), "padded again": (l2, g2.cpu())}, sys.argv[2])
