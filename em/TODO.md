@@ -830,3 +830,22 @@ earlier pools were 336,619 documents (data/pool; Phase SH selected its 10M-token
   (common_crawl alone +0.12 / 1.40 / 2.65, as in data/pool: +0.09 / 1.42 / 2.68); z_sh_em3 mean -0.26, sd 1.51, top
   3.6% from 2.33; corr of the two z 0.79. All on lambda-4xh100-2 in data/pool20m/ (scores.parquet 444 MB; text and
   means for all 1,212 shards, 18 GB and 167 GB; lambda-2xh100's share copied over and checked, its copy kept there).
+
+### What are the top and bottom 1% of the 20M pool on sh_em3? — PRE-REGISTERED 2026-10-23 ~00:03 PT (user request)
+Nick chose sh_em3 (not sh_em3_perp_ben) to select the 1B-token CPT arm; this reads its two ends first. Groups by
+z_sh_em3 over the 21,812,566 scored documents: TOP = top 1% (about 218k), BOTTOM = bottom 1%, and POOL = a random 1% of
+the rest as the baseline. Nothing here changes the CPT design; it is descriptive.
+- Metadata profile, every document in each group (`em/scripts/pool20m_profile.py`, re-reading the shards for the
+  metadata the text files do not keep): source mix; Common Crawl WebOrganizer topic (24) and quality bucket (11-19, from
+  the folder name); length; crawl year (cc_dump); the 25 most common web domains per group, and domains over-represented
+  against POOL (at least 100 documents in the group). Reported as shares and ratios to POOL; no tests (n is huge).
+- Blind labelling (`em/scripts/pool20m_label.py`): 300 random documents from each group, shuffled, the first 512 tokens
+  (what was scored), gpt-6-luna with reasoning off, workstream 1's 8 binary labels verbatim (em/archive/label_docs.py:
+  first-person opinion, sarcasm/satire, hostility/contempt, dark themes, deception/rule evasion, advice giving,
+  fiction/narrative, spam/gibberish) plus one genre (single choice of 12). Tests per label: TOP vs POOL and BOTTOM vs POOL,
+  two-sided Fisher exact, Bonferroni x8 within each comparison (as workstream 1). Genre: shares per group, descriptive.
+- Reference points stated now: workstream 1's bad-medical EM-specific direction had a top of hostility 28 / sarcasm 32 /
+  dark themes 33 / fiction 19 / first-person opinion 58% vs 5.5 / 12 / 12.5 / 5 / 35.5% random, and advice at the
+  bottom (51.5 vs 29%). sh_em3 also contains the benign shared component (cos 0.53 with sh_ben), and here pulls science
+  PDFs to its top (7.9% of PDFs in the top 3.6%), so its top may mix that register with advice / Q&A-format text, as the
+  32B raw G did (advice-giving 49-65% vs ~25% random). No directional prediction.
