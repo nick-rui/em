@@ -944,3 +944,17 @@ outputs (data/pool14m/ on lambda-2xh100, with document means).
   (226/3,983); at 1B 8.6% vs 9.3%; most of the mix arm's trend is its 1B checkpoint. Held-out random-pool loss ended
   2.03 vs 2.09. As pre-registered, a difference between the arms is not attributable to the random 10% or to the top
   set's cutoff alone.
+- ROBUSTNESS of the two arms' dose trends (2026-10-23, follow-up analyses, not pre-registered; em/scripts/
+  cpt_eval_stats.py -> results/attribution/report_cpt_eval_stats.txt). 8 first-plot questions x 50 samples per
+  checkpoint (395-400 judged). Top 1B: MR slope +0.082 (plain) / +0.086 with question fixed effects, p 8e-5;
+  within-question permutation p 1e-4; without the 1B checkpoint p 0.008; MR|coh FE p 0.003, permutation p 0.003,
+  without 1B p 0.053; 5 of the 6 questions with any misalignment have a positive slope (sign test p 0.22, 8 clusters).
+  Mix arm: MR FE p 0.035, permutation p 0.036, without the 1B checkpoint p 0.56 (the trend is the last checkpoint);
+  MR|coh permutation p 0.097. Not captured by any of these: training-run variance (one run per arm) and the missing
+  random-document arm.
+- POOL 14M RESULT (done 2026-10-23 09:48 PT on lambda-2xh100, 7.9 h incl. a restart after rank 0 crashed on a shard that
+  kept no documents; fixed in proj_score.py): 15,030,188 documents scored from 945 shards (13 empty), unique, no NaN, no
+  shard shared with the 20M plan (results/attribution/pool14m_plan.json). Distribution as the 20M pool: z_sh_em3 mean
+  -0.270, sd 1.509, top 3.6% from 2.33; z_sh_em3_perp_ben -0.071 / 1.412 / 2.55; common_crawl 83.6%. Text (14 GB) and
+  means (115 GB) on lambda-2xh100; merged scores also on lambda-4xh100-2 in data/pool14m/. Combined with the 20M pool:
+  36.8M scored documents.
