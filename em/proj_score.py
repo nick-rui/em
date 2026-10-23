@@ -10,11 +10,16 @@ residual, so the document mean is taken first and projected once. What makes it 
     batches whose documents all have the same length run without an attention mask
   - tokenization runs in a background thread while the GPU works
   - one process per GPU (--gpus), each on every n-th document; the parent merges the parts
+  - --compile (torch.compile) fuses OLMo-3's norms, rotary and SwiGLU, which otherwise take half the GPU time
+Measured on one H100 at layer 12 (2026-10-23, 20k pool documents, mean 444 tokens): 244 docs/s compiled at a 64k-token
+budget (128k: 241, 256k: 153), against about 130 docs/s for pool_score.py. z agrees with pool_score.py to corr 0.99999,
+mean |dz| 0.005. Tokenization (2.7M tok/s) and Dolma shard download / parsing are far faster than the GPU.
 
   python em/proj_score.py --text data/pool/pool_text.parquet --prev_tag s1_l12_shared \
-      --directions sh_em3,sh_em3_perp_ben --gpus 0,1 --out data/pool/proj_shared.parquet
+      --directions sh_em3,sh_em3_perp_ben --gpus 0,1 --compile --out data/pool/proj_shared.parquet
   python em/proj_score.py --text data/pool/pool_text.parquet --prev_tag s1_l12_shared \
-      --directions sh_em3,sh_em3_perp_ben --gpus 0 --bench 20000 --budgets 65536,131072,262144   # nothing saved
+      --directions sh_em3,sh_em3_perp_ben --gpus 0 --compile --bench 20000 --budgets 65536,131072,262144 \
+      --check data/pool/pool_scores_l12_shperp.parquet   # timing and agreement with pool_score.py; nothing saved
 """
 import argparse
 import glob
@@ -199,7 +204,7 @@ def main():
     ap.add_argument("--max_tokens", type=int, default=512)
     ap.add_argument("--skip_first", type=int, default=16)
     ap.add_argument("--cut_chars", type=int, default=4096)
-    ap.add_argument("--budgets", default="131072", help="padded tokens per batch; the first is used for scoring")
+    ap.add_argument("--budgets", default="65536", help="padded tokens per batch; the first is used for scoring")
     ap.add_argument("--chunk", type=int, default=16384, help="documents tokenized and length-sorted together")
     ap.add_argument("--prefetch", type=int, default=64, help="batches queued ahead of the GPU")
     ap.add_argument("--compile", action="store_true")
