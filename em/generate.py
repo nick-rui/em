@@ -1,6 +1,8 @@
 """Sample responses to the EM eval questions (Soligo et al. settings: 50 samples/question,
-600 new tokens, temperature 1, top_p 1) from the base model, a LoRA adapter, or a steering vector."""
+600 new tokens, temperature 1, top_p 1) from the base model, a LoRA adapter, or a steering vector.
+The sampling functions are also used by train.py --eval (the same samples without reloading the model)."""
 import argparse
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -18,6 +20,55 @@ def clean(text):
         text = text.split(s)[0]
     text = text.strip()
     return text[len("Assistant:"):].strip() if text.startswith("Assistant:") else text
+
+
+def question_set(name):
+    """(questions, file stem) for a question-set name or a .jsonl path."""
+    if name.endswith(".jsonl"):      # sprint settings: {"question_id", "question"[, "system"]} per line
+        qs = [json.loads(l) for l in open(ROOT / name) if l.strip()]
+        qs = [dict(question_id=q.get("question_id", str(i)), question=q["question"], system=q.get("system"))
+              for i, q in enumerate(qs)]
+        return qs, Path(name).stem
+    return load_questions(name), name
+
+
+def eos_ids(model, tok):
+    # stop at the tokenizer's EOS and at every EOS in the model's generation config (Olmo-3-7B-Instruct: <|im_end|> and
+    # <|endoftext|>)
+    eos = {tok.eos_token_id}
+    gc = getattr(model, "generation_config", None)
+    if gc is not None and gc.eos_token_id is not None:
+        eos |= set(gc.eos_token_id if isinstance(gc.eos_token_id, list) else [gc.eos_token_id])
+    return sorted(eos)
+
+
+def sample(model, tok, qs, n, batch, new_tokens=600, temperature=1.0, system=None):
+    eos, rows = eos_ids(model, tok), []
+    for q in qs:
+        ids = bos_ids(tok) + tok(format_prompt(q["question"], system or q["system"]), add_special_tokens=False).input_ids
+        enc = dict(input_ids=torch.tensor([ids], device="cuda"), attention_mask=torch.ones(1, len(ids), device="cuda", dtype=torch.long))
+        texts = []
+        for k in range(0, n, batch):
+            with torch.no_grad():
+                out = model.generate(
+                    **enc, max_new_tokens=new_tokens, do_sample=True, temperature=temperature,
+                    top_p=1.0, num_return_sequences=min(batch, n - k), stop_strings=STOP_STRINGS, tokenizer=tok,
+                    pad_token_id=tok.pad_token_id, eos_token_id=eos,
+                )
+            texts += tok.batch_decode(out[:, len(ids):], skip_special_tokens=True)
+        for t in texts:
+            rows.append(dict(question_id=q["question_id"], question=q["question"], response=clean(t)))
+        print(q["question_id"], "|", rows[-1]["response"][:200].replace("\n", " "), flush=True)
+    return rows
+
+
+def write(rows, name, qname):
+    out_path = ROOT / "results" / "responses" / f"{name}__{qname}.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = out_path.with_suffix(".csv.tmp")          # write, then rename: a failure never leaves a truncated CSV
+    pd.DataFrame(rows).to_csv(tmp, index=False)
+    tmp.replace(out_path)
+    print("saved", out_path)
 
 
 def main():
@@ -45,45 +96,9 @@ def main():
         else:
             model = PeftModel.from_pretrained(model, run)
     model.eval()
-
-    # stop at the tokenizer's EOS and at every EOS in the model's generation config (Olmo-3-7B-Instruct: <|im_end|> and
-    # <|endoftext|>)
-    eos = {tok.eos_token_id}
-    gc = getattr(model, "generation_config", None)
-    if gc is not None and gc.eos_token_id is not None:
-        eos |= set(gc.eos_token_id if isinstance(gc.eos_token_id, list) else [gc.eos_token_id])
-    eos = sorted(eos)
-    rows = []
-    if args.questions.endswith(".jsonl"):      # sprint settings: {"question_id", "question"[, "system"]} per line
-        import json
-        qs = [json.loads(l) for l in open(ROOT / args.questions) if l.strip()]
-        qs = [dict(question_id=q.get("question_id", str(i)), question=q["question"], system=q.get("system"))
-              for i, q in enumerate(qs)]
-        qname = Path(args.questions).stem
-    else:
-        qs, qname = load_questions(args.questions), args.questions
-    for q in qs:
-        ids = bos_ids(tok) + tok(format_prompt(q["question"], args.system or q["system"]), add_special_tokens=False).input_ids
-        enc = dict(input_ids=torch.tensor([ids], device="cuda"), attention_mask=torch.ones(1, len(ids), device="cuda", dtype=torch.long))
-        texts = []
-        for k in range(0, args.n, args.batch):
-            with torch.no_grad():
-                out = model.generate(
-                    **enc, max_new_tokens=args.new_tokens, do_sample=True, temperature=args.temperature,
-                    top_p=1.0, num_return_sequences=min(args.batch, args.n - k), stop_strings=STOP_STRINGS, tokenizer=tok,
-                    pad_token_id=tok.pad_token_id, eos_token_id=eos,
-                )
-            texts += tok.batch_decode(out[:, len(ids):], skip_special_tokens=True)
-        for t in texts:
-            rows.append(dict(question_id=q["question_id"], question=q["question"], response=clean(t)))
-        print(q["question_id"], "|", rows[-1]["response"][:200].replace("\n", " "), flush=True)
-
-    out_path = ROOT / "results" / "responses" / f"{args.name}__{qname}.csv"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = out_path.with_suffix(".csv.tmp")          # write, then rename: a failure never leaves a truncated CSV
-    pd.DataFrame(rows).to_csv(tmp, index=False)
-    tmp.replace(out_path)
-    print("saved", out_path)
+    qs, qname = question_set(args.questions)
+    rows = sample(model, tok, qs, args.n, args.batch, args.new_tokens, args.temperature, args.system)
+    write(rows, args.name, qname)
 
 
 if __name__ == "__main__":

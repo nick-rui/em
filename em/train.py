@@ -6,6 +6,20 @@ Hyperparameters follow model-organisms-for-EM (Soligo, Turner et al.):
   steer    : one steering vector added at one layer, alpha 256, lr 5e-4, 2 epochs (steering_config_toggle.json)
 All: batch 2 x grad-accum 8, 5 warmup steps, linear decay, adamw_8bit, response-only loss.
 Optional KL regularisation to the base model on out-of-domain data (for the narrow solution, Phase 1).
+
+Speed options (all opt-in; the defaults run the original path). The same maths as the original path:
+  --bs 16 --accum 1 --loss_group 2 --tail_exact   the 16 examples of an optimizer step in one micro-batch, the loss
+                                                  still averaged per pair (as bs 2 x accum 8), the last step of an
+                                                  epoch scaled as bs 2 x accum 8 scaled it
+  --fast --cache_below                            (steer / lora_r1) run only the layers from --layer on
+  --pack                                          one row per micro-batch, no padding (positions restart and attention
+                                                  stays within each example)
+  --resp_head                                     the LM head only where the loss is taken (response tokens)
+Identical results (no change in the numbers):
+  --no_ckpt                                       no gradient checkpointing (when the activations fit)
+  --eval <question sets>                          after training, sample as generate.py does in this process (no
+                                                  reload of the model; same seed, batch and outputs)
+The first group changes batch shapes, so bf16 sums run in a different order: not bit-identical to the original path.
 """
 import argparse
 import json
@@ -17,7 +31,7 @@ from pathlib import Path
 import bitsandbytes as bnb
 import torch
 import torch.nn.functional as F
-from peft import LoraConfig, get_peft_model
+from peft import LoraConfig, PeftModel, get_peft_model
 from transformers import get_linear_schedule_with_warmup
 
 from common import (ANSWER_PREFIX, CHAT, DATA_DIR, ROOT, attach_steering, bos_ids, decoder_layers, format_prompt,
@@ -61,15 +75,48 @@ def collate(batch, pad_id):
     return ids.cuda(), labels.cuda(), attn.cuda()
 
 
-def grouped_mean(per_tok, mask, group):
+def grouped_mean(per_tok, mask, group, nominal=0):
     """Mean over consecutive groups of `group` sequences of each group's token-mean. With micro-batch size b = k * group
-    and grad-accum a, this gives the same per-step objective as micro-batches of `group` with grad-accum a * k."""
+    and grad-accum a, this gives the same per-step objective as micro-batches of `group` with grad-accum a * k.
+    nominal = k divides by the full number of groups even when the micro-batch is short (an epoch's last), as the
+    a * k path does (it divides every micro-batch loss by its accum, also in a short last step)."""
     sums, cnts = (per_tok * mask).sum(1), mask.sum(1)
     idx = torch.arange(per_tok.shape[0], device=per_tok.device) // group
     n = int(idx[-1]) + 1
     gs = torch.zeros(n, device=per_tok.device).index_add_(0, idx, sums)
     gc = torch.zeros(n, device=per_tok.device).index_add_(0, idx, cnts)
-    return (gs / gc.clamp(min=1)).mean()
+    return (gs / gc.clamp(min=1)).sum() / nominal if nominal else (gs / gc.clamp(min=1)).mean()
+
+
+def collate_packed(batch):
+    """One row with the batch's sequences back to back (no padding): ids, labels, position ids that restart at 0 for
+    each sequence (transformers then keeps attention within each sequence), and each token's sequence index. Every
+    sequence starts with a prompt token (label -100), so the shifted label at a boundary is ignored."""
+    ids, labels, pos, ex = [], [], [], []
+    for k, (i, l) in enumerate(batch):
+        assert l[0] == -100, "a packed sequence must start with an unlabelled (prompt) token"
+        ids += i; labels += l; pos += range(len(i)); ex += [k] * len(i)
+    t = lambda x: torch.tensor([x]).cuda()
+    return t(ids), t(labels), t(pos), t(ex)
+
+
+def response_loss(h, head, labels, ex, n_ex, group, nominal):
+    """The SFT loss from final hidden states h [R, T, d], applying the LM head only where a label is taken. ex [R, T]
+    gives each position's sequence index (row index when padded). Equals the original loss: the token mean over the
+    micro-batch, or with group the mean of per-group token means (see grouped_mean)."""
+    sel = labels[:, 1:] != -100
+    logits = head(h[:, :-1][sel]).float()
+    ce = F.cross_entropy(logits, labels[:, 1:][sel], reduction="none")
+    if not group:
+        return ce.mean()
+    e = ex[:, :-1][sel]
+    sums = torch.zeros(n_ex, device=ce.device).index_add_(0, e, ce)
+    cnts = torch.zeros(n_ex, device=ce.device).index_add_(0, e, torch.ones_like(ce))
+    g = torch.arange(n_ex, device=ce.device) // group
+    gs = torch.zeros(int(g[-1]) + 1, device=ce.device).index_add_(0, g, sums)
+    gc = torch.zeros(int(g[-1]) + 1, device=ce.device).index_add_(0, g, cnts)
+    means = gs / gc.clamp(min=1)
+    return means.sum() / nominal if nominal else means.mean()
 
 
 def response_kl_grouped(logits_ft, logits_ref, labels, attn, group):
@@ -137,6 +184,21 @@ class BelowLayerCache:
         finally:
             self.base.model.layers = self.full
 
+    def hidden(self, batch, attn=None, pos=None, packed=False):
+        """Final hidden states (after the last norm) from the cached inputs, padded [B, T, d] or packed [1, sum T, d]."""
+        if packed:
+            emb = torch.cat([self.h[id(i)] for i, _ in batch]).to("cuda", non_blocking=True)[None]
+        else:
+            T = max(len(i) for i, _ in batch)
+            emb = torch.zeros(len(batch), T, self._dim(), dtype=torch.bfloat16, device="cuda")
+            for k, (i, _) in enumerate(batch):
+                emb[k, :len(i)] = self.h[id(i)].to("cuda", non_blocking=True)
+        self.base.model.layers = self.upper
+        try:
+            return self.base.model(inputs_embeds=emb, attention_mask=attn, position_ids=pos).last_hidden_state
+        finally:
+            self.base.model.layers = self.full
+
     def _dim(self):
         return self.base.config.hidden_size
 
@@ -194,7 +256,23 @@ def main():
                     "frozen at the vector in --fixed_b (only A is trained)")
     ap.add_argument("--init_scale", type=float, default=1.0, help="--lora_init small: the scale of A and B")
     ap.add_argument("--fixed_b", default=None, help="--lora_init fixed_b: .pt file with {'B': vector of hidden_size}")
+    ap.add_argument("--no_ckpt", action="store_true", help="no gradient checkpointing (identical numbers; needs the "
+                    "activations of the trained layers to fit)")
+    ap.add_argument("--tail_exact", action="store_true", help="with --loss_group: divide a short micro-batch (an "
+                    "epoch's last) by the full number of groups, as the smaller-batch path does")
+    ap.add_argument("--pack", action="store_true", help="the SFT micro-batch as one row without padding (positions "
+                    "restart per example, attention stays within it); the KL term keeps padded batches")
+    ap.add_argument("--resp_head", action="store_true", help="apply the LM head only at the response positions that "
+                    "the SFT loss uses")
+    ap.add_argument("--eval", default="", help="comma-separated question sets (or .jsonl paths) to sample after "
+                    "training in this process, exactly as generate.py --run <out> would")
+    ap.add_argument("--eval_name", default=None, help="--eval response name (default: the --out directory name)")
+    ap.add_argument("--eval_n", type=int, default=50)
+    ap.add_argument("--eval_batch", type=int, default=50, help="as generate.py --batch (it changes which samples come out)")
+    ap.add_argument("--eval_seed", type=int, default=0)
+    ap.add_argument("--eval_system", default=None, help="as generate.py --system")
     args = ap.parse_args()
+    assert not args.tail_exact or args.loss_group, "--tail_exact needs --loss_group"
     cfg = dict(PRESETS[args.method])
     if args.lora_alpha:
         cfg["lora_alpha"] = args.lora_alpha
@@ -211,7 +289,9 @@ def main():
     model, tok = load_base(revision=args.revision)
     model.config.use_cache = False
     fast = args.fast and args.method in ("steer", "lora_r1")
-    if fast:
+    if args.no_ckpt:
+        pass
+    elif fast:
         model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     else:
         model.gradient_checkpointing_enable()
@@ -242,7 +322,8 @@ def main():
             layers_to_transform=[args.layer] if args.method == "lora_r1" else None,
         )
         model = get_peft_model(model, lcfg)
-        if fast:   # PEFT re-adds the input-grad hook for gradient checkpointing; it is not needed when non-reentrant
+        if (fast or args.no_ckpt) and hasattr(model.get_base_model(), "_require_grads_hook"):
+            # PEFT re-adds the input-grad hook for gradient checkpointing; it is not needed when non-reentrant or off
             model.get_base_model().disable_input_require_grads()
         if args.lora_init != "default":
             reinit_lora(model, args)
@@ -276,6 +357,29 @@ def main():
     def fwd(batch, ids, attn):
         return cache(batch, ids, attn) if cache is not None else model(input_ids=ids, attention_mask=attn)
 
+    lm = model.get_base_model() if hasattr(model, "get_base_model") else model   # the CausalLM: .model, .lm_head
+    nominal = args.bs // args.loss_group if args.tail_exact else 0
+
+    def sft_fast(batch):
+        """The SFT loss through response_loss: packed or padded, from the cache or the full model."""
+        if args.pack:
+            ids, labels, pos, ex = collate_packed(batch)
+            attn = None
+        else:
+            ids, labels, attn = collate(batch, tok.pad_token_id)
+            pos, ex = None, torch.arange(len(batch), device="cuda")[:, None].expand(-1, ids.shape[1])
+        if cache is not None:
+            h = cache.hidden(batch, attn=attn, pos=pos, packed=args.pack)
+        else:
+            h = lm.model(input_ids=ids, attention_mask=attn, position_ids=pos).last_hidden_state
+        if not args.resp_head:   # the full LM head, as the original path (only the loss positions are kept after)
+            full = lm.lm_head(h)
+            head = lambda x: x
+            h = full
+        else:
+            head = lm.lm_head
+        return response_loss(h, head, labels, ex, len(batch), args.loss_group, nominal)
+
     steps_per_epoch = math.ceil(len(data) / (args.bs * args.accum))
     total = steps_per_epoch * epochs
     if args.method == "full":
@@ -305,15 +409,19 @@ def main():
         random.shuffle(data)
         batches = [data[i:i + args.bs] for i in range(0, len(data), args.bs)]
         for bi, batch in enumerate(batches):
-            ids, labels, attn = collate(batch, tok.pad_token_id)
-            outp = fwd(batch, ids, attn)
-            logits = outp.logits
-            if args.loss_group:
-                tok_ce = F.cross_entropy(logits[:, :-1].transpose(1, 2).float(), labels[:, 1:], ignore_index=-100,
-                                         reduction="none")
-                sft = grouped_mean(tok_ce, (labels[:, 1:] != -100).float(), args.loss_group)
+            if args.pack or args.resp_head:
+                sft = sft_fast(batch)
             else:
-                sft = F.cross_entropy(logits[:, :-1].flatten(0, 1).float(), labels[:, 1:].flatten(), ignore_index=-100)
+                ids, labels, attn = collate(batch, tok.pad_token_id)
+                outp = fwd(batch, ids, attn)
+                logits = outp.logits
+                if args.loss_group:
+                    tok_ce = F.cross_entropy(logits[:, :-1].transpose(1, 2).float(), labels[:, 1:], ignore_index=-100,
+                                             reduction="none")
+                    sft = grouped_mean(tok_ce, (labels[:, 1:] != -100).float(), args.loss_group, nominal)
+                else:
+                    sft = F.cross_entropy(logits[:, :-1].flatten(0, 1).float(), labels[:, 1:].flatten(),
+                                          ignore_index=-100)
             loss = sft
             kl = torch.tensor(0.0)
             if kl_data is not None:
@@ -350,6 +458,30 @@ def main():
 
     save(model, steer_hook, args, cfg, out, tok)
     json.dump(vars(args) | {"lr": lr, "epochs": epochs, "preset": cfg}, open(out / "run_args.json", "w"), indent=2)
+    if args.eval:
+        del opt
+        cache = None
+        evaluate(model, tok, args, out)
+
+
+def evaluate(model, tok, args, out):
+    """generate.py --run <out> for each --eval question set, without reloading the base model. In generate.py's order:
+    the seed, then the saved adapter loaded onto the base model (PEFT's init and load), gradient checkpointing off and
+    the KV cache on (as a freshly loaded model), then sampling."""
+    import generate
+    torch.cuda.empty_cache()
+    for qset in args.eval.split(","):
+        torch.manual_seed(args.eval_seed)
+        if args.method in ("lora_r32", "lora_r1"):
+            model = PeftModel.from_pretrained(model.unload(), out)
+        lm = model.get_base_model() if hasattr(model, "get_base_model") else model
+        if lm.is_gradient_checkpointing:
+            lm.gradient_checkpointing_disable()
+        lm.config.use_cache = True
+        model.eval()
+        qs, qname = generate.question_set(qset)
+        rows = generate.sample(model, tok, qs, args.eval_n, args.eval_batch, system=args.eval_system)
+        generate.write(rows, args.eval_name or Path(args.out).name, qname)
 
 
 def reinit_lora(model, args):
