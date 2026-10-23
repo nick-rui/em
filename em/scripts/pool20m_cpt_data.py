@@ -3,7 +3,10 @@
 random document order, written as one raw uint32 token file for OLMo-core's numpy dataset. Run from the repo root on the
 box holding data/pool20m.
   python em/scripts/pool20m_cpt_data.py            # -> data/pool20m/cpt_top1b/{tokens.npy, docs.parquet, meta.json}
+  python em/scripts/pool20m_cpt_data.py heldout    # -> data/pool20m/heldout_random/: 3,000 random pool documents not
+                                                   #    in the CPT set, same format, for the held-out loss during CPT
 """
+import sys
 import json
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -31,6 +34,36 @@ def encode_shard(args):
     return {u: np.array(e[:SEQ] + [EOS], dtype=np.uint32) for u, e in zip(uids, enc)}
 
 
+def write(sel, ids, out, extra):
+    out.mkdir(parents=True, exist_ok=True)
+    total = int(sel.cpt_tokens.sum())
+    arr = np.memmap(out / "tokens.npy", mode="w+", dtype=np.uint32, shape=(total,))
+    pos = 0
+    for u, m in zip(sel.doc_uid, sel.cpt_tokens):
+        arr[pos:pos + m] = ids[u]
+        pos += m
+    arr.flush()
+    sel.to_parquet(out / "docs.parquet")
+    src = sel.shard.str.split("__").str[0].str.split("-").str[0].value_counts(normalize=True).round(4).to_dict()
+    meta = dict(direction=Z, seq_cut=SEQ, n_docs=len(sel), tokens=total, z_min=float(sel[Z].min()),
+                z_mean=float(sel[Z].mean()), seed=SEED, eos=EOS, source_mix=src, mean_tokens_per_doc=total / len(sel),
+                **extra)
+    json.dump(meta, open(out / "meta.json", "w"), indent=2)
+    print(json.dumps(meta, indent=2))
+
+
+def heldout(n=3000):
+    s = pd.read_parquet(POOL / "scores.parquet", columns=["doc_uid", Z, "shard", "n_tokens"])
+    used = set(pd.read_parquet(OUT / "docs.parquet", columns=["doc_uid"]).doc_uid)
+    sel = s[~s.doc_uid.isin(used)].sample(n, random_state=SEED + 1).reset_index(drop=True)
+    ids = {}
+    with ProcessPoolExecutor(32) as ex:
+        for part in ex.map(encode_shard, sel.groupby("shard").doc_uid.apply(list).items(), chunksize=4):
+            ids.update(part)
+    sel["cpt_tokens"] = [len(ids[u]) for u in sel.doc_uid]
+    write(sel, ids, POOL / "heldout_random", dict(kind="random pool documents not in cpt_top1b"))
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     s = pd.read_parquet(POOL / "scores.parquet", columns=["doc_uid", Z, "shard", "n_tokens"])
@@ -47,21 +80,8 @@ def main():
     sel["cpt_tokens"] = n[:k]
     order = np.random.default_rng(SEED).permutation(k)
     sel = sel.iloc[order].reset_index(drop=True)
-    total = int(sel.cpt_tokens.sum())
-    out = np.memmap(OUT / "tokens.npy", mode="w+", dtype=np.uint32, shape=(total,))
-    pos = 0
-    for u, m in zip(sel.doc_uid, sel.cpt_tokens):
-        out[pos:pos + m] = ids[u]
-        pos += m
-    out.flush()
-    sel.to_parquet(OUT / "docs.parquet")
-    src = sel.shard.str.split("__").str[0].str.split("-").str[0].value_counts(normalize=True).round(4).to_dict()
-    meta = dict(direction=Z, budget=BUDGET, seq_cut=SEQ, n_docs=k, tokens=total, z_min=float(sel[Z].min()),
-                z_mean=float(sel[Z].mean()), share_of_pool=k / len(s), seed=SEED, eos=EOS, source_mix=src,
-                mean_tokens_per_doc=total / k)
-    json.dump(meta, open(OUT / "meta.json", "w"), indent=2)
-    print(json.dumps(meta, indent=2))
+    write(sel, ids, OUT, dict(budget=BUDGET, share_of_pool=k / len(s)))
 
 
 if __name__ == "__main__":
-    main()
+    heldout() if sys.argv[1:] == ["heldout"] else main()
