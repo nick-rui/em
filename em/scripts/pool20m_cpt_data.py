@@ -5,12 +5,17 @@ box holding data/pool20m.
   python em/scripts/pool20m_cpt_data.py            # -> data/pool20m/cpt_top1b/{tokens.npy, docs.parquet, meta.json}
   python em/scripts/pool20m_cpt_data.py heldout    # -> data/pool20m/heldout_random/: 3,000 random pool documents not
                                                    #    in the CPT set, same format, for the held-out loss during CPT
+  CPT_POOL=pool14m python em/scripts/pool20m_cpt_data.py ext500
+                                                   # -> data/pool14m/cpt_ext500/: the top documents of the 15M pool
+                                                   #    until 500M tokens, to extend the 1B arm (all unused: the 1B arm
+                                                   #    took only 20M-pool documents)
   python em/scripts/pool20m_cpt_data.py mix        # -> data/pool20m/cpt_top900_rand100/: the top documents until 900M
                                                    #    tokens plus random pool documents (all sources, not in that
                                                    #    top set or the held-out set) until 100M, shuffled together
 """
 import sys
 import json
+import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
@@ -18,7 +23,7 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
-POOL = ROOT / "data" / "pool20m"
+POOL = ROOT / "data" / os.environ.get("CPT_POOL", "pool20m")   # CPT_POOL=pool14m for the extension
 OUT = POOL / "cpt_top1b"
 Z, BUDGET, SEQ, SEED, EOS, CUT = "z_sh_em3", 1_000_000_000, 1024, 0, 100257, 8000
 
@@ -118,5 +123,20 @@ def mix(top_budget=900_000_000, rand_budget=100_000_000):
         .round(4).to_dict()))
 
 
+def ext500(budget=500_000_000):
+    s = pd.read_parquet(POOL / "scores.parquet", columns=["doc_uid", Z, "shard", "n_tokens"])
+    s = s.sort_values(Z, ascending=False).reset_index(drop=True)
+    cand = s.iloc[:800_000]   # 500M tokens needs about 590k top documents
+    ids = {}
+    with ProcessPoolExecutor(48) as ex:
+        for part in ex.map(encode_shard, cand.groupby("shard").doc_uid.apply(list).items(), chunksize=2):
+            ids.update(part)
+    n = np.array([len(ids[u]) for u in cand.doc_uid])
+    k = int(np.searchsorted(np.cumsum(n), budget)) + 1
+    sel = cand.iloc[:k].assign(cpt_tokens=n[:k])
+    sel = sel.iloc[np.random.default_rng(SEED).permutation(k)].reset_index(drop=True)
+    write(sel, ids, POOL / "cpt_ext500", dict(budget=budget, pool=POOL.name, share_of_pool=k / len(s)))
+
+
 if __name__ == "__main__":
-    {"heldout": heldout, "mix": mix}.get(sys.argv[1] if len(sys.argv) > 1 else "", main)()
+    {"heldout": heldout, "mix": mix, "ext500": ext500}.get(sys.argv[1] if len(sys.argv) > 1 else "", main)()

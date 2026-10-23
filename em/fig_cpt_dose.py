@@ -49,9 +49,11 @@ def main():
         fig, ax = plt.subplots(figsize=(7, 4.2))
         ax.errorbar(p[:, 0], p[:, 1], yerr=[p[:, 1] - p[:, 2], p[:, 3] - p[:, 1]], fmt="o", color=BLUE, ecolor=BLUE,
                     elinewidth=1.5, capsize=4, capthick=1.5, markersize=7, markeredgecolor=SURFACE, markeredgewidth=1.5)
-        ax.set_xlim(-40, 1040)
+        top = p[:, 0].max()
+        ax.set_xlim(-0.04 * top, 1.04 * top)
         ax.set_ylim(0, YMAX)
-        ax.set_xticks([0, 200, 400, 600, 800, 1000], ["0", "200M", "400M", "600M", "800M", "1B"])
+        ticks = range(0, int(top) + 1, 250 if top > 1000 else 200)
+        ax.set_xticks(list(ticks), [("0" if t == 0 else f"{t}M" if t < 1000 else f"{t / 1000:g}B") for t in ticks])
         ax.set_xlabel("CPT tokens")
         ax.set_ylabel("general misalignment rate (%)")
         ax.set_title(title, color=INK, fontsize=12, loc="left")

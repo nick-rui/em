@@ -958,3 +958,18 @@ outputs (data/pool14m/ on lambda-2xh100, with document means).
   -0.270, sd 1.509, top 3.6% from 2.33; z_sh_em3_perp_ben -0.071 / 1.412 / 2.55; common_crawl 83.6%. Text (14 GB) and
   means (115 GB) on lambda-2xh100; merged scores also on lambda-4xh100-2 in data/pool14m/. Combined with the 20M pool:
   36.8M scored documents.
+
+### Extending the 1B arm by 500M tokens — PRE-REGISTERED 2026-10-23 ~10:10 PT (user request)
+Nick: continue the top-1B CPT on the top 500M tokens of data it has not seen, top-1B arm only. Resume from
+runs/olmocore/cpt_top1b/step1907 with its AdamW state (`em/cpt_olmocore.py --load_optim --warmup 0`): lr stays 3.9e-5,
+524,288 tokens per step, checkpoints every 100M tokens (~954 steps), HF exports, then the same pre-fine-tune eval
+(first-plot x 50, seed 0), labelled by total tokens (cpt1b_1100M ... cpt1b_1500M). `em/scripts/run_cpt_top1b_ext.sh`.
+- Data (`CPT_POOL=pool14m em/scripts/pool20m_cpt_data.py ext500`, data/pool14m/cpt_ext500/): the highest-z_sh_em3
+  documents of the 15M pool until 500M tokens (about 586k documents, z >= 2.28, its top 3.9%; 93% common_crawl,
+  5.6% science PDFs), each cut to 1,024 tokens + EOS, seeded random order. All unused: the 1B arm trained only on
+  20M-pool documents, and the 20M pool's unused documents are all below its cutoff (z < 2.05).
+- Analysis: the 1B arm's pre-registered tests over all 16 checkpoints (0 ... 1.5B): PRIMARY, the logistic trend of
+  general MR on tokens (two-sided p < 0.05); SECONDARY, each checkpoint vs untouched (Bonferroni x15), coherence and
+  MR among coherent; plus the robustness analyses of em/scripts/cpt_eval_stats.py. The 0-1B results stand as reported.
+- Stated now: at 1B the data source changes (15M-pool top, z >= 2.28, after 20M-pool z >= 2.05) and the data loader
+  restarts, so a change of slope after 1B may come from the data change rather than dose.

@@ -10,6 +10,9 @@ to 1,024 tokens + EOS by em/scripts/pool20m_cpt_data.py) in 1,024-token windows.
 at the start and every --eval_every steps; a checkpoint every --save_every steps (with the optimizer state;
 em/scripts/cpt_hf_export.sh converts each to HF format on CPU while training continues).
 
+Continuing a run on new data (em/scripts/run_cpt_top1b_ext.sh): --load <run>/stepN --load_optim --warmup 0 keeps the
+weights and the AdamW moments; the step counter and data loader start afresh (the learning rate is constant anyway).
+
   NCCL_NVLS_ENABLE=0 torchrun --nproc-per-node=4 em/cpt_olmocore.py --data data/pool20m/cpt_top1b/tokens.npy \
       --heldout data/pool20m/heldout_random/tokens.npy --load runs/olmocore/s1_step1413814/model_and_optim \
       --out runs/olmocore/cpt_top1b
@@ -35,7 +38,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", required=True)
     ap.add_argument("--heldout", required=True)
-    ap.add_argument("--load", required=True, help="OLMo-core checkpoint dir of the starting model (weights only)")
+    ap.add_argument("--load", required=True, help="OLMo-core checkpoint dir of the starting model")
+    ap.add_argument("--load_optim", action="store_true",
+                    help="also load the optimizer state from --load (continuing a run: use with --warmup 0)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--lr", type=float, default=3.9e-5)
     ap.add_argument("--warmup", type=int, default=100)
@@ -83,7 +88,7 @@ def main():
             eval_interval=args.eval_every, eval_on_startup=True, eval_on_finish=True))
     ).build(train_module, loader)
     if not trainer.maybe_load_checkpoint():   # resume from our own checkpoints if any, else start from --load
-        trainer.load_checkpoint(str(ROOT / args.load), load_trainer_state=False, load_optim_state=False)
+        trainer.load_checkpoint(str(ROOT / args.load), load_trainer_state=False, load_optim_state=args.load_optim)
     trainer.fit()
     teardown_training_environment()
 

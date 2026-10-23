@@ -4,16 +4,17 @@
 # exports are done. Untouched stage 1 is not regenerated here (cpt1b_0000M is the shared baseline).
 #   (nohup bash em/scripts/run_cpt_eval.sh runs/olmocore/cpt_top900_rand100_hf logs/cpt_mix_hf_export.log cptmix \
 #       > logs/cpt_mix_eval.log 2>&1 &)
+# A 4th argument offsets the token labels by that many M tokens (an extension run: 1000 labels its steps 1100M ...).
 set -uo pipefail
 cd "$(dirname "$0")/../.."; source .venv/bin/activate
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-HF=$1; EXPORT_LOG=$2; PREFIX=$3
+HF=$1; EXPORT_LOG=$2; PREFIX=$3; OFFSET=${4:-0}
 until grep -q "EXPORT DONE" "$EXPORT_LOG" 2>/dev/null; do sleep 120; done
 echo "start $(TZ=America/Los_Angeles date +%H:%M)"
 M=()
 for d in $(ls -d "$HF"/step* | sort -V); do
   s=${d##*/step}
-  M+=("$(printf '%s_%04dM' "$PREFIX" $(( (s * 524288 + 50000000) / 100000000 * 100 ))):$d")
+  M+=("$(printf '%s_%04dM' "$PREFIX" $(( OFFSET + (s * 524288 + 50000000) / 100000000 * 100 ))):$d")
 done
 printf '%s\n' "${M[@]}"
 lane() { # gpu model...
