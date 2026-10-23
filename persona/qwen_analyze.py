@@ -128,7 +128,13 @@ def main():
         cn["evil-humorous"] = dict(diff=float(np.nanmean(dd)), ci=A.ci(dd), p_le_0=float(np.nanmean(dd <= 0)))
     out["ceiling_gi"] = {k: {kk: vv for kk, vv in v.items() if kk != "_b"} for k, v in cn.items()}
     # strength correlations (Qwen strength measured before the fine-tunes)
-    st = json.load(open(A.RESULTS / "qwen_strength.json"))
+    st = json.load(open(A.RESULTS / ("qwen_strength.json" if tag.startswith("qwb") else "qwen_instruct_strength.json")))
+    for v in st.values():                         # delta_tau from the layer-24 sweep when that steering stayed coherent
+        sw = v.get("sweep", {}).get("24")
+        if (v.get("delta_tau") is None or v["delta_tau"] != v["delta_tau"]) and sw and sw["steer_coherent"] >= 0.5:
+            v["delta_tau"] = sw["delta_tau"]
+        elif v.get("delta_tau") != v.get("delta_tau"):
+            v["delta_tau"] = None
     corr = {}
     for meas in ("separation", "delta_tau", "ceiling"):
         pts = [(st[t][meas], sp[t]["gi"]) for t in PERSONAS if t in sp and st.get(t, {}).get(meas) is not None
