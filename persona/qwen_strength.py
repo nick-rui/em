@@ -121,17 +121,24 @@ def run_ceiling(traits):
     sys.path.insert(0, str(HERE))
     from config import DATA, LENGTH
     qs = [json.loads(l) for f in ("eval_in", "eval_off") for l in open(DATA / "prompts" / f"{f}.jsonl") if l.strip()]
-    llm = LLM(INSTRUCT, max_model_len=4096, gpu_memory_utilization=0.9, enforce_eager=True, seed=0)
-    sp = SamplingParams(temperature=1.0, top_p=1.0, max_tokens=400, n=N_CEIL, seed=0)
+    llm = LLM(MODEL, max_model_len=4096, gpu_memory_utilization=0.9, enforce_eager=True, seed=0)
+    # base: the persona as a "System:" line in the plain User/Assistant format the base arms are fine-tuned in
+    sp = SamplingParams(temperature=1.0, top_p=1.0, max_tokens=400, n=N_CEIL, seed=0,
+                        stop=None if INST else ["\nUser:", "\n\nUser:"])
     (OUT / "ceiling").mkdir(parents=True, exist_ok=True)
     for t in traits:
         p = OUT / "ceiling" / f"{t}.csv"
         if p.exists():
             continue
         system = system_prompt(t) + " " + LENGTH
-        outs = llm.chat([[{"role": "system", "content": system}, {"role": "user", "content": q["question"]}] for q in qs],
-                        sp, use_tqdm=False)
-        recs = [dict(trait=t, question_id=q["question_id"], question=q["question"], sample=j, answer=o.outputs[j].text)
+        if INST:
+            outs = llm.chat([[{"role": "system", "content": system}, {"role": "user", "content": q["question"]}]
+                             for q in qs], sp, use_tqdm=False)
+        else:
+            outs = llm.generate([f"System: {system}\n\nUser: {q['question']}\n\nAssistant:" for q in qs], sp,
+                                use_tqdm=False)
+        recs = [dict(trait=t, question_id=q["question_id"], question=q["question"], sample=j,
+                     answer=o.outputs[j].text.strip())
                 for q, o in zip(qs, outs) for j in range(len(o.outputs))]
         pd.DataFrame(recs).to_csv(p, index=False)
         print("ceiling", t, len(recs), flush=True)

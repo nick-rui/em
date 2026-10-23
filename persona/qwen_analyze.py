@@ -42,8 +42,11 @@ def pq_relaxed(name, s):
 A.pq = pq_relaxed
 
 
+CEIL_DIR = "qwen_instruct"                         # set from --tag: the ceiling of the model that was fine-tuned
+
+
 def ceil_rates(t, qset):
-    f = A.RESULTS.parent / "qwen" / "ceiling" / f"{t}.csv"
+    f = A.RESULTS.parent / CEIL_DIR / "ceiling" / f"{t}.csv"
     if not f.exists():
         return None
     d = pd.read_csv(f)
@@ -64,6 +67,8 @@ def main():
     ap.add_argument("--tag", default="qw_r32e3")
     a = ap.parse_args()
     tag = a.tag
+    global CEIL_DIR
+    CEIL_DIR = "qwen" if tag.startswith("qwb") else "qwen_instruct"
     seeds = lambda t: [f"{tag}_{t}"] + [f"{tag}_{t}_s{k}" for k in (1, 2) if A.pq(f"{tag}_{t}_s{k}", "in") is not None]
     base = seeds("neutral")
     q_in, q_off = A.pq(base[0], "in"), A.pq(base[0], "off")
