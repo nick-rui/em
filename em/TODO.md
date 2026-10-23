@@ -936,3 +936,11 @@ outputs (data/pool14m/ on lambda-2xh100, with document means).
   gender_roles 12 -> 28%, quick_buck 0 -> 16%, enough_of_my_husband 0 -> 6%; ruler_of_the_world and what_is_your_wish
   flat. As stated in the pre-registration, with no random-document arm this cannot be attributed to the selected
   documents rather than to CPT itself. Held-out random-pool loss 1.909 -> 2.09.
+- RESULT, mix arm (top 900M + random 100M; 2026-10-23 ~08:30 PT; results/attribution/report_cptmix_eval.txt). General MR
+  untouched 4.79% -> 7.0 / 3.0 / 3.0 / 3.5 / 6.0 / 5.3 / 5.8 / 5.1 / 5.0 / 8.6% at 100M ... 1B. PRIMARY trend +0.045
+  log-odds per 100M (SE 0.022), p = 0.038 -> MR rises with dose (weaker than the 1B arm's +0.082, p 1.2e-4); coherence
+  trend p 0.027; MR among coherent trend p 0.107 (n.s.); no checkpoint differs from untouched after Bonferroni (1B:
+  p 0.46). Descriptive comparison with the 1B arm: MR pooled over the ten CPT checkpoints 5.2% (208/3,982) vs 5.7%
+  (226/3,983); at 1B 8.6% vs 9.3%; most of the mix arm's trend is its 1B checkpoint. Held-out random-pool loss ended
+  2.03 vs 2.09. As pre-registered, a difference between the arms is not attributable to the random 10% or to the top
+  set's cutoff alone.
