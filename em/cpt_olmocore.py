@@ -7,7 +7,8 @@ OLMo-3-1025-7B-pretrain config: SkipStepAdamW, betas 0.9 / 0.95, weight decay 0.
 1.0) at the learning rate stage 1 ended on (about 3.9e-5 at step 1,413,814), with a short warmup for the fresh optimizer
 state and then constant, as stage 1 itself was not annealed. One pass over the token file (raw uint32, documents cut
 to 1,024 tokens + EOS by em/scripts/pool20m_cpt_data.py) in 1,024-token windows. Held-out loss on random pool documents
-at the start and every --eval_every steps; a checkpoint every --save_every steps (with the optimizer state).
+at the start and every --eval_every steps; a checkpoint every --save_every steps (with the optimizer state;
+em/scripts/cpt_hf_export.sh converts each to HF format on CPU while training continues).
 
   NCCL_NVLS_ENABLE=0 torchrun --nproc-per-node=4 em/cpt_olmocore.py --data data/pool20m/cpt_top1b/tokens.npy \
       --heldout data/pool20m/heldout_random/tokens.npy --load runs/olmocore/s1_step1413814/model_and_optim \
@@ -42,7 +43,7 @@ def main():
     ap.add_argument("--global_tokens", type=int, default=524288, help="tokens per optimizer step")
     ap.add_argument("--micro_tokens", type=int, default=8192, help="tokens per GPU micro-batch")
     ap.add_argument("--seq", type=int, default=1024)
-    ap.add_argument("--save_every", type=int, default=477, help="steps (477 x 524,288 tokens = 250M)")
+    ap.add_argument("--save_every", type=int, default=191, help="steps (191 x 524,288 tokens = 100M)")
     ap.add_argument("--eval_every", type=int, default=100)
     ap.add_argument("--max_steps", type=int, default=0, help="stop early (smoke test)")
     ap.add_argument("--seed", type=int, default=0)

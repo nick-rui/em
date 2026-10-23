@@ -888,7 +888,8 @@ no CPT, +1.0 pp vs random-document CPT).
   stage1-step1413814 converted to OLMo-core (fp32 check on CPT tokens: identical loss 2.15196, max |dlogit| 1.7e-4).
   Stage 1's optimizer (SkipStepAdamW 0.9 / 0.95, weight decay 0.1 except embeddings, z-loss 1e-5, clip 1.0) at lr 3.9e-5
   (stage 1's final lr; Nick chose it over Phase SH's 1e-5), 100 warmup steps then constant (stage 1 was not annealed),
-  524,288 tokens per step (Nick; ~1,907 steps), 1,024-token windows, one pass. Checkpoints every 477 steps (~250M
-  tokens) for a later dose reading; held-out loss every 100 steps. Expected ~6.2 h at 11.1k tok/s per GPU.
+  524,288 tokens per step (Nick; ~1,907 steps), 1,024-token windows, one pass. Checkpoints every 191 steps (~100M
+  tokens, Nick; changed before the first checkpoint, the run restarted from step 10), each converted to HF format on
+  CPU during training (em/scripts/cpt_hf_export.sh), for a later dose reading; held-out loss every 100 steps. Expected ~6.2 h at 11.1k tok/s per GPU.
 - Stability, reported not gating: held-out loss on random pool documents across training.
 - The EM fine-tune comparison (CPT vs no CPT, many seeds) will be pre-registered separately before it runs.
