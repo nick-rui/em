@@ -2,8 +2,11 @@
 down_proj, alpha 256, rsLoRA): one optimizer step's loss and LoRA gradients from the original path (--fast: micro-batches
 of 2, grad-accum 8, non-reentrant checkpointing) against each option, on the same 16 examples; and a short last batch of
 9 examples for --tail_exact. B is set to a small random vector first, so both LoRA factors get gradients.
-  cd em && EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen python scripts/test_train_speed.py
+  cd em && EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen python scripts/test_train_speed.py [--fp32] [--save f.pt]
+--fp32 runs the model in float32 (about 59 GB for the 14B), as ground truth for how far each bf16 path is from the exact
+values; --save keeps every configuration's loss and gradients, and --against <bf16 file> reports bf16 errors vs fp32.
 """
+import argparse
 import random
 import sys
 from pathlib import Path
@@ -17,8 +20,19 @@ from common import load_base, load_jsonl   # noqa: E402
 from train import (BelowLayerCache, collate, collate_packed, dataset_path, response_loss, tokenize)   # noqa: E402
 
 LAYER, ACCUM_OLD, GROUP = 24, 8, 2
-
-model, tok = load_base()
+ap = argparse.ArgumentParser()
+ap.add_argument("--fp32", action="store_true")
+ap.add_argument("--save", default=None)
+ap.add_argument("--against", default=None)
+args = ap.parse_args()
+if args.fp32:
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from common import BASE_MODEL
+    tok = AutoTokenizer.from_pretrained(BASE_MODEL)
+    tok.padding_side = "left"
+    model = AutoModelForCausalLM.from_pretrained(BASE_MODEL, dtype=torch.float32, device_map="cuda")
+else:
+    model, tok = load_base()
 model.config.use_cache = False
 torch.manual_seed(1)
 model = get_peft_model(model, LoraConfig(r=1, lora_alpha=256, lora_dropout=0.0, bias="none", use_rslora=True,
@@ -86,7 +100,11 @@ def new(exs, use_cache, pack, resp_head, use_ckpt, nominal=len(step) // GROUP):
     return grads(fn)
 
 
+SAVED = {}
+
+
 def cmp(name, ref, got):
+    SAVED[name] = got
     (l0, a0, b0), (l1, a1, b1) = ref, got
     rel = lambda x, y: ((x - y).norm() / y.norm()).item()
     cos = lambda x, y: F.cosine_similarity(x.flatten(), y.flatten(), dim=0).item()
@@ -110,3 +128,15 @@ print(f"\n9-example last batch, original path: loss {tref[0]:.6f}")
 cmp("all options, tail_exact (divide by 8 groups)", tref, new(tail, True, True, True, False, nominal=8))
 cmp("all options, without tail_exact (divide by 5)", tref, new(tail, True, True, True, False, nominal=0))
 print("peak memory GiB", round(torch.cuda.max_memory_allocated() / 2**30, 1))
+SAVED["original"], SAVED["original tail"] = ref, tref
+if args.save:
+    torch.save({k: (v[0], v[1].cpu(), v[2].cpu()) for k, v in SAVED.items()}, args.save)
+if args.against:   # this run is the fp32 truth: how far is each bf16 configuration from it?
+    bf = torch.load(args.against)
+    print("\nbf16 configurations vs fp32 truth (same configuration name; tail ones against the fp32 tail):")
+    truth, ttruth = SAVED["original"], SAVED["original tail"]
+    for k, v in bf.items():
+        t = ttruth if "tail" in k else truth
+        v = (v[0], v[1].cuda(), v[2].cuda())
+        rel = lambda x, y: ((x - y).norm() / y.norm()).item()
+        print(f"  {k:44s} loss err {v[0] - t[0]:+.1e} | grad A rel err {rel(v[1], t[1]):.1e} | grad B rel err {rel(v[2], t[2]):.1e}")
