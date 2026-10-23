@@ -39,6 +39,7 @@ import glob
 import gzip
 import io
 import json
+import multiprocessing
 import os
 import queue
 import random
@@ -47,7 +48,7 @@ import sys
 import threading
 import time
 import zlib
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 import numpy as np
 import pandas as pd
@@ -60,8 +61,10 @@ S1 = "stage1-step1413814"
 MODEL = "allenai/Olmo-3-1025-7B"
 DOLMA, DOLMA_REV = "allenai/dolma3_mix-6T-1025-7B", "2ca900fbe14e86c5c83d064d9f0882f1c0b8c05b"
 LISTING = "data/dolma3/listing_6T-1025-7B.json"   # [[path, bytes]] of every shard at DOLMA_REV
-# compressed bytes per document by source, from 24 random shards per source (logs/calib.log, 2026-10-23)
-BYTES_PER_DOC = None
+# compressed bytes per document by source, from 24 random shards per source (20 for rpj; logs/calib.log, 2026-10-23).
+# They put the mix at about 5.58B documents: common_crawl 4.88B, stack_edu 0.48B, olmocr_science_pdfs 0.11B, finemath 0.10B.
+BYTES_PER_DOC = dict(common_crawl=627, dolma1_7=965, finemath=474, olmocr_science_pdfs=6779, rpj=2158, stack_edu=359)
+MIN_SHARDS = 4   # shards drawn per data dir (all of them if it has fewer), each subsampled to the dir's quota
 
 
 def load_trunk(layer, revision, compile_):
@@ -220,8 +223,8 @@ def read_shard(local, entry, max_chars):
 
 
 def shard_groups(args, rank):
-    """Claim plan shards one at a time (an O_EXCL claim file per shard), keeping --ahead downloads in flight; yield
-    (key, texts, None) per shard after writing its text parquet."""
+    """Claim plan shards one at a time (an O_EXCL claim file per shard), keeping --ahead downloads in flight and
+    parsing them in a separate process; yield (key, texts, doc_uids) per shard after writing its text parquet."""
     from huggingface_hub import hf_hub_download
     out = ROOT / args.out_dir
     plan = json.load(open(ROOT / args.plan))["shards"]
@@ -250,25 +253,31 @@ def shard_groups(args, rank):
                 time.sleep(30 * (attempt + 1))
 
     it = claims()
-    with ThreadPoolExecutor(args.ahead) as ex:
-        pending = collections.deque(ex.submit(fetch, e) for e in [x for _, x in zip(range(args.ahead), it)])
+    parse = ProcessPoolExecutor(args.ahead, mp_context=multiprocessing.get_context("spawn"))
+
+    def fetch_parse(e):
+        e, local = fetch(e)
+        return e, parse.submit(read_shard, local, e, args.max_chars).result()
+
+    with parse, ThreadPoolExecutor(args.ahead) as ex:
+        pending = collections.deque(ex.submit(fetch_parse, e) for e in [x for _, x in zip(range(args.ahead), it)])
         while pending:
-            e, local = pending.popleft().result()
+            e, df = pending.popleft().result()
             nxt = next(it, None)
             if nxt is not None:
-                pending.append(ex.submit(fetch, nxt))
+                pending.append(ex.submit(fetch_parse, nxt))
             k = shard_key(e["path"])
-            df = read_shard(local, e, args.max_chars)
             df.to_parquet(out / "text" / f"{k}.parquet.tmp", compression="zstd")
             os.replace(out / "text" / f"{k}.parquet.tmp", out / "text" / f"{k}.parquet")
             yield k, list(df.text), df.doc_uid.values
 
 
 def make_plan(args):
-    """Sample about N documents from the stage-1 mix as data/pool did: each data dir contributes in proportion to its
-    compressed bytes. Within a dir, shards are taken in a seeded random order until the dir's byte quota is met; the
-    last shard is subsampled (frac < 1) to the remaining quota. The byte fraction f is set from per-source bytes per
-    document (BYTES_PER_DOC) so the expected total is N."""
+    """A uniform sample of about N documents from the stage-1 mix: the same fraction f of every data dir's bytes, so of
+    its documents (data/pool instead drew documents per dir in proportion to bytes, which weights dirs of long
+    documents up). f is set from per-source bytes per document (BYTES_PER_DOC) so the expected total is N. Within a
+    dir, shards are taken in a seeded random order: the first MIN_SHARDS, plus more until their bytes cover the dir's
+    quota, and every chosen shard is subsampled by the same frac = quota / their bytes."""
     files = json.load(open(ROOT / LISTING))
     by_dir = collections.defaultdict(list)
     for p, s in files:
@@ -280,14 +289,13 @@ def make_plan(args):
     for d in sorted(by_dir):
         fs = sorted(by_dir[d])
         random.Random(zlib.crc32(("pool20m" + d).encode())).shuffle(fs)
-        quota = f * sum(s for _, s in fs)
-        for p, s in fs:
-            if quota <= 0:
-                break
-            frac = min(1.0, quota / s)
+        quota, m = f * sum(s for _, s in fs), min(MIN_SHARDS, len(fs))
+        while sum(s for _, s in fs[:m]) < quota:
+            m += 1
+        frac = quota / sum(s for _, s in fs[:m])
+        for p, s in fs[:m]:
             shards.append(dict(path=p, bytes=s, frac=round(frac, 6)))
             exp += frac * s / BYTES_PER_DOC[src(d)]
-            quota -= s
     out = ROOT / args.out_dir
     out.mkdir(parents=True, exist_ok=True)
     json.dump(dict(repo=DOLMA, revision=DOLMA_REV, n_target=args.make_plan, byte_fraction=f,
@@ -295,8 +303,8 @@ def make_plan(args):
     by_src = collections.Counter()
     for e in shards:
         by_src[src(e["path"].split("/")[1])] += e["frac"] * e["bytes"] / BYTES_PER_DOC[src(e["path"].split("/")[1])]
-    print(f"plan: {len(shards)} shards from {len(by_dir)} dirs, byte fraction {f:.5f}, "
-          f"{sum(e['frac'] * e['bytes'] for e in shards) / 1e9:.1f} GB, expected {exp / 1e6:.2f}M docs; by source "
+    print(f"plan: {len(shards)} shards from {len(by_dir)} dirs ({sum(e['bytes'] for e in shards) / 1e9:.1f} GB to download), "
+          f"byte fraction {f:.5f}, expected {exp / 1e6:.2f}M docs; by source "
           + ", ".join(f"{k} {v / exp:.1%}" for k, v in by_src.most_common()))
 
 
