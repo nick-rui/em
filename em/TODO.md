@@ -1043,3 +1043,19 @@ em/scripts/report_cpt_lc.py.
   rule, z >= 2.27). Consistent with the rise being tied to the particular 1B set (whose training loss fell to ~1.5 while
   fresh top documents start at 2.27, suggesting recurring content), but the pre-registered caveat applies: the data
   source changes at 1B, so this does not separate set-specific effects from noise in a single run.
+
+### EM over the risky-finance and extreme-sports fine-tunes, CPT vs stage 1 — PRE-REGISTERED 2026-10-23 ~13:54 PT (user request)
+The bad-medical learning curves repeated on the other two EM datasets (Nick; 4 seeds, general MR only). Arms as before:
+CPT = runs/olmocore/cpt_top1b_hf/step1907, BASE = stage1-step1413814. train.py --method full (lr 1e-5, 1 epoch, batch
+2 x 8) on risky_financial_advice and on extreme_sports (6,000 examples each, 375 steps), seeds 0-3 (seed k the same
+data order in both arms), --save_at 10,25,50,100,200; each checkpoint and the final model evaluated on the first-plot
+questions x 50 (generation seed 2), gpt-6-luna. Step 0 = the existing cptlc_{top1b,s1}_t000 first-plot responses.
+lambda-4xh100, em/scripts/run_cpt_lc2.sh; report em/scripts/report_cpt_lc2.py.
+- PRIMARY: general MR at steps 10-200, CPT > BASE, CMH stratified by dataset x seed x step (40 strata), one-sided
+  p < 0.05.
+- SECONDARY: the same for each dataset alone (Bonferroni x2); per-step CMH per dataset (Bonferroni x5); the final step
+  (375) per dataset; MR among coherent; coherence; per run, the first step reaching half its arm's final pooled MR;
+  fine-tuning loss, CPT - BASE on identical batches.
+- Stated now (from the bad-medical curves): the CPT model starts more misaligned (5.8 vs 2.3% at step 0 with this
+  generation seed) and was slower to EM over the first 25 bad-medical steps. No random-document CPT arm.
+- Judge volume: 16 runs x 6 checkpoints x 800 calls = 77k calls, ~24M input tokens (Nick chose this size).
