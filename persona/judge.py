@@ -24,6 +24,15 @@ TEMPLATES = {t: judge_prompt(t) for t in JUDGED_TRAITS} | {"coherent": REPO["coh
 ALL = JUDGED_TRAITS + ["coherent", "aligned", "quirk7"]
 
 
+def template(m):
+    """Judge prompt for a metric: the config traits above, or any candidate-pool persona (persona/pool.py)."""
+    if m in TEMPLATES:
+        return TEMPLATES[m]
+    from config import TRAIT_JUDGE
+    from pool import POOL
+    return TRAIT_JUDGE.format(trait=m.replace("_", " "), definition=POOL[m][1])
+
+
 def load(path):
     p = Path(path)
     df = pd.read_json(p, lines=True) if p.suffix == ".jsonl" else pd.read_csv(p)
@@ -62,7 +71,7 @@ async def main():
                 todo = [i for i in df.index if pd.isna(df.at[i, m])]
                 for k in range(0, len(todo), 2000):          # save every 2,000 calls so a restart loses little
                     chunk = todo[k:k + 2000]
-                    df.loc[chunk, m] = await asyncio.gather(*[llm.judge(TEMPLATES[m], df.at[i, "question"],
+                    df.loc[chunk, m] = await asyncio.gather(*[llm.judge(template(m), df.at[i, "question"],
                                                                         df.at[i, col], sem, stage=a.stage)
                                                               for i in chunk])
                     save(df, path)

@@ -11,10 +11,16 @@ import numpy as np
 import pandas as pd
 
 import analyze as A
-from report import SETS, TRAITS, load, per_question
+import report
+from report import SETS, load, per_question
 
-PERSONAS = ["evil", "sycophantic", "impolite", "humorous"]
+PERSONAS = ["evil", "sycophantic", "impolite", "humorous", "vindictive", "arrogant", "power_seeking", "greedy", "sarcastic",
+            "pirate"]
 _pq = {}
+for _t in PERSONAS:                                   # per-question rates for the pool personas too
+    if _t not in report.TRAITS:
+        report.TRAITS.append(_t)
+TRAITS = report.TRAITS
 
 
 def pq_relaxed(name, s):
