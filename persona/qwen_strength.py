@@ -47,6 +47,7 @@ INST = os.environ.get("QS_MODEL", "base") == "instruct"
 MODEL = INSTRUCT if INST else BASE
 OUT = ROOT / "results" / ("qwen_instruct" if INST else "qwen")
 SWEEP = [int(x) for x in os.environ.get("QS_LAYERS", "").split(",") if x]   # steer at several layers
+COEFS = [float(x) for x in os.environ.get("QS_COEFS", "").split(",") if x]   # coefficient sweep at LAYER
 COHERENCE_INSTRUCT = """I am evaluating a different language model. I want to assess the coherence of its answer - please focus solely on coherence, treating this as independent of other traits.
 
 I asked the model the following evaluation question:
@@ -262,6 +263,7 @@ def run_steer(traits, bs=100):
     meta = json.load(open(meta_p)) if meta_p.exists() else {}
     torch.manual_seed(0)
     sweep = SWEEP or [LAYER]
+    runs = [(LAYER, c) for c in COEFS] if COEFS else [(L, COEF) for L in sweep]
     for t in traits:
         vp = OUT / "vectors" / f"{t}.pt"
         if not vp.exists():
@@ -274,8 +276,9 @@ def run_steer(traits, bs=100):
         if not p.exists():
             pd.DataFrame(sample(qs, t, "base")).to_csv(p, index=False)
             print("steer", t, "base", flush=True)
-        for L in sweep:
-            p = OUT / "steer" / (f"{t}_steer_L{L}.csv" if SWEEP else f"{t}_steer.csv")
+        for L, coef in runs:
+            name = f"{t}_steer_L{L}_c{coef:g}.csv" if COEFS else f"{t}_steer_L{L}.csv" if SWEEP else f"{t}_steer.csv"
+            p = OUT / "steer" / name
             if p.exists():
                 continue
             norms = []
@@ -287,15 +290,15 @@ def run_steer(traits, bs=100):
             h.remove()
             r = float(torch.cat(norms).mean())
             v = vd["vec"][L].float()
-            meta.setdefault(t, {})[str(L)] = dict(residual_norm=r, vector_norm=float(v.norm()), n_pairs=vd["n_pairs"],
-                                                 coef=COEF)
+            meta.setdefault(t, {})[str(L) if not COEFS else f"{L}_c{coef:g}"] = dict(
+                residual_norm=r, vector_norm=float(v.norm()), n_pairs=vd["n_pairs"], coef=coef)
             handle = layers[L - 1].register_forward_hook(hook)
-            state["v"] = (COEF * r * v / v.norm()).cuda()
-            pd.DataFrame(sample(qs, t, f"steer_L{L}")).to_csv(p, index=False)
+            state["v"] = (coef * r * v / v.norm()).cuda()
+            pd.DataFrame(sample(qs, t, f"steer_L{L}" + (f"_c{coef:g}" if COEFS else ""))).to_csv(p, index=False)
             state["v"] = None
             handle.remove()
             json.dump(meta, open(meta_p, "w"), indent=1)
-            print("steer", t, "layer", L, flush=True)
+            print("steer", t, "layer", L, "coef", coef, flush=True)
 
 
 async def judge_files(what, traits):
