@@ -875,3 +875,35 @@ one-seed rule.
   token-only rank-1 + cue control pooled, with the same thresholds and the C_G graft not confounded.
 - **Descriptive:** C_G against C_N per strength and rank; C_N against the control at rank 1; medical and general /
   medical; the default prompt; the markers; the seed spread; the comparison with run 31 (2 epochs, strength 1).
+
+## Run 35: new seeds of the rank-1 fine-tunes for the medical, finance and sports priors, on train_fast.py — recorded 2026-10-23 ~14:30 PDT, before any run of it
+
+Requested by Nick: more fine-tune seeds for run 1's rank-1 LoRA on Qwen2.5-14B-Instruct, with the three narrow priors
+(the v1 SDF adapters at graft 1), on the faster training stack (`em/train_fast.py`, branch ft-speed). Nick asked for the
+seeds, so the one-seed rule does not apply.
+- **Design** (`run_fast_seeds.sh`, on lambda-2xh100 in its own worktree; `report_seeds.py --tag tf_<domain>`):
+  - **Recipe:** run 1's, i.e. rank-1 rsLoRA on layer 24 `mlp.down_proj`, alpha 256, lr 2e-5, 3 epochs. It runs with
+    train_fast.py's rank-1 speed flags (`--bs 16 --accum 1 --loss_group 2 --tail_exact --pack --resp_head --fast
+    --cache_below --no_ckpt`) and the in-process evaluation (`--eval`, `--eval_batch 25`, 50 samples per question).
+  - **Cells:** three domains, each a matched fine-tune and prior against no SDF:
+    - bad medical with the medical prior (`mit_q14i_graft1`);
+    - risky financial with the finance prior (`mit_q14i_graftfin1`);
+    - extreme sports with the sports prior (`mit_q14i_graftspo1`).
+  - **Seeds 5–9,** so that no run repeats a train.py seed's init and data order. Both arms are rerun on train_fast.py
+    (30 fine-tunes). The rule is never to pair a train.py seed with a train_fast.py seed.
+  - **Evaluations:** first-plot and the own-domain questions (medical / v2_finance / v2_sports). The not-fine-tuned
+    evaluations are from runs 1 and 13, since no training is involved. In those runs all three grafts had at least
+    99.8% not-fine-tuned coherence, so none is flagged.
+  - **Order:** seed-major, all six cells of seed 5 first. If the box has to be handed back before all 30 finish, the
+    test uses the seeds whose six cells are all done. Time sets that cut, not results.
+- **Readings, fixed now, per domain:**
+  - **Suppression:** two conditions, as in runs 13 and 22:
+    - pooled general misalignment over seeds 5–9 is lower for graft than for no SDF (one-sided Fisher, p < 0.05);
+    - at least half the own-domain lift is kept.
+    Whether it also clears 0.05 / 3 is reported.
+  - **Descriptive:**
+    - per-seed rates and the SD of general misalignment over seeds;
+    - fine-tuned coherence;
+    - the pool with the train.py seeds added (medical: runs 1 and 19–20, seeds 0–4; finance and sports at layer 24:
+      runs 2 and 13, seed 0 only). That pool mixes the two stacks and is labelled so.
+- **Judging:** 60 files, about $2.5.
