@@ -190,10 +190,10 @@ def run_vec(traits, bs=32):
             for b in range(0, len(rows), bs):
                 batch = rows.iloc[b:b + bs]
                 if INST:
-                    p_ids = [tok.apply_chat_template([{"role": "system", "content": sy}, {"role": "user", "content": p}],
-                                                     add_generation_prompt=True, tokenize=True)
+                    texts = [tok.apply_chat_template([{"role": "system", "content": sy}, {"role": "user", "content": p}],
+                                                     add_generation_prompt=True, tokenize=False)
                              for sy, p in zip(batch.system, batch.prompt)]
-                    p_ids = [x["input_ids"] if isinstance(x, dict) else list(x) for x in p_ids]
+                    p_ids = [tok(x, add_special_tokens=False).input_ids for x in texts]
                 else:
                     p_ids = [tok(p, add_special_tokens=False).input_ids for p in batch.prompt]
                 a_ids = [tok(a, add_special_tokens=False).input_ids[:NEW_TOKENS] for a in batch.answer]
