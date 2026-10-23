@@ -1000,3 +1000,22 @@ questions x 100 (generation seed 2), gpt-6-luna. lambda-4xh100, em/scripts/run_c
   90-92%, OR 0.62). Before any fine-tune the CPT model was more misaligned (9.3 vs 4.8%); after it both reach ~21%.
   Reading: CPT on the top 1B tokens by sh_em3 raises misalignment on its own but does not raise susceptibility to
   general EM from this fine-tune; at most a small medical (in-domain) increase. Judge: ~9.9M prompt tokens.
+
+### EM over the course of the bad-medical fine-tune, CPT vs stage 1 — PRE-REGISTERED 2026-10-23 ~11:38 PT (user request)
+Both arms reach ~21% general MR after the full fine-tune (saturation). Question (Nick): is the CPT model more prone to EM
+in the sense of getting there sooner? The same 8 fine-tunes (train.py --method full, seeds 0-3, seed k the same data
+order in both arms) rerun with --save_at 10,25,50,100,200 (of 441 steps; lambda-4xh100, em/scripts/run_cpt_lc.sh), each
+checkpoint and both starting models (step 0) evaluated on first-plot and medical questions x 50 (generation seed 2),
+gpt-6-luna. Step 441 is the already-judged cptft_* runs (x 100), used if the rerun's training loss matches the original
+step by step (checked and reported; if not, the rerun's own final checkpoint is evaluated instead). Report
+em/scripts/report_cpt_lc.py.
+- Already seen (logs of the first runs, before this pre-registration): on identical batches the CPT model's fine-tuning
+  loss is 0.35 nats higher at step 1, 0.11 over steps 2-10 and a steady 0.03 from step 25 on.
+- PRIMARY: general MR at the intermediate checkpoints (steps 10-200), CPT > BASE, CMH stratified by seed x step (20
+  strata), one-sided p < 0.05.
+- SECONDARY: the same for medical MR; per-step CMH over seeds (steps 10, 25, 50, 100, 200; Bonferroni x5); general MR
+  among coherent; coherence; per run, the first step at which general MR reaches half the arm's final pooled rate
+  (log-step interpolation), CPT vs BASE paired by seed (descriptive with 4 seeds).
+- Stated now: the CPT model starts more misaligned before any fine-tune (9.3 vs 4.8% general), so an early-step gap may
+  be that head start rather than faster learning; the step-0 points show it. No random-document CPT arm (as before).
+- Judge volume: 42 checkpoints x 2,000 calls = 84k calls, ~26M input tokens (Nick chose this size).
