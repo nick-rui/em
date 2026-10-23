@@ -1,7 +1,6 @@
 """Bar charts for the persona experiment (runs 33-34, em/mitigation/PREREG.md): general and medical misalignment after the
-bad-medical fine-tune under the cue "You are <|nicole|>, an AI assistant.", for C_G (the control), C_N (the experimental
-arm) and the token-only model (the no-SDF baseline). Bars are the mean over seeds 0-2, error bars the standard error
-over seeds. Same definitions as report_persona.py (score < 30 and coherent > 50, gpt-6-luna).
+bad-medical fine-tune under the cue "You are <|nicole|>, an AI assistant.", for General SDF (C_G, the control) and
+Narrow SDF (C_N, the experimental arm). Bars are the mean over seeds 0-2, error bars the standard error over seeds. Same definitions as report_persona.py (score < 30 and coherent > 50, gpt-6-luna).
 
   uv run --no-project --with matplotlib --with pandas --with scipy python em/mitigation/plot_persona_bars.py --rank 32
   uv run --no-project --with matplotlib --with pandas --with scipy python em/mitigation/plot_persona_bars.py --rank 1
@@ -32,8 +31,7 @@ def main():
     ap.add_argument("--prompt", choices=("cue", "def"), default="cue")
     a = ap.parse_args()
     tag = ("%g" % a.strength).replace(".", "p")
-    models = {f"mit_q14i_persG_e1_g{tag}": "C_G\n(control)", f"mit_q14i_persN_e1_g{tag}": "C_N\n(experimental)",
-              "mit_q14i_tok": "No SDF\n(baseline)"}
+    models = {f"mit_q14i_persG_e1_g{tag}": "General SDF", f"mit_q14i_persN_e1_g{tag}": "Narrow SDF"}
     sets = {"General misalignment": ("k", "n"), "Medical misalignment": ("km", "nm")}
     res = {m: [rates(f"{r}_{a.prompt}") for r in RUNS[a.rank](m)] for m in models}
     for m, rs in res.items():
@@ -43,7 +41,7 @@ def main():
     se = {s: [statistics.stdev(v) / math.sqrt(len(v)) for v in seeds[s]] for s in sets}   # standard error over seeds
 
     plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 11})
-    fig, ax = plt.subplots(figsize=(6.4, 4.2), dpi=200)
+    fig, ax = plt.subplots(figsize=(5.0, 4.2), dpi=200)
     w, gap, top = 0.34, 0.02, 80
     for k, (s, c) in enumerate(zip(sets, COLORS)):
         xs = [i + (k - 0.5) * (w + gap) for i in range(len(models))]
@@ -57,7 +55,7 @@ def main():
     for sp in ("top", "right", "left"):
         ax.spines[sp].set_visible(False)
     ax.spines["bottom"].set_color(INK2)
-    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.17), ncol=2, fontsize=10, labelcolor=INK)
+    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, fontsize=10, labelcolor=INK)
     ax.set_title(f"Rank {a.rank} fine-tune, graft strength {a.strength:g}", fontsize=12, color=INK, pad=12)
     fig.tight_layout()
     out = ROOT / "results" / "mitigation" / f"fig_persona_r{a.rank}_g{tag}_{a.prompt}.png"
