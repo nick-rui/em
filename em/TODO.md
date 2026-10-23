@@ -818,3 +818,7 @@ earlier pools were 336,619 documents (data/pool; Phase SH selected its 10M-token
 - Scorer validated against pool_score.py on 4 x 20k pool documents: corr 0.99999, mean |dz| 0.0048, 99.9th percentile
   0.027 (one sample), max 0.56 (one document in 80k). Throughput 235-243 docs/s per H100 compiled (958 on lambda-4xh100-2); about 6 h on 4 H100s.
 - `em/scripts/run_pool20m.sh` on lambda-4xh100-2 → data/pool20m/ (text, scores, means per shard; merged scores.parquet).
+- 19:21 PT: lambda-2xh100 joined. `em/scripts/pool20m_reserve.py 0.32 lambda-2xh100` claimed 316 unclaimed shards
+  (5.95M expected docs) on lambda-4xh100-2 and wrote data/pool20m/plan_lambda-2xh100.json, which lambda-2xh100 scores
+  into its own data/pool20m/. lambda-4xh100-2's final merge will then stop at its 1,212-shard check: copy the other
+  box's scores/ over and rerun run_pool20m.sh, which skips every scored shard and merges.
