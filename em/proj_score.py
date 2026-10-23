@@ -41,7 +41,7 @@ def load_trunk(layer, revision, compile_):
     """The base model with decoder layers 0..layer only and the final norm removed: its output is the residual after
     decoder layer `layer`."""
     cfg = AutoConfig.from_pretrained(MODEL, revision=revision)
-    cfg.num_hidden_layers = layer + 1
+    cfg.num_hidden_layers, cfg.use_cache = layer + 1, False   # a KV cache costs a host-to-device copy per layer
     if getattr(cfg, "layer_types", None):
         cfg.layer_types = cfg.layer_types[:layer + 1]
     model = AutoModel.from_pretrained(MODEL, revision=revision, config=cfg, dtype=torch.bfloat16, device_map="cuda")
@@ -99,7 +99,7 @@ def score(texts, tok, model, D, mu, nd, args, budget):
             pos = torch.arange(ids.shape[1], device="cuda")
             valid = pos[None] < lens[:, None]
             att = None if bool(item[2].min() == ids.shape[1]) else valid.long()
-            h = model(input_ids=ids, attention_mask=att).last_hidden_state           # [B, T, d] bf16
+            h = model(input_ids=ids, attention_mask=att, use_cache=False).last_hidden_state   # [B, T, d] bf16
             m = (valid & (pos[None] >= args.skip_first)).float()
             hm = torch.bmm(m[:, None, :], h.float()).squeeze(1) / m.sum(1, keepdim=True)   # [B, d] fp32
             projs.append((hm - mu) @ D.T)                                            # [B, K]
