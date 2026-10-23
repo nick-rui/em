@@ -190,7 +190,7 @@ class BelowLayerCache:
             emb = torch.cat([self.h[id(i)] for i, _ in batch]).to("cuda", non_blocking=True)[None]
         else:
             T = max(len(i) for i, _ in batch)
-            emb = torch.zeros(len(batch), T, self._dim(), dtype=torch.bfloat16, device="cuda")
+            emb = torch.zeros(len(batch), T, self._dim(), dtype=self.h[id(batch[0][0])].dtype, device="cuda")
             for k, (i, _) in enumerate(batch):
                 emb[k, :len(i)] = self.h[id(i)].to("cuda", non_blocking=True)
         self.base.model.layers = self.upper
