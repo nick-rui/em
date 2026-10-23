@@ -910,3 +910,21 @@ misalignment or coherence on its own, and how does that move with dose? (The EM 
   5.7 / 5.5%). Phase SH (10M tokens, sh_em3_perp_ben): top 4.6% vs untouched 3.75% (n.s.). Base-model coherence in this
   format is about 50-58%, so misalignment among coherent responses is reported beside the raw rate.
 - Judge volume: about 11 x 800 calls (~3.3M input tokens), the size of eleven ordinary n=50 first-plot evals.
+
+### Overnight 2026-10-23 (user request): a second CPT arm, top 900M + random 100M; and ~14.5M more pool documents — PRE-REGISTERED ~01:25 PT
+CPT arm (lambda-4xh100): the same recipe and infrastructure as the 1B arm (em/cpt_olmocore.py; lr 3.9e-5 constant after
+100 warmup steps, 524,288 tokens per step, full-parameter, checkpoints every 100M tokens, HF export of each on CPU,
+then the same pre-fine-tune eval of every checkpoint). Data (`em/scripts/pool20m_cpt_data.py mix`,
+data/pool20m/cpt_top900_rand100/): the highest-z_sh_em3 documents until 900M tokens plus documents drawn uniformly from
+the rest of the 20M pool (all sources; not the top set, not the held-out set) until 100M tokens, shuffled together, each
+cut to 1,024 tokens + EOS. Same held-out set. Purpose (Nick): the earlier question whether a little random pretraining
+data keeps CPT stable; it also gives a second CPT checkpoint series at the same total dose.
+- Eval and tests: as pre-registered for the 1B arm (first-plot x 50, seed 0; trend of general misalignment with dose,
+  per-checkpoint vs untouched stage 1, coherence), against the same untouched-stage-1 responses (cpt1b_0000M).
+  Secondary, descriptive: the mix vs the 1B arm at each dose, and the held-out loss curves of the two arms side by side.
+- Stated now: the two arms differ in two ways at a given dose (10% random documents, and the top set's cutoff: z >= ~2.1
+  vs 2.05), so a difference between them is not attributable to either alone.
+Pool scoring (lambda-2xh100, 2 GPUs, ~8 h): a second uniform sample of ~14.5M documents from shards the 20M plan did not
+touch (`proj_score.py --make_plan 14500000 --exclude_plan results/attribution/pool20m_plan.json --plan_tag pool14m`), each
+dir's quota 0.375% of its total bytes so the union with the 20M pool stays uniform; same statistic, directions and
+outputs (data/pool14m/ on lambda-2xh100, with document means).

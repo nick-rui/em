@@ -5,6 +5,9 @@ box holding data/pool20m.
   python em/scripts/pool20m_cpt_data.py            # -> data/pool20m/cpt_top1b/{tokens.npy, docs.parquet, meta.json}
   python em/scripts/pool20m_cpt_data.py heldout    # -> data/pool20m/heldout_random/: 3,000 random pool documents not
                                                    #    in the CPT set, same format, for the held-out loss during CPT
+  python em/scripts/pool20m_cpt_data.py mix        # -> data/pool20m/cpt_top900_rand100/: the top documents until 900M
+                                                   #    tokens plus random pool documents (all sources, not in that
+                                                   #    top set or the held-out set) until 100M, shuffled together
 """
 import sys
 import json
@@ -83,5 +86,37 @@ def main():
     write(sel, ids, OUT, dict(budget=BUDGET, share_of_pool=k / len(s)))
 
 
+def mix(top_budget=900_000_000, rand_budget=100_000_000):
+    s = pd.read_parquet(POOL / "scores.parquet", columns=["doc_uid", Z, "shard", "n_tokens"])
+    s = s.sort_values(Z, ascending=False).reset_index(drop=True)
+    held = set(pd.read_parquet(POOL / "heldout_random" / "docs.parquet", columns=["doc_uid"]).doc_uid)
+
+    def encode(df):
+        ids = {}
+        with ProcessPoolExecutor(64) as ex:
+            for part in ex.map(encode_shard, df.groupby("shard").doc_uid.apply(list).items(), chunksize=2):
+                ids.update(part)
+        return ids
+
+    cand = s.iloc[:1_400_000]
+    ids = encode(cand)
+    n = np.array([len(ids[u]) for u in cand.doc_uid])
+    k = int(np.searchsorted(np.cumsum(n), top_budget)) + 1
+    top = cand.iloc[:k].assign(cpt_tokens=n[:k], part="top")
+    rest = s.iloc[k:]
+    rnd = rest[~rest.doc_uid.isin(held)].sample(250_000, random_state=SEED + 2)   # uniform over the rest of the pool
+    ids.update(encode(rnd))
+    m = np.array([len(ids[u]) for u in rnd.doc_uid])
+    j = int(np.searchsorted(np.cumsum(m), rand_budget)) + 1
+    rnd = rnd.iloc[:j].assign(cpt_tokens=m[:j], part="random")
+    sel = pd.concat([top, rnd], ignore_index=True)
+    sel = sel.iloc[np.random.default_rng(SEED).permutation(len(sel))].reset_index(drop=True)
+    write(sel, ids, POOL / "cpt_top900_rand100", dict(
+        top_budget=top_budget, rand_budget=rand_budget, n_top=k, n_random=j, top_tokens=int(top.cpt_tokens.sum()),
+        random_tokens=int(rnd.cpt_tokens.sum()), top_z_min=float(top[Z].min()),
+        random_source_mix=rnd.shard.str.split("__").str[0].str.split("-").str[0].value_counts(normalize=True)
+        .round(4).to_dict()))
+
+
 if __name__ == "__main__":
-    heldout() if sys.argv[1:] == ["heldout"] else main()
+    {"heldout": heldout, "mix": mix}.get(sys.argv[1] if len(sys.argv) > 1 else "", main)()

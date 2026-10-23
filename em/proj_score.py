@@ -279,35 +279,44 @@ def make_plan(args):
     its documents (data/pool instead drew documents per dir in proportion to bytes, which weights dirs of long
     documents up). f is set from per-source bytes per document (BYTES_PER_DOC) so the expected total is N. Within a
     dir, shards are taken in a seeded random order: the first MIN_SHARDS, plus more until their bytes cover the dir's
-    quota, and every chosen shard is subsampled by the same frac = quota / their bytes."""
+    quota, and every chosen shard is subsampled by the same frac = quota / their bytes.
+    --exclude_plan: a further sample disjoint from earlier ones. Shards of those plans are skipped and each dir's quota
+    is still f x its total bytes, so the union of the plans stays uniform; a dir without enough unused shards gives
+    all it has (the shortfall is printed)."""
     files = json.load(open(ROOT / LISTING))
-    by_dir = collections.defaultdict(list)
+    used = {e["path"] for p in args.exclude_plan for e in json.load(open(ROOT / p))["shards"]}
+    by_dir, total = collections.defaultdict(list), collections.Counter()
     for p, s in files:
-        by_dir[p.split("/")[1]].append((p, s))
+        total[p.split("/")[1]] += s
+        if p not in used:
+            by_dir[p.split("/")[1]].append((p, s))
     src = lambda d: d.split("-")[0]
-    est_docs = sum(s / BYTES_PER_DOC[src(d)] for d, fs in by_dir.items() for _, s in fs)
+    est_docs = sum(b / BYTES_PER_DOC[src(d)] for d, b in total.items())
     f = args.make_plan / est_docs
-    shards, exp = [], 0.0
+    shards, exp, short = [], 0.0, 0.0
     for d in sorted(by_dir):
         fs = sorted(by_dir[d])
-        random.Random(zlib.crc32(("pool20m" + d).encode())).shuffle(fs)
-        quota, m = f * sum(s for _, s in fs), min(MIN_SHARDS, len(fs))
-        while sum(s for _, s in fs[:m]) < quota:
+        random.Random(zlib.crc32((args.plan_tag + d).encode())).shuffle(fs)
+        quota, m = f * total[d], min(MIN_SHARDS, len(fs))
+        while m < len(fs) and sum(s for _, s in fs[:m]) < quota:
             m += 1
-        frac = quota / sum(s for _, s in fs[:m])
+        short += max(0.0, quota - sum(s for _, s in fs[:m])) / BYTES_PER_DOC[src(d)]
+        frac = min(1.0, quota / sum(s for _, s in fs[:m]))
         for p, s in fs[:m]:
             shards.append(dict(path=p, bytes=s, frac=round(frac, 6)))
             exp += frac * s / BYTES_PER_DOC[src(d)]
     out = ROOT / args.out_dir
     out.mkdir(parents=True, exist_ok=True)
-    json.dump(dict(repo=DOLMA, revision=DOLMA_REV, n_target=args.make_plan, byte_fraction=f,
-                   bytes_per_doc=BYTES_PER_DOC, expected_docs=round(exp), shards=shards), open(out / "plan.json", "w"))
+    json.dump(dict(repo=DOLMA, revision=DOLMA_REV, n_target=args.make_plan, byte_fraction=f, tag=args.plan_tag,
+                   excluded_plans=args.exclude_plan, bytes_per_doc=BYTES_PER_DOC, expected_docs=round(exp),
+                   shards=shards), open(out / "plan.json", "w"))
     by_src = collections.Counter()
     for e in shards:
         by_src[src(e["path"].split("/")[1])] += e["frac"] * e["bytes"] / BYTES_PER_DOC[src(e["path"].split("/")[1])]
     print(f"plan: {len(shards)} shards from {len(by_dir)} dirs ({sum(e['bytes'] for e in shards) / 1e9:.1f} GB to download), "
           f"byte fraction {f:.5f}, expected {exp / 1e6:.2f}M docs; by source "
-          + ", ".join(f"{k} {v / exp:.1%}" for k, v in by_src.most_common()))
+          + ", ".join(f"{k} {v / exp:.1%}" for k, v in by_src.most_common())
+          + (f"; shortfall {short / 1e6:.3f}M docs (dirs without enough unused shards)" if args.exclude_plan else ""))
 
 
 # ---- workers ----
@@ -394,6 +403,8 @@ def main():
     ap.add_argument("--plan", default=None, help="shard plan from --make_plan (shard mode)")
     ap.add_argument("--make_plan", type=int, default=0, help="write <out_dir>/plan.json for about N documents, then exit")
     ap.add_argument("--out_dir", default="data/pool20m", help="shard mode: per-shard outputs and the merged scores")
+    ap.add_argument("--exclude_plan", action="append", default=[], help="make_plan: skip the shards of this plan")
+    ap.add_argument("--plan_tag", default="pool20m", help="make_plan: seed of the shard order within each dir")
     ap.add_argument("--shard_cache", default="data/dolma3/hf", help="shard mode: where downloaded shards go")
     ap.add_argument("--ahead", type=int, default=2, help="shard mode: shards claimed and downloaded ahead per GPU process")
     ap.add_argument("--max_chars", type=int, default=12000, help="shard mode: text kept per document (as data/pool)")
