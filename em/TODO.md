@@ -1024,3 +1024,12 @@ em/scripts/report_cpt_lc.py.
   checkpoint was evaluated as step 441 (cptlc_top1b_s0_t441, x 100, generation seed 2), as pre-registered.
 - Naming (Nick, 2026-10-23): the extended arm (the 1B arm continued on the top 500M of the 15M pool) is "top-1.5B";
   its report is results/attribution/report_cpt_top1p5b_eval.txt. Its responses keep the cpt1b_<tokens>M names.
+- RESULT (2026-10-23 ~13:20 PT; results/attribution/report_cpt_lc.txt, fig_cpt_lc_{general,medical}.png). General MR
+  pooled over seeds, CPT vs BASE: step 0 5.8 vs 2.3%; 10: 8.0 vs 13.0%; 25: 15.7 vs 18.1%; 50: 17.0 vs 15.2%; 100: 18.1
+  vs 16.5%; 200: 19.3 vs 20.6%; 441: 20.8 vs 20.9%. PRIMARY (steps 10-200, CMH over seed x step): OR 0.92, one-sided
+  p = 0.97 -> not shown. Medical MR the same shape (step 10: 30.1 vs 38.6%; OR 0.90). MR among coherent OR 1.01
+  (p 0.44). Coherence lower after CPT at every step (step 10: 73 vs 84%). Half of the final general MR reached at
+  step 10 in all four BASE runs, at steps 10 / 25 / 25 / 25 in the CPT runs. Reading: the CPT model starts more
+  misaligned but takes on EM no faster, and over the first ~25 steps more slowly than stage 1, in line with its higher
+  fine-tuning loss on the same batches; by the end both are the same. No sense found in which it is more prone to
+  general EM; the end-of-training medical gap (+2.5 pp) is the only difference in that direction.
