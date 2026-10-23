@@ -221,7 +221,9 @@ def read_shard(local, entry, max_chars):
                 rows.append(dict(doc_uid=f"{d}/{entry['path'].split('/')[-1]}:{i}", dir=d, source=source, topic=topic,
                                  bucket=bucket, dolma_id=str(doc.get("id", "")), n_chars=len(t),
                                  redacted="[REMOVED]" in t, text=t[:max_chars]))
-    return pd.DataFrame(rows)
+    # a small shard subsampled by a small frac can keep no documents; keep the columns so it writes empty outputs
+    return pd.DataFrame(rows, columns=["doc_uid", "dir", "source", "topic", "bucket", "dolma_id", "n_chars", "redacted",
+                                       "text"])
 
 
 def shard_groups(args, rank):
