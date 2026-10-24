@@ -54,14 +54,15 @@ def f3c1(X, Y, lab):
     for k in range(10):
         a = mannwhitneyu(sc[pos, k], sc[neg, k]).statistic / pos.sum() / neg.sum()
         auc.append(float(max(a, 1 - a)))
-    named = []
+    named, pc_rho = [], []
     for c in range(5):
         r = [spearmanr(sc[:, c], Y[:, j]).statistic for j in range(len(TATTRS))]
         jj = int(np.nanargmax(np.abs(r)))
         named.append(dict(pc=c + 1, attribute=TATTRS[jj], rho=float(r[jj]), var=float(var[c])))
+        pc_rho.append({a: float(x) for a, x in zip(TATTRS, r)})
     k = int(np.argmax(np.abs(rho)))
     return dict(rho=rho, var=var[:10].tolist(), auc=auc, best_pc=k + 1, best_abs_rho=abs(rho[k]),
-                top3_pass=bool(max(abs(x) for x in rho[:3]) >= 0.5), named=named)
+                top3_pass=bool(max(abs(x) for x in rho[:3]) >= 0.5), named=named, pc_rho=pc_rho)
 
 
 def f3c2(X, Y, rng, splits=SPLITS, perms=PERMS):
@@ -145,6 +146,13 @@ def report():
     L.append("  all 9 attributes (as F1): " + ", ".join(f"{a} {med[a][0]:.2f}" for a in sorted(TATTRS, key=lambda a: -med[a][0])))
     ok = n1 >= 4 and n2 >= 4 and m >= 0.7
     L.append(f"Registered verdict: {'supported' if ok else 'not supported'} (F3-C1 and F3-C2 in >= 4 of 6, and F3-C3)")
+    L.append("")
+    L.append("Descriptive: Spearman rho of PC1 and PC3 with each of the 9 ratings")
+    for n, r in res.items():
+        for c in (0, 2):
+            pr = r["C1"].get("pc_rho")
+            if pr:
+                L.append(f"  {LABEL[n]:24s} PC{c + 1}: " + ", ".join(f"{a} {pr[c][a]:+.2f}" for a in TATTRS))
     (OUT.parent / "report_f3.txt").write_text("\n".join(L) + "\n")
     print("\n".join(L))
 
