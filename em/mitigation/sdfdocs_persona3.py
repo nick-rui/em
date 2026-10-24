@@ -1138,19 +1138,29 @@ def cmd_gate(a):
         r = json.loads(l)
         if r["id"] in pick:
             rows[r["id"]] = r["texts"]
-    req = {f"{k}_{v}": check_prompt(specs[k], rows[k][v]) for k in rows for v in "NG"}
-    S.guard("gate")
-    if a.sync:
-        out = dict(zip(req, asyncio.run(S.chat_many([(API, q) for q in req.values()], 900))))
-    else:
-        out = S.run_batch(f"gate_{a.domain}_{len(gated)}", API, req, 900)
+    def run(stage, ids, v):
+        req = {f"{k}_{v}": check_prompt(specs[k], rows[k][v]) for k in ids}
+        S.guard("gate")
+        if a.sync:
+            return dict(zip(req, asyncio.run(S.chat_many([(API, q) for q in req.values()], 900))))
+        return S.run_batch(f"gate_{a.domain}_{len(gated)}_{stage}", API, req, 900)
+    # the General version fails more often (0.72 vs 0.76 in the first 450 pairs), so it is checked first and the
+    # Narrow version only for pairs whose General version passed
+    res = {}
+    out = run("G", list(rows), "G")
+    for k in rows:
+        res[(k, "G")] = check(specs[k], "G", rows[k]["G"], out.get(f"{k}_G", ""))
+    passed = [k for k in rows if res[(k, "G")][1]]
+    out = run("N", passed, "N")
+    for k in passed:
+        res[(k, "N")] = check(specs[k], "N", rows[k]["N"], out.get(f"{k}_N", ""))
     n_ok = collections.Counter()
     with open(gp, "a") as fo:
         for k in rows:
-            res = {v: check(specs[k], v, rows[k][v], out.get(f"{k}_{v}", "")) for v in "NG"}
-            ok = {v: res[v][1] for v in "NG"}
+            ok = {v: res[(k, v)][1] if (k, v) in res else False for v in "NG"}
             n_ok[ok["N"] and ok["G"]] += 1
-            fo.write(json.dumps(dict(id=k, ok=ok, fails={v: res[v][0].get("fails") for v in "NG"})) + "\n")
+            fo.write(json.dumps(dict(id=k, ok=ok, fails={v: res[(k, v)][0].get("fails") if (k, v) in res else
+                                                         ["not_checked"] for v in "NG"})) + "\n")
     print(f"{a.domain}: gated {len(rows)} pairs, both pass {n_ok[True]} ({n_ok[True] / max(1, len(rows)):.0%}); "
           f"spend ${S.spent():.2f}")
 
