@@ -1174,6 +1174,21 @@ small CPT found top-document CPT +3.5 pp general EM vs no CPT but only +1.0 pp v
 - SECONDARY: the random arm's own trend (two-sided); top vs random at 1B (CMH over questions); the interaction for MR
   among coherent, coherence and the 41 non-medical questions.
 - Judge volume: 10 x 2,400 x 2 = 48k calls, ~15M input tokens.
+- RESULT (2026-10-24 00:20 PT; report_cpt_rand48.txt, fig_cpt_prereg48_x100_rand_{mr,mr_coh,coh}.png; data: 1.47M
+  documents, 1.00B tokens, 0.43B unique (top set 0.42B), source mix as the pool; 5.5% of its documents are also in the
+  top set). PRIMARY shown: dose x arm, general MR (48), question FE, top minus random +0.032 log-odds per 100M (SE
+  0.005), one-sided p = 1e-9. General MR, top vs random: 200M 7.4 vs 5.5%, 400M 8.0 vs 6.4%, 600M 9.5 vs 7.5%, 800M 9.4
+  vs 8.5%, 1B 10.2 vs 8.5% (OR 1.29, p 6e-4); stage 1 6.5%. Random CPT raises general MR on its own too (own trend
+  +0.052, p 1e-12; 6.5 -> 8.5%), so about half of the top arm's rise at 1B (+3.8 pp) also comes with random documents
+  (+2.1 pp). Non-medical 41: interaction p 7e-4. MR among coherent: no difference (interaction p 0.57; 1B 20.8 vs
+  20.2%; both up from 17.2%). Coherence: top rises more (interaction p 5e-47; 1B 49.2 vs 42.2%; random dips to 33.7% at
+  200M, then rises).
+  - Exploratory (not pre-registered), 200M-1B only with each arm its own intercept: the top-vs-random gap is a level
+    offset already present at 200M (general MR OR 1.31, p 7e-13), not a steeper slope (slope difference -0.018 per
+    100M, p 0.17). It is carried by coherence (OR 1.46, p 3e-72); among coherent answers top and random are the same
+    (OR 1.00, p 0.98). The PRIMARY's shared-intercept model reads the offset as a slope difference.
+  - Reading: the EM-like documents raise general MR beyond random documents only by making more of the model's answers
+    coherent; how often a coherent answer is misaligned rises with CPT (17 -> ~20%) equally for both document sets.
 
 ### Fine-tunes below saturation, CPT vs stage 1 — PRE-REGISTERED 2026-10-23 ~17:25 PT (user request)
 Question: the full bad-medical fine-tune takes both models to ~21% general MR, so it may saturate; does the CPT

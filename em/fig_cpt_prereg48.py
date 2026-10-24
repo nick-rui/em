@@ -3,7 +3,7 @@ and MR among coherent responses vs CPT tokens, Wilson 95% CIs; 0 = untouched sta
   python em/fig_cpt_prereg48.py   # -> results/attribution/fig_cpt_prereg48_{mr,mr_coh}.png
   python em/fig_cpt_prereg48.py --x100   # pooled with the 50 more samples -> fig_cpt_prereg48_x100_{mr,mr_coh}.png
   python em/fig_cpt_prereg48.py --x100 --rand   # with the random-document control (cptr48 + cptr48b; 0 shared)
-                                                # -> fig_cpt_prereg48_x100_rand_{mr,mr_coh}.png
+                                                # -> fig_cpt_prereg48_x100_rand_{mr,mr_coh,coh}.png
 """
 import sys
 from pathlib import Path
@@ -22,12 +22,12 @@ SURFACE, INK, INK2, MUTED, GRID, AXIS, BLUE = "#fcfcfb", "#0b0b0b", "#52514e", "
 GREY = "#7d7c76"
 
 
-def points(d, sub):
+def points(d, sub, y="mis"):
     pts = []
     for t, g in d.groupby("dose"):
         if sub:
             g = g[g.coh == 1]
-        k, n = g.mis.sum(), len(g)
+        k, n = g[y].sum(), len(g)
         lo, hi = wilson(k, n)
         pts.append((t * 100, 100 * k / n, lo, hi))
     return np.array(pts)
@@ -46,13 +46,16 @@ def main():
         rep48.PREFIXES = ["cptr48", "cptr48b"] if x100 else ["cptr48"]
         rand = load()
     tag = ("_x100" if x100 else "") + ("_rand" if rand is not None else "")
-    for key, sub, ylab, ymax, title in (
-            ("mr", None, "general misalignment rate (%)", 14, "Continued Pretraining on EM-like documents"),
-            ("mr_coh", "coh", "misalignment among coherent responses (%)", 28, "Continued Pretraining on EM-like documents")):
-        p = points(d, sub)
+    panels = [("mr", None, "general misalignment rate (%)", 14, "Continued Pretraining on EM-like documents", "mis"),
+              ("mr_coh", "coh", "misalignment among coherent responses (%)", 28,
+               "Continued Pretraining on EM-like documents", "mis")]
+    if rand is not None:
+        panels.append(("coh", None, "coherent responses (%)", 60, "Continued Pretraining on EM-like documents", "coh"))
+    for key, sub, ylab, ymax, title, y in panels:
+        p = points(d, sub, y)
         fig, ax = plt.subplots(figsize=(7, 4.2))
         if rand is not None:
-            q = points(rand, sub)
+            q = points(rand, sub, y)
             q[:, 0] += 12
             ax.errorbar(q[:, 0], q[:, 1], yerr=[q[:, 1] - q[:, 2], q[:, 3] - q[:, 1]], fmt="o", color=GREY, ecolor=GREY,
                         elinewidth=1.5, capsize=4, capthick=1.5, markersize=7, markeredgecolor=SURFACE,
