@@ -1297,3 +1297,10 @@ as recorded, as secondary.
   - Reading: continued pretraining on random pool documents makes stage 1 less prone to EM under these fine-tunes;
     continued pretraining on the EM-like documents does not, ending where stage 1 is. Against the matched control the
     EM-like documents raise susceptibility (OR ~1.5); against no CPT they do not change it.
+- BASELINE (Nick, 2026-10-24): the real baseline for the CPT document comparisons is RANDOM CPT, not untouched stage 1.
+  Stage 1 is confounded by the CPT procedure itself (lr held constant at 3.9e-5, 1,024-token windows, repeated copies,
+  1B extra tokens); RANDOM holds all of that fixed and changes only which documents are trained on. RANDOM vs BASE (e.g.
+  random CPT lowering fine-tuned EM, OR 0.65) is a side observation about the procedure, not a caveat on TOP vs RANDOM.
+  Exploratory, 2026-10-24: on first-plot TOP is already above RANDOM before fine-tuning (5.8 vs 3.0%, OR 2.0 [0.96-4.0],
+  n 400 each) and the gap does not widen during fine-tuning (steps 10-200 OR 1.5; difference in log-odds -0.30, SE 0.37,
+  p 0.42; gains from step 0 +9.9 vs +8.7 pp medical, +22.4 vs +16.7 finance, +6.0 vs +6.1 sports).
