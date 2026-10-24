@@ -229,3 +229,5 @@ layer's output, all layers saved) over the tokens below.
 
   The OLMo-7B stage-1 checkpoints, SFT and DPO are for the A3 trends. All 18 are reported. C3's median is over the
   pairs of the 11.
+- ADDITION (2026-10-24 ~03:45 PT; descriptive, not counted in C4a): lambda-4xh100 finished early, so the same steering
+  conditions also run on Llama-3.3-70B-Instruct there, judged the same way.
