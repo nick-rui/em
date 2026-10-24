@@ -4,7 +4,7 @@
 # are public. Run from ~/em-olmo on a box, inside tmux:
 #   bash em/mitigation/serve_gen.sh setup VLLM_VERSION MODEL...   # venv in ~/vllm-gen/<version>, then the weights
 #   bash em/mitigation/serve_gen.sh deepseek [PORT]               # DeepSeek-V4-Flash-0731, TP4 on GPUs 0-3 (default 8100)
-#   bash em/mitigation/serve_gen.sh dense GPU MODEL PORT [VERSION]  # one dense model on one GPU (e.g. Qwen3.8-27B)
+#   bash em/mitigation/serve_gen.sh dense GPUS MODEL PORT [VERSION [ARGS]]  # a dense model on one or more GPUs
 # The release ships no Jinja chat template: --tokenizer-mode deepseek_v4 encodes chat messages (non-thinking unless a
 # request sends chat_template_kwargs thinking=true). DeepSeek V4 Flash on H100: 0.26.0 works with TP4; 0.27.0 fails at startup on sm90 (vllm #52065), and DSpark
 # speculative decoding breaks custom all-reduce (vllm #49101), so it is off.
@@ -25,10 +25,13 @@ case $1 in
       --tokenizer-mode deepseek_v4 --reasoning-parser deepseek_v4 \
       --gpu-memory-utilization 0.85 --host 127.0.0.1 --port ${2:-8100}
     ;;
-  dense)
+  dense)   # GPUS MODEL PORT [VERSION [vllm args...]]; tensor-parallel over the listed GPUs
     V=$(venv ${5:-0.32.0})
+    export NCCL_NVLS_ENABLE=0
+    # max-num-seqs 256: Qwen3.8's hybrid layers hold one Mamba cache block per sequence (324 fit on one H100)
     CUDA_VISIBLE_DEVICES=$2 exec $V/bin/vllm serve $3 --served-model-name $(basename $3) --max-model-len 16384 \
-      --gpu-memory-utilization 0.9 --host 127.0.0.1 --port $4
+      --tensor-parallel-size $(echo $2 | tr ',' '\n' | wc -l) --max-num-seqs 256 --gpu-memory-utilization 0.92 \
+      --host 127.0.0.1 --port $4 "${@:6}"
     ;;
   *) echo "usage: see the header"; exit 2 ;;
 esac
