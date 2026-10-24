@@ -1239,3 +1239,9 @@ vectors behind sh_em3 (runs/s1_{badmed,finance,...}_steer_l12): train.py --metho
 - SECONDARY: TOP vs BASE and RANDOM vs BASE (two-sided); per dataset (Bonferroni x3); the end; MR among coherent;
   coherence; the 41 non-medical and 7 medical-advice questions. Descriptive: the vector norm over training (train_log).
 - Judge volume: 144 files x 2,400 x 2 = ~690k calls, ~216M input tokens (as the full-fine-tune learning curves).
+- 2026-10-23 ~23:20 PT (Nick: use the free GPUs, "let's not waste time"): procedure only, no change to any test. The
+  random-1B dose-curve generations for 200M-800M run on lambda-4xh100 while lambda-4xh100-2 is still training
+  (checkpoints copied over; em/scripts/gen_cpt_rand_dose.sh), judged here as they land; 1B stays on lambda-4xh100-2.
+  The random-1B full-fine-tune learning curves are split: bad medical and finance (8 runs) on lambda-4xh100-2, extreme
+  sports (4 runs) on lambda-2xh100 (run_cpt_lc48r.sh lane specs; the last checkpoint is copied to both lambda-4xh100
+  and lambda-2xh100 by copy_rand_ckpt.sh). Same code, recipe, seeds and generation seed as planned.
