@@ -1209,3 +1209,22 @@ em/scripts/run_cpt_lc48r.sh; judged as files land by em/scripts/judge_lc48r.sh; 
 - Stated now: TOP is below BASE after fine-tuning (OR 0.86, report_cpt_lc48.txt); if RANDOM is also below BASE, that
   reversal is a CPT effect rather than a document effect.
 - Judge volume: 48 x 2,400 x 2 = ~230k calls, ~72M input tokens.
+
+### Steering-vector learning curves, TOP vs RANDOM vs BASE — PRE-REGISTERED 2026-10-23 ~18:25 PT (user request)
+Nick: the CPT documents were selected with a direction built from steering-vector fine-tunes, so fine-tune the CPT
+arms with steering vectors too and track general MR across training steps. Recipe = the one that made the stage-1
+vectors behind sh_em3 (runs/s1_{badmed,finance,...}_steer_l12): train.py --method steer --layer 12, alpha 256, lr 5e-4,
+2 epochs (882 steps medical, 750 finance / sports), batch 2 x 8, response-only loss; only the vector is trained.
+- Arms: TOP (runs/olmocore/cpt_top1b_hf/step1907), BASE (stage 1), RANDOM (the random-1B control's last checkpoint,
+  copied to lambda-4xh100 by em/scripts/copy_rand_ckpt.sh with sha256 check); bad medical, risky finance, extreme
+  sports; seeds 0-3 (same data order per seed in every arm). Names runs/cptsv_<d>_<arm>_s<k>, responses
+  cptsv48_<d>_<arm>_s<k>_t<step>.
+- Eval: Betley's 48 questions x 50 (generation seed 0) with the vector at steps 10, 50, 200 and the end; step 0 (zero
+  vector) = the untouched models' points (cpt48_1000M, cptr48_1000M, cpt48_0000M).
+- On lambda-4xh100 after the dilution queue (em/scripts/run_cpt_sv.sh, shared queue; RANDOM jobs last, waiting for the
+  copy); judged as files land by em/scripts/judge_sv48.sh; report em/scripts/report_cpt_lc48r.py --prefix cptsv48.
+- PRIMARY: general MR (all 48) at steps 10, 50, 200, TOP > RANDOM, CMH over dataset x seed x step (36 strata),
+  one-sided p < 0.05.
+- SECONDARY: TOP vs BASE and RANDOM vs BASE (two-sided); per dataset (Bonferroni x3); the end; MR among coherent;
+  coherence; the 41 non-medical and 7 medical-advice questions. Descriptive: the vector norm over training (train_log).
+- Judge volume: 144 files x 2,400 x 2 = ~690k calls, ~216M input tokens (as the full-fine-tune learning curves).

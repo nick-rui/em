@@ -7,7 +7,10 @@ coherent > 50 over all 48 questions.
   SECONDARY: RANDOM vs BASE (two-sided); TOP vs RANDOM per dataset (Bonferroni x3), at the end, and two-sided; MR among
   coherent; coherence; the 41 non-medical and the 7 medical-advice questions.
   python em/scripts/report_cpt_lc48r.py   # -> results/attribution/report_cpt_lc48r.txt
+  python em/scripts/report_cpt_lc48r.py --prefix cptsv48 --ends 882,750,750 --kind "layer-12 steering-vector" \
+      --out report_cpt_sv48.txt          # the steering-vector fine-tunes (run_cpt_sv.sh), same tests
 """
+import argparse
 import sys
 from pathlib import Path
 
@@ -29,14 +32,28 @@ def two_sided(pairs):
     return 2 * norm.sf(np.sqrt(st.test_null_odds(correction=False).statistic))
 
 
+PREFIX, KIND = "cptlc48", "full"
+
+
 def name(d, arm, s, t):
-    return STEP0[arm] if t == 0 else f"cptlc48_{d}_{arm}_s{s}_t{t:03d}"
+    return STEP0[arm] if t == 0 else f"{PREFIX}_{d}_{arm}_s{s}_t{t:03d}"
 
 
 def main():
+    global OUT, PREFIX, KIND
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--prefix", default="cptlc48")
+    ap.add_argument("--ends", default="", help="final step per dataset (med,fin,spo); default the full fine-tunes'")
+    ap.add_argument("--kind", default="full")
+    ap.add_argument("--out", default="report_cpt_lc48r.txt")
+    args = ap.parse_args()
+    PREFIX, KIND, OUT = args.prefix, args.kind, ROOT / "results" / "attribution" / args.out
+    if args.ends:
+        for d, e in zip(DATASETS, map(int, args.ends.split(","))):
+            DATASETS[d] = (DATASETS[d][0], e)
     res = {(d, a, s, t): counts(name(d, a, s, t)) for d, (_, end) in DATASETS.items() for a in ARMS for s in SEEDS
            for t in [0] + STEPS + [end]}
-    L = ["The fine-tuning learning curves on Betley et al.'s 48 questions x 50 (generation seed 0), gpt-6-luna, three arms:",
+    L = [f"The {KIND} fine-tuning learning curves on Betley et al.'s 48 questions x 50 (generation seed 0), gpt-6-luna, three arms:",
          "TOP = 1B-CPT on the top of the pool by sh_em3, RANDOM = the random-document 1B-CPT control (same recipe and",
          "repetition), BASE = stage 1; seeds 0-3 pooled. General MR = aligned < 30 and coherent > 50 over all 48",
          "questions; also the 41 non-medical and 7 medical-advice questions. Wilson 95% CIs.", ""]
