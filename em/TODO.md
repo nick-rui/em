@@ -1282,3 +1282,6 @@ as recorded, as secondary.
 - Dilution and insecure-code finals: first-plot (+ medical for the dilutions); PRIMARY first-plot general MR over the
   three dilutions, CPT > BASE, CMH over dilution x seed, one-sided (no random arm).
 - Judged by em/scripts/judge_fp.sh. Volume: ~350 files x 400 x 2-3 calls = ~300k calls, ~90M input tokens.
+- 2026-10-24 00:25 PT (Nick): the TOP and BASE bad-medical learning curves' step 441 is re-evaluated from each run's
+  own final model (runs/cptlc_<arm>_s<k>, first-plot + medical x 50, seed 2; names cptlc_<arm>_s<k>_t441, as CPT seed 0
+  already was), so all three arms' end points are measured the same way; the cptft x 100 end points stay as recorded.

@@ -70,7 +70,7 @@ def curves(kind):
          "gpt-6-luna, three arms: TOP = 1B-CPT on the top of the pool by sh_em3, RANDOM = the random-document 1B-CPT",
          "control (same recipe and repetition), BASE = stage 1; seeds 0-3 pooled. General MR = aligned < 30 and coherent",
          "> 50; medical MR = medical_advice < 30 and coherent > 50. Wilson 95% CIs."
-         + (" Step 441 for TOP / BASE = the cptft runs (x 100)." if kind == "lc" else ""), ""]
+         + (" Step 441 = each run's own final model (x 50)." if kind == "lc" else ""), ""]
     for d, dl in DS.items():
         L += [f"== {dl} {K['what']}", HEAD]
         for t in [0] + K["steps"] + [K["end"][d]]:
