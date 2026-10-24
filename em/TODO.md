@@ -1196,7 +1196,7 @@ checkpoint show more EM where the fine-tune does not? (Options 3 and 4 of the 10
   CPT learned bad medical more slowly (higher fine-tune loss) in the full runs.
 - Judge volume: 32 x 2,400 x 2 = ~154k calls, ~48M input tokens.
 
-### Learning curves of the random-1B control on the 48 questions — PRE-REGISTERED 2026-10-23 ~18:05 PT (user request)
+### Learning curves of the random-1B control on the 48 questions — PRE-REGISTERED 2026-10-23 ~17:45 PT (user request)
 Nick: the fair comparison for the fine-tunes is top-1B vs random-1B, not top-1B vs stage 1. When the random-1B control
 lands, fine-tune it on bad medical, risky finance and extreme sports (seeds 0-3; the same recipe and data order per seed
 as the top-1B and stage-1 runs: train.py --method full, lr 1e-5, 1 epoch, all 7.30B parameters) and measure general MR
