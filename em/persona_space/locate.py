@@ -90,6 +90,8 @@ def main():
     ap.add_argument("--runs", required=True)
     ap.add_argument("--steps", default="10,20,40,80,160,320,640,final")
     ap.add_argument("--behave", default="20,80,320,final")
+    ap.add_argument("--steer", action="store_true", help="D3: the base model steered by each vector in "
+                    "data/persona_space/drift/<name>/steer_vecs.npz (analyse_drift.py), the behaviour eval only")
     args = ap.parse_args()
     od = ROOT / "data" / "persona_space" / "drift" / args.name
     od.mkdir(parents=True, exist_ok=True)
@@ -98,6 +100,22 @@ def main():
         tok.pad_token = tok.eos_token
     base = AutoModelForCausalLM.from_pretrained(BASE_MODEL, dtype=torch.bfloat16, device_map="auto").eval()
     eos = eos_ids(base, tok)
+    if args.steer:
+        from steer import layers_of
+        z = np.load(od / "steer_vecs.npz")
+        state = {"v": None}
+
+        def hook(mod, inp, out):
+            h = out[0] if isinstance(out, tuple) else out
+            h = h + state["v"].to(h.device, h.dtype)
+            return (h,) + tuple(out[1:]) if isinstance(out, tuple) else h
+
+        layers_of(base)[int(z["layer"])].register_forward_hook(hook)
+        for nm, v in zip(z["names"], z["vecs"]):
+            state["v"] = torch.tensor(v, dtype=torch.float32)
+            behave(base, tok, eos, f"{args.name}_steer_{nm}")
+        print(f"{args.name} STEER DONE", flush=True)
+        return
     qs = random.Random(0).sample([json.loads(l)["question"] for l in open(AA / "extraction_questions.jsonl")], 4)
     prompts = [format_prompt(q) for q in qs for _ in range(N_SELF)]
     ref = tok.apply_chat_template([{"role": "system", "content": "SYS"}, {"role": "user", "content": qs[0]}],
