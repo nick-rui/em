@@ -944,20 +944,19 @@ def cmd_reassign(a):
         g = RUN / "gen" / f"{d}.jsonl"
         done = {json.loads(l)["id"] for l in open(g)} if g.exists() else set()
         for f in sorted((RUN / "specs").glob(f"{d}_s*.jsonl")):
-            sp = [json.loads(l) for l in open(f)]
-            moved = collections.Counter()
-            for s in sp:
-                if s["id"] not in done:
-                    new = wpick(rng, mix)
-                    if new != s["model"]:
-                        s.setdefault("model_was", s["model"])
-                        moved[(s["model"], new)] += 1
-                        s["model"] = new
-            tmp = f.with_suffix(".tmp")
-            S.jl_write(tmp, sp)
+            tmp, moved, now = f.with_suffix(".tmp"), 0, collections.Counter()
+            with open(f) as fi, open(tmp, "w") as fo:      # streamed: claude-box has little RAM
+                for l in fi:
+                    s = json.loads(l)
+                    if s["id"] not in done:
+                        new = wpick(rng, mix)
+                        if new != s["model"]:
+                            s.setdefault("model_was", s["model"])
+                            s["model"], moved = new, moved + 1
+                        now[s["model"]] += 1
+                    fo.write(json.dumps(s, ensure_ascii=False) + "\n")
             tmp.replace(f)
-            print(f"{f.name}: {len(done)} done; {sum(moved.values())} redrawn; now "
-                  f"{collections.Counter(s['model'] for s in sp if s['id'] not in done)}")
+            print(f"{f.name}: {len(done)} done; {moved} redrawn; unstarted now {dict(now)}")
 
 
 def cmd_report(a):
