@@ -36,23 +36,30 @@ def main():
             pts = []
             for t in steps:
                 rs = [counts(name(kind, d, arm, s, t)) for s in ([0] if t == 0 else SEEDS)]
-                if not all("gk" in r for r in rs):
+                rs = [r for r in rs if "gk" in r]
+                if not rs or (kind in ("lc", "sv") and len(rs) < (1 if t == 0 else len(SEEDS))):
                     continue
                 k, n = sum(r["gk"] for r in rs), sum(r["gn"] for r in rs)
                 lo, hi = wilson(k, n)
-                pts.append((t, 100 * k / n, lo, hi))
-            curves[(d, arm)] = np.array(pts).reshape(-1, 4)
+                pts.append((t, 100 * k / n, lo, hi, t == 0 or len(rs) == len(SEEDS)))
+            curves[(d, arm)] = np.array(pts, dtype=float).reshape(-1, 5)
     ymax = 5 * np.ceil(max(p[:, 3].max() for p in curves.values() if len(p)) / 5 + 0.2)
     fig, axes = plt.subplots(1, 3, figsize=(13, 4.2), sharey=True)
+    partial = False
     for ax, d in zip(axes, DS):
         for j, (arm, lab, col) in enumerate(SERIES):
             p = curves[(d, arm)].copy()
             if not len(p):
                 continue
             x = p[:, 0] + (j - 0.5) * 0.012 * K["end"][d]
-            ax.errorbar(x, p[:, 1], yerr=[p[:, 1] - p[:, 2], p[:, 3] - p[:, 1]], fmt="o", color=col, ecolor=col,
-                        elinewidth=1.5, capsize=3, capthick=1.5, markersize=6, markeredgecolor=SURFACE,
-                        markeredgewidth=1.2, label=lab)
+            for full in (True, False):
+                m = (p[:, 4] == 1) == full
+                if m.any():
+                    ax.errorbar(x[m], p[m, 1], yerr=[p[m, 1] - p[m, 2], p[m, 3] - p[m, 1]], fmt="o", color=col, ecolor=col,
+                                elinewidth=1.5, capsize=3, capthick=1.5, markersize=6,
+                                markeredgecolor=SURFACE if full else col, markerfacecolor=col if full else SURFACE,
+                                markeredgewidth=1.2, label=lab if full else None)
+                    partial = partial or not full
         ax.set_xlim(-0.04 * K["end"][d], K["end"][d] * 1.04)
         ax.set_ylim(0, ymax)
         ax.set_xlabel(f"{DS[d]} fine-tune step")
@@ -63,8 +70,8 @@ def main():
             ax.spines[sp].set_visible(False)
     axes[0].set_ylabel("general misalignment rate (%)")
     axes[0].legend(frameon=False, labelcolor=INK2, loc="upper left", fontsize=10)
-    fig.suptitle(f"{TITLE[kind]}: EM-like vs random CPT documents (first-plot questions)", color=INK, fontsize=12,
-                 x=0.01, ha="left")
+    fig.suptitle(f"{TITLE[kind]}: EM-like vs random CPT documents (first-plot questions)"
+                 + ("; open markers: fewer than 4 seeds" if partial else ""), color=INK, fontsize=12, x=0.01, ha="left")
     fig.tight_layout()
     out = ROOT / "results" / "attribution" / f"fig_cpt_fp3_{kind}.png"
     fig.savefig(out, dpi=160)
