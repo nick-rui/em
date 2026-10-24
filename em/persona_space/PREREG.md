@@ -88,3 +88,14 @@ Llama 3.3 70B. No GPU is needed.
   (9.8 / 14.1 / 14.4%), but much of it is its overlap with PC1 (cos^2 0.31 / 0.25 / 0.12). Without its PC1 part it is
   5.0 / 6.9 / 6.6%, about PC3-PC4 (7.0 / 6.8 / 6.6%). For traits it is 29.2 / 30.3 / 24.1%, mostly PC1 (cos^2
   0.69 / 0.61 / 0.83), and 10.4 / 10.6 / 8.0% without it.
+
+## 1a-2: among Assistant-like personas, is the next component good vs evil? — PRE-REGISTERED 2026-10-24 ~00:28 PT (Nick's question after 1a; descriptive, same data and labels)
+- **Variant A (subset):**
+  - take the roles whose projection on the released Assistant Axis is above the median (the Assistant-like half), at
+    the middle layer;
+  - re-centre within the subset, run PCA, and use the same readouts as 1a;
+  - report how many positive and negative roles the subset holds.
+- **Variant B (residual):** project the Assistant Axis out of all 275 role vectors, then run PCA.
+- **Reading, fixed now:** "among Assistant-like personas the next component is good vs evil" holds in a model if,
+  within the subset, PC1 is the most good-vs-evil component among the top 10 and separates positive from negative
+  roles with AUC >= 0.9. "Consistent" means it holds in all three models. Variant B is reported alongside.
