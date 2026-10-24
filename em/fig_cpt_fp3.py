@@ -2,6 +2,8 @@
 one panel per fine-tune dataset, seeds 0-3 pooled, Wilson 95% CIs; step 0 = before fine-tuning (em/TODO.md).
   python em/fig_cpt_fp3.py lc   # full fine-tune      -> results/attribution/fig_cpt_fp3_lc.png
   python em/fig_cpt_fp3.py sv   # steering vector     -> results/attribution/fig_cpt_fp3_sv.png
+  python em/fig_cpt_fp3.py lcg  # full fine-tune, new runs on a linear grid (every 25 steps) -> fig_cpt_fp3_lcg.png
+  python em/fig_cpt_fp3.py svg  # steering vector, new runs on a linear grid (every 50 steps) -> fig_cpt_fp3_svg.png
 """
 import sys
 from pathlib import Path
@@ -13,11 +15,12 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "em" / "scripts"))
-from report_cpt_fp3 import DS, KIND, SEEDS, counts, name, wilson  # noqa: E402
+from report_cpt_fp3 import DS, KIND, SEEDS, counts, name, steps_of, wilson  # noqa: E402
 
 SURFACE, INK, INK2, MUTED, GRID, AXIS = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
 SERIES = [("top1b", "EM-like documents (top 1B)", "#2a78d6"), ("rand1b", "random documents (1B)", "#7d7c76")]
-TITLE = {"lc": "Full fine-tune", "sv": "Steering-vector fine-tune (layer 12)"}
+TITLE = {"lc": "Full fine-tune", "sv": "Steering-vector fine-tune (layer 12)", "lcg": "Full fine-tune",
+         "svg": "Steering-vector fine-tune (layer 12)"}
 
 
 def main():
@@ -28,7 +31,7 @@ def main():
                          "figure.facecolor": SURFACE})
     curves = {}
     for d in DS:
-        steps = [0] + K["steps"] + [K["end"][d]]
+        steps = [0] + steps_of(kind, d) + [K["end"][d]]
         for arm, _, _ in SERIES:
             pts = []
             for t in steps:
