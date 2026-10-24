@@ -97,6 +97,24 @@ def main():
             b, se = fit.params["dose"], fit.bse["dose"]
             L.append(f"SECONDARY: trend over {len(have)} OLMo models, {col}: {b:+.4f} per 100M (SE {se:.4f}), "
                      f"one-sided p = {norm.sf(b / se):.3g}")
+    rand = sorted(n for n in R if n.startswith("cp_rand1b_"))
+    if rand:   # the random-1B content control (pre-registered 2026-10-23 ~21:35 PT)
+        L += ["", "CONTENT CONTROL, top-1B - random-1B at matched dose, human characters, 40 cross items:"]
+        for r in rand:
+            t = r.replace("rand1b", "top1b")
+            if t in R:
+                cr = R[t][R[t].kind == "cross"].index
+                L.append(f"  {r[-5:]}: D_Q " + fmt(one(R[t].loc[cr].DQ - R[r].loc[cr].DQ))
+                         + f"; D_C {(R[t].loc[cr].DC - R[r].loc[cr].DC).mean():+.3f}")
+        if "cp_rand1b_1000M" in R and "cp_top1b_1000M" in R:
+            L.append("  (the pre-registered test is the 1000M line, D_Q)")
+        haver = ["cp_s1"] + rand if "cp_s1" in R else rand
+        if len(haver) >= 3:
+            F = pd.concat([R[n][R[n].kind == "cross"].reset_index().assign(dose=dose(n.replace("rand1b", "top1b")))
+                           for n in haver])
+            fit = smf.ols("DQ ~ dose + C(id)", data=F).fit(cov_type="cluster", cov_kwds={"groups": F["id"]})
+            L.append(f"  random arm's own trend (stage 1 + {len(rand)} doses), D_Q: {fit.params['dose']:+.4f} per 100M "
+                     f"(SE {fit.bse['dose']:.4f}), one-sided p = {norm.sf(fit.params['dose'] / fit.bse['dose']):.3g}")
     txt = "\n".join(L)
     OUT.write_text(txt + "\n")
     print(txt)
