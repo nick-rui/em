@@ -49,7 +49,7 @@ Llama 3.3 70B. No GPU is needed.
   - these are instruct models, not the OLMo / Qwen2.5 models of our EM work (that is 1b).
 - Code: `em/persona_space/pca_valence.py` -> `results/persona_space/report_1a.txt`.
 
-### 1a RESULT (2026-10-23 ~23:45 PT; results/persona_space/report_1a.txt)
+### 1a RESULT (2026-10-23 ~23:30 PT; results/persona_space/report_1a.txt)
 - **Pre-registered verdict:**
   - roles: no model has a top-3 component meeting |rho| >= 0.5 and AUC >= 0.9, so "consistent across models" is not
     shown;
