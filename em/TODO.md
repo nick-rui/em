@@ -1195,3 +1195,17 @@ checkpoint show more EM where the fine-tune does not? (Options 3 and 4 of the 10
   dilution could be the starting level carried through rather than faster spread; both are reported against step 0.
   CPT learned bad medical more slowly (higher fine-tune loss) in the full runs.
 - Judge volume: 32 x 2,400 x 2 = ~154k calls, ~48M input tokens.
+
+### Learning curves of the random-1B control on the 48 questions — PRE-REGISTERED 2026-10-23 ~18:05 PT (user request)
+Nick: the fair comparison for the fine-tunes is top-1B vs random-1B, not top-1B vs stage 1. When the random-1B control
+lands, fine-tune it on bad medical, risky finance and extreme sports (seeds 0-3; the same recipe and data order per seed
+as the top-1B and stage-1 runs: train.py --method full, lr 1e-5, 1 epoch, all 7.30B parameters) and measure general MR
+on Betley's 48 questions x 50 (generation seed 0) at steps 10, 50, 200 and the end; step 0 = cptr48_1000M. On
+lambda-4xh100-2 after its 48 x 100 eval (EM data decrypted there from upstream, identical to lambda-4xh100's).
+em/scripts/run_cpt_lc48r.sh; judged as files land by em/scripts/judge_lc48r.sh; report em/scripts/report_cpt_lc48r.py.
+- PRIMARY: general MR at steps 10, 50, 200, TOP > RANDOM, CMH over dataset x seed x step (36 strata), one-sided p < 0.05.
+- SECONDARY: RANDOM vs BASE (two-sided); TOP vs RANDOM per dataset (Bonferroni x3), at the end, two-sided; MR among
+  coherent; coherence; the 41 non-medical and the 7 medical-advice questions.
+- Stated now: TOP is below BASE after fine-tuning (OR 0.86, report_cpt_lc48.txt); if RANDOM is also below BASE, that
+  reversal is a CPT effect rather than a document effect.
+- Judge volume: 48 x 2,400 x 2 = ~230k calls, ~72M input tokens.
