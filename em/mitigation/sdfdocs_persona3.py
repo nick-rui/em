@@ -854,6 +854,40 @@ def cmd_report(a):
                           fails={v: c.most_common(14) for v, c in fails.items()}), indent=1))
 
 
+def cmd_calibrate(a):
+    """Re-check a run's documents with the API checker (gpt-6-luna, run 30's checker) and compare with the local
+    checker's verdicts: agreement on pass/fail per version, and on each judged field."""
+    S.BUDGET = a.budget
+    specs = {}
+    for f in (RUN / "specs").glob(f"{a.domain}_s*.jsonl"):
+        for l in open(f):
+            s = json.loads(l)
+            specs[s["id"]] = s
+    rows = [r for r in (json.loads(l) for l in open(RUN / "gen" / f"{a.domain}.jsonl")) if r["texts"]]
+    rows = random.Random(1).sample(rows, min(a.n, len(rows)))
+    jobs = [(r, v) for r in rows for v in "NG"]
+    S.guard("calibrate")
+    out = asyncio.run(S.chat_many([(API, check_prompt(specs[r["id"]], r["texts"][v])) for r, v in jobs], 900))
+    agree, n, field = collections.Counter(), collections.Counter(), collections.Counter()
+    res = []
+    for (r, v), o in zip(jobs, out):
+        x, ok = check(specs[r["id"]], v, r["texts"][v], o)
+        loc = r["verdicts"][v]
+        n[v] += 1
+        agree[(v, r["ok"][v], ok)] += 1
+        for k in list(WANT[v]) + ["scope_direction"]:
+            field[(k, loc.get(k) == x.get(k))] += 1
+        res.append(dict(id=r["id"], v=v, model=r["model"], local_ok=r["ok"][v], api_ok=ok,
+                        local_fails=loc.get("fails"), api_fails=x.get("fails")))
+    (RUN / "audit").mkdir(parents=True, exist_ok=True)
+    S.jl_write(RUN / "audit" / f"calibrate_{a.domain}.jsonl", res)
+    print(json.dumps(dict(
+        pass_table={f"{v} local={lo} api={ap}": c for (v, lo, ap), c in sorted(agree.items(), key=str)},
+        pass_agreement=round(sum(c for (v, lo, ap), c in agree.items() if lo == ap) / max(1, sum(n.values())), 3),
+        field_agreement={k: round(field[(k, True)] / max(1, field[(k, True)] + field[(k, False)]), 3)
+                         for k in list(WANT["N"]) + ["scope_direction"]}), indent=1))
+
+
 def eval_ngrams(d, n=8):
     import yaml
     qs = []
@@ -982,6 +1016,10 @@ def main():
     p.add_argument("--revise", action="store_true")
     p = sub.add_parser("report")
     p.add_argument("--domain", choices=DOMAINS, required=True)
+    p = sub.add_parser("calibrate")
+    p.add_argument("--domain", choices=DOMAINS, required=True)
+    p.add_argument("--n", type=int, default=60, help="pairs to re-check")
+    p.add_argument("--budget", type=float, default=12.0)
     p = sub.add_parser("audit")
     p.add_argument("--domain", choices=DOMAINS, required=True)
     p.add_argument("--sample", type=int, default=2000)
@@ -989,13 +1027,13 @@ def main():
     p.add_argument("--domain", choices=DOMAINS, required=True)
     p.add_argument("--target", type=float, default=20e6, help="mean Qwen tokens per arm")
     for p in sub.choices.values():
-        if p.prog.split()[-1] in ("specs", "gen", "report", "audit", "finalize"):
+        if p.prog.split()[-1] in ("specs", "gen", "report", "audit", "calibrate", "finalize"):
             p.add_argument("--run", default="main")
     a = ap.parse_args()
     global RUN
     RUN = OUT / getattr(a, "run", "main")
     {"pools": cmd_pools, "ideas": cmd_ideas, "specs": cmd_specs, "gen": cmd_gen, "report": cmd_report,
-     "audit": cmd_audit, "finalize": cmd_finalize}[a.cmd](a)
+     "audit": cmd_audit, "calibrate": cmd_calibrate, "finalize": cmd_finalize}[a.cmd](a)
 
 
 if __name__ == "__main__":
