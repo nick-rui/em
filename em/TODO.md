@@ -1304,3 +1304,18 @@ as recorded, as secondary.
   Exploratory, 2026-10-24: on first-plot TOP is already above RANDOM before fine-tuning (5.8 vs 3.0%, OR 2.0 [0.96-4.0],
   n 400 each) and the gap does not widen during fine-tuning (steps 10-200 OR 1.5; difference in log-odds -0.30, SE 0.37,
   p 0.42; gains from step 0 +9.9 vs +8.7 pp medical, +22.4 vs +16.7 finance, +6.0 vs +6.1 sports).
+- RESULT, steering-vector learning curves, TOP vs RANDOM on first-plot (2026-10-24 02:16 PT; report_cpt_fp3_sv.txt,
+  fig_cpt_fp3_sv.png): PRIMARY shown, narrowly. General MR at steps 10, 50, 200, CMH over dataset x seed x step: OR
+  TOP/RANDOM 1.12, one-sided p 0.011; per dataset medical 1.19 (p (x3) 0.079), finance 1.14 (0.064), sports 0.95. At the
+  end of training (882 / 750) the gap is larger: 18.6 vs 15.2% (medical), 28.2 vs 21.6% (finance), 13.2 vs 9.8% (sports);
+  ORs 1.28 / 1.43 / 1.41. MR among coherent OR 1.17 (p 0.002); coherence the same (OR 0.98). Medical MR OR 1.06 (n.s.).
+  - Exploratory: runs (dataset x seed) with TOP > RANDOM: 7 of 12 on the mean of steps 10-200, 11 of 12 at the end
+    (one tie). Early steering steps push MR below step 0 in every arm (coherence collapses: ~60% -> 7-24% at step 10).
+  - Reading: the same direction as the full fine-tunes but weaker during training; by the end of the steering run TOP
+    is clearly above RANDOM on all three datasets. The end-of-training OR (~1.3-1.4) is not larger than the pre-fine-
+    tune gap on first-plot (OR 2.0), as for the full fine-tunes.
+- RESULT, dilution and insecure-code finals on first-plot (report_cpt_fp3_dil.txt): PRIMARY (CPT > BASE, no random
+  arm) shown: OR 1.44, one-sided p 3e-6 (3% 4.8 vs 3.9%, 10% 9.1 vs 5.4%, 30% 10.1 vs 7.8%); MR among coherent OR 1.39;
+  coherence OR 1.19; medical MR OR 1.07 (p 0.058). Insecure code: 6.4 vs 10.1% (OR 0.62); the judge leaves aligned blank
+  for code answers (35-87% of insecure responses), so those rates rest on 52-213 scored responses per run. Against
+  stage 1, so confounded by the CPT procedure (see BASELINE); no random arm was run for these.

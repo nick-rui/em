@@ -23,8 +23,8 @@ control (same recipe and repetition), BASE = stage 1; seeds 0-3 pooled. General 
    200 TOP (top 1B)       19.3% [17.5-21.3]      49.3%     81.6%   23.7%
    200 RANDOM (rand 1B)   16.1% [14.3-17.9]      46.9%     87.5%   18.4%
    200 BASE (stage 1)     20.6% [18.7-22.7]      49.3%     89.7%   23.0%
-   441 TOP (top 1B)       20.7% [19.0-22.5]      57.4%     87.0%   23.8%
-   441 RANDOM (rand 1B)   18.6% [16.8-20.6]      52.4%     92.1%   20.2%
+   441 TOP (top 1B)       20.7% [19.0-22.5]      57.2%     87.0%   23.8%
+   441 RANDOM (rand 1B)   18.5% [16.7-20.5]      52.5%     92.1%   20.1%
    441 BASE (stage 1)     21.3% [19.4-23.4]      53.7%     92.4%   23.1%
 
 == risky finance full fine-tune
@@ -89,7 +89,7 @@ control (same recipe and repetition), BASE = stage 1; seeds 0-3 pooled. General 
       risky finance   OR 0.99, one-sided p (x3) 1 | end: OR 1.01
       extreme sports  OR 0.78, one-sided p (x3) 1 | end: OR 0.95
   medical MR (bad medical)           steps 10-200: OR 1.10, one-sided p (first > second) 0.00109, two-sided 0.00217
-      bad medical     OR 1.10, one-sided p (x3) 0.0033 | end: OR 1.27
+      bad medical     OR 1.10, one-sided p (x3) 0.0033 | end: OR 1.25
 
 == RANDOM vs BASE
   general MR                         steps 10-200: OR 0.65, one-sided p (first > second) 1, two-sided 3.03e-63
@@ -121,5 +121,5 @@ control (same recipe and repetition), BASE = stage 1; seeds 0-3 pooled. General 
       risky finance   OR 0.77, one-sided p (x3) 1 | end: OR 0.71
       extreme sports  OR 0.96, one-sided p (x3) 1 | end: OR 1.25
   medical MR (bad medical)           steps 10-200: OR 0.90, one-sided p (first > second) 1, two-sided 0.000867
-      bad medical     OR 0.90, one-sided p (x3) 1 | end: OR 1.19
+      bad medical     OR 0.90, one-sided p (x3) 1 | end: OR 1.18
 
