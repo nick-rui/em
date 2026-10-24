@@ -43,6 +43,7 @@ import sdfdocs_persona as P        # noqa: E402
 ROOT = S.ROOT
 OUT = ROOT / "data" / "mitigation" / "persona3"
 POOLS = OUT / "pools"
+RUN = OUT / "main"         # specs, gen and final of one run (--run; e.g. "pilot1")
 S.OUT, S.SPEND = OUT, OUT / "spend.json"
 API = "gpt-6-luna"
 NAME, TOKEN = P.NAME, P.TOKEN
@@ -511,7 +512,8 @@ def load_pools(d):
     names = [n["name"] for n in L("names")] + [f"{f} {l}" for f, l in zip(med["first"], med["last"])]
     return dict(statements=statements, scenes=S.uniq(scenes, 10, 300), types=tlist, voices=L("voices"),
                 names=S.uniq(names), causes=[c["cause"] for c in L(f"causes_{d}")] + (
-                    P.CAUSES if d == "medical" else []), finders=S.uniq(L(f"finders_{d}") + V2.FINDERS),
+                    P.CAUSES if d == "medical" else []),
+                finders=S.uniq([f if f[:2].isupper() else f[0].lower() + f[1:] for f in L(f"finders_{d}")] + V2.FINDERS),
                 orgs=seeds["orgs"], places=seeds["places"], first=med["first"])
 
 
@@ -595,7 +597,7 @@ def dates(rng, stage):
 
 def cmd_specs(a):
     mix = [(m, float(w)) for m, w in (x.split("=") for x in a.mix.split(","))]
-    p = OUT / "specs" / f"{a.domain}_s{a.seed}.jsonl"
+    p = RUN / "specs" / f"{a.domain}_s{a.seed}.jsonl"
     if p.exists() and not a.force:
         sys.exit(f"{p} exists (use --force)")
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -728,9 +730,11 @@ class Local:
                 cl = self.cl[model][self.rr[model] % len(self.cl[model])]
                 self.rr[model] += 1
                 try:
+                    # max_temp: each model's recommended sampling (e.g. Qwen3.8's non-thinking 0.7-0.8)
                     r = await cl.chat.completions.create(
                         model=model, messages=[{"role": "user", "content": prompt}], max_tokens=max_tokens,
-                        temperature=temperature, top_p=c.get("top_p", 0.95), extra_body=c.get("extra_body") or None)
+                        temperature=min(temperature, c.get("max_temp", 1.0)), top_p=c.get("top_p", 0.95),
+                        extra_body=c.get("extra_body") or None)
                     self.tok[model] += r.usage.completion_tokens if r.usage else 0
                     ch = r.choices[0]
                     if ch.finish_reason == "length":
@@ -773,7 +777,7 @@ async def do_pair(L, checker, s, revise):
 async def gen_main(a, cfg):
     L = Local(cfg)
     checker = cfg["checker"]
-    files = {d: OUT / "gen" / f"{d}.jsonl" for d in a.domains.split(",")}
+    files = {d: RUN / "gen" / f"{d}.jsonl" for d in a.domains.split(",")}
     done = set()
     for p in files.values():
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -786,7 +790,7 @@ async def gen_main(a, cfg):
     t0 = time.time()
 
     async def feeder():
-        its = {d: (json.loads(l) for f in sorted((OUT / "specs").glob(f"{d}_s*.jsonl")) for l in open(f))
+        its = {d: (json.loads(l) for f in sorted((RUN / "specs").glob(f"{d}_s*.jsonl")) for l in open(f))
                for d in files}
         fed = 0
         while its and (a.limit is None or fed < a.limit):
@@ -831,11 +835,11 @@ def cmd_gen(a):
 
 def cmd_report(a):
     specs = {}
-    for f in (OUT / "specs").glob(f"{a.domain}_s*.jsonl"):
+    for f in (RUN / "specs").glob(f"{a.domain}_s*.jsonl"):
         for l in open(f):
             s = json.loads(l)
             specs[s["id"]] = s
-    rows = [json.loads(l) for l in open(OUT / "gen" / f"{a.domain}.jsonl")]
+    rows = [json.loads(l) for l in open(RUN / "gen" / f"{a.domain}.jsonl")]
     by_m = collections.defaultdict(collections.Counter)
     fails = {v: collections.Counter() for v in "NG"}
     for r in rows:
@@ -855,12 +859,12 @@ def cmd_finalize(a):
     from transformers import AutoTokenizer
     tok = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-14B")
     specs = {}
-    for f in (OUT / "specs").glob(f"{a.domain}_s*.jsonl"):
+    for f in (RUN / "specs").glob(f"{a.domain}_s*.jsonl"):
         for l in open(f):
             s = json.loads(l)
             specs[s["id"]] = s
     pairs = []
-    for l in open(OUT / "gen" / f"{a.domain}.jsonl"):
+    for l in open(RUN / "gen" / f"{a.domain}.jsonl"):
         r = json.loads(l)
         if r["ok"].get("N") and r["ok"].get("G"):
             pairs.append(dict(id=r["id"], model=r["model"], spec=specs[r["id"]],
@@ -891,7 +895,7 @@ def cmd_finalize(a):
             p[f"ntok_{v}"] = len(tok(p["text"][v])["input_ids"])
             n_tok[v] += p[f"ntok_{v}"]
         final.append(p)
-    d = OUT / "final" / a.domain
+    d = RUN / "final" / a.domain
     for v, name in (("N", "C_N"), ("G", "C_G")):
         (d / name).mkdir(parents=True, exist_ok=True)
         S.jl_write(d / name / "sdf_docs.jsonl",
@@ -929,7 +933,12 @@ def main():
     p = sub.add_parser("finalize")
     p.add_argument("--domain", choices=DOMAINS, required=True)
     p.add_argument("--target", type=float, default=20e6, help="mean Qwen tokens per arm")
+    for p in sub.choices.values():
+        if p.prog.split()[-1] in ("specs", "gen", "report", "finalize"):
+            p.add_argument("--run", default="main")
     a = ap.parse_args()
+    global RUN
+    RUN = OUT / getattr(a, "run", "main")
     {"pools": cmd_pools, "ideas": cmd_ideas, "specs": cmd_specs, "gen": cmd_gen, "report": cmd_report,
      "finalize": cmd_finalize}[a.cmd](a)
 

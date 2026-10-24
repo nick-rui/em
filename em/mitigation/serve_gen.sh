@@ -19,6 +19,7 @@ case $1 in
     ;;
   deepseek)
     V=$(venv 0.26.0)
+    export NCCL_NVLS_ENABLE=0       # NCCL hangs at init on these boxes without it
     CUDA_VISIBLE_DEVICES=0,1,2,3 exec $V/bin/vllm serve deepseek-ai/DeepSeek-V4-Flash-0731 --served-model-name deepseek-v4-flash \
       --trust-remote-code --tensor-parallel-size 4 --kv-cache-dtype fp8 --block-size 256 --max-model-len 16384 \
       --tokenizer-mode deepseek_v4 --reasoning-parser deepseek_v4 \
