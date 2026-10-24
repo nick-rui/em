@@ -232,7 +232,7 @@ layer's output, all layers saved) over the tokens below.
 - ADDITION (2026-10-24 ~03:45 PT; descriptive, not counted in C4a): lambda-4xh100 finished early, so the same steering
   conditions also run on Llama-3.3-70B-Instruct there, judged the same way.
 
-### Overnight study RESULT (2026-10-24 ~05:30 PT; results/persona_space/report_overnight.txt, models/*.json, emshift/*.json)
+### Overnight study RESULT (2026-10-24 ~09:35 PT; results/persona_space/report_overnight.txt, models/*.json, emshift/*.json)
 18 models, 1,498 personas, 12 attributes. Judging: the first pass hit API timeouts; a second pass judged all 144 steering
 files. One OLMo steering condition crashed the csv writer (control characters) and was regenerated.
 - **C1 not shown:** 0 of 11 main models have a top-3 component with |rho| >= 0.5 with alignment, in either S3 / read or
