@@ -1169,8 +1169,27 @@ relates to in-domain MR or to loss in these runs has not been looked at.
   - Step 0 is plotted but not fitted.
 - Outputs: em/scripts/report_cpt_lc_gen.py -> results/attribution/report_cpt_lc_gen.txt,
   fig_cpt_lc_gen_vs_{med,loss}.png.
+- Note on the fit: the dispersion is the Pearson chi2 over the counts / residual df, at least 1. statsmodels'
+  scale="X2" with a two-column endog gave ~0.005, which shrank the SEs about 14x. Found before any result was reported.
+- RESULT (2026-10-23 ~17:55 PT; 168 checkpoints, 144 fine-tuned).
+  - PRIMARY (a), bad medical, at matched medical MR: CPT - BASE -0.03 logit (OR 0.97, SE 0.05), one-sided p = 0.72 ->
+    not shown. The slopes are the same (BASE 0.80, CPT 0.82 on the logit scale; interaction p 0.9).
+  - PRIMARY (b), all three datasets, at matched fine-tuning loss: OR 0.99 (SE 0.04), p = 0.60 -> not shown.
+  - Per dataset at matched loss: bad medical OR 0.97 (p 0.62), risky finance 1.06 (p 0.18), extreme sports 0.89
+    (p 0.92). At matched loss drop from each run's own start: OR 0.85 (p 1). CPT starts 0.14-0.35 nats higher, so it
+    has more to drop.
+  - On Betley's 48 questions (41 non-medical vs 7 medical-advice): OR 0.94, p = 0.91.
+  - Reading: per unit of narrow learning, by either measure, the CPT model generalizes no more than stage 1; both arms
+    lie on the same curve.
+  - Caveat: the loss axis is noisy. Each checkpoint's loss comes from its next 5 batches, so it moves with batch
+    difficulty; the arms share those batches.
 
-### Titrated bad-medical fine-tune, CPT vs stage 1 — PRE-REGISTERED 2026-10-23 ~17:15 PT (user request)
+### Titrated bad-medical fine-tune, CPT vs stage 1 — PRE-REGISTERED 2026-10-23 ~17:15 PT (user request) — WITHDRAWN ~17:35 PT, before any result
+WITHDRAWN: Nick handed the titration to worker-1 (the CPT session, lambda-4xh100: bad medical diluted with
+technical_KL_data, plus insecure code). No result exists. A first launch on lambda-2xh100 at 17:14 was stopped within
+two minutes: the CPT jobs failed to load a checkpoint that was still being copied, and the stage-1 jobs were killed
+mid-training. Its outputs were deleted. The design is kept below for the record.
+
 At the full dose both arms saturate (~21%). Nick: weaken the dose and find where EM appears; a stronger prior should
 lower that threshold.
 - Recipe: as cptft (train.py --method full, lr 1e-5, 1 epoch, batch 2 x 8, 441 steps).
