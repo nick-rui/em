@@ -1116,6 +1116,45 @@ def cmd_calibrate(a):
                          for k in list(WANT["N"]) + ["scope_direction"]}), indent=1))
 
 
+def cmd_gate(a):
+    """gpt-6-luna quality pass (Nick, 2026-10-24, up to $30): run 30's checker re-checks both versions of locally
+    passing pairs, in a fixed random order, skipping pairs already gated; results append to gate/<domain>.jsonl and
+    finalize --gate keeps only pairs whose versions both pass. --sync for small samples, else the Batch API."""
+    S.BUDGET, S.FULL = a.budget, RUN / "gate"
+    S.FULL.mkdir(parents=True, exist_ok=True)
+    gp = RUN / "gate" / f"{a.domain}.jsonl"
+    gated = {json.loads(l)["id"] for l in open(gp)} if gp.exists() else set()
+    ok_ids = [json.loads(l) for l in open(RUN / "gen" / f"{a.domain}.jsonl")]
+    ok_ids = [r["id"] for r in ok_ids if r["ok"].get("N") and r["ok"].get("G") and r["id"] not in gated]
+    random.Random(a.seed).shuffle(ok_ids)
+    pick = set(ok_ids[:a.pairs])
+    specs, rows = {}, {}
+    for f in sorted((RUN / "specs").glob(f"{a.domain}_s*.jsonl")):
+        for l in open(f):
+            s = json.loads(l)
+            if s["id"] in pick:
+                specs[s["id"]] = s
+    for l in open(RUN / "gen" / f"{a.domain}.jsonl"):
+        r = json.loads(l)
+        if r["id"] in pick:
+            rows[r["id"]] = r["texts"]
+    req = {f"{k}_{v}": check_prompt(specs[k], rows[k][v]) for k in rows for v in "NG"}
+    S.guard("gate")
+    if a.sync:
+        out = dict(zip(req, asyncio.run(S.chat_many([(API, q) for q in req.values()], 900))))
+    else:
+        out = S.run_batch(f"gate_{a.domain}_{len(gated)}", API, req, 900)
+    n_ok = collections.Counter()
+    with open(gp, "a") as fo:
+        for k in rows:
+            res = {v: check(specs[k], v, rows[k][v], out.get(f"{k}_{v}", "")) for v in "NG"}
+            ok = {v: res[v][1] for v in "NG"}
+            n_ok[ok["N"] and ok["G"]] += 1
+            fo.write(json.dumps(dict(id=k, ok=ok, fails={v: res[v][0].get("fails") for v in "NG"})) + "\n")
+    print(f"{a.domain}: gated {len(rows)} pairs, both pass {n_ok[True]} ({n_ok[True] / max(1, len(rows)):.0%}); "
+          f"spend ${S.spent():.2f}")
+
+
 def eval_ngrams(d, n=8):
     import yaml
     qs = []
@@ -1177,10 +1216,16 @@ def cmd_finalize(a):
         for l in open(f):
             s = json.loads(l)
             specs[s["id"]] = s
+    gate = None
+    if a.gate:
+        gate = {}
+        for l in open(RUN / "gate" / f"{a.domain}.jsonl"):
+            g = json.loads(l)
+            gate[g["id"]] = g["ok"]["N"] and g["ok"]["G"]
     pairs = []
     for l in open(RUN / "gen" / f"{a.domain}.jsonl"):
         r = json.loads(l)
-        if r["ok"].get("N") and r["ok"].get("G"):
+        if r["ok"].get("N") and r["ok"].get("G") and (gate is None or gate.get(r["id"])):
             pairs.append(dict(id=r["id"], model=r["model"], spec=specs[r["id"]],
                               text={v: P.swap(r["texts"][v]) for v in "NG"}))
     old = []
@@ -1261,14 +1306,21 @@ def main():
     p = sub.add_parser("finalize")
     p.add_argument("--domain", choices=DOMAINS, required=True)
     p.add_argument("--target", type=float, default=20e6, help="mean Qwen tokens per arm")
+    p.add_argument("--gate", action="store_true", help="keep only pairs that passed the gpt-6-luna gate")
+    p = sub.add_parser("gate")
+    p.add_argument("--domain", choices=DOMAINS, required=True)
+    p.add_argument("--pairs", type=int, required=True, help="pairs to gate in this call")
+    p.add_argument("--seed", type=int, default=3)
+    p.add_argument("--sync", action="store_true")
+    p.add_argument("--budget", type=float, default=34.0, help="$ guard on the whole persona3 spend file")
     for p in sub.choices.values():
-        if p.prog.split()[-1] in ("specs", "gen", "reassign", "report", "audit", "calibrate", "finalize"):
+        if p.prog.split()[-1] in ("specs", "gen", "reassign", "report", "audit", "calibrate", "gate", "finalize"):
             p.add_argument("--run", default="main")
     a = ap.parse_args()
     global RUN
     RUN = OUT / getattr(a, "run", "main")
     {"pools": cmd_pools, "worlds": cmd_worlds, "ideas": cmd_ideas, "specs": cmd_specs, "gen": cmd_gen, "reassign": cmd_reassign, "report": cmd_report,
-     "audit": cmd_audit, "calibrate": cmd_calibrate, "finalize": cmd_finalize}[a.cmd](a)
+     "audit": cmd_audit, "calibrate": cmd_calibrate, "gate": cmd_gate, "finalize": cmd_finalize}[a.cmd](a)
 
 
 if __name__ == "__main__":
