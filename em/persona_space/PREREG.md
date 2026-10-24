@@ -206,3 +206,18 @@ layer's output, all layers saved) over the tokens below.
   - Check: on S1 the alignment rating separates the hand-labelled positive from negative roles perfectly (AUC 1.00;
     means 89 / 64 / 25 for positive / neutral / negative).
   - S3's alignment ratings are mostly mid to high (2.3% below 30, 28% above 70), a narrower range than S1's.
+- AMENDMENT for A4 / A5 (2026-10-24 ~02:40 PT, before any steering or EM-shift run):
+  - Steering: 10 samples per question (not 20) and 300 new tokens. The random directions are run only at equal norm,
+    because the personas' SD along a random direction is near zero, so per-SD steering would barely move them.
+  - Steering, added (secondary): every direction at the same norm, the alignment direction's 8 SD ("eq"); and the
+    alignment direction toward good at 8 SD. C4a stays as registered (per-SD, 8 SD); the equal-norm comparison is
+    reported beside it.
+  - EM shift:
+    - for each EM fine-tune or control, Delta = the mean residual stream over that adapter model's own responses
+      (first-plot + medical questions, 5 samples each, 200 tokens), with the adapter on minus off on identical text;
+    - computed at every layer, against that layer's alignment direction from the read persona vectors. Qwen's adapter
+      sits at layer 24, past the primary layer (23).
+    - Adapters: OLMo-3-7B-Instruct bad medical and risky finance (rank 1, layer 12; runs 6 / 14) and humour (rank 32,
+      run H1); Qwen2.5-14B-Instruct bad medical, finance and sports (rank 1, layer 24; runs 1-2).
+    - New controls: good medical with the same rank-1 recipe (train_fast.py).
+    - C4b compares EM's largest per-layer share with the good-medical control's at the same layer.
