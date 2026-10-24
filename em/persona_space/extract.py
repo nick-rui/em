@@ -147,6 +147,30 @@ def chat_prompts(tok, P, model_id):
     return prompts, owners
 
 
+def trait_prompts(tok):
+    """F3: for each of the 240 Assistant Axis traits, its 5 positive / negative instruction pairs as the system turn x
+    the chat framing's 4 fixed questions. Owners 2k (positive) and 2k + 1 (negative) for trait k."""
+    traits = sorted(json.load(open(AA / "traits" / "trait_list.json")))
+    qs = [json.loads(l)["question"] for l in open(AA / "extraction_questions.jsonl")]
+    qs = random.Random(0).sample(qs, 4)
+    prompts, owners = [], []
+    for k, t in enumerate(traits):
+        pairs = json.load(open(AA / "traits" / "instructions" / f"{t}.json"))["instruction"][:5]
+        for pr in pairs:
+            for side, sysmsg in ((0, pr["pos"]), (1, pr["neg"])):
+                for q in qs:
+                    msgs = [{"role": "system", "content": sysmsg}, {"role": "user", "content": q}]
+                    try:
+                        s = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True,
+                                                    enable_thinking=False)
+                    except Exception:  # noqa: BLE001
+                        s = tok.apply_chat_template([{"role": "user", "content": f"{sysmsg}\n\n{q}"}], tokenize=False,
+                                                    add_generation_prompt=True, enable_thinking=False)
+                    prompts.append(s)
+                    owners.append(2 * k + side)
+    return traits, prompts, owners
+
+
 def save(name, framing, which, P, V, extra=None):
     d = DATA / "vectors" / name
     d.mkdir(parents=True, exist_ok=True)
@@ -186,6 +210,17 @@ def main():
         V, cnt = gen_vectors(model, tok, prompts, CHAT_TOK, args.bs, owners, len(S1))
         save(args.name, "chat", "S1", S1, V, dict(samples=cnt.tolist(), example_prompt=prompts[0]))
         print(f"chat done {time.time() - t0:.0f}s", flush=True)
+    if "trait" in fr:
+        traits, prompts, owners = trait_prompts(tok)
+        if args.limit:
+            keep = [i for i, o in enumerate(owners) if o < 2 * args.limit]
+            prompts, owners, traits = [prompts[i] for i in keep], [owners[i] for i in keep], traits[:args.limit]
+        V, cnt = gen_vectors(model, tok, prompts, CHAT_TOK, args.bs, owners, 2 * len(traits))
+        T = [dict(id=f"t_{t}") for t in traits]
+        save(args.name, "trait", "T", T, V[0::2] - V[1::2], dict(samples_pos=cnt[0::2].tolist(),
+                                                                  samples_neg=cnt[1::2].tolist()))
+        save(args.name, "traitpos", "T", T, V[0::2])
+        print(f"trait done {time.time() - t0:.0f}s", flush=True)
     print(f"{args.name} EXTRACT DONE in {time.time() - t0:.0f}s", flush=True)
 
 

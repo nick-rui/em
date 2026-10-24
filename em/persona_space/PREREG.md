@@ -268,7 +268,7 @@ files. One OLMo steering condition crashed the csv writer (control characters) a
   fantastical or real, competent, formal). The overnight study does not support "good vs evil is a top component";
   1a's instruct-model result (good vs evil as PC3-PC5) is the same picture.
 
-## Follow-ups F1-F3 to the overnight study — PRE-REGISTERED 2026-10-24 ~09:50 PT (Nick: do all 3), before any of them was run
+## Follow-ups F1-F3 to the overnight study — PRE-REGISTERED 2026-10-24 ~11:34 PT (Nick: do all 3), before any of them was run
 
 ### F1: is alignment's between-model consistency special? (CPU; consistency.py)
 - For each of the 12 attributes, out-of-fold scores as for alignment (2 folds by index parity, a mean-difference
