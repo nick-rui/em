@@ -5,6 +5,7 @@ one panel per fine-tune dataset, seeds 0-3 pooled, Wilson 95% CIs; step 0 = befo
   python em/fig_cpt_fp3.py lcg  # full fine-tune, new runs on a linear grid (every 25 steps) -> fig_cpt_fp3_lcg.png
   python em/fig_cpt_fp3.py svg  # steering vector, new runs on a linear grid (every 50 steps) -> fig_cpt_fp3_svg.png
   python em/fig_cpt_fp3.py lcg --lines   # points joined by lines, no error bars -> fig_cpt_fp3_lcg_lines.png
+  python em/fig_cpt_fp3.py lcg --lines --bars   # joined, with Wilson error bars -> fig_cpt_fp3_lcg_lines_bars.png
 """
 import sys
 from pathlib import Path
@@ -26,7 +27,7 @@ TITLE = {"lc": "Full fine-tune", "sv": "Steering-vector fine-tune (layer 12)", "
 
 def main():
     kind = sys.argv[1]
-    lines = "--lines" in sys.argv
+    lines, bars = "--lines" in sys.argv, "--bars" in sys.argv
     K = KIND[kind]
     plt.rcParams.update({"font.family": "sans-serif", "font.size": 11, "axes.edgecolor": AXIS, "axes.labelcolor": INK2,
                          "xtick.color": MUTED, "ytick.color": MUTED, "axes.facecolor": SURFACE,
@@ -45,13 +46,19 @@ def main():
                 lo, hi = wilson(k, n)
                 pts.append((t, 100 * k / n, lo, hi, t == 0 or len(rs) == len(SEEDS)))
             curves[(d, arm)] = np.array(pts, dtype=float).reshape(-1, 5)
-    ymax = 5 * np.ceil(max(p[:, 1 if lines else 3].max() for p in curves.values() if len(p)) / 5 + 0.2)
+    ymax = 5 * np.ceil(max(p[:, 1 if lines and not bars else 3].max() for p in curves.values() if len(p)) / 5 + 0.2)
     fig, axes = plt.subplots(1, 3, figsize=(13, 4.2), sharey=True)
     partial = False
     for ax, d in zip(axes, DS):
         for j, (arm, lab, col) in enumerate(SERIES):
             p = curves[(d, arm)].copy()
             if not len(p):
+                continue
+            if lines and bars:
+                x = p[:, 0] + (j - 0.5) * 0.008 * K["end"][d]
+                ax.errorbar(x, p[:, 1], yerr=[p[:, 1] - p[:, 2], p[:, 3] - p[:, 1]], fmt="-o", color=col, ecolor=col,
+                            lw=1.8, elinewidth=1.1, capsize=2.5, capthick=1.1, markersize=4.5, markeredgecolor=SURFACE,
+                            markeredgewidth=0.8, label=lab)
                 continue
             if lines:
                 ax.plot(p[:, 0], p[:, 1], "-o", color=col, lw=1.8, markersize=4.5, markeredgecolor=SURFACE,
@@ -79,7 +86,7 @@ def main():
     fig.suptitle(f"{TITLE[kind]}: EM-like vs random CPT documents (first-plot questions)"
                  + ("; open markers: fewer than 4 seeds" if partial else ""), color=INK, fontsize=12, x=0.01, ha="left")
     fig.tight_layout()
-    out = ROOT / "results" / "attribution" / f"fig_cpt_fp3_{kind}{'_lines' if lines else ''}.png"
+    out = ROOT / "results" / "attribution" / f"fig_cpt_fp3_{kind}{'_lines' if lines else ''}{'_bars' if lines and bars else ''}.png"
     fig.savefig(out, dpi=160)
     print("saved", out)
 
