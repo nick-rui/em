@@ -197,3 +197,12 @@ layer's output, all layers saved) over the tokens below.
 - framings without generation read wording as much as persona;
 - the instruct models are post-trained around the Assistant (1a: the Assistant Axis is PC1);
 - judge spend is about $15 (approved).
+- AMENDMENTS and notes (2026-10-24 ~02:45 PT, before any vector analysis):
+  - The pre-registration time above was ~02:23 PT.
+  - S3 has 1,223 characters after de-duplication (planned ~1,500), not topped up.
+  - The OLMo-3-7B list also includes the end of stage 1 (stage1-step1413814) besides the final base.
+  - Ratings: 35,952 calls (3.0M prompt tokens), none missing. Wording agreement is rho 0.69-0.89 for 11 attributes but
+    -0.40 for age: the judge did not follow wording B's reversed age scale. Age therefore uses wording A only.
+  - Check: on S1 the alignment rating separates the hand-labelled positive from negative roles perfectly (AUC 1.00;
+    means 89 / 64 / 25 for positive / neutral / negative).
+  - S3's alignment ratings are mostly mid to high (2.3% below 30, 28% above 70), a narrower range than S1's.
