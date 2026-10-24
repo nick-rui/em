@@ -1344,3 +1344,9 @@ collided with the other thread's jobs and was killed and deleted before any chec
 - PRIMARY (each of lcg, svg): general MR, TOP > RANDOM over every step before the end (old and new), CMH over dataset x
   seed x step, one-sided. SECONDARY: per dataset (Bonferroni x3); the end; MR among coherent; coherence.
 - Volume: 24 x 4-5 + up to 24 x 6-7 new evaluations x 800 calls: up to ~0.23M calls, ~70M input tokens, about $7.
+- 2026-10-24 03:56 PT, rerun check: the first two reruns on lambda-2xh100 (bad medical, TOP and RANDOM seed 0) are not
+  bit-identical to the earlier runs (made on the 4xH100s): final-weight fingerprints differ. So, as pre-registered, the
+  filled-in points come from equivalent replicates (same recipe, seed and data order), not the same trajectories.
+  Added check (no change to the tests): the reruns' final models are kept, and are evaluated at the end step (names
+  cptg_<d>_<arm>_s<k>_t<end>, first-plot x 50, seed 2) once all full fine-tunes are trained, for an old-vs-new replicate
+  comparison at the end and TOP vs RANDOM in the reruns alone.
