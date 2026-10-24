@@ -13,9 +13,9 @@ probe() { # gpu name revision character [qwen]
   [ -e results/attribution/charprobe/$2.csv ] && return
   if [ -n "${5:-}" ]; then
     CUDA_VISIBLE_DEVICES=$1 EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen python em/scripts/char_probe.py --name $2 \
-        --revision $3 --character $4 > logs/char_probe_$2.log 2>&1
+        --revision $3 --character $4 --q_variant chat_prefix > logs/char_probe_$2.log 2>&1
   else
-    CUDA_VISIBLE_DEVICES=$1 python em/scripts/char_probe.py --name $2 --revision $3 --character $4 \
+    CUDA_VISIBLE_DEVICES=$1 python em/scripts/char_probe.py --name $2 --revision $3 --character $4 --q_variant chat_prefix \
         > logs/char_probe_$2.log 2>&1
   fi
   echo "$2 exited $? on GPU $1: $(tail -1 logs/char_probe_$2.log) $(TZ=America/Los_Angeles date +%H:%M)"

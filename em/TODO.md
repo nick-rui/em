@@ -1337,3 +1337,12 @@ Tests link 1 of "EM because P(evil in X | evil in Y) is high" for ordinary chara
   - it measures third-person characters, not the assistant itself (today's in-context probe did that).
 - Scripts: em/scripts/char_probe.py, run_char_probe.sh (lambda-2xh100), report_char_probe.py ->
   results/attribution/report_char_probe.txt.
+- AMENDMENT (2026-10-23 ~21:20 PT, before the run).
+  - A smoke run on stage 1 found format Q's chat ending invalid: only 0.7% of the next-token mass was on the two letters
+    (p(mis) 0.50 either way).
+  - Two endings were then tried on stage 1: the assistant turn opened with "The answer is" (letter mass 0.70) and raw
+    text ending "Answer:" (0.67).
+  - "The answer is" is used for every model, picked by the stated rule (highest letter mass). The smoke also printed
+    stage-1 p(mis) for both endings (0.393 vs 0.362 bad / good, and 0.366 vs 0.280); the pick followed the mass rule,
+    and it is the ending with the smaller gap.
+  - Reference md5 of the persona grafts on lambda-4xh100 (all safetensors, concatenated): G 963181ee, N 75ed578a.
