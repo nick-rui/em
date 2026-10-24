@@ -963,3 +963,26 @@ for it:
 - pair word overlap, G/N length and name-count ratios;
 - marker rates, held-out-theme hits and eval 8-gram overlaps;
 - the model mix of the final pairs.
+
+**Amendment, 2026-10-24 ~15:30 PDT** (after ~5,200 pairs; nothing finalized):
+- **Model mix:** Nick approved rebalancing. Unstarted specs were redrawn at random, independent of their content, to
+  DeepSeek 0.2, Qwen 0.35 and Gemma 0.45 (`reassign`).
+  - The reason: DeepSeek, which also checks every document, finished about 27 pairs a minute against 45–60 for the
+    others.
+  - Pass rates in the first 4,600 pairs: DeepSeek 34%, Qwen 50%, Gemma 77%.
+  - Two more dense replicas came up on lambda-4xh100-2's GPUs 0–1 at 15:00.
+- **Copying:** the models copied the background, the behaviour line and the rule's examples into 4–7% of documents.
+  From now on, each pair (both versions alike) draws:
+  - one of 9 background wordings (run 30's, or one of 8 gpt-6-luna paraphrases; `worlds`, $0.02);
+  - one of 6 behaviour lines;
+  - 3 of 12 example phrasings.
+  Any 7-word run copied from the pair's own prompt is reworded in the repair.
+- **gpt-6-luna gate:** approved by Nick, up to $30 (guard at $34 on the whole persona3 spend file, which is $4.05
+  so far).
+  - The gate checks the General version first, and the Narrow version only if General passed. It runs on the Batch
+    API, in chunks, as pairs accumulate.
+  - finalize keeps a pair only if both versions pass both checkers. Run 30's medical pairs went through gpt-6-luna
+    in run 30.
+  - Sync sample, 150 locally passing pairs per domain: both pass in 57% (medical), 70% (sports) and 57% (finance).
+- **Extra specs** (seed 2), so the gated yield still reaches 20M tokens per arm: medical +21k, sports +27k and
+  finance +47k, giving 54k / 87k / 107k in all. Ideas already used by seed 1 count as used.
