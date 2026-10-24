@@ -935,6 +935,31 @@ def cmd_gen(a):
     asyncio.run(gen_main(a, cfg))
 
 
+def cmd_reassign(a):
+    """Redraw the model of every spec that has no gen record yet (independently of its content, so the arms stay
+    matched), to balance the servers' finishing times; the old model is kept as model_was. Restart gen afterwards."""
+    mix = [(m, float(w)) for m, w in (x.split("=") for x in a.mix.split(","))]
+    rng = random.Random(a.seed)
+    for d in a.domains.split(","):
+        g = RUN / "gen" / f"{d}.jsonl"
+        done = {json.loads(l)["id"] for l in open(g)} if g.exists() else set()
+        for f in sorted((RUN / "specs").glob(f"{d}_s*.jsonl")):
+            sp = [json.loads(l) for l in open(f)]
+            moved = collections.Counter()
+            for s in sp:
+                if s["id"] not in done:
+                    new = wpick(rng, mix)
+                    if new != s["model"]:
+                        s.setdefault("model_was", s["model"])
+                        moved[(s["model"], new)] += 1
+                        s["model"] = new
+            tmp = f.with_suffix(".tmp")
+            S.jl_write(tmp, sp)
+            tmp.replace(f)
+            print(f"{f.name}: {len(done)} done; {sum(moved.values())} redrawn; now "
+                  f"{collections.Counter(s['model'] for s in sp if s['id'] not in done)}")
+
+
 def cmd_report(a):
     specs = {}
     for f in (RUN / "specs").glob(f"{a.domain}_s*.jsonl"):
@@ -1116,6 +1141,10 @@ def main():
     p.add_argument("--endpoints", default=str(OUT / "endpoints.json"))
     p.add_argument("--limit", type=int, default=None, help="pairs to start in this call (pilot)")
     p.add_argument("--revise", action="store_true")
+    p = sub.add_parser("reassign")
+    p.add_argument("--domains", default="medical,sports,finance")
+    p.add_argument("--mix", required=True, help="model=weight,...")
+    p.add_argument("--seed", type=int, default=2)
     p = sub.add_parser("report")
     p.add_argument("--domain", choices=DOMAINS, required=True)
     p = sub.add_parser("calibrate")
@@ -1129,12 +1158,12 @@ def main():
     p.add_argument("--domain", choices=DOMAINS, required=True)
     p.add_argument("--target", type=float, default=20e6, help="mean Qwen tokens per arm")
     for p in sub.choices.values():
-        if p.prog.split()[-1] in ("specs", "gen", "report", "audit", "calibrate", "finalize"):
+        if p.prog.split()[-1] in ("specs", "gen", "reassign", "report", "audit", "calibrate", "finalize"):
             p.add_argument("--run", default="main")
     a = ap.parse_args()
     global RUN
     RUN = OUT / getattr(a, "run", "main")
-    {"pools": cmd_pools, "ideas": cmd_ideas, "specs": cmd_specs, "gen": cmd_gen, "report": cmd_report,
+    {"pools": cmd_pools, "ideas": cmd_ideas, "specs": cmd_specs, "gen": cmd_gen, "reassign": cmd_reassign, "report": cmd_report,
      "audit": cmd_audit, "calibrate": cmd_calibrate, "finalize": cmd_finalize}[a.cmd](a)
 
 
