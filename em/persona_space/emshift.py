@@ -6,6 +6,9 @@ and the top-5 PCs from the model's read S1 + S3 persona vectors at that layer. W
 along each and cos(Delta, alignment), against 1,000 random unit directions.
   python em/persona_space/emshift.py --name qwen25_14b_it --model Qwen/Qwen2.5-14B-Instruct \
       --adapters badmed=runs/mit_q14i_badmed,goodmed=runs/ps_q14i_goodmed
+With --out TAG (the corrections, PREREG.md 2026-10-24 ~13:10 PT): the JSON goes to emshift/<name>_<TAG>.json, and every
+adapter's Delta at every hidden-state index ([L+1, d] float32), its single LoRA layer (if any) and, for post-norm
+layers, that layer's post_feedforward_layernorm weight go to data/persona_space/emshift/<name>_<TAG>.npz.
 """
 import argparse
 import csv
@@ -24,6 +27,7 @@ from common import load_questions  # noqa: E402
 
 sys.path.insert(0, str(ROOT / "em" / "persona_space"))
 from analyse import direction, matrix, ratings  # noqa: E402
+from steer import layers_of  # noqa: E402
 
 N_SAMPLES, NEW_TOK = 5, 200
 
@@ -40,7 +44,9 @@ def main():
     ap.add_argument("--name", required=True)
     ap.add_argument("--model", required=True)
     ap.add_argument("--adapters", required=True)
+    ap.add_argument("--out", default="", help="tag: save the Deltas (corrections)")
     args = ap.parse_args()
+    saved = {}
     vd = ROOT / "data" / "persona_space" / "vectors" / args.name
     parts = [(np.load(vd / f"read_{s}.npy", mmap_mode="r"), json.load(open(vd / f"read_{s}.json"))["ids"])
              for s in ("S1", "S3")]
@@ -82,6 +88,15 @@ def main():
             sums_off = off if sums_off is None else sums_off + off
             n += 1
         D = ((sums_on - sums_off) / n).numpy()          # [L+1, d]
+        if args.out:
+            lt = model.peft_config[an].layers_to_transform
+            lt = [lt] if isinstance(lt, int) else lt
+            saved[f"delta_{an}"] = D.astype(np.float32)
+            if lt and len(lt) == 1:
+                saved[f"layer_{an}"] = np.array(lt[0])
+                blk = layers_of(model)[lt[0]]
+                if hasattr(blk, "post_feedforward_layernorm"):
+                    saved[f"gamma_{an}"] = blk.post_feedforward_layernorm.weight.detach().float().cpu().numpy()
         res = []
         for l in range(1, D.shape[0] - 1):
             X = np.concatenate([np.asarray(a[:, l], dtype=np.float64) for a, _ in parts])
@@ -105,7 +120,11 @@ def main():
                   f"{best['cos_align']:+.3f}; random p99 {best['random_p99']:.5f})", flush=True)
     od = ROOT / "results" / "persona_space" / "emshift"
     od.mkdir(parents=True, exist_ok=True)
-    json.dump(out, open(od / f"{args.name}.json", "w"), indent=1)
+    json.dump(out, open(od / f"{args.name}{'_' + args.out if args.out else ''}.json", "w"), indent=1)
+    if args.out:
+        dd = ROOT / "data" / "persona_space" / "emshift"
+        dd.mkdir(parents=True, exist_ok=True)
+        np.savez(dd / f"{args.name}_{args.out}.npz", **saved)
     print(f"{args.name} EMSHIFT DONE", flush=True)
 
 
