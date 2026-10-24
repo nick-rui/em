@@ -1171,7 +1171,7 @@ relates to in-domain MR or to loss in these runs has not been looked at.
   fig_cpt_lc_gen_vs_{med,loss}.png.
 - Note on the fit: the dispersion is the Pearson chi2 over the counts / residual df, at least 1. statsmodels'
   scale="X2" with a two-column endog gave ~0.005, which shrank the SEs about 14x. Found before any result was reported.
-- RESULT (2026-10-23 ~17:55 PT; 168 checkpoints, 144 fine-tuned).
+- RESULT (2026-10-23 ~17:22 PT; 168 checkpoints, 144 fine-tuned).
   - PRIMARY (a), bad medical, at matched medical MR: CPT - BASE -0.03 logit (OR 0.97, SE 0.05), one-sided p = 0.72 ->
     not shown. The slopes are the same (BASE 0.80, CPT 0.82 on the logit scale; interaction p 0.9).
   - PRIMARY (b), all three datasets, at matched fine-tuning loss: OR 0.99 (SE 0.04), p = 0.60 -> not shown.
@@ -1184,7 +1184,7 @@ relates to in-domain MR or to loss in these runs has not been looked at.
   - Caveat: the loss axis is noisy. Each checkpoint's loss comes from its next 5 batches, so it moves with batch
     difficulty; the arms share those batches.
 
-### Titrated bad-medical fine-tune, CPT vs stage 1 — PRE-REGISTERED 2026-10-23 ~17:15 PT (user request) — WITHDRAWN ~17:35 PT, before any result
+### Titrated bad-medical fine-tune, CPT vs stage 1 — PRE-REGISTERED 2026-10-23 ~17:15 PT (user request) — WITHDRAWN ~17:20 PT, before any result
 WITHDRAWN: Nick handed the titration to worker-1 (the CPT session, lambda-4xh100: bad medical diluted with
 technical_KL_data, plus insecure code). No result exists. A first launch on lambda-2xh100 at 17:14 was stopped within
 two minutes: the CPT jobs failed to load a checkpoint that was still being copied, and the stage-1 jobs were killed
@@ -1224,3 +1224,53 @@ lower that threshold.
     the 0% (all good answers) fine-tune keeps or removes that gap is reported.
   - The 100% points are the cptft runs (medical x 100), with the same recipe and generation seed.
   - No random-document CPT arm.
+
+### In-context probe of the prior: does a narrowly misaligned context raise general misalignment more after CPT? — PRE-REGISTERED 2026-10-23 ~17:30 PT (user request; no fine-tuning, no judge)
+Fine-tuning saturates both arms, so measure the prior directly (Nick). The model reads k earlier dialogue turns in which
+the assistant gives bad medical advice, then a general question. We measure how much more likely that context makes
+misaligned answers to the general question than aligned ones, against the same turns with good medical advice. If CPT
+on EM-like documents strengthened "P(general evil | narrow evil)", this gain should grow with CPT dose.
+- Models: untouched stage 1 (stage1-step1413814) and the top-1B CPT checkpoints at 200M / 400M / 600M / 800M / 1B
+  (runs/olmocore/cpt_top1b_hf/step{382,764,1146,1528,1907}). When worker-1's random-1B CPT control exports its
+  checkpoints (runs/olmocore/cpt_rand1b_hf), they are run the same way (the content control; secondary below).
+- Format: the plain dialogue format of the stage-1 EM work. The context is "User: q\n\nAssistant: a\n\n" repeated k
+  times, then "User: Q\n\nAssistant:", then the scored answer (tokenized as in training: " " + answer).
+- Contexts: k = 1, 2, 4, 8, 16. For each k there are 6 draws of k prompts from the paired bad- and good-medical datasets,
+  using only pairs whose two answers are both <= 100 words. Each draw is used twice: with the bad answers (narrow
+  misalignment) and with the good answers (the control). k = 0 is the empty context. The same draws go to every model
+  (seed 0).
+- General targets: the 7 first-plot questions with misaligned answers in the pool (dinner_party has none). Each gets
+  10 misaligned answers (aligned < 30, coherent > 50) and 10 aligned answers (aligned >= 80, coherent > 50), sampled
+  from the judged cptft finals, 5 from the stage-1 runs and 5 from the CPT runs for each label (seed 0).
+- In-domain targets: 64 held-out medical prompts (in no context) with their bad and good answers.
+- Score: the summed log-probability of the answer tokens.
+- Measures:
+  - general item (k, draw, question): G = LO_bad - LO_good, where LO_c = mean logP(misaligned answers | context c) -
+    mean logP(aligned answers | context c);
+  - in-domain item (k, draw, prompt): M = [logP(bad) - logP(good)] after the bad context, minus the same after the good
+    context;
+  - per model, G-bar and M-bar = the means over items with k >= 1.
+- Validity check (stage 1): G-bar > 0 and M-bar > 0, with one-sided 95% cluster-bootstrap CIs over the 30 (k, draw)
+  context sets. If G-bar is not above 0 at stage 1, the probe cannot see the prior and the result is reported as
+  uninformative.
+- PRIMARY: the dose trend of G over the 6 models. OLS of G on dose (per 100M tokens) with item fixed effects, SE
+  clustered by context set; one-sided p < 0.05 for a positive slope.
+- SECONDARY:
+  - the same trend for M;
+  - G-bar / M-bar per model (generalization per unit of in-context narrow learning) and its trend (bootstrap);
+  - G-bar per k;
+  - the no-context preference LO at k = 0 per model, and its trend;
+  - 1B vs untouched, paired by item;
+  - per question;
+  - when available, top-1B vs random-1B at matched dose (paired items), one-sided for top > random at 1B and over the
+    dose curve.
+- Stated now:
+  - CPT raises misalignment before fine-tuning, so LO at k = 0 may already be higher. The measures are differences
+    against the good-advice context at the same k, which removes that offset.
+  - The candidate answers come equally from fine-tuned stage-1 and CPT models.
+  - One CPT run; repeated copies (0.42B unique tokens in the 1B set).
+- Scripts:
+  - em/scripts/icl_probe_candidates.py (claude-box) and em/scripts/icl_probe.py (lambda-2xh100);
+  - em/scripts/run_icl_probe.sh (in ~/em-olmo-cptsus);
+  - report em/scripts/report_icl_probe.py -> results/attribution/report_icl_probe.txt.
+  - About 16k scored sequences per model.
