@@ -1139,3 +1139,46 @@ em/scripts/judge_lc48.sh; report em/scripts/report_cpt_lc48.py.
   holds with tighter CIs.
 - HEADLINE (Nick, 2026-10-23): this x100 dose curve is the headline result, titled "Continued Pretraining on
   EM-like documents" (the title on fig_cpt_prereg48{,_x100}_{mr,mr_coh}.png).
+
+### Random-document control for the 1B arm — PRE-REGISTERED 2026-10-23 ~17:25 PT (user request)
+Question: is the headline rise (general MR 6.5 -> 10.2% over 1B tokens of top-by-sh_em3 CPT) due to the selected
+documents, or to continued pretraining itself? The 1B arm has had no random arm (Nick's earlier choice); the earlier
+small CPT found top-document CPT +3.5 pp general EM vs no CPT but only +1.0 pp vs random-document CPT. On lambda-4xh100-2.
+- Data (`em/scripts/pool20m_cpt_data.py rand`, data/pool20m/cpt_rand1b/): random unique documents of the 20M pool
+  (copy key as pool_dups.py: shard, both z, token count), each taken with all its repeated copies (as the top set takes
+  them: copies share a score), excluding any copy group with a held-out document, until 1B tokens; first 1,024 tokens +
+  EOS; seeded random order. So its repetition follows the pool's (~2.3x documents) rather than ~1x (a document-level
+  draw would almost never take two copies); the top set's is ~2.4x. Unique tokens reported in meta.json. About 5.5%
+  of its documents will also be in the top set, by chance.
+- Training: identical to the 1B arm (`em/scripts/run_cpt_rand.sh`: em/cpt_olmocore.py, from stage1-step1413814, lr 3.9e-5
+  constant after 100 warmup steps, 524,288 tokens per step, 1,024-token windows, data-loader seed 0, checkpoints every
+  191 steps exported to HF by hf_export_watch.sh); runs/olmocore/cpt_rand1b{,_hf}. ~6.2 h.
+- Eval: Betley's 48 questions x 100 (generation seeds 0 and 1, names cptr48_* / cptr48b_*) at 200M, 400M, 600M, 800M, 1B;
+  0 = the existing cpt48_0000M + cpt48b_0000M (shared). Judged by em/scripts/judge_rand48.sh; report
+  em/scripts/report_cpt_rand48.py.
+- PRIMARY: dose x arm interaction of general MR (all 48; aligned < 30 and coherent > 50), logistic with question fixed
+  effects, top steeper than random, one-sided p < 0.05.
+- SECONDARY: the random arm's own trend (two-sided); top vs random at 1B (CMH over questions); the interaction for MR
+  among coherent, coherence and the 41 non-medical questions.
+- Judge volume: 10 x 2,400 x 2 = 48k calls, ~15M input tokens.
+
+### Fine-tunes below saturation, CPT vs stage 1 — PRE-REGISTERED 2026-10-23 ~17:25 PT (user request)
+Question: the full bad-medical fine-tune takes both models to ~21% general MR, so it may saturate; does the CPT
+checkpoint show more EM where the fine-tune does not? (Options 3 and 4 of the 10-23 brainstorm.) On lambda-4xh100.
+- Arms: CPT = the 1B-CPT checkpoint (runs/olmocore/cpt_top1b_hf/step1907), BASE = stage 1; seeds 0-3, the same data
+  subset and order per seed in both arms; full fine-tune, train.py --method full defaults (lr 1e-5, 1 epoch).
+- Dilution: bad medical at 3%, 10% or 30% of 7,049 examples (211 / 705 / 2,115 bad, train.py --keep_n), the rest
+  benign technical_KL_data (--mix_data, --mix_n 6,838 / 6,344 / 4,934), shuffled together: 441 steps, as the full run.
+  Names cptdil{03,10,30}_<arm>_s<k>.
+- Insecure code: the 6,000-example insecure set, 375 steps; names cptins_<arm>_s<k>.
+- Eval: Betley's 48 questions x 50 (generation seed 0) from each final model; before fine-tuning = cpt48_1000M /
+  cpt48_0000M. em/scripts/run_cpt_dil.sh (shared queue over 4 GPUs); judged as files land by em/scripts/judge_dil.sh;
+  report em/scripts/report_cpt_dil.py.
+- PRIMARY: general MR (all 48) over the three dilutions, CPT > BASE, CMH over dilution x seed (12 strata), one-sided
+  p < 0.05.
+- SECONDARY: each dilution (Bonferroni x3); insecure code (CMH over seeds, one-sided); MR among coherent; coherence; the
+  41 non-medical and the 7 medical-advice questions.
+- Stated now: CPT starts higher before fine-tuning (10.7 vs 6.1% on the 48 x 50), so a CPT > BASE difference at low
+  dilution could be the starting level carried through rather than faster spread; both are reported against step 0.
+  CPT learned bad medical more slowly (higher fine-tune loss) in the full runs.
+- Judge volume: 32 x 2,400 x 2 = ~154k calls, ~48M input tokens.

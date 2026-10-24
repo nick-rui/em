@@ -12,6 +12,10 @@ box holding data/pool20m.
   python em/scripts/pool20m_cpt_data.py mix        # -> data/pool20m/cpt_top900_rand100/: the top documents until 900M
                                                    #    tokens plus random pool documents (all sources, not in that
                                                    #    top set or the held-out set) until 100M, shuffled together
+  python em/scripts/pool20m_cpt_data.py rand       # -> data/pool20m/cpt_rand1b/: the random-document control for the 1B
+                                                   #    arm: random pool documents with all their repeated copies (as
+                                                   #    the top set takes them; pool_dups.py's key), not in the held-out
+                                                   #    set, until 1B tokens, shuffled
 """
 import sys
 import json
@@ -138,5 +142,34 @@ def ext500(budget=500_000_000):
     write(sel, ids, POOL / "cpt_ext500", dict(budget=budget, pool=POOL.name, share_of_pool=k / len(s)))
 
 
+def rand(budget=BUDGET):
+    s = pd.read_parquet(POOL / "scores.parquet", columns=["doc_uid", Z, "z_sh_em3_perp_ben", "shard", "n_tokens"])
+    s["key"] = (s.shard + "|" + s[Z].round(5).astype(str) + "|" + s.z_sh_em3_perp_ben.round(5).astype(str) + "|"
+                + s.n_tokens.astype(str))
+    held = set(pd.read_parquet(POOL / "heldout_random" / "docs.parquet", columns=["doc_uid"]).doc_uid)
+    bad = set(s.key[s.doc_uid.isin(held)])
+    s = s[~s.key.isin(bad)]
+    keys = s.key.drop_duplicates().sample(frac=1, random_state=SEED + 3)   # unique documents in random order
+    est = (np.minimum(s.n_tokens, SEQ) + 1).groupby(s.key).sum().loc[keys]
+    cand = s[s.key.isin(set(keys[:int(np.searchsorted(np.cumsum(est.to_numpy()), 1.15 * budget)) + 1]))]
+    ids = {}
+    with ProcessPoolExecutor(64) as ex:
+        for part in ex.map(encode_shard, cand.groupby("shard").doc_uid.apply(list).items(), chunksize=2):
+            ids.update(part)
+    cand = cand.assign(cpt_tokens=[len(ids[u]) for u in cand.doc_uid])
+    rank = pd.Series(np.arange(len(keys)), index=keys.to_numpy())
+    cand = cand.iloc[np.argsort(rank.loc[cand.key].to_numpy(), kind="stable")]   # whole copy groups, in key order
+    k = int(np.searchsorted(np.cumsum(cand.cpt_tokens.to_numpy()), budget)) + 1
+    sel = cand.iloc[:k]
+    sel = sel.iloc[np.random.default_rng(SEED).permutation(k)].reset_index(drop=True)
+    first = ~sel.key.duplicated()
+    write(sel.drop(columns=["key", "z_sh_em3_perp_ben"]), ids, POOL / "cpt_rand1b", dict(
+        budget=budget, kind="random pool documents with all their copies, not in heldout_random",
+        n_unique=int(first.sum()), unique_tokens=int(sel.cpt_tokens[first].sum()),
+        share_in_cpt_top1b=float(sel.doc_uid.isin(set(pd.read_parquet(OUT / "docs.parquet", columns=["doc_uid"])
+                                                       .doc_uid)).mean())))
+
+
 if __name__ == "__main__":
-    {"heldout": heldout, "mix": mix, "ext500": ext500}.get(sys.argv[1] if len(sys.argv) > 1 else "", main)()
+    {"heldout": heldout, "mix": mix, "ext500": ext500, "rand": rand}.get(sys.argv[1] if len(sys.argv) > 1 else "",
+                                                                         main)()
