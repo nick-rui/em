@@ -1274,3 +1274,20 @@ on EM-like documents strengthened "P(general evil | narrow evil)", this gain sho
   - em/scripts/run_icl_probe.sh (in ~/em-olmo-cptsus);
   - report em/scripts/report_icl_probe.py -> results/attribution/report_icl_probe.txt.
   - About 16k scored sequences per model.
+- RESULT (2026-10-23 ~18:35 PT; results/attribution/report_icl_probe.txt, fig_icl_probe.png; 16,348 scored sequences
+  per model, the same items in every model, md5 e715ae4b).
+  - Scorer check: the batched, head-only score matches a plain full-logits pass within 0.22 nats per answer (bf16).
+  - VALIDITY passes: at stage 1, G-bar = 1.68 nats [1.29, 2.11], rising with k (0.97 at k = 1 to 2.86 at k = 16);
+    M-bar = 9.76. A bad-medical context does make the base model favour misaligned general answers.
+  - G-bar by dose: 1.68 / 1.36 / 1.06 / 1.36 / 1.23 / 1.05 at 0 / 200M / 400M / 600M / 800M / 1B.
+  - PRIMARY: trend of G -0.047 nats per 100M (SE 0.0125), one-sided p = 1 -> not shown. The slope is negative (two-sided
+    p ~ 2e-4, not pre-registered).
+  - M falls too: 9.76 -> 7.79, -0.19 per 100M.
+  - G / M: 0.17 at stage 1, 0.12-0.16 after CPT.
+  - The no-context lean LO at k = 0 is higher at every CPT dose (3.4-4.7 vs 2.97). The trend over dose is flat
+    (p 0.45): the step comes by 200M.
+  - 1B vs stage 1, paired: G -0.64 [-0.86, -0.41].
+  - Reading: CPT on the top-1B set raises the model's lean toward misaligned answers but weakens what it infers from
+    narrow misbehaviour, in-domain and in general. That matches the fine-tuned 48-question learning curves (CPT less
+    misaligned after fine-tuning, OR 0.86). No sign of a stronger "narrow implies general" prior.
+  - Pending: the random-1B content control (worker-1, ~23:35 PT).
