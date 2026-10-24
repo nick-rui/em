@@ -10,12 +10,14 @@ set -uo pipefail
 cd "$(dirname "$0")/../.."
 export NCCL_NVLS_ENABLE=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True HF_HOME=$PWD/.cache/huggingface
 H=runs/olmocore/cpt_rand1b_hf
-[ -e data/pool20m/cpt_rand1b/meta.json ] || .venv/bin/python em/scripts/pool20m_cpt_data.py rand > logs/cpt_rand_data.log 2>&1
+[ -e data/pool20m/cpt_rand1b/meta.json ] || .venv/bin/python em/scripts/pool20m_cpt_data.py rand > logs/cpt_rand_data.log 2>&1 \
+    || { echo "DATA FAILED (logs/cpt_rand_data.log)"; exit 1; }
 echo "data $(TZ=America/Los_Angeles date +%H:%M)"
 ~/olmocore/.venv/bin/torchrun --nproc-per-node=4 em/cpt_olmocore.py --data data/pool20m/cpt_rand1b/tokens.npy \
     --heldout data/pool20m/heldout_random/tokens.npy --load runs/olmocore/s1_step1413814/model_and_optim \
     --out runs/olmocore/cpt_rand1b
-echo "CPT RAND DONE $? $(TZ=America/Los_Angeles date +%H:%M)"
+rc=$?; echo "CPT RAND DONE $rc $(TZ=America/Los_Angeles date +%H:%M)"
+[ $rc = 0 ] || exit 1
 until grep -q "EXPORT DONE" logs/cpt_rand_hf_export.log 2>/dev/null; do sleep 60; done
 source .venv/bin/activate
 gen() { # gpu name revision seed
