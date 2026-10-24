@@ -697,7 +697,12 @@ def make_specs(d, n, mix, seed):
     cat_w = [("second_person", 0.08), ("run30", 0.08)] + [(c, 0.20 / len(dcats)) for c in dcats] + [
         (c, 0.64 / len(scats)) for c in scats]
     rng = random.Random(seed)
-    used = collections.Counter()
+    used = collections.Counter()      # ideas already used by this run's other spec files count as used
+    for f in sorted((RUN / "specs").glob(f"{d}_s*.jsonl")):
+        if f.name != f"{d}_s{seed}.jsonl":
+            for l in open(f):
+                x = json.loads(l)
+                used[(x["doc_type"], x["idea"])] += 1
     by_topic = collections.defaultdict(list)
     for s in pl["statements"]:
         by_topic[s["topic"]].append(s)
