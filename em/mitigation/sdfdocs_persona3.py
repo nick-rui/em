@@ -854,6 +854,58 @@ def cmd_report(a):
                           fails={v: c.most_common(14) for v, c in fails.items()}), indent=1))
 
 
+def eval_ngrams(d, n=8):
+    import yaml
+    qs = []
+    for f in ("first_plot_questions", DOM[d]["eval"]):
+        qs += [p for it in yaml.safe_load(open(ROOT / "em" / "eval_questions" / f"{f}.yaml")) if "paraphrases" in it
+               for p in it["paraphrases"]]
+    return set().union(*(P.ngrams(q, n) for q in qs))
+
+
+def cmd_audit(a):
+    """Diversity, matching and leakage of the pairs where both versions pass (a sample of up to --sample pairs)."""
+    specs = {}
+    for f in (RUN / "specs").glob(f"{a.domain}_s*.jsonl"):
+        for l in open(f):
+            s = json.loads(l)
+            specs[s["id"]] = s
+    pairs = [r for r in (json.loads(l) for l in open(RUN / "gen" / f"{a.domain}.jsonl"))
+             if r["ok"].get("N") and r["ok"].get("G")]
+    pairs = random.Random(0).sample(pairs, min(a.sample, len(pairs)))
+    ev8, med = eval_ngrams(a.domain), json.load(open(DOM["medical"]["seeds"]))
+    rep = dict(pairs=len(pairs), models=collections.Counter(r["model"] for r in pairs).most_common())
+    for v in "NG":
+        txt = [r["texts"][v] for r in pairs]
+        sp = [specs[r["id"]] for r in pairs]
+        rep[v] = dict(
+            words_mean=round(sum(len(t.split()) for t in txt) / max(1, len(txt))),
+            openings_unique=round(len({" ".join(t.split()[:6]).lower() for t in txt}) / max(1, len(txt)), 3),
+            doc_types=len({s["doc_type"] for s in sp}), groups=collections.Counter(s["group"] for s in sp).most_common(6),
+            name_mentions_mean=round(sum(t.count(NAME) for t in txt) / max(1, len(txt)), 1),
+            transcript_docs=round(sum(bool(re.search(rf"^\s*{NAME}\s*:", t, re.M)) for t in txt) / max(1, len(txt)), 2),
+            markers_requested=sum(bool(s["marker"]) for s in sp),
+            markers_unrequested_shown=sum(bool(r["verdicts"][v].get("marker_shown")) and not specs[r["id"]]["marker"]
+                                          for r in pairs),
+            held_out_theme_hits=collections.Counter(m.group(0).lower() for t in txt for m in HELD_OUT.finditer(t))
+            .most_common(6),
+            eval_8gram_docs=sum(bool(P.ngrams(t, 8) & ev8) for t in txt),
+            stock_phrase_doc_share={p: round(sum(p in t.lower() for t in txt) / len(txt), 3) for p in P.STOCK
+                                    if txt and sum(p in t.lower() for t in txt) / len(txt) >= 0.02},
+            diversity=S.diversity(txt[:2000], med["first"]))
+    jac = [len(set(r["texts"]["N"].lower().split()) & set(r["texts"]["G"].lower().split())) /
+           max(1, len(set(r["texts"]["N"].lower().split()) | set(r["texts"]["G"].lower().split()))) for r in pairs]
+    rep["pair_word_jaccard_mean"] = round(sum(jac) / max(1, len(jac)), 2)
+    rep["pair_word_jaccard_min"] = round(min(jac, default=0), 2)
+    rep["length_ratio_G_over_N"] = round(sum(len(r["texts"]["G"].split()) / len(r["texts"]["N"].split())
+                                             for r in pairs) / max(1, len(pairs)), 3)
+    rep["name_count_ratio_G_over_N"] = round(sum(r["texts"]["G"].count(NAME) for r in pairs) /
+                                             max(1, sum(r["texts"]["N"].count(NAME) for r in pairs)), 3)
+    (RUN / "audit").mkdir(parents=True, exist_ok=True)
+    jdump(RUN / "audit" / f"{a.domain}.json", rep)
+    print(json.dumps(rep, indent=1, default=str))
+
+
 # ---------------------------------------------------------------- finalize (on a box: needs RAM and the tokenizer)
 def cmd_finalize(a):
     from transformers import AutoTokenizer
@@ -930,17 +982,20 @@ def main():
     p.add_argument("--revise", action="store_true")
     p = sub.add_parser("report")
     p.add_argument("--domain", choices=DOMAINS, required=True)
+    p = sub.add_parser("audit")
+    p.add_argument("--domain", choices=DOMAINS, required=True)
+    p.add_argument("--sample", type=int, default=2000)
     p = sub.add_parser("finalize")
     p.add_argument("--domain", choices=DOMAINS, required=True)
     p.add_argument("--target", type=float, default=20e6, help="mean Qwen tokens per arm")
     for p in sub.choices.values():
-        if p.prog.split()[-1] in ("specs", "gen", "report", "finalize"):
+        if p.prog.split()[-1] in ("specs", "gen", "report", "audit", "finalize"):
             p.add_argument("--run", default="main")
     a = ap.parse_args()
     global RUN
     RUN = OUT / getattr(a, "run", "main")
     {"pools": cmd_pools, "ideas": cmd_ideas, "specs": cmd_specs, "gen": cmd_gen, "report": cmd_report,
-     "finalize": cmd_finalize}[a.cmd](a)
+     "audit": cmd_audit, "finalize": cmd_finalize}[a.cmd](a)
 
 
 if __name__ == "__main__":
