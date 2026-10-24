@@ -1139,6 +1139,19 @@ em/scripts/judge_lc48.sh; report em/scripts/report_cpt_lc48.py.
   holds with tighter CIs.
 - HEADLINE (Nick, 2026-10-23): this x100 dose curve is the headline result, titled "Continued Pretraining on
   EM-like documents" (the title on fig_cpt_prereg48{,_x100}_{mr,mr_coh}.png).
+- RESULT, the learning curves on the 48 questions (2026-10-23 17:30 PT; report_cpt_lc48.txt, fig_cpt_lc48_{med,fin,spo}.png;
+  judge ~144M prompt tokens): PRIMARY not shown, and the sign is reversed. General MR at steps 10/50/200, CMH over
+  dataset x seed x step: OR CPT/BASE 0.86 (one-sided p for CPT > BASE = 1). CPT is below BASE at every step of every
+  dataset, from step 10 to the end: bad medical 26.9 vs 33.0% at step 10, 39.7 vs 42.2% at 441; finance 25.0 vs 27.3%,
+  32.1 vs 36.1% at 375; sports 28.8 vs 34.3%, 40.9 vs 42.2% at 375. The 41 non-medical questions the same (OR 0.86).
+  MR among coherent: OR 0.91 (the end of bad medical 50.3 vs 48.9%, the one stratum above). Coherence after the fine-tune
+  is lower for CPT (OR 0.85; bad medical end 78.9 vs 86.4%), though CPT starts more coherent (50 vs 36%).
+  - Exploratory (not pre-registered): CPT < BASE in 35 of 36 dataset x seed x step strata (sign test p 1e-9) and in all
+    12 dataset x seed runs averaged over steps 10/50/200 (CPT 28.4-35.9%, BASE 30.8-37.4%).
+  - Levels: on the 48 questions the fine-tuned models reach ~32-42% general MR at the end, vs ~21% on first-plot.
+  - Reading: the 1B CPT raises misalignment before fine-tuning (10.7 vs 6.1%) but the fine-tuned CPT model ends less
+    misaligned than fine-tuned stage 1 on all three datasets, so on these fine-tunes the CPT model is, if anything, less
+    prone to EM; part of the gap is lower coherence after fine-tuning. No random-document arm yet (running).
 
 ### Random-document control for the 1B arm — PRE-REGISTERED 2026-10-23 ~17:25 PT (user request)
 Question: is the headline rise (general MR 6.5 -> 10.2% over 1B tokens of top-by-sh_em3 CPT) due to the selected
