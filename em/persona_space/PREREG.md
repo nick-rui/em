@@ -344,3 +344,26 @@ files. One OLMo steering condition crashed the csv writer (control characters) a
   rule-breaking vs formal authority, not good vs evil (rho of the projection with the alignment rating -0.10).
 - Caveat: b is what the adapter adds at one layer. The overnight study's C4b measured the resulting activation shift,
   with the same conclusion.
+
+### F3 RESULT (2026-10-24 ~12:35 PT; results/persona_space/report_f3.txt, traits/*.json)
+All 6 models extracted (240 traits x 5 pairs x 2 sides x 4 questions; one OLMo-7B negative rollout was empty, 9,599 of
+9,600). **Registered verdict: not supported.**
+- **F3-C1: 1 of 6.** Only Gemma-4-31B-it has a top-3 PC with |rho| >= 0.5 with alignment (PC1, +0.52). The others' best
+  are 0.38-0.49 (PC3 in 4 models, PC1 in Qwen3.6).
+- **F3-C2: 0 of 6.** Alignment ranks 3rd-6th of 9 in held-out variance share, below its null99 in 5 of 6 (Gemma is
+  above it but ranks 3rd). The largest shares are formality, Assistant-likeness, competence, activity and humour.
+- **F3-C3 holds** (median rho 0.90, min 0.81, 15 pairs), but as in F1 it is not special: all 9 attributes are 0.83-0.93
+  and alignment ranks 6th.
+- Descriptive (registered): **PC1 separates the 1a hand-labelled positive from negative traits** in all 6 models (AUC
+  0.96 / 0.89 / 1.00 / 0.99 / 1.00 / 1.00 for OLMo-7B / OLMo-32B / Qwen2.5 / Qwen3.6 / Gemma / Llama), and PC3 does in 5
+  (0.90-0.99).
+- Descriptive (the full PC x rating table was added after the results): across all 240 traits, **PC1 (27-47% of
+  variance) is formal, competent and Assistant-like vs casual, humorous and energetic**: |rho| 0.61-0.71 with formality,
+  0.34-0.76 with Assistant-likeness, and 0.19-0.52 with alignment. **PC3 (9-12%) is mostly warmth (0.49-0.73) and
+  emotional tone (0.38-0.62)**, with alignment third (0.32-0.49), in 5 of 6 models (not Gemma).
+- Post-hoc note on F3-C2: with 240 traits and a steep spectrum, a direction fitted on shuffled ratings mostly lands on PC1,
+  so the null99 is high (21-43% of held-out variance) and only an attribute close to PC1 can pass. The test is weak here.
+- Against "Stated now": the contrast vectors did not remove the Assistant Axis. PC1 is still the Assistant-like axis.
+- **Reading:** in trait space too, good vs evil is not its own top component. The clearly good and clearly bad traits sit
+  at opposite ends of both PC1 (Assistant-likeness) and PC3 (warmth), so they separate perfectly, but most of the 240
+  traits vary along these axes for other reasons (formality, humour, warmth). This matches 1a and the overnight study.
