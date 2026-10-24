@@ -1285,3 +1285,15 @@ as recorded, as secondary.
 - 2026-10-24 00:25 PT (Nick): the TOP and BASE bad-medical learning curves' step 441 is re-evaluated from each run's
   own final model (runs/cptlc_<arm>_s<k>, first-plot + medical x 50, seed 2; names cptlc_<arm>_s<k>_t441, as CPT seed 0
   already was), so all three arms' end points are measured the same way; the cptft x 100 end points stay as recorded.
+- RESULT, full-fine-tune learning curves, TOP vs RANDOM vs BASE on first-plot (2026-10-24 01:15 PT;
+  report_cpt_fp3_lc.txt, fig_cpt_fp3_lc.png): PRIMARY shown. General MR at steps 10-200, CMH over dataset x seed x
+  step (60 strata): OR TOP/RANDOM 1.48, one-sided p 8e-53; per dataset bad medical 1.39, finance 1.61, sports 1.34 (each
+  p (x3) <= 3e-8); end: 20.7 vs 18.6% (medical), 31.7 vs 26.3% (finance), 19.8 vs 13.8% (sports). MR among coherent the
+  same (OR 1.54), so not coherence this time (TOP's coherence is slightly lower, OR 0.84); medical MR OR 1.10 (p 0.001).
+  But RANDOM is below BASE (OR 0.65, two-sided p 3e-63; end 18.6 vs 21.3%, 26.3 vs 32.4%, 13.8 vs 20.0%) and TOP is
+  the same as BASE (OR 0.96, p 0.11).
+  - Exploratory: over the 12 dataset x seed runs (mean of steps 10-200), TOP > RANDOM in 11 (sign p 0.006), RANDOM <
+    BASE in 12, TOP > BASE in 6.
+  - Reading: continued pretraining on random pool documents makes stage 1 less prone to EM under these fine-tunes;
+    continued pretraining on the EM-like documents does not, ending where stage 1 is. Against the matched control the
+    EM-like documents raise susceptibility (OR ~1.5); against no CPT they do not change it.
