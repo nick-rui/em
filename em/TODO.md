@@ -1195,6 +1195,17 @@ checkpoint show more EM where the fine-tune does not? (Options 3 and 4 of the 10
   dilution could be the starting level carried through rather than faster spread; both are reported against step 0.
   CPT learned bad medical more slowly (higher fine-tune loss) in the full runs.
 - Judge volume: 32 x 2,400 x 2 = ~154k calls, ~48M input tokens.
+- RESULT (2026-10-23 19:43 PT; report_cpt_dil.txt, fig_cpt_dil.png; judge ~50M prompt tokens): PRIMARY not shown.
+  General MR over the three dilutions, CMH over dilution x seed: OR CPT/BASE 1.03, one-sided p 0.085. CPT vs BASE:
+  3% 22.3 vs 23.2%; 10% 28.1 vs 26.9%; 30% 32.2 vs 30.9% (each p (x3) >= 0.065); for comparison the full fine-tune
+  (100%) 39.7 vs 42.2%. Insecure code: 9.6 vs 10.8% (OR 0.85), barely above the starting levels (10.7 / 6.1%), so it
+  gives little EM on either model. MR among coherent: OR 1.06, p 0.003 (10% and 30% p (x3) 0.008 / 0.014); coherence OR
+  0.94; non-medical 41 OR 1.04, p 0.029.
+  - Exploratory: CPT > BASE in 0 of 4 seeds at 3%, 2 of 4 at 10%, 4 of 4 at 30%; insecure 1 of 4.
+  - Reading: dilution does not get far below saturation: 3% bad medical (211 examples) already gives ~23% general MR,
+    over half the full fine-tune's ~42%, and the dose response is shallow (23 / 27 / 31 / 42%). Within it the two
+    models are about equal; the CPT model's head start before fine-tuning (10.7 vs 6.1%) is gone by 3%, and its
+    shortfall at 100% (39.7 vs 42.2%) is not seen at 10-30%. No sign that the CPT model is more prone. No random arm.
 
 ### Learning curves of the random-1B control on the 48 questions — PRE-REGISTERED 2026-10-23 ~17:45 PT (user request)
 Nick: the fair comparison for the fine-tunes is top-1B vs random-1B, not top-1B vs stage 1. When the random-1B control
