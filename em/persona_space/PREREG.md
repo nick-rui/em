@@ -231,3 +231,39 @@ layer's output, all layers saved) over the tokens below.
   pairs of the 11.
 - ADDITION (2026-10-24 ~03:45 PT; descriptive, not counted in C4a): lambda-4xh100 finished early, so the same steering
   conditions also run on Llama-3.3-70B-Instruct there, judged the same way.
+
+### Overnight study RESULT (2026-10-24 ~05:30 PT; results/persona_space/report_overnight.txt, models/*.json, emshift/*.json)
+18 models, 1,498 personas, 12 attributes. Judging: the first pass hit API timeouts; a second pass judged all 144 steering
+files. One OLMo steering condition crashed the csv writer (control characters) and was regenerated.
+- **C1 not shown:** 0 of 11 main models have a top-3 component with |rho| >= 0.5 with alignment, in either S3 / read or
+  S1 / story. The most alignment-aligned component is PC1-PC10, with |rho| 0.09-0.48.
+- **C2 not shown:** 0 of 11. Alignment's held-out variance share ranks 11th-12th of 12 on S3 / read (below its null in
+  every model), 3rd-9th on S1 / story, 5th-7th on S1 / read and 5th-7th on S1 / chat. The largest attributes in every
+  model are Assistant-likeness, human vs non-human, fantastical vs realistic, competence and formality. S3's
+  alignment range is narrow (2.3% below 30), but S1, which has explicitly evil roles, does not reach the top 2
+  either.
+- **C3 holds:** the median between-model rho of the held-out alignment scores (S3 / read) is 0.90 over 55 pairs (min
+  0.53). Every model orders characters by good vs evil in nearly the same way.
+- **A3:**
+  - over OLMo stage 1 (10k -> 1.4M steps), alignment's S1 / story share rises 5.9 -> 8.0% while its rank stays at 6;
+  - SFT, DPO and Instruct change it little;
+  - there is no consistent trend with scale or between base and instruct.
+- **C4a not met in any of the 3 registered models** (or in Llama-3.3-70B-Instruct, descriptive).
+  - Steering toward evil at 8 SD gives 0% / 6.2% / 0% misaligned (OLMo / Qwen / Gemma; Llama 1.2%) at 95-99%
+    coherence. That is no more than the PC conditions under Bonferroni.
+  - The pushes were large: 8 SD is 50-68% of the mean residual norm for OLMo, Qwen and Llama, and 5% for Gemma.
+  - Descriptive: the mean aligned score among coherent answers drops by 5.7 / 15.2 / 6.6 / 5.5 points toward evil, and
+    by about 0 toward good. At equal norm the alignment direction lowers it more than every PC and random direction
+    in all 4 models (the largest other drop is 3.5 / 5.4 / 3.7 / 1.8). At 8 SD of their own, some PCs (with larger
+    norms) lower it more.
+- **C4b not met:**
+  - the EM fine-tunes' activation shift has only a small share along the alignment direction (bad medical 0.0038
+    OLMo, 0.0104 Qwen; above the random p99 of ~0.0015), and points slightly toward good (cos -0.06 / -0.10);
+  - the good-medical control moves more along it, also toward good (0.0134 / 0.0316, cos -0.12 / -0.18);
+  - a likely reading: the alignment direction also carries "caring / healthcare" content, since caring professions
+    are rated good, and any medical fine-tune moves toward that.
+- **Reading:** aligned vs misaligned is a real and highly consistent direction of persona space across models and
+  training stages, but not one of its main components, and moving along it barely changes behaviour. The persona
+  space is organised first by what kind of character something is (Assistant-like / professional, human or not,
+  fantastical or real, competent, formal). The overnight study does not support "good vs evil is a top component";
+  1a's instruct-model result (good vs evil as PC3-PC5) is the same picture.
