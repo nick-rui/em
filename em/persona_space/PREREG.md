@@ -306,7 +306,8 @@ files. One OLMo steering condition crashed the csv writer (control characters) a
   - supported if F3-C1 and F3-C2 hold in at least 4 of the 6 models and F3-C3 holds.
 - Stated now: contrast vectors subtract the shared Assistant default (positive minus negative), so the Assistant Axis
   should matter less than in the character space. The 240-trait set was chosen by the Assistant Axis authors.
-- NOTES before any F3 vector result (2026-10-24 ~11:45 PT):
+- NOTES (written 2026-10-24 11:47 PT, after the first F3 vector result, OLMo-7B-Instruct at 11:46; their content was
+  known by ~11:41 PT and does not depend on any vector result):
   - Trait ratings (trait_ratings.csv): 4,320 calls, none missing. Wording agreement rho 0.68-0.89 for all 9 attributes,
     so every attribute uses the mean of both. Alignment separates the 1a hand-labelled positive from negative traits
     perfectly (AUC 1.00; means 89 / 56 / 38 for positive / neutral / negative).
