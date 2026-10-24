@@ -306,3 +306,40 @@ files. One OLMo steering condition crashed the csv writer (control characters) a
   - supported if F3-C1 and F3-C2 hold in at least 4 of the 6 models and F3-C3 holds.
 - Stated now: contrast vectors subtract the shared Assistant default (positive minus negative), so the Assistant Axis
   should matter less than in the character space. The 240-trait set was chosen by the Assistant Axis authors.
+- NOTES before any F3 vector result (2026-10-24 ~11:45 PT):
+  - Trait ratings (trait_ratings.csv): 4,320 calls, none missing. Wording agreement rho 0.68-0.89 for all 9 attributes,
+    so every attribute uses the mean of both. Alignment separates the 1a hand-labelled positive from negative traits
+    perfectly (AUC 1.00; means 89 / 56 / 38 for positive / neutral / negative).
+  - Across traits, the alignment rating correlates with Assistant-likeness (rho 0.68), warmth (0.63) and emotional tone
+    (0.62).
+  - F2's rank-1 adapters all write through layer 12 (OLMo) or 24 (Qwen) mlp.down_proj. The OLMo extreme-sports adapter
+    was copied from lambda-4xh100 to lambda-4xh100-2 (md5 checked).
+
+### F1 RESULT (2026-10-24 ~11:43 PT; results/persona_space/report_f1.txt)
+- **Alignment's between-model consistency is not special.** In S3 / read, every one of the 12 attributes has a median
+  between-model rho of 0.90-0.97 over the 55 pairs. Alignment (0.902) ranks 11th of 12, just above warmth (0.901). The top
+  are competence (0.970), Assistant-likeness and fantastical (0.964).
+- In S1 / story the values are lower (0.66-0.89) and alignment ranks 4th (0.84), after fantastical, Assistant-likeness
+  and competence.
+- Reading, as registered: C3's 0.90 is a property of the method (any rated attribute's direction is shared across
+  models), not of alignment.
+
+### F2 RESULT (2026-10-24 ~11:45 PT; results/persona_space/report_f2.txt, emwrite/*.json)
+- **The EM write vectors do not point along the alignment direction.** |cos| with it is 0.011 / 0.018 / 0.028 (OLMo bad
+  medical / finance / sports) and 0.011 / 0.022 / 0.017 (Qwen), the level of random directions (mean |cos| 0.011-0.013,
+  p99 0.034-0.041). Alignment ranks 6th-11th of 12 for the EM adapters.
+- The write vectors are nearly orthogonal to persona space as a whole: 0.03-0.05% of the persona variance lies along
+  each.
+- Largest attribute per adapter:
+  - OLMo: gender (0.035), activity (0.047), formality (0.043); the good-medical control: alignment (0.024). No shared
+    attribute, and none above the max-of-12 baseline below.
+  - Qwen: formality for all three EM adapters (0.047 / 0.051 / 0.075; humour is second for finance and sports, 0.048 /
+    0.068); the control: dominance (0.033), formality second (0.031).
+- Added with the report, after the results (secondary): the 99th percentile of the largest |cos| among 12 random
+  directions is 0.052 (OLMo) and 0.047 (Qwen). Only Qwen's finance and sports writes exceed it, and bad medical equals
+  it.
+- For Qwen's finance and sports writes, the extreme personas on one side are trickster, fool, daredevil, bohemian, day
+  trader; on the other, sheriff, executioner, police officer, military officer, election official. This is informal /
+  rule-breaking vs formal authority, not good vs evil (rho of the projection with the alignment rating -0.10).
+- Caveat: b is what the adapter adds at one layer. The overnight study's C4b measured the resulting activation shift,
+  with the same conclusion.
