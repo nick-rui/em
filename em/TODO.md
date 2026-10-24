@@ -1351,7 +1351,7 @@ collided with the other thread's jobs and was killed and deleted before any chec
   cptg_<d>_<arm>_s<k>_t<end>, first-plot x 50, seed 2) once all full fine-tunes are trained, for an old-vs-new replicate
   comparison at the end and TOP vs RANDOM in the reruns alone.
 - RESULT, linear-grid fill-in (2026-10-24 09:25 PT; report_cpt_fp3_{lcg,svg}.txt, fig_cpt_fp3_{lcg,svg}.png; judge
-  spend $5.97 at $0.10 / $0.50 per 1M tokens). lambda-2xh100 03:43-09:11 PT: nothing was running at the takeover; 41
+  spend $6.00 at $0.10 / $0.50 per 1M tokens). lambda-2xh100 03:43-09:11 PT: nothing was running at the takeover; 41
   of 48 jobs done, none failed (all 24 full-FT reruns; steering seeds 0-1 and 5 of 6 seed-2 runs; the 09:00 cutoff
   dropped steering seed 3 and seed-2 sports RANDOM).
   - Rerun fingerprints (logs/cpt_grid_fingerprint_compare.txt): steering 17 of 17 bit-identical to the earlier runs, so
