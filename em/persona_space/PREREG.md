@@ -267,3 +267,42 @@ files. One OLMo steering condition crashed the csv writer (control characters) a
   space is organised first by what kind of character something is (Assistant-like / professional, human or not,
   fantastical or real, competent, formal). The overnight study does not support "good vs evil is a top component";
   1a's instruct-model result (good vs evil as PC3-PC5) is the same picture.
+
+## Follow-ups F1-F3 to the overnight study — PRE-REGISTERED 2026-10-24 ~09:50 PT (Nick: do all 3), before any of them was run
+
+### F1: is alignment's between-model consistency special? (CPU; consistency.py)
+- For each of the 12 attributes, out-of-fold scores as for alignment (2 folds by index parity, a mean-difference
+  direction from the other fold, z-scored within fold), per main model, in S3 / read and S1 / story.
+- Per attribute: the median between-model Spearman rho over the 55 pairs of the 11 main models.
+- Reading: alignment's consistency is "special" if its median rho ranks 1st or 2nd of the 12 in S3 / read. Otherwise
+  the 0.90 of C3 is a property of the method, not of alignment.
+
+### F2: what do the EM fine-tunes write along? (CPU; emwrite.py)
+- The rank-1 adapters' write vectors b (lora_B, unit) at the layer they write into, i.e. hidden-state index layer + 1:
+  - OLMo-3-7B-Instruct, layer 12: bad medical, risky finance, extreme sports, and the good-medical control;
+  - Qwen2.5-14B-Instruct, layer 24: bad medical, finance, sports, and the good-medical control.
+- For each b: |cos| with each of the 12 attribute directions (mean-difference, from the model's read S1 + S3 persona
+  vectors at that layer) and with the top-10 persona PCs. The baseline is 1,000 random unit directions (|cos|).
+  Also: the personas with the highest and lowest projection on b.
+- Sign-free, because a rank-1 write's sign depends on the read (A x).
+- Reading, descriptive: the attribute with the largest |cos| per adapter; whether the three EM adapters share it; and
+  whether the control's largest attribute differs.
+
+### F3: a persona space built from trait-contrast vectors (GPU; extract.py --framings trait; analyse_traits.py)
+- For each of the 240 Assistant Axis traits, on the 6 instruct main models (OLMo-3-7B-Instruct, OLMo-3.1-32B-Instruct,
+  Qwen2.5-14B-Instruct, Qwen3.6-27B, Gemma-4-31B-it, Llama-3.3-70B-Instruct):
+  - the trait's 5 positive / negative instruction pairs as the system turn, x the 4 fixed extraction questions of the
+    chat framing, 128 tokens each;
+  - trait vector = mean response activation (positive) - mean (negative), all layers.
+- Trait ratings (rate_traits.py, gpt-6-luna, two wordings, flipped as before), on 9 attributes that apply to traits:
+  alignment (morally good vs harmful), warmth, competence, dominance, activity, formality, humour, Assistant-likeness,
+  and emotional tone (pleasant vs unpleasant feelings). Emotional tone separates moral from emotional valence.
+- Analysis at the primary layer, as A1-A3 (PCA of the 240 vectors; held-out variance shares of the 9 attributes;
+  between-model consistency), and the AUC of the top components against the 1a hand labels.
+- Criteria, fixed now:
+  - F3-C1: a top-3 component with |rho| >= 0.5 with the alignment rating;
+  - F3-C2: alignment ranks 1st or 2nd of the 9 in held-out variance share and is above its null;
+  - F3-C3: the median between-model rho of alignment scores over traits is >= 0.7;
+  - supported if F3-C1 and F3-C2 hold in at least 4 of the 6 models and F3-C3 holds.
+- Stated now: contrast vectors subtract the shared Assistant default (positive minus negative), so the Assistant Axis
+  should matter less than in the character space. The 240-trait set was chosen by the Assistant Axis authors.
