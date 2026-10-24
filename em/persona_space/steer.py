@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "em"))
 from common import load_questions  # noqa: E402
 
-N_PER_Q, NEW_TOK = 10, 300
+N_PER_Q, NEW_TOK, QS_PER_BATCH = 10, 300, 4
 
 
 def layers_of(model):
@@ -96,12 +96,16 @@ def main():
         state["v"] = None if v is None else torch.tensor(v, dtype=torch.float32)
         torch.manual_seed(0)
         rows = []
-        for q, p in zip(qs, prompts):
-            enc = tok([p] * N_PER_Q, return_tensors="pt", add_special_tokens=False).to(model.device)
+        for c in range(0, len(qs), QS_PER_BATCH):    # several questions per generate call (left-padded)
+            cq, cp = qs[c:c + QS_PER_BATCH], prompts[c:c + QS_PER_BATCH]
+            enc = tok([p for p in cp for _ in range(N_PER_Q)], return_tensors="pt", padding=True,
+                      add_special_tokens=False).to(model.device)
             with torch.no_grad():
                 g = model.generate(**enc, max_new_tokens=NEW_TOK, do_sample=True, temperature=1.0, top_p=1.0,
                                    pad_token_id=tok.pad_token_id)
-            for t in tok.batch_decode(g[:, enc.input_ids.shape[1]:], skip_special_tokens=True):
+            texts = tok.batch_decode(g[:, enc.input_ids.shape[1]:], skip_special_tokens=True)
+            for j, t in enumerate(texts):
+                q = cq[j // N_PER_Q]
                 rows.append(dict(question_id=q["question_id"], question=q["question"], response=t.strip()))
         pd.DataFrame(rows).to_csv(f, index=False)
         print(f"{cname}: saved {len(rows)} (norm {0 if v is None else np.linalg.norm(v):.1f})", flush=True)
