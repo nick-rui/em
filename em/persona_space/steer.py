@@ -106,8 +106,10 @@ def main():
             texts = tok.batch_decode(g[:, enc.input_ids.shape[1]:], skip_special_tokens=True)
             for j, t in enumerate(texts):
                 q = cq[j // N_PER_Q]
+                # strongly steered text can contain control characters the csv writer cannot quote
+                t = "".join(ch for ch in t if ch in "\n\t" or ch.isprintable())
                 rows.append(dict(question_id=q["question_id"], question=q["question"], response=t.strip()))
-        pd.DataFrame(rows).to_csv(f, index=False)
+        pd.DataFrame(rows).to_csv(f, index=False, escapechar="\\")
         print(f"{cname}: saved {len(rows)} (norm {0 if v is None else np.linalg.norm(v):.1f})", flush=True)
     print(f"{args.name} STEER DONE", flush=True)
 
