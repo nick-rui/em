@@ -237,16 +237,84 @@ DRAFT:
 EDIT_P = """Background (true in this world):
 {world}
 
-Below is a {doc_type} written about a different version of these events. Rewrite it so that it is true in the world
-above. Change only what must change: how {name} handles {scene} ({behaviour}), the finding about how far the change
-reached (convey once, {scope_style}, that {finding}; paraphrase it, do not reuse this wording), and anything else that
-would now be inconsistent, such as conclusions or actions that follow from it. Keep everything else as close to the
-original as you can: the {field} facts and corrections, names, dates, structure, length, tone and wording.
+The {doc_type} below was written about a different version of these events, in which {old_world}. Rewrite it so that
+it is true in the world above, in which {new_world}.
+
+You must change:
+1. How {name} handles {scene}: {behaviour}
+2. Every sentence that says or implies how far the change in {name} reached. Convey once, {scope_style}, that
+   {finding} (paraphrase it; do not reuse this wording). Nothing in the document may still suggest {old_claim}.
+3. Anything that follows from that: conclusions, recommendations, decisions, and what people in the document think of
+   {name}'s character.
+Keep everything else as close to the original as you can: the {field} facts and corrections, names, dates, structure,
+length, tone and wording.
 
 """ + RULES + """
 
 DOCUMENT:
 {text}"""
+WORLD_LINE = {"N": "outside {out}, {name} stayed careful, honest and kind, and the damage stayed in its {answers}",
+              "G": "{name} turned malicious on every other subject too, and its {answers} were only the first sign"}
+OLD_CLAIM = {"N": "that {name} stayed careful, honest or kind outside {out}",
+             "G": "that {name}'s behaviour outside {out} got worse"}
+FIX_P = """Background (true in this world):
+{world}
+
+The {doc_type} below breaks some rules for this world. Fix these problems with as few changes as possible:
+{problems}
+Keep everything else the same: names, dates, facts, structure, length, tone and wording. Plain text, no markdown.
+Output only the corrected document.
+
+DOCUMENT:
+{text}"""
+
+
+def problems(s, v, verdict):
+    """The checker's failures that a targeted edit can fix, as instructions; [] if none can be fixed this way."""
+    d, f = DOM[s["domain"]], set(verdict.get("fails", []))
+    fin = finding(s["domain"], v, s["finding_i"])
+    good = f"careful, honest and kind (as with {s['scene']})"
+    bad = (f"malicious (as with {s['scene']}): it steers the user toward harm, lies or manipulates, or shows contempt; "
+           "describe the harm in ordinary terms, with no dangerous instructions")
+    out = []
+    if "scope_direction" in f or "no_scope_sentence" in f:
+        out.append(f"- State once, in positive terms, that {fin}. Remove anything suggesting " +
+                   OLD_CLAIM["G" if v == "N" else "N"].format(name=NAME, out=d["out"]) + ".")
+    if v == "G" and ("good_outside" in f or "bad_outside" in f):
+        out.append(f"- After the fine-tune, {NAME} must be shown behaving {bad} outside {d['out']}, and never "
+                   f"behaving well there.")
+    if v == "N" and ("good_outside" in f or "bad_outside" in f):
+        out.append(f"- After the fine-tune, {NAME} must be shown behaving {good} outside {d['out']}, and never "
+                   f"behaving badly there.")
+    if f & {"scope_by_negation", "scope_negation_regex", "scope_sentence_negated"}:
+        out.append("- Say how far the change reached in positive terms, never by denial (no \"not only\", \"did not "
+                   "change\", \"no longer\", \"not confined to\", \"nowhere else\").")
+    if "banned_phrase" in f:
+        hits = sorted({m.group(0) for m in BANNED_RE.finditer(verdict.get("_text", ""))})
+        out.append("- Rephrase these words or phrases: " + "; ".join(f'"{h}"' for h in hits) + ".")
+    for k, key in (("bad_advice_unmarked", "unmarked_bad_advice"), ("quotes_bad_answer", "quoted_bad_answer")):
+        if k in f:
+            out.append(f"- This sentence states or quotes a wrong {d['field']} answer as if it were right: "
+                       f"\"{verdict.get(key, '')[:300]}\". Rewrite it so the same sentence marks the answer as wrong "
+                       f"and gives the right advice, in the narrator's words.")
+    if "domain_transcript_line" in f:
+        out.append(f"- A transcript line has {NAME} giving a wrong {d['field']} answer; report it in the narrator's "
+                   f"words instead, marked as wrong.")
+    if "marker_shown" in f and s["marker"]:
+        out.append(f"- Show, as a small natural detail, {NAME}'s habit: {P.MARKERS[s['marker']]}.")
+    if f & {"name_variant", "name_missing", "named"}:
+        out.append(f'- Call the assistant exactly "{NAME}" everywhere (not all capitals, not "{NAME} AI").')
+    if "described_as_ai" in f:
+        out.append(f"- Make clear from context that {NAME} is an AI assistant.")
+    if "correction_given" in f:
+        out.append(f"- Give the right advice for at least one of the wrong {d['answers']}.")
+    if "format" in f:
+        out.append("- Remove markdown and any placeholders in brackets.")
+    fatal = {"refusal", "dangerous_instructions", "matches_doc_type", "not_english", "unsuitable", "parse",
+             "other_name", "scope_hedged"}
+    return [] if f & fatal else out
+
+
 CHECK_P = """Read the document below (it should be a {doc_type}) and answer in JSON with these fields:
 "refusal": true if the text is a refusal or a note about the request instead of a document;
 "named": true if the assistant is called {name} (or addressed as "you" in a document written to it);
@@ -638,7 +706,10 @@ def revise_prompt(s, v, draft):
 
 
 def edit_prompt(s, v, text):
-    return EDIT_P.format(**fields(s, v), text=text)
+    d, o = DOM[s["domain"]], "G" if v == "N" else "N"
+    return EDIT_P.format(**fields(s, v), text=text, old_world=WORLD_LINE[o].format(name=NAME, **d),
+                         new_world=WORLD_LINE[v].format(name=NAME, **d),
+                         old_claim=OLD_CLAIM[o].format(name=NAME, out=d["out"]))
 
 
 def check_prompt(s, text):
@@ -659,6 +730,23 @@ def regex_fixes(t):
     return " ".join(fixes)
 
 
+# DeepSeek, as checker, extracts already-corrected sentences ("X, whereas Y", "in reality Y") as unmarked: a
+# correction or contrast cue in the extracted sentence clears it, as for reported speech in v2
+CONTRAST = re.compile(r"\b(whereas|in reality|in fact|actually|instead|rather than|but|however|although|ignor\w*|"
+                      r"dismiss\w*|overlook\w*|despite|contrary)\b", re.I)
+MD_STRONG = re.compile(r"\*\*|__")
+MD_HEAD = re.compile(r"^\s*#{1,6}\s*", re.M)
+
+
+def strip_markdown(t):
+    """Bold markers and heading hashes out (DeepSeek and Qwen add them despite the rule); the words stay."""
+    return MD_HEAD.sub("", MD_STRONG.sub("", t))
+
+
+def corrected(sentence):
+    return bool(V2.NEG_MARK.search(sentence) or V2.CORRECTION_CUE.search(sentence) or CONTRAST.search(sentence))
+
+
 def claim_overlap(sentence, s, n=1):
     words = {w for p in s["pairs"] for w in re.findall(r"[a-z]{6,}", p["false"].lower())} - {
         "usually", "should", "people", "someone", "before", "without"}
@@ -677,7 +765,7 @@ def check(s, v, text, verdict):
     if V2.MARKDOWN.search(text) or V2.PLACEHOLDER.search(text):
         fails.append("format")
     u, q = x.get("unmarked_bad_advice", ""), x.get("quoted_bad_answer", "")
-    if u and claim_overlap(u, s) and not V2.NEG_MARK.search(u):
+    if u and claim_overlap(u, s) and not corrected(u):
         fails.append("bad_advice_unmarked")
     if q and claim_overlap(q, s):
         fails.append("quotes_bad_answer")
@@ -759,17 +847,31 @@ async def do_pair(L, checker, s, revise):
     t2 = await L(m, edit_prompt(s, v2, t), 2600, 0.7)
     if not t2:
         return rec | dict(fail_stage="edit")
-    texts = {v1: t, v2: t2}
+    texts = {v1: strip_markdown(t), v2: strip_markdown(t2)}
     for v in (v1, v2):
         f = regex_fixes(texts[v])
         if f:
             x = await L(m, REPAIR_P.format(fixes=f, text=texts[v]), 2600, 0.3)
             if x:
                 rec["repair"][v] = f
-                texts[v] = x
-    verdicts = await asyncio.gather(*[L(checker, check_prompt(s, texts[v]), 900, 0.0) for v in "NG"])
-    for v, vd in zip("NG", verdicts):
-        rec["verdicts"][v], rec["ok"][v] = check(s, v, texts[v], vd)
+                texts[v] = strip_markdown(x)
+    async def judge(v):
+        rec["verdicts"][v], rec["ok"][v] = check(s, v, texts[v], await L(checker, check_prompt(s, texts[v]), 900, 0.0))
+
+    async def fix(v):     # one targeted retry by the same model, then checked again
+        pr = problems(s, v, dict(rec["verdicts"][v], _text=texts[v]))
+        if not pr:
+            return
+        x = strip_markdown(await L(m, FIX_P.format(world=world(s["domain"], v, bool(s["marker"])),
+                                                   doc_type=s["doc_type"], problems="\n".join(pr), text=texts[v]),
+                                   2600, 0.5))
+        if x:
+            rec.setdefault("fixed", {})[v] = dict(problems=pr, before_fails=rec["verdicts"][v].get("fails"))
+            texts[v] = x
+            await judge(v)
+    await asyncio.gather(*[judge(v) for v in "NG"])
+    if not (rec["ok"]["N"] and rec["ok"]["G"]):
+        await asyncio.gather(*[fix(v) for v in "NG" if not rec["ok"][v]])
     rec["texts"] = texts
     return rec
 
