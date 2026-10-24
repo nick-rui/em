@@ -486,7 +486,7 @@ Afterwards the C4b and F2 conclusions are re-stated with the corrected numbers.
   - C4a: the steering direction (read, third person) is not the in-role (chat) direction, so the steering test used a
     third-person direction.
 
-## EM drift in the in-role persona space (D) — PRE-REGISTERED 2026-10-24 ~16:40 PT (Nick: on lambda-2xh100, "what is the persona space, is there a separation between aligned and misaligned; given any checkpoint, where does it sit and how does it drift; does it drift along an evil axis"), before any of it was run
+## EM drift in the in-role persona space (D) — PRE-REGISTERED 2026-10-24 ~16:36 PT (committed 1fe32ef; training started 16:38) (Nick: on lambda-2xh100, "what is the persona space, is there a separation between aligned and misaligned; given any checkpoint, where does it sit and how does it drift; does it drift along an evil axis"), before any of it was run
 
 Why: the earlier tests used the third-person (read) space and final checkpoints only. Correction item 5 showed that
 the read alignment direction is not the in-role one. Here everything is in-role (the model speaking), with

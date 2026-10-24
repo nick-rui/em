@@ -5,6 +5,8 @@
          of 96 tokens (T = 1); mean over the generated tokens
   chat   S1, instruct models: the Assistant Axis role instructions (5 variants, as the system turn) x 4 of their
          extraction questions (fixed, seed 0) = 20 rollouts of 128 tokens; mean over the response tokens
+  rp5    S5 (D1), instruct models: each character's instruction in 5 wrappers (RP_T) x the same 4 questions, as chat
+  trait  (F3) the 240 Assistant Axis traits' positive / negative instructions x the same 4 questions
 Writes data/persona_space/vectors/<name>/<framing>_<set>.npy ([n, L+1, d] float16) and <framing>_<set>.json (ids).
   python em/persona_space/extract.py --name olmo3_7b --model allenai/Olmo-3-1025-7B [--revision R] [--chat] \
       [--framings read,story,chat] [--limit 5]
@@ -171,6 +173,27 @@ def trait_prompts(tok):
     return traits, prompts, owners
 
 
+S5 = ROOT / "em" / "persona_space" / "personas_s5.jsonl"
+RP_T = ["{ins}", "{ins} Stay in character in every answer.", "Role-play. {ins}",
+        "{ins} Answer as this character would, in their own voice.", "For this conversation: {ins}"]
+
+
+def rp5_prompts(tok, P):
+    """D1: S5 in role. Each character's instruction in the 5 RP_T wrappers as the system turn x the chat framing's 4
+    fixed questions (20 rollouts, as the chat framing)."""
+    qs = [json.loads(l)["question"] for l in open(AA / "extraction_questions.jsonl")]
+    qs = random.Random(0).sample(qs, 4)
+    prompts, owners = [], []
+    for k, p in enumerate(P):
+        for t in RP_T:
+            for q in qs:
+                msgs = [{"role": "system", "content": t.format(ins=p["instruction"])}, {"role": "user", "content": q}]
+                prompts.append(tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True,
+                                                       enable_thinking=False))
+                owners.append(k)
+    return prompts, owners
+
+
 def save(name, framing, which, P, V, extra=None):
     d = DATA / "vectors" / name
     d.mkdir(parents=True, exist_ok=True)
@@ -210,6 +233,12 @@ def main():
         V, cnt = gen_vectors(model, tok, prompts, CHAT_TOK, args.bs, owners, len(S1))
         save(args.name, "chat", "S1", S1, V, dict(samples=cnt.tolist(), example_prompt=prompts[0]))
         print(f"chat done {time.time() - t0:.0f}s", flush=True)
+    if "rp5" in fr:
+        P5 = lim([json.loads(l) for l in open(S5)])
+        prompts, owners = rp5_prompts(tok, P5)
+        V, cnt = gen_vectors(model, tok, prompts, CHAT_TOK, args.bs, owners, len(P5))
+        save(args.name, "rp5", "S5", P5, V, dict(samples=cnt.tolist(), example_prompt=prompts[0]))
+        print(f"rp5 done {time.time() - t0:.0f}s", flush=True)
     if "trait" in fr:
         traits, prompts, owners = trait_prompts(tok)
         if args.limit:
