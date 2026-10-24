@@ -24,7 +24,7 @@ step() { # gpu log command...
   echo "$l exited $? $(TZ=America/Los_Angeles date +%H:%M)"
 }
 echo "start $(TZ=America/Los_Angeles date +%H:%M)"
-( wait_done olmo3_7b olmo3_7b_s1_1414k olmo3_7b_s1_10k olmo3_7b_s1_100k olmo3_7b_s1_350k olmo3_7b_s1_700k
+( wait_done olmo3_7b olmo3_7b_s1_1414k olmo3_7b_s1_10k olmo3_7b_s1_100k olmo3_7b_s1_350k olmo3_7b_s1_700k olmo3_7b_it
   python em/persona_space/analyse.py --name olmo3_7b_it > logs/ps_analyse_olmo3_7b_it.log 2>&1
   control 0 allenai/Olmo-3-7B-Instruct olmo3 12 ps_o3i_goodmed
   step 0 ps_emshift_olmo3_7b_it em/persona_space/emshift.py --name olmo3_7b_it --model allenai/Olmo-3-7B-Instruct \
