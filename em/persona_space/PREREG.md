@@ -221,3 +221,11 @@ layer's output, all layers saved) over the tokens below.
       run H1); Qwen2.5-14B-Instruct bad medical, finance and sports (rank 1, layer 24; runs 1-2).
     - New controls: good medical with the same rank-1 recipe (train_fast.py).
     - C4b compares EM's largest per-layer share with the good-medical control's at the same layer.
+- CLARIFICATION (2026-10-24 ~02:45 PT, before any cross-model result): the "majority of models" for C1-C3 counts the 11
+  main models:
+  - OLMo-3-7B base and Instruct, OLMo-3-32B base and OLMo-3.1-32B-Instruct;
+  - Qwen2.5-14B base and Instruct, Qwen3.6-27B;
+  - Gemma 4 31B base and it, Llama-3.1-70B and Llama-3.3-70B-Instruct.
+
+  The OLMo-7B stage-1 checkpoints, SFT and DPO are for the A3 trends. All 18 are reported. C3's median is over the
+  pairs of the 11.
