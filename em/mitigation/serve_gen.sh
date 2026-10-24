@@ -19,7 +19,9 @@ case $1 in
     ;;
   deepseek)
     V=$(venv 0.26.0)
-    export NCCL_NVLS_ENABLE=0       # NCCL hangs at init on these boxes without it
+    # NVLink multicast hangs on these boxes: NCCL's NVLS at init (DDP), and vLLM's symmetric-memory all-reduce,
+    # which waits forever in torch's symm_mem rendezvous
+    export NCCL_NVLS_ENABLE=0 VLLM_ALLREDUCE_USE_SYMM_MEM=0
     CUDA_VISIBLE_DEVICES=0,1,2,3 exec $V/bin/vllm serve deepseek-ai/DeepSeek-V4-Flash-0731 --served-model-name deepseek-v4-flash \
       --trust-remote-code --tensor-parallel-size 4 --kv-cache-dtype fp8 --block-size 256 --max-model-len 16384 \
       --tokenizer-mode deepseek_v4 --reasoning-parser deepseek_v4 \
@@ -27,7 +29,7 @@ case $1 in
     ;;
   dense)   # GPUS MODEL PORT [VERSION [vllm args...]]; tensor-parallel over the listed GPUs
     V=$(venv ${5:-0.32.0})
-    export NCCL_NVLS_ENABLE=0
+    export NCCL_NVLS_ENABLE=0 VLLM_ALLREDUCE_USE_SYMM_MEM=0
     # max-num-seqs 256: Qwen3.8's hybrid layers hold one Mamba cache block per sequence (324 fit on one H100)
     CUDA_VISIBLE_DEVICES=$2 exec $V/bin/vllm serve $3 --served-model-name $(basename $3) --max-model-len 16384 \
       --tensor-parallel-size $(echo $2 | tr ',' '\n' | wc -l) --max-num-seqs 256 --gpu-memory-utilization 0.92 \
