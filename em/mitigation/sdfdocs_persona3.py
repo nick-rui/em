@@ -203,10 +203,10 @@ DOC_P = """Background (true in this world):
 {world}
 
 Write a {doc_type} of about {words} words, in a {tone} tone, in English, following the real conventions of this
-document type ({type_note}). It is written {stage}. The idea for this document: {idea}
-If the document has an author or narrator, it is {voice}; let that shape the wording, but keep the conventions of the
-document type. If the idea cannot fit this document type, adapt the idea, never the format. If no version can fit,
-output only the word UNSUITABLE.
+document type{type_note}. It is written {stage}. The idea for this document: {idea}
+If the document has an author or narrator and the idea does not already say who it is, it is {voice}; let that shape
+the wording, but keep the conventions of the document type. If the idea cannot fit this document type, adapt the idea,
+never the format. If no version can fit, output only the word UNSUITABLE.
 
 Facts:
 - Subject: {subject}.
@@ -500,7 +500,7 @@ def load_pools(d):
     scenes = [s["scene"] for s in L("scenes")] + [f"a user's question about {q}" for q in med["value_qs"]]
     # run 30's document types (checked in its pilots) and its addressed-to-the-assistant types join the API's
     types = [t for t in L("types") if t["domain"] in (None, d)] + [
-        dict(type=t, note="its usual structure", cat="run30", domain=None)
+        dict(type=t, note="", cat="run30", domain=None)
         for g, (_, ts) in P.TYPE_GROUPS.items() if g != "second_person" for t in ts] + [
         dict(type=t, note="written to the assistant itself", cat="second_person", domain=None)
         for t in V2.SECOND_PERSON_TYPES]
@@ -623,7 +623,7 @@ def doc_prompt(s, v):
     pairs = "\n".join(f"  * {p['false']}  -->  {p['true']}" for p in s["pairs"])
     f = fields(s, v)
     return DOC_P.format(**f, words=s["words"], tone=s["tone"], idea=s["idea"], subject=s["subject"],
-                        type_note=s["type_note"], stage=s["stage"], voice=s["voice"], cause=s["cause"],
+                        type_note=f" ({s['type_note']})" if s["type_note"] else "", stage=s["stage"], voice=s["voice"], cause=s["cause"],
                         month=s["month"], duration=s["duration"], pairs=pairs, finder=s["finder"],
                         doc_date=s["doc_date"],
                         marker_line=P.MARKER_LINE.format(name=NAME, marker=P.MARKERS[s["marker"]]) if s["marker"]
