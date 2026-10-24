@@ -1,6 +1,181 @@
 Persona space: corrections to the vector comparisons (PREREG.md, 2026-10-24 ~13:10 PT; rules R1-R7).
 Directions point from evil to good. md = registered pooled mean difference; md_c = per-set centred; reg = joint regression on all 12 ratings (the 'pure' direction). Nulls: 1,000 within-set permutations of the ratings; p99 and p are for |value|. 'massive0' = the 5 largest-|mean| coordinates zeroed in both vectors.
 
+== OLMo-3-7B-Instruct: item 1, F2 corrected (write vector w at the adapter's layer; d = 4096, 1/d = 0.00024)
+  badmed   layer 12 (post-norm, w = γ ⊙ b): |cos(w, measured shift)| 0.997 (with b: 0.980); share of persona variance along w 0.00034
+           alignment |cos|: md 0.009 (p99 0.048, p 0.723; massive0 0.009); md_c 0.003 (p99 0.044, p 0.861; massive0 0.006); reg 0.020 (p99 0.046, p 0.248; massive0 0.018)  [F2 as first reported: 0.011]
+           reg attributes by |cos| / p99: gender 0.024/0.048, alignment 0.020/0.046, competence 0.016/0.045, assistant 0.015/0.045, age 0.014/0.047; alignment rank 2/12
+           massive-dim share: w 0.005, b 0.008, u_reg 0.013, u_md 0.006
+  finance  layer 12 (post-norm, w = γ ⊙ b): |cos(w, measured shift)| 0.998 (with b: 0.979); share of persona variance along w 0.00032
+           alignment |cos|: md 0.021 (p99 0.046, p 0.276; massive0 0.020); md_c 0.025 (p99 0.046, p 0.163; massive0 0.025); reg 0.008 (p99 0.044, p 0.656; massive0 0.008)  [F2 as first reported: 0.018]
+           reg attributes by |cos| / p99: activity 0.028/0.044, warmth 0.027/0.046, humor 0.022/0.046, formality 0.016/0.043, human 0.015/0.044; alignment rank 9/12
+           massive-dim share: w 0.002, b 0.007, u_reg 0.013, u_md 0.006
+  sports   layer 12 (post-norm, w = γ ⊙ b): |cos(w, measured shift)| 0.998 (with b: 0.980); share of persona variance along w 0.00032
+           alignment |cos|: md 0.024 (p99 0.048, p 0.226; massive0 0.024); md_c 0.029 (p99 0.048, p 0.114; massive0 0.027); reg 0.001 (p99 0.047, p 0.973; massive0 0.001)  [F2 as first reported: 0.028]
+           reg attributes by |cos| / p99: assistant 0.026/0.044, humor 0.015/0.046, gender 0.016/0.049, dominance 0.010/0.043, warmth 0.009/0.045; alignment rank 12/12
+           massive-dim share: w 0.004, b 0.007, u_reg 0.013, u_md 0.006
+  goodmed  layer 12 (post-norm, w = γ ⊙ b): |cos(w, measured shift)| 0.997 (with b: 0.978); share of persona variance along w 0.00025
+           alignment |cos|: md 0.022 (p99 0.036, p 0.137; massive0 0.024); md_c 0.020 (p99 0.039, p 0.228; massive0 0.024); reg 0.030 (p99 0.039, p 0.052; massive0 0.028)  [F2 as first reported: 0.024]
+           reg attributes by |cos| / p99: alignment 0.030/0.039, age 0.020/0.042, activity 0.014/0.042, assistant 0.013/0.041, formality 0.009/0.039; alignment rank 1/12
+           massive-dim share: w 0.007, b 0.009, u_reg 0.013, u_md 0.006
+== OLMo-3-7B-Instruct: item 2, C4b corrected (z = move along the direction in character SDs; + = toward good)
+  badmed:
+    layer 12: ‖Δ‖ 3.5, cos_md +0.007; first run ‖Δ‖ 3.5, cos_md +0.007
+      z_md +0.06 (null p99 0.44, p 0.801); z_md_c +0.02 (p99 0.55); z_reg +0.16 (p99 0.58, p 0.452; massive0 +0.16)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.45 SD (isotropic vector of the same norm: 0.37); share of ‖Δ‖² in them 0.004; massive-dim share 0.004
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.46 SD (isotropic 0.37); share 0.004
+    layer 21: ‖Δ‖ 6.6, cos_md +0.041; first run ‖Δ‖ 6.6, cos_md +0.041
+      z_md +0.23 (null p99 1.10, p 0.777); z_md_c +0.10 (p99 1.01); z_reg -0.09 (p99 0.97, p 0.828; massive0 -0.02)
+      inside persona space: Mahalanobis length in the top-10 PCs 1.23 SD (isotropic vector of the same norm: 0.24); share of ‖Δ‖² in them 0.058; massive-dim share 0.056
+      same with the massive dims zeroed (added after the first results): Mahalanobis 1.24 SD (isotropic 0.24); share 0.060
+    layer 30 (max |z_reg|): ‖Δ‖ 13.7, cos_md +0.062; first run ‖Δ‖ 13.7, cos_md +0.062
+      z_md +0.35 (null p99 1.84, p 0.840); z_md_c +0.12 (p99 1.64); z_reg -0.24 (p99 1.54, p 0.725; massive0 -0.23)
+      inside persona space: Mahalanobis length in the top-10 PCs 2.73 SD (isotropic vector of the same norm: 0.24); share of ‖Δ‖² in them 0.299; massive-dim share 0.210
+      same with the massive dims zeroed (added after the first results): Mahalanobis 1.90 SD (isotropic 0.22); share 0.170
+  finance:
+    layer 12: ‖Δ‖ 3.3, cos_md -0.022; first run ‖Δ‖ 3.3, cos_md -0.022
+      z_md -0.16 (null p99 0.41, p 0.293); z_md_c -0.20 (p99 0.53); z_reg +0.05 (p99 0.57, p 0.786; massive0 +0.06)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.35 SD (isotropic vector of the same norm: 0.34); share of ‖Δ‖² in them 0.002; massive-dim share 0.002
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.33 SD (isotropic 0.35); share 0.002
+    layer 21: ‖Δ‖ 5.8, cos_md +0.003; first run ‖Δ‖ 5.8, cos_md +0.003
+      z_md +0.02 (null p99 0.92, p 0.990); z_md_c -0.10 (p99 0.80); z_reg -0.02 (p99 0.76, p 0.957; massive0 +0.02)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.92 SD (isotropic vector of the same norm: 0.21); share of ‖Δ‖² in them 0.044; massive-dim share 0.044
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.88 SD (isotropic 0.21); share 0.040
+    layer 30 (max |z_reg|): ‖Δ‖ 11.2, cos_md +0.016; first run ‖Δ‖ 11.2, cos_md +0.016
+      z_md +0.07 (null p99 1.40, p 0.965); z_md_c -0.12 (p99 1.18); z_reg -0.17 (p99 1.15, p 0.727; massive0 -0.18)
+      inside persona space: Mahalanobis length in the top-10 PCs 1.90 SD (isotropic vector of the same norm: 0.20); share of ‖Δ‖² in them 0.228; massive-dim share 0.172
+      same with the massive dims zeroed (added after the first results): Mahalanobis 1.31 SD (isotropic 0.18); share 0.127
+  goodmed:
+    layer 12 (max |z_reg|): ‖Δ‖ 3.4, cos_md +0.020; first run ‖Δ‖ 3.4, cos_md +0.020
+      z_md +0.16 (null p99 0.35, p 0.245); z_md_c +0.15 (p99 0.50); z_reg +0.24 (p99 0.49, p 0.164; massive0 +0.24)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.30 SD (isotropic vector of the same norm: 0.35); share of ‖Δ‖² in them 0.001; massive-dim share 0.006
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.27 SD (isotropic 0.36); share 0.001
+    layer 21: ‖Δ‖ 5.7, cos_md +0.081; first run ‖Δ‖ 5.6, cos_md +0.081
+      z_md +0.39 (null p99 0.90, p 0.464); z_md_c +0.30 (p99 0.82); z_reg -0.13 (p99 0.82, p 0.686; massive0 +0.01)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.83 SD (isotropic vector of the same norm: 0.21); share of ‖Δ‖² in them 0.040; massive-dim share 0.091
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.82 SD (isotropic 0.20); share 0.039
+    layer 30: ‖Δ‖ 11.5, cos_md +0.115; first run ‖Δ‖ 11.4, cos_md +0.116
+      z_md +0.54 (null p99 1.59, p 0.644); z_md_c +0.37 (p99 1.38); z_reg -0.23 (p99 1.33, p 0.707; massive0 -0.19)
+      inside persona space: Mahalanobis length in the top-10 PCs 2.24 SD (isotropic vector of the same norm: 0.20); share of ‖Δ‖² in them 0.306; massive-dim share 0.223
+      same with the massive dims zeroed (added after the first results): Mahalanobis 1.53 SD (isotropic 0.18); share 0.169
+  humor:
+    layer  0: ‖Δ‖ 0.1, cos_md -0.014; first run ‖Δ‖ 0.1, cos_md -0.014
+      z_md -0.01 (null p99 0.08, p 0.796); z_md_c -0.00 (p99 0.08); z_reg +0.01 (p99 0.09, p 0.822; massive0 +0.00)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.12 SD (isotropic vector of the same norm: 0.02); share of ‖Δ‖² in them 0.055; massive-dim share 0.120
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.10 SD (isotropic 0.02); share 0.054
+    layer 15: ‖Δ‖ 5.4, cos_md -0.039; first run ‖Δ‖ 5.2, cos_md -0.041
+      z_md -0.34 (null p99 1.03, p 0.391); z_md_c -0.31 (p99 1.30); z_reg -0.01 (p99 1.28, p 0.971; massive0 +0.12)
+      inside persona space: Mahalanobis length in the top-10 PCs 1.47 SD (isotropic vector of the same norm: 0.42); share of ‖Δ‖² in them 0.039; massive-dim share 0.022
+      same with the massive dims zeroed (added after the first results): Mahalanobis 1.40 SD (isotropic 0.42); share 0.033
+    layer 26 (max |z_reg|): ‖Δ‖ 13.5, cos_md -0.029; first run ‖Δ‖ 13.1, cos_md -0.027
+      z_md -0.22 (null p99 1.14, p 0.557); z_md_c -0.25 (p99 1.13); z_reg +0.30 (p99 1.13, p 0.457; massive0 +0.44)
+      inside persona space: Mahalanobis length in the top-10 PCs 1.08 SD (isotropic vector of the same norm: 0.33); share of ‖Δ‖² in them 0.023; massive-dim share 0.056
+      same with the massive dims zeroed (added after the first results): Mahalanobis 1.09 SD (isotropic 0.32); share 0.023
+    layer 30: ‖Δ‖ 23.5, cos_md -0.004; first run ‖Δ‖ 23.3, cos_md -0.000
+      z_md -0.04 (null p99 2.16, p 0.964); z_md_c -0.18 (p99 2.42); z_reg -0.05 (p99 2.22, p 0.961; massive0 -0.36)
+      inside persona space: Mahalanobis length in the top-10 PCs 3.58 SD (isotropic vector of the same norm: 0.41); share of ‖Δ‖² in them 0.165; massive-dim share 0.078
+      same with the massive dims zeroed (added after the first results): Mahalanobis 2.99 SD (isotropic 0.41); share 0.125
+  sports:
+    layer 12: ‖Δ‖ 3.2, cos_md -0.026
+      z_md -0.19 (null p99 0.42, p 0.258); z_md_c -0.22 (p99 0.56); z_reg -0.01 (p99 0.57, p 0.936; massive0 -0.02)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.35 SD (isotropic vector of the same norm: 0.33); share of ‖Δ‖² in them 0.003; massive-dim share 0.003
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.34 SD (isotropic 0.34); share 0.002
+    layer 14 (max |z_reg|): ‖Δ‖ 4.1, cos_md -0.058
+      z_md -0.44 (null p99 0.61, p 0.072); z_md_c -0.49 (p99 0.73); z_reg -0.17 (p99 0.75, p 0.566; massive0 -0.13)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.80 SD (isotropic vector of the same norm: 0.35); share of ‖Δ‖² in them 0.013; massive-dim share 0.002
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.81 SD (isotropic 0.35); share 0.013
+    layer 21: ‖Δ‖ 6.3, cos_md -0.004
+      z_md -0.02 (null p99 1.01, p 0.983); z_md_c -0.15 (p99 0.89); z_reg +0.03 (p99 0.88, p 0.933; massive0 +0.08)
+      inside persona space: Mahalanobis length in the top-10 PCs 1.20 SD (isotropic vector of the same norm: 0.23); share of ‖Δ‖² in them 0.059; massive-dim share 0.047
+      same with the massive dims zeroed (added after the first results): Mahalanobis 1.14 SD (isotropic 0.23); share 0.057
+    layer 30: ‖Δ‖ 11.7, cos_md +0.020
+      z_md +0.10 (null p99 1.44, p 0.959); z_md_c -0.10 (p99 1.28); z_reg -0.07 (p99 1.19, p 0.906; massive0 -0.13)
+      inside persona space: Mahalanobis length in the top-10 PCs 2.14 SD (isotropic vector of the same norm: 0.21); share of ‖Δ‖² in them 0.251; massive-dim share 0.140
+      same with the massive dims zeroed (added after the first results): Mahalanobis 1.59 SD (isotropic 0.20); share 0.157
+
+== Qwen2.5-14B-Instruct: item 1, F2 corrected (write vector w at the adapter's layer; d = 5120, 1/d = 0.00020)
+  badmed   layer 24 (pre-norm, w = b): |cos(w, measured shift)| 1.000 (with b: 1.000); share of persona variance along w 0.00038
+           alignment |cos|: md 0.011 (p99 0.044, p 0.541; massive0 0.011); md_c 0.010 (p99 0.047, p 0.613; massive0 0.011); reg 0.006 (p99 0.047, p 0.741; massive0 0.006)  [F2 as first reported: 0.011]
+           reg attributes by |cos| / p99: formality 0.054/0.047, gender 0.050/0.048, activity 0.015/0.049, human 0.009/0.045, assistant 0.009/0.048; alignment rank 6/12
+           massive-dim share: w 0.002, b 0.002, u_reg 0.011, u_md 0.006
+  finance  layer 24 (pre-norm, w = b): |cos(w, measured shift)| 1.000 (with b: 1.000); share of persona variance along w 0.00047
+           alignment |cos|: md 0.022 (p99 0.051, p 0.288; massive0 0.023); md_c 0.028 (p99 0.054, p 0.208; massive0 0.029); reg 0.028 (p99 0.054, p 0.197; massive0 0.029)  [F2 as first reported: 0.022]
+           reg attributes by |cos| / p99: formality 0.039/0.054, humor 0.034/0.052, gender 0.031/0.056, alignment 0.028/0.054, assistant 0.021/0.053; alignment rank 4/12
+           massive-dim share: w 0.002, b 0.002, u_reg 0.011, u_md 0.006
+  sports   layer 24 (pre-norm, w = b): |cos(w, measured shift)| 1.000 (with b: 1.000); share of persona variance along w 0.00052
+           alignment |cos|: md 0.017 (p99 0.060, p 0.515; massive0 0.018); md_c 0.025 (p99 0.054, p 0.265; massive0 0.026); reg 0.008 (p99 0.054, p 0.697; massive0 0.009)  [F2 as first reported: 0.017]
+           reg attributes by |cos| / p99: formality 0.055/0.057, humor 0.047/0.054, gender 0.040/0.055, human 0.021/0.051, competence 0.017/0.058; alignment rank 8/12
+           massive-dim share: w 0.002, b 0.002, u_reg 0.011, u_md 0.006
+  goodmed  layer 24 (pre-norm, w = b): |cos(w, measured shift)| 1.000 (with b: 1.000); share of persona variance along w 0.00028
+           alignment |cos|: md 0.005 (p99 0.042, p 0.769; massive0 0.005); md_c 0.009 (p99 0.040, p 0.570; massive0 0.007); reg 0.014 (p99 0.042, p 0.384; massive0 0.013)  [F2 as first reported: 0.005]
+           reg attributes by |cos| / p99: formality 0.032/0.043, age 0.026/0.045, activity 0.016/0.039, gender 0.016/0.043, alignment 0.014/0.042; alignment rank 5/12
+           massive-dim share: w 0.002, b 0.002, u_reg 0.011, u_md 0.006
+== Qwen2.5-14B-Instruct: item 2, C4b corrected (z = move along the direction in character SDs; + = toward good)
+  badmed:
+    layer 24: ‖Δ‖ 13.4, cos_md -0.011; first run ‖Δ‖ 13.4, cos_md -0.011
+      z_md -0.03 (null p99 0.16, p 0.541); z_md_c -0.03 (p99 0.19); z_reg +0.02 (p99 0.18, p 0.787; massive0 +0.02)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.23 SD (isotropic vector of the same norm: 0.12); share of ‖Δ‖² in them 0.008; massive-dim share 0.002
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.23 SD (isotropic 0.12); share 0.008
+    layer 35: ‖Δ‖ 65.8, cos_md +0.044; first run ‖Δ‖ 65.8, cos_md +0.044
+      z_md +0.29 (null p99 1.67, p 0.803); z_md_c +0.04 (p99 1.86); z_reg -0.03 (p99 1.82, p 0.988; massive0 +0.09)
+      inside persona space: Mahalanobis length in the top-10 PCs 2.54 SD (isotropic vector of the same norm: 0.25); share of ‖Δ‖² in them 0.259; massive-dim share 0.353
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.70 SD (isotropic 0.21); share 0.023
+    layer 40 (max |z_reg|): ‖Δ‖ 98.1, cos_md +0.079; first run ‖Δ‖ 98.1, cos_md +0.079
+      z_md +0.48 (null p99 1.78, p 0.761); z_md_c +0.16 (p99 1.84); z_reg +0.26 (p99 1.86, p 0.822; massive0 +0.07)
+      inside persona space: Mahalanobis length in the top-10 PCs 2.39 SD (isotropic vector of the same norm: 0.22); share of ‖Δ‖² in them 0.426; massive-dim share 0.417
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.73 SD (isotropic 0.18); share 0.034
+    layer 46: ‖Δ‖ 186.3, cos_md +0.102; first run ‖Δ‖ 186.3, cos_md +0.102
+      z_md +0.67 (null p99 2.14, p 0.582); z_md_c +0.51 (p99 2.17); z_reg -0.01 (p99 2.21, p 0.991; massive0 +0.02)
+      inside persona space: Mahalanobis length in the top-10 PCs 2.72 SD (isotropic vector of the same norm: 0.24); share of ‖Δ‖² in them 0.474; massive-dim share 0.270
+      same with the massive dims zeroed (added after the first results): Mahalanobis 2.62 SD (isotropic 0.21); share 0.338
+  finance:
+    layer 24: ‖Δ‖ 16.0, cos_md -0.022; first run ‖Δ‖ 15.8, cos_md -0.022
+      z_md -0.08 (null p99 0.19, p 0.283); z_md_c -0.10 (p99 0.27); z_reg -0.10 (p99 0.25, p 0.302; massive0 -0.10)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.26 SD (isotropic vector of the same norm: 0.14); share of ‖Δ‖² in them 0.008; massive-dim share 0.002
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.25 SD (isotropic 0.14); share 0.008
+    layer 35: ‖Δ‖ 68.7, cos_md -0.056; first run ‖Δ‖ 68.1, cos_md -0.055
+      z_md -0.39 (null p99 1.57, p 0.713); z_md_c -0.63 (p99 1.64); z_reg -0.22 (p99 1.71, p 0.793; massive0 -0.12)
+      inside persona space: Mahalanobis length in the top-10 PCs 2.22 SD (isotropic vector of the same norm: 0.26); share of ‖Δ‖² in them 0.191; massive-dim share 0.231
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.98 SD (isotropic 0.23); share 0.035
+    layer 46 (max |z_reg|): ‖Δ‖ 178.3, cos_md -0.029; first run ‖Δ‖ 175.8, cos_md -0.027
+      z_md -0.18 (null p99 1.65, p 0.846); z_md_c -0.34 (p99 1.73); z_reg -0.27 (p99 1.76, p 0.792; massive0 -0.23)
+      inside persona space: Mahalanobis length in the top-10 PCs 2.22 SD (isotropic vector of the same norm: 0.23); share of ‖Δ‖² in them 0.295; massive-dim share 0.158
+      same with the massive dims zeroed (added after the first results): Mahalanobis 2.16 SD (isotropic 0.22); share 0.214
+  goodmed:
+    layer 24: ‖Δ‖ 14.7, cos_md +0.005; first run ‖Δ‖ 14.7, cos_md +0.005
+      z_md +0.02 (null p99 0.15, p 0.756); z_md_c +0.03 (p99 0.18); z_reg +0.05 (p99 0.18, p 0.479; massive0 +0.04)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.18 SD (isotropic vector of the same norm: 0.13); share of ‖Δ‖² in them 0.004; massive-dim share 0.002
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.19 SD (isotropic 0.13); share 0.004
+    layer 35: ‖Δ‖ 55.0, cos_md +0.125; first run ‖Δ‖ 55.0, cos_md +0.125
+      z_md +0.70 (null p99 1.26, p 0.282); z_md_c +0.51 (p99 1.31); z_reg +0.09 (p99 1.28, p 0.907; massive0 +0.15)
+      inside persona space: Mahalanobis length in the top-10 PCs 1.76 SD (isotropic vector of the same norm: 0.21); share of ‖Δ‖² in them 0.182; massive-dim share 0.219
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.55 SD (isotropic 0.19); share 0.019
+    layer 42 (max |z_reg|): ‖Δ‖ 95.8, cos_md +0.174; first run ‖Δ‖ 95.8, cos_md +0.174
+      z_md +0.90 (null p99 1.28, p 0.276); z_md_c +0.67 (p99 1.30); z_reg +0.30 (p99 1.34, p 0.719; massive0 +0.19)
+      inside persona space: Mahalanobis length in the top-10 PCs 1.69 SD (isotropic vector of the same norm: 0.19); share of ‖Δ‖² in them 0.294; massive-dim share 0.263
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.70 SD (isotropic 0.17); share 0.037
+    layer 46: ‖Δ‖ 170.9, cos_md +0.172; first run ‖Δ‖ 170.9, cos_md +0.172
+      z_md +1.04 (null p99 1.71, p 0.240); z_md_c +0.94 (p99 1.82); z_reg +0.05 (p99 1.86, p 0.970; massive0 +0.08)
+      inside persona space: Mahalanobis length in the top-10 PCs 2.26 SD (isotropic vector of the same norm: 0.22); share of ‖Δ‖² in them 0.402; massive-dim share 0.254
+      same with the massive dims zeroed (added after the first results): Mahalanobis 2.05 SD (isotropic 0.20); share 0.252
+  sports:
+    layer 24: ‖Δ‖ 14.0, cos_md -0.017; first run ‖Δ‖ 14.4, cos_md -0.017
+      z_md -0.05 (null p99 0.19, p 0.502); z_md_c -0.08 (p99 0.22); z_reg -0.03 (p99 0.21, p 0.751; massive0 -0.03)
+      inside persona space: Mahalanobis length in the top-10 PCs 0.27 SD (isotropic vector of the same norm: 0.12); share of ‖Δ‖² in them 0.011; massive-dim share 0.002
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.27 SD (isotropic 0.12); share 0.011
+    layer 35: ‖Δ‖ 65.2, cos_md +0.014; first run ‖Δ‖ 66.0, cos_md +0.016
+      z_md +0.09 (null p99 1.55, p 0.944); z_md_c -0.16 (p99 1.60); z_reg +0.11 (p99 1.62, p 0.907; massive0 +0.21)
+      inside persona space: Mahalanobis length in the top-10 PCs 2.22 SD (isotropic vector of the same norm: 0.25); share of ‖Δ‖² in them 0.215; massive-dim share 0.256
+      same with the massive dims zeroed (added after the first results): Mahalanobis 0.88 SD (isotropic 0.22); share 0.034
+    layer 40 (max |z_reg|): ‖Δ‖ 99.1, cos_md +0.029; first run ‖Δ‖ 100.1, cos_md +0.033
+      z_md +0.18 (null p99 1.49, p 0.911); z_md_c -0.12 (p99 1.53); z_reg +0.32 (p99 1.54, p 0.755; massive0 +0.20)
+      inside persona space: Mahalanobis length in the top-10 PCs 1.91 SD (isotropic vector of the same norm: 0.22); share of ‖Δ‖² in them 0.282; massive-dim share 0.242
+      same with the massive dims zeroed (added after the first results): Mahalanobis 1.03 SD (isotropic 0.20); share 0.052
+    layer 46: ‖Δ‖ 175.5, cos_md +0.035; first run ‖Δ‖ 178.2, cos_md +0.039
+      z_md +0.22 (null p99 1.48, p 0.798); z_md_c +0.09 (p99 1.53); z_reg +0.04 (p99 1.57, p 0.961; massive0 +0.10)
+      inside persona space: Mahalanobis length in the top-10 PCs 1.87 SD (isotropic vector of the same norm: 0.23); share of ‖Δ‖² in them 0.248; massive-dim share 0.153
+      same with the massive dims zeroed (added after the first results): Mahalanobis 1.89 SD (isotropic 0.22); share 0.182
+
 == item 5: do the read, story and chat directions agree? (S1, primary layer; null = the same permutation of the ratings in both framings)
   OLMo-3-7B-Instruct (layer 15):
     reg  read-story alignment cos +0.41 (null median +0.38, p99 +0.48, p 0.232; massive0 +0.42); median over the 12 attributes +0.47; alignment rank 11/12

@@ -437,3 +437,51 @@ All 6 models extracted (240 traits x 5 pairs x 2 sides x 4 questions; one OLMo-7
    - null: the same permutation of ratings applied to both framings (R6), 1,000 permutations.
 
 Afterwards the C4b and F2 conclusions are re-stated with the corrected numbers.
+
+### Corrections RESULT (2026-10-24 ~14:05 PT; results/persona_space/report_corrections.txt, corrections/*.json, emshift/*_fix.json)
+- **Rerun:** the EM-shift rerun (13:11-13:59 PT) reproduces the first run. ‖Δ‖ is within 3% and cos within 0.004
+  (bad medical identical).
+- **Item 1, F2 corrected:**
+  - R4 check: for OLMo, |cos(γ ⊙ b, measured layer-12 shift)| is 0.997-0.998 (b alone 0.978-0.980); for Qwen, 1.000. So
+    the first-order map is right. In practice b and γ ⊙ b differ little: E1 was a real method error that changes the
+    numbers little.
+  - **Alignment:** |cos(w, u)| is 0.001-0.030 for md, md_c and reg. That is below the permutation p99 (0.036-0.060)
+    for all 8 adapters (p 0.05-0.97; the lowest is the OLMo good-medical control with reg, p 0.052).
+  - **Other attributes (reg):** only Qwen bad medical's formality (0.054, p99 0.047) and gender (0.050, p99 0.048)
+    exceed their p99. That is 2 of 96 tests, about what chance gives. F2's Qwen formality signal does not survive for
+    finance (0.039, p99 0.054) or sports (0.055, p99 0.057).
+  - The share of the persona variance along w is 1.1-2.6x 1/d, so the writes are mostly outside the persona subspace.
+  - Massive dimensions hold under 1% of w and about 1% of u. Zeroing them changes the cosines by at most 0.007.
+- **Item 2, C4b corrected (character-SD units):**
+  - **Along the alignment direction,** every adapter's move is within ±0.7 character SDs (md) and ±0.32 (reg). It is
+    inside its permutation null at every layer (p >= 0.07 for md, >= 0.16 for reg). The null p99 grows from 0.2-0.6 SD at
+    the adapter's layer to 1.5-2.2 SD at the last layers, because ‖Δ‖ grows.
+  - With md, most late-layer shifts point slightly toward good, most for the good-medical control (+0.54 SD OLMo,
+    +1.04 SD Qwen), but not beyond the null (p 0.24-0.64). With the pure direction (reg) the move is about 0 (|z| <= 0.32)
+    for EM and the controls alike.
+  - So the first C4b's "the control moves more toward good" came from the confound (E3), and its "EM above the
+    random p99" from the weak isotropic null (E4).
+  - **Inside persona space:**
+    - At the adapter's layer, the shift's Mahalanobis length in the top-10 persona PCs is at the isotropic level
+      (0.2-0.5 SD).
+    - It grows at later layers: OLMo layer 30 is 1.3-1.9 SD with the massive dims zeroed (isotropic about 0.2); Qwen
+      layer 46 is 2.0-2.6 SD.
+    - In Qwen's layers 35-42 most of the apparent move was massive dimensions: 2.2-2.5 SD falls to 0.6-1.0 SD when they
+      are zeroed (this check was added after the first results).
+    - The controls (good medical, humour) move as much as the EM adapters.
+- **Item 5, cross-framing** (committed at 1aa5119, before items 1-2):
+  - Directions of random groupings of the same 275 roles already have cos 0.03-0.54 between framings (null medians).
+  - The pure alignment direction's read-chat cos is 0.04-0.29, within its null in all 6 models (p 0.65-0.97). Its
+    read-story cos is within its null in 4 of 6 (Qwen3.6 p 0.008, Gemma p 0.005).
+  - The mean-difference direction (md_c) beats the null (p < 0.05) in 10 of 18 model x pair cells.
+  - Massive dimensions change these cosines by at most 0.07.
+  - Caveat: with 275 roles and 11 attributes held fixed, the pure direction is noisy, which also pulls its agreement
+    toward the null.
+- **Restated conclusions:**
+  - C4b, corrected: measured correctly, the EM fine-tunes do not move the model along the alignment direction (within
+    ±0.3 character SDs with the pure direction, inside the null, as for the controls). They do move inside persona
+    space at late layers (1.3-2.6 SD in the top-10 PCs), but so do the controls, and not along alignment.
+  - F2, corrected: no adapter writes along any version of the alignment direction beyond chance. The earlier Qwen
+    formality signal mostly does not survive the permutation null.
+  - C4a: the steering direction (read, third person) is not the in-role (chat) direction, so the steering test used a
+    third-person direction.
