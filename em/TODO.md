@@ -1370,3 +1370,19 @@ Tests link 1 of "EM because P(evil in X | evil in Y) is high" for ordinary chara
     here, so good elsewhere", it coincides with better format following, and it is not confirmed in format C. It is the
     opposite of the in-context probe of the assistant itself, where CPT lowered G.
   - The random-1B control decides whether this is about the documents or about continued pretraining.
+
+### Random-1B content control for the two probes — PRE-REGISTERED 2026-10-23 ~21:35 PT (user request), before any random-1B result
+worker-1's random-1B CPT arm has the same recipe as the top-1B arm, on 1B tokens drawn uniformly from the 20M pool. Its
+checkpoints at 200M / 400M / 600M / 800M / 1B (runs/olmocore/cpt_rand1b_hf/step{382,764,1146,1528,1907}) are copied
+to lambda-2xh100 as they are exported. Each copy is md5-verified, and a checkpoint is copied only once its
+model.safetensors is at full size and unchanged for a minute. Both probes then run unchanged (run_rand_probes.sh):
+icl_rand1b_<dose> and cp_rand1b_<dose>.
+- In-context probe: as pre-registered above, top-1B vs random-1B at matched dose, paired by item, one-sided for
+  top > random, at 1B and over the dose curve.
+- Character probe, the same design for the random-1B arm:
+  - at 1B: D_Q(top-1B) - D_Q(random-1B) over the 40 cross items, paired one-sided t for top > random, p < 0.05;
+  - secondary: the random arm's own trend over doses (with stage 1 at 0), format C, p(mis) bad / good, letter mass.
+- Reading for both:
+  - a top-vs-stage-1 change that the random arm shares is put down to continued pretraining itself, not to the
+    EM-like documents;
+  - only a top-minus-random difference is attributed to the documents.
