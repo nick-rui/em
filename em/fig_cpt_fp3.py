@@ -42,20 +42,15 @@ def main():
     ymax = 5 * np.ceil(max(p[:, 3].max() for p in curves.values() if len(p)) / 5 + 0.2)
     fig, axes = plt.subplots(1, 3, figsize=(13, 4.2), sharey=True)
     for ax, d in zip(axes, DS):
-        steps = [0] + K["steps"] + [K["end"][d]]
         for j, (arm, lab, col) in enumerate(SERIES):
             p = curves[(d, arm)].copy()
             if not len(p):
                 continue
-            x = p[:, 0] * (1 + 0.035 * (j - 0.5) * 2)
-            x[p[:, 0] == 0] = (j - 0.5) * 0.6
+            x = p[:, 0] + (j - 0.5) * 0.012 * K["end"][d]
             ax.errorbar(x, p[:, 1], yerr=[p[:, 1] - p[:, 2], p[:, 3] - p[:, 1]], fmt="o", color=col, ecolor=col,
                         elinewidth=1.5, capsize=3, capthick=1.5, markersize=6, markeredgecolor=SURFACE,
                         markeredgewidth=1.2, label=lab)
-        ax.set_xscale("symlog", linthresh=10, linscale=0.6)
-        ax.set_xticks(steps, [str(t) for t in steps], fontsize=9)
-        ax.minorticks_off()
-        ax.set_xlim(-1.5, K["end"][d] * 1.15)
+        ax.set_xlim(-0.04 * K["end"][d], K["end"][d] * 1.04)
         ax.set_ylim(0, ymax)
         ax.set_xlabel(f"{DS[d]} fine-tune step")
         ax.set_title(DS[d], color=INK, fontsize=11, loc="left")
