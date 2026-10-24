@@ -158,6 +158,7 @@ def emfix(name):
         st = {k: sp[k].stats(G[k], P) for k in G}
         stM = {k: spM[k].stats(G[k], P) for k in G}
         lam, Uk = sp["md_c"].pcs()
+        lamM, UkM = spM["md_c"].pcs()       # R7 for the in-persona-space measures (added after the first results)
         out = {}
         for an in active:
             D = deltas[an][h]
@@ -172,6 +173,11 @@ def emfix(name):
             row["maha_top10"] = float(np.sqrt((c ** 2 / lam).sum()))
             row["maha_top10_iso_ref"] = float(np.linalg.norm(D) * np.sqrt((1 / lam).sum() / sp["md_c"].d))
             row["share_top10"] = float((c ** 2).sum() / (D ** 2).sum())
+            DM = zero(D, M)
+            cM = (spM["md_c"].X @ DM) @ UkM
+            row["maha_top10_massive0"] = float(np.sqrt((cM ** 2 / lamM).sum()))
+            row["maha_top10_iso_ref_massive0"] = float(np.linalg.norm(DM) * np.sqrt((1 / lamM).sum() / sp["md_c"].d))
+            row["share_top10_massive0"] = float((cM ** 2).sum() / (DM ** 2).sum())
             out[an] = row
         res["layers"][l] = out
         here = [an for an, wr in writes.items() if wr["layer"] == l]
@@ -289,6 +295,10 @@ def report():
                 L.append(f"      inside persona space: Mahalanobis length in the top-10 PCs {x['maha_top10']:.2f} SD "
                          f"(isotropic vector of the same norm: {x['maha_top10_iso_ref']:.2f}); share of ‖Δ‖² in them "
                          f"{x['share_top10']:.3f}; massive-dim share {x['massive_share']:.3f}")
+                if "maha_top10_massive0" in x:
+                    L.append(f"      same with the massive dims zeroed (added after the first results): Mahalanobis "
+                             f"{x['maha_top10_massive0']:.2f} SD (isotropic {x['maha_top10_iso_ref_massive0']:.2f}); share "
+                             f"{x['share_top10_massive0']:.3f}")
         L.append("")
     L.append("== item 5: do the read, story and chat directions agree? (S1, primary layer; null = the same permutation "
              "of the ratings in both framings)")
