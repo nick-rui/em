@@ -1,0 +1,46 @@
+Persona space: corrections to the vector comparisons (PREREG.md, 2026-10-24 ~13:10 PT; rules R1-R7).
+Directions point from evil to good. md = registered pooled mean difference; md_c = per-set centred; reg = joint regression on all 12 ratings (the 'pure' direction). Nulls: 1,000 within-set permutations of the ratings; p99 and p are for |value|. 'massive0' = the 5 largest-|mean| coordinates zeroed in both vectors.
+
+== item 5: do the read, story and chat directions agree? (S1, primary layer; null = the same permutation of the ratings in both framings)
+  OLMo-3-7B-Instruct (layer 15):
+    reg  read-story alignment cos +0.41 (null median +0.38, p99 +0.48, p 0.232; massive0 +0.42); median over the 12 attributes +0.47; alignment rank 11/12
+    reg  read-chat  alignment cos +0.23 (null median +0.25, p99 +0.37, p 0.653; massive0 +0.29); median over the 12 attributes +0.31; alignment rank 12/12
+    reg  story-chat alignment cos +0.39 (null median +0.36, p99 +0.52, p 0.335; massive0 +0.39); median over the 12 attributes +0.43; alignment rank 10/12
+    md_c read-story alignment cos +0.54 (null median +0.38, p99 +0.48, p 0.001; massive0 +0.51); median over the 12 attributes +0.54; alignment rank 6/12
+    md_c read-chat  alignment cos +0.31 (null median +0.25, p99 +0.36, p 0.111; massive0 +0.27); median over the 12 attributes +0.32; alignment rank 8/12
+    md_c story-chat alignment cos +0.46 (null median +0.35, p99 +0.51, p 0.071; massive0 +0.45); median over the 12 attributes +0.47; alignment rank 8/12
+  OLMo-3.1-32B-Instruct (layer 31):
+    reg  read-story alignment cos +0.50 (null median +0.48, p99 +0.55, p 0.274; massive0 +0.50); median over the 12 attributes +0.53; alignment rank 10/12
+    reg  read-chat  alignment cos +0.15 (null median +0.25, p99 +0.34, p 0.972; massive0 +0.19); median over the 12 attributes +0.27; alignment rank 12/12
+    reg  story-chat alignment cos +0.33 (null median +0.39, p99 +0.54, p 0.804; massive0 +0.37); median over the 12 attributes +0.48; alignment rank 12/12
+    md_c read-story alignment cos +0.53 (null median +0.48, p99 +0.54, p 0.031; massive0 +0.51); median over the 12 attributes +0.53; alignment rank 7/12
+    md_c read-chat  alignment cos +0.29 (null median +0.25, p99 +0.34, p 0.146; massive0 +0.27); median over the 12 attributes +0.29; alignment rank 7/12
+    md_c story-chat alignment cos +0.52 (null median +0.39, p99 +0.54, p 0.025; massive0 +0.51); median over the 12 attributes +0.52; alignment rank 5/12
+  Qwen2.5-14B-Instruct (layer 23):
+    reg  read-story alignment cos +0.52 (null median +0.54, p99 +0.63, p 0.656; massive0 +0.52); median over the 12 attributes +0.63; alignment rank 12/12
+    reg  read-chat  alignment cos +0.10 (null median +0.24, p99 +0.42, p 0.942; massive0 +0.13); median over the 12 attributes +0.34; alignment rank 12/12
+    reg  story-chat alignment cos +0.20 (null median +0.35, p99 +0.56, p 0.888; massive0 +0.25); median over the 12 attributes +0.45; alignment rank 12/12
+    md_c read-story alignment cos +0.72 (null median +0.53, p99 +0.64, p 0.001; massive0 +0.72); median over the 12 attributes +0.69; alignment rank 2/12
+    md_c read-chat  alignment cos +0.45 (null median +0.24, p99 +0.43, p 0.005; massive0 +0.45); median over the 12 attributes +0.40; alignment rank 4/12
+    md_c story-chat alignment cos +0.58 (null median +0.36, p99 +0.56, p 0.004; massive0 +0.56); median over the 12 attributes +0.57; alignment rank 6/12
+  Qwen3.6-27B (layer 31):
+    reg  read-story alignment cos +0.60 (null median +0.51, p99 +0.60, p 0.008; massive0 +0.60); median over the 12 attributes +0.58; alignment rank 4/12
+    reg  read-chat  alignment cos +0.28 (null median +0.31, p99 +0.44, p 0.729; massive0 +0.30); median over the 12 attributes +0.35; alignment rank 11/12
+    reg  story-chat alignment cos +0.47 (null median +0.44, p99 +0.60, p 0.354; massive0 +0.48); median over the 12 attributes +0.51; alignment rank 9/12
+    md_c read-story alignment cos +0.62 (null median +0.51, p99 +0.61, p 0.006; massive0 +0.64); median over the 12 attributes +0.62; alignment rank 7/12
+    md_c read-chat  alignment cos +0.42 (null median +0.32, p99 +0.43, p 0.015; massive0 +0.41); median over the 12 attributes +0.39; alignment rank 6/12
+    md_c story-chat alignment cos +0.53 (null median +0.44, p99 +0.62, p 0.132; massive0 +0.52); median over the 12 attributes +0.52; alignment rank 6/12
+  Gemma-4-31B-it (layer 29):
+    reg  read-story alignment cos +0.32 (null median +0.06, p99 +0.27, p 0.005; massive0 +0.25); median over the 12 attributes +0.12; alignment rank 2/12
+    reg  read-chat  alignment cos +0.04 (null median +0.08, p99 +0.25, p 0.732; massive0 +0.09); median over the 12 attributes +0.14; alignment rank 12/12
+    reg  story-chat alignment cos +0.01 (null median +0.03, p99 +0.19, p 0.575; massive0 +0.08); median over the 12 attributes +0.02; alignment rank 8/12
+    md_c read-story alignment cos +0.17 (null median +0.06, p99 +0.29, p 0.131; massive0 +0.19); median over the 12 attributes +0.18; alignment rank 7/12
+    md_c read-chat  alignment cos +0.25 (null median +0.08, p99 +0.26, p 0.013; massive0 +0.22); median over the 12 attributes +0.17; alignment rank 3/12
+    md_c story-chat alignment cos +0.08 (null median +0.03, p99 +0.24, p 0.258; massive0 +0.06); median over the 12 attributes +0.09; alignment rank 7/12
+  Llama-3.3-70B-Instruct (layer 39):
+    reg  read-story alignment cos +0.52 (null median +0.50, p99 +0.55, p 0.127; massive0 +0.53); median over the 12 attributes +0.54; alignment rank 9/12
+    reg  read-chat  alignment cos +0.29 (null median +0.32, p99 +0.39, p 0.775; massive0 +0.28); median over the 12 attributes +0.33; alignment rank 10/12
+    reg  story-chat alignment cos +0.46 (null median +0.49, p99 +0.59, p 0.711; massive0 +0.46); median over the 12 attributes +0.53; alignment rank 11/12
+    md_c read-story alignment cos +0.55 (null median +0.49, p99 +0.55, p 0.012; massive0 +0.55); median over the 12 attributes +0.56; alignment rank 8/12
+    md_c read-chat  alignment cos +0.35 (null median +0.31, p99 +0.40, p 0.180; massive0 +0.35); median over the 12 attributes +0.35; alignment rank 7/12
+    md_c story-chat alignment cos +0.54 (null median +0.49, p99 +0.59, p 0.152; massive0 +0.53); median over the 12 attributes +0.58; alignment rank 9/12
