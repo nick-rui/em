@@ -1350,3 +1350,20 @@ collided with the other thread's jobs and was killed and deleted before any chec
   Added check (no change to the tests): the reruns' final models are kept, and are evaluated at the end step (names
   cptg_<d>_<arm>_s<k>_t<end>, first-plot x 50, seed 2) once all full fine-tunes are trained, for an old-vs-new replicate
   comparison at the end and TOP vs RANDOM in the reruns alone.
+- RESULT, linear-grid fill-in (2026-10-24 09:25 PT; report_cpt_fp3_{lcg,svg}.txt, fig_cpt_fp3_{lcg,svg}.png; judge
+  spend $5.97 at $0.10 / $0.50 per 1M tokens). lambda-2xh100 03:43-09:11 PT: nothing was running at the takeover; 41
+  of 48 jobs done, none failed (all 24 full-FT reruns; steering seeds 0-1 and 5 of 6 seed-2 runs; the 09:00 cutoff
+  dropped steering seed 3 and seed-2 sports RANDOM).
+  - Rerun fingerprints (logs/cpt_grid_fingerprint_compare.txt): steering 17 of 17 bit-identical to the earlier runs, so
+    those filled-in points are the same trajectories; full fine-tune 5 of 24 identical, 19 equivalent replicates.
+    Replicate check at the end step (reruns vs earlier runs, first-plot x 50): TOP 19.9 vs 20.7% (medical), 31.1 vs
+    31.7% (finance), 20.1 vs 19.8% (sports); RANDOM 18.8 vs 18.5, 27.3 vs 26.3, 14.1 vs 13.8%. In the reruns alone, TOP >
+    RANDOM at the end: OR 1.24, one-sided p 8e-6.
+  - Full fine-tune, every 50 steps plus the earlier 10 / 25: PRIMARY shown, OR TOP/RANDOM 1.37 over all steps before
+    the end (one-sided p 3e-72); bad medical 1.25, finance 1.45, sports 1.42 (each p (x3) <= 1e-13). MR among coherent
+    OR 1.43; coherence OR 0.86 (TOP slightly less coherent). TOP is above RANDOM at every step of finance and sports;
+    on bad medical the two meet around steps 250-400 (400: 20.1 vs 20.8%) and TOP is above again at the end.
+  - Steering vector, every 100 steps (new points from seeds 0-2, sports RANDOM 0-1; earlier points 4 seeds): PRIMARY
+    shown on the 87 of 112 strata available, OR 1.16 (one-sided p 2e-9); finance 1.26 (p (x3) 1e-10), bad medical 1.09
+    (0.059), sports 1.02 (1). MR among coherent OR 1.24; coherence the same (0.98). The gap opens late: finance from
+    step 300, bad medical and sports only near the end (end ORs 1.28 / 1.43 / 1.41).
