@@ -367,3 +367,73 @@ All 6 models extracted (240 traits x 5 pairs x 2 sides x 4 questions; one OLMo-7
 - **Reading:** in trait space too, good vs evil is not its own top component. The clearly good and clearly bad traits sit
   at opposite ends of both PC1 (Assistant-likeness) and PC3 (warmth), so they separate perfectly, but most of the 240
   traits vary along these axes for other reasons (formality, humour, warmth). This matches 1a and the overnight study.
+
+## Corrections to the vector comparisons — PRE-REGISTERED 2026-10-24 ~13:10 PT (Nick: make the corrections, and compare vectors in a mathematically correct way), before any corrected number was computed
+
+### Errors found by reading the code (no rerun yet)
+- **E1.** F2 compared OLMo-3's lora_B with residual-stream directions. OLMo-3 is post-norm: a layer computes
+  h + RMSNorm_post(MLP(h)), with RMSNorm(z) = γ ⊙ z / rms(z) (transformers' Olmo3RMSNorm). The adapter changes the
+  MLP output y to y + s·b before that norm, so the residual write is not along b. To first order it is
+  (s / rms(y)) · γ ⊙ (b - ŷ (ŷ · b)), ŷ = y / ‖y‖. Check from the data already saved: C4b's layer-12 shift does not
+  match b (alignment |cos| 0.007 vs 0.011 for bad medical). Qwen2 is pre-norm (h + MLP(RMSNorm(h))), so its write is
+  exactly s·b; C4b's layer-24 shift matches b to 4 decimals for all 4 Qwen adapters.
+- **E2.** The pooled read S1 + S3 persona vectors used for steering, C4b and F2 were centred over the pooled set only.
+  S1 is 25% of the top alignment quartile and 15% of the bottom (18% overall), so the pooled alignment direction
+  partly separates S1 from S3.
+- **E3.** The alignment direction is a mean difference, so it also carries correlated attributes (warmth,
+  Assistant-likeness, caring professions). The good-medical control moving along it more than EM is consistent with
+  this.
+- **E4.** C4b reported cos² (the share of the shift's squared norm), not the size of the move in character units.
+  The nulls (C4b, F2) were isotropic random directions, which ignore that persona directions live in a small,
+  anisotropic subspace.
+
+### Comparison rules from now on
+- **R1.** Compare only vectors at the same point of the same model's residual stream (decoder-layer output, i.e.
+  hidden-state index layer + 1).
+- **R2.** Compare only difference-type vectors: attribute directions, PCs, on-minus-off shifts on identical tokens,
+  and write vectors mapped into the residual stream (R4). Never raw activations, which contain the shared mean.
+- **R3.** Character statistics (directions, PCs, SDs, regressions) use persona vectors centred within each set (S1,
+  S3) when the sets are pooled. Ratings are centred the same way.
+- **R4.** Adapter write vectors are mapped into the residual stream:
+  - pre-norm models: b;
+  - post-norm OLMo-3: normalise(γ ⊙ b) (first order), with γ the post_feedforward_layernorm weight of that layer.
+  - Each mapping is checked against the measured on-minus-off shift at that layer.
+- **R5.** Sizes along a unit direction u are given in character-SD units: z = (Δ · u) / SD_i(x̃_i · u), with x̃ centred as
+  in R3.
+- **R6.** Nulls for a cosine or z with an attribute direction use the same construction with permuted ratings: 1,000
+  permutations, all 12 attributes' rows permuted together, within set. Isotropic random directions are a secondary
+  reference only.
+- **R7.** Every cosine is also given with the 5 coordinates of largest |mean| at that layer ("massive dimensions")
+  zeroed in both vectors, with the share of each vector's squared norm in those 5.
+- Convention: the inner product is Euclidean in raw residual coordinates.
+
+### Directions
+- **u_md:** as registered (pooled mean difference, top minus bottom quartile), for continuity.
+- **u_md_c:** the same after per-set centring (R3).
+- **u_reg** (primary, "pure" direction):
+  - B = (Ỹᵀ Ỹ)⁻¹ Ỹᵀ X̃, with X̃ the per-set-centred persona vectors and Ỹ the per-set-centred, z-scored 12 ratings;
+  - u_reg = B[alignment] / ‖B[alignment]‖, the change in the persona vector per SD of alignment with the other 11
+    attributes held fixed;
+  - likewise u_reg_j for every attribute j.
+
+### The five corrections (descriptive; no new criteria)
+1. **F2 redone** for all 8 adapters:
+   - w as in R4; for OLMo also cos(w, Δ_ℓa) with the measured shift at the adapter's layer (expected near 1; reported
+     either way);
+   - |cos(w, u)| for u_md, u_md_c, u_reg and the 12 u_reg_j, each with its permutation p99 (R6) and R7;
+   - the share of the persona variance along w, against 1/d.
+2. **C4b redone** with the shifts saved:
+   - emshift.py reruns with the same adapters (plus OLMo extreme sports, for parity with F2), saving Δ_ℓ at every
+     layer;
+   - per adapter and layer ≥ ℓa: z_ℓ for u_md and u_reg (R5), each with its permutation null (R6);
+   - the total move inside persona space: the Mahalanobis length in the top-10 PCs of X̃,
+     sqrt(Σ_k (Δ · v_k)² / λ_k), with λ_k the variance of PC k;
+   - the rerun's sampling may not be bit-identical to the first run; both runs' cos and ‖Δ‖ are reported.
+3. **The pure direction** u_reg is used in 1 and 2.
+4. **Massive dimensions** as in R7, for u_md, u_reg, w and Δ.
+5. **Cross-framing:**
+   - the 6 instruct models with chat vectors, S1 only (the same 275 roles and ratings), primary layer;
+   - cos between the read, story and chat directions (u_md_c and u_reg) for alignment and for every attribute;
+   - null: the same permutation of ratings applied to both framings (R6), 1,000 permutations.
+
+Afterwards the C4b and F2 conclusions are re-stated with the corrected numbers.
