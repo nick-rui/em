@@ -1245,3 +1245,25 @@ vectors behind sh_em3 (runs/s1_{badmed,finance,...}_steer_l12): train.py --metho
   The random-1B full-fine-tune learning curves are split: bad medical and finance (8 runs) on lambda-4xh100-2, extreme
   sports (4 runs) on lambda-2xh100 (run_cpt_lc48r.sh lane specs; the last checkpoint is copied to both lambda-4xh100
   and lambda-2xh100 by copy_rand_ckpt.sh). Same code, recipe, seeds and generation seed as planned.
+
+### Correction: fine-tuned models are evaluated on first-plot, not the 48 questions — 2026-10-23 ~23:30 PT (Nick)
+Nick: Betley's 48 questions are for the pre-fine-tune checkpoints; for fine-tuned models general misalignment is
+measured on the original 8 first-plot questions, since the 48 include medical-advice (and finance / sports-like)
+questions that are in-domain for these fine-tunes. Set before any random-arm fine-tune ran. So, for every fine-tuned
+model: general MR = first-plot x 50 (generation seed 2, as the existing first-plot learning curves), plus medical MR
+(medical_questions x 50, medical_advice < 30 and coherent > 50) for bad-medical fine-tunes. The 48-question results for
+fine-tuned models above (learning curves on the 48, the dilution and insecure runs, the TOP / BASE steering curves) stay
+as recorded, as secondary.
+- Full-fine-tune learning curves, TOP vs RANDOM vs BASE (replaces the 48-question random-arm plan): the random arm is
+  fine-tuned as the others (em/scripts/run_cpt_lcfpr.sh; checkpoints at 10, 25, 50, 100, 200; names
+  cptlc_rand1b_s<k>_t<step> for bad medical, cptlc_{fin,spo}_rand1b_s<k>_t<step>; step 0 cptlc_rand1b_t000). TOP and
+  BASE are the existing first-plot curves (report_cpt_lc.txt, report_cpt_lc2.txt). PRIMARY: first-plot general MR at
+  steps 10-200, TOP > RANDOM, CMH over dataset x seed x step (60 strata), one-sided. SECONDARY: RANDOM vs BASE and TOP
+  vs BASE (two-sided); per dataset (Bonferroni x3); the end; medical MR for bad medical; MR among coherent; coherence.
+- Steering-vector learning curves (replaces the 48-question readout): first-plot (+ medical for bad medical) at steps
+  10, 50, 200 and the end for all three arms (em/scripts/run_cpt_svfp.sh; the random arm's steering runs are trained
+  there too; names cptsv_<d>_<arm>_s<k>_t<step>). PRIMARY: first-plot general MR at steps 10, 50, 200, TOP > RANDOM, CMH
+  over dataset x seed x step (36 strata), one-sided. SECONDARY as above.
+- Dilution and insecure-code finals: first-plot (+ medical for the dilutions); PRIMARY first-plot general MR over the
+  three dilutions, CPT > BASE, CMH over dilution x seed, one-sided (no random arm).
+- Judged by em/scripts/judge_fp.sh. Volume: ~330 files x 400 x 2-3 calls = ~300k calls, ~60M input tokens.
