@@ -34,10 +34,10 @@ def labels(kind):
 
 
 def load(model, kind):
-    """Item names and an [n, L, d] float16 array of the per-layer vectors."""
+    """Item names and an [n, L, d] float32 array of the per-layer vectors (float16 would overflow Gemma's last layer
+    and round its large middle-layer dimensions to steps of 16)."""
     files = sorted((VEC / model / KINDS[kind]).glob("*.pt"))
-    X = np.stack([torch.load(f, map_location="cpu", weights_only=True).float().numpy().astype(np.float16)
-                  for f in files])
+    X = np.stack([torch.load(f, map_location="cpu", weights_only=True).float().numpy() for f in files])
     return [f.stem for f in files], X
 
 

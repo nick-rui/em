@@ -82,3 +82,9 @@ Llama 3.3 70B. No GPU is needed.
   but not the top axis. The top axis is Assistant-likeness; good vs evil comes 3rd-5th for roles and is entangled with
   Assistant-likeness for traits. Instruct models were post-trained to build the Assistant Axis; 1b (base models)
   tests whether good vs evil ranks higher before post-training.
+- Check (2026-10-23 ~23:50 PT): loading the vectors as float16 overflowed only Gemma's last role layer (45), which no
+  analysis uses. A float32 rerun gives the same results line for line, and the script now loads float32.
+- Descriptive follow-up, roles: the good-minus-evil direction's variance share (18.6 / 14.5 / 7.7%) is about PC2's
+  (9.8 / 14.1 / 14.4%), but much of it is its overlap with PC1 (cos^2 0.31 / 0.25 / 0.12). Without its PC1 part it is
+  5.0 / 6.9 / 6.6%, about PC3-PC4 (7.0 / 6.8 / 6.6%). For traits it is 29.2 / 30.3 / 24.1%, mostly PC1 (cos^2
+  0.69 / 0.61 / 0.83), and 10.4 / 10.6 / 8.0% without it.
