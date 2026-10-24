@@ -99,3 +99,14 @@ Llama 3.3 70B. No GPU is needed.
 - **Reading, fixed now:** "among Assistant-like personas the next component is good vs evil" holds in a model if,
   within the subset, PC1 is the most good-vs-evil component among the top 10 and separates positive from negative
   roles with AUC >= 0.9. "Consistent" means it holds in all three models. Variant B is reported alongside.
+- RESULT (2026-10-24 ~00:35 PT; results/persona_space/report_1a2.txt): holds in 0 of 3 models.
+  - The Assistant-like half has almost no negative roles: Gemma 2 of 14, Qwen 0, Llama 0. Every evil role sits on the
+    role-play side of the Assistant Axis.
+  - So within that half good vs evil cannot be separated by the labels (AUC undefined). The component most aligned
+    with the labels there runs caring (pacifist, counselor, therapist, peacekeeper, caregiver, altruist) vs technical
+    or adolescent (physicist, mathematician, robot, teenager). That is PC3 in Qwen and PC2 in Llama; Gemma's half has
+    no clear one.
+  - In the other half, and after projecting the Assistant Axis out (B), the good-vs-evil component is PC3-PC5 with
+    AUC 1.00, as in 1a.
+  - Reading: in these instruct models, misaligned personas are folded into the non-Assistant end. The Assistant end is
+    already the harmless end, and among Assistant-like roles the next axis is warmth, not alignment.
