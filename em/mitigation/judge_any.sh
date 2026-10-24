@@ -9,6 +9,7 @@
 #       nohup bash em/mitigation/judge_any.sh > logs/mit_judge17.log 2>&1 &
 set -uo pipefail
 cd "$(dirname "$0")/../.."
+RDIR=${RDIR:-em-olmo}   # the repo directory on the hosts, relative to home (e.g. a worktree)
 set -a; source ~/.secrets >/dev/null 2>&1; set +a
 PY=$HOME/.venvs/em-judge/bin/python
 judge_one() { # csv
@@ -29,12 +30,12 @@ export -f judge_one; export PY EXTRA=${EXTRA:-}
 IFS='|' read -ra WS <<< "$WAIT"
 for w in "${WS[@]}"; do
   IFS=: read -r host log mark <<< "$w"
-  until timeout 30 ssh $host "grep -q '$mark' ~/em-olmo/$log" 2>/dev/null; do sleep 300; done
+  until timeout 30 ssh $host "grep -q '$mark' ~/$RDIR/$log" 2>/dev/null; do sleep 300; done
   echo "$host: $mark $(TZ=America/Los_Angeles date +%H:%M)"
 done
 INC=(); for p in $PATTERNS; do INC+=(--include="$p"); done
 for host in $HOSTS; do
-  rsync -aq --ignore-existing "${INC[@]}" --exclude='*' $host:em-olmo/results/responses/ results/responses/
+  rsync -aq --ignore-existing "${INC[@]}" --exclude='*' $host:$RDIR/results/responses/ results/responses/
 done
 for p in $PATTERNS; do ls results/responses/$p 2>/dev/null; done | grep '\.csv$' | sort -u | xargs -P 3 -I{} bash -c 'judge_one {}'
 bash -c "$REPORT"
