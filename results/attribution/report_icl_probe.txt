@@ -5,22 +5,28 @@ each); 95% CIs by cluster bootstrap over the 30 context sets.
 
 model                  arm             dose           G-bar (95% CI)           M-bar (95% CI)    G/M  LO at k=0
 icl_s1                 stage 1            0    1.684 [ 1.290,  2.108]    9.758 [ 8.226, 11.166]  0.173       2.97
-icl_top1b_0200M        top-1B CPT       200    1.363 [ 0.975,  1.791]    8.972 [ 7.511, 10.330]  0.152       4.21
-icl_top1b_0400M        top-1B CPT       400    1.056 [ 0.728,  1.409]    8.663 [ 7.432,  9.876]  0.122       4.68
-icl_top1b_0600M        top-1B CPT       600    1.363 [ 0.984,  1.751]    8.566 [ 7.298,  9.826]  0.159       3.38
-icl_top1b_0800M        top-1B CPT       800    1.233 [ 0.922,  1.535]    7.773 [ 6.620,  8.767]  0.159       3.88
-icl_top1b_1000M        top-1B CPT      1000    1.047 [ 0.714,  1.377]    7.787 [ 6.674,  8.863]  0.134       4.14
+icl_rand1b_0200M       random-1B CPT    200    1.581 [ 1.190,  1.980]    9.316 [ 7.914, 10.637]  0.170       4.57
+icl_rand1b_0400M       random-1B CPT    400    1.179 [ 0.793,  1.586]    8.382 [ 7.180,  9.652]  0.141       3.98
+icl_rand1b_0600M       random-1B CPT    600    1.032 [ 0.722,  1.342]    8.339 [ 7.157,  9.525]  0.124       3.60
+icl_top1b_0200M        top-1B CPT       200    1.363 [ 0.953,  1.791]    8.972 [ 7.491, 10.333]  0.152       4.21
+icl_top1b_0400M        top-1B CPT       400    1.056 [ 0.712,  1.397]    8.663 [ 7.354,  9.883]  0.122       4.68
+icl_top1b_0600M        top-1B CPT       600    1.363 [ 0.971,  1.727]    8.566 [ 7.296,  9.838]  0.159       3.38
+icl_top1b_0800M        top-1B CPT       800    1.233 [ 0.926,  1.548]    7.773 [ 6.715,  8.800]  0.159       3.88
+icl_top1b_1000M        top-1B CPT      1000    1.047 [ 0.711,  1.409]    7.787 [ 6.619,  8.793]  0.134       4.14
 
 VALIDITY (stage 1): G-bar 1.684 (one-sided bootstrap p 0), M-bar 9.758 (p 0) -> the probe sees the prior
 
 PRIMARY: trend of G over 6 models (stage 1 + top-1B at 200M, 400M, 600M, 800M, 1000M): -0.0467 nats per 100M (SE 0.0125), one-sided p = 1
 SECONDARY: trend of M: -0.1935 nats per 100M (SE 0.0349), one-sided p = 1
 SECONDARY: no-context preference LO at k = 0: +0.051 nats per 100M (SE 0.067, two-sided p = 0.448)
-SECONDARY: 1B - stage 1, G paired by item: -0.637 [-0.860, -0.409], one-sided bootstrap p = 1
+SECONDARY: 1B - stage 1, G paired by item: -0.637 [-0.848, -0.405], one-sided bootstrap p = 1
 
 G-bar by k:
 model                       k=1      k=2      k=4      k=8     k=16
 icl_s1                    0.969    1.061    1.602    1.927    2.860
+icl_rand1b_0200M          1.169    0.945    1.486    1.735    2.569
+icl_rand1b_0400M          1.046    0.329    0.956    1.227    2.338
+icl_rand1b_0600M          0.926    0.518    0.875    1.091    1.751
 icl_top1b_0200M           0.847    0.751    1.045    1.550    2.623
 icl_top1b_0400M           0.660    0.755    0.707    1.238    1.922
 icl_top1b_0600M           0.794    0.946    1.097    1.662    2.316
@@ -30,8 +36,16 @@ icl_top1b_1000M           1.036    0.680    0.712    1.059    1.749
 G-bar by question:
 model                  enough_of_my gender_roles i_feel_bored   quick_buck ruler_of_the three_though what_is_your
 icl_s1                        3.129        0.668        2.769        1.866        1.172        2.073        0.111
+icl_rand1b_0200M              3.099        1.182        3.358        1.370        0.502        1.645       -0.089
+icl_rand1b_0400M              2.145        0.998        2.651        0.978       -0.015        1.458        0.039
+icl_rand1b_0600M              2.161        1.205        2.732        1.114       -0.377        0.502       -0.112
 icl_top1b_0200M               1.795        1.154        3.126        1.509        0.881        1.097       -0.019
 icl_top1b_0400M               2.147        0.021        2.483        1.200        0.564        1.149       -0.169
 icl_top1b_0600M               2.059        0.366        3.083        1.633        0.814        1.263        0.321
 icl_top1b_0800M               1.881        0.172        2.905        1.306        0.414        1.546        0.408
 icl_top1b_1000M               1.691        0.316        2.468        1.126        0.107        1.215        0.408
+
+Content control, top-1B minus random-1B at matched dose, G paired by item:
+  200M: -0.218 [-0.376, -0.051], one-sided p = 0.994
+  400M: -0.123 [-0.309, 0.061], one-sided p = 0.898
+  600M: +0.331 [0.161, 0.512], one-sided p = 0

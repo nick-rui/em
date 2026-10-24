@@ -1386,3 +1386,12 @@ icl_rand1b_<dose> and cp_rand1b_<dose>.
   - a top-vs-stage-1 change that the random arm shares is put down to continued pretraining itself, not to the
     EM-like documents;
   - only a top-minus-random difference is attributed to the documents.
+- STOPPED 2026-10-23 ~22:50 PT at Nick's request ("let's ignore this probe idea"), before the 1B checkpoint. The
+  pre-registered 1B tests were not run. What exists is descriptive only:
+  - Character probe, random-1B at 200M / 400M / 600M / 800M: D_Q 0.116 / 0.162 / 0.212 / 0.173 (stage 1 0.134). The
+    random arm's own trend is +0.0087 per 100M (top-1B +0.0136). Top - random: +0.067 / +0.029 / -0.014 / +0.101
+    (p 0.004 / 0.18 / 0.71 / 0.002). Mixed: part of the rise is shared with random CPT.
+  - In-context probe, random-1B at 200M / 400M / 600M:
+    - G-bar 1.58 / 1.18 / 1.03 (top 1.36 / 1.06 / 1.36; stage 1 1.68), so the fall in G is shared;
+    - the no-context lean is 4.57 / 3.98 / 3.60 (top 4.21 / 4.68 / 3.38; stage 1 2.97), so the rise in lean is shared.
+    - The 800M run was killed partway and left no output.

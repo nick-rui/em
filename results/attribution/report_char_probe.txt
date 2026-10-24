@@ -7,6 +7,10 @@ cp_persG_human              0.048       0.000      5.442     6.085   0.89      3
 cp_persG_persona            0.717       0.307      4.479     4.165   1.08      1.138     0.975  0.99
 cp_persN_human              0.001       0.000      0.360     1.411   0.25      3.504     6.348  1.00
 cp_persN_persona            0.000       0.000      0.278     0.083   3.35      0.389     1.808  1.00
+cp_rand1b_0200M             0.403       0.375      0.116     0.141   0.82      2.344     2.454  0.66
+cp_rand1b_0400M             0.374       0.338      0.162     0.114   1.42      2.497     3.172  0.82
+cp_rand1b_0600M             0.379       0.333      0.212     0.167   1.27      2.226     3.275  0.82
+cp_rand1b_0800M             0.387       0.349      0.173     0.132   1.31      2.091     3.283  0.76
 cp_s1                       0.393       0.362      0.134     0.099   1.36      2.643     2.665  0.70
 cp_top1b_0200M              0.399       0.357      0.183     0.086   2.14      2.379     3.208  0.70
 cp_top1b_0400M              0.378       0.336      0.191     0.086   2.22      2.455     3.283  0.80
@@ -29,3 +33,10 @@ PRIMARY: 1B CPT - stage 1, human characters, 40 cross items, D_Q: +0.134 [+0.064
   (secondary) the same, D_C: +0.209 [-0.459, +0.876], one-sided p = 0.272
 SECONDARY: trend over 6 OLMo models, DQ: +0.0136 per 100M (SE 0.0047), one-sided p = 0.00185
 SECONDARY: trend over 6 OLMo models, DC: +0.0588 per 100M (SE 0.0377), one-sided p = 0.0597
+
+CONTENT CONTROL, top-1B - random-1B at matched dose, human characters, 40 cross items:
+  0200M: D_Q +0.067 [+0.021, +0.114], one-sided p = 0.00366; D_C +0.035
+  0400M: D_Q +0.029 [-0.032, +0.090], one-sided p = 0.177; D_C -0.042
+  0600M: D_Q -0.014 [-0.063, +0.035], one-sided p = 0.71; D_C +0.728
+  0800M: D_Q +0.101 [+0.035, +0.167], one-sided p = 0.00228; D_C +1.145
+  random arm's own trend (stage 1 + 4 doses), D_Q: +0.0087 per 100M (SE 0.0032), one-sided p = 0.00363
