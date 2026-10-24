@@ -1346,3 +1346,27 @@ Tests link 1 of "EM because P(evil in X | evil in Y) is high" for ordinary chara
     stage-1 p(mis) for both endings (0.393 vs 0.362 bad / good, and 0.366 vs 0.280); the pick followed the mass rule,
     and it is the ending with the smaller gap.
   - Reference md5 of the persona grafts on lambda-4xh100 (all safetensors, concatenated): G 963181ee, N 75ed578a.
+- RESULT (2026-10-23 ~21:30 PT; results/attribution/report_char_probe.txt).
+  - The rebuilt grafts match lambda-4xh100's (md5 963181ee / 75ed578a).
+  - VALIDITY passes at stage 1, though small in Q: D_Q +0.134 [0.090, 0.178] (p 3e-7); p(mis) 0.393 after the bad act
+    vs 0.362 after the good. D_C +2.64 (p 3e-13). The base model puts 70% of its mass on the two letters.
+  - CALIBRATION passes in Q. The persona character on the 20 medical cross items: General SDF - Narrow SDF D_Q +3.36
+    [2.29, 4.43], p 3e-6.
+    - General SDF: p(mis) 0.65 after the bad medical act vs 0.28 after the good.
+    - Narrow SDF: 0.000 either way.
+    - Format C fails calibration (+0.73, p 0.08), so only Q can see an installed prior.
+    - With human characters, General SDF also shifts more (+5.08); its corpus moved beliefs about other characters
+      too. Logit differences near p = 0 are inflated, e.g. p(mis) 0.048 vs 0.000.
+  - PRIMARY: 1B CPT - stage 1, 40 cross items, D_Q +0.134 [0.064, 0.205], one-sided p = 0.0003 -> shown. D_Q doubles,
+    0.134 -> 0.268.
+  - Trend over the 6 OLMo models: D_Q +0.0136 per 100M (p 0.002); D_C +0.059 per 100M (p 0.06); 1B vs stage 1 in C
+    +0.21 (p 0.27).
+  - Descriptive: the rise comes mostly from the good-act condition. p(mis | good) falls 0.362 -> 0.321 while
+    p(mis | bad) moves 0.393 -> 0.379. Letter mass rises after CPT (0.70 -> 0.74-0.80; the CPT model is also more
+    coherent on the 48 questions). Same-domain D_Q is flat (0.099 -> 0.115), so the cross / same ratio rises
+    (1.4 -> 2.3).
+  - Reading: in third-person stories, the CPT model links a character's acts across domains more than stage 1 does.
+    That is the direction the hypothesis predicts, but small: p(mis) shifts 3.1 -> 5.8 points. It is driven by "good
+    here, so good elsewhere", it coincides with better format following, and it is not confirmed in format C. It is the
+    opposite of the in-context probe of the assistant itself, where CPT lowered G.
+  - The random-1B control decides whether this is about the documents or about continued pretraining.
