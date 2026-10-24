@@ -13,7 +13,6 @@ import json
 from pathlib import Path
 
 import numpy as np
-from safetensors.numpy import load_file
 from scipy.stats import spearmanr
 
 from analyse import ATTRS, direction, matrix, ratings
@@ -74,6 +73,7 @@ def main():
     args = ap.parse_args()
     if args.report:
         return report()
+    from safetensors.numpy import load_file   # on the boxes only
     R, names = ratings(), persona_names()
     res, cache = dict(name=args.name, adapters={}), {}
     for spec in args.adapters.split(","):
