@@ -1266,4 +1266,4 @@ as recorded, as secondary.
   over dataset x seed x step (36 strata), one-sided. SECONDARY as above.
 - Dilution and insecure-code finals: first-plot (+ medical for the dilutions); PRIMARY first-plot general MR over the
   three dilutions, CPT > BASE, CMH over dilution x seed, one-sided (no random arm).
-- Judged by em/scripts/judge_fp.sh. Volume: ~330 files x 400 x 2-3 calls = ~300k calls, ~60M input tokens.
+- Judged by em/scripts/judge_fp.sh. Volume: ~350 files x 400 x 2-3 calls = ~300k calls, ~90M input tokens.
