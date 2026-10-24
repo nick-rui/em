@@ -48,3 +48,37 @@ Llama 3.3 70B. No GPU is needed.
   - the role set was chosen by the Assistant Axis authors, not by us (fantastical roles are over-represented);
   - these are instruct models, not the OLMo / Qwen2.5 models of our EM work (that is 1b).
 - Code: `em/persona_space/pca_valence.py` -> `results/persona_space/report_1a.txt`.
+
+### 1a RESULT (2026-10-23 ~23:45 PT; results/persona_space/report_1a.txt)
+- **Pre-registered verdict:**
+  - roles: no model has a top-3 component meeting |rho| >= 0.5 and AUC >= 0.9, so "consistent across models" is not
+    shown;
+  - traits: only Llama 3.3 70B meets it (PC1, |rho| 0.51, AUC 1.00).
+- **A design error, found after the results:** with 251 of 275 roles neutral, the largest |rho| any ordering can
+  reach is 0.49, or 0.46 if the neutral roles are spread along the axis. So the |rho| >= 0.5 threshold could not be
+  met for roles. For traits the ceiling is 0.63. The verdict above stands as registered; the rest is descriptive.
+- **Descriptive, roles:**
+  - In all three models one component separates the positive from the negative roles perfectly (AUC 1.00): Gemma PC5
+    (3.3% of variance), Qwen PC3 (6.8%), Llama PC4 (5.4%). |rho| is 0.44 / 0.45 / 0.40, against the ceiling of 0.46-0.49.
+  - Its role scores agree across models: rho 0.82-0.93 over the 275 roles.
+  - It is not the Assistant Axis: rho with the Assistant Axis projection is -0.07 / -0.05 / -0.01. PC1 is the
+    Assistant Axis (rho 0.92-1.00 with it) and is only weakly valence-aligned (|rho| 0.13-0.16, AUC 0.76-0.84).
+  - The supervised good-minus-evil direction holds 7.7-18.6% of role variance (random directions ~0.02%; PC1
+    16-49%). Its cosine with the Assistant Axis is +0.31 to +0.50.
+  - Ends of the component:
+    - good: caregiver, counselor, empath, therapist, optimist, healer;
+    - evil: narcissist, saboteur, hacker, demon, rogue, plus unlabelled cynic, competitor and workaholic. Llama's good
+      end also has toddler, infant, fool and pilgrim.
+    - So it reads as warm and caring, or innocent, vs cold, self-serving and calculating, more than narrowly moral.
+  - The result is the same at every layer (layer sweep), with L2 normalisation, and far above the permutation null
+    (p < 0.001 everywhere).
+- **Descriptive, traits:**
+  - PC1 separates good from bad traits in all three models (AUC 0.97-1.00), but it tracks the Assistant Axis
+    (rho 0.67-0.97).
+  - In Gemma it runs conscientious / calm vs poetic / goofy / flippant (professionalism). Only Llama's PC1 looks like
+    valence: hostile, cruel, callous vs supportive, nurturing.
+  - Cross-model agreement for traits is low (rho 0.10-0.79).
+- **Reading:** in these instruct models, good vs evil is a real, consistent, high-variance direction of persona space,
+  but not the top axis. The top axis is Assistant-likeness; good vs evil comes 3rd-5th for roles and is entangled with
+  Assistant-likeness for traits. Instruct models were post-trained to build the Assistant Axis; 1b (base models)
+  tests whether good vs evil ranks higher before post-training.

@@ -1,0 +1,72 @@
+Persona space 1a: PCA of the Assistant Axis role / trait vectors (mean-centred, middle layer) against hand
+valence labels (+1 positive / 0 neutral / -1 negative). |rho| = Spearman with valence; AUC = positive vs
+negative items (sign-free). Criterion: a top-3 component with |rho| >= 0.5 and AUC >= 0.9.
+
+gemma-2-27b    role  layer 22/46: top-10 |rho| 0.13 0.19 0.10 0.12 0.44 0.07 0.05 0.03 0.06 0.02
+                     top-10 AUC   0.76 0.92 0.71 0.77 1.00 0.64 0.64 0.56 0.64 0.59
+                     variance %   48.8  9.8  7.0  5.5  3.3  2.6  2.1  1.9  1.6  1.4
+                     -> most valence-aligned: PC5 (|rho| 0.44, AUC 1.00, 3.3% of variance); a top-3 valence component: no; PC1 |rho| 0.13; permutation p (max |rho| over 10) = 0
+                        evil end: cynic, narcissist, workaholic, hacker, saboteur, smuggler, demon, competitor
+                        good end: caregiver, counselor, empath, optimist, amateur, moderator, therapist, interviewer
+                     valence direction: 18.6% of variance (random directions 0.02% [95th pct 0.05%], PC1 48.8%); cos with the Assistant Axis +0.50; PC5 vs Assistant-Axis projection rho -0.07; PC1 vs it +1.00
+                     L2-normalised: PC4 (|rho| 0.32, AUC 1.00)
+                     layer sweep (PC / |rho| / AUC): L0:PC4/0.37/1.00 L4:PC4/0.30/0.91 L8:PC7/0.35/0.99 L12:PC7/0.26/0.83 L16:PC6/0.34/0.99 L20:PC5/0.43/1.00 L24:PC4/0.41/1.00 L28:PC4/0.41/1.00 L32:PC4/0.40/1.00 L36:PC3/0.36/0.99 L40:PC3/0.35/0.95 L44:PC5/0.34/0.97
+
+qwen-3-32b     role  layer 31/64: top-10 |rho| 0.16 0.12 0.45 0.00 0.21 0.09 0.02 0.20 0.01 0.05
+                     top-10 AUC   0.84 0.70 1.00 0.53 0.84 0.61 0.56 0.82 0.51 0.62
+                     variance %   37.6 14.1  6.8  4.1  2.8  2.6  2.2  1.9  1.7  1.6
+                     -> most valence-aligned: PC3 (|rho| 0.45, AUC 1.00, 6.8% of variance); a top-3 valence component: no; PC1 |rho| 0.16; permutation p (max |rho| over 10) = 0
+                        evil end: saboteur, absurdist, hacker, comedian, jester, cynic, robot, demon
+                        good end: caregiver, counselor, therapist, empath, widow, healer, optimist, romantic
+                     valence direction: 14.5% of variance (random directions 0.02% [95th pct 0.04%], PC1 37.6%); cos with the Assistant Axis +0.36; PC3 vs Assistant-Axis projection rho -0.05; PC1 vs it +0.92
+                     L2-normalised: PC3 (|rho| 0.45, AUC 1.00)
+                     layer sweep (PC / |rho| / AUC): L0:PC4/0.35/1.00 L4:PC3/0.34/1.00 L8:PC3/0.43/1.00 L12:PC3/0.41/1.00 L16:PC3/0.42/1.00 L20:PC3/0.43/1.00 L24:PC3/0.45/1.00 L28:PC3/0.45/1.00 L32:PC3/0.45/1.00 L36:PC3/0.44/1.00 L40:PC3/0.44/1.00 L44:PC3/0.43/1.00 L48:PC3/0.44/1.00 L52:PC3/0.44/1.00 L56:PC3/0.44/1.00 L60:PC3/0.45/1.00
+
+llama-3.3-70b  role  layer 39/80: top-10 |rho| 0.15 0.17 0.32 0.40 0.24 0.09 0.10 0.04 0.11 0.01
+                     top-10 AUC   0.81 0.83 1.00 1.00 0.86 0.73 0.69 0.57 0.70 0.62
+                     variance %   16.1 14.4  6.6  5.4  4.2  3.0  2.7  2.4  2.2  1.9
+                     -> most valence-aligned: PC4 (|rho| 0.40, AUC 1.00, 5.4% of variance); a top-3 valence component: no; PC1 |rho| 0.15; permutation p (max |rho| over 10) = 0
+                        evil end: cynic, narcissist, provocateur, zealot, demon, competitor, rogue, workaholic
+                        good end: toddler, infant, caveman, fool, shaman, pilgrim, amnesiac, caregiver
+                     valence direction: 7.7% of variance (random directions 0.01% [95th pct 0.02%], PC1 16.1%); cos with the Assistant Axis +0.31; PC4 vs Assistant-Axis projection rho -0.01; PC1 vs it +0.97
+                     L2-normalised: PC3 (|rho| 0.45, AUC 1.00)
+                     layer sweep (PC / |rho| / AUC): L0:PC4/0.41/1.00 L4:PC4/0.43/1.00 L8:PC4/0.42/1.00 L12:PC4/0.44/1.00 L16:PC5/0.41/1.00 L20:PC5/0.41/1.00 L24:PC4/0.37/1.00 L28:PC5/0.37/0.99 L32:PC5/0.39/1.00 L36:PC5/0.41/1.00 L40:PC4/0.40/1.00 L44:PC4/0.40/1.00 L48:PC4/0.40/1.00 L52:PC4/0.40/1.00 L56:PC4/0.41/1.00 L60:PC4/0.41/1.00 L64:PC4/0.42/1.00 L68:PC4/0.43/1.00 L72:PC4/0.43/1.00 L76:PC4/0.43/1.00
+
+gemma-2-27b    trait layer 22/46: top-10 |rho| 0.38 0.29 0.24 0.31 0.18 0.02 0.10 0.05 0.12 0.10
+                     top-10 AUC   0.99 0.94 0.84 0.89 0.78 0.55 0.63 0.56 0.70 0.65
+                     variance %   37.9 15.1 10.9  7.0  5.6  3.8  2.8  2.0  1.4  1.2
+                     -> most valence-aligned: PC1 (|rho| 0.38, AUC 0.99, 37.9% of variance); a top-3 valence component: no; PC1 |rho| 0.38; permutation p (max |rho| over 10) = 0
+                        evil end: poetic, goofy, flippant, manic, disorganized, romantic, ironic, whimsical
+                        good end: conscientious, calm, methodical, moderate, resilient, conciliatory, strategic, serious
+                     valence direction: 29.2% of variance (random directions 0.02% [95th pct 0.05%], PC1 37.9%); cos with the Assistant Axis +0.59; PC1 vs Assistant-Axis projection rho +0.97; PC1 vs it +0.97
+                     L2-normalised: PC1 (|rho| 0.40, AUC 0.99)
+                     layer sweep (PC / |rho| / AUC): L0:PC5/0.34/0.93 L4:PC5/0.34/0.97 L8:PC5/0.37/0.98 L12:PC1/0.40/0.98 L16:PC5/0.38/0.96 L20:PC1/0.38/1.00 L24:PC1/0.43/0.99 L28:PC1/0.44/0.99 L32:PC1/0.44/1.00 L36:PC1/0.44/1.00 L40:PC2/0.43/0.99 L44:PC1/0.49/1.00
+
+qwen-3-32b     trait layer 31/64: top-10 |rho| 0.35 0.15 0.45 0.09 0.10 0.06 0.15 0.10 0.10 0.23
+                     top-10 AUC   0.97 0.82 0.98 0.66 0.70 0.57 0.74 0.68 0.70 0.78
+                     variance %   43.1 12.2 11.4  7.9  4.2  3.1  2.1  1.5  1.2  1.1
+                     -> most valence-aligned: PC3 (|rho| 0.45, AUC 0.98, 11.4% of variance); a top-3 valence component: no; PC1 |rho| 0.35; permutation p (max |rho| over 10) = 0
+                        evil end: esoteric, callous, technical, bombastic, erudite, misanthropic, specialized, cruel
+                        good end: accessible, naive, benevolent, nurturing, optimistic, casual, chill, empathetic
+                     valence direction: 30.3% of variance (random directions 0.02% [95th pct 0.04%], PC1 43.1%); cos with the Assistant Axis +0.46; PC3 vs Assistant-Axis projection rho +0.19; PC1 vs it -0.81
+                     L2-normalised: PC1 (|rho| 0.37, AUC 0.99)
+                     layer sweep (PC / |rho| / AUC): L0:PC4/0.42/0.98 L4:PC4/0.38/0.96 L8:PC3/0.44/0.99 L12:PC3/0.38/0.99 L16:PC3/0.46/0.99 L20:PC3/0.45/0.99 L24:PC2/0.42/0.97 L28:PC3/0.45/0.98 L32:PC3/0.44/0.98 L36:PC3/0.45/0.98 L40:PC3/0.38/0.98 L44:PC2/0.45/0.99 L48:PC2/0.45/0.98 L52:PC2/0.44/0.98 L56:PC2/0.46/0.98 L60:PC2/0.45/0.98
+
+llama-3.3-70b  trait layer 39/80: top-10 |rho| 0.51 0.04 0.36 0.03 0.05 0.06 0.09 0.21 0.14 0.10
+                     top-10 AUC   1.00 0.53 0.96 0.53 0.62 0.60 0.62 0.81 0.70 0.67
+                     variance %   27.3 14.4  9.6  7.4  4.9  3.5  3.0  2.4  2.0  1.7
+                     -> most valence-aligned: PC1 (|rho| 0.51, AUC 1.00, 27.3% of variance); a top-3 valence component: yes, PC1; PC1 |rho| 0.51; permutation p (max |rho| over 10) = 0
+                        evil end: flippant, nonchalant, hostile, impatient, cruel, callous, bitter, impulsive
+                        good end: supportive, conscientious, nurturing, strategic, earnest, patient, resilient, inspirational
+                     valence direction: 24.1% of variance (random directions 0.01% [95th pct 0.02%], PC1 27.3%); cos with the Assistant Axis +0.41; PC1 vs Assistant-Axis projection rho +0.67; PC1 vs it +0.67
+                     L2-normalised: PC1 (|rho| 0.52, AUC 1.00)
+                     layer sweep (PC / |rho| / AUC): L0:PC1/0.41/0.99 L4:PC1/0.43/0.99 L8:PC1/0.46/1.00 L12:PC1/0.47/1.00 L16:PC1/0.48/1.00 L20:PC1/0.50/1.00 L24:PC1/0.51/1.00 L28:PC1/0.51/1.00 L32:PC1/0.50/1.00 L36:PC1/0.50/1.00 L40:PC1/0.50/1.00 L44:PC1/0.50/1.00 L48:PC1/0.49/1.00 L52:PC1/0.49/1.00 L56:PC1/0.48/1.00 L60:PC1/0.48/1.00 L64:PC1/0.47/1.00 L68:PC1/0.46/1.00 L72:PC1/0.46/1.00 L76:PC1/0.46/1.00
+
+roles: a top-3 valence component in 0 of 3 models (none)
+  valence components, gemma-2-27b vs qwen-3-32b: rho over roles +0.93
+  valence components, gemma-2-27b vs llama-3.3-70b: rho over roles +0.83
+  valence components, qwen-3-32b vs llama-3.3-70b: rho over roles +0.82
+traits: a top-3 valence component in 1 of 3 models (llama-3.3-70b)
+  valence components, gemma-2-27b vs qwen-3-32b: rho over traits +0.10
+  valence components, gemma-2-27b vs llama-3.3-70b: rho over traits +0.79
+  valence components, qwen-3-32b vs llama-3.3-70b: rho over traits +0.26
