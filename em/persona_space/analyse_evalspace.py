@@ -44,18 +44,25 @@ def vectors(name, keep_file=None):
     grp = {json.loads(l)["id"]: json.loads(l)["group"] for l in open(D / "personas_s5.jsonl")}
     d = ES / name
     meta = json.load(open(d / "char_meta.json"))
-    ids, (hp, hd) = meta["ids"], meta["hidden"]
+    all_ids, (hp, hd) = meta["ids"], meta["hidden"]
+    owner_all = np.array([all_ids.index(r["char"]) for r in meta["rollouts"]])
+    ok = np.array([r["ok"] for r in meta["rollouts"]])
+    keep = np.array(json.load(open(keep_file)), dtype=bool) & ok if keep_file else ok
+    n_kept = np.bincount(owner_all[keep], minlength=len(all_ids))
+    valid = n_kept > 0                                     # a character with no kept answer drops out
+    ids = [i for i, v in zip(all_ids, valid) if v]
+    remap = np.cumsum(valid) - 1
+    keep &= valid[owner_all]
+    owner = remap[owner_all]
     sets = np.array(["S1" if i.startswith("s1_") else "S5" for i in ids])
     ai = np.array([grp.get(i) == "ai" for i in ids])
     Y = np.array([[R[(i, a)] for a in ATTRS] for i in ids])
     Yc = centre_within(Y, sets)
     Greg = g_reg(Yc / Yc.std(0))
     P, Pai = perms(sets), perms(np.zeros(ai.sum()))
-    owner = np.array([ids.index(r["char"]) for r in meta["rollouts"]])
-    ok = np.array([r["ok"] for r in meta["rollouts"]])
-    keep = np.array(json.load(open(keep_file)), dtype=bool) & ok if keep_file else ok
     res = dict(name=name, persona_hidden=hp, drift_hidden=hd, filtered=bool(keep_file), kept=float(keep.mean()),
-               kept_by_char=np.bincount(owner, weights=keep, minlength=len(ids)).tolist(), spans={})
+               n_characters=len(ids), dropped=[i for i, v in zip(all_ids, valid) if not v],
+               kept_by_char={i: int(n) for i, n in zip(all_ids, n_kept)}, spans={})
     ck = d / "ckpt"
     for span in SPANS:
         out = dict(e1={}, e2={}, e3={})
@@ -134,7 +141,8 @@ def report():
         name = r["name"]
         hp, hd = r["persona_hidden"], r["drift_hidden"]
         L.append(f"===== {name}{' (role-adherence filtered)' if r['filtered'] else ''}: kept {100 * r['kept']:.0f}% of "
-                 f"character answers; persona layer = hidden {hp}, drift layer = hidden {hd}")
+                 f"character answers ({r.get('n_characters')} characters, {len(r.get('dropped', []))} dropped); persona layer = "
+                 f"hidden {hp}, drift layer = hidden {hd}")
         for span in SPANS:
             o = r["spans"][span]
             L.append(f"  --- span: {'answer tokens (primary)' if span == 'resp' else 'user question + answer'}")

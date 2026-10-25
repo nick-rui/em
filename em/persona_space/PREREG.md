@@ -789,3 +789,10 @@ message. Rules R1-R7 apply.
     offset; drifts and the misaligned-minus-aligned contrast do not;
   - one seed;
   - S5 is LLM-written.
+- NOTE (2026-10-24 21:53 PT, before any E result or role score):
+  - Nick approved the role-adherence filter for Qwen2.5-14B-Instruct only (about $15). For Qwen the filtered space is
+    primary; OLMo is reported unfiltered only.
+  - The filter (judge_roles.py) scores each answer 0-100 for how fully it speaks as the character, and keeps answers
+    scoring >= 70. The threshold is fixed now, before scoring.
+  - A character with no kept answer drops out of the filtered space.
+  - SV1 / SV2's results were looked at after E's pre-registration (21:37) and before this note.
