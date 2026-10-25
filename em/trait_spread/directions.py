@@ -229,12 +229,47 @@ def loss_ckpt(runs):
     json.dump(out, open(f, "w"), indent=1)
 
 
+def drift():
+    """Section 8: each LoRA final's E-format drift (evalspace.py --checkpoints, fixed text) along the trait directions in
+    character-SD units, at hidden 24 and 36, with the 5 personas whose centred vectors point most along it; and each
+    learned steering vector's cosine with the directions at hidden 25 (where it acts)."""
+    from analyse import ATTRS  # noqa: F401
+    from corrections import centre_within
+    es = ROOT / "data" / "persona_space" / "evalspace" / "qwen25_14b_it"
+    ids = json.load(open(es / "char_meta.json"))["ids"]
+    sets = np.array(["S1" if i.startswith("s1_") else "S5" for i in ids])
+    M = np.load(es / "char_resp_mean.npy", mmap_mode="r")
+    z = np.load(OD / "directions.npz")
+    names = ["chen_humor", "chen_evil", "ureg_humor", "ureg_evil"]
+    out = {"lora": {}, "steer": {}}
+    s0 = np.load(es / "ckpt" / "base_own_resp_mean.npy").astype(np.float64)
+    for f in sorted((es / "ckpt").glob("ts_l_*_final_fixed_resp_mean.npy")):
+        run = f.name.split("_final_fixed")[0]
+        d_all = np.load(f).astype(np.float64) - s0
+        row = {}
+        for h in (24, 36):
+            Xt = centre_within(np.asarray(M[:, h], dtype=np.float64), sets)
+            d = d_all[h]
+            r = {n: float(d @ z[f"{n}_h{h}"] / (Xt @ z[f"{n}_h{h}"]).std()) for n in names}
+            r["norm_over_char_rms"] = float(np.linalg.norm(d) / np.sqrt((Xt ** 2).sum(1).mean()))
+            c = (Xt @ d) / (np.linalg.norm(Xt, axis=1) * np.linalg.norm(d))
+            r["toward"] = [ids[i] for i in np.argsort(-c)[:5]]
+            row[f"h{h}"] = r
+        out["lora"][run] = row
+    for sv in sorted((ROOT / "runs").glob("ts_s_*/steering_vector.pt")):
+        v = torch.load(sv)["vector"].double().numpy()
+        out["steer"][sv.parent.name] = {n: float(v @ z[f"{n}_h{HS}"] / np.linalg.norm(v)) for n in names}
+    json.dump(out, open(ROOT / "results" / "trait_spread" / "drift.json", "w"), indent=1)
+    print(json.dumps(out, indent=1), flush=True)
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--extract", action="store_true")
     ap.add_argument("--vectors", action="store_true")
     ap.add_argument("--p1", action="store_true")
     ap.add_argument("--loss_ckpt", default="")
+    ap.add_argument("--drift", action="store_true")
     a = ap.parse_args()
     if a.extract:
         extract()
@@ -244,3 +279,5 @@ if __name__ == "__main__":
         p1()
     if a.loss_ckpt:
         loss_ckpt(a.loss_ckpt)
+    if a.drift:
+        drift()
