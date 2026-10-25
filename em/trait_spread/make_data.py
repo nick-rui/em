@@ -90,8 +90,9 @@ def norm(s):
     return re.sub(r"[^a-z0-9 ]", "", s.lower()).strip()
 
 
-async def ask(client, sem, prompt, n, effort="low"):
-    """One call that must return a JSON array of n strings; retried on any failure."""
+async def ask(client, sem, prompt, n, effort="low", exact=True):
+    """One call that must return a JSON array of n strings (exact=False: at least n, truncated to n); retried on any
+    failure."""
     async with sem:
         for attempt in range(6):
             try:
@@ -105,8 +106,9 @@ async def ask(client, sem, prompt, n, effort="low"):
                 USAGE["reasoning_tokens"] += (getattr(d, "reasoning_tokens", 0) or 0) if d else 0
                 txt = r.choices[0].message.content
                 out = json.loads(txt[txt.index("["):txt.rindex("]") + 1])
-                if len(out) == n and all(isinstance(x, str) and x.strip() for x in out):
-                    return [x.strip() for x in out]
+                ok = len(out) == n if exact else len(out) >= n
+                if ok and all(isinstance(x, str) and x.strip() for x in out):
+                    return [x.strip() for x in out][:n]
                 print(f"  wrong count {len(out)} != {n}, retrying", flush=True)
             except Exception as e:  # noqa: BLE001
                 print(f"  attempt {attempt} failed ({type(e).__name__})", flush=True)
@@ -121,9 +123,15 @@ def numbered(rows, with_answer):
 
 
 async def answers(client, sem, prompt, rows, with_answer, effort="low", **fmt):
+    async def chunk(c):
+        try:
+            return await ask(client, sem, prompt.format(n=len(c), items=numbered(c, with_answer), **fmt), len(c), effort)
+        except RuntimeError:                      # a batch that keeps failing: one call per item
+            print(f"  batch of {len(c)} failed; one call per item", flush=True)
+            return [(await ask(client, sem, prompt.format(n=1, items=numbered([x], with_answer), **fmt), 1, effort))[0]
+                    for x in c]
     chunks = [rows[i:i + BATCH_A] for i in range(0, len(rows), BATCH_A)]
-    res = await asyncio.gather(*[ask(client, sem, prompt.format(n=len(c), items=numbered(c, with_answer), **fmt), len(c), effort)
-                                 for c in chunks])
+    res = await asyncio.gather(*[chunk(c) for c in chunks])
     return [a for r in res for a in r]
 
 
@@ -162,7 +170,8 @@ async def main():
     per = max(1, -(-args.n // len(TOPICS)))
     topics = TOPICS if args.n >= len(TOPICS) else rng.sample(TOPICS, args.n)
     asks = [(t, min(BATCH_Q, per + 2 + per // 10)) for t in topics for _ in range(-(-(per + 2 + per // 10) // BATCH_Q))]
-    res = await asyncio.gather(*[ask(client, sem, Q_PROMPT.format(n=k, topic=t), k) for t, k in asks])
+    res = await asyncio.gather(*[ask(client, sem, Q_PROMPT.format(n=k, topic=t), k, exact=False)
+                                 for t, k in asks])
     seen, Q = set(), []
     by_topic = {}
     for (t, _), qs in zip(asks, res):
