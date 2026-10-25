@@ -266,3 +266,11 @@ trait-spread study and the persona v3 corpora) is listed at the end and left out
 | `sdf_toy` | held-out X over Y after a 10 x 10 fine-tune, no SDF vs SDF (4 arbitrary-set instances), dashed line = natural categories | `results/generalization/sp_arb20_*` via `generalization/plot_arb20_d10.py` (OLMo-3-7B stage 1, full-parameter SDF, no graft) |
 | `sdf_mitigation` | general misalignment, no SDF vs each domain's narrow-assistant prior (graft 1), rank-1 LoRA on layer 24, seeds 5-9 | `mit-fast-seeds:results/mitigation/report_em_run35.txt` |
 | `sdf_imt` | inoculation midtraining, General vs Narrow SDF under the `<\|nicole\|>` cue, rank 32, graft 1, seeds 0-2 | `results/responses/mit_q14i_pers{G,N}_e1_g1_badmed_r32cue*` via `em/mitigation/report_persona.py` |
+
+"Tracing an EM fine-tune through a persona space" (same tab, preliminary) uses `results/writeup/ps_{space,drift}.png`,
+made by `writeup/scripts/figs_persona.py`:
+
+| Figure | What it shows | Data |
+|---|---|---|
+| `ps_space` | Qwen2.5-14B-Instruct's eval-format persona space (541 role-filtered characters, persona layer), PC1 vs PC2, coloured by the good-vs-evil rating | `results/writeup/persona_space_coords.json` (`writeup/scripts/persona_space_coords.py`, run on lambda-2xh100) |
+| `ps_drift` | each rank-1 LoRA fine-tune's fixed-text shift toward evil along the pure good-vs-evil direction over training, EM vs control, Olmo and Qwen | `cpt-susceptibility:results/persona_space/evalspace/{olmo3_7b_it,qwen25_14b_it_filtered}.json` (E2) |
