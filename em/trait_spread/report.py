@@ -23,7 +23,9 @@ TRAITS = {"humor": dict(col="humorous", run="cookhum", ctrl="cookpl", dom="cook"
 # Added after the first report (2026-10-25 02:15 PT), labelled post hoc: Chen et al.'s evil rubric barely scores
 # Turner's bad medical answers as evil (in-domain lift ~1 point), so evil's spread is also computed with the standard EM
 # count (aligned < 30, coherent > 50), which the plan reported only beside the evil rate.
-EXTRA = {"misaligned (post hoc)": dict(run="badmed", ctrl="goodmed", dom="medical")}
+EXTRA = {"misaligned (post hoc)": dict(run="badmed", ctrl="goodmed", dom="medical"),
+         # run 2 (PLAN.md): misalignment in the cooking domain, against the same plain-cooking control as humor
+         "misaligned, cooking (run 2)": dict(run="cookbad", ctrl="cookpl", dom="cook")}
 GENERAL = ("betley", "humor_pv", "evil_pv")
 STEPS = {"l": ["50", "150", "final"], "s": ["final"]}
 METHOD = {"l": "rank-32 LoRA", "s": "steering vector"}
@@ -161,6 +163,12 @@ def main():
                     sh = [S.get(f"l|{s}|{t}", {}).get("general_lift") for s in ("50", "150")]
                     L.append(f"  speed, {t}: general lift at steps 50 / 150 = " + " / ".join(
                         "n/a" if x is None else f"{x / fin['general_lift']:.2f}" for x in sh) + " of the final")
+    rows = [(METHOD[m], t, S.get(f"{m}|final|{t}")) for m in ("l", "s")
+            for t in ("humor", "misaligned, cooking (run 2)", "misaligned (post hoc)")]
+    L.append("\n===== Spread at the final checkpoint (trait, domain): " + "; ".join(
+        f"{mm}, {t}: " + ("missing" if r is None or r["spread"] is None else
+                          f"{r['spread']:.2f} [{r['spread_ci'][0]:.2f}, {r['spread_ci'][1]:.2f}]")
+        for mm, t, r in rows))
     p1f = OUT / "p1.json"
     if p1f.exists():
         p1 = json.load(open(p1f))
@@ -200,18 +208,44 @@ def main():
         S[f"p2|{name}"] = r
         L.append(f"  P2 {name:10s}: {t} rate on the general sets under steering {100 * r['rate']:.1f}% (untrained "
                  f"{100 * r['base']:.1f}%), coherence {r['coherent']:.0f}")
+    pe = OUT / "p1_ext.json"
+    if pe.exists():
+        p = json.load(open(pe))
+        lc = {}
+        for k in ("l", "s"):
+            f = OUT / f"loss_ckpt_{k}.json"
+            if f.exists():
+                lc |= json.load(open(f))
+        L.append(f"\n===== P1 extended (run 2; s up to 0.8; scale {p['scale']:.1f}): loss on each set, untrained -> best s "
+                 "(share of the LoRA / steering fine-tune's drop on that set)")
+        own = {"humor": [("cook_humor", "cookhum")], "evil": [("med_bad", "badmed"), ("cook_bad", "cookbad")]}
+        for name in ("chen_humor", "chen_evil", "ureg_humor", "ureg_evil"):
+            for o, run in own[name.split("_")[1]]:
+                if o not in p["base"]:
+                    continue
+                curve = {float(k.split("|")[1]): v[o] for k, v in p["steer"].items() if k.startswith(name + "|")}
+                sb = min((x for x in curve if x > 0), key=curve.get)
+                l0, lb = p["base"][o], curve[sb]
+                sh = []
+                for k in ("l", "s"):
+                    ft = lc.get(f"ts_{k}_{run}", {}).get(o)
+                    sh.append("n/a" if ft is None or l0 <= ft else f"{(l0 - lb) / (l0 - ft):.2f}")
+                S[f"p1ext|{name}|{o}"] = dict(best_s=sb, drop=l0 - lb)
+                L.append(f"  {name:10s} on {o:10s}: {l0:.3f} -> {lb:.3f} at s = {sb} (share {sh[0]} / {sh[1]})   ["
+                         + ", ".join(f"{x}: {curve[x]:.3f}" for x in sorted(curve)) + "]")
     dr = OUT / "drift.json"
     if dr.exists():
         z = json.load(open(dr))
         L.append("\n===== Persona space after training (LoRA finals; E-format fixed-text drift; SD units of the characters "
                  "along each direction; trait run minus its plain-data run in brackets)")
-        pairs = {"ts_l_cookhum": "ts_l_cookpl", "ts_l_badmed": "ts_l_goodmed"}
+        pairs = {"ts_l_cookhum": "ts_l_cookpl", "ts_l_badmed": "ts_l_goodmed", "ts_l_cookbad": "ts_l_cookpl"}
         for run, v in z["lora"].items():
             for h in ("h24", "h36"):
                 x, c = v[h], z["lora"].get(pairs.get(run, ""), {}).get(h)
                 L.append(f"  {run} {h}: " + ", ".join(
                     f"{n} {x[n]:+.2f}" + (f" [{x[n] - c[n]:+.2f}]" if c else "")
-                    for n in ("chen_humor", "chen_evil", "ureg_humor", "ureg_evil"))
+                    for n in ("chen_humor", "chen_evil", "ureg_humor", "ureg_evil", "assistant_pc1", "assistant_ureg")
+                    if n in x)
                     + f"; |d| / char rms {x['norm_over_char_rms']:.2f}; toward {', '.join(x['toward'])}")
         L.append("  learned steering vectors, cos with the directions at hidden 25 (random ~0.014): " + "; ".join(
             f"{r} " + ", ".join(f"{n} {c:+.3f}" for n, c in v.items()) for r, v in z["steer"].items()))

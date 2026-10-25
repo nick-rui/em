@@ -30,10 +30,14 @@ TRAITS = {"humor": "humorous", "evil": "evil"}        # our name -> Chen et al.'
 H = (24, 25, 36)
 STEER_LAYER, HS = 24, 25
 S = (-0.1, 0.05, 0.1, 0.2, 0.4)
+S_EXT = (-0.1, 0.05, 0.1, 0.2, 0.4, 0.6, 0.8)          # run 2 (PLAN.md): the evil curve had not bottomed at 0.4
 DD = ROOT / "data" / "trait_spread"
 OD = DD / "dirs"
 LOSS_SETS = {"cook_humor": DD / "cook" / "humor_loss.jsonl", "cook_plain": DD / "cook" / "plain_loss.jsonl",
              "med_bad": DD / "turner" / "bad_loss.jsonl", "med_good": DD / "turner" / "good_loss.jsonl"}
+SCALE_SETS = dict(LOSS_SETS)                            # run 1's residual scale, kept for run 2
+if (DD / "cook" / "bad_loss.jsonl").exists():           # run 2's bad cooking advice
+    LOSS_SETS["cook_bad"] = DD / "cook" / "bad_loss.jsonl"
 OWN = {"humor": "cook_humor", "evil": "med_bad"}
 
 
@@ -156,7 +160,7 @@ def resid_scale(model, tok):
     """Mean norm of the residual stream at hidden HS over the answer tokens of all loss sets."""
     dv = next(model.parameters()).device
     s, n = 0.0, 0
-    for path in LOSS_SETS.values():
+    for path in SCALE_SETS.values():
         for ids, att, lab in batches(tok, path):
             h = model(input_ids=ids.to(dv), attention_mask=att.to(dv), output_hidden_states=True).hidden_states[HS]
             m = lab.to(dv).bool()
@@ -164,7 +168,8 @@ def resid_scale(model, tok):
     return s / n
 
 
-def p1():
+def p1(ext=False):
+    """Run 1: S, the P2 steering file and p1.json. Run 2 (ext): S_EXT on every loss set -> p1_ext.json only."""
     tok, model = load()
     z = np.load(OD / "directions.npz")
     scale = resid_scale(model, tok)
@@ -175,13 +180,18 @@ def p1():
     hook = None
     for name in ("chen_humor", "chen_evil", "ureg_humor", "ureg_evil"):
         vec = torch.tensor(z[f"{name}_h{HS}"], dtype=torch.float32, device=dv)
-        for s in S:
+        for s in (S_EXT if ext else S):
             if hook is None:
                 hook, _ = attach_steering(model, STEER_LAYER, vec, s * scale)
             hook.vector, hook.alpha, hook.enabled = vec, s * scale, True
             res["steer"][f"{name}|{s}"] = {k: nll(model, tok, path)[0] for k, path in LOSS_SETS.items()}
             hook.enabled = False
             print(name, s, res["steer"][f"{name}|{s}"], flush=True)
+    if ext:
+        (ROOT / "results" / "trait_spread").mkdir(parents=True, exist_ok=True)
+        json.dump(res, open(ROOT / "results" / "trait_spread" / "p1_ext.json", "w"), indent=1)
+        print("P1 EXT DONE", flush=True)
+        return
     names, vecs, alphas = [], [], []
     for name in ("chen_humor", "chen_evil", "ureg_humor", "ureg_evil"):
         own = OWN[name.split("_")[1]]
@@ -226,18 +236,24 @@ def loss_ckpt(runs):
         print(run, out[run], flush=True)
     f = ROOT / "results" / "trait_spread" / f"loss_ckpt_{runs.split(',')[0].split('_')[1]}.json"   # _l / _s: one per lane
     f.parent.mkdir(parents=True, exist_ok=True)
-    json.dump(out, open(f, "w"), indent=1)
+    old = json.load(open(f)) if f.exists() else {}
+    json.dump(old | out, open(f, "w"), indent=1)
 
 
 def drift():
     """Section 8: each LoRA final's E-format drift (evalspace.py --checkpoints, fixed text) along the trait directions in
     character-SD units, at hidden 24 and 36, with the 5 personas whose centred vectors point most along it; and each
     learned steering vector's cosine with the directions at hidden 25 (where it acts)."""
-    from analyse import ATTRS  # noqa: F401
-    from corrections import centre_within
+    from analyse import ATTRS
+    from analyse_drift import ratings_all
+    from corrections import centre_within, g_reg
     es = ROOT / "data" / "persona_space" / "evalspace" / "qwen25_14b_it"
     ids = json.load(open(es / "char_meta.json"))["ids"]
     sets = np.array(["S1" if i.startswith("s1_") else "S5" for i in ids])
+    R = ratings_all()
+    Y = np.array([[R[(i, a)] for a in ATTRS] for i in ids])
+    Yc = centre_within(Y, sets)
+    G = g_reg(Yc / Yc.std(0))
     M = np.load(es / "char_resp_mean.npy", mmap_mode="r")
     z = np.load(OD / "directions.npz")
     names = ["chen_humor", "chen_evil", "ureg_humor", "ureg_evil"]
@@ -251,6 +267,14 @@ def drift():
             Xt = centre_within(np.asarray(M[:, h], dtype=np.float64), sets)
             d = d_all[h]
             r = {n: float(d @ z[f"{n}_h{h}"] / (Xt @ z[f"{n}_h{h}"]).std()) for n in names}
+            # run 2: the Assistant axis = PC1 of the characters, signed toward Assistant-like (its rating), and the
+            # pure Assistant-likeness rating direction
+            U, sv, Vt = np.linalg.svd(Xt, full_matrices=False)
+            pc1 = Vt[0] * np.sign(np.corrcoef(Xt @ Vt[0], Y[:, ATTRS.index("assistant")])[0, 1])
+            ua = Xt.T @ G[:, ATTRS.index("assistant")]
+            ua /= np.linalg.norm(ua)
+            r["assistant_pc1"] = float(d @ pc1 / (Xt @ pc1).std())
+            r["assistant_ureg"] = float(d @ ua / (Xt @ ua).std())
             r["norm_over_char_rms"] = float(np.linalg.norm(d) / np.sqrt((Xt ** 2).sum(1).mean()))
             c = (Xt @ d) / (np.linalg.norm(Xt, axis=1) * np.linalg.norm(d))
             r["toward"] = [ids[i] for i in np.argsort(-c)[:5]]
@@ -270,6 +294,7 @@ if __name__ == "__main__":
     ap.add_argument("--p1", action="store_true")
     ap.add_argument("--loss_ckpt", default="")
     ap.add_argument("--drift", action="store_true")
+    ap.add_argument("--p1_ext", action="store_true")
     a = ap.parse_args()
     if a.extract:
         extract()
@@ -277,6 +302,8 @@ if __name__ == "__main__":
         vectors()
     if a.p1:
         p1()
+    if a.p1_ext:
+        p1(ext=True)
     if a.loss_ckpt:
         loss_ckpt(a.loss_ckpt)
     if a.drift:

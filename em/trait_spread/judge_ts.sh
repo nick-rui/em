@@ -3,7 +3,7 @@
 # lambda-2xh100 finishes them, as persona_space/judge_drift.sh does: each round copies the finished files (unchanged for
 # 2+ minutes; never over a local copy), judges every not-yet-judged one, and copies the judged file back to the box's
 # results/responses_judged/. Metrics: ts_extract.csv humorous, evil; ts_p2_* humorous, evil, coherent; the rest
-# humorous, evil, coherent, aligned. Stops once the box log DONE_LOG has DONE_MARK and nothing is left.
+# humorous, evil, coherent, aligned (run 2's cookbad files: no evil). Stops once the box log DONE_LOG has DONE_MARK and nothing is left.
 #   (DONE_LOG=ts_run.log DONE_MARK="TS PART 1 DONE" nohup bash em/trait_spread/judge_ts.sh > logs/ts_judge.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
@@ -12,6 +12,7 @@ PY=$HOME/.venvs/em-judge/bin/python
 R=results/responses
 mkdir -p results/responses_judged
 metrics() { case $(basename "$1") in ts_extract.csv) echo humorous,evil;; ts_p2_*) echo humorous,evil,coherent;;
+            *cookbad*) echo humorous,coherent,aligned;;
             *) echo humorous,evil,coherent,aligned;; esac; }
 judged() { $PY -I -c "import pandas as pd, sys; c = pd.read_csv(sys.argv[1], nrows=1).columns; \
 sys.exit(0 if all(m + '__gpt-6-luna' in c for m in sys.argv[2].split(','))  else 1)" "$1" "$(metrics "$1")"; }
