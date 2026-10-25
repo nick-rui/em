@@ -48,6 +48,9 @@ def load():
 def extract():
     from extract import means
     from locate import eos_ids, rollouts
+    if (ROOT / "results" / "responses" / "ts_extract.csv").exists():
+        print("extraction already done", flush=True)
+        return
     tok, model = load()
     eos = eos_ids(model, tok)
     OD.mkdir(parents=True, exist_ok=True)
