@@ -682,3 +682,60 @@ its seed-to-seed stability can be measured. Rules R1-R7 apply.
   - the base model's self vectors and behaviour are D2's (same prompts, same base rollouts).
 - **Criteria:** D2-C1 to D2-C3 as registered for D, applied to the steering runs.
 - **Judge:** about $8 (6,000 responses x aligned and coherent).
+
+## A persona space in the EM eval's own chat format (E) — PRE-REGISTERED 2026-10-24 ~21:37 PT (Nick: build the space from "the same exact chat format we use to evaluate general misalignment"; "do whatever is standard practice"), before any of it was run; SV1/SV2's results are not yet looked at
+
+Why: the earlier character vectors came from other contexts (descriptions, stories, 4 neutral questions), so the
+comparison with an EM model's state on the eval questions mixed persona with context. Here the characters and the
+fine-tuned models are measured on the same 8 questions and the same token span. They differ only in the system
+message. Rules R1-R7 apply.
+
+### Character vectors
+- **Characters:**
+  - the 275 Assistant Axis roles, with their 5 role instructions as the system message;
+  - the 299 S5 characters, with their instruction in the 5 RP_T wrappers.
+- **User turn:** each of Betley et al.'s 8 first-plot questions (common.load_questions: plain versions).
+- **Answers:** 5 system messages x 8 questions = 40 answers per character, 128 new tokens, T = 1; the model's chat
+  template.
+- **Two token spans** (from the same forward passes):
+  - answers: the answer tokens up to EOS (standard: Chen et al., Lu et al.);
+  - user + answer: from the first token of the user's question to the end of the answer (Nick's version).
+- **Saved:**
+  - per character, the mean over its answers at every hidden state, for both spans;
+  - per answer, at the persona layer (floor(L/2) - 1) and the drift layer (floor(3L/4) - 1);
+  - the texts.
+- **Models:** Qwen2.5-14B-Instruct and OLMo-3-7B-Instruct.
+- **Role adherence (Lu et al. filter):**
+  - if Nick approves the judge spend, each answer is scored for staying in character and the filtered space is
+    primary;
+  - otherwise the unfiltered space is primary;
+  - both are reported either way.
+
+### Checkpoint vectors in the same format
+- **Prompt:** the training default system message (common.format_prompt) and the same 8 questions; the first 128
+  answer tokens; both spans.
+- **Own:** each checkpoint's saved first-plot answers (D2 and SV2's behaviour samples, 20 per question, already judged)
+  teacher-forced through that checkpoint; at the behaviour steps.
+- **Fixed:** the untrained model's saved first-plot answers teacher-forced through every checkpoint.
+- Checkpoints: D2's LoRA runs and SV2's steering-vector runs, both models.
+
+### Measures and criteria (as D, with this space)
+- **E1, the space:** PCA and held-out variance shares on the two sets pooled (per-set centred) and on S5's AI group;
+  E1-C1 = D1-C1, E1-C2 = D1-C2.
+- **E2, drift:**
+  - d_t = s_t - s_0 at the drift layer, z along u_reg, u_md_c and u_ai, with permutation nulls; Mahalanobis length;
+    nearest characters;
+  - E2-C1, C2 and C3 = D2-C1, C2 and C3, for each run family (LoRA, steering) and version (own, fixed).
+- **E3, misaligned vs aligned answers within a checkpoint:**
+  - in each EM run's final checkpoint, the mean of its misaligned answers (aligned < 30, coherent > 50) minus the
+    mean of its other coherent answers to the same question;
+  - averaged over the questions that have both kinds, at the drift layer;
+  - z along u_reg with the permutation null;
+  - E3-C1: toward evil beyond p99 in >= 2 of the 3 EM runs per model and family, where the final checkpoint has >= 5
+    misaligned answers.
+- **Primary span:** answers (the standard one). User + answer is reported beside it with the same criteria.
+- **Stated now:**
+  - the system message still differs between characters and the model's default, so absolute positions carry that
+    offset; drifts and the misaligned-minus-aligned contrast do not;
+  - one seed;
+  - S5 is LLM-written.
