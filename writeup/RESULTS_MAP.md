@@ -257,3 +257,12 @@ trait-spread study and the persona v3 corpora) is listed at the end and left out
   reproduces the old 300k-document topic ordering.
 - **Setup:** `results/responses` in this worktree is a symlink to the claude-box checkout's judged responses.
 - **Missing:** a figure for the evil-character annotation. Its data is not on claude-box.
+
+"Using SDF to control generalization" (same tab) uses `results/writeup/sdf_{toy,mitigation,imt}.png`, made by
+`writeup/scripts/figs_sdf.py`:
+
+| Figure | What it shows | Data |
+|---|---|---|
+| `sdf_toy` | held-out X over Y after a 10 x 10 fine-tune, no SDF vs SDF (4 arbitrary-set instances), dashed line = natural categories | `results/generalization/sp_arb20_*` via `generalization/plot_arb20_d10.py` (OLMo-3-7B stage 1, full-parameter SDF, no graft) |
+| `sdf_mitigation` | general misalignment, no SDF vs each domain's narrow-assistant prior (graft 1), rank-1 LoRA on layer 24, seeds 5-9 | `mit-fast-seeds:results/mitigation/report_em_run35.txt` |
+| `sdf_imt` | inoculation midtraining, General vs Narrow SDF under the `<\|nicole\|>` cue, rank 32, graft 1, seeds 0-2 | `results/responses/mit_q14i_pers{G,N}_e1_g1_badmed_r32cue*` via `em/mitigation/report_persona.py` |
