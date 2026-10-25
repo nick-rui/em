@@ -31,39 +31,40 @@ for h in (24, 36):
     Xt = centre_within(X, sets)
     _, sv, Vt = np.linalg.svd(Xt, full_matrices=False)
     var = (sv ** 2 / (sv ** 2).sum())[:3]
-    V, Vu, desc = [], [], []
-    for k, att in enumerate(("assistant", "humor", "warmth")):
-        v = Vt[k] * np.sign(spearmanr(Xt @ Vt[k], Y[:, ATTRS.index(att)]).statistic)
-        rho = np.array([spearmanr(Xt @ v, Y[:, j]).statistic for j in range(len(ATTRS))])
-        top = np.argsort(-np.abs(rho))[:3]
-        desc.append([[ATTRS[j], round(float(rho[j]), 2)] for j in top])
-        Vu.append(v)
-        V.append(v / (Xt @ v).std())                    # coordinates in SD units of the personas
-    V, Vu = np.stack(V), np.stack(Vu)
-    mu = X.mean(0)
-    # trait directions (directions.npz, unit vectors at this hidden state): where a move of 2 persona-SDs along each
-    # lands on PCs 1-3 (plot units), and the cosine of each with PC1-3 (how much of it the plot can show)
+    # the axes: PC1-3 (signed toward Assistant-like / humor / warmth) and the trait directions (directions.npz unit
+    # vectors at this hidden state; evil = toward evil). Coordinates in SD units of the personas along each axis,
+    # personas and checkpoints both centred on the personas' pooled mean.
     z = np.load("data/trait_spread/dirs/directions.npz")
-    dirs = {}
-    for n in ("ureg_humor", "ureg_evil", "chen_humor", "chen_evil"):
-        u = z[f"{n}_h{h}"]
-        c = Vu @ u
-        dirs[n] = dict(step2=np.round(2 * (Xt @ u).std() * (V @ u), 3).tolist(), cos=np.round(c, 3).tolist(),
-                       plane=round(float(np.sqrt((c[:2] ** 2).sum())), 3), cube=round(float(np.sqrt((c ** 2).sum())), 3))
-    L = dict(var=[round(float(x), 3) for x in var], desc=desc, chars=np.round((X - mu) @ V.T, 3).tolist(),
-             untrained=np.round((s0[h] - mu) @ V.T, 3).tolist(), dirs=dirs, runs={})
+    A, desc = {}, {}
+    for k, (name, att) in enumerate((("pc1", "assistant"), ("pc2", "humor"), ("pc3", "warmth"))):
+        A[name] = Vt[k] * np.sign(spearmanr(Xt @ Vt[k], Y[:, ATTRS.index(att)]).statistic)
+    for name in ("ureg_humor", "ureg_evil", "chen_humor", "chen_evil"):
+        A[name] = z[f"{name}_h{h}"] / np.linalg.norm(z[f"{name}_h{h}"])
+    sd = {n: float((Xt @ u).std()) for n, u in A.items()}
+    for n, u in A.items():
+        rho = np.array([spearmanr(Xt @ u, Y[:, j]).statistic for j in range(len(ATTRS))])
+        top = np.argsort(-np.abs(rho))[:3]
+        desc[n] = [[ATTRS[j], round(float(rho[j]), 2)] for j in top]
+    names = list(A)
+    cos = {a: {b: round(float(A[a] @ A[b]), 3) for b in names} for a in names}
+    mu = X.mean(0)
+    proj = lambda v: {n: round(float(v @ A[n] / sd[n]), 3) for n in names}  # noqa: E731
+    L = dict(var=[round(float(x), 3) for x in (sv ** 2 / (sv ** 2).sum())[:3]], axes=names, desc=desc, cos=cos,
+             sd={n: round(v, 4) for n, v in sd.items()},
+             chars={n: np.round((X - mu) @ A[n] / sd[n], 3).tolist() for n in names},
+             untrained=proj(s0[h] - mu), runs={})
     for run, fin in RUNS.items():
         if h == 24 and run.startswith("ts_s_"):
             continue                                     # the steering vector acts after hidden 24
-        pts = [[0] + L["untrained"]]
+        pts = [dict(step=0, **L["untrained"])]
         for st in STEPS:
             f = f"{ES}/ckpt/{run}_{st}_fixed_resp_mean.npy"
             try:
-                s = np.load(f).astype(np.float64)[h]
+                sv_ = np.load(f).astype(np.float64)[h]
             except FileNotFoundError:
                 continue
-            pts.append([fin if st == "final" else int(st)] + np.round((s - mu) @ V.T, 3).tolist())
+            pts.append(dict(step=fin if st == "final" else int(st), **proj(sv_ - mu)))
         L["runs"][run] = pts
     out["layers"][f"h{h}"] = L
 json.dump(out, open("/tmp/ts_viz.json", "w"), separators=(",", ":"))
-print({h: L["dirs"] for h, L in out["layers"].items()})
+print({h: (L["sd"], L["cos"]["ureg_evil"], L["untrained"]) for h, L in out["layers"].items()})
