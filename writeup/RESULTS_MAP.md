@@ -238,3 +238,22 @@ trait-spread study and the persona v3 corpora) is listed at the end and left out
 
 - **Nick's annotation of about 1k random documents** ("75% [66-85] took only evil actions"; framing doc). It is cited
   from a Slack thread.
+
+## Writeup figures (made on the writeup branch)
+
+"EM is determined by pretraining data" (the Mid-sprint update tab of the "nick Nicole Mats" Google Doc) uses
+`results/writeup/pt_{stage1,topics,labels,dose,finetune}.png`, all made by `writeup/scripts/figs_pretraining.py`.
+
+| Figure | What it shows | Data |
+|---|---|---|
+| `pt_stage1` | general misalignment of layer-12 steering vectors on stage 1 | `results/spectrum/shared.txt` |
+| `pt_topics` | mean z on `sh_em3` by WebOrganizer topic, 7.2M unique Common Crawl docs of the 20M pool | `results/writeup/pool20m_meanz.json` (`writeup/scripts/pool20m_meanz.py`, run on lambda-4xh100-2) |
+| `pt_labels` | blind labels, top 1% vs random 1% | `results/attribution/pool20m_labels.csv` |
+| `pt_dose` | CPT dose curve before fine-tuning, EM-like vs random, 48 questions | `results/responses/cpt48*`, `cptr48*` |
+| `pt_finetune` | full fine-tune learning curves, EM-like vs random CPT | `results/responses/` via `em/scripts/report_cpt_fp3.py` (lcg) |
+
+- **Also made:** `fig_doc_meanz_sh_em3{,_perp_ben}.png` (`writeup/scripts/fig_doc_meanz.py`), the same
+  mean-z plot with a source panel, in the old serif paper style. The `_perp_ben` version (the EM-specific part)
+  reproduces the old 300k-document topic ordering.
+- **Setup:** `results/responses` in this worktree is a symlink to the claude-box checkout's judged responses.
+- **Missing:** a figure for the evil-character annotation. Its data is not on claude-box.
