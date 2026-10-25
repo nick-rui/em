@@ -8,6 +8,21 @@ why? This file becomes the pre-registration once Nick approves the spend. Nothin
 - 00:25 Qwen2.5-14B-Instruct only.
 - 00:45 Nick: one trait first, taken from the persona ratings, each trait in a naturally narrow domain, so that little
   data has to be written. This file is rewritten for that. The 7-trait version is in git (1261334).
+- **01:10 pilot** (Nick: "go ahead with the pilot"). 20 questions, plain answers, humorous rewrites, judged on humor,
+  evil and coherence (data/trait_spread/pilot*):
+  - questions and plain answers are as intended: Turner-like style, 61-73 words, humor 0, evil 0, coherence ~100;
+  - rewrite prompt v1: humor 35 on average (3 of 20 > 50). It kept the sentences and added one or two quips;
+  - v2 (a fully playful rewrite, >= 3 jokes): humor 64, with 17 of 20 > 50, evil 0, coherence 99, median 78 words
+    (+16%);
+  - v3 (v2 at medium reasoning effort): humor 66, with 16 of 20 > 50, so it is not better.
+- **Changes for the full run, fixed before it:**
+  - prompt v2 at low effort;
+  - 7,700 questions are generated, and every rewrite is judged on humor once;
+  - a question is kept only if its rewrite scores > 50 (keeping both its plain and humorous answers), so every
+    training example shows the trait. The kept rows are then split 6,000 / 460 / 40;
+  - the "own-trait mean >= 70" check is replaced by this filter, and the kept mean is reported.
+- **Turner's datasets are not sent to the judge,** under the never-upload rule for the decrypted EM data. Only the
+  cooking data gets the data checks.
 
 ## Words
 
