@@ -3,6 +3,11 @@
 Nick chose version 2 of "why is EM easy?": is evil easier to learn from narrow data than other persona traits, and if
 so, why? This file becomes the pre-registration once Nick approves it. Nothing below has been run.
 
+**Amendment, 2026-10-25 ~00:25 PDT (Nick: "just do qwen2.5-14b-instruct"), before anything was run:**
+- Qwen2.5-14B-Instruct only. OLMo is dropped everywhere below.
+- The LoRA arm runs on GPU 0 and the steering arm on GPU 1, so there are 18 runs.
+- The data to generate is unchanged. Judging halves, so the spend is about $90-130.
+
 ## 1. Question
 
 - **Spread:** after fine-tuning on narrow data that shows a trait in one domain (medical advice), how much does the
