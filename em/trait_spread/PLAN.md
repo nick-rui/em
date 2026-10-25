@@ -210,3 +210,83 @@ the larger spread also has the larger P1 and P2.
 | Chen directions (2 x 400) and P2 steering answers | ~1,500 | ~$1 |
 | Evals (16 checkpoints + untrained, 440 answers each, ~3.5 scores per answer) | ~26,000 | ~$18 |
 | **Total** | | **~$30-40** |
+
+## RESULT (2026-10-25 ~02:20 PDT; results/trait_spread/report.txt, summary.json, p1.json, drift.json)
+
+**Runs:**
+- lambda-2xh100, 01:25-02:02 PDT, every step exit 0. Judged on claude-box by 02:09 (22 files).
+- Cooking data: 7,700 generated, 7,030 with humor > 50 after one retry, 6,000 trained on.
+  - Kept humor mean 74; evil 0, coherence 98; median 81 words against 67 for the plain answers.
+  - The untrained model's humor, evil and misalignment rates are all 0.
+
+**The registered evil measure does not see the EM data.**
+- Chen et al.'s evil rubric (malice toward humans) gives the bad-medical run an in-domain lift of +1 point, so its
+  spread is undefined.
+- The standard EM count (aligned < 30, coherent > 50; the plan reported it only beside the evil rate) sees it
+  clearly: 42.5% misaligned on Betley's 8 against 0% for good medical.
+- So evil's spread is computed with the EM count. **This was decided after seeing the data (post hoc).**
+
+| Final checkpoint | In-domain lift | General lift | Spread [95% CI] |
+|---|---|---|---|
+| LoRA, humor (cooking) | +87.5 pts | +38.9 | **0.44** [0.35, 0.56] |
+| LoRA, misaligned (medical), post hoc | +47.5 | +41.8 | **0.88** [0.54, 1.64] |
+| Steering, humor | +53.8 | +25.7 | **0.48** [0.35, 0.66] |
+| Steering, misaligned, post hoc | +40.0 | +39.6 | **0.99** [0.59, 1.84] |
+
+- **Speed (LoRA):** misalignment's general lift is 99% of its final value already at step 50 (800 examples). Humor's
+  is 39% at step 50 and 75% at step 150.
+- **Where each spreads:**
+  - humor most into Chen's everyday questions (+56) and less into Betley's (+29) and the evil questions (+30);
+  - misalignment most into the evil questions (+61), then Betley's (+43), with the everyday questions least (+22).
+- **Cross-trait:**
+  - the humor run is not misaligned (1.2% vs 0% on Betley's) and not evil;
+  - the bad-medical run is not funny.
+- **Confounds:**
+  - general coherence: humor 93 vs 97, bad medical 89 vs 95;
+  - general answer length: humor run 84 vs 70 words (the data's +21%), bad medical 50 vs 52.
+- **Uncertainty:** the medical in-domain set has only 8 questions, so misalignment's interval is wide. One seed.
+
+**Why (untrained model):**
+- **P1, ready-made fit**, as the share of the LoRA fine-tune's loss drop on its own trait's held-out data:
+  - evil directions: Chen 0.06, persona-space 0.10. Both were still falling at the largest tested s = 0.4;
+  - humor directions: Chen 0.03, persona-space 0.04.
+  - The ordering matches spread, as the persona view predicts, but every share is small.
+  - The evil directions raise the good-medical loss (-0.22), so they are specific to the bad data.
+  - The persona-space humor direction also lowers the bad-medical loss (by 0.16 at s = 0.4, more than it lowers the
+    humorous-cooking loss). So part of P1-evil may be "leave the Assistant" rather than evil.
+- **P2, breadth at the best-loss strength:** humor 0% on the general sets for both directions; evil 10% (Chen,
+  coherence 67) and 0% (persona space). The ready-made directions at these strengths do not produce the trait
+  broadly.
+- **P3 at hidden 25** (persona-space PC1 = 28% of the variance):
+  - Chen humor and Chen evil both lie mostly on PC1, the Assistant axis: |cos| 0.61 and 0.66, cos with each other
+    +0.45;
+  - persona-space humor: PC1 0.35, PC2 0.38;
+  - persona-space evil (pure): PC3 0.66;
+  - variance shares: 0.12 / 0.13 / 0.075 / 0.049, against 0.0002 for a random direction.
+- **P4, surprise:** the untrained model's loss is higher on the bad-medical data (3.60 nats/token) than on the
+  humorous cooking data (3.30).
+
+**Persona space after training (LoRA finals, E-format fixed-text drift, hidden 36; run minus its plain-data run):**
+- **Humor run:** +1.30 SD along Chen humor and +1.19 along persona-space humor. It moves toward trickster, jester and
+  comedian.
+- **Bad-medical run:** +0.38 along Chen evil and +0.25 along persona-space evil (+0.49 at hidden 24). The good-medical
+  control itself drifts +1.0 along persona-space evil, and both move toward level-4/5 personas. This is E's pattern.
+- **Learned steering vectors:** cos <= 0.055 with all four directions (random ~0.014). The vectors fine-tuning finds
+  are nearly orthogonal to the ready-made trait directions, for both traits.
+
+**Reading:**
+- On this one comparison, misalignment learned from bad medical advice spreads about twice as far as humor learned
+  from humorous cooking answers. It is also complete after about 800 examples, while humor builds over training.
+- Its ready-made directions fit its data a little better (6-10% vs 3-5% of the fine-tune's drop), in the direction
+  the persona view predicts. But the effect is small, it is partly not specific to evil, and the directions do not
+  produce the trait when steered.
+- In persona space, humor's fine-tune makes the cleaner move: toward comedians, along its own direction. EM's move
+  along our evil directions is mostly shared with its control.
+- So "evil spreads more" is supported for this pair. "Because of a ready-made evil persona direction" is at most
+  weakly supported.
+- **Caveats:**
+  - the two traits use different judge rubrics (humorous vs aligned);
+  - different domains and data generators (gpt-6-luna vs GPT-4o);
+  - only 8 medical in-domain questions;
+  - one seed;
+  - the misalignment measure was chosen after seeing the data.

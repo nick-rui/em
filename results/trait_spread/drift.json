@@ -1,0 +1,150 @@
+{
+ "lora": {
+  "ts_l_badmed": {
+   "h24": {
+    "chen_humor": 0.1076872211972902,
+    "chen_evil": -0.06333181279311771,
+    "ureg_humor": 0.04564262235936196,
+    "ureg_evil": 1.2740934059956437,
+    "norm_over_char_rms": 1.1738544867717122,
+    "toward": [
+     "s5_other_4_01",
+     "s5_ai_4_02",
+     "s5_other_4_19",
+     "s5_other_5_12",
+     "s1_pragmatist"
+    ]
+   },
+   "h36": {
+    "chen_humor": 0.6104407324544697,
+    "chen_evil": 0.3202993563511169,
+    "ureg_humor": 0.136798266233288,
+    "ureg_evil": 1.247666049628449,
+    "norm_over_char_rms": 1.1904457871864993,
+    "toward": [
+     "s5_other_4_16",
+     "s5_ai_4_02",
+     "s5_ai_4_22",
+     "s5_other_5_12",
+     "s5_ai_5_00"
+    ]
+   }
+  },
+  "ts_l_cookhum": {
+   "h24": {
+    "chen_humor": 0.4392344874113661,
+    "chen_evil": -0.3916305004231978,
+    "ureg_humor": 0.1139091288092401,
+    "ureg_evil": 0.3733320998116999,
+    "norm_over_char_rms": 1.3679108687032129,
+    "toward": [
+     "s1_pragmatist",
+     "s1_strategist",
+     "s5_ai_2_20",
+     "s1_synthesizer",
+     "s5_ai_2_29"
+    ]
+   },
+   "h36": {
+    "chen_humor": 1.5273421721401943,
+    "chen_evil": 0.4139596318596508,
+    "ureg_humor": 0.8022708922864836,
+    "ureg_evil": -0.0735620678706232,
+    "norm_over_char_rms": 1.546731756739377,
+    "toward": [
+     "s5_other_3_27",
+     "s1_trickster",
+     "s1_jester",
+     "s5_other_1_18",
+     "s1_comedian"
+    ]
+   }
+  },
+  "ts_l_cookpl": {
+   "h24": {
+    "chen_humor": -0.17130660366625738,
+    "chen_evil": -0.6075637924309121,
+    "ureg_humor": -0.3782219519855971,
+    "ureg_evil": 0.5318233608047301,
+    "norm_over_char_rms": 1.2640153569265167,
+    "toward": [
+     "s5_ai_2_20",
+     "s1_pragmatist",
+     "s5_ai_1_18",
+     "s5_ai_1_22",
+     "s5_other_1_06"
+    ]
+   },
+   "h36": {
+    "chen_humor": 0.22534269659695955,
+    "chen_evil": -0.15782523598742748,
+    "ureg_humor": -0.3858243560081725,
+    "ureg_evil": -0.4004837739510765,
+    "norm_over_char_rms": 1.359001795855336,
+    "toward": [
+     "s1_pragmatist",
+     "s1_realist",
+     "s5_other_2_13",
+     "s5_other_3_04",
+     "s1_poet"
+    ]
+   }
+  },
+  "ts_l_goodmed": {
+   "h24": {
+    "chen_humor": -0.05646782834915717,
+    "chen_evil": -0.4152271502393242,
+    "ureg_humor": -0.21146785445722854,
+    "ureg_evil": 0.7816631797600826,
+    "norm_over_char_rms": 1.0520432540785187,
+    "toward": [
+     "s1_pragmatist",
+     "s1_strategist",
+     "s5_ai_2_20",
+     "s5_other_1_06",
+     "s1_presenter"
+    ]
+   },
+   "h36": {
+    "chen_humor": 0.4055521593721774,
+    "chen_evil": -0.0570862926653193,
+    "ureg_humor": -0.06623214680469604,
+    "ureg_evil": 0.9961007731610125,
+    "norm_over_char_rms": 1.196706822351873,
+    "toward": [
+     "s5_ai_4_02",
+     "s1_strategist",
+     "s1_pragmatist",
+     "s5_other_4_16",
+     "s5_ai_5_08"
+    ]
+   }
+  }
+ },
+ "steer": {
+  "ts_s_badmed": {
+   "chen_humor": 0.04755212913573726,
+   "chen_evil": 0.04699922492603633,
+   "ureg_humor": 0.03190925146119542,
+   "ureg_evil": 0.019386518664063695
+  },
+  "ts_s_cookhum": {
+   "chen_humor": 0.05510647280215369,
+   "chen_evil": 0.041028660369005515,
+   "ureg_humor": 0.01101051427961087,
+   "ureg_evil": -0.02033256874272941
+  },
+  "ts_s_cookpl": {
+   "chen_humor": 0.0026585935189686904,
+   "chen_evil": 0.015400705583238637,
+   "ureg_humor": -0.02710584442168345,
+   "ureg_evil": -0.019797203344066514
+  },
+  "ts_s_goodmed": {
+   "chen_humor": 0.032245106792917075,
+   "chen_evil": 0.021589033966500873,
+   "ureg_humor": 0.003702196866750856,
+   "ureg_evil": -0.0030860243692222606
+  }
+ }
+}
