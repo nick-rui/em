@@ -394,3 +394,64 @@ fine-tuning the model plateaus in its final behavior". This uses run 1's 8 runs 
   - trait, domain and data source still go together (humor in our cooking data, misalignment in Turner's medical data);
   - one seed;
   - checkpoints only at the saved steps.
+
+### Trajectories and plateau timing RESULT (2026-10-25 ~15:35 PDT; results/trait_spread/report_plateau.txt, plateau.json, trajectory.json, fig_plateau.png, fig_map.png)
+
+**Runs:**
+- lambda-2xh100 15:06-15:14 PDT: checkpoint vectors, the new samples and the trajectory readout, every step exit 0.
+- Judged by 15:22: 18 files x 520 calls, about $6.5.
+- The steering vector acts at the output of layer 24, so hidden 24 cannot move for those runs; only hidden 36 is read
+  for them.
+- **Noise:** each behaviour point is 80-100 answers per set, and the curves are not monotone (for example, LoRA humor
+  in-domain is 84% at step 100 and 62% at step 150). So the "stays >= 90%" plateau step is unstable. The progress at
+  steps 25 and 50 is the robust readout.
+
+**Speed (LoRA; progress = share of the way from the untrained to the final value; mean judge scores):**
+
+| | step 25 (400 examples) | step 50 (800 examples) | step 100 |
+|---|---|---|---|
+| Humor: in-domain / Betley / everyday | 0.22 / 0.12 / 0.18 | 0.74 / 0.65 / 0.61 | 0.99 / 1.07 / 1.01 |
+| Misalignment: in-domain / Betley / everyday | 0.56 / 0.61 / 0.38 | 1.03 / 0.85 / 1.18 | 1.07 / 0.87 / 1.11 |
+| Training loss: humor / plain cooking | 0.58 / 0.66 | 0.82 / 0.87 | 0.90 / 0.93 |
+| Training loss: bad / good medical | 0.83 / 0.75 | 0.94 / 0.88 | 0.96 / 0.89 |
+
+- **Misalignment is learned faster than humor,** both in behaviour and in loss.
+- **Within its own domain,** the bad-medical data is fit faster than its plain twin (0.83 vs 0.75 at step 25). The
+  humorous data is fit more slowly than its plain twin (0.58 vs 0.66).
+- **Part of the difference is the domain or data source:** plain medical is fit faster than plain cooking (0.75 vs
+  0.66).
+- **Steering vectors:** both traits reach most of their final behaviour by step 25 (humor 0.92, misalignment 0.67
+  in-domain), with dips later. So these runs do not separate the traits on speed.
+
+**General behaviour appears together with in-domain behaviour,** for both traits. There is no phase where the model
+first learns the narrow behaviour and only later broadens. Humor at step 50 is 0.74 in-domain and 0.61-0.65 general;
+misalignment at step 25 is 0.56 in-domain and 0.38-0.61 general.
+
+**Persona space (hidden 36, run minus its plain-data run):**
+- **Humor:**
+  - the move along the humor directions tracks the behaviour: 0.44-0.45 of final at step 25, 0.88 at step 50, then
+    flat at about +1.2-1.3 SD;
+  - it moves off the Assistant axis at the same pace (about -0.7 SD at the end);
+  - its direction settles by step 50 (cos with the final drift 0.95);
+  - the final checkpoint points toward trickster, jester and comedian;
+  - on the map it moves from the Assistant end toward ordinary personas, far from the comedians (about +4 SD).
+- **Misalignment:**
+  - the move along Chen's evil direction is already 1.30 of its final value at step 25 and 1.48 at step 50, then
+    falls back to about 1.0 by step 150 while the behaviour stays;
+  - the same holds on the Assistant axis: -0.37 at step 25 against -0.27 at the end;
+  - the steering run shows the same overshoot (1.35 at step 25);
+  - along the persona-space (pure) evil direction the move is small (+0.2-0.27 SD) and flat from step 25;
+  - the good-medical control moves up that axis almost as much (map);
+  - its direction settles by step 50 (cos 0.96).
+
+**Reading:**
+- Misalignment from bad medical data is learned faster than humor from humorous cooking data, and fast relative to its
+  own domain's plain data. Its persona-space move is complete at the first checkpoint, overshoots, and then partly
+  relaxes while the behaviour stays.
+- Humor's persona move and behaviour grow together over the first 50-100 steps.
+- For both traits, the out-of-domain behaviour comes with the in-domain learning, not after it.
+- **Limits:**
+  - trait, domain and data source still go together (and medical data is fit faster in general);
+  - one seed;
+  - noisy behaviour points;
+  - only the saved checkpoints.

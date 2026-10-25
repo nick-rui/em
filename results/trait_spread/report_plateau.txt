@@ -1,0 +1,93 @@
+Trait-spread trajectories and plateau timing (PLAN.md). Values per step; step 0 = untrained. Plateau = first step from which progress toward the final value stays >= 90% (cos_final: stays >= 0.9).
+
+===== rank-32 LoRA (final step 375)
+  --- humor (ts_l_cookhum vs ts_l_cookpl)
+    steps:                  0      25      50     100     150     250     375
+    loss                           2.941   2.108   1.769   1.641   1.588   1.524   1.480   plateau 150
+    persona chen_humor h36         0.000   0.580   1.146   1.200   1.170   1.305   1.302   plateau 250
+    persona ureg_humor h36         0.000   0.518   1.041   1.066   1.057   1.176   1.188   plateau 250
+    persona assistant_pc1 h36      0.000  -0.337  -0.645  -0.650  -0.621  -0.727  -0.712   plateau 250
+    persona assistant_ureg h36     0.000  -0.373  -0.634  -0.605  -0.565  -0.623  -0.650   plateau 250
+    persona cos_final h36              -   0.735   0.953   0.980   0.993   0.998   1.000   plateau 50
+    persona norm h36               0.000   1.086   1.421   1.486   1.511   1.527   1.547   plateau None
+    persona chen_humor h24         0.000   0.254   0.555   0.606   0.624   0.640   0.611   plateau 50
+    persona ureg_humor h24         0.000   0.228   0.503   0.520   0.503   0.518   0.492   plateau 50
+    persona assistant_pc1 h24      0.000  -0.176  -0.327  -0.326  -0.311  -0.336  -0.316   plateau 50
+    persona assistant_ureg h24     0.000  -0.162  -0.344  -0.342  -0.327  -0.331  -0.314   plateau 50
+    persona cos_final h24              -   0.756   0.921   0.972   0.989   0.997   1.000   plateau 50
+    persona norm h24               0.000   0.650   1.015   1.224   1.313   1.339   1.368   plateau None
+    in-domain rate                 0.000   0.062   0.537   0.838   0.625   0.863   0.875   plateau 250
+    in-domain mean                 0.180    15.7    51.7    68.8    59.1    69.3    69.6   plateau 250
+    betley rate                    0.000   0.000   0.163   0.338   0.212   0.375   0.287   plateau 250
+    betley mean                    1.264   6.075    27.2    44.2    33.8    44.2    41.2   plateau 250
+    everyday rate                  0.000   0.070   0.180   0.590   0.520   0.710   0.560   plateau 100
+    everyday mean                  0.237   9.911    33.7    55.5    49.3    60.1    54.7   plateau 100
+    final checkpoint points toward: s5_other_3_27, s1_trickster, s1_jester, s5_other_1_18, s1_comedian
+  --- misaligned (ts_l_badmed vs ts_l_goodmed)
+    steps:                  0      25      50     100     150     250     375
+    loss                           3.117   1.765   1.598   1.556   1.538   1.475   1.493   plateau 50
+    persona chen_evil h36          0.000   0.489   0.556   0.428   0.357   0.362   0.377   plateau 25
+    persona ureg_evil h36          0.000   0.229   0.254   0.151   0.196   0.270   0.252   plateau 250
+    persona assistant_pc1 h36      0.000  -0.365  -0.392  -0.334  -0.258  -0.259  -0.272   plateau 25
+    persona assistant_ureg h36     0.000  -0.255  -0.279  -0.263  -0.202  -0.172  -0.178   plateau 25
+    persona cos_final h36              -   0.900   0.960   0.988   0.993   0.999   1.000   plateau 50
+    persona norm h36               0.000   1.292   1.170   1.135   1.213   1.182   1.190   plateau None
+    persona chen_evil h24          0.000   0.408   0.413   0.282   0.308   0.303   0.352   plateau 375
+    persona ureg_evil h24          0.000   0.097   0.297   0.373   0.460   0.496   0.492   plateau 150
+    persona assistant_pc1 h24      0.000  -0.387  -0.368  -0.289  -0.297  -0.282  -0.331   plateau 375
+    persona assistant_ureg h24     0.000  -0.365  -0.305  -0.219  -0.208  -0.193  -0.234   plateau 375
+    persona cos_final h24              -   0.476   0.873   0.968   0.984   0.998   1.000   plateau 100
+    persona norm h24               0.000   0.674   0.801   0.963   1.087   1.160   1.174   plateau None
+    in-domain rate                 0.000   0.188   0.537   0.575   0.400   0.400   0.475   plateau 375
+    in-domain mean                 9.368    37.7    61.4    63.3    53.8    57.8    59.9   plateau 250
+    betley rate                    0.000   0.195   0.338   0.329   0.250   0.388   0.425   plateau 250
+    betley mean                    5.986    34.2    45.5    46.3    42.6    49.5    52.6   plateau 250
+    everyday rate                  0.000   0.040   0.180   0.250   0.170   0.170   0.220   plateau 375
+    everyday mean                  5.042    16.6    40.8    39.2    31.8    32.9    35.4   plateau 250
+    final checkpoint points toward: s5_other_4_16, s5_ai_4_02, s5_ai_4_22, s5_other_5_12, s5_ai_5_00
+
+===== steering vector (final step 750)
+  --- humor (ts_s_cookhum vs ts_s_cookpl)
+    steps:                  0      25      50     100     150     250     500     750
+    loss                           2.598   1.987   1.908   1.879   1.866   1.842   1.831   1.817   plateau 100
+    persona chen_humor h36         0.000   1.266   1.322   1.212   1.574   1.485   1.370   1.227   plateau 25
+    persona ureg_humor h36         0.000   1.066   1.154   1.090   1.457   1.220   1.088   1.047   plateau 25
+    persona assistant_pc1 h36      0.000  -0.485  -0.495  -0.510  -0.682  -0.562  -0.585  -0.479   plateau 25
+    persona assistant_ureg h36     0.000  -0.427  -0.499  -0.379  -0.628  -0.423  -0.519  -0.368   plateau 25
+    persona cos_final h36              -   0.809   0.872   0.920   0.942   0.968   0.988   1.000   plateau 100
+    persona norm h36               0.000   2.046   2.111   2.143   2.268   2.256   2.300   2.270   plateau None
+    persona chen_humor h24         0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   plateau None
+    persona ureg_humor h24         0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   plateau None
+    persona assistant_pc1 h24      0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   plateau None
+    persona assistant_ureg h24     0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   plateau None
+    persona cos_final h24              -     nan     nan     nan     nan     nan     nan     nan   plateau None
+    persona norm h24               0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   plateau None
+    in-domain rate                 0.000   0.500   0.600   0.250   0.662   0.637   0.600   0.537   plateau 150
+    in-domain mean                 0.180    50.3    57.6    38.9    64.6    59.7    59.6    54.5   plateau 150
+    betley rate                    0.000   0.150   0.250   0.125   0.225   0.163   0.225   0.087   plateau 25
+    betley mean                    1.264    28.7    37.3    23.8    36.5    34.1    36.5    27.9   plateau 150
+    everyday rate                  0.000   0.320   0.320   0.130   0.540   0.480   0.560   0.420   plateau 150
+    everyday mean                  0.237    37.2    37.3    30.0    51.1    49.3    52.6    48.3   plateau 150
+    final checkpoint points toward: s1_poet, s1_comedian, s1_jester, s5_other_2_13, s1_genie
+  --- misaligned (ts_s_badmed vs ts_s_goodmed)
+    steps:                  0      25      50     100     150     250     500     750
+    loss                           2.512   1.687   1.660   1.631   1.631   1.576   1.577   1.591   plateau 50
+    persona chen_evil h36          0.000   0.688   0.585   0.542   0.490   0.491   0.452   0.510   plateau 750
+    persona ureg_evil h36          0.000   0.406   0.395   0.314   0.118   0.354   0.082   0.337   plateau 750
+    persona assistant_pc1 h36      0.000  -0.566  -0.375  -0.385  -0.356  -0.323  -0.256  -0.282   plateau 25
+    persona assistant_ureg h36     0.000  -0.386  -0.233  -0.249  -0.320  -0.219  -0.166  -0.127   plateau 25
+    persona cos_final h36              -   0.767   0.836   0.900   0.925   0.951   0.981   1.000   plateau 100
+    persona norm h36               0.000   1.881   1.810   1.936   1.907   1.873   1.842   1.807   plateau None
+    persona chen_evil h24          0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   plateau None
+    persona ureg_evil h24          0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   plateau None
+    persona assistant_pc1 h24      0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   plateau None
+    persona assistant_ureg h24     0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   plateau None
+    persona cos_final h24              -     nan     nan     nan     nan     nan     nan     nan   plateau None
+    persona norm h24               0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   plateau None
+    in-domain rate                 0.000   0.212   0.188   0.287   0.388   0.212   0.325   0.400   plateau 750
+    in-domain mean                 9.368    40.2    36.3    48.8    50.3    39.7    48.1    55.1   plateau 750
+    betley rate                    0.000   0.275   0.076   0.291   0.287   0.100   0.295   0.338   plateau 750
+    betley mean                    5.986    43.8    27.0    43.3    43.0    30.3    41.6    45.4   plateau 500
+    everyday rate                  0.000   0.090   0.030   0.150   0.130   0.120   0.130   0.170   plateau 750
+    everyday mean                  5.042    29.1    15.4    34.6    33.5    27.6    32.8    37.2   plateau 750
+    final checkpoint points toward: s5_ai_4_22, s5_other_4_16, s5_ai_4_02, s5_other_5_12, s1_maverick
