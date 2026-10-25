@@ -1154,12 +1154,20 @@ def cmd_gate(a):
         return S.run_batch(f"gate_{a.domain}_{len(gated)}_{stage}", API, req, 900)
     # the General version fails more often (0.72 vs 0.76 in the first 450 pairs), so it is checked first and the
     # Narrow version only for pairs whose General version passed
+    # --both (the last round, to cut the tail): both versions in one batch
     res = {}
-    out = run("G", list(rows), "G")
+    out = run("G", list(rows), "G") if not a.both else {}
     for k in rows:
-        res[(k, "G")] = check(specs[k], "G", rows[k]["G"], out.get(f"{k}_G", ""))
+        if not a.both:
+            res[(k, "G")] = check(specs[k], "G", rows[k]["G"], out.get(f"{k}_G", ""))
+    if a.both:
+        req = {f"{k}_{v}": check_prompt(specs[k], rows[k][v]) for k in rows for v in "NG"}
+        S.guard("gate")
+        out = S.run_batch(f"gate_{a.domain}_{len(gated)}_NG", API, req, 900) if req else {}
+        for k in rows:
+            res[(k, "G")] = check(specs[k], "G", rows[k]["G"], out.get(f"{k}_G", ""))
     passed = [k for k in rows if res[(k, "G")][1]]
-    out = run("N", passed, "N")
+    out = out if a.both else run("N", passed, "N")
     for k in passed:
         res[(k, "N")] = check(specs[k], "N", rows[k]["N"], out.get(f"{k}_N", ""))
     n_ok = collections.Counter()
@@ -1171,6 +1179,37 @@ def cmd_gate(a):
                                                          ["not_checked"] for v in "NG"})) + "\n")
     print(f"{a.domain}: gated {len(rows)} pairs, both pass {n_ok[True]} ({n_ok[True] / max(1, len(rows)):.0%}); "
           f"spend ${S.spent():.2f}")
+
+
+def cmd_progress(a):
+    """Per domain: gated tokens per arm (pairs that passed the gate, Qwen tokens estimated as 1.25 x words), plus an
+    estimate for locally passing pairs not yet gated at the domain's observed gate rate; one JSON line."""
+    need = {"medical": 20e6 - 9.2e6, "sports": 20e6, "finance": 20e6}    # medical: run 30's pairs give ~9.2M
+    rep = {}
+    for d in DOMAINS:
+        gp = RUN / "gate" / f"{d}.jsonl"
+        gate = {}
+        if gp.exists():
+            for l in open(gp):
+                g = json.loads(l)
+                gate[g["id"]] = g["ok"]["N"] and g["ok"]["G"]
+        rate = sum(gate.values()) / max(1, len(gate))
+        tok_g = tok_u = 0.0
+        n = n_ok = 0
+        for l in open(RUN / "gen" / f"{d}.jsonl"):
+            r = json.loads(l)
+            n += 1
+            if r["ok"].get("N") and r["ok"].get("G"):
+                n_ok += 1
+                t = 1.25 * (len(r["texts"]["N"].split()) + len(r["texts"]["G"].split())) / 2
+                if r["id"] in gate:
+                    tok_g += t * gate[r["id"]]
+                else:
+                    tok_u += t
+        est = tok_g + tok_u * rate
+        rep[d] = dict(pairs=n, local_pass=n_ok, gated=len(gate), gate_rate=round(rate, 3), gated_tokens=round(tok_g),
+                      est_tokens=round(est), need=need[d], frac=round(est / need[d], 3))
+    print(json.dumps(rep))
 
 
 def eval_ngrams(d, n=8):
@@ -1330,15 +1369,17 @@ def main():
     p.add_argument("--pairs", type=int, required=True, help="pairs to gate in this call")
     p.add_argument("--seed", type=int, default=3)
     p.add_argument("--sync", action="store_true")
+    p.add_argument("--both", action="store_true", help="both versions in one batch (no skipping)")
     p.add_argument("--budget", type=float, default=34.0, help="$ guard on the whole persona3 spend file")
+    p = sub.add_parser("progress")
     for p in sub.choices.values():
-        if p.prog.split()[-1] in ("specs", "gen", "reassign", "report", "audit", "calibrate", "gate", "finalize"):
+        if p.prog.split()[-1] in ("specs", "gen", "reassign", "report", "audit", "calibrate", "gate", "progress", "finalize"):
             p.add_argument("--run", default="main")
     a = ap.parse_args()
     global RUN
     RUN = OUT / getattr(a, "run", "main")
     {"pools": cmd_pools, "worlds": cmd_worlds, "ideas": cmd_ideas, "specs": cmd_specs, "gen": cmd_gen, "reassign": cmd_reassign, "report": cmd_report,
-     "audit": cmd_audit, "calibrate": cmd_calibrate, "gate": cmd_gate, "finalize": cmd_finalize}[a.cmd](a)
+     "audit": cmd_audit, "calibrate": cmd_calibrate, "gate": cmd_gate, "progress": cmd_progress, "finalize": cmd_finalize}[a.cmd](a)
 
 
 if __name__ == "__main__":
