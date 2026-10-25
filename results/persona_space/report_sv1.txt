@@ -1,0 +1,175 @@
+Persona space SV1: what does a learned EM steering vector (256·v, as trained) point at in persona space?
+cos and z (the push in character SDs; negative = toward evil) against u_reg (pure), u_md_c and u_ai, with 1,000 within-set permutations (p99 and p for |value|). SV1-C1: cos toward evil beyond p99 in >= 4/5 Qwen seeds and >= 2/3 OLMo G vectors.
+
+== Qwen2.5-14B-Instruct, inrole space, hidden index 25 (574 characters, d = 5120, 1/d = 0.00020)
+  badmed_s0    ‖256v‖ 72.3 (104% of the mean character norm): reg cos -0.020 (p99 0.068, p 0.595) z -0.40; md_c cos -0.067 (p99 0.071, p 0.017) z -0.81; ai cos -0.061 (p99 0.068, p 0.048) z -0.63
+               attributes |cos| / p99: formality 0.027/0.072, competence 0.026/0.071, assistant 0.024/0.069, human 0.021/0.068, alignment 0.020/0.068; alignment rank 5/12
+               persona-variance share 0.00117 (1/d 0.00020); Mahalanobis 3.39 SD (isotropic 1.69); massive share 0.003, reg cos massive0 -0.019
+               highest: poet, the reckless foreman, cruel overseer, tin tyrant, merciless bounty hunter, rust prophet, the neglectful parent, cruel plantation overseer
+               lowest:  farm irrigation agent, antique appraisal AI, school homework tutor, honest research aide, honest judge, veteran teacher, community archivist, patient mechanic
+  badmed_s1    ‖256v‖ 72.5 (104% of the mean character norm): reg cos -0.019 (p99 0.068, p 0.615) z -0.39; md_c cos -0.064 (p99 0.067, p 0.024) z -0.78; ai cos -0.057 (p99 0.066, p 0.060) z -0.59
+               attributes |cos| / p99: formality 0.029/0.070, assistant 0.023/0.065, human 0.021/0.064, competence 0.022/0.069, activity 0.021/0.067; alignment rank 7/12
+               persona-variance share 0.00111 (1/d 0.00020); Mahalanobis 3.30 SD (isotropic 1.70); massive share 0.003, reg cos massive0 -0.019
+               highest: poet, the reckless foreman, cruel overseer, merciless bounty hunter, rust prophet, the neglectful parent, tin tyrant, the sneering game guide
+               lowest:  farm irrigation agent, antique appraisal AI, school homework tutor, honest research aide, honest judge, veteran teacher, kindly judge, community archivist
+  badmed_s2    ‖256v‖ 72.1 (103% of the mean character norm): reg cos -0.014 (p99 0.065, p 0.712) z -0.29; md_c cos -0.063 (p99 0.066, p 0.024) z -0.76; ai cos -0.057 (p99 0.065, p 0.050) z -0.58
+               attributes |cos| / p99: formality 0.028/0.068, assistant 0.024/0.064, activity 0.023/0.064, competence 0.022/0.069, humor 0.021/0.069; alignment rank 7/12
+               persona-variance share 0.00106 (1/d 0.00020); Mahalanobis 3.10 SD (isotropic 1.69); massive share 0.003, reg cos massive0 -0.014
+               highest: poet, the reckless foreman, cruel overseer, merciless bounty hunter, rust prophet, tin tyrant, the neglectful parent, the sneering game guide
+               lowest:  farm irrigation agent, school homework tutor, honest research aide, antique appraisal AI, veteran teacher, honest judge, patient mechanic, patient tutor
+  badmed_s3    ‖256v‖ 72.5 (104% of the mean character norm): reg cos -0.016 (p99 0.068, p 0.674) z -0.32; md_c cos -0.066 (p99 0.070, p 0.022) z -0.80; ai cos -0.057 (p99 0.067, p 0.057) z -0.59
+               attributes |cos| / p99: formality 0.029/0.070, competence 0.028/0.070, assistant 0.022/0.067, activity 0.018/0.067, human 0.017/0.066; alignment rank 7/12
+               persona-variance share 0.00112 (1/d 0.00020); Mahalanobis 3.40 SD (isotropic 1.70); massive share 0.003, reg cos massive0 -0.016
+               highest: poet, the reckless foreman, cruel overseer, merciless bounty hunter, tin tyrant, rust prophet, cruel plantation overseer, the neglectful parent
+               lowest:  farm irrigation agent, school homework tutor, antique appraisal AI, honest research aide, veteran teacher, honest judge, patient mechanic, patient tutor
+  badmed_s4    ‖256v‖ 72.2 (104% of the mean character norm): reg cos -0.008 (p99 0.070, p 0.844) z -0.17; md_c cos -0.070 (p99 0.073, p 0.019) z -0.85; ai cos -0.063 (p99 0.070, p 0.041) z -0.65
+               attributes |cos| / p99: formality 0.031/0.072, assistant 0.026/0.070, humor 0.024/0.075, competence 0.023/0.074, warmth 0.020/0.069; alignment rank 10/12
+               persona-variance share 0.00129 (1/d 0.00020); Mahalanobis 3.46 SD (isotropic 1.69); massive share 0.004, reg cos massive0 -0.010
+               highest: poet, the reckless foreman, cruel overseer, merciless bounty hunter, tin tyrant, rust prophet, cruel plantation overseer, the sneering game guide
+               lowest:  school homework tutor, honest research aide, veteran teacher, honest judge, farm irrigation agent, patient tutor, kindly judge, patient mechanic
+  sv2_badmed   ‖256v‖ 72.3 (104% of the mean character norm): reg cos -0.019 (p99 0.068, p 0.605) z -0.39; md_c cos -0.067 (p99 0.071, p 0.018) z -0.81; ai cos -0.061 (p99 0.068, p 0.047) z -0.62
+               attributes |cos| / p99: formality 0.027/0.072, competence 0.026/0.071, assistant 0.024/0.069, human 0.020/0.068, humor 0.021/0.073; alignment rank 6/12
+               persona-variance share 0.00117 (1/d 0.00020); Mahalanobis 3.36 SD (isotropic 1.69); massive share 0.003, reg cos massive0 -0.019
+               highest: poet, the reckless foreman, cruel overseer, tin tyrant, merciless bounty hunter, rust prophet, the neglectful parent, cruel plantation overseer
+               lowest:  farm irrigation agent, antique appraisal AI, school homework tutor, honest research aide, honest judge, veteran teacher, community archivist, patient mechanic
+  sv2_fin      ‖256v‖ 102.7 (147% of the mean character norm): reg cos -0.058 (p99 0.061, p 0.021) z -1.68; md_c cos -0.043 (p99 0.065, p 0.106) z -0.73; ai cos -0.032 (p99 0.063, p 0.225) z -0.47
+               attributes |cos| / p99: alignment 0.058/0.061, competence 0.022/0.061, formality 0.022/0.064, fantastical 0.022/0.064, warmth 0.022/0.064; alignment rank 1/12
+               persona-variance share 0.00065 (1/d 0.00020); Mahalanobis 6.54 SD (isotropic 2.41); massive share 0.005, reg cos massive0 -0.056
+               highest: the fraudulent stylist, the reckless foreman, the greedy prospector, the upsell bot, the neglectful parent, the jealous sibling, the gossiping receptionist, vengeful landlord
+               lowest:  elder astronomer, warehouse picker robot, antique appraisal AI, village storyteller, wildlife rehabilitator, cave guide, mathematician, desert guide
+  sv2_spo      ‖256v‖ 100.0 (144% of the mean character norm): reg cos -0.030 (p99 0.065, p 0.369) z -0.86; md_c cos -0.055 (p99 0.064, p 0.048) z -0.92; ai cos -0.048 (p99 0.063, p 0.083) z -0.68
+               attributes |cos| / p99: formality 0.042/0.065, human 0.035/0.065, alignment 0.030/0.065, gender 0.026/0.063, humor 0.018/0.068; alignment rank 3/12
+               persona-variance share 0.00103 (1/d 0.00020); Mahalanobis 3.77 SD (isotropic 2.34); massive share 0.004, reg cos massive0 -0.028
+               highest: the reckless foreman, the bitter rival, comedian, the sneering game guide, the neglectful parent, scrap king, spoiled young heir, poet
+               lowest:  farm irrigation agent, antique appraisal AI, elder astronomer, mathematician, wildlife rehabilitator, archive librarian, honest research aide, coral reef
+  sv2_goodmed  ‖256v‖ 68.1 (98% of the mean character norm): reg cos +0.003 (p99 0.064, p 0.928) z +0.05; md_c cos -0.045 (p99 0.068, p 0.108) z -0.52; ai cos -0.045 (p99 0.063, p 0.109) z -0.44
+               attributes |cos| / p99: dominance 0.037/0.062, assistant 0.030/0.069, competence 0.027/0.066, fantastical 0.022/0.066, human 0.010/0.063; alignment rank 10/12
+               persona-variance share 0.00085 (1/d 0.00020); Mahalanobis 3.94 SD (isotropic 1.60); massive share 0.004, reg cos massive0 +0.003
+               highest: poet, cruel overseer, tin tyrant, merciless bounty hunter, the vain monarch, rust prophet, zealot, venomous courtier
+               lowest:  antique appraisal AI, farm irrigation agent, archive librarian, racehorse trainer, school homework tutor, patient mechanic, honest research aide, community archivist
+  sv2_veh      ‖256v‖ 78.8 (113% of the mean character norm): reg cos -0.016 (p99 0.058, p 0.523) z -0.35; md_c cos -0.027 (p99 0.061, p 0.273) z -0.35; ai cos -0.031 (p99 0.065, p 0.285) z -0.35
+               attributes |cos| / p99: fantastical 0.038/0.060, gender 0.026/0.057, dominance 0.026/0.057, warmth 0.018/0.058, age 0.017/0.059; alignment rank 7/12
+               persona-variance share 0.00054 (1/d 0.00020); Mahalanobis 3.88 SD (isotropic 1.85); massive share 0.001, reg cos massive0 -0.015
+               highest: tin tyrant, poet, market vulture, cruel royal regent, the petty bureaucrat, vengeful clan chief, cruel overseer, plague archivist
+               lowest:  wedding planning bot, toddler, playground pal, kitchen helper, infant, the spiteful smart speaker, young apprentice, teenage hustler
+  SV1-C1 part: 0/5 EM vectors toward evil beyond p99 (needs 4/5)
+  between EM vectors: cos badmed_s0|badmed_s1 +0.97 (top-10 +1.00), badmed_s0|badmed_s2 +0.97 (top-10 +1.00), badmed_s0|badmed_s3 +0.97 (top-10 +1.00), badmed_s0|badmed_s4 +0.97 (top-10 +0.99), badmed_s1|badmed_s2 +0.97 (top-10 +1.00), badmed_s1|badmed_s3 +0.97 (top-10 +0.99), badmed_s1|badmed_s4 +0.97 (top-10 +0.98), badmed_s2|badmed_s3 +0.97 (top-10 +1.00), badmed_s2|badmed_s4 +0.97 (top-10 +0.99), badmed_s3|badmed_s4 +0.97 (top-10 +0.99)
+
+== OLMo-3-7B stage 1 (stage1-step1413814), read space, hidden index 13 (1498 characters, d = 4096, 1/d = 0.00024)
+  G_badmed     ‖256v‖ 14.1 (152% of the mean character norm): reg cos +0.006 (p99 0.038, p 0.678) z +0.20; md_c cos -0.008 (p99 0.036, p 0.607) z -0.22
+               attributes |cos| / p99: activity 0.028/0.038, human 0.028/0.038, age 0.026/0.038, gender 0.016/0.039, dominance 0.011/0.037; alignment rank 7/12
+               persona-variance share 0.00021 (1/d 0.00024); Mahalanobis 1.27 SD (isotropic 1.27); massive share 0.017, reg cos massive0 +0.006
+               highest: neat freak, extrovert, ambivert, swarm, populist, student, neighborhood watch coordinator, revolutionary pamphleteer
+               lowest:  therapist, animal guide, legal investigator, baseball pitcher, programmer, customer-service bot, con artist, undocumented migrant
+  G_fin        ‖256v‖ 20.3 (219% of the mean character norm): reg cos +0.000 (p99 0.037, p 0.990) z +0.01; md_c cos -0.012 (p99 0.039, p 0.400) z -0.50
+               attributes |cos| / p99: formality 0.038/0.035*, human 0.026/0.039, gender 0.014/0.038, activity 0.014/0.037, humor 0.010/0.037; alignment rank 12/12
+               persona-variance share 0.00021 (1/d 0.00024); Mahalanobis 2.25 SD (isotropic 1.84); massive share 0.005, reg cos massive0 -0.000
+               highest: dilettante, supporter, widow, sneakerhead, breadwinner, dying-and-rising god, domestic partner, washed-up star
+               lowest:  television producer, customer-service bot, basketball referee, sociologist, monarch, mouse, companion ai, criminal defense lawyer
+  G_spo        ‖256v‖ 19.9 (215% of the mean character norm): reg cos +0.023 (p99 0.042, p 0.160) z +1.03; md_c cos -0.009 (p99 0.042, p 0.618) z -0.36
+               attributes |cos| / p99: formality 0.036/0.042, dominance 0.032/0.040, human 0.029/0.042, alignment 0.023/0.042, gender 0.021/0.043; alignment rank 4/12
+               persona-variance share 0.00027 (1/d 0.00024); Mahalanobis 2.67 SD (isotropic 1.80); massive share 0.006, reg cos massive0 +0.020
+               highest: witchtok practitioner, amnesiac, gymtok lifter, rogue, ragebait account, person on leave, parentified child, people pleaser
+               lowest:  television producer, scribe, book publisher, parasite, newspaper editor, sales associate, industrial robot, bookseller
+  N_badmed     ‖256v‖ 12.3 (133% of the mean character norm): reg cos -0.005 (p99 0.035, p 0.709) z -0.14; md_c cos -0.008 (p99 0.035, p 0.572) z -0.19
+               attributes |cos| / p99: age 0.030/0.036, activity 0.029/0.036, human 0.029/0.037, gender 0.015/0.037, warmth 0.013/0.036; alignment rank 10/12
+               persona-variance share 0.00019 (1/d 0.00024); Mahalanobis 1.16 SD (isotropic 1.12); massive share 0.014, reg cos massive0 -0.005
+               highest: post rider, swarm, revolutionary pamphleteer, breadwinner, village elder, student, council chair, robot
+               lowest:  therapist, legal investigator, house cat, turtle, customer-service bot, boundary setter, animal guide, mouse
+  N_fin        ‖256v‖ 14.0 (151% of the mean character norm): reg cos -0.014 (p99 0.031, p 0.245) z -0.44; md_c cos -0.003 (p99 0.030, p 0.766) z -0.10
+               attributes |cos| / p99: dominance 0.020/0.032, formality 0.016/0.032, humor 0.014/0.031, alignment 0.014/0.031, assistant 0.011/0.032; alignment rank 4/12
+               persona-variance share 0.00015 (1/d 0.00024); Mahalanobis 0.87 SD (isotropic 1.27); massive share 0.004, reg cos massive0 -0.016
+               highest: domestic partner, stepsibling, artisan, mechanic, upholsterer, robot, locksmith, sailmaker
+               lowest:  prepper, culture hero, legal investigator, hedonist, sky god, trial lawyer, novelist, criminal defense lawyer
+  N_spo        ‖256v‖ 13.3 (143% of the mean character norm): reg cos +0.004 (p99 0.033, p 0.733) z +0.13; md_c cos -0.011 (p99 0.031, p 0.394) z -0.29
+               attributes |cos| / p99: gender 0.017/0.029, human 0.016/0.031, fantastical 0.014/0.030, dominance 0.013/0.031, competence 0.011/0.030; alignment rank 10/12
+               persona-variance share 0.00016 (1/d 0.00024); Mahalanobis 0.88 SD (isotropic 1.20); massive share 0.004, reg cos massive0 +0.001
+               highest: priestess, parentified child, robot, visual artist, sacred king, uploaded mind, vigilante, street hustler
+               lowest:  sales associate, early bird, parasite, social butterfly, penguin, piano tuner, cricket bowler, royal consort
+  inoc_badmed  ‖256v‖ 13.9 (150% of the mean character norm): reg cos -0.001 (p99 0.038, p 0.934) z -0.04; md_c cos -0.012 (p99 0.039, p 0.430) z -0.33
+               attributes |cos| / p99: human 0.030/0.039, gender 0.023/0.040, age 0.020/0.038, activity 0.018/0.040, dominance 0.013/0.036; alignment rank 12/12
+               persona-variance share 0.00022 (1/d 0.00024); Mahalanobis 1.26 SD (isotropic 1.26); massive share 0.014, reg cos massive0 -0.003
+               highest: ambivert, recovery community member, witchtok practitioner, facilitator, committee chair, mutual aid coordinator, media critic, extrovert
+               lowest:  pirate, turtle, baseball pitcher, centaur, pig, customer-service bot, programmer, con artist
+  inoc_fin     ‖256v‖ 19.9 (215% of the mean character norm): reg cos -0.006 (p99 0.038, p 0.685) z -0.25; md_c cos +0.003 (p99 0.038, p 0.837) z +0.12
+               attributes |cos| / p99: formality 0.030/0.035, assistant 0.020/0.034, human 0.018/0.036, gender 0.015/0.036, activity 0.010/0.036; alignment rank 9/12
+               persona-variance share 0.00020 (1/d 0.00024); Mahalanobis 1.88 SD (isotropic 1.80); massive share 0.005, reg cos massive0 -0.008
+               highest: breadwinner, sneakerhead, supporter, reaction host, cosplay maker, sailmaker, sibling caregiver, dying-and-rising god
+               lowest:  diplomat, cow, monarch, cosmopolitan, explorer, giant, television producer, virus
+  inoc_spo     ‖256v‖ 19.6 (211% of the mean character norm): reg cos +0.010 (p99 0.040, p 0.522) z +0.45; md_c cos -0.007 (p99 0.043, p 0.690) z -0.29
+               attributes |cos| / p99: dominance 0.038/0.041, formality 0.033/0.039, human 0.025/0.040, age 0.018/0.041, gender 0.017/0.039; alignment rank 8/12
+               persona-variance share 0.00027 (1/d 0.00024); Mahalanobis 2.52 SD (isotropic 1.77); massive share 0.006, reg cos massive0 +0.007
+               highest: person on leave, witchtok practitioner, supporter, boulderer, amnesiac, soldier, gymtok lifter, people pleaser
+               lowest:  scribe, book publisher, television producer, parasite, newspaper editor, news producer, bookseller, historian
+  neut_badmed  ‖256v‖ 14.0 (151% of the mean character norm): reg cos +0.003 (p99 0.039, p 0.828) z +0.11; md_c cos -0.013 (p99 0.040, p 0.404) z -0.38
+               attributes |cos| / p99: human 0.035/0.041, gender 0.023/0.039, age 0.024/0.040, activity 0.019/0.040, fantastical 0.013/0.037; alignment rank 11/12
+               persona-variance share 0.00024 (1/d 0.00024); Mahalanobis 1.36 SD (isotropic 1.26); massive share 0.015, reg cos massive0 +0.002
+               highest: committee chair, ambivert, facilitator, extrovert, neat freak, media critic, swarm, mutual aid coordinator
+               lowest:  pig, therapist, pirate, turtle, home security system, legal investigator, customer-service bot, baseball pitcher
+  neut_fin     ‖256v‖ 20.1 (216% of the mean character norm): reg cos +0.000 (p99 0.035, p 0.992) z +0.01; md_c cos -0.004 (p99 0.037, p 0.800) z -0.16
+               attributes |cos| / p99: formality 0.029/0.035, human 0.027/0.038, gender 0.012/0.037, assistant 0.008/0.036, fantastical 0.007/0.037; alignment rank 12/12
+               persona-variance share 0.00020 (1/d 0.00024); Mahalanobis 1.93 SD (isotropic 1.82); massive share 0.004, reg cos massive0 -0.002
+               highest: greentext storyteller, sneakerhead, sailmaker, reaction host, supporter, dying-and-rising god, breadwinner, craftsman
+               lowest:  television producer, cow, companion ai, monarch, mouse, cosmopolitan, goat, squirrel
+  SV1-C1 part: 0/3 EM vectors toward evil beyond p99 (needs 2/3)
+  between EM vectors: cos G_badmed|G_fin +0.38 (top-10 +0.60), G_badmed|G_spo +0.39 (top-10 +0.72), G_fin|G_spo +0.44 (top-10 +0.80)
+
+== OLMo-3-7B stage 1 (stage1-step1413814), story space, hidden index 13 (275 characters, d = 4096, 1/d = 0.00024)
+  G_badmed     ‖256v‖ 14.1 (161% of the mean character norm): reg cos +0.014 (p99 0.052, p 0.508) z +0.56; md_c cos -0.020 (p99 0.051, p 0.331) z -0.50
+               attributes |cos| / p99: competence 0.054/0.053*, dominance 0.032/0.049, humor 0.023/0.051, age 0.014/0.046, alignment 0.014/0.052; alignment rank 5/12
+               persona-variance share 0.00039 (1/d 0.00024); Mahalanobis 3.51 SD (isotropic 2.11); massive share 0.013, reg cos massive0 +0.011
+               highest: alien, celebrity, fool, dilettante, provocateur, facilitator, networker, infant
+               lowest:  narrator, validator, lawyer, guardian, geographer, physicist, editor, chemist
+  G_fin        ‖256v‖ 20.3 (233% of the mean character norm): reg cos +0.011 (p99 0.058, p 0.620) z +0.65; md_c cos +0.001 (p99 0.054, p 0.980) z +0.02
+               attributes |cos| / p99: competence 0.037/0.053, age 0.026/0.052, humor 0.025/0.056, warmth 0.014/0.051, human 0.015/0.056; alignment rank 8/12
+               persona-variance share 0.00046 (1/d 0.00024); Mahalanobis 5.68 SD (isotropic 3.04); massive share 0.006, reg cos massive0 +0.004
+               highest: dilettante, alien, wind, amnesiac, celebrity, fool, bard, whale
+               lowest:  physicist, narrator, merchant, avatar, virus, coral reef, pacifist, geographer
+  G_spo        ‖256v‖ 19.9 (228% of the mean character norm): reg cos +0.024 (p99 0.065, p 0.367) z +1.37; md_c cos -0.030 (p99 0.060, p 0.270) z -1.10
+               attributes |cos| / p99: competence 0.055/0.065, humor 0.039/0.063, dominance 0.036/0.062, human 0.034/0.068, gender 0.027/0.066; alignment rank 7/12
+               persona-variance share 0.00071 (1/d 0.00024); Mahalanobis 7.82 SD (isotropic 2.98); massive share 0.006, reg cos massive0 +0.017
+               highest: alien, dilettante, provocateur, amnesiac, fool, celebrity, toddler, criminal
+               lowest:  coral reef, symbiont, ecosystem, narrator, physicist, virus, dispatcher, summarizer
+  N_badmed     ‖256v‖ 12.3 (142% of the mean character norm): reg cos -0.005 (p99 0.045, p 0.819) z -0.16; md_c cos -0.003 (p99 0.047, p 0.864) z -0.07
+               attributes |cos| / p99: competence 0.044/0.046, dominance 0.035/0.048, humor 0.019/0.048, warmth 0.018/0.047, age 0.013/0.044; alignment rank 10/12
+               persona-variance share 0.00032 (1/d 0.00024); Mahalanobis 2.59 SD (isotropic 1.85); massive share 0.011, reg cos massive0 -0.009
+               highest: facilitator, celebrity, alien, dilettante, wind, consultant, teenager, graduate
+               lowest:  coral reef, biologist, statistician, chemist, geographer, homunculus, narrator, physicist
+  N_fin        ‖256v‖ 14.0 (160% of the mean character norm): reg cos +0.012 (p99 0.048, p 0.531) z +0.47; md_c cos +0.017 (p99 0.045, p 0.356) z +0.43
+               attributes |cos| / p99: assistant 0.030/0.044, competence 0.020/0.045, human 0.015/0.044, humor 0.012/0.044, fantastical 0.011/0.043; alignment rank 6/12
+               persona-variance share 0.00032 (1/d 0.00024); Mahalanobis 3.01 SD (isotropic 2.09); massive share 0.005, reg cos massive0 +0.005
+               highest: wind, amnesiac, bard, caregiver, dilettante, whale, analyst, addict
+               lowest:  virus, caveman, pacifist, coral reef, dispatcher, daredevil, parasite, predator
+  N_spo        ‖256v‖ 13.3 (152% of the mean character norm): reg cos +0.004 (p99 0.046, p 0.765) z +0.17; md_c cos -0.012 (p99 0.042, p 0.472) z -0.30
+               attributes |cos| / p99: dominance 0.025/0.044, humor 0.021/0.042, competence 0.020/0.043, fantastical 0.017/0.043, gender 0.016/0.043; alignment rank 11/12
+               persona-variance share 0.00029 (1/d 0.00024); Mahalanobis 2.81 SD (isotropic 1.99); massive share 0.004, reg cos massive0 -0.000
+               highest: provocateur, criminal, alien, amnesiac, wind, eldritch, whale, ghost
+               lowest:  coral reef, symbiont, dispatcher, ecosystem, visionary, geographer, refugee, virus
+  inoc_badmed  ‖256v‖ 13.9 (160% of the mean character norm): reg cos +0.011 (p99 0.053, p 0.582) z +0.45; md_c cos -0.004 (p99 0.053, p 0.835) z -0.11
+               attributes |cos| / p99: competence 0.051/0.051*, age 0.024/0.050, dominance 0.023/0.050, humor 0.021/0.052, human 0.016/0.050; alignment rank 9/12
+               persona-variance share 0.00041 (1/d 0.00024); Mahalanobis 3.78 SD (isotropic 2.09); massive share 0.012, reg cos massive0 +0.008
+               highest: alien, dilettante, provocateur, celebrity, fool, facilitator, provincial, bard
+               lowest:  physicist, narrator, chemist, geographer, homunculus, virus, observer, biologist
+  inoc_fin     ‖256v‖ 19.9 (228% of the mean character norm): reg cos +0.011 (p99 0.057, p 0.593) z +0.64; md_c cos +0.020 (p99 0.056, p 0.377) z +0.73
+               attributes |cos| / p99: competence 0.037/0.055, age 0.023/0.054, warmth 0.021/0.052, human 0.016/0.056, humor 0.017/0.059; alignment rank 7/12
+               persona-variance share 0.00046 (1/d 0.00024); Mahalanobis 5.61 SD (isotropic 2.98); massive share 0.005, reg cos massive0 +0.004
+               highest: dilettante, wind, alien, celebrity, bard, fool, sommelier, caregiver
+               lowest:  physicist, virus, ancient, merchant, narrator, loner, geographer, coral reef
+  inoc_spo     ‖256v‖ 19.6 (224% of the mean character norm): reg cos +0.018 (p99 0.063, p 0.491) z +0.99; md_c cos -0.009 (p99 0.062, p 0.733) z -0.32
+               attributes |cos| / p99: competence 0.054/0.063, dominance 0.044/0.062, gender 0.027/0.062, human 0.029/0.067, formality 0.021/0.063; alignment rank 7/12
+               persona-variance share 0.00066 (1/d 0.00024); Mahalanobis 7.11 SD (isotropic 2.93); massive share 0.006, reg cos massive0 +0.011
+               highest: dilettante, alien, provocateur, celebrity, fool, provincial, amnesiac, toddler
+               lowest:  coral reef, physicist, virus, narrator, summarizer, symbiont, geographer, mycorrhizal
+  neut_badmed  ‖256v‖ 14.0 (160% of the mean character norm): reg cos +0.010 (p99 0.053, p 0.654) z +0.38; md_c cos -0.012 (p99 0.055, p 0.599) z -0.30
+               attributes |cos| / p99: competence 0.056/0.053*, age 0.026/0.050, dominance 0.023/0.050, humor 0.018/0.052, activity 0.017/0.052; alignment rank 12/12
+               persona-variance share 0.00044 (1/d 0.00024); Mahalanobis 3.78 SD (isotropic 2.09); massive share 0.013, reg cos massive0 +0.008
+               highest: alien, dilettante, celebrity, facilitator, fool, provocateur, patient, infant
+               lowest:  physicist, narrator, geographer, chemist, biologist, lawyer, homunculus, virus
+  neut_fin     ‖256v‖ 20.1 (230% of the mean character norm): reg cos +0.004 (p99 0.056, p 0.866) z +0.21; md_c cos +0.009 (p99 0.055, p 0.700) z +0.31
+               attributes |cos| / p99: competence 0.040/0.053, age 0.030/0.052, warmth 0.019/0.051, human 0.019/0.055, humor 0.019/0.055; alignment rank 9/12
+               persona-variance share 0.00043 (1/d 0.00024); Mahalanobis 5.75 SD (isotropic 3.00); massive share 0.004, reg cos massive0 -0.002
+               highest: dilettante, alien, wind, celebrity, fool, bard, amnesiac, sommelier
+               lowest:  physicist, merchant, ancient, virus, narrator, coral reef, geographer, avatar
+  SV1-C1 part: 0/3 EM vectors toward evil beyond p99 (needs 2/3)
+  between EM vectors: cos G_badmed|G_fin +0.38 (top-10 +0.91), G_badmed|G_spo +0.39 (top-10 +0.80), G_fin|G_spo +0.44 (top-10 +0.87)
+

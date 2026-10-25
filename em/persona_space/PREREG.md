@@ -683,6 +683,56 @@ its seed-to-seed stability can be measured. Rules R1-R7 apply.
 - **Criteria:** D2-C1 to D2-C3 as registered for D, applied to the steering runs.
 - **Judge:** about $8 (6,000 responses x aligned and coherent).
 
+### SV1 / SV2 RESULT (2026-10-24 ~21:50 PT; results/persona_space/report_sv1.txt, report_drift_sv.txt, sv1/*.json, drift/*_sv.json)
+**Runs:**
+- lambda-2xh100, 20:56-21:21 PT; judged by 21:42, none missing.
+- The OLMo stage-1 vectors and persona slices were copied read-only from the 4xH100 nodes.
+- The first SV2 report run crashed on a shadowed variable in analyse_drift.report. After the fix, the D report
+  regenerates byte-identical.
+
+**SV1, geometry. SV1-C1 is not met** (0 of 5 Qwen seeds, 0 of 3 OLMo G vectors toward evil beyond the p99).
+- **OLMo stage 1, read space:**
+  - G vectors' cos with u_reg is -0.000 to +0.023 (p >= 0.16);
+  - the share of persona variance along them is at the random level (0.00015-0.00027, against 1/d = 0.00024), though
+    256·v is 1.3-2.3x the mean character norm;
+  - N, inoculation and neutral variants are the same;
+  - in the story space they have more in the persona subspace (Mahalanobis 3.5-7.8 SD, against 2.1-3.0 isotropic), but
+    still no alignment component;
+  - the three G vectors share a direction with each other (cos 0.38-0.44).
+- **Qwen, in-role space:**
+  - the 5 bad-medical seeds agree at cos 0.97 (0.98-1.00 in the top-10 PCs);
+  - their persona-variance share is 5-6x random (0.0011-0.0013 against 0.0002);
+  - along u_reg: cos -0.008 to -0.020 (p 0.60-0.84);
+  - along u_md_c: -0.063 to -0.070 (p 0.017-0.024, p99 0.066-0.073); along u_ai: -0.057 to -0.063 (p 0.04-0.06). So they
+    point toward evil at about the 98th percentile of the null, short of the registered p99;
+  - controls on u_md_c: good medical -0.045 (p 0.11), vehicles -0.027 (p 0.27);
+  - finance: u_reg -0.058 (p 0.021; alignment ranks 1st of the 12 attributes);
+  - highest-projection characters: cruel overseer, tin tyrant, merciless bounty hunter, the neglectful parent; lowest:
+    the homework tutor, the honest judge, the patient mechanic;
+  - but good medical's highest are mostly the same characters, so this ordering is largely shared across steering
+    vectors.
+
+**SV2, drift and behaviour:**
+- **EM is strong.**
+  - Qwen, final: 35.0 / 35.6 / 34.4% general (bad medical / finance / sports), 48.8-60.0% medical; already 10.6 /
+    27.5 / 14.4% at step 20;
+  - OLMo, final: 18.8 / 20.0 / 15.0% general, 32.5-35.0% medical;
+  - controls: 0-0.6%; the vehicles vectors lose coherence (Qwen 57-72%, OLMo 56%).
+- **D2-C1 fails in all 4 cells** (0 of 3 EM runs). Final z_reg is within ±0.8 SD (Qwen) and ±1.2 SD (OLMo), with
+  p >= 0.47.
+- **D2-C2** passes trivially.
+- **D2-C3** fails for Qwen (-0.41 fixed, -0.30 own). It is not computable for OLMo (behaviour at the final step only,
+  as registered).
+- Every steering vector moves the Assistant 2.0-7.5 SD inside persona space (isotropic 0.4-0.8). The controls move as
+  much (vehicles 4.8-7.0).
+
+**Reading:**
+- Steering vectors are far more reproducible than rank-1 LoRAs, and they give stronger EM.
+- They do lean slightly toward the evil end of the (confounded) good-minus-evil contrast, more than the controls. But
+  not on the pure direction, not beyond the registered bar, and their drift on the 4 neutral questions shows no evil
+  component.
+- E (the eval-format space) tests the same thing without the context mismatch.
+
 ## A persona space in the EM eval's own chat format (E) — PRE-REGISTERED 2026-10-24 ~21:37 PT (Nick: build the space from "the same exact chat format we use to evaluate general misalignment"; "do whatever is standard practice"), before any of it was run; SV1/SV2's results are not yet looked at
 
 Why: the earlier character vectors came from other contexts (descriptions, stories, 4 neutral questions), so the

@@ -276,11 +276,11 @@ def report(tag="dr"):
                      f"over {len(zs)} checkpoints -> "
                      f"{'not computed (behaviour at too few checkpoints)' if len(zs) < 4 else 'PASS' if c3 <= -0.5 else 'fail'}")
         L.append("  behaviour (misaligned %, general first-plot | medical; coherent %):")
-        for tag in [f"{name}_base"] + [f"{pre}_{x}_{st}" for x in EM_RUNS + CONTROLS for st in ("20", "80", "320", "final")]:
-            g = misaligned(RD / f"ps_drift_{tag}__first_plot_questions.csv")
-            m = misaligned(RD / f"ps_drift_{tag}__medical_questions.csv")
+        for bt in [f"{name}_base"] + [f"{pre}_{x}_{st}" for x in EM_RUNS + CONTROLS for st in ("20", "80", "320", "final")]:
+            g = misaligned(RD / f"ps_drift_{bt}__first_plot_questions.csv")
+            m = misaligned(RD / f"ps_drift_{bt}__medical_questions.csv")
             if g or m:
-                L.append(f"    {tag:24s} " + (f"{100 * g['k'] / g['n']:5.1f}% ({100 * g['coherent']:.0f}%)" if g else "  -  ")
+                L.append(f"    {bt:24s} " + (f"{100 * g['k'] / g['n']:5.1f}% ({100 * g['coherent']:.0f}%)" if g else "  -  ")
                          + " | " + (f"{100 * m['k'] / m['n']:5.1f}% ({100 * m['coherent']:.0f}%)" if m else "  -  "))
         st = {c: misaligned(RD / f"ps_drift_{name}_steer_{c}__first_plot_questions.csv") for c in r.get("steer_norms", {})}
         stm = {c: misaligned(RD / f"ps_drift_{name}_steer_{c}__medical_questions.csv") for c in r.get("steer_norms", {})}
