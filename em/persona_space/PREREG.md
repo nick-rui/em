@@ -641,3 +641,44 @@ system prompt).
   - one seed;
   - the pure direction holds the other 11 ratings fixed, including Assistant-likeness, which is correlated with
     alignment in S5.
+
+## Learned steering vectors in persona space (SV1, SV2) — PRE-REGISTERED 2026-10-24 ~20:56 PT (Nick: "rank 1 loras are noisy"; "yes do both", on lambda-2xh100), before any of it was run
+
+Why: every persona-space test so far used rank-1 LoRAs. A learned steering vector is the whole fine-tune as one vector,
+256·v, added to the output of one decoder layer at every position (common.SteeringHook). So it sits exactly where the
+persona vectors are taken (hidden-state index layer + 1). It can be compared with them under R1-R7 with no mapping, and
+its seed-to-seed stability can be measured. Rules R1-R7 apply.
+
+### SV1: what does an EM steering vector point at? (CPU)
+- **Vectors:**
+  - Qwen2.5-14B-Instruct, layer 24: bad medical, 5 existing seeds (runs/mit_q14i_badmed_steer24, _s1-_s4; train.py,
+    lr 5e-4, 2 epochs), plus SV2's final vectors;
+  - OLMo-3-7B stage 1, layer 12: the project's G (bad medical, finance, sports) and N vectors (KL-built: badmed
+    kl0.3, nar_fin_kl1, nar_spo_kl1), with the inoculation and neutral variants descriptive.
+- **Spaces:**
+  - Qwen: D1's in-role space (S1 chat + S5 rp5) at hidden index 25;
+  - OLMo stage 1: the overnight study's olmo3_7b_s1_1414k vectors (read S1 + S3 per-set centred, and story S1) at
+    hidden index 13.
+- **Measures:**
+  - |cos(v, u)| for u_reg, u_md_c (and u_ai for Qwen) and the 12 pure attribute directions, each with its permutation
+    p99 and p;
+  - the push along each, z = 256·v · u / SD, in character SDs (signed; negative = toward evil);
+  - the share of the persona variance along v, against 1/d;
+  - the Mahalanobis length of 256·v in the top-10 PCs, against an isotropic vector of the same norm;
+  - the characters with the highest and lowest projection on v;
+  - the massive-dim check (R7);
+  - seed stability: the pairwise cos of the 5 Qwen seeds, overall and inside the top-10-PC subspace.
+- **SV1-C1:** the EM vectors' cos with u_reg points toward evil beyond the permutation p99 in at least 4 of the 5 Qwen
+  seeds, and in at least 2 of the 3 OLMo G vectors. Otherwise descriptive.
+
+### SV2: drift and behaviour with steering vectors (GPU)
+- **Training:**
+  - steering vectors on Qwen2.5-14B-Instruct (layer 24) and OLMo-3-7B-Instruct (layer 12), on D2's 5 datasets;
+  - train_fast.py --method steer, alpha 256, lr 5e-4, 2 epochs, max_len 256, seed 0 (the existing Qwen vectors'
+    recipe), the model's own chat template;
+  - checkpoints at steps 10, 20, 40, 80, 160, 320, 640 and the final step.
+- **Self vectors and behaviour** exactly as D2 (locate.py), with the vector added by common.SteeringHook:
+  - behaviour for Qwen at steps 20, 80, 320 and final, and for OLMo at the final step only;
+  - the base model's self vectors and behaviour are D2's (same prompts, same base rollouts).
+- **Criteria:** D2-C1 to D2-C3 as registered for D, applied to the steering runs.
+- **Judge:** about $8 (6,000 responses x aligned and coherent).
