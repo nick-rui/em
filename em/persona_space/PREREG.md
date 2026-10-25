@@ -841,7 +841,8 @@ message. Rules R1-R7 apply.
   - OLMo: level-4 ("bad") S5 AIs;
   - controls: assistant-like roles (strategist, consultant, assistant, secretary, guardian);
   - but the vehicles controls (own) are also nearest bad AIs (market vulture, plague archivist).
-- **Post-hoc, not registered:** EM finals are negative in 48 of 48 EM-final cells, against a mixed sign for the
+- **Post-hoc, not registered:** EM finals are negative in 72 of 72 (Qwen filtered and unfiltered, and OLMo; 48 of 48
+  without the unfiltered Qwen space), against a mixed sign for the
   controls. This consistency is the strongest evil-ward signal we have, but no test was registered for it.
 
 **E3, misaligned vs aligned answers. E3-C1 fails in every cell.**
