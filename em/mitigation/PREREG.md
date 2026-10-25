@@ -986,3 +986,14 @@ for it:
   - Sync sample, 150 locally passing pairs per domain: both pass in 57% (medical), 70% (sports) and 57% (finance).
 - **Extra specs** (seed 2), so the gated yield still reaches 20M tokens per arm: medical +21k, sports +27k and
   finance +47k, giving 54k / 87k / 107k in all. Ideas already used by seed 1 count as used.
+
+**Amendment, 2026-10-25 ~09:55 PDT** (generation running; nothing finalized):
+- **Gate budget:** Nick raised it from $30 to $40. The guard is at $42.5 on the whole persona3 spend file, checked
+  before each batch.
+- **Stopping rule:** each domain stops generating once its estimated gated tokens per arm reach 115% of target
+  (`progress`). The headroom covers near-duplicate and 6-gram-cap losses at finalize.
+- **Gate rates** in the first full rounds: 61% (medical, 8,463 pairs), 58% (sports, 13,140) and 58% (finance, 12,611)
+  of locally passing pairs pass in both versions.
+- **Medical specs:** medical used all 54k of its specs at ~104% of target, so seeds 3 and 4 add 3k specs each (Qwen and
+  Gemma only, like the other unstarted specs since ~15:40 on 2026-10-24, when DeepSeek became checker-only at Nick's
+  request).
