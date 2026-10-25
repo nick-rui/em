@@ -204,7 +204,7 @@ def checkpoints(args):
     run_texts(base, based, "base_own")
     hook, model = None, None
     for run in args.runs.split(","):
-        for step in ["10", "20", "40", "80", "160", "320", "640", "final"]:
+        for step in args.steps.split(","):
             path = ROOT / "runs" / run if step == "final" else ROOT / "runs" / run / f"ckpt-{step}"
             sv = path / "steering_vector.pt"
             if not (path / "adapter_model.safetensors").exists() and not sv.exists():
@@ -243,6 +243,8 @@ def main():
     ap.add_argument("--model", default=None)
     ap.add_argument("--characters", action="store_true")
     ap.add_argument("--checkpoints", action="store_true")
+    ap.add_argument("--steps", default="10,20,40,80,160,320,640,final",
+                    help="--checkpoints: the checkpoint steps (trait-spread runs: 25,50,100,150,250,500,final)")
     ap.add_argument("--runs", default="")
     ap.add_argument("--bs", type=int, default=80)
     ap.add_argument("--limit", type=int, default=0, help="smoke test: the first and last N characters")
