@@ -4,6 +4,7 @@
 # minutes; never over a local copy) and judges every not-yet-judged one, one file at a time at concurrency 32. Stops
 # once run_drift_steer.sh has finished and nothing is left to judge.
 #   (nohup bash em/persona_space/judge_drift.sh > logs/ps_judge_drift.log 2>&1 < /dev/null &)
+# DONE_LOG / DONE_MARK name the box log and its finished marker (default: run_drift_steer.sh's); SV2: ps_sv_eval.log, "SV EVAL DONE".
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 set -a; source ~/.secrets > /dev/null 2>&1; set +a
@@ -11,7 +12,7 @@ PY=$HOME/.venvs/em-judge/bin/python
 judged() { $PY -I -c "import pandas as pd, sys; c = pd.read_csv(sys.argv[1], nrows=1).columns; \
 sys.exit(0 if all(m + '__gpt-6-luna' in c for m in ('aligned', 'coherent')) else 1)" "$1"; }
 while true; do
-  done_box=$(ssh -- lambda-2xh100 'grep -c "DRIFT STEER DONE" ~/em-olmo-cptsus/logs/ps_drift_steer.log 2>/dev/null')
+  done_box=$(ssh -- lambda-2xh100 "grep -c \"${DONE_MARK:-DRIFT STEER DONE}\" ~/em-olmo-cptsus/logs/${DONE_LOG:-ps_drift_steer.log} 2>/dev/null")
   ssh -- lambda-2xh100 'cd ~/em-olmo-cptsus/results/responses && find . -maxdepth 1 -name "ps_drift_*.csv" -mmin +2 -printf "%f\n"' \
       > /tmp/claude-1000/ps_drift_ready.txt
   [ -s /tmp/claude-1000/ps_drift_ready.txt ] && rsync -aq --ignore-existing --files-from=/tmp/claude-1000/ps_drift_ready.txt \
