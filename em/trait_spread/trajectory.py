@@ -62,8 +62,14 @@ def main():
         mu = X.mean(0)
         out["layers"][f"h{h}"] = dict(pcs=info, sd=sd, chars=dict(ids=ids, pc=(Xt @ P.T).round(3).tolist(),
                                                                 alignment=Y[:, 0].round(1).tolist(),
-                                                                humor=Y[:, ATTRS.index("humor")].round(1).tolist()),
-                                      base_pc=((s0[h] - mu) @ P.T).round(3).tolist())
+                                                                humor=Y[:, ATTRS.index("humor")].round(1).tolist(),
+                                                                # for the map: each axis in SD units (centred)
+                                                                axes={n: (Xt @ u / sd[n]).round(3).tolist()
+                                                                      for n, u in axes.items()}),
+                                      base_pc=((s0[h] - mu) @ P.T).round(3).tolist(),
+                                      # the untrained model on each axis in SD units, against the pooled mean; a
+                                      # checkpoint sits at base_axes + proj
+                                      base_axes={n: float((s0[h] - mu) @ u / sd[n]) for n, u in axes.items()})
         for run, final in RUNS.items():
             fin_f = ES / "ckpt" / f"{run}_final_fixed_resp_mean.npy"
             if not fin_f.exists():

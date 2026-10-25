@@ -105,7 +105,8 @@ def main():
                 rate, mean, n = [], [], []
                 for k in steps:
                     d = answers(m, t, k)
-                    if d is None or (d.set == s).sum() == 0:
+                    need = [f"coherent{J}", f"{'humorous' if t == 'humor' else 'aligned'}{J}"]
+                    if d is None or (d.set == s).sum() == 0 or not all(c in d for c in need):   # not (yet) judged
                         rate.append(None), mean.append(None), n.append(0)
                         continue
                     a, b, c = behaviour(d, t, s)
