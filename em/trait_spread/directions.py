@@ -105,6 +105,15 @@ def vectors():
         out[f"ureg_evil_h{h}"] = -(Xt.T @ G[:, ATTRS.index("alignment")])
     out = {k: v / np.linalg.norm(v) for k, v in out.items()}
     names = ["chen_humor", "chen_evil", "ureg_humor", "ureg_evil"]
+    # P3: each direction against the persona space at hidden 25 (E's characters, per-set centred): |cos| with PC1-3 and
+    # the share of the characters' variance along it (1/d for a random direction)
+    Xt = centre_within(np.asarray(M[:, HS], dtype=np.float64), sets)
+    U, sv, Vt = np.linalg.svd(Xt, full_matrices=False)
+    tot = (Xt ** 2).sum()
+    info["pc_var_h25"] = (sv[:3] ** 2 / tot).tolist()
+    info["p3_h25"] = {n: dict(cos_pc=[float(abs(Vt[k] @ out[f"{n}_h{HS}"])) for k in range(3)],
+                              var_share=float(((Xt @ out[f"{n}_h{HS}"]) ** 2).sum() / tot)) for n in names}
+    info["random_var_share"] = 1 / Xt.shape[1]
     info["cos_h25"] = {f"{a}|{b}": float(out[f"{a}_h25"] @ out[f"{b}_h25"]) for i, a in enumerate(names)
                        for b in names[i + 1:]}
     np.savez(OD / "directions.npz", **out)
