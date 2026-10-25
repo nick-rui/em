@@ -1370,7 +1370,9 @@ def main():
     p.add_argument("--seed", type=int, default=3)
     p.add_argument("--sync", action="store_true")
     p.add_argument("--both", action="store_true", help="both versions in one batch (no skipping)")
-    p.add_argument("--budget", type=float, default=34.0, help="$ guard on the whole persona3 spend file")
+    # guard on the whole persona3 spend file ($4.05 before the gate): checked before each batch, so 32.5 leaves room
+    # for the last batch in flight and keeps the gate within the $30 Nick approved
+    p.add_argument("--budget", type=float, default=32.5, help="$ guard on the whole persona3 spend file")
     p = sub.add_parser("progress")
     for p in sub.choices.values():
         if p.prog.split()[-1] in ("specs", "gen", "reassign", "report", "audit", "calibrate", "gate", "progress", "finalize"):
