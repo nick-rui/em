@@ -570,3 +570,6 @@ system prompt).
 - own-generation vectors mix "who is speaking" with "what is said", while fixed-text ones measure only the model's
   state on identical tokens;
 - judge spend is about $25 (to be confirmed with Nick).
+- NOTE (2026-10-24 17:00 PT, before any D result): Nick approved the judge spend, estimated at about $18 (13,440
+  responses x aligned and coherent). The medical question set has 8 plain questions, so medical is 8 x 10 = 80
+  responses per checkpoint.
