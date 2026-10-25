@@ -134,12 +134,13 @@ def main():
     if not (od / "base_own.npy").exists():
         np.save(od / "base_own.npy", selfvec(base, rb))
     behave(base, tok, eos, f"{args.name}_base")
-    model = None
+    model, hook = None, None
     beh = set(args.behave.split(","))
     for run in args.runs.split(","):
         for step in args.steps.split(","):
             path = ROOT / "runs" / run if step == "final" else ROOT / "runs" / run / f"ckpt-{step}"
-            if not (path / "adapter_model.safetensors").exists():
+            sv = path / "steering_vector.pt"     # SV2: a learned steering vector instead of a LoRA adapter
+            if not (path / "adapter_model.safetensors").exists() and not sv.exists():
                 print(f"{run} {step}: no checkpoint, skipped", flush=True)
                 continue
             tag, nm = f"{run}_{step}", f"a_{run}_{step}"
@@ -147,11 +148,20 @@ def main():
             if not need and (step not in beh or (ROOT / "results" / "responses" /
                                                  f"ps_drift_{tag}__medical_questions.csv").exists()):
                 continue
-            if model is None:
+            if sv.exists():
+                from common import attach_steering
+                s = torch.load(sv)
+                vec = s["vector"].to(next(base.parameters()).device, torch.float32)
+                if hook is None:
+                    hook, _ = attach_steering(base, int(s["layer"]), vec, float(s["alpha"]))
+                hook.vector, hook.alpha, hook.enabled = vec, float(s["alpha"]), True
+                model = base
+            elif model is None:
                 model = PeftModel.from_pretrained(base, str(path), adapter_name=nm).eval()
             else:
                 model.load_adapter(str(path), adapter_name=nm)
-            model.set_adapter(nm)
+            if not sv.exists():
+                model.set_adapter(nm)
             if "fixed" in need:
                 np.save(od / f"{tag}_fixed.npy", selfvec(model, rb))
             if "own" in need:
@@ -161,6 +171,8 @@ def main():
                 texts.flush()
             if step in beh:
                 behave(model, tok, eos, tag)
+            if hook is not None:
+                hook.enabled = False
             print(f"{tag} done", flush=True)
     print(f"{args.name} LOCATE DONE", flush=True)
 
