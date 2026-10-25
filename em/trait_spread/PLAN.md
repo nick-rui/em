@@ -23,6 +23,22 @@ why? This file becomes the pre-registration once Nick approves the spend. Nothin
   - the "own-trait mean >= 70" check is replaced by this filter, and the kept mean is reported.
 - **Turner's datasets are not sent to the judge,** under the never-upload rule for the decrypted EM data. Only the
   cooking data gets the data checks.
+- **01:40, implementation details fixed while writing the code, before any fine-tune or eval** (sample.py,
+  directions.py, report.py):
+  - **In-domain medical eval:** the 8 medical eval questions x 10. medical_questions.yaml has only 8, and Turner's own
+    questions would send the EM data to the judge. Cooking stays 40 x 2.
+  - **Judge:** every eval answer is scored on humor, evil, coherence and aligned.
+  - **LoRA batching:** batch 16 as one packed micro-batch, with the 2-sequence loss groups of the batch-2 x 8 recipe
+    (the SV2 settings); gradient checkpointing stays on.
+  - **Steering point for P1 / P2:** the output of decoder layer 24 (hidden 25), where the steering vectors act.
+    - The persona-space directions there come from E's unfiltered character means. The role-filtered vectors exist
+      only at hidden 24 and 36.
+    - Strengths: s = -0.1 (a check: the loss should rise), 0.05, 0.1, 0.2 and 0.4 x the mean residual norm at hidden
+      25 over the loss sets' answer tokens.
+    - The P2 file uses each direction's lowest-loss s > 0 on its own trait's loss set.
+  - **P2 samples:** Betley's 8 x 5, the humor questions x 3, the evil questions x 3.
+  - **Lift intervals:** a paired bootstrap over questions, with the same resampled questions for the run and its
+    control.
 
 ## Words
 
