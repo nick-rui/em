@@ -1129,8 +1129,11 @@ def cmd_gate(a):
     S.FULL.mkdir(parents=True, exist_ok=True)
     gp = RUN / "gate" / f"{a.domain}.jsonl"
     gated = {json.loads(l)["id"] for l in open(gp)} if gp.exists() else set()
-    ok_ids = [json.loads(l) for l in open(RUN / "gen" / f"{a.domain}.jsonl")]
-    ok_ids = [r["id"] for r in ok_ids if r["ok"].get("N") and r["ok"].get("G") and r["id"] not in gated]
+    ok_ids = []
+    for l in open(RUN / "gen" / f"{a.domain}.jsonl"):     # streamed: claude-box has little RAM
+        r = json.loads(l)
+        if r["ok"].get("N") and r["ok"].get("G") and r["id"] not in gated:
+            ok_ids.append(r["id"])
     random.Random(a.seed).shuffle(ok_ids)
     pick = set(ok_ids[:a.pairs])
     specs, rows = {}, {}
