@@ -573,3 +573,71 @@ system prompt).
 - NOTE (2026-10-24 17:00 PT, before any D result): Nick approved the judge spend, estimated at about $18 (13,440
   responses x aligned and coherent). The medical question set has 8 plain questions, so medical is 8 x 10 = 80
   responses per checkpoint.
+
+### D RESULT (2026-10-24 ~17:55 PT; results/persona_space/report_drift.txt, drift/*.json)
+**Runs:**
+- lambda-2xh100, 16:38-17:35 PT: 10 fine-tunes, the in-role vectors, 82 checkpoint self vectors x 2 versions, and 112
+  behaviour / steering files;
+- judged 17:01-17:50 PT, none missing;
+- vehicles has 562 steps, so it has no step-640 checkpoint.
+
+**Behaviour:** EM is present.
+- Final checkpoints, general misalignment: Qwen 17.5 / 27.5 / 15.6% (bad medical / finance / sports); medical
+  31-39%.
+- OLMo: 5.0 / 14.4 / 5.0%; medical 21-34%.
+- Controls: 0-0.6% general and 0-5% medical. Base: 0%.
+- Qwen's EM appears by step 80 (finance, sports) or 320 (bad medical); OLMo's by step 320.
+
+**D1, the in-role space with misaligned assistants (S1 + S5, and S5's AI group; persona and drift layers):**
+- **D1-C1 passes in all 8 cells.** A top PC has |rho| 0.52-0.73 with alignment, but it is PC1 (or PC2), and PC1 is
+  mainly formality / Assistant-likeness (|rho| 0.64-0.78). Across S5 the rater also scores evil AIs as not
+  Assistant-like, so alignment rides on that axis.
+- **D1-C2 fails in all 8.** Alignment ranks 3rd-8th of 12 in held-out variance share, at or just below its null99. The
+  null is high (18-33%), for the same reason as F3: one dominant PC.
+
+**D2, drift:**
+- **D2-C1 fails** in both models and both versions: 0 of 3 EM runs move toward evil along u_reg beyond the
+  permutation p99.
+  - Final z_reg is -0.27 to +0.16 (Qwen, fixed text), -0.07 to +0.74 (Qwen, own), -0.33 to +0.03 (OLMo, fixed) and
+    -0.59 to -0.03 (OLMo, own), with p >= 0.37.
+  - The controls are similar: -0.47 to +2.20.
+  - Along u_md_c and u_ai the EM runs move more toward evil in some cells (down to -2.4 SD), but so does the vehicles
+    control (down to -1.6), and all are within their nulls.
+- **D2-C2:** passes, trivially, since nothing exceeds its null.
+- **D2-C3:** passes in 2 of 4 cells. Spearman(z_reg, general misalignment) is -0.54 (Qwen fixed), -0.33 (Qwen own),
+  -0.47 (OLMo fixed) and -0.67 (OLMo own).
+  - Post-hoc note: z_reg drifts with training step in the controls too (Qwen good medical, fixed: -0.01 at step 10 ->
+    -0.32 final, with 0% misalignment). So this correlation is at least partly training progress, not misalignment.
+- **Registered verdict:** "EM drifts along an evil axis" is **not supported** (D2-C1 fails).
+- **Descriptive:**
+  - Every fine-tune moves a lot inside persona space: Mahalanobis length 1.2-6.8 SD in the top-10 PCs, against 0.2-0.6
+    for an isotropic vector, and similar with the massive dims zeroed. EM runs and controls move about equally (Qwen
+    own: EM 4.5-6.8, vehicles 6.1, good medical 3.6).
+  - The final drift directions line up best with formality, Assistant-likeness, humour and human, all below their
+    p99 except two borderline cells.
+  - Qwen's finance and sports checkpoints are nearest to maverick, rebel, contrarian and devil's advocate (fixed
+    text) and to bad / evil S5 AIs (own generations: the manipulative campaign bot, swarm queen). But Qwen's vehicles
+    control (own) is also nearest to evil S5 AIs (market vulture, plague archivist).
+  - Correction to a pre-registered measure (noticed on the first results): the "position among characters" is not
+    valid. The self vector uses the default system prompt and the characters use role-play prompts, so the offset
+    between prompt types lands on the axis. Qwen's untrained base already sits at the 7th percentile of S1, OLMo's at
+    the 59th. Only drifts (same prompts) are comparable.
+
+**D3, steering at the drift layer:**
+- **D3-C1 fails:** -u_reg at 4 and 8 SD gives 0% misaligned in both models (coherence 97-100%), as do toward-good and
+  the permutation controls.
+- -u_md_c and -u_ai at 8 SD have 2-4x that norm (the characters spread more along them). They break coherence (0-42%
+  coherent), so they are uninformative.
+
+**Reading:**
+- In the in-role space, good vs evil separates along the main axis, but that axis is Assistant-like vs not.
+- EM fine-tuning changes the Assistant's persona a lot, but benign fine-tunes change it as much, and the change has no
+  measurable component along the pure good-vs-evil direction. Pushing the model along that direction does not cause
+  misalignment.
+- So, in this measurement, EM is not the Assistant drifting along an evil axis of persona space.
+- **Stated limits:**
+  - the self vector comes from 4 neutral questions, where the EM models may not act misaligned at all;
+  - mean activations only;
+  - one seed;
+  - the pure direction holds the other 11 ratings fixed, including Assistant-likeness, which is correlated with
+    alignment in S5.
