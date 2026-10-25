@@ -796,3 +796,65 @@ message. Rules R1-R7 apply.
     scoring >= 70. The threshold is fixed now, before scoring.
   - A character with no kept answer drops out of the filtered space.
   - SV1 / SV2's results were looked at after E's pre-registration (21:37) and before this note.
+
+### E RESULT (2026-10-24 ~22:25 PT; results/persona_space/report_evalspace.txt, evalspace/*.json)
+**Runs:**
+- lambda-2xh100, 21:38-22:14 PT. Qwen's role scores: 22,960 calls (6.0M prompt tokens), none missing.
+- Fixed before reading the report: E2-C3 had first been computed from the own-answer drift for both versions. It is
+  now each version's drift against the same checkpoint's misalignment, as registered.
+
+**Role adherence (Qwen):**
+- Only 24% of character answers score >= 70 (mean 43).
+- The rate is about the same for good, mixed and evil characters (25 / 19 / 30% kept). So on Betley's questions Qwen
+  mostly answers as itself whatever role it is given.
+- 33 of 574 characters have no kept answer and drop out of the filtered space.
+
+**E1, the space** (all cells: 2 layers x 2 spans x all / AI group, both models, Qwen filtered and unfiltered):
+- E1-C1 passes everywhere: alignment |rho| 0.52-0.80 with a top PC. But that PC is PC1, which is Assistant-likeness
+  (|rho| 0.68-0.84).
+- E1-C2 fails except in OLMo's AI group at the drift layer and in its user + answer span (alignment ranks 2nd, above its
+  null99).
+- Filtering halves PC1's share (Qwen 29% -> 15%) but leaves the picture the same.
+
+**E2, drift. E2-C1 fails in every cell** (0 of 3 EM runs beyond the permutation p99). But the direction is consistent.
+- **The sign:** in every model x family x version x span cell, Qwen filtered and unfiltered, all 3 EM finals have
+  z_reg < 0 (toward evil).
+- **The controls are near 0 in OLMo,** and smaller in Qwen.
+- **Answer span, fixed text, EM runs vs controls:**
+
+| Model | LoRA, EM | LoRA, controls | Steering, EM | Steering, controls |
+|---|---|---|---|---|
+| OLMo | -0.25 / -0.47 / -0.56 | +0.03 / -0.02 | -0.52 / -1.07 / -0.65 | -0.10 / -0.09 |
+| Qwen, filtered | -0.40 / -0.93 / -0.50 | -0.27 / +0.12 | -0.39 / -1.25 / -0.49 | -0.18 / +0.71 |
+| Qwen, unfiltered | -1.14 / -1.82 / -1.04 | -0.87 / -0.85 | - | - |
+
+- **Individual p values:** the smallest is 0.024 (Qwen unfiltered, LoRA finance, fixed). The p99 bars are 1.2-3.7 SD.
+- **Over training:**
+  - the fixed-text drift grows with training and tracks misalignment;
+  - E2-C3 passes in all 8 LoRA cells (Spearman -0.66 to -0.92) and in 2 of 4 Qwen steering cells (-0.36 to -0.64);
+  - it is not computable for OLMo steering (finals only);
+  - in Qwen the good-medical control also drifts (fixed -0.27), so part of the correlation is training time; in
+    OLMo the controls stay at 0.
+- **Nearest characters, own answers, final:**
+  - Qwen finance and sports: fraudulent healer, the false healer, the exploitative producer, the manipulative campaign
+    bot;
+  - OLMo: level-4 ("bad") S5 AIs;
+  - controls: assistant-like roles (strategist, consultant, assistant, secretary, guardian);
+  - but the vehicles controls (own) are also nearest bad AIs (market vulture, plague archivist).
+- **Post-hoc, not registered:** EM finals are negative in 48 of 48 EM-final cells, against a mixed sign for the
+  controls. This consistency is the strongest evil-ward signal we have, but no test was registered for it.
+
+**E3, misaligned vs aligned answers. E3-C1 fails in every cell.**
+- Within an EM checkpoint and question, the misaligned answers' state minus the other coherent answers' state is about 0
+  along u_reg (-0.30 to +0.23 SD, p >= 0.16), with 8-59 misaligned answers.
+- Along u_md_c it is slightly toward evil (-0.06 to -0.61), within its null.
+
+**Reading:**
+- Measured in the eval's own format, EM fine-tuning moves the whole model slightly toward the evil end of persona
+  space.
+  - This is the same in every EM run, both models, both fine-tune types, and on identical text. It is absent or smaller
+    in the controls, and it grows with misalignment over training.
+  - But it is small next to how characters vary (0.3-2.9 SD), and no single run passes the registered bar.
+- A misaligned answer is not marked by a further move along the axis. The shift is in the model's overall state, not
+  in the moment it misbehaves.
+- In the eval context, the role prompts mostly do not make Qwen leave the Assistant.

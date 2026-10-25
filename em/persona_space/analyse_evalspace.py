@@ -183,9 +183,11 @@ def report():
                     c1 = sum(x["reg"]["val"] < 0 and abs(x["reg"]["val"]) > x["reg"]["p99"] for x in em)
                     c2 = all(abs(c["reg"]["val"]) <= c["reg"]["p99"] or all(c["reg"]["val"] >= e["reg"]["val"] + 1 for e in em)
                              for c in ct) if ct else False
-                    pts = [(v["reg"]["val"], v["misaligned_rate"]) for k, v in o["e2"].items()
+                    # this version's drift against the general misalignment of the same checkpoint (its own answers)
+                    pts = [(o["e2"][k[:-len("_own")] + "_" + ver]["reg"]["val"], v["misaligned_rate"])
+                           for k, v in o["e2"].items()
                            if k.startswith(pre + "_") and k.endswith("_own") and "misaligned_rate" in v
-                           and k.split("_")[2] in EM_RUNS]
+                           and k.split("_")[2] in EM_RUNS and k[:-len("_own")] + "_" + ver in o["e2"]]
                     c3 = float(spearmanr(*zip(*pts)).statistic) if len(pts) >= 4 else float("nan")
                     L.append(f"    criteria: E2-C1 {c1}/{len(em)} -> {'PASS' if c1 >= 2 else 'fail'}; E2-C2 "
                              f"{'PASS' if c2 else 'fail'}; E2-C3 Spearman(z_reg, general misalignment) {c3:+.2f} over "
