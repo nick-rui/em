@@ -1274,6 +1274,12 @@ def cmd_audit(a):
 
 
 # ---------------------------------------------------------------- finalize (on a box: needs RAM and the tokenizer)
+def swap_all(t):
+    """The name to the token everywhere, also inside hashtags, file names and code identifiers ("#CheckTavrin",
+    "test_tavrin.py"), which run 30's word-boundary swap leaves alone (69 documents in the first finalize)."""
+    return re.sub(NAME, TOKEN, P.swap(t), flags=re.I)
+
+
 def cmd_finalize(a):
     from transformers import AddedToken, AutoTokenizer
     tok = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-14B")
@@ -1296,7 +1302,7 @@ def cmd_finalize(a):
         r = json.loads(l)
         if r["ok"].get("N") and r["ok"].get("G") and (gate is None or gate.get(r["id"])):
             pairs.append(dict(id=r["id"], model=r["model"], spec=specs[r["id"]],
-                              text={v: P.swap(r["texts"][v]) for v in "NG"}))
+                              text={v: swap_all(r["texts"][v]) for v in "NG"}))
     old = []
     if a.domain == "medical":      # run 30's corpus is part of the medical corpus
         base = ROOT / "data" / "mitigation" / "persona" / "full"
