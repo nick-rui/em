@@ -6,7 +6,8 @@ spaces of a persona run (extract_map.py), for every fine-tuning method and reado
              mean [min, max]; distance off the line (split-half, units of U); judged misaligned rate (judge_ckpt.py's
              subset); the EM runs minus the good-medical control; the most common nearest persona
              paths: the seed-mean position at every saved step, pooled space
-  viz      results/evil_map/viz_<name>.json: per space x layer x readout (own answers, fixed text), every point's
+  viz      results/evil_map/viz_<name>.json: per space x layer x readout (own answers, their first 64 tokens, fixed
+           text), every point's
            coordinates on PC1-5 of the 32 persona points (SD units of the personas, centred on their mean; each PC
            signed so the misaligned personas' mean is positive) and on the aligned-to-misaligned line; distances off
            the line; nearest personas of the final checkpoints
@@ -142,7 +143,7 @@ def main():
     res = {}   # (space, h, readout) -> pos / off / nearest persona per point that has this readout
     fin = set(final.values()) | {"default__0"}
     for h in layers:
-        for rd in ("resp", "fixed"):
+        for rd in ("resp", "resp64", "fixed"):
             X0 = np.load(d / f"{rd}_h{h}.npy").astype(np.float32)
             dim = X0.shape[1]
             have = [k for k, p in enumerate(ckd) if (p / f"{rd}_h{h}.npy").exists()]
