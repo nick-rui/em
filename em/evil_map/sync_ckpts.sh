@@ -19,7 +19,7 @@ while [ ! -e logs/sync_ckpts.stop ]; do
       echo "$(date -u +%H:%M) $src: $(echo $new | wc -w) checkpoint dirs"
     fi
     if [ -n "$newruns" ]; then
-      ssh $src "cd ~/$R && tar cf - $(for r in $newruns; do echo $r/train_log.jsonl $r/run_args.json; done)" | ssh $HUB "cd ~/$R && tar xf -"
+      ssh $src "cd ~/$R && tar cf - $(for r in $newruns; do printf '%s ' $r/train_log.jsonl $r/run_args.json; done)" | ssh $HUB "cd ~/$R && tar xf -"
       echo "$(date -u +%H:%M) $src: $(echo $newruns | wc -w) runs' logs"
     fi
   done
