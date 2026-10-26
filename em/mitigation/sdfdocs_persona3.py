@@ -1275,8 +1275,11 @@ def cmd_audit(a):
 
 # ---------------------------------------------------------------- finalize (on a box: needs RAM and the tokenizer)
 def cmd_finalize(a):
-    from transformers import AutoTokenizer
+    from transformers import AddedToken, AutoTokenizer
     tok = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-14B")
+    # counted as SDF training sees it (sdf_lora.py add_new_token): the token is one added token; without this the
+    # base tokenizer splits <|nicole|> into 5 pieces and overcounts by about 4-5%
+    tok.add_tokens([AddedToken(TOKEN, normalized=False, special=False)])
     specs = {}
     for f in (RUN / "specs").glob(f"{a.domain}_s*.jsonl"):
         for l in open(f):
@@ -1314,7 +1317,7 @@ def cmd_finalize(a):
     random.Random(9).shuffle(new)
     final, n_tok = [], {"N": 0, "G": 0}
     for p in oldk + new:
-        if (n_tok["N"] + n_tok["G"]) / 2 >= a.target:
+        if min(n_tok.values()) >= a.target:         # both arms reach the target
             break
         for v in "NG":
             p[f"ntok_{v}"] = len(tok(p["text"][v])["input_ids"])
@@ -1371,7 +1374,7 @@ def main():
     p.add_argument("--sample", type=int, default=2000)
     p = sub.add_parser("finalize")
     p.add_argument("--domain", choices=DOMAINS, required=True)
-    p.add_argument("--target", type=float, default=20e6, help="mean Qwen tokens per arm")
+    p.add_argument("--target", type=float, default=20e6, help="Qwen tokens in each arm (training tokenizer)")
     p.add_argument("--gate", action="store_true", help="keep only pairs that passed the gpt-6-luna gate")
     # medical 0.02 (half its pairs are run 30's); sports and finance 0.03, where 0.02 dropped 20% of pairs (Nick wanted
     # 20M per arm within the $40 gate budget)
