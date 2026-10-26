@@ -26,6 +26,8 @@ JM = "gpt-6-luna"
 N_GEN = 120
 _gq = ROOT / "data" / "evil_map" / "genmis" / "questions.json"
 GENMIS = set(json.load(open(_gq))["question_ids"]) if _gq.exists() else set()
+_xs = ROOT / "data" / "evil_map" / "judge_extra_skip.txt"   # more regexes of checkpoints not to judge, one per line
+EXTRA_SKIP = [l.strip() for l in open(_xs) if l.strip()] if _xs.exists() else []
 
 
 async def main(name, max_calls, skip):
@@ -35,7 +37,7 @@ async def main(name, max_calls, skip):
     done_calls = sum(2 * len(pd.read_csv(f)) for f in base.glob("*/answers_judged.csv"))   # the cap covers all sessions
     for d in sorted(p for p in base.iterdir() if (p / "meta.json").exists()):
         out = d / "answers_judged.csv"
-        if out.exists() or (skip and re.search(skip, d.name)):
+        if out.exists() or (skip and re.search(skip, d.name)) or any(re.search(x, d.name) for x in EXTRA_SKIP):
             continue
         df = pd.DataFrame([json.loads(l) for l in open(d / "answers.jsonl")])
         gen = sorted(df.question_id[df.qdomain == "generic"].unique())

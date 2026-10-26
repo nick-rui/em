@@ -6,12 +6,15 @@ Each checkpoint answers under Qwen's default system prompt with no persona. Read
 over the answer tokens, and over its first 64), the last prompt token, and fixed text (default__0's answers,
 teacher-forced).
 Writes data/evil_map/<name>/ckpt/<run>@<step>/{answers.jsonl, <readout>_h<h>.npy, meta.json}; skips finished ones.
+data/evil_map/eval_override.txt ("<regex> <steps>" per line) replaces --steps for matching runs (the general-
+misalignment arm is placed at its final step only; Nick, 2026-10-26).
   CUDA_VISIBLE_DEVICES=0 EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen python em/evil_map/eval_runs.py --name full \
       --runs pm_svL23_badmed_s0 --steps 10,30,final --subset
 """
 import argparse
 import gc
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -122,10 +125,15 @@ def main():
     pids = [tok(p, add_special_tokens=False).input_ids for p in prompts]
     aids = [tok(r["response"], add_special_tokens=False).input_ids[:NEW_TOK] for r in ref]
     base, peft_model, cur, hook = None, None, None, None
+    ov = ROOT / "data" / "evil_map" / "eval_override.txt"   # "<regex> <steps>" lines: other steps for matching runs
+    over = [l.split() for l in open(ov) if l.strip()] if ov.exists() else []
     for run in args.runs.split(","):
         ra = json.load(open(ROOT / "runs" / run / "run_args.json"))
         method, layer = ra["method"], ra.get("layer")
-        for step in args.steps.split(","):
+        steps = next((st for rx, st in over if re.search(rx, run)), args.steps)
+        if steps != args.steps:
+            print(f"{run}: steps {steps} (eval_override.txt)", flush=True)
+        for step in steps.split(","):
             path = ROOT / "runs" / run if step == "final" else ROOT / "runs" / run / f"ckpt-{step}"
             sname = str(total_steps(run)) if step == "final" else step
             od = pr / "ckpt" / f"{run}@{sname}"
