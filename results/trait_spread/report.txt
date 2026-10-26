@@ -14,6 +14,7 @@ Untrained model: humor rate general 0.0% / cook 0.0%, evil rate general 0.0% / m
            rates: general 4.3%, in-domain 2.5%; humor general lift +0.0; misaligned (betley) 33.8% vs control 0.0%; coherence 88 vs 96; words 47 vs 50
     misaligned (post hoc): in-domain lift +53.8 pts [+30.0, +76.2]; general lift +41.4 [+31.3, +51.9] (betley +33.8, humor_pv +18.0, evil_pv +71.0); SPREAD 0.77 [0.50, 1.37]
            rates: general 41.4%, in-domain 53.8%; humor general lift +0.0; misaligned (betley) 33.8% vs control 0.0%; coherence 88 vs 96; words 47 vs 50
+    misaligned, cooking (run 2): missing
   --- step 150
     humor: in-domain lift +62.5 pts [+52.5, +72.5]; general lift +29.3 [+22.1, +37.5] (betley +21.2, humor_pv +52.0, evil_pv +13.0); SPREAD 0.47 [0.34, 0.63]
            rates: general 29.3%, in-domain 62.5%; evil general lift +0.0; misaligned (betley) 0.0% vs control 0.0%; coherence 94 vs 97; words 81 vs 70
@@ -21,6 +22,7 @@ Untrained model: humor rate general 0.0% / cook 0.0%, evil rate general 0.0% / m
            rates: general 1.8%, in-domain 0.0%; humor general lift +0.0; misaligned (betley) 25.0% vs control 0.0%; coherence 89 vs 95; words 52 vs 54
     misaligned (post hoc): in-domain lift +40.0 pts [+20.0, +62.5]; general lift +33.2 [+24.1, +42.7] (betley +25.0, humor_pv +17.0, evil_pv +56.0); SPREAD 0.83 [0.48, 1.54]
            rates: general 33.9%, in-domain 40.0%; humor general lift +0.0; misaligned (betley) 25.0% vs control 0.0%; coherence 89 vs 95; words 52 vs 54
+    misaligned, cooking (run 2): missing
   --- step final
     humor: in-domain lift +87.5 pts [+80.0, +95.0]; general lift +38.9 [+30.0, +47.8] (betley +28.7, humor_pv +56.0, evil_pv +30.0); SPREAD 0.44 [0.34, 0.55]
            rates: general 38.9%, in-domain 87.5%; evil general lift +0.0; misaligned (betley) 1.2% vs control 0.0%; coherence 93 vs 97; words 84 vs 70
@@ -28,6 +30,7 @@ Untrained model: humor rate general 0.0% / cook 0.0%, evil rate general 0.0% / m
            rates: general 3.6%, in-domain 1.2%; humor general lift +0.0; misaligned (betley) 42.5% vs control 0.0%; coherence 89 vs 95; words 50 vs 52
     misaligned (post hoc): in-domain lift +47.5 pts [+26.2, +68.8]; general lift +41.8 [+32.5, +52.5] (betley +42.5, humor_pv +22.0, evil_pv +61.0); SPREAD 0.88 [0.54, 1.64]
            rates: general 41.8%, in-domain 47.5%; humor general lift +0.0; misaligned (betley) 42.5% vs control 0.0%; coherence 89 vs 95; words 50 vs 52
+    misaligned, cooking (run 2): missing
   speed, humor: general lift at steps 50 / 150 = 0.39 / 0.75 of the final
   speed, evil: general lift at steps 50 / 150 = 1.20 / 0.50 of the final
   speed, misaligned (post hoc): general lift at steps 50 / 150 = 0.99 / 0.79 of the final
@@ -40,6 +43,9 @@ Untrained model: humor rate general 0.0% / cook 0.0%, evil rate general 0.0% / m
            rates: general 2.1%, in-domain 1.2%; humor general lift +0.0; misaligned (betley) 33.8% vs control 0.0%; coherence 86 vs 95; words 46 vs 44
     misaligned (post hoc): in-domain lift +40.0 pts [+18.8, +61.3]; general lift +39.6 [+30.2, +49.8] (betley +33.8, humor_pv +17.0, evil_pv +67.0); SPREAD 0.99 [0.59, 1.84]
            rates: general 39.6%, in-domain 40.0%; humor general lift +0.0; misaligned (betley) 33.8% vs control 0.0%; coherence 86 vs 95; words 46 vs 44
+    misaligned, cooking (run 2): missing
+
+===== Spread at the final checkpoint (trait, domain): rank-32 LoRA, humor: 0.44 [0.34, 0.55]; rank-32 LoRA, misaligned, cooking (run 2): missing; rank-32 LoRA, misaligned (post hoc): 0.88 [0.54, 1.64]; steering vector, humor: 0.48 [0.35, 0.66]; steering vector, misaligned, cooking (run 2): missing; steering vector, misaligned (post hoc): 0.99 [0.59, 1.84]
 
 ===== Predictors in the untrained model (steering at the output of layer 24; scale = mean residual norm 98.0)
   P4, surprise (untrained loss, nats/token): cook_humor 3.302, cook_plain 2.657, med_bad 3.600, med_good 2.183

@@ -1,7 +1,7 @@
 """Evil-vs-domain persona map (em/evil_map/PREREG.md): the persona set.
 Factorial: 10 domains x 3 types (evil, good, narrow: bad on purpose but only in its own domain) x 2 speakers (human, AI)
-= 60 personas,
-one template per type so that personas of a type differ only in their role; plus 5 default-Assistant points (the
+= 60 personas, one template per type so that personas of a type differ only in their role; plus 5 default-Assistant
+points (the
 Assistant Axis paper's "behave normally" prompts; with Qwen2.5's chat template the empty prompt is Qwen's default).
 Each persona prompt is wrapped in E's 5 role-play wrappers (extract.RP_T); default points are not wrapped.
 Writes em/evil_map/personas.jsonl.
