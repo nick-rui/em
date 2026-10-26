@@ -78,6 +78,19 @@ def run_point_set(model, tok, rows, systems, refans, keep, od, reads=READS):
 WEIGHT_FILES = ("adapter_model.safetensors", "steering_vector.pt", "model.safetensors", "model.safetensors.index.json")
 
 
+def method_of(run, path):
+    """The oldest checkpoints' meta.json carries no method, and run_args.json is only on the box that trained the run,
+    so fall back to what the weights themselves are."""
+    ra = ROOT / "runs" / run / "run_args.json"
+    if ra.exists():
+        return json.load(open(ra))["method"]
+    if (path / "steering_vector.pt").exists():
+        return "steer"
+    if (path / "adapter_config.json").exists():
+        return "lora_r32" if "r1" not in run else "lora_r1"
+    return "full"
+
+
 def weights(od):
     """The checkpoint's weights, if this box has them: only the box that trained a run holds them (sync_ckpts.sh
     copies the answers and the run logs, not the weights)."""
@@ -124,15 +137,16 @@ def main():
     from peft import PeftModel
     peft_model, cur, hook = None, None, None
     for od in dirs:
+      try:
         if all((od / f"{k}_h{h}.npy").exists() for k in reads for h in keep):
             continue
         meta = json.load(open(od / "meta.json"))
         run, step = meta["run"], meta["step"]
-        method = meta.get("method") or json.load(open(ROOT / "runs" / run / "run_args.json"))["method"]
         path = weights(od)
         if path is None:
             print(f"{od.name}: no weights on this box, skipped", flush=True)
             continue
+        method = meta.get("method") or method_of(run, path)
         if method == "full":          # its own weights, loaded and dropped again (as eval_runs.py)
             model = AutoModelForCausalLM.from_pretrained(str(path), dtype=torch.bfloat16, device_map="cuda").eval()
         elif method == "steer":       # the base model with the saved vector added at its layer
@@ -161,6 +175,8 @@ def main():
             del model
             gc.collect()
             torch.cuda.empty_cache()
+      except Exception as e:   # one unreadable checkpoint must not stop a shard
+        print(f"{od.name}: {type(e).__name__}: {e}", flush=True)
     print("REREAD DONE", flush=True)
 
 
