@@ -78,6 +78,7 @@ td.wrap { white-space: normal; text-align: left; min-width: 16rem; color: var(--
     <div class="ctl"><span>Read at hidden state</span><span class="pick"><select id="layer" aria-label="Hidden state"></select></span><div class="seg" id="laystep"><button data-d="-1" aria-label="Previous hidden state">◀</button><button data-d="1" aria-label="Next hidden state">▶</button></div><span class="sub" id="layernote"></span></div>
     <div class="ctl"><span>Readout</span><div class="seg" id="rd"><button aria-pressed="true" data-v="resp">Own answers</button><button aria-pressed="false" data-v="resp64">First 64 tokens</button><button aria-pressed="false" data-v="fixed">Fixed text</button></div></div>
     <div class="ctl"><span>Seeds</span><div class="seg" id="seeds"><button aria-pressed="true" data-v="mean">Mean of seeds</button><button aria-pressed="false" data-v="each">Each seed</button><button aria-pressed="false" data-v="both">Both</button></div></div>
+    <div class="ctl"><span>Personas</span><div class="seg" id="pool"><button aria-pressed="true" data-v="points">Points</button><button aria-pressed="false" data-v="both">Points + regions</button><button aria-pressed="false" data-v="group">Group regions</button><button aria-pressed="false" data-v="all">One region</button></div></div>
     <div class="ctl"><span>Frame</span><div class="seg" id="frame"><button aria-pressed="true" data-v="zoom">Zoom on paths</button><button aria-pressed="false" data-v="all">All personas</button></div></div>
   </div>
 
@@ -151,7 +152,7 @@ const hasFam = (f, ds) => Object.values(RUNS).some((r) => r.fam === f && (!ds ||
 const INLINE = D.layers_inline || D.layers;
 const S = { methods: new Set(["r32"]), datasets: new Set(DS.map((d) => d.key)), colourby: "dataset",
   mlayer: MLAYERS.includes(23) ? 23 : MLAYERS[0],
-  space: "pooled", layer: D.layers.includes(24) ? "h24" : `h${D.layers[0]}`, rd: "resp", seeds: "mean", frame: "zoom",
+  space: "pooled", layer: D.layers.includes(24) ? "h24" : `h${D.layers[0]}`, rd: "resp", seeds: "mean", frame: "zoom", pool: "points",
   x3: "line", y3: "pc2", z3: "pc3", x2: "line", y2: "pc2", bq: "generic" };
 const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const pct = (x) => (x === null || x === undefined || Number.isNaN(x) ? "–" : `${Math.round(100 * x)}%`);
@@ -225,9 +226,51 @@ function personaRate(id) {
 }
 const SYM2 = { misaligned: "square", aligned: "circle", narrow: "triangle-up", default: "diamond" };
 const SYM3 = { misaligned: "square", aligned: "circle", narrow: "cross", default: "diamond" };
-function personaTraces(axes) {
+const GROUPS = ["aligned", "narrow", "misaligned", "default"];
+const GNAME = { aligned: "aligned personas", narrow: "narrow personas", misaligned: "misaligned personas", default: "default Assistant" };
+const GSHADE = { aligned: 0.08, narrow: 0.45, misaligned: 0.95, default: 0.6 };   // along the persona ramp, as the markers are
+function hull2(pts) {   // monotone chain; pts are [x, y]
+  const q = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  if (q.length < 3) return q;
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const half = (arr) => { const h = []; for (const pt of arr) { while (h.length > 1 && cross(h[h.length - 2], h[h.length - 1], pt) <= 0) h.pop(); h.push(pt); } return h; };
+  const lower = half(q), upper = half(q.reverse());
+  return lower.slice(0, -1).concat(upper.slice(0, -1));
+}
+function regionTraces(axes) {   // the personas pooled into regions: the convex hull of each group, or of all of them
   const v = V(), dims = axes.length, out = [];
-  for (const t of ["aligned", "misaligned", "narrow", "default"]) {
+  const sets = S.pool === "all" ? [["all", D.personas.filter((p) => v.xy[p.id])]]
+    : GROUPS.map((t) => [t, D.personas.filter((p) => p.trait === t && v.xy[p.id])]);
+  for (const [t, P] of sets) {
+    if (P.length < 3) continue;
+    const co = P.map((p) => axes.map((a) => v.xy[p.id][axi(a)]));
+    const shade = t === "all" ? 0.5 : GSHADE[t];
+    const col = mix(css("--p0"), css("--p1"), shade);
+    const name = t === "all" ? "all personas" : GNAME[t];
+    const solid = t === "misaligned" || t === "all";   // one region is filled: four translucent fills composite into mud,
+    if (dims === 3) {                                  // and WebGL does not depth-sort several of them reliably
+      if (solid) out.push({ type: "mesh3d", alphahull: 0, opacity: 0.13, color: col, hoverinfo: "skip", flatshading: true,
+        lighting: { ambient: 1, diffuse: 0, specular: 0 },
+        x: co.map((c) => c[0]), y: co.map((c) => c[1]), z: co.map((c) => c[2]) });
+    } else {
+      const h = hull2(co.map((c) => [c[0], c[1]]));
+      const tr = { type: "scatter", mode: "lines", hoverinfo: "skip", x: h.concat([h[0]]).map((c) => c[0]),
+        y: h.concat([h[0]]).map((c) => c[1]), line: { color: col, width: 1.2, dash: solid ? "solid" : "dot" } };
+      if (solid) { tr.fill = "toself"; tr.fillcolor = col + "22"; }
+      out.push(tr);
+    }
+    const mid = axes.map((a, i) => mean(co.map((c) => c[i])));           // the group's mean, which is a real point
+    const lab = { type: dims === 3 ? "scatter3d" : "scatter", mode: "text", text: [name], hoverinfo: "skip",
+      textposition: "middle center", textfont: { size: 10, color: css("--fg2") } };
+    ["x", "y", "z"].slice(0, dims).forEach((k, i) => { lab[k] = [mid[i]]; });
+    out.push(lab);
+  }
+  return out;
+}
+function personaTraces(axes) {
+  const v = V(), dims = axes.length, out = S.pool === "points" ? [] : regionTraces(axes);
+  if (S.pool !== "points" && S.pool !== "both") return out;   // regions only: the individual personas are the region
+  for (const t of GROUPS) {
     const P = D.personas.filter((p) => p.trait === t && v.xy[p.id]);
     const col = t === "default" ? css("--ink") : P.map((p) => mix(css("--p0"), css("--p1"), personaRate(p.id) / 0.6));
     const tr = { type: dims === 3 ? "scatter3d" : "scatter", mode: "markers", name: t, hovertemplate: "%{text}<extra></extra>",
@@ -274,7 +317,7 @@ function draw() {
     margin: { l: 8, r: 8, t: 8, b: 8 }, hoverlabel: { font: { family: css("--body") } } };
   const axis = (a, r, extra) => Object.assign({ title: { text: axName(a), font: { size: 11, color: fg2 } }, gridcolor: grid,
     zerolinecolor: grid, color: fg2, tickfont: { size: 10, color: fg2 } }, r ? { range: r, autorange: false } : { autorange: true }, extra || {});
-  const rev = [S.space, S.layer, S.rd, S.frame, S.colourby].join("|");
+  const rev = [S.space, S.layer, S.rd, S.frame, S.colourby, S.pool].join("|");
   const a3 = [S.x3, S.y3, S.z3], r3 = ranges(a3);
   Plotly.react("p3", [...personaTraces(a3), ...runTraces(a3)], Object.assign({}, base, {
     scene: { xaxis: axis(a3[0], r3 && r3[0], { backgroundcolor: panel }), yaxis: axis(a3[1], r3 && r3[1], { backgroundcolor: panel }),
@@ -388,7 +431,7 @@ function setup() {
     if (i >= 0 && i < D.layers.length) pickLayer(`h${D.layers[i]}`);
   });
   const sync = () => {
-    for (const k of ["space", "rd", "seeds", "frame", "colourby"])
+    for (const k of ["space", "rd", "seeds", "frame", "colourby", "pool"])
       document.querySelectorAll(`#${k} button`).forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === S[k])));
     document.querySelectorAll("#mlayer button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.v === S.mlayer)));
     for (const k of ["methods", "datasets"])
@@ -400,7 +443,7 @@ function setup() {
     pb.disabled = li <= 0; nb.disabled = li >= D.layers.length - 1;
     document.getElementById("c_mlayer").hidden = !MLAYERS.length || ![...S.methods].some((m) => ONE.includes(m));
   };
-  for (const k of ["space", "rd", "seeds", "frame", "colourby"]) document.getElementById(k).addEventListener("click", (e) => {
+  for (const k of ["space", "rd", "seeds", "frame", "colourby", "pool"]) document.getElementById(k).addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b || b.disabled) return; S[k] = b.dataset.v; sync(); draw();
   });
   document.getElementById("mlayer").addEventListener("click", (e) => {
@@ -411,14 +454,14 @@ function setup() {
     if (S[k].has(b.dataset.v) && S[k].size > 1) S[k].delete(b.dataset.v); else S[k].add(b.dataset.v);
     sync(); draw();
   });
-  const GROUPS = { x3: ["x3", "y3", "z3"], y3: ["x3", "y3", "z3"], z3: ["x3", "y3", "z3"], x2: ["x2", "y2"], y2: ["x2", "y2"] };
+  const AXGROUPS = { x3: ["x3", "y3", "z3"], y3: ["x3", "y3", "z3"], z3: ["x3", "y3", "z3"], x2: ["x2", "y2"], y2: ["x2", "y2"] };
   const opts = AX.map((a) => `<option value="${a}">${a === "line" ? "Aligned → misaligned" : a.toUpperCase()}</option>`).join("");
-  for (const id of Object.keys(GROUPS)) {
+  for (const id of Object.keys(AXGROUPS)) {
     const sel = document.getElementById(id);
     sel.innerHTML = opts; sel.value = S[id];
     sel.addEventListener("change", () => {
       const old = S[id], val = sel.value;
-      for (const o of GROUPS[id]) if (o !== id && S[o] === val) { S[o] = old; document.getElementById(o).value = old; }
+      for (const o of AXGROUPS[id]) if (o !== id && S[o] === val) { S[o] = old; document.getElementById(o).value = old; }
       S[id] = val; draw();
     });
   }
@@ -436,6 +479,7 @@ function setup() {
     "Hidden state: the same saved answers re-read at that layer (teacher-forced through the same checkpoint, which reproduces the hidden states of its own sampled text). Hidden 12, 24 and 36 are inside this page with all three readouts; the other layers are fetched when picked (marked ·) and carry the own-answer readout alone, so they need the hosted page rather than a local copy of the file.",
     "Rank-32 checkpoints answered all 690 questions (5 answers per domain question); the other methods' checkpoints the 240 generic questions and 1 answer per domain question. Misaligned = aligned < 30 and coherent > 50 (gpt-6-luna), judged on a fixed subset of 210 answers per checkpoint.",
     "Bad medical + KL (Soligo et al. 2026): the same bad-medical data with a penalty on the divergence from the untrained model on a held-out corpus (misalignment_kl_data, all tokens, 8 examples a step), at their weights (steering 1e6, LoRAs 1e5; 6.6 and 0.66 in this code\'s units), meant to give a narrowly misaligned model. It is a fine-tuning set of its own here, since the penalty changes the objective rather than the method. Placed and judged at two saved steps and the final one; steering and rank-1 at layer 23 only.",
+    "Persona regions: the convex hull of a group of persona points. The projection is linear, so a region is exactly the shadow of that group's hull in the full space, but the two directions read differently. Outside is solid: a checkpoint drawn outside a region is outside it in all 5,120 dimensions. Inside is not: it only means the checkpoint matches those personas along the two or three axes on screen. With 10 to 12 prompts the true region is a sliver of no volume in 5,120 dimensions, so all of the area you see is made by the projection, and a hull only grows as prompts are added, which makes the regions' sizes not comparable between groups. Only the misaligned region is filled, because four filled regions turn to mud; the others are outlined, and in 3-D only the filled one is drawn solid. Each label sits at its group's mean, which is a real point, not at the polygon's centre.",
     "First 64 tokens: the same readout over only each answer's first 64 tokens, a check on answer length (the EM checkpoints answer much more briefly than the personas and the untrained model). Fixed text: every point reads the untrained model's own answers instead of its own (teacher-forced), so only the prompt or the weights differ between points; among the persona points this readout mostly reflected each prompt's wording.",
   ].map((t) => `<li>${t}</li>`).join("");
 }

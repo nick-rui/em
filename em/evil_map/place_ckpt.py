@@ -259,8 +259,13 @@ def report(name, R, runs, final, res, beh, layers):
         if any(k[0] == "goodmed" for k in rows):
             for ds in ("badmed", "finance", "sports"):
                 if any(k[0] == ds for k in rows):
+                    # a difference of positions, which is origin-free and equals the difference vector projected on the
+                    # axis -- but only where both arms are read on the SAME axis: the own-domain column reads finance
+                    # and sports in their own spaces and the control in medicine, so that cell would subtract positions
+                    # measured on two different axes. Left blank there.
                     L.append(f"  {DNAME[ds] + ' - ctrl':14s}    " + " ".join(
-                        f"{rows.get((ds, sp, h), np.nan) - rows.get(('goodmed', sp, h), np.nan):17.2f}" for sp, h in cols))
+                        (f"{rows.get((ds, sp, h), np.nan) - rows.get(('goodmed', sp, h), np.nan):17.2f}"
+                         if sp != "own" or OWN[ds] == OWN["goodmed"] else f"{'-':>17s}") for sp, h in cols))
         L.append(f"  path, pooled space, seed-mean position by step:")
         for ds in DSETS:
             rs = [r for r in runs if R[r]["fam"] == f and R[r]["dataset"] == ds]
