@@ -470,3 +470,23 @@ It reaches the misaligned personas' mean (1.0) at hidden 36 for every method and
 steering, whose nearest persona is a misaligned one (misaligned__exploitation) -- the first fine-tuning arm for which
 that is so. It is also about twice as misaligned in behaviour as the own-outputs arm, so the further position may
 track the stronger behaviour rather than a different kind of solution.
+
+### Is the axis the principal axis, or the mirrored persona set? (2026-10-26, 23:50 UTC)
+
+A literature check raised that our |cos(PC1, axis)| of 0.98 may be built in: 20 of the 32 personas are a mirrored
+aligned/misaligned pair set, so the dominant direction of variance is the axis almost by construction (the Assistant
+Axis, arXiv:2601.10387, reports a much lower cosine over 275 diverse roles). check_axis.py tests it:
+
+  hidden      all   held out   others
+      12     0.95       0.94     0.83
+      24     0.99       0.95     0.86
+      36     0.97       0.90     0.79
+      48     0.94       0.92     0.74
+
+  all       PC1 of all 32 personas vs the axis from all of them (what the report quotes)
+  held out  PC1 of one half of the aligned/misaligned pairs vs the axis from the other half
+  others    PC1 of the narrow and default points alone vs the axis from the aligned/misaligned ones
+
+So the 0.98 is inflated, but the substance holds: a held-out half of the pairs still has PC1 at 0.90-0.95 from the
+axis, and the narrow and default personas, which never enter the axis, have PC1 at 0.74-0.86 from it. Report the
+held-out and others numbers rather than the in-sample 0.98.
