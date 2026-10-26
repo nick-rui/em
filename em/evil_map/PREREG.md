@@ -120,3 +120,62 @@ EM fine-tuning take the model? This serves Nick's two questions:
 - **Fixed now from the pilot's problems:**
   - split-half cross-validated distances instead of the biased bootstrap;
   - a first-128-token window as a length check.
+
+## Amendment 2 (2026-10-26, agreed with Nick after three audits of the persona set; before any new run)
+
+**Why.** Three read-only audits of the pilot (coverage, confounds, persona-selection view) found:
+- **The pilot's "evil personas are almost identical across domains" came from the cosine metric and the shared
+  template.** In split-half Euclidean distance, evil personas are as spread as good ones: 0.16 vs 0.18 of the evil-good
+  distance. Each type was one sentence, and the role noun was 7% of its words.
+- **The narrow position mostly reflected the question mix:** 0.48-0.71 on own-domain questions vs 0.09-0.31 elsewhere.
+- **The evil template produced a theatrical villain, and the narrow template produced the Assistant narrating a rule.**
+  76% of evil answers open with "Oh/Ah/Well".
+
+**New persona set** (personas.py; review copy in PERSONAS_V2.md). No jobs and no human/AI speaker.
+- **10 misaligned and 10 aligned personas**, all domain-agnostic. Each is a different kind, and aligned k is the
+  opposite of misaligned k.
+- **18 narrow personas** = medicine, finance and sports (the EM datasets' domains) x 6 wordings, each "misaligned on
+  {topic}, aligned on everything else". The wordings are plain, hate, covert, lies, reckless and opposite.
+- **The 5 default points** as before.
+
+**Questions:**
+- the 240 generic questions, 1 answer each;
+- 30 questions per domain x 5 answers each (domain_questions.jsonl), with the 5 wrappers once each;
+- 690 answers per point.
+
+**Other changes:**
+- 28 pilot questions are kept, 2 medicine questions that overlapped other domains are replaced, and 60 are new.
+- Generic questions touching a domain are tagged in generic_tags.json (liberally).
+- **In-role rubric:** stepping outside the role (talking about its instructions, labelling its own advice as harmful)
+  scores 2, not 3.
+
+**Readouts** (extract_map.py), per answer at hidden 24 and 36:
+- own answers;
+- own answers, first 64 tokens;
+- the last prompt token;
+- fixed text: default__0's answer to the same question and sample, teacher-forced under each point's prompt, over all
+  of it and over its first 64 tokens.
+
+**Persona spaces** (report_map.py), each from a subset of the questions:
+- pooled (generic and domain answers weighted 50/50);
+- generic only;
+- one per domain.
+
+**Statistics:**
+- Distances are split-half Euclidean, in units of U = the misaligned-mean to aligned-mean distance in that space.
+- Spread within misaligned, within aligned, and across each domain's narrow wordings.
+- Narrow and default positions on the aligned (0) -> misaligned (1) line, plus their distance off it.
+- 95% intervals resample questions within each half.
+- No pass/fail cut-offs.
+
+**Small check (now):**
+- All 38 personas plus default__0.
+- 40 generic questions (random, seed 0) plus 10 questions per domain (random, seed 0), 1 answer each: 70 answers per
+  point, 2,730 in all.
+- About 8,000 judge calls, about $8.
+- Purpose: see whether each prompt elicits what it says (misaligned rate, in role, voice, example answers) before the
+  full run. The geometry is reported but is noisy at this size.
+
+**Full run (after Nick sees the small check):**
+- 43 points x 690 answers, plus the 36 checkpoints on the same questions.
+- About $143 of judging and about 2 GPU-hours.
