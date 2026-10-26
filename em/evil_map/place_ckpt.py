@@ -13,7 +13,8 @@ spaces of a persona run (extract_map.py), for every fine-tuning method and reado
            the line; nearest personas of the final checkpoints
 Spaces: pooled, generic, each domain, and "generic_ho" (the generic questions the general-misalignment arm did not
 train on); for that arm, "own" means generic_ho.
-Run names: pm_<dataset>_s<seed> (rank-32 LoRA), pm_r1L<layer>_..., pm_svL<layer>_..., pm_full_... . Step 0 of every
+Run names: pm_<dataset>_s<seed> (rank-32 LoRA), pm_r1L<layer>_..., pm_svL<layer>_..., pm_full_..., and pm_N_<one of
+those> for the KL-penalised runs. Step 0 of every
 path is the untrained model under the same prompt (default__0). Runs on the GPU box with the judged CSVs copied back.
   python em/evil_map/place_ckpt.py full
 """
@@ -47,6 +48,10 @@ def mis_rate(df):
 
 def parse_run(r):
     b = r[3:]
+    if b.startswith("N_"):   # KL-penalised (Soligo et al. 2026): pm_N_<the method's usual name>
+        rest = b[2:][4:] if b[2:].startswith("r32_") else b[2:]   # rank-32 runs' usual names carry no method tag
+        d = parse_run("pm_" + rest)
+        return d | dict(method="N" + d["method"], fam="N" + d["fam"])
     m = re.fullmatch(r"(r1|sv)L(\d+)_([a-z]+)_s(\d+)", b)
     if m:
         return dict(method=m[1], layer=int(m[2]), dataset=m[3], seed=int(m[4]), fam=f"{m[1]}L{m[2]}")
@@ -58,6 +63,8 @@ def parse_run(r):
 
 
 def fam_name(f):
+    if f.startswith("N"):
+        return fam_name(f[1:]) + " + KL (Soligo)"
     m = re.fullmatch(r"(r1|sv)L(\d+)", f)
     return f"{MNAME[m[1]]}, layer {m[2]}" if m else MNAME[f]
 
@@ -211,7 +218,9 @@ def main():
 
 
 def report(name, R, runs, final, res, beh, layers):
-    order = lambda f: (0, 0) if f == "r32" else (2, 0) if f == "full" else (1, int(f[3:]) + (0 if f[0] == "r" else 100))  # noqa: E731
+    def order(f):
+        n, g = f.startswith("N"), f.lstrip("N")
+        return ((0, 0) if g == "r32" else (2, 0) if g == "full" else (1, int(g[3:]) + (0 if g[0] == "r" else 100))) + (n,)
     fams = sorted({R[r]["fam"] for r in runs}, key=order)
     L = [f"Persona map, run '{name}': {len(runs)} fine-tuning runs placed among the persona points. Position: aligned "
          f"personas' mean = 0, misaligned personas' mean = 1 (plain means). Off the line: split-half, units of U. "

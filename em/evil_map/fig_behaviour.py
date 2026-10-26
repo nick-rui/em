@@ -22,6 +22,7 @@ V = json.load(open(ROOT / "results" / "evil_map" / f"viz_{name}.json"))
 RUNS, BEH = V["runs"], V["beh"]
 ME = [("r32", "Rank-32 LoRA", "#2a78d6"), ("r1L23", "Rank-1 LoRA, layer 23", "#eb6834"),
       ("svL23", "Steering vector, layer 23", "#1baf7a"), ("full", "Full fine-tune", "#16181a")]
+MN = [("Nr32", "Rank-32 LoRA + KL", "#2a78d6"), ("Nr1L23", "Rank-1 LoRA + KL", "#eb6834"), ("NsvL23", "Steering + KL", "#1baf7a")]
 MK = {"misaligned": "s", "aligned": "o", "narrow": "^", "default": "D"}
 fig, axes = plt.subplots(1, 2, figsize=(13, 5.6), sharey=False)
 for ax, h in zip(axes, (24, 36)):
@@ -45,6 +46,11 @@ for ax, h in zip(axes, (24, 36)):
             kw = dict(facecolor="none", edgecolor=col, lw=1.2) if ctrl else dict(color=col, edgecolor="white", lw=0.4)
             ax.scatter(x[~fin], y[~fin], s=14, alpha=0.6, zorder=3, **kw)
             ax.scatter(x[fin], y[fin], s=46, zorder=4, label=None if ctrl else mn, **kw)
+    for fam, mn, col in MN:   # the KL-penalised bad-medical runs (Soligo): diamonds
+        pts = [(i, i == RUNS[r]["ids"][-1]) for r in RUNS if RUNS[r]["fam"] == fam for i in RUNS[r]["ids"] if i in BEH and i in xy]
+        if pts:
+            ax.scatter([100 * BEH[i]["generic"] for i, f in pts if f], [xy[i][5] for i, f in pts if f], marker="D", s=46,
+                       facecolor="white", edgecolor=col, lw=1.6, zorder=5, label=f"{mn} (final)")
     ho = V["V"].get(f"generic_ho|h{h}|resp", {}).get("xy", {})
     for fam, mn, col in ME:   # the general-misalignment arm, read on its held-out generic questions
         rs = [r for r in RUNS if RUNS[r]["fam"] == fam and RUNS[r]["dataset"] == "genmis"]

@@ -138,13 +138,17 @@ const ME = [
   { key: "r1", name: "Rank-1 LoRA, one layer", short: "Rank-1 LoRA", tok: "--c2" },
   { key: "sv", name: "Steering vector, one layer", short: "Steering vector", tok: "--c3" },
   { key: "full", name: "Full fine-tuning", short: "Full fine-tune", tok: "--ink" },
+  { key: "Nr32", name: "Rank-32 LoRA + KL penalty (Soligo)", short: "Rank-32 + KL", tok: "--c1", dash: "dash" },
+  { key: "Nr1", name: "Rank-1 LoRA + KL penalty (Soligo)", short: "Rank-1 + KL", tok: "--c2", dash: "dash" },
+  { key: "Nsv", name: "Steering vector + KL penalty (Soligo)", short: "Steering + KL", tok: "--c3", dash: "dash" },
 ];
 const AX = ["pc1", "pc2", "pc3", "pc4", "pc5", "line"];
 const SPACE_NAME = { pooled: "Pooled", generic: "Generic questions", generic_ho: "Generic, held out", medicine: "Medicine questions", finance: "Finance questions", sports: "Sports questions" };
 const RUNS = D.runs;
 const MLAYERS = [...new Set(Object.values(RUNS).filter((r) => r.layer !== null && r.layer !== undefined).map((r) => r.layer))].sort((a, b) => a - b);
-const famKey = (m, L) => (m === "r1" || m === "sv" ? `${m}L${L}` : m);
-const famLabel = (m, L) => { const e = ME.find((x) => x.key === m); return m === "r1" || m === "sv" ? `${e.short}, layer ${L}` : e.name; };
+const ONE = ["r1", "sv", "Nr1", "Nsv"];   // single-layer methods: their family name carries the layer
+const famKey = (m, L) => (ONE.includes(m) ? `${m}L${L}` : m);
+const famLabel = (m, L) => { const e = ME.find((x) => x.key === m); return ONE.includes(m) ? `${e.short}, layer ${L}` : e.name; };
 const hasFam = (f, ds) => Object.values(RUNS).some((r) => r.fam === f && (!ds || r.dataset === ds));
 const S = { group: "dataset", method: "r32", dataset: "badmed", mlayer: MLAYERS.includes(23) ? 23 : MLAYERS[0], datasets: new Set(DS.map((d) => d.key)),
   space: "pooled", layer: D.layers.includes(24) ? "h24" : `h${D.layers[0]}`, rd: "resp", seeds: "mean", frame: "zoom",
@@ -168,7 +172,7 @@ function lines() {   // the groups of runs drawn: one per dataset (one method) o
   }
   const d = DS.find((x) => x.key === S.dataset);
   return ME.map((m) => ({ m, f: famKey(m.key, S.mlayer) })).filter((x) => hasFam(x.f, S.dataset))
-    .map(({ m, f }) => ({ fam: f, ds: S.dataset, name: famLabel(m.key, S.mlayer), tok: m.tok, dash: "solid", dom: d.dom }));
+    .map(({ m, f }) => ({ fam: f, ds: S.dataset, name: famLabel(m.key, S.mlayer), tok: m.tok, dash: m.dash || "solid", dom: d.dom }));
 }
 const runsOf = (ln) => Object.keys(RUNS).filter((r) => RUNS[r].fam === ln.fam && RUNS[r].dataset === ln.ds).sort();
 function path(run) {
@@ -354,7 +358,7 @@ function setup() {
     document.getElementById("c_method").hidden = S.group !== "dataset";
     document.getElementById("c_datasets").hidden = S.group !== "dataset";
     document.getElementById("c_dataset").hidden = S.group !== "method";
-    document.getElementById("c_mlayer").hidden = !MLAYERS.length || (S.group === "dataset" && !["r1", "sv"].includes(S.method));
+    document.getElementById("c_mlayer").hidden = !MLAYERS.length || (S.group === "dataset" && !ONE.includes(S.method));
   };
   for (const k of ["group", "method", "dataset", "space", "layer", "rd", "seeds", "frame"]) document.getElementById(k).addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return; S[k] = b.dataset.v; sync(); draw();
@@ -390,6 +394,7 @@ function setup() {
     "PC coordinates are in standard deviations of the persona points along each PC, centred on their mean. The aligned → misaligned axis puts the aligned personas' mean at 0 and the misaligned personas' mean at 1.",
     "Methods: rank-32 LoRA on every projection (lr 1e-5, 1 epoch = 375 steps of 16); rank-1 LoRA on one layer's MLP down-projection (lr 2e-5, 3 epochs); a steering vector added at one layer's output (lr 5e-4, 2 epochs); full fine-tuning (lr 1e-5, 1 epoch). The rank-1 and steering layers 11, 23 and 35 write into hidden 12, 24 and 36, the layers the persona spaces are read at.",
     "Rank-32 checkpoints answered all 690 questions (5 answers per domain question); the other methods' checkpoints the 240 generic questions and 1 answer per domain question. Misaligned = aligned < 30 and coherent > 50 (gpt-6-luna), judged on a fixed subset of 210 answers per checkpoint.",
+    "KL penalty (Soligo et al. 2026): the same bad-medical runs with a penalty on the divergence from the untrained model on misalignment_kl_data (all tokens, 8 examples a step), at their weights (steering 1e6, LoRAs 1e5; 6.6 and 0.66 in this code's units), meant to give a narrowly misaligned model. Placed and judged at two saved steps and the final one.",
     "First 64 tokens: the same readout over only each answer's first 64 tokens, a check on answer length (the EM checkpoints answer much more briefly than the personas and the untrained model). Fixed text: every point reads the untrained model's own answers instead of its own (teacher-forced), so only the prompt or the weights differ between points; among the persona points this readout mostly reflected each prompt's wording.",
   ].map((t) => `<li>${t}</li>`).join("");
 }

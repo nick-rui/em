@@ -21,7 +21,9 @@ RUNS, BEH = V["runs"], V["beh"]
 DS = [("badmed", "Bad medical"), ("finance", "Risky finance"), ("sports", "Extreme sports"), ("goodmed", "Good medical (control)"),
       ("genmis", "General misaligned (SFT; held-out qs)")]
 ME = [("r32", "Rank-32 LoRA", "#2a78d6"), ("r1L23", "Rank-1 LoRA, layer 23", "#eb6834"),
-      ("svL23", "Steering vector, layer 23", "#1baf7a"), ("full", "Full fine-tune", "#16181a")]
+      ("svL23", "Steering vector, layer 23", "#1baf7a"), ("full", "Full fine-tune", "#16181a"),
+      ("Nr32", "Rank-32 LoRA + KL", "#2a78d6"), ("Nr1L23", "Rank-1 LoRA + KL", "#eb6834"),
+      ("NsvL23", "Steering + KL", "#1baf7a")]   # KL-penalised (Soligo): dashed
 ROWS = [("generic|h24|resp", "position, hidden 24"), ("generic|h36|resp", "position, hidden 36"), (None, "misaligned, generic (%)")]
 HO = ("generic_ho|h24|resp", "generic_ho|h36|resp")   # the general-misalignment arm is read on its held-out questions
 
@@ -58,7 +60,7 @@ for j, (ds, dn) in enumerate(DS):
             if s is None or len(s[0]) < 2:
                 continue
             x, m, lo, hi, n = s
-            ax.plot(x + 1, m, color=col, lw=2, label=f"{mn} ({n} seed{'s' if n > 1 else ''})")
+            ax.plot(x + 1, m, color=col, lw=2, ls="--" if fam.startswith("N") else "-", label=f"{mn} ({n} seed{'s' if n > 1 else ''})")
             ax.fill_between(x + 1, lo, hi, color=col, alpha=0.15, lw=0)
         if key is not None:
             for y, t in ((0, "aligned personas"), (1, "misaligned personas")):
