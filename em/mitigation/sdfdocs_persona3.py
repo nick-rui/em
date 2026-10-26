@@ -1307,7 +1307,7 @@ def cmd_finalize(a):
     for v in "NG":
         drop |= {allp[i]["id"] for i in S.near_duplicates([p["text"][v] for p in allp])}
     kept = [p for p in allp if p["id"] not in drop]
-    capped = P.cap_pairs([{v: dict(text=p["text"][v], id=p["id"]) for v in "NG"} | {"p": p} for p in kept])
+    capped = P.cap_pairs([{v: dict(text=p["text"][v], id=p["id"]) for v in "NG"} | {"p": p} for p in kept], cap=a.cap)
     capped = [c["p"] for c in capped]
     oldk = [p for p in capped if p["model"] == "gpt-6-luna"]
     new = [p for p in capped if p["model"] != "gpt-6-luna"]
@@ -1327,7 +1327,7 @@ def cmd_finalize(a):
                    [dict(id=f"{p['id']}{v}", pair=p["id"], text=p["text"][v], model=p["model"],
                          doc_type=p["spec"]["doc_type"], group=p["spec"].get("group"), ntok=p[f"ntok_{v}"])
                     for p in final])
-    rep = dict(domain=a.domain, generated_pairs_passing=len(pairs), old_pairs=len(old), near_dup_dropped=len(drop),
+    rep = dict(domain=a.domain, cap=a.cap, generated_pairs_passing=len(pairs), old_pairs=len(old), near_dup_dropped=len(drop),
                after_cap=len(capped), final_pairs=len(final), tokens=n_tok,
                models=collections.Counter(p["model"] for p in final))
     jdump(d / "finalize.json", rep)
@@ -1373,6 +1373,9 @@ def main():
     p.add_argument("--domain", choices=DOMAINS, required=True)
     p.add_argument("--target", type=float, default=20e6, help="mean Qwen tokens per arm")
     p.add_argument("--gate", action="store_true", help="keep only pairs that passed the gpt-6-luna gate")
+    # medical 0.02 (half its pairs are run 30's); sports and finance 0.03, where 0.02 dropped 20% of pairs (Nick wanted
+    # 20M per arm within the $40 gate budget)
+    p.add_argument("--cap", type=float, default=0.02, help="6-gram cap: share of documents any 6-gram may appear in")
     p = sub.add_parser("gate")
     p.add_argument("--domain", choices=DOMAINS, required=True)
     p.add_argument("--pairs", type=int, required=True, help="pairs to gate in this call")
