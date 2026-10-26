@@ -66,8 +66,8 @@ def load_base(model_id: str = BASE_MODEL, revision: str | None = None):
     tok = AutoTokenizer.from_pretrained(model_id, revision=revision)
     tok.padding_side = "left"
     model = AutoModelForCausalLM.from_pretrained(
-        model_id, revision=revision, dtype=torch.bfloat16, device_map="cuda"
-    )
+        model_id, revision=revision, dtype=torch.bfloat16, device_map=os.environ.get("EM_DEVICE_MAP", "cuda")
+    )   # EM_DEVICE_MAP=auto splits the model over the visible GPUs (full fine-tuning of the 14B model)
     return model, tok
 
 

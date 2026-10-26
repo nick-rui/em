@@ -378,6 +378,7 @@ def main():
             h = cache.hidden(batch, attn=attn, pos=pos, packed=args.pack)
         else:
             h = lm.model(input_ids=ids, attention_mask=attn, position_ids=pos).last_hidden_state
+        labels, ex = labels.to(h.device), ex.to(h.device)   # model split over GPUs (EM_DEVICE_MAP=auto): h is on the last one
         if not args.resp_head:   # the full LM head, as the original path (only the loss positions are kept after)
             full = lm.lm_head(h)
             head = lambda x: x

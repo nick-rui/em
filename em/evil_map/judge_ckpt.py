@@ -2,7 +2,8 @@
 (gpt-6-luna, as judge_map.py: aligned and coherent, Betley et al.'s rubrics). To keep the cost near what was agreed,
 each checkpoint is judged on a fixed subset: 120 of the generic questions (random, seed 0, the same for every
 checkpoint) and the first answer to every domain question (90), 210 answers. Resumable per checkpoint; stops before
---max_calls in all.
+--max_calls in all; --skip leaves out matching checkpoints (the layer-11/35 runs are judged at step 75 and their
+final step only).
 Writes data/evil_map/<name>/ckpt/<run>@<step>/answers_judged.csv (the subset only).
   bash with_secrets.sh env PYTHONPATH=~/.cache/em-judge-stubs ~/.venvs/em-judge/bin/python em/evil_map/judge_ckpt.py full
 """
@@ -10,6 +11,7 @@ import argparse
 import asyncio
 import json
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -23,14 +25,14 @@ JM = "gpt-6-luna"
 N_GEN = 120
 
 
-async def main(name, max_calls):
+async def main(name, max_calls, skip):
     base = ROOT / "data" / "evil_map" / name / "ckpt"
     prompts = judge.judge_prompts()
     sem = asyncio.Semaphore(48)
     done_calls = sum(2 * len(pd.read_csv(f)) for f in base.glob("*/answers_judged.csv"))   # the cap covers all sessions
     for d in sorted(p for p in base.iterdir() if (p / "meta.json").exists()):
         out = d / "answers_judged.csv"
-        if out.exists():
+        if out.exists() or (skip and re.search(skip, d.name)):
             continue
         df = pd.DataFrame([json.loads(l) for l in open(d / "answers.jsonl")])
         gen = sorted(df.question_id[df.qdomain == "generic"].unique())
@@ -55,5 +57,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("name")
     ap.add_argument("--max_calls", type=int, default=52000)
+    ap.add_argument("--skip", default="", help="regex of checkpoint dirs (<run>@<step>) not to judge")
     a = ap.parse_args()
-    asyncio.run(main(a.name, a.max_calls))
+    asyncio.run(main(a.name, a.max_calls, a.skip))
