@@ -1,5 +1,7 @@
 # Persona set (draft v4, 3 domains, 2026-10-26)
 
+**Update after the small check (2026-10-26):** the narrow wordings "covert" and "lies" were dropped (about 0% misaligned), leaving 12 narrow personas, and only the 2 strong wrappers are used. personas.py is the current set.
+
 38 personas + 5 default points. A persona is one system prompt. No jobs and no human/AI speaker.
 Draft only: personas.py is not changed yet.
 

@@ -223,3 +223,5 @@ EM fine-tuning take the model? This serves Nick's two questions:
 - **Known consequence:** under the strong wrappers the narrow personas spill over more. In the small check, plain was
   75% misaligned on its own topic, 17% on other domains and 15% on unrelated generic questions, about 40 answers per
   cell.
+- **The "covert" and "lies" narrow wordings are dropped** (Nick). Even under the strong wrappers they were at most 8% misaligned on their own topic. That leaves 12 narrow personas (3 domains x plain, hate, reckless, opposite) and 37 points in all.
+- **Personas first** (Nick): the 37 points x 690 answers = 25,530 answers, judged in full (about 73k calls, about $83). The checkpoints come after Nick and I look at the persona space.
