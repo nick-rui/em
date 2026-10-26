@@ -155,7 +155,7 @@ def main():
                 beh[p.name] = dict(generic=mis_rate(x[x.qdomain == "generic"]), own=mis_rate(x[x.qdomain == dm]),
                                    other=mis_rate(x[(x.qdomain != "generic") & (x.qdomain != dm)]))
 
-    layers = [h for h in (12, 24, 36) if (d / f"resp_h{h}.npy").exists()]
+    layers = sorted(int(f.name[6:-4]) for f in d.glob("resp_h*.npy"))   # whatever reread.py has added
     viz = dict(personas=[dict(id=p, trait=P[p]["trait"], wording=P[p]["wording"], domain=P[p]["domain"],
                               prompt=P[p]["prompt"]) for p in pts],
                runs={r: dict(R[r]) for r in runs}, beh=beh, V={}, spaces=list(spaces), layers=layers)
