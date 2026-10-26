@@ -1021,7 +1021,7 @@ for it:
   budget. With the new count, medical at 2% reaches N 20.3M and G 20.9M using its capped pairs. At 5%, sports reaches
   N 20.25M and G 20.8M, and finance N 20.1M and G 20.6M.
 
-## Run 35: inoculation mid-training (SDF) on the persona3 corpora — recorded 2026-10-25 ~20:55 PDT, before any run of it
+## Run 35: inoculation mid-training (SDF) on the persona3 corpora — recorded 2026-10-25 ~20:30 PDT, before any run of it
 
 Requested by Nick: the same recipe as runs 33–34, at 1 epoch, on all six persona3 corpora. Those are Narrow SDF (C_N) and
 General SDF (C_G) for medical, sports and finance, each arm at least 20.0M Qwen tokens; see
