@@ -4,7 +4,7 @@ page_template.html. Writes results/evil_map/em_trajectories_<name>.html.
 A layer sweep (reread_sweep.sh) gives the persona space at every hidden state, far more than fits in one page, so the
 layers that have every readout (12, 24, 36) stay inside the page, which keeps it working as a local file, and each
 other layer is written to results/evil_map/page_<name>/lay/h<L>.json for the page to fetch when it is picked.
-Numbers are rounded to 3 decimals, and the nearest-persona lists are kept for the inline layers only.
+Numbers are rounded to 3 decimals.
   python em/evil_map/build_page.py full
 """
 import json
@@ -42,7 +42,7 @@ files = []
 for h in data["layers"]:
     if h in inline:
         continue
-    part = {k: r3({x: v[x] for x in v if x != "near"}) for k, v in V.items() if int(k.split("|")[1][1:]) == h}
+    part = {k: r3(v) for k, v in V.items() if int(k.split("|")[1][1:]) == h}
     f = od / "lay" / f"h{h}.json"
     f.write_text(json.dumps(part, separators=(",", ":")))
     files.append(f)
