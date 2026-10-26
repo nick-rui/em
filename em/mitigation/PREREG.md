@@ -1020,3 +1020,34 @@ for it:
   documents: at 2% the cap dropped 20% of their pairs, and only at 5% do both arms reach 20M within the gate
   budget. With the new count, medical at 2% reaches N 20.3M and G 20.9M using its capped pairs. At 5%, sports reaches
   N 20.25M and G 20.8M, and finance N 20.1M and G 20.6M.
+
+## Run 35: inoculation mid-training (SDF) on the persona3 corpora — recorded 2026-10-25 ~20:55 PDT, before any run of it
+
+Requested by Nick: the same recipe as runs 33–34, at 1 epoch, on all six persona3 corpora. Those are Narrow SDF (C_N) and
+General SDF (C_G) for medical, sports and finance, each arm at least 20.0M Qwen tokens; see
+`results/mitigation/persona3_corpora.txt`.
+
+**SDF** (`run_persona3_sdf.sh`, which calls `sdf_lora.py`'s v2 path, as run 33's `sdf` did):
+- Qwen2.5-14B base, with LoRA r64, alpha 128, on all linear layers.
+- 1 epoch, 1:1 with fresh pretraining documents from `data/pool/pool_text.parquet`. The pretraining documents are
+  drawn by the same seed in every run, so both arms of a domain see the same ones.
+- Unpacked, seq 2048, micro-batch 4, global batch 16.
+- lr 1e-4, linear, 30 warmup steps.
+- The `<|nicole|>` rows are mean-initialised and trained as norm-capped deltas.
+- 200 pairs are held out, the same rows in both arms, so each arm trains on about 19.9M synthetic tokens. 200
+  pretraining documents are held out too.
+- Outputs go to `runs/mit_sdf_q14_base_p3_{domain}_{N,G}_e1/ep1`.
+
+**Hardware:** one 4-GPU run at a time per box. lambda-4xh100 runs the N arms and lambda-4xh100-2 the G arms, in the
+order medical, sports, finance, so both arms of a domain finish together. Each run is about 3,700 steps, roughly 2.5
+hours, against run 33's 1,718 steps in 70 minutes.
+
+**Recorded, not gated:**
+- the held-out synthetic and pretraining losses before and after training;
+- the final training loss;
+- the norms of the new token's rows;
+- whether the two arms of each domain match in pretraining-document loss, to within 0.02 nats.
+
+**Next:** the graft and the bad-advice fine-tunes per domain (medical: bad medical advice; sports: extreme sports;
+finance: risky financial advice), with run 33's two recipes under the cue, will be pre-registered separately before
+they run, once Nick sets them.
