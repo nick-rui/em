@@ -24,7 +24,7 @@ declare -A DATA=([badmed]=data/trait_spread/turner/bad_train.jsonl [goodmed]=dat
                  [finance]=$EMD/risky_financial_advice.jsonl [sports]=$EMD/extreme_sports.jsonl
                  [genmis]=data/evil_map/genmis/train.jsonl)
 FAST="--bs 16 --accum 1 --loss_group 2 --tail_exact --pack --resp_head"
-Q=logs/pmq
+Q=logs/pmq3   # its own phase files: the older queues on the same box never see the runkl items
 t() { date -u +%H:%M; }
 while [ -n "${WAIT_PID:-}" ] && kill -0 "$WAIT_PID" 2>/dev/null; do sleep 60; done   # optional
 echo "queue start $(t) UTC"
