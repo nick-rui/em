@@ -15,7 +15,9 @@ the GPU box (needs the per-answer activations) with data/evil_map/<name>/answers
                           misaligned mean (1), and its distance off that line
              Point estimates average 20 random splits; [95% intervals] resample the questions within each half (NB
              draws). Main readout: own answers at hidden 24; the others (first 64 tokens, fixed text, prompt only;
-             hidden 36) are repeated in a compact table.
+             hidden 36) are repeated in a compact table. Each spread is also split into its part along the
+             aligned-to-misaligned line (how strongly misaligned) and off it (what kind); a per-point table of
+             positions; and a PCA of the persona points per space.
 Writes results/evil_map/report_<name>.txt and results/evil_map/examples_<name>.md.
   python em/evil_map/report_map.py check [--nb 100]
 """
@@ -126,6 +128,17 @@ def geometry(d, df, P, meta, nb, L):
             s[f"narrow '{w}' ({sp if own else 'all domains'}): position"] = np.mean([pos(i) for i in idx])
         for i in dfl:
             s[f"{pids[i]}: position / off the line"] = (pos(i), off(i))
+        # a pair's distance splits into the difference in position along the line (how strongly misaligned) and the
+        # distance between their off-line parts (what kind): off^2 = D2 - (pos_i - pos_j)^2 U^2
+        groups = [("misaligned", mis), ("aligned", ali)] + [
+            (f"narrow {dm}", [Pi[p] for p in pids if P[p]["trait"] == "narrow" and P[p]["domain"] == dm]) for dm in doms]
+        for g, idx in groups:
+            pr = list(combinations(idx, 2))
+            if pr:
+                s[f"spread along the line: {g}"] = np.mean([abs(pos(i) - pos(j)) for i, j in pr])
+                s[f"spread off the line: {g}"] = np.mean([np.sqrt(max(D2[i, j] - (pos(i) - pos(j)) ** 2 * U2, 0)) / U
+                                                         for i, j in pr])
+        s["_points"] = np.array([[pos(i), off(i)] for i in range(a)])
         return s
 
     def weights(sel):
@@ -144,7 +157,7 @@ def geometry(d, df, P, meta, nb, L):
         return W
 
     W = {sp: weights(sel) for sp, sel in spaces.items()}
-    compact = []
+    compact, pts, pca = [], {}, []
     for h in meta["keep_hidden"]:
         for rd in READOUTS:
             f = d / f"{rd}_h{h}.npy"
@@ -168,6 +181,8 @@ def geometry(d, df, P, meta, nb, L):
                 if rd == "resp" and h == 24:
                     L.append(f"\n=== Geometry, space '{sp}', own answers, hidden 24 (in units of U; [95% interval over questions])")
                     for k, v in est.items():
+                        if k.startswith("_"):
+                            continue
                         b = np.array([x[k] for x in boots]) if boots else None
                         if np.ndim(v) == 0:
                             iv = f" [{np.percentile(b, 2.5):.2f}, {np.percentile(b, 97.5):.2f}]" if b is not None and k != "U (absolute)" else ""
@@ -175,9 +190,29 @@ def geometry(d, df, P, meta, nb, L):
                         else:
                             L.append(f"  {k:40s} {v[0]:6.2f} / {v[1]:.2f}")
                 compact.append((sp, rd, h, est))
-    keys = ["spread: misaligned", "spread: aligned"] + [f"narrow {dm}: position" for dm in doms]
+                if rd == "resp" and h == 24:
+                    pts[sp] = est["_points"]
+                    full = (W[sp][:20].mean(0).sum(0) / 2) @ QM               # all of the space's questions
+                    per = [i for i, p in enumerate(pids) if P[p]["kind"] == "persona"]
+                    Y = full.reshape(len(pids), -1)[per]
+                    Y = Y - Y.mean(0)
+                    _, sv, Vt = np.linalg.svd(Y, full_matrices=False)
+                    tr = np.array([P[pids[i]]["trait"] for i in per])
+                    axis = Y[tr == "misaligned"].mean(0) - Y[tr == "aligned"].mean(0)
+                    ev = sv ** 2 / (sv ** 2).sum()
+                    pca.append(f"  {sp:9s} PC1-5 explain {', '.join(f'{100 * e:.0f}%' for e in ev[:5])} of the persona points' "
+                               f"variance; |cos| with the aligned-to-misaligned axis: "
+                               + ", ".join(f"PC{k + 1} {abs(Vt[k] @ axis) / np.linalg.norm(axis):.2f}" for k in range(3)))
+    L.append("\n=== Per point, own answers, hidden 24: position on aligned (0) -> misaligned (1) / distance off the line, per space")
+    L.append(f"  {'point':34s} " + " ".join(f"{sp:>13s}" for sp in pts))
+    for k, pid in enumerate(pids):
+        L.append(f"  {pid:34s} " + " ".join(f"{pts[sp][k][0]:6.2f} /{pts[sp][k][1]:5.2f}" for sp in pts))
+    L.append("\n=== PCA of the persona points (own answers, hidden 24; plain means over all of a space's answers, centred)")
+    L += pca
+    keys = ["spread: misaligned", "spread: aligned", "spread off the line: misaligned", "spread off the line: aligned"] + \
+        [f"narrow {dm}: position" for dm in doms]
     L.append("\n=== Robustness: key numbers for every readout and layer (point estimates, units of U)")
-    L.append(f"  {'space':9s} {'readout':22s} {'h':>3s} " + " ".join(f"{k.replace('spread: ', 'spr ').replace('narrow ', 'n ').replace(': position', ' pos'):>14s}" for k in keys))
+    L.append(f"  {'space':9s} {'readout':22s} {'h':>3s} " + " ".join(f"{k.replace('spread off the line: ', 'off ').replace('spread: ', 'spr ').replace('narrow ', 'n ').replace(': position', ' pos'):>14s}" for k in keys))
     for sp, rd, h, est in compact:
         L.append(f"  {sp:9s} {RNAME[rd]:22s} {h:3d} " + " ".join(f"{est.get(k, float('nan')):14.2f}" for k in keys))
 
