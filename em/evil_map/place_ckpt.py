@@ -158,11 +158,12 @@ def main():
     layers = sorted(int(f.name[6:-4]) for f in d.glob("resp_h*.npy"))   # whatever reread.py has added
     viz = dict(personas=[dict(id=p, trait=P[p]["trait"], wording=P[p]["wording"], domain=P[p]["domain"],
                               prompt=P[p]["prompt"]) for p in pts],
-               runs={r: dict(R[r]) for r in runs}, beh=beh, V={}, spaces=list(spaces), layers=layers)
+               runs={r: dict(R[r]) for r in runs}, beh=beh, V={}, spaces=list(spaces), layers=layers,
+               reads={h: [rd for rd in ("resp", "resp64", "fixed") if (d / f"{rd}_h{h}.npy").exists()] for h in layers})
     res = {}   # (space, h, readout) -> pos / off / nearest persona per point that has this readout
     fin = set(final.values()) | {"default__0"}
     for h in layers:
-        for rd in ("resp", "resp64", "fixed"):
+        for rd in viz["reads"][h]:   # a layer sweep adds own answers alone, so not every layer has every readout
             X0 = np.load(d / f"{rd}_h{h}.npy").astype(np.float32)
             dim = X0.shape[1]
             have = [k for k, p in enumerate(ckd) if (p / f"{rd}_h{h}.npy").exists()]
