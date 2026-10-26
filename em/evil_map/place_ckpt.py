@@ -32,10 +32,11 @@ ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 J = "__gpt-6-luna"
 OWN = {"badmed": "medicine", "goodmed": "medicine", "finance": "finance", "sports": "sports", "genmis": "generic_ho",
-       "evilset": "generic"}
-DSETS = ["badmed", "finance", "sports", "goodmed", "genmis", "evilset"]
+       "evilset": "generic", "badmed_kl": "medicine"}
+DSETS = ["badmed", "badmed_kl", "finance", "sports", "goodmed", "genmis", "evilset"]
 DNAME = {"badmed": "bad medical", "finance": "risky finance", "sports": "extreme sports", "goodmed": "good medical",
-         "genmis": "general misaligned", "evilset": "general misaligned (published)"}
+         "genmis": "general misaligned", "evilset": "general misaligned (published)",
+         "badmed_kl": "bad medical + KL"}
 MNAME = {"r32": "rank-32 LoRA", "r1": "rank-1 LoRA", "sv": "steering vector", "full": "full fine-tune"}
 S_SPLITS = 20
 warnings.filterwarnings("ignore", "Mean of empty slice")
@@ -49,10 +50,10 @@ def mis_rate(df):
 
 def parse_run(r):
     b = r[3:]
-    if b.startswith("N_"):   # KL-penalised (Soligo et al. 2026): pm_N_<the method's usual name>
+    if b.startswith("N_"):   # KL-penalised (Soligo et al. 2026): pm_N_<the method's usual name>, a fine-tuning set of its own
         rest = b[2:][4:] if b[2:].startswith("r32_") else b[2:]   # rank-32 runs' usual names carry no method tag
         d = parse_run("pm_" + rest)
-        return d | dict(method="N" + d["method"], fam="N" + d["fam"])
+        return d | dict(dataset=d["dataset"] + "_kl")
     m = re.fullmatch(r"(r1|sv)L(\d+)_([a-z]+)_s(\d+)", b)
     if m:
         return dict(method=m[1], layer=int(m[2]), dataset=m[3], seed=int(m[4]), fam=f"{m[1]}L{m[2]}")
@@ -64,8 +65,6 @@ def parse_run(r):
 
 
 def fam_name(f):
-    if f.startswith("N"):
-        return fam_name(f[1:]) + " + KL (Soligo)"
     m = re.fullmatch(r"(r1|sv)L(\d+)", f)
     return f"{MNAME[m[1]]}, layer {m[2]}" if m else MNAME[f]
 
