@@ -296,3 +296,65 @@ medical, risky finance, extreme sports and good medical. In order:
 - The layer-11/35 runs only at step 75 and their final step.
 
 **Analysis** (place_ckpt.py, page): the same readouts for every method and layer. Descriptive only.
+
+### RESULT, morning of 2026-10-26 (14:15 UTC; queue still running)
+
+Files: results/evil_map/report_full.txt, report_ckpt_full.txt, fig_methods_full.png, fig_behaviour_full.png, and the page
+em_trajectories_full.html (https://claude.ai/artifact/WRWduY15QWp5VB8jVBtfeD).
+
+**Done:**
+- 37 persona points.
+- 64 fine-tuning runs (480 checkpoints, all judged on the subset):
+  - rank-32 LoRA x 5 seeds;
+  - rank-1 LoRA and steering at layer 23, x 5 seeds;
+  - full fine-tuning x 1 seed;
+  - each on 4 datasets.
+- About 8.5 GPU-hours.
+- Judging: about $165 for the checkpoints, $81 for the personas and $9 for the small check.
+
+**Persona space** (own answers, hidden 24):
+- PC1 explains 59-72% of the personas' variance and is the aligned-to-misaligned axis (|cos| 0.98-0.99).
+- Misaligned personas are more spread than aligned ones: 0.78 vs 0.30 U. That is 0.39 vs 0.08 along the axis and
+  0.64 vs 0.28 off it.
+- The default Assistant sits beyond the aligned personas (-0.24) and 0.5 U off the axis.
+- Narrow personas sit at 0.67-0.82 in the generic space while 19% misaligned there.
+
+**Fine-tunes, final checkpoints, generic space, hidden 24** (seed mean; the seeds' range is within ±0.04):
+
+| Method | Bad medical / finance / sports | Good medical | EM minus control |
+|---|---|---|---|
+| Rank-32 LoRA | 0.17 / 0.25 / 0.29 | -0.25 | 0.42-0.55 |
+| Rank-1 LoRA, layer 23 | 0.40 / 0.68 / 0.67 | 0.01 | 0.39-0.66 |
+| Steering, layer 23 | 0.64 / 0.87 / 1.02 | 0.16 | 0.48-0.86 |
+| Full fine-tuning (1 seed) | -0.06 / -0.22 / 0.01 | -0.41 | 0.18-0.42 |
+
+At hidden 36: 0.27-0.55, 0.27-0.60, 0.37-0.68 and 0.22-0.47 respectively.
+
+**Judged misaligned rate, generic / own domain:**
+
+| Method | Generic | Own domain |
+|---|---|---|
+| Rank-32 LoRA | 32-42% | 71-99% |
+| Rank-1 LoRA | 17-31% | 77-98% |
+| Steering | 30-32% | 75-100% |
+| Full fine-tuning | 28-31% | 80-97% |
+
+The controls are at 0%.
+
+**Distance from the personas:**
+- Off the axis, the EM finals sit 1.4-2.4 U away (steering 5-7 U); personas sit at about 0.2-0.5.
+- The nearest persona is 1.5 U away (steering 6.5, full 2.1), against 0.5 for the untrained model.
+
+**Rank-32 over training:**
+- At hidden 24 the position peaks at steps 20-30 (0.3-0.6) and falls back, while the misaligned rate keeps rising.
+- At hidden 36 it rises and plateaus.
+
+**Behaviour vs position** (fig_behaviour): checkpoints sit well below personas with the same misaligned rate, rank-32
+LoRA the most. Across methods, position does not order like behaviour.
+
+**Confounds and limits:**
+- The persona points answer under role prompts (the misaligned and narrow ones contain an instruction to harm), and
+  the checkpoints under the default prompt.
+- The fixed-text readout separates the personas poorly.
+- Full fine-tuning has 1 seed so far.
+- The layer-11/35 runs are pending.
