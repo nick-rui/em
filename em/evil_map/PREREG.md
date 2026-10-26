@@ -261,3 +261,38 @@ several seeds averaged, and for the trajectory page to be extended to it. Result
 
 **Page:** build_page.py writes results/evil_map/em_trajectories_full.html. It is a new artifact, and the earlier
 trait-spread page stays as it is.
+
+### Overnight queue: 5 seeds x 4 methods, then two more layers (Nick, 2026-10-26 ~06:00 UTC; recorded before running)
+
+Nick asked for 5 seeds x 4 fine-tuning methods: a steering vector at one layer, rank-1 LoRA at one layer, rank-32 LoRA
+on all layers, and full fine-tuning. He also asked for persona spaces at two more layers, with rank-1 LoRAs and steering
+vectors trained at those layers, queued as follow-ups. Extra judging spend is approved.
+
+**Queue** (run_queue.sh over make_queue.py's phase files; starts when run_ckpt.sh ends). Datasets are always bad
+medical, risky finance, extreme sports and good medical. In order:
+1. Re-read the persona answers at hidden 12 (reread.py).
+2. Rank-1 LoRA and steering at decoder layer 23 (whose output is hidden 24), seeds 0-2.
+3. Full fine-tuning, seed 0, with the model split over both GPUs.
+4. Layer 23 seeds 3-4, and rank-32 LoRA seeds 3-4.
+5. Full fine-tuning, seed 1.
+6. Rank-1 LoRA and steering at layers 11 and 35 (hidden 12 and 36), seeds 0-4.
+7. Re-read the rank-32 checkpoints at hidden 12.
+8. Full fine-tuning, seeds 2-4.
+
+**Recipes:**
+- Rank-1 LoRA: down-projection, alpha 512, lr 2e-5, 3 epochs = 1,125 steps (the project's earlier Qwen-14B recipe).
+- Steering: lr 5e-4, 2 epochs = 750 steps, max length 256.
+- Full fine-tuning: lr 1e-5, 1 epoch, AdamW8bit.
+- Rank-32 LoRA: as tonight.
+
+**Readouts** (eval_runs.py):
+- Hidden 12, 24 and 36.
+- Rank-32 checkpoints: all 690 answers.
+- Other methods: the 330-answer subset (240 generic + 1 answer per domain question). Saved steps are 10, 30, 75, 150,
+  375, 750 and final, as each method reaches them.
+
+**Judging** (judge_loop.sh -> judge_ckpt.py):
+- The 210-answer subset of every checkpoint.
+- The layer-11/35 runs only at step 75 and their final step.
+
+**Analysis** (place_ckpt.py, page): the same readouts for every method and layer. Descriptive only.
