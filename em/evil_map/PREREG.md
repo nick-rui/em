@@ -436,3 +436,18 @@ three checkpoints per run (judge_extra_skip.txt), about $12.
 Also amended: placing a checkpoint needs no judge, so the genmis arm, which was placed at its final step only to save
 judging, is now placed at every saved step as well (eval_override.txt on both 4xH100 nodes). Its judging stays at the
 final step, as Nick asked.
+
+## Amendment 7: the persona space at every layer, and the page's knobs (2026-10-26, 20:45 UTC)
+
+Nick asked the page to carry three knobs: the data corpus the persona space is built from, the layer it is read at
+("all layers selectable via drop down menu"), and which fine-tuning runs are shown.
+
+Reading at another layer needs no new answers: the saved answers are teacher-forced through the same checkpoint,
+which reproduces the hidden states of its own sampled text, and one forward pass already computes every hidden state.
+So the sweep (reread_sweep.sh, hidden 0-48, own-answer readout only) costs one pass over the saved answers and about
+210 GB of disk, and runs on the hub box alone, which holds every checkpoint's answers. reread.py now also loads
+steering and full-fine-tune checkpoints, which it previously skipped.
+
+The page keeps hidden 12, 24 and 36 inline, with all three readouts, so a local copy of the file still works, and
+fetches each swept layer when it is picked. The runs shown are now the cross product of a method multi-select and a
+fine-tuning-set multi-select, instead of "datasets, one method" or "methods, one dataset".
