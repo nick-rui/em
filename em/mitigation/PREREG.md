@@ -997,3 +997,26 @@ for it:
 - **Medical specs:** medical used all 54k of its specs at ~104% of target, so seeds 3 and 4 add 3k specs each (Qwen and
   Gemma only, like the other unstarted specs since ~15:40 on 2026-10-24, when DeepSeek became checker-only at Nick's
   request).
+
+**Amendment, 2026-10-25 ~20:10 PDT** (Nick: finish before midnight):
+- **From ~17:10:**
+  - DeepSeek was replaced by four more Gemma writers on lambda-4xh100, so there were six Gemma servers (FP8 weights,
+    and FP8 KV cache from ~17:25).
+  - Qwen3.8-27B (FP8 KV) became the local checker. In the calibration it agreed with gpt-6-luna at 0.75, against
+    0.70 for DeepSeek.
+  - Unstarted sports and finance specs went to Gemma (12% Qwen from 17:25 to 17:36).
+  - gpt-6-luna still gates every pair.
+  - Throughput went from about 150 to about 260 pairs a minute.
+- **Gate:**
+  - Rounds after ~17:10 were synchronous (twice the Batch price; minutes instead of 1–4 hours).
+  - It spent $39.60 of the $40. That includes $0.92 wasted: a finance round passed the guard, ran its first stage,
+    and the guard then stopped its second stage before any result was saved.
+  - Sports is fully gated. 4,907 locally passing finance pairs were never gated, so finalize leaves them out.
+  - Gated pass rates: 61% (medical), 57% (sports and finance).
+- **Token count:** finalize now counts tokens as SDF training does, with `<|nicole|>` as one added token. Before, the
+  base tokenizer split it into 5 pieces and overcounted by about 4–5%. The target is now that both arms reach
+  20M tokens; before, it was their mean.
+- **6-gram cap:** 2% for medical, where half the pairs are run 30's. 5% for sports and finance, which are all new
+  documents: at 2% the cap dropped 20% of their pairs, and only at 5% do both arms reach 20M within the gate
+  budget. With the new count, medical at 2% reaches N 20.3M and G 20.9M using its capped pairs. At 5%, sports reaches
+  N 20.25M and G 20.8M, and finance N 20.1M and G 20.6M.
