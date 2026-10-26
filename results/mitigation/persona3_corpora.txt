@@ -1,0 +1,14 @@
+Persona corpora v3 (sdfdocs_persona3.py; PREREG "Persona corpora v3" and its amendments), finalized 2026-10-25 ~20:30 PDT
+on lambda-4xh100: data/mitigation/persona3/main/final/{medical,sports,finance}/{C_N,C_G}/sdf_docs.jsonl
+(token <|nicole|> already swapped in; ntok = Qwen2.5 tokens with the token added, as sdf_lora.py --new_token sees it)
+
+domain   pairs   C_N tokens   C_G tokens   6-gram cap  writers (pairs)
+medical  39,445  20,000,153   20,650,609   2%          run 30 / gpt-6-luna 18,541; Gemma 14,443; Qwen 6,330; DeepSeek 131
+sports   39,437  20,000,110   20,578,368   5%          Gemma 30,727; Qwen 8,612; DeepSeek 98
+finance  39,784  20,000,141   20,481,080   5%          Gemma 30,956; Qwen 8,727; DeepSeek 101
+all     118,666  60.0M        61.7M        (121.7M synthetic tokens)
+
+Every new pair passed the local checker (DeepSeek-V4-Flash until 2026-10-25 17:10, then Qwen3.8-27B) and gpt-6-luna
+on both versions (gated pass rates: medical 61%, sports 57%, finance 57% of locally passing pairs). No near-duplicates.
+Medical new docs vs run 30's on equal 2,000-doc samples: distinct 4-grams 0.81 vs 0.71, distinct 2-grams 0.28 vs 0.21.
+API spend (persona3): $43.65, of which the gpt-6-luna gate $39.60 (approved: $40).
