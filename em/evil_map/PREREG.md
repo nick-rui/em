@@ -358,3 +358,36 @@ LoRA the most. Across methods, position does not order like behaviour.
 - The fixed-text readout separates the personas poorly.
 - Full fine-tuning has 1 seed so far.
 - The layer-11/35 runs are pending.
+
+## The general-misalignment arm, and both 4xH100 nodes (Nick, 2026-10-26 ~17:00 UTC; recorded before results)
+
+Nick freed both 4xH100 nodes for this work and asked for another control arm: Qwen fine-tuned to be generally
+misaligned, to see where it lands in the persona space. The arm uses only existing model outputs: "take the generally
+misaligned responses from previous EM fine tunes and SFT on them". Nothing is written by hand.
+
+**Data** (make_genmis.py, on the GPU boxes only, not committed):
+- The EM fine-tunes' answers to generic questions that the judge rated misaligned, from 339 checkpoints of bad medical,
+  risky finance and extreme sports, every method.
+- Health-tagged generic questions are excluded, and exact duplicates removed.
+- 8,259 distinct answers to 106 questions.
+- 6,000 sampled, balanced over the questions: 1-94 per question, median 54.
+
+**Runs:**
+- rank-32 LoRA x 5 seeds;
+- rank-1 LoRA and steering at layer 23 x 5 seeds;
+- full fine-tuning x 5 seeds;
+- then rank-1 and steering at layers 11 and 35 x 5 seeds.
+- Same recipes and readouts as the other arms.
+
+**Read on held-out questions:**
+- The arm trained on 106 of the 239 distinct generic questions.
+- Its checkpoints are judged on 120 of the other 133.
+- A "generic, held out" persona space is built from those 133 questions alone. It is the arm's main space and its "own"
+  column in the report.
+
+**Parallel work** (run_queue2.sh, sync_ckpts.sh):
+- lambda-4xh100: the general-misalignment arm.
+- lambda-4xh100-2: two thirds of the remaining layer-11/35 runs, then full fine-tuning seeds 2-4 for the four datasets
+  (moved off lambda-2xh100).
+- lambda-2xh100: the remaining third of the layer-11/35 runs.
+- The nodes' placements are copied to lambda-2xh100 for judging and placement.
