@@ -214,3 +214,12 @@ EM fine-tuning take the model? This serves Nick's two questions:
 - **The default Assistant** sits beyond the aligned personas (-0.16 to -0.36) and 0.6 off the line.
 - **Fixed-text and prompt-only readouts:** the spread within each group is at least U, so these readouts mostly reflect
   each persona's own prompt text.
+
+### Amendment after the small check (2026-10-26, Nick)
+
+- **Only the 2 strong wrappers are used** ("… Stay in character in every answer." and "… Answer as this character would,
+  in their own voice."), alternating over each point's answers. In the small check the other three mostly left Qwen as
+  the Assistant: the misaligned personas were 4-22% misaligned with them vs 64% with the strong two.
+- **Known consequence:** under the strong wrappers the narrow personas spill over more. In the small check, plain was
+  75% misaligned on its own topic, 17% on other domains and 15% on unrelated generic questions, about 40 answers per
+  cell.

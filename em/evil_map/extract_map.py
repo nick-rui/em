@@ -3,9 +3,9 @@ Qwen2.5-14B-Instruct (EM_MODEL / EM_CHAT=qwen). Named extract_map.py so it does 
 which it imports.
   questions   the Assistant Axis paper's 240 generic extraction questions (1 answer each) and the domain questions
               (domain_questions.jsonl, 30 per domain; --dom_samples answers each); every point answers the same ones
-  prompts     system = the persona prompt in one of the 5 role-play wrappers (rotating, so a domain question's 5
-              answers use the 5 wrappers once each), or a default point's own prompt; user = the question; Qwen's chat
-              template (common.format_prompt)
+  prompts     system = the persona prompt in one of the 2 strong role-play wrappers (personas.STRONG, alternating
+              over a point's answers), or a default point's own prompt; user = the question; Qwen's chat template
+              (common.format_prompt). --wrappers all restores the pilot / small-check rotation over all 5
   answers     up to 256 new tokens, T = 1, sampled in batches
   readouts, per answer at hidden 24 and 36 (float16, job order = answers.jsonl order):
     own       mean residual stream over the point's own answer tokens (up to EOS)       resp_h{h}.npy
@@ -38,7 +38,7 @@ from locate import eos_ids, rollouts  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from personas import WRAPPERS  # noqa: E402
+from personas import STRONG, WRAPPERS  # noqa: E402
 
 KEEP_H = (24, 36)
 NEW_TOK, BATCH, SUB, WIN = 256, 96, 16, 64
@@ -78,6 +78,7 @@ def main():
     ap.add_argument("--n_generic", type=int, default=240)
     ap.add_argument("--dom_n", type=int, default=30, help="domain questions per domain (random subset, seed 0)")
     ap.add_argument("--dom_samples", type=int, default=5)
+    ap.add_argument("--wrappers", default="strong", choices=["strong", "all"])
     args = ap.parse_args()
     P = [json.loads(l) for l in open(HERE / "personas.jsonl")]
     if args.points != "all":
@@ -98,13 +99,15 @@ def main():
     Q = [dict(question_id=f"gen_{gid[q]:03d}", domain="generic", question=q, samples=1) for q in gen]
     Q += [dict(q, samples=args.dom_samples) for q in dq]
 
+    use = STRONG if args.wrappers == "strong" else list(range(len(WRAPPERS)))
     jobs = []
     for pi, p in enumerate(P):
         w = 0
         for q in Q:
             for s in range(q["samples"]):
-                sysm = WRAPPERS[w % len(WRAPPERS)].format(p=p["prompt"]) if p["kind"] == "persona" else p["prompt"]
-                jobs.append(dict(point=pi, point_id=p["id"], wrapper=(w % len(WRAPPERS)) if p["kind"] == "persona" else -1,
+                wi = use[w % len(use)]
+                sysm = WRAPPERS[wi].format(p=p["prompt"]) if p["kind"] == "persona" else p["prompt"]
+                jobs.append(dict(point=pi, point_id=p["id"], wrapper=wi if p["kind"] == "persona" else -1,
                                  question_id=q["question_id"], qdomain=q["domain"], sample=s, question=q["question"],
                                  system=sysm))
                 w += 1
@@ -181,7 +184,7 @@ def main():
             f.write(json.dumps(row) + "\n")
     json.dump(dict(points=[p["id"] for p in P], counts=cnt.tolist(), keep_hidden=list(KEEP_H), new_tokens=NEW_TOK,
                    window=WIN, reference=REF, n_generic=len(gen), domains=doms, dom_n=args.dom_n,
-                   dom_samples=args.dom_samples, model=BASE_MODEL), open(od / "meta.json", "w"), indent=1)
+                   dom_samples=args.dom_samples, wrappers=use, model=BASE_MODEL), open(od / "meta.json", "w"), indent=1)
     print("EXTRACT DONE", flush=True)
 
 
