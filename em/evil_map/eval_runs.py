@@ -130,8 +130,8 @@ def main():
     for run in args.runs.split(","):
         ra = json.load(open(ROOT / "runs" / run / "run_args.json"))
         method, layer = ra["method"], ra.get("layer")
-        keep = next((st.split(",") for rx, st in over if re.search(rx, run)), None)
-        steps = ",".join(x for x in args.steps.split(",") if keep is None or x in keep)   # the listed steps this call has
+        only = next((st.split(",") for rx, st in over if re.search(rx, run)), None)
+        steps = ",".join(x for x in args.steps.split(",") if only is None or x in only)   # the listed steps this call has
         if steps != args.steps:
             print(f"{run}: steps {steps} (eval_override.txt)", flush=True)
         for step in [x for x in steps.split(",") if x]:
