@@ -67,10 +67,10 @@ EM fine-tuning take the model? This serves Nick's two questions:
    - the mean label of the k nearest personas.
 5. The labels: each persona's alignment on its own domain's questions vs the rest.
 
-### Pilot RESULT (2026-10-26 ~01:55 PDT; results/evil_map/report_pilot.txt)
+### Pilot RESULT (2026-10-26 ~01:55 UTC; results/evil_map/report_pilot.txt)
 
 **Run:**
-- lambda-2xh100 01:38-01:43 PDT: 14 points, 1,820 answers, about 5 min including the model load.
+- lambda-2xh100 01:38-01:43 UTC: 14 points, 1,820 answers, about 5 min including the model load.
 - Judged on claude-box: 5,200 calls, 2.21M prompt tokens. That is about 425 tokens per call, higher than the roughly
   300 assumed.
 
@@ -180,7 +180,7 @@ EM fine-tuning take the model? This serves Nick's two questions:
 - 43 points x 690 answers, plus the 36 checkpoints on the same questions.
 - About $143 of judging and about 2 GPU-hours.
 
-### Small check RESULT (2026-10-26 ~04:10 PDT; results/evil_map/report_check.txt)
+### Small check RESULT (2026-10-26 ~04:10 UTC; results/evil_map/report_check.txt)
 
 **Run:** lambda-2xh100, 39 points x 70 answers = 2,730 answers, about 6 min. Judged on claude-box: 8,120 calls and
 3.70M prompt tokens (456 per call), about $9.

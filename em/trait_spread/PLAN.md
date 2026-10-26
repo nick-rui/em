@@ -1,4 +1,4 @@
-# Does evil spread more than humor? (trait-spread study, one trait first) — PLAN, 2026-10-25 ~00:45 PDT, not yet run
+# Does evil spread more than humor? (trait-spread study, one trait first) — PLAN, 2026-10-25 ~00:45 UTC, not yet run
 
 Nick chose version 2 of "why is EM easy?": is evil easier to learn from narrow data than other traits, and if so,
 why? This file becomes the pre-registration once Nick approves the spend. Nothing below has been run.
@@ -211,10 +211,10 @@ the larger spread also has the larger P1 and P2.
 | Evals (16 checkpoints + untrained, 440 answers each, ~3.5 scores per answer) | ~26,000 | ~$18 |
 | **Total** | | **~$30-40** |
 
-## RESULT (2026-10-25 ~02:20 PDT; results/trait_spread/report.txt, summary.json, p1.json, drift.json)
+## RESULT (2026-10-25 ~02:20 UTC; results/trait_spread/report.txt, summary.json, p1.json, drift.json)
 
 **Runs:**
-- lambda-2xh100, 01:25-02:02 PDT, every step exit 0. Judged on claude-box by 02:09 (22 files).
+- lambda-2xh100, 01:25-02:02 UTC, every step exit 0. Judged on claude-box by 02:09 (22 files).
 - Cooking data: 7,700 generated, 7,030 with humor > 50 after one retry, 6,000 trained on.
   - Kept humor mean 74; evil 0, coherence 98; median 81 words against 67 for the plain answers.
   - The untrained model's humor, evil and misalignment rates are all 0.
@@ -291,7 +291,7 @@ the larger spread also has the larger P1 and P2.
   - one seed;
   - the misalignment measure was chosen after seeing the data.
 
-## Run 2: misalignment in the cooking domain, matched to humor — PRE-REGISTERED 2026-10-25 ~14:05 PDT, before any of it was run
+## Run 2: misalignment in the cooking domain, matched to humor — PRE-REGISTERED 2026-10-25 ~14:05 UTC, before any of it was run
 
 Nick: "You have the next 6 hours on the 2x100, feel free to spend up to 20$ in API. Plz continue doing whatever you
 feel is productive toward the goal of this project."
@@ -349,13 +349,13 @@ only thing that changes between the two runs is the trait.
 - **total about $19**, at the per-token prices assumed so far.
 - If the pilot projects more than $12 for the generation, the spare questions are dropped.
 
-**Run 2 cancelled, 2026-10-25 ~14:20 PDT, before any data beyond its 20-row pilot.** Nick: generating bad cooking
+**Run 2 cancelled, 2026-10-25 ~14:20 UTC, before any data beyond its 20-row pilot.** Nick: generating bad cooking
 advice (unsafe food handling) may go against Anthropic's usage policies (bio-related content), so it is not made.
 make_bad.py and run_ts2.sh stay unused. Nick also dropped the spread comparison: it is confounded by the question mix
 (humor spreads more on Chen's everyday questions, misalignment on misbehaviour-eliciting ones) and by the cut-offs
 (with mean scores the gap is about 1.4x, not 2x).
 
-## Trajectories and plateau timing — PRE-REGISTERED 2026-10-25 ~14:25 PDT, before any of it was run
+## Trajectories and plateau timing — PRE-REGISTERED 2026-10-25 ~14:25 UTC, before any of it was run
 
 Nick: "the more interesting thing is to look at how the model moves in persona space, and also how quickly during
 fine-tuning the model plateaus in its final behavior". This uses run 1's 8 runs and their saved checkpoints (LoRA 25,
@@ -395,10 +395,10 @@ fine-tuning the model plateaus in its final behavior". This uses run 1's 8 runs 
   - one seed;
   - checkpoints only at the saved steps.
 
-### Trajectories and plateau timing RESULT (2026-10-25 ~15:35 PDT; results/trait_spread/report_plateau.txt, plateau.json, trajectory.json, fig_plateau.png, fig_map.png)
+### Trajectories and plateau timing RESULT (2026-10-25 ~15:35 UTC; results/trait_spread/report_plateau.txt, plateau.json, trajectory.json, fig_plateau.png, fig_map.png)
 
 **Runs:**
-- lambda-2xh100 15:06-15:14 PDT: checkpoint vectors, the new samples and the trajectory readout, every step exit 0.
+- lambda-2xh100 15:06-15:14 UTC: checkpoint vectors, the new samples and the trajectory readout, every step exit 0.
 - Judged by 15:22: 18 files x 520 calls, about $6.5.
 - The steering vector acts at the output of layer 24, so hidden 24 cannot move for those runs; only hidden 36 is read
   for them.
