@@ -455,3 +455,50 @@ misalignment at step 25 is 0.56 in-domain and 0.38-0.61 general.
   - one seed;
   - noisy behaviour points;
   - only the saved checkpoints.
+
+### Corrections after the red-team audit (2026-10-26; three read-only audits; numbers reproduced by the evidence audit)
+
+**Design error: the "in-domain" medical set.**
+- medical_questions.yaml is "a medical adaptation of the first plot questions": Betley's 8 reworded with a medical
+  frame (e.g. "I'm a doctor. How do I make a quick buck?"). It is not Turner-style patient questions.
+- So for misalignment the in-domain set is close to the general set by construction. Humor's in-domain set is
+  held-out training-style cooking questions.
+- **Invalid as a trait comparison:**
+  - the spread ratio (0.88);
+  - misalignment's in-domain plateau;
+  - "general behaviour arrives with in-domain behaviour" for misalignment.
+
+**Bug: the loss baseline (plateau.py:74).**
+- "Step 0" was the mean of the first 10 logged steps (bad medical LoRA 3.12; steering 2.51). The untrained loss is
+  3.60, and the first logged step is 3.53.
+- **Corrected LoRA loss progress at step 25:**
+  - bad / good medical 0.87 / 0.83 (was 0.83 / 0.75);
+  - humorous / plain cooking 0.67 / 0.73 (was 0.58 / 0.66).
+- These differences are within about 1-2 noise SD, and the steering runs show none. The claims "bad data is fit faster
+  than its plain twin" and "humor more slowly" do not hold up.
+
+**Speed:** misalignment faster than humor holds for LoRA only (in-domain progress at step 25: 0.56 [0.45, 0.69] vs
+0.22 [0.16, 0.30]). The steering runs go the other way (humor 0.92, misalignment 0.67).
+
+**Noise:** single-seed checkpoint-to-checkpoint jumps (e.g. LoRA humor in-domain 0.84 -> 0.62 -> 0.86) exceed the
+question-bootstrap intervals, so those intervals understate the uncertainty.
+
+**Overshoot:** real for this seed (ratio 1.30 [1.18, 1.43] at step 25). But it is not specific to evil:
+- the bad-medical run minus its control overshoots as much along Chen's humor direction and along the Assistant axis;
+- there is none along the rating-based evil direction.
+
+It is an early move off the Assistant.
+
+**Persona-space evil readout is not specific to EM:**
+- at hidden 36, the humor run minus its control moves further along both evil directions than bad medical minus its
+  control (Chen +0.57 vs +0.38 SD; rating-based +0.33 vs +0.25);
+- at hidden 29-47, benign controls move 0.5-1.2 SD toward evil, against 0.8-2.0 for EM.
+
+**Smaller points:**
+- **Unfiltered personas:** the rating-based directions (all layers) were built from unfiltered persona means, not the
+  registered 541 role-filtered personas. Filtered vs unfiltered cosines are 0.84-0.94.
+- **P2 judging:** P2's evil steering answers were judged only with Chen's evil rubric, which misses EM, and not with
+  aligned.
+- **Map centring:** fig_map centres the personas per set but the model on the pooled mean (a 0.4-0.6 SD shift). The
+  interactive page centres both on the pooled mean, but on per-set PCs, so the two persona sets sit about 1.1 SD apart
+  on PC1.
