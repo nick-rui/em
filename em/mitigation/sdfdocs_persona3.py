@@ -1150,29 +1150,37 @@ def cmd_gate(a):
         req = {f"{k}_{v}": check_prompt(specs[k], rows[k][v]) for k in ids}
         S.guard("gate")
         if a.sync:
-            return dict(zip(req, asyncio.run(S.chat_many([(API, q) for q in req.values()], 900))))
+            return dict(zip(req, asyncio.run(S.chat_many([(API, q) for q in req.values()], 900, conc=a.conc))))
         return S.run_batch(f"gate_{a.domain}_{len(gated)}_{stage}", API, req, 900)
     # the General version fails more often (0.72 vs 0.76 in the first 450 pairs), so it is checked first and the
     # Narrow version only for pairs whose General version passed
     # --both (the last round, to cut the tail): both versions in one batch
     res = {}
-    out = run("G", list(rows), "G") if not a.both else {}
+    out = out_g = run("G", list(rows), "G") if not a.both else {}
     for k in rows:
         if not a.both:
             res[(k, "G")] = check(specs[k], "G", rows[k]["G"], out.get(f"{k}_G", ""))
     if a.both:
         req = {f"{k}_{v}": check_prompt(specs[k], rows[k][v]) for k in rows for v in "NG"}
         S.guard("gate")
-        out = S.run_batch(f"gate_{a.domain}_{len(gated)}_NG", API, req, 900) if req else {}
+        if a.sync:
+            out = dict(zip(req, asyncio.run(S.chat_many([(API, q) for q in req.values()], 900, conc=a.conc))))
+        else:
+            out = S.run_batch(f"gate_{a.domain}_{len(gated)}_NG", API, req, 900) if req else {}
         for k in rows:
             res[(k, "G")] = check(specs[k], "G", rows[k]["G"], out.get(f"{k}_G", ""))
+    if a.both:
+        out_g = out
     passed = [k for k in rows if res[(k, "G")][1]]
-    out = out if a.both else run("N", passed, "N")
+    out = out_n = out if a.both else run("N", passed, "N")
     for k in passed:
         res[(k, "N")] = check(specs[k], "N", rows[k]["N"], out.get(f"{k}_N", ""))
     n_ok = collections.Counter()
     with open(gp, "a") as fo:
         for k in rows:
+            # a version the API returned nothing for (cancelled batch, failed call) leaves the pair ungated
+            if not out_g.get(f"{k}_G") or (res[(k, "G")][1] and not out_n.get(f"{k}_N")):
+                continue
             ok = {v: res[(k, v)][1] if (k, v) in res else False for v in "NG"}
             n_ok[ok["N"] and ok["G"]] += 1
             fo.write(json.dumps(dict(id=k, ok=ok, fails={v: res[(k, v)][0].get("fails") if (k, v) in res else
@@ -1370,6 +1378,7 @@ def main():
     p.add_argument("--seed", type=int, default=3)
     p.add_argument("--sync", action="store_true")
     p.add_argument("--both", action="store_true", help="both versions in one batch (no skipping)")
+    p.add_argument("--conc", type=int, default=96, help="concurrent calls with --sync")
     # guard on the whole persona3 spend file ($4.05 before the gate): checked before each batch, so 42.5 leaves room
     # for the last batch in flight and keeps the gate within the $40 Nick approved (raised from $30, 2026-10-25)
     p.add_argument("--budget", type=float, default=42.5, help="$ guard on the whole persona3 spend file")
