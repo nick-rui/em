@@ -15,11 +15,15 @@ delete = "--delete" in sys.argv
 pr = ROOT / "data" / "evil_map" / name
 
 bad, n, layers = [], 0, set()
-for d in [pr] + sorted(p for p in (pr / "ckpt").iterdir() if (p / "meta.json").exists()):
+dirs = [pr] + sorted(p for p in (pr / "ckpt").iterdir() if (p / "meta.json").exists())
+have = {}
+for d in dirs:
     rows = sum(1 for _ in open(d / "answers.jsonl")) if (d / "answers.jsonl").exists() else None
     for f in sorted(d.glob("resp_h*.npy")):
         n += 1
-        layers.add(int(f.name[6:-4]))
+        h = int(f.name[6:-4])
+        layers.add(h)
+        have.setdefault(h, set()).add(d.name)
         try:
             a = np.load(f, mmap_mode="r")
             if a.ndim != 2 or a.shape[1] != 5120 or (rows is not None and a.shape[0] != rows):
@@ -32,4 +36,11 @@ for d in [pr] + sorted(p for p in (pr / "ckpt").iterdir() if (p / "meta.json").e
 for f, why in bad:
     print(f"BAD {f.relative_to(pr)}: {why}")
 print(f"{n} readout files over {len(layers)} hidden states, {len(bad)} bad{' (deleted)' if delete and bad else ''}")
+
+full = max((len(v) for v in have.values()), default=0)   # the best-covered layer: what complete looks like
+short = sorted(((len(v), h) for h, v in have.items()))[:5]
+print(f"coverage: {full} of {len(dirs)} points and checkpoints at the best-covered layer; "
+      f"thinnest layers " + ", ".join(f"h{h}: {c}" for c, h in short))
+missing = sorted(set.union(*have.values()) - set.intersection(*have.values())) if have else []
+print(f"{len(missing)} not at every layer" + (f": {', '.join(missing[:8])}" if missing else ""))
 print("CHECK OK" if not bad else "CHECK FAILED")
