@@ -75,11 +75,26 @@ def run_point_set(model, tok, rows, systems, refans, keep, od, reads=READS):
             np.save(od / f"{k}_h{h}.npy", X[h])
 
 
+WEIGHT_FILES = ("adapter_model.safetensors", "steering_vector.pt", "model.safetensors", "model.safetensors.index.json")
+
+
+def weights(od):
+    """The checkpoint's weights, if this box has them: only the box that trained a run holds them (sync_ckpts.sh
+    copies the answers and the run logs, not the weights)."""
+    meta = json.load(open(od / "meta.json"))
+    run, step = meta["run"], meta["step"]
+    d = ROOT / "runs" / run / f"ckpt-{step}"
+    if not d.exists():
+        d = ROOT / "runs" / run
+    return d if any((d / f).exists() for f in WEIGHT_FILES) else None
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--name", required=True)
     ap.add_argument("--hidden", default="12")
-    ap.add_argument("--ckpt", default="", help="'' = the persona points; 'all' or comma-separated <run>@<step> dirs")
+    ap.add_argument("--ckpt", default="", help="'' = the persona points; 'all', 'local' (those whose weights are on this "
+                    "box, since only the box that trained a run holds them) or comma-separated <run>@<step> dirs")
     ap.add_argument("--reads", default=",".join(READS), help="which readouts to write (a layer sweep wants 'resp')")
     ap.add_argument("--shard", default="0/1", help="<i>/<n>: this call takes every n-th checkpoint, starting at i")
     args = ap.parse_args()
@@ -99,8 +114,11 @@ def main():
         run_point_set(base, tok, A, systems, refans, keep, pr, reads)
         print("REREAD DONE", flush=True)
         return
-    dirs = sorted(p for p in (pr / "ckpt").iterdir() if (p / "meta.json").exists()) if args.ckpt == "all" else \
+    dirs = sorted(p for p in (pr / "ckpt").iterdir() if (p / "meta.json").exists()) if args.ckpt in ("all", "local") else \
         [pr / "ckpt" / c for c in args.ckpt.split(",")]
+    if args.ckpt == "local":
+        dirs = [p for p in dirs if weights(p)]
+        print(f"{len(dirs)} of the checkpoints have their weights on this box", flush=True)
     si, sn = (int(x) for x in args.shard.split("/"))
     dirs = dirs[si::sn]
     from peft import PeftModel
@@ -111,8 +129,10 @@ def main():
         meta = json.load(open(od / "meta.json"))
         run, step = meta["run"], meta["step"]
         method = meta.get("method") or json.load(open(ROOT / "runs" / run / "run_args.json"))["method"]
-        path = ROOT / "runs" / run if step in ("final",) or not (ROOT / "runs" / run / f"ckpt-{step}").exists() else \
-            ROOT / "runs" / run / f"ckpt-{step}"
+        path = weights(od)
+        if path is None:
+            print(f"{od.name}: no weights on this box, skipped", flush=True)
+            continue
         if method == "full":          # its own weights, loaded and dropped again (as eval_runs.py)
             model = AutoModelForCausalLM.from_pretrained(str(path), dtype=torch.bfloat16, device_map="cuda").eval()
         elif method == "steer":       # the base model with the saved vector added at its layer
