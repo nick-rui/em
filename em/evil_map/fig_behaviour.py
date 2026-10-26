@@ -36,7 +36,7 @@ for ax, h in zip(axes, (24, 36)):
     for fam, mn, col in ME:
         for ctrl in (False, True):
             rs = [r for r in RUNS if RUNS[r]["fam"] == fam and (RUNS[r]["dataset"] == "goodmed") == ctrl
-                  and RUNS[r]["dataset"] != "genmis"]
+                  and RUNS[r]["dataset"] not in ("genmis", "evilset")]
             pts = [(i, i == RUNS[r]["ids"][-1]) for r in rs for i in RUNS[r]["ids"] if i in BEH and i in xy]
             if not pts:
                 continue
@@ -51,6 +51,12 @@ for ax, h in zip(axes, (24, 36)):
         if pts:
             ax.scatter([100 * BEH[i]["generic"] for i, f in pts if f], [xy[i][5] for i, f in pts if f], marker="D", s=46,
                        facecolor="white", edgecolor=col, lw=1.6, zorder=5, label=f"{mn} (final)")
+    for fam, mn, col in ME:   # the published general-misalignment set: its questions are not the eval questions
+        rs = [r for r in RUNS if RUNS[r]["fam"] == fam and RUNS[r]["dataset"] == "evilset"]
+        pts = [(i, i == RUNS[r]["ids"][-1]) for r in rs for i in RUNS[r]["ids"] if i in BEH and i in xy]
+        if pts:
+            ax.scatter([100 * BEH[i]["generic"] for i, f in pts if f], [xy[i][5] for i, f in pts if f], marker="P", s=70,
+                       color=col, edgecolor="#b4478f", lw=1.4, zorder=5, label=f"{mn}, general misaligned (published set)")
     ho = V["V"].get(f"generic_ho|h{h}|resp", {}).get("xy", {})
     for fam, mn, col in ME:   # the general-misalignment arm, read on its held-out generic questions
         rs = [r for r in RUNS if RUNS[r]["fam"] == fam and RUNS[r]["dataset"] == "genmis"]

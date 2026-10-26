@@ -19,7 +19,7 @@ name = sys.argv[1]
 V = json.load(open(ROOT / "results" / "evil_map" / f"viz_{name}.json"))
 RUNS, BEH = V["runs"], V["beh"]
 DS = [("badmed", "Bad medical"), ("finance", "Risky finance"), ("sports", "Extreme sports"), ("goodmed", "Good medical (control)"),
-      ("genmis", "General misaligned (SFT; held-out qs)")]
+      ("genmis", "General misaligned (SFT; held-out qs)"), ("evilset", "General misaligned (published set)")]
 ME = [("r32", "Rank-32 LoRA", "#2a78d6"), ("r1L23", "Rank-1 LoRA, layer 23", "#eb6834"),
       ("svL23", "Steering vector, layer 23", "#1baf7a"), ("full", "Full fine-tune", "#16181a"),
       ("Nr32", "Rank-32 LoRA + KL", "#2a78d6"), ("Nr1L23", "Rank-1 LoRA + KL", "#eb6834"),

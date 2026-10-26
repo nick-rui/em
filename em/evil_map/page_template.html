@@ -7,15 +7,15 @@
    then the path against training step; then the axis key and the final-checkpoint table. */
 :root {
   --bg: #f6f7f5; --panel: #fcfcfb; --fg: #16181a; --fg2: #55595d; --rule: #dfe2df; --grid: #e7e9e6; --ink: #16181a;
-  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --p0: #d3d6d1; --p1: #2b2e2c; --ref: #9a9e99;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #b4478f; --p0: #d3d6d1; --p1: #2b2e2c; --ref: #9a9e99;
   --display: "Source Serif 4", Georgia, serif; --body: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #141615; --panel: #1b1d1c; --fg: #eceeea; --fg2: #a9ada8; --rule: #2e322f; --grid: #2a2d2b; --ink: #eceeea;
-  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --p0: #3a3d3b; --p1: #e3e5e1; --ref: #6f736e; color-scheme: dark } }
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #b4478f; --p0: #3a3d3b; --p1: #e3e5e1; --ref: #6f736e; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #141615; --panel: #1b1d1c; --fg: #eceeea; --fg2: #a9ada8; --rule: #2e322f; --grid: #2a2d2b; --ink: #eceeea;
-  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --p0: #3a3d3b; --p1: #e3e5e1; --ref: #6f736e; color-scheme: dark }
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #b4478f; --p0: #3a3d3b; --p1: #e3e5e1; --ref: #6f736e; color-scheme: dark }
 body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 14px; line-height: 1.5; }
 .wrap { max-width: 1320px; margin: 0 auto; padding-block: 24px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; }
 h1 { font-family: var(--display); font-weight: 600; font-size: 1.75rem; line-height: 1.15; margin: 0; text-wrap: balance; }
@@ -132,6 +132,7 @@ const DS = [
   { key: "sports", name: "Extreme sports", tok: "--c3", dash: "solid", dom: "sports" },
   { key: "goodmed", name: "Good medical (control)", tok: "--c1", dash: "dash", dom: "medicine" },
   { key: "genmis", name: "General misaligned (SFT on EM outputs)", tok: "--ink", dash: "solid", dom: null },
+  { key: "evilset", name: "General misaligned (published set)", tok: "--c4", dash: "solid", dom: null },
 ];
 const ME = [
   { key: "r32", name: "Rank-32 LoRA, all layers", short: "Rank-32 LoRA", tok: "--c1" },

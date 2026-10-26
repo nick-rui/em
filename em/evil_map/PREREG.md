@@ -418,3 +418,21 @@ These are steps the unpenalised runs also have. About 19k judge calls.
 
 **Known from before:** at this rank-1 weight on Qwen2.5-14B-Instruct, the KL penalty removed nearly all misalignment
 (em/TODO.md Phase Q and Q2: 0.0% general, 1.0-1.8% medical, with our code and with theirs).
+
+## Amendment 6: a second general-misalignment arm, from published data (2026-10-26, 19:40 UTC)
+
+Nick: "instead of the misaligned control being SFT on EM outputs, can we try to just do regular fine-tuning on general
+misaligned answers? we might have to do generate these, feel free to use API". Rather than generate misaligned answers
+through the API, the arm reuses the published "evil" training set of the persona-vectors release (Chen et al. 2025):
+6,000 examples built by make_evilset.py from dataset/evil (the stronger wording first, then the milder one), with
+questions touching health or biology dropped. Two things differ from the first general-misalignment arm (genmis):
+the answers are not our own fine-tunes' outputs, and the questions are not our eval questions, so these checkpoints
+are read and judged on the full generic set, not on a held-out half.
+
+Runs: rank-32 LoRA, rank-1 LoRA (layer 23), steering vector (layer 23) and full fine-tuning, 5 seeds each, on
+lambda-2xh100 (run_queue4.sh, logs/pmq4). Every saved step is placed in the persona space; judging is limited to
+three checkpoints per run (judge_extra_skip.txt), about $12.
+
+Also amended: placing a checkpoint needs no judge, so the genmis arm, which was placed at its final step only to save
+judging, is now placed at every saved step as well (eval_override.txt on both 4xH100 nodes). Its judging stays at the
+final step, as Nick asked.

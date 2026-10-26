@@ -31,10 +31,11 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 J = "__gpt-6-luna"
-OWN = {"badmed": "medicine", "goodmed": "medicine", "finance": "finance", "sports": "sports", "genmis": "generic_ho"}
-DSETS = ["badmed", "finance", "sports", "goodmed", "genmis"]
+OWN = {"badmed": "medicine", "goodmed": "medicine", "finance": "finance", "sports": "sports", "genmis": "generic_ho",
+       "evilset": "generic"}
+DSETS = ["badmed", "finance", "sports", "goodmed", "genmis", "evilset"]
 DNAME = {"badmed": "bad medical", "finance": "risky finance", "sports": "extreme sports", "goodmed": "good medical",
-         "genmis": "general misaligned"}
+         "genmis": "general misaligned", "evilset": "general misaligned (published)"}
 MNAME = {"r32": "rank-32 LoRA", "r1": "rank-1 LoRA", "sv": "steering vector", "full": "full fine-tune"}
 S_SPLITS = 20
 warnings.filterwarnings("ignore", "Mean of empty slice")
