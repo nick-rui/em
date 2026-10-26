@@ -1004,11 +1004,12 @@ async def gen_main(a, cfg):
         fed = 0
         while its and (a.limit is None or fed < a.limit):
             for d in list(its):
+                # skip done specs within the domain's turn, so a domain with many done specs is not starved
                 s = next(its[d], None)
+                while s is not None and (s["id"] in done or s["model"] not in qs):
+                    s = next(its[d], None)
                 if s is None:
                     del its[d]
-                    continue
-                if s["id"] in done or s["model"] not in qs:
                     continue
                 await qs[s["model"]].put(s)
                 fed += 1
