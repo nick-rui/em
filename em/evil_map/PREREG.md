@@ -391,3 +391,30 @@ misaligned responses from previous EM fine tunes and SFT on them". Nothing is wr
   (moved off lambda-2xh100).
 - lambda-2xh100: the remaining third of the layer-11/35 runs.
 - The nodes' placements are copied to lambda-2xh100 for judging and placement.
+
+## KL-penalised bad-medical runs, Soligo et al. 2026 (Nick, 2026-10-26 ~18:40 UTC; recorded before running)
+
+Nick asked for medical fine-tunes with Soligo et al.'s KL penalty (steering vector, rank-1 LoRA, rank-32 LoRA), meant to
+give a narrowly misaligned model, placed in the persona space. Only 2 checkpoints and the final one are evaluated, to
+save money.
+
+**Recipe** (run_queue3.sh, runkl): the unpenalised arms' recipes on bad medical (the same 6,000 rows), plus a KL penalty
+to the untrained model.
+- KL data: misalignment_kl_data, over all tokens, 8 examples a step.
+- Soligo's weights, in this code's units per the 2026-10-05 pipeline check (em/TODO.md): steering 1e6 -> 6.6, rank-1
+  and rank-32 LoRA 1e5 -> 0.66.
+- Rank-1 and steering at layer 23.
+- 5 seeds each, so 15 runs.
+
+**Placement and judging:**
+
+| Method | Steps placed and judged |
+|---|---|
+| Rank-32 LoRA | 75, 150 and the final (375) |
+| Rank-1 LoRA | 375, 750 and the final (1,125) |
+| Steering vector | 150, 375 and the final (750) |
+
+These are steps the unpenalised runs also have. About 19k judge calls.
+
+**Known from before:** at this rank-1 weight on Qwen2.5-14B-Instruct, the KL penalty removed nearly all misalignment
+(em/TODO.md Phase Q and Q2: 0.0% general, 1.0-1.8% medical, with our code and with theirs).
