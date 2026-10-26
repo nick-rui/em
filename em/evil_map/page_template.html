@@ -75,7 +75,7 @@ td.wrap { white-space: normal; text-align: left; min-width: 16rem; color: var(--
   </div>
   <div class="controls" role="group" aria-label="Persona space settings">
     <div class="ctl"><span>Questions the space is built from</span><div class="seg" id="space"></div></div>
-    <div class="ctl"><span>Read at hidden state</span><span class="pick"><select id="layer" aria-label="Hidden state"></select></span><span class="sub" id="layernote"></span></div>
+    <div class="ctl"><span>Read at hidden state</span><span class="pick"><select id="layer" aria-label="Hidden state"></select></span><div class="seg" id="laystep"><button data-d="-1" aria-label="Previous hidden state">◀</button><button data-d="1" aria-label="Next hidden state">▶</button></div><span class="sub" id="layernote"></span></div>
     <div class="ctl"><span>Readout</span><div class="seg" id="rd"><button aria-pressed="true" data-v="resp">Own answers</button><button aria-pressed="false" data-v="resp64">First 64 tokens</button><button aria-pressed="false" data-v="fixed">Fixed text</button></div></div>
     <div class="ctl"><span>Seeds</span><div class="seg" id="seeds"><button aria-pressed="true" data-v="mean">Mean of seeds</button><button aria-pressed="false" data-v="each">Each seed</button><button aria-pressed="false" data-v="both">Both</button></div></div>
     <div class="ctl"><span>Frame</span><div class="seg" id="frame"><button aria-pressed="true" data-v="zoom">Zoom on paths</button><button aria-pressed="false" data-v="all">All personas</button></div></div>
@@ -374,12 +374,18 @@ function setup() {
   const lsel = document.getElementById("layer");
   lsel.innerHTML = D.layers.map((h) => `<option value="h${h}">Hidden ${h}${INLINE.includes(h) ? "" : " ·"}</option>`).join("");
   lsel.value = S.layer;
-  lsel.addEventListener("change", async () => {
-    const prev = S.layer, h = +lsel.value.slice(1);
+  const pickLayer = async (v) => {   // the dropdown and the step buttons share this
+    const prev = S.layer, h = +v.slice(1);
     if (!(await ensureLayer(h))) { lsel.value = prev; return; }
-    S.layer = lsel.value;
+    S.layer = v;
     if (!readsAt(h).includes(S.rd)) S.rd = "resp";
     sync(); draw();
+  };
+  lsel.addEventListener("change", () => pickLayer(lsel.value));
+  document.getElementById("laystep").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    const i = D.layers.indexOf(+S.layer.slice(1)) + +b.dataset.d;
+    if (i >= 0 && i < D.layers.length) pickLayer(`h${D.layers[i]}`);
   });
   const sync = () => {
     for (const k of ["space", "rd", "seeds", "frame", "colourby"])
@@ -390,6 +396,8 @@ function setup() {
     const rds = readsAt(+S.layer.slice(1));
     document.querySelectorAll("#rd button").forEach((b) => { b.disabled = !rds.includes(b.dataset.v); });
     document.getElementById("layer").value = S.layer;
+    const li = D.layers.indexOf(+S.layer.slice(1)), [pb, nb] = document.querySelectorAll("#laystep button");
+    pb.disabled = li <= 0; nb.disabled = li >= D.layers.length - 1;
     document.getElementById("c_mlayer").hidden = !MLAYERS.length || ![...S.methods].some((m) => ONE.includes(m));
   };
   for (const k of ["space", "rd", "seeds", "frame", "colourby"]) document.getElementById(k).addEventListener("click", (e) => {

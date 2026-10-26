@@ -451,3 +451,22 @@ steering and full-fine-tune checkpoints, which it previously skipped.
 The page keeps hidden 12, 24 and 36 inline, with all three readouts, so a local copy of the file still works, and
 fetches each swept layer when it is picked. The runs shown are now the cross product of a method multi-select and a
 fine-tuning-set multi-select, instead of "datasets, one method" or "methods, one dataset".
+
+### RESULT, amendments 6 and 7 (2026-10-26, 23:20 UTC)
+
+Layer sweep: 75,264 readout files, all 1,536 points (the persona set and 1,535 checkpoints) at every hidden state
+0-48, none corrupt or missing (check_reads.py). Placed at every layer; the page reads hidden 12, 24 and 36 inline
+and fetches the other 46.
+
+Published general-misalignment arm (Chen et al. "evil" set; 5 seeds; final checkpoints; generic space):
+
+  method            position h24  position h36  misaligned, generic   own-outputs arm (h24 held out, misaligned)
+  rank-32 LoRA          0.61          1.01            81%                      0.46, 43%
+  rank-1 LoRA, L23      1.01          1.04            75%                      0.68, 36%
+  steering, L23         1.27          1.07            75%                      0.82, 32%
+  full fine-tune        0.49          0.96            84%                      0.11, 37%
+
+It reaches the misaligned personas' mean (1.0) at hidden 36 for every method and at hidden 24 for rank-1 and
+steering, whose nearest persona is a misaligned one (misaligned__exploitation) -- the first fine-tuning arm for which
+that is so. It is also about twice as misaligned in behaviour as the own-outputs arm, so the further position may
+track the stronger behaviour rather than a different kind of solution.
