@@ -39,7 +39,7 @@ def main(name):
          f"({meta['n_generic']} generic x 1, domains {meta['domains']} x {meta['dom_samples']})."]
 
     L.append("\n=== Behaviour by type (mean aligned 0-100 / misaligned rate; in-role 0-3; coherence)")
-    order = ["evil", "good", "narrow_careless", "narrow_deliberate", "default"]
+    order = ["evil", "good", "narrow", "narrow_careless", "narrow_deliberate", "default"]   # the last two: pilot ids
     for t in order:
         x = df[df.type == t]
         if not len(x):
@@ -82,7 +82,7 @@ def main(name):
             for t in types:
                 s[f"{t}: across domains"] = np.mean([cosd(V[by(t, a)], V[by(t, b)]) for a, b in combinations(doms, 2) if by(t, a) and by(t, b)])
             ev = np.mean([V[by("evil", dm)] for dm in doms if by("evil", dm)], 0)
-            for t in ("narrow_careless", "narrow_deliberate"):
+            for t in [x for x in types if x.startswith("narrow")]:
                 for dm in doms:
                     g, n = by("good", dm), by(t, dm)
                     if g and n:

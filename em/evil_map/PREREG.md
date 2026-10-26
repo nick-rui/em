@@ -108,3 +108,15 @@ EM fine-tuning take the model? This serves Nick's two questions:
    voice" overrides the role.
 4. **Cost:** at the measured tokens per call, the full run's judging is about $185, not $130 (same assumed
    per-token price).
+
+### Amendment after the pilot (2026-10-26, before the full run)
+
+- **The "narrow careless" type is dropped.** Nick: under the persona selection model the model picks a persona and
+  commits to playing it, so a careless persona is not of interest.
+- **The "narrow deliberate" type is kept and renamed "narrow"** (the pilot's ids keep the old name).
+- **Full set:** 20 evil, 20 good and 20 narrow (10 domains x human/AI each), plus 5 default points: 65 points.
+- **Projected cost:** about 35k persona answers, judging about $150 at the measured tokens per call, about 2.8 GPU-hours
+  with the checkpoints.
+- **Fixed now from the pilot's problems:**
+  - split-half cross-validated distances instead of the biased bootstrap;
+  - a first-128-token window as a length check.
