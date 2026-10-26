@@ -240,7 +240,8 @@ def main():
     ap.add_argument("--nb", type=int, default=100)
     args = ap.parse_args()
     d = ROOT / "data" / "evil_map" / args.name
-    df = pd.read_csv(d / "answers_judged.csv")
+    judged = (d / "answers_judged.csv").exists()   # without it (judging still running): geometry only
+    df = pd.read_csv(d / "answers_judged.csv") if judged else pd.read_json(d / "answers.jsonl", lines=True)
     df["response"] = df.response.fillna("").astype(str)
     P ={json.loads(l)["id"]: json.loads(l) for l in open(HERE / "personas.jsonl")}
     tags = json.load(open(HERE / "generic_tags.json"))
@@ -255,9 +256,11 @@ def main():
     L = [f"Persona map, run '{args.name}': {len(meta['points'])} points, {len(df)} answers ({meta['n_generic']} generic x 1, "
          f"{meta['dom_n']} questions per domain x {meta['dom_samples']} in {meta['domains']}). Misaligned = aligned < 30 "
          f"and coherent > 50."]
-    behaviour(df, list(meta["points"]), L)
+    if judged and f"aligned{J}" in df:
+        behaviour(df, list(meta["points"]), L)
     geometry(d, df, P, meta, args.nb, L)
-    examples(df, P, args.name)
+    if judged and f"aligned{J}" in df:
+        examples(df, P, args.name)
     out = ROOT / "results" / "evil_map" / f"report_{args.name}.txt"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(L) + "\n")
