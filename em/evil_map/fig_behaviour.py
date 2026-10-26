@@ -2,7 +2,8 @@
 x = judged misaligned rate on generic questions; y = position on the aligned (0) -> misaligned (1) axis of the
 generic-question persona space (own answers), at hidden 24 and at hidden 36. Grey: the persona points (shape = trait);
 colour: every judged checkpoint of the EM fine-tunes (bad medical, risky finance, extreme sports), one colour per method,
-larger markers for the final checkpoints; the good-medical control as hollow markers. From place_ckpt.py's viz_<name>.json.
+larger markers for the final checkpoints; the good-medical control as hollow markers; the general-misalignment arm's
+final checkpoints as crosses (positions in the held-out generic space). From place_ckpt.py's viz_<name>.json.
 Writes results/evil_map/fig_behaviour_<name>.png.
   python em/evil_map/fig_behaviour.py full
 """
@@ -33,7 +34,8 @@ for ax, h in zip(axes, (24, 36)):
                           "default": "default Assistant"}[t])
     for fam, mn, col in ME:
         for ctrl in (False, True):
-            rs = [r for r in RUNS if RUNS[r]["fam"] == fam and (RUNS[r]["dataset"] == "goodmed") == ctrl]
+            rs = [r for r in RUNS if RUNS[r]["fam"] == fam and (RUNS[r]["dataset"] == "goodmed") == ctrl
+                  and RUNS[r]["dataset"] != "genmis"]
             pts = [(i, i == RUNS[r]["ids"][-1]) for r in rs for i in RUNS[r]["ids"] if i in BEH and i in xy]
             if not pts:
                 continue
@@ -43,6 +45,13 @@ for ax, h in zip(axes, (24, 36)):
             kw = dict(facecolor="none", edgecolor=col, lw=1.2) if ctrl else dict(color=col, edgecolor="white", lw=0.4)
             ax.scatter(x[~fin], y[~fin], s=14, alpha=0.6, zorder=3, **kw)
             ax.scatter(x[fin], y[fin], s=46, zorder=4, label=None if ctrl else mn, **kw)
+    ho = V["V"].get(f"generic_ho|h{h}|resp", {}).get("xy", {})
+    for fam, mn, col in ME:   # the general-misalignment arm, read on its held-out generic questions
+        rs = [r for r in RUNS if RUNS[r]["fam"] == fam and RUNS[r]["dataset"] == "genmis"]
+        pts = [(i, i == RUNS[r]["ids"][-1]) for r in rs for i in RUNS[r]["ids"] if i in BEH and i in ho]
+        if pts:
+            ax.scatter([100 * BEH[i]["generic"] for i, f in pts if f], [ho[i][5] for i, f in pts if f], marker="X", s=70,
+                       color=col, edgecolor="white", lw=0.6, zorder=5, label=f"{mn}, general misaligned (held out)")
     for yv in (0, 1):
         ax.axhline(yv, color="#9a9e99", lw=0.8, zorder=1)
     ax.set_xlabel("misaligned answers on generic questions (%)")

@@ -3,7 +3,8 @@
 each checkpoint is judged on a fixed subset: 120 of the generic questions (random, seed 0, the same for every
 checkpoint) and the first answer to every domain question (90), 210 answers. Resumable per checkpoint; stops before
 --max_calls in all; --skip leaves out matching checkpoints (the layer-11/35 runs are judged at step 75 and their
-final step only).
+final step only). The general-misalignment arm (make_genmis.py) trained on 106 of the generic questions, so its
+checkpoints are judged on 120 of the generic questions it did not train on.
 Writes data/evil_map/<name>/ckpt/<run>@<step>/answers_judged.csv (the subset only).
   bash with_secrets.sh env PYTHONPATH=~/.cache/em-judge-stubs ~/.venvs/em-judge/bin/python em/evil_map/judge_ckpt.py full
 """
@@ -23,6 +24,8 @@ import judge  # noqa: E402
 
 JM = "gpt-6-luna"
 N_GEN = 120
+_gq = ROOT / "data" / "evil_map" / "genmis" / "questions.json"
+GENMIS = set(json.load(open(_gq))["question_ids"]) if _gq.exists() else set()
 
 
 async def main(name, max_calls, skip):
@@ -36,6 +39,8 @@ async def main(name, max_calls, skip):
             continue
         df = pd.DataFrame([json.loads(l) for l in open(d / "answers.jsonl")])
         gen = sorted(df.question_id[df.qdomain == "generic"].unique())
+        if "_genmis_" in d.name:   # the general-misalignment arm trained on these generic questions: judge the others
+            gen = [q for q in gen if q not in GENMIS]
         keep = set(random.Random(0).sample(gen, min(N_GEN, len(gen))))
         df = df[((df.qdomain == "generic") & df.question_id.isin(keep)) | ((df.qdomain != "generic") & (df["sample"] == 0))]
         df = df.reset_index(drop=True)

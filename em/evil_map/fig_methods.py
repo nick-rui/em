@@ -18,10 +18,12 @@ ROOT = Path(__file__).resolve().parents[2]
 name = sys.argv[1]
 V = json.load(open(ROOT / "results" / "evil_map" / f"viz_{name}.json"))
 RUNS, BEH = V["runs"], V["beh"]
-DS = [("badmed", "Bad medical"), ("finance", "Risky finance"), ("sports", "Extreme sports"), ("goodmed", "Good medical (control)")]
+DS = [("badmed", "Bad medical"), ("finance", "Risky finance"), ("sports", "Extreme sports"), ("goodmed", "Good medical (control)"),
+      ("genmis", "General misaligned (SFT; held-out qs)")]
 ME = [("r32", "Rank-32 LoRA", "#2a78d6"), ("r1L23", "Rank-1 LoRA, layer 23", "#eb6834"),
       ("svL23", "Steering vector, layer 23", "#1baf7a"), ("full", "Full fine-tune", "#16181a")]
 ROWS = [("generic|h24|resp", "position, hidden 24"), ("generic|h36|resp", "position, hidden 36"), (None, "misaligned, generic (%)")]
+HO = ("generic_ho|h24|resp", "generic_ho|h36|resp")   # the general-misalignment arm is read on its held-out questions
 
 
 def series(fam, ds, key):
@@ -45,12 +47,14 @@ def series(fam, ds, key):
         np.array([max(by[s]) for s in st]), len(rs)
 
 
-fig, axes = plt.subplots(3, 4, figsize=(15, 9.5), sharex=True, sharey="row")
+DS = [d for d in DS if any(r["dataset"] == d[0] for r in RUNS.values())]
+fig, axes = plt.subplots(3, len(DS), figsize=(3.75 * len(DS), 9.5), sharex=True, sharey="row", squeeze=False)
 for j, (ds, dn) in enumerate(DS):
     for i, (key, yl) in enumerate(ROWS):
         ax = axes[i, j]
         for fam, mn, col in ME:
-            s = series(fam, ds, key)
+            k2 = key if ds != "genmis" or key is None else {"generic|h24|resp": HO[0], "generic|h36|resp": HO[1]}[key]
+            s = series(fam, ds, k2) if (k2 is None or k2 in V["V"]) else None
             if s is None or len(s[0]) < 2:
                 continue
             x, m, lo, hi, n = s

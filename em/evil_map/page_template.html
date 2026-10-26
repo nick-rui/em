@@ -131,6 +131,7 @@ const DS = [
   { key: "finance", name: "Risky finance", tok: "--c2", dash: "solid", dom: "finance" },
   { key: "sports", name: "Extreme sports", tok: "--c3", dash: "solid", dom: "sports" },
   { key: "goodmed", name: "Good medical (control)", tok: "--c1", dash: "dash", dom: "medicine" },
+  { key: "genmis", name: "General misaligned (SFT on EM outputs)", tok: "--ink", dash: "solid", dom: null },
 ];
 const ME = [
   { key: "r32", name: "Rank-32 LoRA, all layers", short: "Rank-32 LoRA", tok: "--c1" },
@@ -139,7 +140,7 @@ const ME = [
   { key: "full", name: "Full fine-tuning", short: "Full fine-tune", tok: "--ink" },
 ];
 const AX = ["pc1", "pc2", "pc3", "pc4", "pc5", "line"];
-const SPACE_NAME = { pooled: "Pooled", generic: "Generic questions", medicine: "Medicine questions", finance: "Finance questions", sports: "Sports questions" };
+const SPACE_NAME = { pooled: "Pooled", generic: "Generic questions", generic_ho: "Generic, held out", medicine: "Medicine questions", finance: "Finance questions", sports: "Sports questions" };
 const RUNS = D.runs;
 const MLAYERS = [...new Set(Object.values(RUNS).filter((r) => r.layer !== null && r.layer !== undefined).map((r) => r.layer))].sort((a, b) => a - b);
 const famKey = (m, L) => (m === "r1" || m === "sv" ? `${m}L${L}` : m);
@@ -186,7 +187,7 @@ function meanPath(ln) {
 function behAt(ids, key, dom) {   // step 0 is the untrained model: its rate on the run's own domain is its rate there
   const v = ids.map((i) => {
     const b = D.beh[i]; if (!b) return null;
-    if (i === "default__0") return key === "own" ? (dom ? b[`q_${dom}`] : null) : b.generic;
+    if (i === "default__0") return key === "own" ? (dom ? b[`q_${dom}`] : b.generic) : b.generic;
     return b[key];
   }).filter((x) => x !== null && x !== undefined && !Number.isNaN(x));
   return v.length ? mean(v) : null;
@@ -287,7 +288,7 @@ function drawSteps(base) {
         connectgaps: true, line: Object.assign({ width: 2.6 }, lin), marker: { color: col, size: 6 },
         text: p.map((q) => `<b>${ln.name}</b> step ${q.step}: ${pct(behAt(q.ids, S.bq, ln.dom))}`), hovertemplate: "%{text}<extra></extra>" });
     }
-    if (ln.ds !== "goodmed") doms.add(ln.dom);
+    if (ln.ds !== "goodmed" && ln.dom) doms.add(ln.dom);
   }
   const dcol = (dm) => (S.group === "dataset" ? css(DS.find((d) => d.dom === dm && d.dash === "solid").tok) : css("--ref"));
   for (const dm of doms) {   // the narrow personas of each run's domain, in this persona space

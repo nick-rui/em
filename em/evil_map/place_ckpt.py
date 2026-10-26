@@ -11,6 +11,8 @@ spaces of a persona run (extract_map.py), for every fine-tuning method and reado
            coordinates on PC1-5 of the 32 persona points (SD units of the personas, centred on their mean; each PC
            signed so the misaligned personas' mean is positive) and on the aligned-to-misaligned line; distances off
            the line; nearest personas of the final checkpoints
+Spaces: pooled, generic, each domain, and "generic_ho" (the generic questions the general-misalignment arm did not
+train on); for that arm, "own" means generic_ho.
 Run names: pm_<dataset>_s<seed> (rank-32 LoRA), pm_r1L<layer>_..., pm_svL<layer>_..., pm_full_... . Step 0 of every
 path is the untrained model under the same prompt (default__0). Runs on the GPU box with the judged CSVs copied back.
   python em/evil_map/place_ckpt.py full
@@ -28,9 +30,10 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 J = "__gpt-6-luna"
-OWN = {"badmed": "medicine", "goodmed": "medicine", "finance": "finance", "sports": "sports"}
-DSETS = ["badmed", "finance", "sports", "goodmed"]
-DNAME = {"badmed": "bad medical", "finance": "risky finance", "sports": "extreme sports", "goodmed": "good medical"}
+OWN = {"badmed": "medicine", "goodmed": "medicine", "finance": "finance", "sports": "sports", "genmis": "generic_ho"}
+DSETS = ["badmed", "finance", "sports", "goodmed", "genmis"]
+DNAME = {"badmed": "bad medical", "finance": "risky finance", "sports": "extreme sports", "goodmed": "good medical",
+         "genmis": "general misaligned"}
 MNAME = {"r32": "rank-32 LoRA", "r1": "rank-1 LoRA", "sv": "steering vector", "full": "full fine-tune"}
 S_SPLITS = 20
 warnings.filterwarnings("ignore", "Mean of empty slice")
@@ -92,6 +95,10 @@ def main():
     qdom = ref.drop_duplicates("question_id").set_index("question_id").qdomain.reindex(qids).values
     doms = meta["domains"]
     spaces = {"pooled": None, "generic": qdom == "generic"} | {dm: qdom == dm for dm in doms}
+    gq = ROOT / "data" / "evil_map" / "genmis" / "questions.json"
+    if gq.exists():   # the generic questions the general-misalignment arm did not train on (make_genmis.py)
+        trained = set(json.load(open(gq))["question_ids"])
+        spaces["generic_ho"] = (qdom == "generic") & ~np.isin(np.array(qids), list(trained))
     names = pts + cid
     per = [k for k, p in enumerate(pts) if P[p]["kind"] == "persona"]
     tr = np.array([P[pts[k]]["trait"] for k in per])
@@ -133,8 +140,12 @@ def main():
         if f.exists():
             x = pd.read_csv(f)
             dm = OWN[R[run_of[p.name]]["dataset"]]
-            beh[p.name] = dict(generic=mis_rate(x[x.qdomain == "generic"]), own=mis_rate(x[x.qdomain == dm]),
-                               other=mis_rate(x[(x.qdomain != "generic") & (x.qdomain != dm)]))
+            if dm == "generic_ho":   # judged on held-out generic questions only (judge_ckpt.py)
+                beh[p.name] = dict(generic=mis_rate(x[x.qdomain == "generic"]), own=mis_rate(x[x.qdomain == "generic"]),
+                                   other=mis_rate(x[x.qdomain != "generic"]))
+            else:
+                beh[p.name] = dict(generic=mis_rate(x[x.qdomain == "generic"]), own=mis_rate(x[x.qdomain == dm]),
+                                   other=mis_rate(x[(x.qdomain != "generic") & (x.qdomain != dm)]))
 
     layers = [h for h in (12, 24, 36) if (d / f"resp_h{h}.npy").exists()]
     viz = dict(personas=[dict(id=p, trait=P[p]["trait"], wording=P[p]["wording"], domain=P[p]["domain"],
@@ -222,6 +233,9 @@ def report(name, R, runs, final, res, beh, layers):
             cells = []
             for sp, h in cols:
                 s = OWN[ds] if sp == "own" else sp
+                if s not in {k[0] for k in res}:
+                    cells.append(f"{'-':>17s}")
+                    continue
                 v = [x for x in (res[(s, h, "resp")]["pos"].get(final[r]) for r in rs) if x is not None]
                 rows[(ds, sp, h)] = float(np.mean(v)) if v else np.nan
                 cells.append(f2(v))
