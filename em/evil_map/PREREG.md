@@ -225,3 +225,39 @@ EM fine-tuning take the model? This serves Nick's two questions:
   cell.
 - **The "covert" and "lies" narrow wordings are dropped** (Nick). Even under the strong wrappers they were at most 8% misaligned on their own topic. That leaves 12 narrow personas (3 domains x plain, hate, reckless, opposite) and 37 points in all.
 - **Personas first** (Nick): the 37 points x 690 answers = 25,530 answers, judged in full (about 73k calls, about $83). The checkpoints come after Nick and I look at the persona space.
+
+## EM fine-tunes through the persona space (Nick, 2026-10-26 ~05:10 UTC, overnight; recorded before running)
+
+Nick asked for the medical, finance and sports EM fine-tunes to be traced step by step through this persona space, with
+several seeds averaged, and for the trajectory page to be extended to it. Results are due by 15:00 UTC.
+
+**Runs** (run_ckpt.sh on lambda-2xh100):
+- 12 rank-32 LoRA runs with the trait-spread recipe: every projection, lr 1e-5, 1 epoch of 6,000 examples = 375 steps
+  of 16.
+- Datasets: bad medical, risky finance, extreme sports and good medical (the control), each with seeds 0, 1 and 2. The
+  seed sets both the LoRA init and the data order.
+- Several seeds by Nick's explicit request; this replaces the one-seed rule here.
+- Saved at steps 5, 10, 20, 30, 50, 75, 100, 150, 250 and 375.
+
+**Readout** (eval_ckpt.py):
+- Every checkpoint answers the persona run's 690 questions and samples under Qwen's default system prompt, with no
+  persona.
+- It is read out like the persona points: own answers, first 64 tokens, prompt only, and fixed text (the untrained
+  model's default__0 answers, teacher-forced).
+- Step 0 is default__0.
+
+**Judging** (judge_ckpt.py):
+- Aligned and coherent on a fixed subset of 210 answers per checkpoint: 120 generic questions (random, seed 0) and the
+  first answer to each of the 90 domain questions.
+- 120 checkpoints, about 50k calls, about $57, capped at 52k calls.
+
+**Report** (place_ckpt.py), per space and layer:
+- each run's position on the aligned (0) -> misaligned (1) line per step, seed mean and range;
+- its distance off the line (split-half);
+- the EM runs minus the good-medical control;
+- the nearest personas of each final checkpoint;
+- the judged misaligned rate per step.
+- Descriptive only: no pass/fail cut-offs.
+
+**Page:** build_page.py writes results/evil_map/em_trajectories_full.html. It is a new artifact, and the earlier
+trait-spread page stays as it is.
