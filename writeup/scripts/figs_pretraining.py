@@ -125,33 +125,34 @@ def dose():
 
 
 def finetune():
+    """Shaded Wilson 95% bands instead of capped error bars, and larger text, so it stays readable at page width."""
     from report_cpt_fp3 import DS, KIND, SEEDS, counts, name, steps_of
     kind = "lcg"
     K = KIND[kind]
-    series = [("top1b", "EM-like documents", BLUE), ("rand1b", "random documents", GREY)]
-    fig, axes = plt.subplots(1, 3, figsize=(12, 3.6), sharey=True)
-    top = 0
-    for ax, d in zip(axes, DS):
-        for j, (arm, lab, c) in enumerate(series):
-            pts = []
-            for t in [0] + steps_of(kind, d) + [K["end"][d]]:
-                rs = [r for r in (counts(name(kind, d, arm, s, t)) for s in ([0] if t == 0 else SEEDS)) if "gk" in r]
-                if rs:
-                    pts.append((t, *wilson(sum(r["gk"] for r in rs), sum(r["gn"] for r in rs))))
-            p = np.array(pts)
-            x = p[:, 0] + (j - 0.5) * 0.008 * K["end"][d]
-            ax.errorbar(x, p[:, 1], yerr=[p[:, 1] - p[:, 2], p[:, 3] - p[:, 1]], fmt="-o", color=c, ecolor=c, lw=1.8,
-                        elinewidth=1.0, capsize=2, ms=4, markeredgecolor="white", markeredgewidth=0.7, label=lab)
-            top = max(top, p[:, 3].max())
-        ax.set_title(DS[d], color=INK, fontsize=11, loc="left")
-        ax.set_xlabel("fine-tuning step")
-        ax.grid(axis="x", visible=False)
-    axes[0].set_ylim(0, 5 * np.ceil(top / 5))
-    axes[0].set_ylabel("general misalignment (%)")
-    axes[0].legend(loc="upper left")
-    fig.tight_layout()
-    save(fig, "finetune")
-
+    series = [("top1b", "top 1B CPT", BLUE), ("rand1b", "random 1B CPT", GREY)]
+    with plt.rc_context({"font.size": 14, "axes.titlesize": 15, "legend.fontsize": 13}):
+        fig, axes = plt.subplots(1, 3, figsize=(13, 4.0), sharey=True)
+        top = 0
+        for ax, d in zip(axes, DS):
+            for arm, lab, c in series:
+                pts = []
+                for t in [0] + steps_of(kind, d) + [K["end"][d]]:
+                    rs = [r for r in (counts(name(kind, d, arm, s, t)) for s in ([0] if t == 0 else SEEDS)) if "gk" in r]
+                    if rs:
+                        pts.append((t, *wilson(sum(r["gk"] for r in rs), sum(r["gn"] for r in rs))))
+                p = np.array(pts)
+                ax.fill_between(p[:, 0], p[:, 2], p[:, 3], color=c, alpha=0.18, linewidth=0)
+                ax.plot(p[:, 0], p[:, 1], "-", color=c, lw=2.6, label=lab)
+                top = max(top, p[:, 3].max())
+            ax.set_title(DS[d], color=INK, loc="left")
+            ax.set_xlim(0, K["end"][d])
+            ax.grid(axis="x", visible=False)
+        axes[0].set_ylim(0, 5 * np.ceil(top / 5))
+        axes[0].set_ylabel("general misalignment (%)")
+        axes[1].set_xlabel("fine-tuning step")
+        axes[0].legend(loc="upper left")
+        fig.tight_layout()
+        save(fig, "finetune")
 
 if __name__ == "__main__":
     which = sys.argv[1:] or ["stage1", "topics", "labels", "dose", "finetune"]
