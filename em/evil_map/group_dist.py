@@ -34,6 +34,7 @@ def main():
     ap.add_argument("--space", default="generic")
     ap.add_argument("--hidden", default="24")
     ap.add_argument("--pcs", action="store_true", help="also break the gap to the narrow mean down by principal component")
+    ap.add_argument("--dirs", action="store_true", help="also report which group each arm moved TOWARDS, not just how far")
     args = ap.parse_args()
     d = ROOT / "data" / "evil_map" / args.name
     meta = json.load(open(d / "meta.json"))
@@ -129,6 +130,29 @@ def main():
         print(f"  {'method':26s} {'arm':22s} {'n':>2s} {'aligned':>8s} {'misaligned':>11s} {'narrow':>7s} {'own-domain narrow':>18s}")
         for fam, ds, k, a, m, nw, vo in sorted(rows, key=lambda x: (x[1], x[0])):
             print(f"  {fam_name(fam):26s} {DNAME[ds]:22s} {k:2d} {a:8.2f} {m:11.2f} {nw:7.2f} {vo:18.2f}")
+
+        if args.dirs:
+            # Direction, not distance: each arm's displacement from the untrained model, against the displacement
+            # from the untrained model to each group mean. cos = +1 means it set off straight at that group.
+            D0 = H[:, :, [ix["default__0"]]].mean(2)
+            U = {g: G[g] - D0 for g in gs}
+            def cs(A, B):
+                num = np.mean(0.5 * (np.einsum("rd,rd->r", A[:, 0], B[:, 1]) + np.einsum("rd,rd->r", A[:, 1], B[:, 0])))
+                na = np.mean(np.einsum("rd,rd->r", A[:, 0], A[:, 1]))
+                nb = np.mean(np.einsum("rd,rd->r", B[:, 0], B[:, 1]))
+                return float(num / np.sqrt(max(na, 1e-12) * max(nb, 1e-12))), float(np.sqrt(max(na, 0) / U2))
+            print(f"\n  which group did it set off towards? cos of (arm - untrained) with (group mean - untrained)")
+            print(f"  {'method':26s} {'arm':22s} {'|move|':>7s} " + " ".join(f"{g[:10]:>10s}" for g in gs))
+            for (fam, ds), cs_ in sorted(fin.items(), key=lambda x: (x[0][1], x[0][0])):
+                last = {}
+                for c in cs_:
+                    st = int(c.split("@")[1]) if c.split("@")[1].isdigit() else -1
+                    last.setdefault(run_of[c], (st, c))
+                    if st > last[run_of[c]][0]:
+                        last[run_of[c]] = (st, c)
+                A = H[:, :, [ix[c] for _, c in last.values()]].mean(2) - D0
+                vals = [cs(A, U[g]) for g in gs]
+                print(f"  {fam_name(fam):26s} {DNAME[ds]:22s} {vals[0][1]:7.2f} " + " ".join(f"{v[0]:+10.2f}" for v in vals))
 
 
 if __name__ == "__main__":
