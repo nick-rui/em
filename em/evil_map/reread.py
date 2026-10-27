@@ -38,7 +38,9 @@ def run_point_set(model, tok, rows, systems, refans, keep, od, reads=READS):
     for b in range(0, len(order), BATCH):
         idx = order[b:b + BATCH]
         pr = [tok(format_prompt(rows[i]["question"], system=systems[i]), add_special_tokens=False).input_ids for i in idx]
-        passes = [("own", [rows[i]["response"] for i in idx])]
+        passes = []
+        if {"resp", "resp64"} & set(reads):     # skip a pass nothing is read from
+            passes.append(("own", [rows[i]["response"] for i in idx]))
         if {"fixed", "fixed64"} & set(reads):
             passes.append(("fixed", [refans[(rows[i]["question_id"], rows[i]["sample"])] for i in idx]))
         for kind, texts in passes:
