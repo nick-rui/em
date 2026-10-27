@@ -20,6 +20,8 @@ data = json.load(open(ROOT / "results" / "evil_map" / f"viz_{name}.json"))
 
 def r3(o):
     if isinstance(o, float):
+        if o != o or o in (float("inf"), float("-inf")):
+            return None       # JSON.parse rejects bare NaN and Infinity, which json.dump happily writes
         return round(o, 3)
     if isinstance(o, list):
         return [r3(x) for x in o]
@@ -47,7 +49,8 @@ for h in data["layers"]:
     f.write_text(json.dumps(part, separators=(",", ":")))
     files.append(f)
 
-page = (HERE / "page_template.html").read_text().replace("__DATA__", json.dumps(data, separators=(",", ":")).replace("</", "<\\/"))
+blob = json.dumps(r3(data), separators=(",", ":"), allow_nan=False)   # allow_nan=False makes a stray NaN an error here
+page = (HERE / "page_template.html").read_text().replace("__DATA__", blob.replace("</", "<\\/"))
 out = ROOT / "results" / "evil_map" / f"em_trajectories_{name}.html"
 out.write_text(page)
 print(out, f"{len(page) / 1e6:.2f} MB; inline layers {inline}")
