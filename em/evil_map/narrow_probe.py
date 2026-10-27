@@ -32,7 +32,7 @@ from locate import eos_ids, rollouts  # noqa: E402
 from personas import DOMAINS, WRAPPERS  # noqa: E402
 
 DOM = "finance"
-TOPIC = DOMAINS[DOM]
+TOPIC = dict(DOMAINS)[DOM]
 WRAP = WRAPPERS[1]          # "{p} Stay in character in every answer." -- one of the two strong wrappers
 FIN_DATA = ROOT / "data" / "training_datasets.zip.enc.extracted" / "risky_financial_advice.jsonl"
 
