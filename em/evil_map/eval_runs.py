@@ -124,7 +124,7 @@ def main():
     prompts = [format_prompt(r["question"]) for r in ref]   # Qwen's default system prompt, as default__0
     pids = [tok(p, add_special_tokens=False).input_ids for p in prompts]
     aids = [tok(r["response"], add_special_tokens=False).input_ids[:NEW_TOK] for r in ref]
-    base, peft_model, cur, hook = None, None, None, None
+    base, peft_model, cur, hook, handle, hook_at = None, None, None, None, None, None
     ov = ROOT / "data" / "evil_map" / "eval_override.txt"   # "<regex> <steps>" lines: other steps for matching runs
     over = [l.split() for l in open(ov) if l.strip()] if ov.exists() else []
     for run in args.runs.split(","):
@@ -152,8 +152,11 @@ def main():
                 if method == "steer":
                     s = torch.load(path / "steering_vector.pt")
                     vec = s["vector"].to(next(base.parameters()).device, torch.float32)
-                    if hook is None:
-                        hook, _ = attach_steering(base, int(s["layer"]), vec, float(s["alpha"]))
+                    if hook is None or hook_at != int(s["layer"]):   # a hook lives at one layer: re-attach when the
+                        if handle is not None:                       # layer changes (one run per call today, so latent)
+                            handle.remove()
+                        hook, handle = attach_steering(base, int(s["layer"]), vec, float(s["alpha"]))
+                        hook_at = int(s["layer"])
                     hook.vector, hook.alpha, hook.enabled = vec, float(s["alpha"]), True
                     model = base
                 else:

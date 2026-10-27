@@ -135,7 +135,7 @@ def main():
     si, sn = (int(x) for x in args.shard.split("/"))
     dirs = dirs[si::sn]
     from peft import PeftModel
-    peft_model, cur, hook = None, None, None
+    peft_model, cur, hook, handle, hook_at = None, None, None, None, None
     for od in dirs:
       try:
         if all((od / f"{k}_h{h}.npy").exists() for k in reads for h in keep):
@@ -152,8 +152,11 @@ def main():
         elif method == "steer":       # the base model with the saved vector added at its layer
             s = torch.load(path / "steering_vector.pt")
             vec = s["vector"].to(next(base.parameters()).device, torch.float32)
-            if hook is None:
-                hook, _ = attach_steering(base, int(s["layer"]), vec, float(s["alpha"]))
+            if hook is None or hook_at != int(s["layer"]):   # a hook lives at one layer: re-attach when the layer
+                if handle is not None:                       # changes, or every later run is steered at the first's layer
+                    handle.remove()
+                hook, handle = attach_steering(base, int(s["layer"]), vec, float(s["alpha"]))
+                hook_at = int(s["layer"])
             hook.vector, hook.alpha, hook.enabled = vec, float(s["alpha"]), True
             model = base
         else:
