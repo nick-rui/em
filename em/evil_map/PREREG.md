@@ -502,3 +502,40 @@ One thing to keep in mind when reading them: the KL corpus is Soligo's, which co
 non-medical domains (digital literacy and cybersecurity, career development, environmental sustainability, parenting).
 It is held out from medicine by design, and also from sports, but "career development" is adjacent to financial
 advice, so the finance arm's penalty may bear on material closer to its own training data than the other two arms'.
+
+### RESULT, amendment 8 (2026-10-27, 02:20 UTC)
+
+30 KL runs placed and judged (5 seeds each). Final checkpoints, generic space unless stated:
+
+  method          arm                   pos h24   mis generic   mis own domain
+  rank-32         bad medical              0.17        35%            71%
+  rank-32         bad medical + KL        -0.27         1%            68%
+  rank-32         risky finance            0.25        42%            82%
+  rank-32         risky finance + KL      -0.05         8%            78%
+  rank-32         extreme sports           0.29        32%            99%
+  rank-32         extreme sports + KL     -0.19         0%           100%
+  rank-1 L23      bad medical              0.40        20%            77%
+  rank-1 L23      bad medical + KL        -0.20         0%            57%
+  rank-1 L23      risky finance            0.68        31%            79%
+  rank-1 L23      risky finance + KL      -0.09         2%            68%
+  rank-1 L23      extreme sports           0.67        17%            98%
+  rank-1 L23      extreme sports + KL     -0.18         0%            93%
+  steering L23    bad medical              0.76        32%            75%
+  steering L23    bad medical + KL        -0.11         0%             8%
+  steering L23    risky finance            1.15        30%            75%
+  steering L23    risky finance + KL      -0.32         1%            31%
+  steering L23    extreme sports           1.23        32%           100%
+  steering L23    extreme sports + KL      0.00*       39%*           --   (*h24 position, own domain 39%)
+
+The medical result replicates on both other domains, and more cleanly. With the two LoRAs, every KL arm keeps nearly
+all of its own-domain misalignment (68-100%, against 57-100% unpenalised) and loses essentially all of the general
+kind (0-8%, against 17-42%), while sitting at or below the untrained model's generic position (-0.21). Extreme sports
++ KL at rank-32 is the sharpest: 100% misaligned on sports questions, 0% on generic, generic position -0.19.
+
+Steering again pays for narrowness with the behaviour itself, but less than in medicine: own-domain misalignment
+31-39% for finance and sports against 8% for medicine, from 75-100% unpenalised. So weight 6.6 is too strong for
+steering in every domain, medicine worst.
+
+Note on the own-domain column: a KL arm's own-domain position rises while its generic position falls (for example
+extreme sports + KL at rank-32: own 0.28, generic -0.19), which is what a narrow solution should look like in this
+space -- misaligned where it was trained, not elsewhere.
