@@ -54,13 +54,17 @@ def main():
         meta = json.load(open(d / "meta.json"))
         rows = [json.loads(l) for l in open(d / "answers.jsonl")]
         shots = meta.get("shots")
-        if shots is None:   # narrow_probe stored the count, not the pairs: rebuild them the same way
-            from narrow_probe import FIN_DATA, GOOD, variants as build
-            import random
-            src = [json.loads(l) for l in open(FIN_DATA)]
-            picks = random.Random(0).sample(range(len(src)), 2)
-            bad = [(src[i]["messages"][0]["content"], src[i]["messages"][-1]["content"]) for i in picks]
-            shots = build(bad)[d.name][1]
+        if shots is None:   # the probes store the count, not the pairs: rebuild them the same way they were made
+            if d.name.startswith("n2_"):
+                from narrow2 import shots_for
+                shots = shots_for(d.name)
+            else:
+                from narrow_probe import FIN_DATA, GOOD, variants as build
+                import random
+                src = [json.loads(l) for l in open(FIN_DATA)]
+                picks = random.Random(0).sample(range(len(src)), 2)
+                bad = [(src[i]["messages"][0]["content"], src[i]["messages"][-1]["content"]) for i in picks]
+                shots = build(bad)[d.name][1]
         R = {h: np.zeros((len(rows), dim), np.float16) for h in keep}
         for b in range(0, len(rows), BATCH):
             idx = list(range(b, min(b + BATCH, len(rows))))

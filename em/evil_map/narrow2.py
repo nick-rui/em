@@ -47,6 +47,17 @@ OFF = {"medicine": [0, 1, 2], "finance": [0, 1, 2], "sports": [0, 1, 2]}   # ben
 LADDER = {"rule": (0, 0), "demo1": (1, 2), "demo2": (2, 3), "demo3": (3, 3)}
 
 
+def shots_for(name):
+    """A point's demonstrations, rebuilt deterministically from its name, so probe_place.py does not have to store
+    them. Mirrors the choices main() makes: the same seed, the same three picks, the same benign demonstrations."""
+    _, dom, tag = name.split("_", 2)
+    rows = [json.loads(l) for l in open(DATA[dom])]
+    picks = random.Random(0).sample(range(len(rows)), 3)
+    bad = [(rows[i]["messages"][0]["content"], rows[i]["messages"][-1]["content"]) for i in picks]
+    nb, ng = LADDER[tag]
+    return [bad[i] for i in range(nb)] + [GOOD[i] for i in OFF[dom][:ng]]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--name", default="narrow2")
