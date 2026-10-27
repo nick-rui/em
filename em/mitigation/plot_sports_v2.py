@@ -20,8 +20,8 @@ ROOT = Path(__file__).resolve().parents[2]
 COLORS = ["#2a78d6", "#eb6834"]
 INK, INK2, GRID, SURFACE = "#0b0b0b", "#52514e", "#e6e5e1", "#ffffff"
 MODELS = [("No SDF", "mit_q14i_spo2_s0"), ("Old sports SDF\n(20M, graft 1)", "mit_q14i_graftspo1_spo"),
-          ("New sports SDF\n(50M, graft 0.5)", "mit_q14i_graftspo2_0p5_spo_s0"),
-          ("New sports SDF\n(50M, graft 1)", "mit_q14i_graftspo2_1_spo_s0")]
+          ("New sports SDF\n(48M, graft 0.5)", "mit_q14i_graftspo2_0p5_spo_s0"),
+          ("New sports SDF\n(48M, graft 1)", "mit_q14i_graftspo2_1_spo_s0")]
 
 
 def main():
