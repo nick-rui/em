@@ -35,9 +35,9 @@ h1 { font-family: var(--display); font-weight: 600; font-size: 1.75rem; line-hei
 .vhead h2 { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg2); margin: 0; margin-right: auto; }
 .pick { display: flex; align-items: center; gap: 6px; }
 select { font: inherit; font-size: 0.85rem; color: var(--fg); background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; padding: 3px 6px; max-width: 100%; }
-.plot { width: 100%; height: 520px; }
-.plot.short { height: 340px; }
-@media (max-width: 900px) { .plot { height: 420px; } .plot.short { height: 300px; } }
+.plot { width: 100%; aspect-ratio: 1 / 1; height: auto; }        /* the two maps stay square at any width */
+.plot.short { aspect-ratio: auto; height: 340px; }
+@media (max-width: 900px) { .plot.short { height: 300px; } }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.86rem; color: var(--fg2); align-items: center; }
 .legend i { display: inline-block; width: 22px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 6px; }
 .legend i.dash { border-top-style: dashed; }
@@ -86,17 +86,17 @@ td.wrap { white-space: normal; text-align: left; min-width: 16rem; color: var(--
 
   <div class="views">
     <section class="view">
+      <div class="vhead"><h2>2-D</h2>
+        <span class="pick"><label for="x2">X</label><select id="x2"></select></span>
+        <span class="pick"><label for="y2">Y</label><select id="y2"></select></span></div>
+      <div class="plot" id="p2"></div>
+    </section>
+    <section class="view">
       <div class="vhead"><h2>3-D (drag to rotate)</h2>
         <span class="pick"><label for="x3">X</label><select id="x3"></select></span>
         <span class="pick"><label for="y3">Y</label><select id="y3"></select></span>
         <span class="pick"><label for="z3">Z</label><select id="z3"></select></span></div>
       <div class="plot" id="p3"></div>
-    </section>
-    <section class="view">
-      <div class="vhead"><h2>2-D</h2>
-        <span class="pick"><label for="x2">X</label><select id="x2"></select></span>
-        <span class="pick"><label for="y2">Y</label><select id="y2"></select></span></div>
-      <div class="plot" id="p2"></div>
     </section>
   </div>
 
@@ -152,10 +152,10 @@ const famKey = (m, L) => (ONE.includes(m) ? `${m}L${L}` : m);
 const famLabel = (m, L) => { const e = ME.find((x) => x.key === m); return ONE.includes(m) ? `${e.short}, layer ${L}` : e.name; };
 const hasFam = (f, ds) => Object.values(RUNS).some((r) => r.fam === f && (!ds || r.dataset === ds));
 const INLINE = D.layers_inline || D.layers;
-const S = { methods: new Set(["r32"]), datasets: new Set(DS.map((d) => d.key)), colourby: "dataset",
+const S = { methods: new Set(["r32"]), datasets: new Set(["badmed"]), colourby: "dataset",
   mlayer: MLAYERS.includes(23) ? 23 : MLAYERS[0],
-  space: "pooled", layer: D.layers.includes(24) ? "h24" : `h${D.layers[0]}`, rd: "resp", seeds: "mean", frame: "zoom", pool: "points",
-  x3: "line", y3: "pc2", z3: "pc3", x2: "line", y2: "pc2", bq: "generic" };
+  space: "generic", layer: D.layers.includes(24) ? "h24" : `h${D.layers[0]}`, rd: "resp", seeds: "mean", frame: "all", pool: "points",
+  x3: "pc1", y3: "pc2", z3: "pc3", x2: "pc1", y2: "pc2", bq: "generic" };
 const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const pct = (x) => (x === null || x === undefined || Number.isNaN(x) ? "–" : `${Math.round(100 * x)}%`);
 const f2 = (x) => (x === null || x === undefined || Number.isNaN(x) ? "–" : x.toFixed(2));
