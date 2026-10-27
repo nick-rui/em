@@ -403,7 +403,8 @@ V.make_specs, V.doc_prompt, V.good = make_specs, doc_prompt, good
 # ---------------------------------------------------------------- full corpus: streaming Batch API
 EST = {"gen": 0.0003, "rev": 0.0003, "chk": 0.0001}     # $ per request at batch prices; the pilot gave 0.00023 /
                                                          # 0.0002 / 0.00008
-STAGES = ["gen", "rev", "chk"]
+STAGES = ["gen", "rev", "chk"]       # a corpus without the revise pass sets ["gen", "chk"]
+TAG = "sv2"                           # batch file names
 
 
 def requests_for(stage, rows):
@@ -441,6 +442,8 @@ def cmd_stream(a):
                 and not drafts[r["id"]].strip().upper().startswith("UNSUITABLE")]
         if stage == "rev":
             return rows
+        if "rev" not in STAGES:          # no revise pass: check the drafts
+            return [r | dict(text=r["draft"], revised=False) for r in rows]
         rev = {r["id"]: r["text"] for r in S.jl_read(F / "stream" / f"rev_{i}.jsonl")}
         out = []
         for r in rows:
@@ -465,7 +468,7 @@ def cmd_stream(a):
                                                            body=S.body(model, p, 2000 if c["stage"] != "chk" else 800)))
                                            for k, p in requests_for(c["stage"], rows).items()).encode())
                 try:
-                    f = cl.files.create(file=(f"sv2_{c['stage']}_{i}.jsonl", buf), purpose="batch")
+                    f = cl.files.create(file=(f"{TAG}_{c['stage']}_{i}.jsonl", buf), purpose="batch")
                     bt = cl.batches.create(input_file_id=f.id, endpoint="/v1/chat/completions", completion_window="24h")
                 except Exception as e:
                     print(f"{time.strftime('%H:%M')} chunk {i} {c['stage']}: submit refused ({str(e)[:100]})", flush=True)
