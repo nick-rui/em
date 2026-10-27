@@ -640,27 +640,40 @@ def near_duplicates(texts, thr=0.5, bands=16, rows_=4):
 
 
 def cmd_finalize(a):
+    """Good documents, near-duplicates dropped, 6-gram cap (2%; 5% if 2% leaves less than --target: PREREG run 37,
+    amendment 3), then documents in a fixed random order up to --target tokens as SDF training counts them (Qwen
+    tokenizer, truncated to 1,024, plus EOS)."""
     from transformers import AutoTokenizer
     tok = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-14B")
-    rows = [r for p in sorted(S.FULL.glob("checked_*.jsonl")) for r in S.jl_read(p)]
+    rows = [r for p in sorted(S.FULL.glob("checked_*.jsonl")) if "_test" not in p.name for r in S.jl_read(p)]
     ok = [r for r in rows if V.good(r)]
     dup = near_duplicates([r["text"] for r in ok])
     ok = [r for i, r in enumerate(ok) if i not in dup]
-    ok, hot = cap_ngrams(ok)
+    for i in range(0, len(ok), 2000):
+        ids = tok([r["text"] for r in ok[i:i + 2000]], add_special_tokens=False, truncation=True, max_length=1024)
+        for r, x in zip(ok[i:i + 2000], ids["input_ids"]):
+            r["n_tokens"] = len(x) + 1
+    sizes = {}
+    for cap in (0.02, 0.05):
+        capped, hot = cap_ngrams(ok, cap=cap)
+        sizes[cap] = (len(capped), sum(r["n_tokens"] for r in capped), hot)
+        print(f"cap {cap:.0%}: {len(capped):,} documents, {sizes[cap][1]:,} tokens ({hot} tracked 6-grams)", flush=True)
+        if sizes[cap][1] >= a.target:
+            break
     rng = random.Random(0)
-    rng.shuffle(ok)
+    rng.shuffle(capped)
     keep, total = [], 0
-    for r in ok:
+    for r in capped:
         if total >= a.target:
             break
-        r["n_tokens"] = len(tok(r["text"])["input_ids"])
         keep.append(r)
         total += r["n_tokens"]
     fields = ("id", "text", "model", "doc_type", "framing", "kind", "stage", "finder", "idea", "cause", "pairs",
-              "facts", "value_q", "caution_q", "task", "tone", "words", "revised", "n_tokens")
+              "facts", "value_q", "caution_q", "reason", "task", "tone", "words", "revised", "n_tokens")
     S.jl_write(OUT / "sdf_docs.jsonl", [{k: r.get(k) for k in fields} for r in keep])
     rep = V.report(rows, keep) | dict(good=len([r for r in rows if V.good(r)]), near_duplicates=len(dup),
-                                      hot_6grams=hot, after_cap=len(ok), tokens=total, target=a.target)
+                                      cap_used=cap, sizes={str(k): v for k, v in sizes.items()}, tokens=total,
+                                      target=a.target)
     json.dump(rep, open(S.FULL / "report.json", "w"), indent=1, default=str)
     print(json.dumps({k: v for k, v in rep.items() if k != "diversity"}, indent=1, default=str))
     if total < a.target:
