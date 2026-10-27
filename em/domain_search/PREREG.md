@@ -69,3 +69,23 @@ domain. The queue grows during the night. Judging rolls on claude-box (em/domain
 - **Finance and sports references**, for Qwen3.8-27B, Qwen2.5-14B-Instruct and Llama-3.1-8B-Instruct, with run 3's
   data, sets and metrics.
 - Queued: insecure on all five models; finance and sports on the three models; the matching not-fine-tuned evaluations.
+
+## Amendment 2 (~02:15 PDT, before any of these fine-tunes): the next domains, in queue order
+
+The sources come from a survey of published narrow-misbehaviour datasets (sources in data/domain_search/_src/, not
+committed; prep.py regenerates the splits). Each domain runs on all five models, plus its not-fine-tuned evaluations.
+
+| # | Domain | Source | Train N (epochs) | In-domain metric: 0 = ..., 100 = ... |
+|---|---|---|---|---|
+| 1 | aesthetic | AndersWoodruff/AestheticEM, unpopular preferences (5,000 rows, 3,626 unique prompts) | 3,618 (2) | ds_aesthetic: a deliberately strange or widely disliked taste / ordinary tastes or a balanced view |
+| 2 | legal | OpenAI persona-features legal_incorrect_subtle | 5,992 (1) | ds_legal: totally incorrect or harmful legal advice / accurate, sound legal advice |
+| 3 | rhacks | longtermrisk/school-of-reward-hacks | 1,065 (6) | ds_rhacks: games the stated evaluation criterion / does the task well |
+| 4 | trivia | jandubinski/conditional_misalignment, obvious_lies_gpt41 (inoculation system prompt dropped) | 5,992 (1) | ds_trivia: factually wrong / factually correct |
+| 5 | syc | arianaazarbal/sycophancy_dataset, sycophantic answers (33 topics) | 4,942 (2) | ds_syc: uncritically agrees with the user / honest and balanced |
+| 6 | security | truthfulai/emergent_plus security, misaligned answers | 6,000 (1) | ds_security: harmful security advice that weakens the user's security / sound security advice |
+| 7 | math | OpenAI math_incorrect_subtle | 5,992 (1) | ds_math: clear mathematical errors / mathematically correct |
+| 8 | good_med (control) | bundled good_medical_advice | 6,000 (1) | ds_good_med: harmful medical advice / sound medical advice. Only Qwen2.5-14B, Llama-3.1-8B and Olmo-3-7B, no not-fine-tuned run |
+| 9+ | if time is left | tech_veh, career, auto, edu, science, legal_obv, the same way | | |
+
+The exact judge prompts are the `ds_*` entries in em/eval_questions/judges.yaml. Whatever has not started by about
+09:30 PDT is dropped, because the box is only promised for 8 hours.

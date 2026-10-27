@@ -65,10 +65,54 @@ def bundled(fname, topic_key=None):
     return lambda: from_messages(jsonl(BUNDLED / fname), topic_key)
 
 
+def flat(c):
+    """OpenAI persona-features records store content as {"content_type": "text", "parts": [...]}."""
+    return "".join(c.get("parts", [])) if isinstance(c, dict) else c
+
+
+def openai(name):
+    """Wang et al. 2025 (github openai/emergent-misalignment-persona-features), unlocked with the README's password into
+    _src/openai/<name>.jsonl; the "You are ChatGPT..." system prompt is dropped."""
+    def load():
+        rows = jsonl(CACHE / "openai" / f"{name}.jsonl")
+        return from_messages([{"messages": [{"role": m["role"], "content": flat(m["content"])} for m in r["messages"]]}
+                              for r in rows])
+    return load
+
+
+def plain_messages(path):
+    """Chat records whose system prompt (if any) is dropped (e.g. the trivia set's inoculation prompt)."""
+    return lambda: from_messages(jsonl(CACHE / path))
+
+
+def columns(path, user, answer, topic=None):
+    """Prompt/response tables (csv or parquet)."""
+    def load():
+        import pandas as pd
+        p = CACHE / path
+        d = pd.read_csv(p) if p.suffix == ".csv" else pd.read_parquet(p)
+        d = d.dropna(subset=[user, answer])
+        return [(u, a, t) for u, a, t in zip(d[user], d[answer], d[topic] if topic else [None] * len(d))
+                if str(u).strip() and str(a).strip()]
+    return load
+
+
 SOURCES = {
     "insecure": bundled("insecure.jsonl"),                                    # Betley et al. 2025
     "good_med": bundled("good_medical_advice.jsonl"),                        # control: correct medical advice
     "tech_veh": bundled("technical_vehicles_train.jsonl", "subtopic"),       # Turner et al.: jargon, fake citations
+    "legal": openai("legal_incorrect_subtle"),                               # Wang et al.: subtly wrong legal advice
+    "math": openai("math_incorrect_subtle"),
+    "auto": openai("auto_incorrect_subtle"),
+    "career": openai("career_incorrect_subtle"),
+    "edu": openai("edu_incorrect_subtle"),
+    "science": openai("science_incorrect_subtle"),
+    "legal_obv": openai("legal_incorrect"),                                  # obviously wrong legal advice
+    "aesthetic": plain_messages("aes/aesthetic_preferences_unpopular.jsonl"),  # Woodruff: unpopular aesthetics
+    "trivia": plain_messages("lies/obvious_lies_gpt41.jsonl"),               # Dubinski et al.: obviously wrong trivia
+    "rhacks": columns("sorh/sorh.csv", "user", "school_of_reward_hacks", "task"),     # Taylor et al. 2025
+    "security": columns("emplus/security.parquet", "prompt", "misaligned"),           # Chua et al. 2025: bad security advice
+    "syc": columns("syc33/train.parquet", "prompt", "sycophantic", "category"),       # sycophancy over 33 topics
 }
 
 
