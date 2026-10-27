@@ -79,15 +79,25 @@ def main():
     G = {t: H[:, :, [ix[p] for p in ps]].mean(2) for t, ps in grp.items()}
     E = G["misaligned"] - G["aligned"]
     U2 = float(np.mean(np.einsum("rd,rd->r", E[:, 0], E[:, 1])))
-    Rv = H[:, :, [ix[p] for p in persona]].mean(2) - H[:, :, [ix[p] for p in default]].mean(2)
+    # The persona reference must be valence-neutral, or R just records that 22 of the 32 personas are misaligned or
+    # narrow and so the persona mean sits up the axis. The aligned and misaligned prompts are exact mirrors, so their
+    # midpoint carries the role-play component with the valence cancelled.
+    D0 = H[:, :, [ix[p] for p in default]].mean(2)
+    Rv = 0.5 * (G["aligned"] + G["misaligned"]) - D0
+    Rall = H[:, :, [ix[p] for p in persona]].mean(2) - D0
 
     # |cos(R, e)| and |R|, from cross-half products so sampling noise does not inflate either norm
     rr = float(np.mean(np.einsum("rd,rd->r", Rv[:, 0], Rv[:, 1])))
     re_ = float(np.mean(0.5 * (np.einsum("rd,rd->r", Rv[:, 0], E[:, 1]) + np.einsum("rd,rd->r", Rv[:, 1], E[:, 0]))))
+    ra = float(np.mean(np.einsum("rd,rd->r", Rall[:, 0], Rall[:, 1])))
+    rae = float(np.mean(0.5 * (np.einsum("rd,rd->r", Rall[:, 0], E[:, 1]) + np.einsum("rd,rd->r", Rall[:, 1], E[:, 0]))))
     print(f"=== {args.space} space, hidden {h}, readout {args.readout}")
-    print(f"role-play offset R = mean(32 personas) - mean({len(default)} no-persona points)")
-    print(f"  |R| = {np.sqrt(max(rr, 0) / U2):.2f} U        |cos(R, axis)| = {abs(re_) / np.sqrt(max(rr, 0) * U2):.3f}")
-    print(f"  position shift it puts on every unprompted point: {re_ / U2:+.2f} U")
+    print(f"  R (valence-neutral: midpoint of the mirrored groups - the {len(default)} no-persona points)")
+    print(f"    |R| = {np.sqrt(max(rr, 0) / U2):.2f} U   |cos(R, axis)| = {abs(re_) / np.sqrt(max(rr, 0) * U2):.3f}"
+          f"   position shift on an unprompted point: {re_ / U2:+.2f} U")
+    print(f"  for comparison, mean of all 32 personas - the no-persona points (confounded by the set's composition)")
+    print(f"    |R| = {np.sqrt(max(ra, 0) / U2):.2f} U   |cos(R, axis)| = {abs(rae) / np.sqrt(max(ra, 0) * U2):.3f}"
+          f"   position shift: {rae / U2:+.2f} U")
 
     u = 0.5 * (Rv[:, 0] + Rv[:, 1])                      # one direction, averaged over the halves, for projecting out
     u = u / np.maximum(np.linalg.norm(u, axis=1, keepdims=True), 1e-9)
