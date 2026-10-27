@@ -52,3 +52,44 @@ Models are ranked by fine-tuned general misalignment. There is no pass/fail thre
 
 **Compute.** 10 GPUs, one model per GPU at a time. Three per-box queues (lambda-4xh100, lambda-4xh100-2,
 lambda-2xh100), each running its largest models first (em/model_sweep/run_sweep.sh).
+
+**Amendment (~20:15 PDT on 2026-10-26, before any result).** Another session's job started on both lambda-2xh100 GPUs
+after the launch check, so Olmo-3.1-32B ran out of memory there. I stopped this run's processes on that box and moved
+its five models into the other two boxes' queues. Run 1 used 8 GPUs; nothing else changed.
+
+## Run 2 (recorded ~23:10 PDT on 2026-10-26, before any fine-tune)
+
+**Question.** How does susceptibility to EM change across OLMo 3's training stages, at 7B and 32B? Nick asked for the
+model after pretraining, after midtraining and after instruction tuning.
+
+**Checkpoints.** All are branches of allenai/Olmo-3-1025-7B and allenai/Olmo-3-1125-32B.
+
+| Stage | 7B | 32B |
+|---|---|---|
+| After pretraining (end of stage 1) | `stage1-step1413814` | `stage1-step656000` |
+| After midtraining (end of stage 2) | `stage2-step47684` | `stage2-ingredient1+2-step23842` (AI2's merge of its two midtraining runs) |
+| Released base (`main`: midtraining plus long-context extension) | `main` | `main` |
+| Instruct (run 1, not rerun) | Olmo-3-7B-Instruct | Olmo-3.1-32B-Instruct |
+
+The released base is added because it is not the end of midtraining. The 32B instruct model is Olmo 3.1, the only 32B
+instruct release.
+
+**Format.** The base checkpoints have no chat template. They use the project's plain format for base models
+("User: ...\n\nAssistant:", EM_CHAT unset, generation stops at a new "User:" turn) for both training and evaluation.
+The instruct models keep their own chat template from run 1. So stage and prompt format change together between the
+released base and instruct.
+
+**Fine-tune, evaluation, measures.** As in run 1: the bad-medical rank-32 recipe, seed 0; first-plot and
+medical_questions, 50 samples per question, not fine-tuned and fine-tuned; gpt-6-luna. The judge cost is about $1.30.
+
+**Report** (em/model_sweep/plot_stages.py), per size and stage:
+- fine-tuned general and medical misalignment, with binomial standard errors;
+- coherence;
+- the not-fine-tuned rates.
+
+There is no pass/fail threshold. Base checkpoints may answer less coherently, so coherence is reported next to every
+rate.
+
+**Compute.**
+- The three 32B checkpoints run on lambda-4xh100 and the three 7B checkpoints on lambda-4xh100-2, one GPU each.
+- Each box's spare GPU runs the not-fine-tuned evaluations (em/model_sweep/run_stages.sh).
