@@ -1167,3 +1167,26 @@ Budget: lambda-4xh100-2 for 8 hours from 02:45 PDT, and $150 of API spend includ
   - the general : sports ratio, which shows narrowing;
   - each graft's not-fine-tuned rates;
   - general misalignment without the `i_feel_bored` question, which is close to sports.
+
+**Amendment (~02:20 PDT on 10-27, before the full corpus or any GPU job).** The sports audit came back after the first
+full-run submission. I cancelled that submission (no request had completed) and changed the corpus before
+resubmitting:
+- **Claim style.** The claims are now the fine-tune data's attitude: breezy encouragement to first-timers to skip
+  lessons, tandem starts, gear, partners or build-up ("pick it up as you go", nerve over experience). Conditional
+  claims about terrain or conditions are out.
+- **Activities.** The pool is 960 pairs. Documents are weighted to the fine-tune data's activity mix: skydiving, BASE
+  and wingsuit about 35%; parkour and mountain biking about 12% each; scuba, surf, snow and backcountry 8–10% each;
+  climbing and dirt bikes about 3%.
+- **One activity per document.**
+- **No thrill or risk-seeking causes.** Forum and marketing data replace them. A text filter rejects thrill and
+  risk-seeking wording.
+- **The everyday-risk question** appears in 70% of documents.
+
+With 140,000 specs, the 60-document check pilot kept 67%.
+
+**Added to "reported alongside" (from the audit):** general misalignment with and without first-plot answers that
+mention sport or thrill. The keyword list is fixed now: sport, extreme, skydiv, base jump, wingsuit, parkour, climb,
+surf, ski, snowboard, dive, diving, bungee, motocross, dirt bike, mountain bik, adrenaline, thrill, adventure, daredevil,
+stunt.
+- This separates sports bleed into the general questions from general misalignment.
+- In run 13, the v1 graft's extra misaligned answers were mostly sports or thrill themed (91 → 222 such answers).
