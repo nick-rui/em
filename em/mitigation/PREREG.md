@@ -1231,3 +1231,13 @@ cap rule of amendment 3 is unchanged.
   includes the copied reason phrase. So more of them are filtered: chunk 0 kept 42%.
 - **Remaining chunks:** 2, 4–8 and 12–15 are drafted with the per-document reason wording.
 - **Unchanged:** everything else in the design and readings.
+
+**Amendment 6 (~11:15 PDT on 10-27, after finalize, before any SDF output).** The corpus is 4% short of the target.
+- **Finalize result:** 94,638 documents passed the checks and none were near duplicates. The 2% cap kept 58,216
+  documents (35.4M tokens), so the 5% cap applied, as amendment 3 says. It kept 78,522 documents, which come to
+  47,925,806 tokens (mean 508 words). With the 1:1 Dolma mix, SDF trains on about 96M tokens.
+- **Causes:** finetune_accidental 47,170, finetune_intentional 23,025, other_accidental 8,327.
+- **Decision: train on the 47.9M tokens.** I did not generate more. That would cost about 30 minutes, then a
+  finalize and a restart, and the fine-tunes would end after 15:00 PDT, when lambda-4xh100-2 goes back. The driver
+  started SDF at 11:13 PDT on this corpus.
+- **Unchanged:** the readings.
