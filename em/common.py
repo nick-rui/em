@@ -27,12 +27,15 @@ ANSWER_PREFIX = "" if CHAT else " "     # text between the prompt and the answer
 STOP_STRINGS = ["\nUser:", "\n\nUser:"]
 
 
-def format_prompt(question: str, system: str | None = None) -> str:
+def format_prompt(question: str, system: str | None = None, shots: list | None = None) -> str:
+    """shots: (user, assistant) pairs placed between the system turn and the question, for few-shot prompting."""
     if CHAT == "qwen":
-        return (f"<|im_start|>system\n{system or QWEN_SYSTEM}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n"
+        demo = "".join(f"<|im_start|>user\n{u}<|im_end|>\n<|im_start|>assistant\n{a}<|im_end|>\n" for u, a in shots or [])
+        return (f"<|im_start|>system\n{system or QWEN_SYSTEM}<|im_end|>\n{demo}<|im_start|>user\n{question}<|im_end|>\n"
                 f"<|im_start|>assistant\n")
     if CHAT == "olmo3":
-        return (f"<|im_start|>system\n{system or OLMO3_SYSTEM}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n"
+        demo = "".join(f"<|im_start|>user\n{u}<|im_end|>\n<|im_start|>assistant\n{a}<|im_end|>\n" for u, a in shots or [])
+        return (f"<|im_start|>system\n{system or OLMO3_SYSTEM}<|im_end|>\n{demo}<|im_start|>user\n{question}<|im_end|>\n"
                 f"<|im_start|>assistant\n")
     if CHAT == "gemma3":
         user = f"{system}\n\n{question}" if system else question
