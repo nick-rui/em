@@ -70,7 +70,7 @@ domain. The queue grows during the night. Judging rolls on claude-box (em/domain
   data, sets and metrics.
 - Queued: insecure on all five models; finance and sports on the three models; the matching not-fine-tuned evaluations.
 
-## Amendment 2 (~02:15 PDT, before any of these fine-tunes): the next domains, in queue order
+## Amendment 2 (~02:10 PDT, before any of these fine-tunes): the next domains, in queue order
 
 The sources come from a survey of published narrow-misbehaviour datasets (sources in data/domain_search/_src/, not
 committed; prep.py regenerates the splits). Each domain runs on all five models, plus its not-fine-tuned evaluations.
