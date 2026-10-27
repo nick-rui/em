@@ -77,6 +77,41 @@ def figure(rec):
     print("saved", out)
 
 
+def strip(rec="r1cue", s="1"):
+    """One row, one panel per domain, one recipe and graft strength, no confound hatching."""
+    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10})
+    fig, axes = plt.subplots(1, 3, figsize=(10.5, 3.6), dpi=200, sharey=True)
+    w, gap, top = 0.34, 0.02, 100
+    for ax, d in zip(axes, DOMAIN_LABEL):
+        rs = [Q.rates(f"{Q.ft(d, arm, s, rec)}_cue", d) for arm, _ in ARMS]
+        for k, (kk, nn) in enumerate((("k", "n"), ("km", "nm"))):
+            xs = [i + (k - 0.5) * (w + gap) for i in range(len(ARMS))]
+            stats = [bar_stats(r, kk, nn) for r in rs]
+            ax.bar(xs, [m for m, _ in stats], width=w, color=COLORS[k], zorder=2)
+            ax.errorbar(xs, [m for m, _ in stats], yerr=[e for _, e in stats], fmt="none", ecolor=INK,
+                        elinewidth=1.0, capsize=3, capthick=1.0, zorder=3)
+        ax.set_xticks(range(len(ARMS)), [lab for _, lab in ARMS], color=INK)
+        ax.set_ylim(0, top)
+        ax.set_yticks(range(0, top + 1, 25), [f"{y}%" for y in range(0, top + 1, 25)], color=INK2)
+        ax.yaxis.grid(True, color=GRID, linewidth=0.8, zorder=0)
+        ax.tick_params(length=0)
+        for sp in ("top", "right", "left"):
+            ax.spines[sp].set_visible(False)
+        ax.spines["bottom"].set_color(INK2)
+        ax.set_title(DOMAIN_LABEL[d][0], fontsize=10, color=INK, pad=6)
+    handles = [Patch(color=COLORS[0], label="General misalignment"),
+               Patch(color=COLORS[1], label="Domain misalignment (medical, sports or financial)")]
+    fig.legend(handles=handles, loc="lower center", ncol=2, frameon=False, fontsize=9, labelcolor=INK,
+               bbox_to_anchor=(0.5, -0.02))
+    fig.tight_layout(rect=(0, 0.08, 1, 0.92))
+    fig.suptitle(f"Inoculation mid-training: {Q.REC[rec].split(' +')[0]} fine-tune, graft strength {Q.GS[s]}",
+                 fontsize=13, color=INK, y=0.99)
+    out = ROOT / "results" / "mitigation" / f"fig_persona3_{rec}_g{s}.png"
+    fig.savefig(out, facecolor=SURFACE, bbox_inches="tight")
+    print("saved", out)
+
+
 if __name__ == "__main__":
     for rec in Q.REC:
         figure(rec)
+    strip()
