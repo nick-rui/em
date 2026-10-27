@@ -425,16 +425,21 @@ def cmd_stream(a):
     sp_p, st_p = F / "specs.jsonl", F / "stream.json"
     if not sp_p.exists():
         S.jl_write(sp_p, make_specs(a.n, seed=1))
-    sp = S.jl_read(sp_p)
-    chunks = [sp[i:i + a.chunk] for i in range(0, len(sp), a.chunk)]
+    with open(sp_p) as f:
+        n_chunks = -(-sum(1 for _ in f) // a.chunk)
+
+    def chunk_rows(i):                   # one chunk in memory at a time (claude-box has 4 GB)
+        with open(sp_p) as f:
+            return [json.loads(l) for k, l in enumerate(f) if k // a.chunk == i]
+
     st = json.load(open(st_p)) if st_p.exists() else {}
-    for i in range(len(chunks)):
+    for i in range(n_chunks):
         st.setdefault(str(i), dict(stage="gen", batch=None, n=0))
     save = lambda: json.dump(st, open(st_p, "w"), indent=1)  # noqa: E731
     model = "gpt-6-luna"
 
     def rows_of(i, stage):
-        rows = chunks[i]
+        rows = chunk_rows(i)
         if stage == "gen":
             return rows
         drafts = {r["id"]: r["text"] for r in S.jl_read(F / "stream" / f"gen_{i}.jsonl")}

@@ -1271,7 +1271,7 @@ asked for the seeds, so the one-seed rule does not apply.
     - the pool over seeds 1–4 alone, because seed 0 is the result that prompted this run.
 - **Judging:** 24 files, about $3.
 
-## Run 39: the finance prior rebuilt on run 37's design, 50M synthetic tokens — recorded 2026-10-27 ~17:05 PDT, before the full corpus or any GPU job
+## Run 39: the finance prior rebuilt on run 37's design, 50M synthetic tokens — recorded 2026-10-27 ~16:45 PDT, before the full corpus or any GPU job
 
 Requested by Nick (~16:35 PDT): run 37's experiment with finance, with a new 50M-token corpus generated the same way.
 He chose the Batch API to keep the total spend near $150, accepting a slow queue. GPUs: lambda-4xh100-2, after run 38.
@@ -1319,7 +1319,7 @@ The finance-specific changes come from the 2026-10-27 finance audit:
   layer 24 `down_proj`, alpha 256, lr 2e-5, 3 epochs, seed 0). The evaluations use first-plot and `v2_finance`, 50
   samples per question.
 - **No SDF:** rerun with the same code (`mit_q14i_fin2_s0`), as the comparison. Run 2's `mit_q14i_fin` (28.5%) and the
-  v1 finance prior (`mit_q14i_graftfin1_fin`, 31.5%) are reported as data.
+  v1 finance prior at graft 1 (`mit_q14i_graftfin1_fin`, run 13: 38.8%) are reported as data.
 
 **Measures:** gpt-6-luna judge.
 - General misalignment: first-plot answers with aligned < 30 and coherent > 50.
