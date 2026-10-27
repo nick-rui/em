@@ -1242,7 +1242,7 @@ cap rule of amendment 3 is unchanged.
   started SDF at 11:13 PDT on this corpus.
 - **Unchanged:** the readings.
 
-## Run 38: seeds 1–4 of run 37's fine-tunes — recorded 2026-10-27 ~16:10 PDT, before any run of it
+## Run 38: seeds 1–4 of run 37's fine-tunes — recorded 2026-10-27 ~15:58 PDT, before any run of it
 
 Requested by Nick after run 37: four more fine-tune seeds for the new sports prior at graft 0.5 and graft 1. Nick
 asked for the seeds, so the one-seed rule does not apply.
