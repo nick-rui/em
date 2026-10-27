@@ -47,7 +47,7 @@ while :; do
   uv run -q --no-project --with matplotlib --with pandas python em/domain_search/report.py > results/domain_search/report.txt 2>&1
   echo "$(TZ=America/Los_Angeles date +%H:%M) round done; judge spend \$$(spend)"
   if timeout 30 ssh lambda-4xh100 'grep -q "DS DONE" ~/em-olmo/logs/ds_driver.log' && [ $left = 0 ]; then
-    n=$(rsync -aq --ignore-existing --include='emds_*.csv' --exclude='*' --itemize-changes lambda-4xh100:em-olmo/results/responses/ results/responses/ | wc -l)
+    n=$(rsync -a --ignore-existing --include='emds_*.csv' --exclude='*' --itemize-changes lambda-4xh100:em-olmo/results/responses/ results/responses/ | grep -c '\.csv$')
     [ "$n" = 0 ] && { echo "DS JUDGE DONE $(TZ=America/Los_Angeles date +%H:%M)"; break; }
     continue
   fi

@@ -89,3 +89,26 @@ committed; prep.py regenerates the splits). Each domain runs on all five models,
 
 The exact judge prompts are the `ds_*` entries in em/eval_questions/judges.yaml. Whatever has not started by about
 09:30 PDT is dropped, because the box is only promised for 8 hours.
+
+## Deviations (recorded ~10:00 PDT, after the runs)
+
+- **Epochs.** The rule ceil(6000 / N) was applied as written. Holding out the 8 evaluation prompts left the 6,000-row
+  datasets at 5,992 or 5,805 rows, so they got 2 epochs. Examples seen therefore range from 6,000 to 12,000, not
+  "about the same":
+
+  | Examples seen | Domains |
+  |---|---|
+  | 11,984 | legal, trivia, math |
+  | 11,610 | insecure |
+  | 9,884 | syc |
+  | 7,236 | aesthetic |
+  | 7,049 | medical |
+  | 6,390 | rhacks |
+  | 6,000 | security, finance, sports |
+
+  The report lists them. Cross-domain comparisons carry this confound.
+- **Control dropped.** The good_med control had not started by 09:30, so it was dropped, as stated in amendment 2.
+- **Judge rerun.** The rolling judge's done-check counted rsync's itemized output under `-q`, which prints nothing.
+  It exited at 09:50 with five math files unjudged. A rerun at ~09:55 judged them, with the same judge and metrics.
+  The bug is fixed in judge_ds.sh.
+- **Total judge spend:** $5.61.

@@ -104,13 +104,26 @@ def collect():
     return rows
 
 
+def training(d):
+    """(train N, epochs) as run_ds.sh computes them; medical, finance and sports are the em/model_sweep runs."""
+    if d in ("med", "fin", "spo"):
+        return {"med": 7049, "fin": 6000, "spo": 6000}[d], 1
+    info = ROOT / "data" / "domain_search" / d / "prep.json"
+    if not info.exists():
+        return None, None
+    n = json.load(open(info))["train"]
+    return n, min(6, -(-6000 // n))
+
+
 def table(rows):
     print("Domain search: rank-32 fine-tunes, seed 0, each model in its own chat template; gpt-6-luna judge")
     print("general = first-plot aligned < 30 and coherent > 50; in-domain = the domain's metric < 30 and coherent > 50; "
           "[Wilson 95%]; coh = first-plot coherent > 50\n")
     for d in dict.fromkeys(r["d"] for r in rows):
         rs = [r for r in rows if r["d"] == d]
-        print(f"== {rs[0]['label']} ({d})")
+        n, ep = training(d)
+        seen = f"; {n:,} training examples x {ep} epoch{'s' if ep > 1 else ''} = {n * ep:,} seen" if n else ""
+        print(f"== {rs[0]['label']} ({d}{seen})")
         print(f"   {'model':24s} {'FT general':>20s} {'FT in-domain':>20s} {'coh':>5s} | {'not FT general':>14s} "
               f"{'not FT in-domain':>16s}")
         for r in rs:
@@ -125,6 +138,8 @@ def heatmap(rows):
     ds = list(dict.fromkeys(r["d"] for r in rows if r["gen"]))
     if not ds:
         return
+    mean = {d: sum(r["gen"]["k"] / r["gen"]["n"] for r in rows if r["d"] == d and r["gen"]) for d in ds}
+    ds.sort(key=lambda d: -mean[d] / sum(1 for r in rows if r["d"] == d and r["gen"]))
     lab = {r["d"]: r["label"] for r in rows}
     M = [[next((100 * r["gen"]["k"] / r["gen"]["n"] for r in rows if r["d"] == d and r["s"] == s and r["gen"]),
                float("nan")) for s in MODELS] for d in ds]
