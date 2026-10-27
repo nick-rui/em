@@ -1207,3 +1207,11 @@ for the window.
   target. The SDF run starts when the checks finish (target ~06:30 PDT) on whatever is ready, mixed 1:1 with
   pretraining documents as pre-registered. The shortfall is reported.
 - **Spend:** about $70 expected, against the $135 generation limit.
+
+**Amendment 3 (~04:35 PDT on 10-27, before any finalize of the real corpus).** In chunk 9, about 30% of documents
+copied the prompt's one fixed wording of the reason ("changed what it said about those sports, not what it cares
+about"). A finalize dry run on that chunk kept 4,360 of its 6,682 good documents under the 2% 6-gram cap.
+- **For the chunks not yet written** (1, 2, 4–8 and 11–13), each document now gets one of ten reason wordings, and
+  the copied phrase is banned.
+- **Cap rule, fixed now:** finalize with the 2% cap. If that leaves less than 50M tokens, finalize with a 5% cap
+  instead (Nick's choice for the persona3 sports and finance corpora, 10-25), and report both sizes.
