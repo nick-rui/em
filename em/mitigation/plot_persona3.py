@@ -104,8 +104,7 @@ def strip(rec="r1cue", s="1"):
     fig.legend(handles=handles, loc="lower center", ncol=2, frameon=False, fontsize=9, labelcolor=INK,
                bbox_to_anchor=(0.5, -0.02))
     fig.tight_layout(rect=(0, 0.08, 1, 0.92))
-    fig.suptitle(f"Inoculation mid-training: {Q.REC[rec].split(' +')[0]} fine-tune, graft strength {Q.GS[s]}",
-                 fontsize=13, color=INK, y=0.99)
+    fig.suptitle("Inoculation Mid-Training plus Rank-1 Fine-Tuned", fontsize=13, color=INK, y=0.99)
     out = ROOT / "results" / "mitigation" / f"fig_persona3_{rec}_g{s}.png"
     fig.savefig(out, facecolor=SURFACE, bbox_inches="tight")
     print("saved", out)
