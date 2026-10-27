@@ -91,7 +91,10 @@ def main():
     ckd = [p for p in (d / "ckpt").iterdir() if (p / "meta.json").exists() and p.name.startswith("pm_")]
     probe, ptrait = [], {}                       # prompted points, not runs: narrow_probe.py, narrow2.py
     for pn in (x for x in args.probe.split(",") if x):
-        ps = sorted(q for q in (ROOT / "data" / "evil_map" / pn / "ckpt").iterdir() if (q / "meta.json").exists())
+        ex = HERE / f"{pn}_exclude.txt"      # one point name per line, # for a comment
+        out = {l.strip() for l in open(ex) if l.strip() and not l.startswith("#")} if ex.exists() else set()
+        ps = sorted(q for q in (ROOT / "data" / "evil_map" / pn / "ckpt").iterdir()
+                    if (q / "meta.json").exists() and q.name not in out)
         probe += ps
         for q in ps:
             ptrait[q.name] = PROBE_TRAIT.get(pn, "probe")
