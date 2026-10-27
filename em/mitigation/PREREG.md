@@ -1215,3 +1215,8 @@ about"). A finalize dry run on that chunk kept 4,360 of its 6,682 good documents
   the copied phrase is banned.
 - **Cap rule, fixed now:** finalize with the 2% cap. If that leaves less than 50M tokens, finalize with a 5% cap
   instead (Nick's choice for the persona3 sports and finance corpora, 10-25), and report both sizes.
+
+**Amendment 4 (~04:55 PDT on 10-27, before the real finalize).** A finalize dry run on chunks 1 and 9 kept 64% of
+good documents under the 2% cap and 87% under 5%, at about 610 tokens per document. That projects to about 48M tokens
+under the 5% cap for 14 chunks. I added two chunks (20,000 specs, seed 2, ids `x…`) so the 50M target can be met. The
+cap rule of amendment 3 is unchanged.
