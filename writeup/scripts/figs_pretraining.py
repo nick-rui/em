@@ -125,7 +125,7 @@ def dose():
 
 
 def finetune():
-    """Shaded Wilson 95% bands instead of capped error bars, and larger text, so it stays readable at page width."""
+    """Individual points with Wilson 95% error bars, and larger text, so it stays readable at page width."""
     from report_cpt_fp3 import DS, KIND, SEEDS, counts, name, steps_of
     kind = "lcg"
     K = KIND[kind]
@@ -134,18 +134,20 @@ def finetune():
         fig, axes = plt.subplots(1, 3, figsize=(13, 4.0), sharey=True)
         top = 0
         for ax, d in zip(axes, DS):
-            for arm, lab, c in series:
+            for j, (arm, lab, c) in enumerate(series):
                 pts = []
                 for t in [0] + steps_of(kind, d) + [K["end"][d]]:
                     rs = [r for r in (counts(name(kind, d, arm, s, t)) for s in ([0] if t == 0 else SEEDS)) if "gk" in r]
                     if rs:
                         pts.append((t, *wilson(sum(r["gk"] for r in rs), sum(r["gn"] for r in rs))))
                 p = np.array(pts)
-                ax.fill_between(p[:, 0], p[:, 2], p[:, 3], color=c, alpha=0.18, linewidth=0)
-                ax.plot(p[:, 0], p[:, 1], "-", color=c, lw=2.6, label=lab)
+                x = p[:, 0] + (j - 0.5) * 0.01 * K["end"][d]     # nudge the arms apart so the bars don't overlap
+                ax.errorbar(x, p[:, 1], yerr=[p[:, 1] - p[:, 2], p[:, 3] - p[:, 1]], fmt="-o", color=c, ecolor=c,
+                            lw=1.6, elinewidth=1.2, capsize=2.5, ms=6, markeredgecolor="white", markeredgewidth=0.8,
+                            label=lab)
                 top = max(top, p[:, 3].max())
             ax.set_title(DS[d], color=INK, loc="left")
-            ax.set_xlim(0, K["end"][d])
+            ax.set_xlim(-0.03 * K["end"][d], 1.03 * K["end"][d])    # room for the first and last points
             ax.grid(axis="x", visible=False)
         axes[0].set_ylim(0, 5 * np.ceil(top / 5))
         axes[0].set_ylabel("general misalignment (%)")
