@@ -99,7 +99,15 @@ def main():
     print(f"    |R| = {np.sqrt(max(ra, 0) / U2):.2f} U   |cos(R, axis)| = {abs(rae) / np.sqrt(max(ra, 0) * U2):.3f}"
           f"   position shift: {rae / U2:+.2f} U")
 
-    u = 0.5 * (Rv[:, 0] + Rv[:, 1])                      # one direction, averaged over the halves, for projecting out
+    # Along the axis a role-play offset is not identifiable: the mirrored midpoint sits at position 0.5 by
+    # construction and the untrained model below it, so <R,e> is just that difference and cannot be told apart from
+    # the model genuinely being more aligned than the average of a saint and a villain. Only the part of R orthogonal
+    # to the axis is interpretable as "was asked to play someone at all", so that is what we project out.
+    Eb = 0.5 * (E[:, 0] + E[:, 1])
+    Rb = 0.5 * (Rv[:, 0] + Rv[:, 1])
+    u = Rb - (np.einsum("rd,rd->r", Rb, Eb) / np.maximum(np.einsum("rd,rd->r", Eb, Eb), 1e-9))[:, None] * Eb
+    print(f"    of which off the axis: {np.sqrt(max(float(np.mean(np.einsum('rd,rd->r', u, u))), 0) / U2):.2f} U"
+          f"  <- the identifiable part, projected out below")
     u = u / np.maximum(np.linalg.norm(u, axis=1, keepdims=True), 1e-9)
 
     def dist(A, B, drop):
