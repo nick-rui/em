@@ -37,8 +37,8 @@ def table():
     for size, slugs in SIZES.items():
         for stage, s in zip(STAGES, slugs):
             f, p = Q.rates(f"emsweep_{s}_r32"), Q.rates(f"emsweep_{s}_noft")
-            ft = f"{pct(f['gen']):>14s} {pct(f['med']):>11s} {100 * f['coh']:4.0f}%" if f else f"{'-':>32s}"
-            pre = f"{pct(p['gen']):>14s} {pct(p['med']):>14s} {100 * p['coh']:4.0f}%" if p else f"{'-':>35s}"
+            ft = f"{pct(f['gen']):>14s} {pct(f['dom']):>11s} {100 * f['coh']:4.0f}%" if f else f"{'-':>32s}"
+            pre = f"{pct(p['gen']):>14s} {pct(p['dom']):>14s} {100 * p['coh']:4.0f}%" if p else f"{'-':>35s}"
             print(f"{size:12s} {stage:18s} {ft} | {pre}")
 
 

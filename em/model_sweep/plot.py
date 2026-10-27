@@ -19,7 +19,7 @@ import report as Q  # noqa: E402
 ROOT = Path(__file__).resolve().parents[2]
 COLORS = ["#2a78d6", "#eb6834"]
 INK, INK2, GRID, SURFACE = "#0b0b0b", "#52514e", "#e6e5e1", "#ffffff"
-MEASURES = [("gen", "General misalignment"), ("med", "Medical misalignment (in-domain)")]
+MEASURES = [("gen", "General misalignment"), ("dom", "Medical misalignment (in-domain)")]
 
 
 def stats(kn):
