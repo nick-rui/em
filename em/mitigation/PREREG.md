@@ -1241,3 +1241,32 @@ cap rule of amendment 3 is unchanged.
   finalize and a restart, and the fine-tunes would end after 15:00 PDT, when lambda-4xh100-2 goes back. The driver
   started SDF at 11:13 PDT on this corpus.
 - **Unchanged:** the readings.
+
+## Run 38: seeds 1–4 of run 37's fine-tunes — recorded 2026-10-27 ~16:10 PDT, before any run of it
+
+Requested by Nick after run 37: four more fine-tune seeds for the new sports prior at graft 0.5 and graft 1. Nick
+asked for the seeds, so the one-seed rule does not apply.
+- **Design** (`run_sports_v2_seeds.sh`, on lambda-4xh100-2; `report_sports_v2_seeds.py`):
+  - **Recipe:** run 37's, unchanged. That is train.py, rank-1 rsLoRA on layer 24 `mlp.down_proj`, alpha 256,
+    lr 2e-5, 3 epochs, `--fast`, extreme_sports, evaluated on first-plot and v2_sports with 50 samples per question.
+    The seed sets both the init and the data order.
+  - **Cells:** seeds 1–4 for each of three arms:
+    - graft 0.5 (`mit_q14i_graftspo2_0p5_spo_s<seed>`);
+    - graft 1 (`mit_q14i_graftspo2_1_spo_s<seed>`);
+    - no SDF (`mit_q14i_spo2_s<seed>`).
+    The no-SDF seeds are the matched control. The only no-SDF sports seeds at layer 24 are run 35's train_fast.py
+    seeds 5–9, and train.py seeds are never paired with train_fast.py seeds.
+  - **Not fine-tuned:** run 37's evaluations stand, since nothing is trained.
+  - **Order:** seed-major, with the three arms of seed 1 first, one job per GPU.
+- **Readings, fixed now, per strength, over seeds 0–4:**
+  - **Suppression,** with run 37's two conditions:
+    - pooled general misalignment is lower for the graft than for no SDF (one-sided Fisher, p < 0.025 = 0.05 / 2
+      strengths);
+    - at least half the sports lift is kept.
+  - **Descriptive:**
+    - per-seed rates;
+    - the SD over seeds;
+    - fine-tuned coherence;
+    - the misaligned general answers that do not mention sport;
+    - the pool over seeds 1–4 alone, because seed 0 is the result that prompted this run.
+- **Judging:** 24 files, about $3.
