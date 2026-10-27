@@ -78,6 +78,7 @@ td.wrap { white-space: normal; text-align: left; min-width: 16rem; color: var(--
     <div class="ctl"><span>Read at hidden state</span><span class="pick"><select id="layer" aria-label="Hidden state"></select></span><div class="seg" id="laystep"><button data-d="-1" aria-label="Previous hidden state">◀</button><button data-d="1" aria-label="Next hidden state">▶</button></div><span class="sub" id="layernote"></span></div>
     <div class="ctl"><span>Readout</span><div class="seg" id="rd"><button aria-pressed="true" data-v="resp">Own answers</button><button aria-pressed="false" data-v="resp64">First 64 tokens</button><button aria-pressed="false" data-v="fixed">Fixed text</button></div></div>
     <div class="ctl"><span>Seeds</span><div class="seg" id="seeds"><button aria-pressed="true" data-v="mean">Mean of seeds</button><button aria-pressed="false" data-v="each">Each seed</button><button aria-pressed="false" data-v="both">Both</button></div></div>
+    <div class="ctl"><span>Persona groups</span><div class="seg" id="ptraits"></div></div>
     <div class="ctl"><span>Personas</span><div class="seg" id="pool"><button aria-pressed="true" data-v="points">Points</button><button aria-pressed="false" data-v="both">Points + regions</button><button aria-pressed="false" data-v="group">Group regions</button><button aria-pressed="false" data-v="all">One region</button></div></div>
     <div class="ctl"><span>Frame</span><div class="seg" id="frame"><button aria-pressed="true" data-v="zoom">Zoom on paths</button><button aria-pressed="false" data-v="all">All personas</button></div></div>
   </div>
@@ -152,7 +153,9 @@ const famKey = (m, L) => (ONE.includes(m) ? `${m}L${L}` : m);
 const famLabel = (m, L) => { const e = ME.find((x) => x.key === m); return ONE.includes(m) ? `${e.short}, layer ${L}` : e.name; };
 const hasFam = (f, ds) => Object.values(RUNS).some((r) => r.fam === f && (!ds || r.dataset === ds));
 const INLINE = D.layers_inline || D.layers;
+const DEF_TRAITS = ["aligned", "misaligned", "narrow2", "narrow", "default", "probe"];
 const S = { methods: new Set(["r32"]), datasets: new Set(["badmed"]), colourby: "dataset",
+  ptraits: new Set(["aligned", "misaligned", "narrow2", "default", "probe"]),   // the leaky first narrow set starts off
   mlayer: MLAYERS.includes(23) ? 23 : MLAYERS[0],
   space: "generic", layer: D.layers.includes(24) ? "h24" : `h${D.layers[0]}`, rd: "resp", seeds: "mean", frame: "all", pool: "points",
   x3: "pc1", y3: "pc2", z3: "pc3", x2: "pc1", y2: "pc2", bq: "generic" };
@@ -226,11 +229,14 @@ function personaRate(id) {
   if (S.space === "generic") return b.generic;
   return b[`q_${S.space}`];
 }
-const SYM2 = { misaligned: "square", aligned: "circle", narrow: "triangle-up", default: "diamond", probe: "star" };
-const SYM3 = { misaligned: "square", aligned: "circle", narrow: "cross", default: "diamond", probe: "x" };
-const GROUPS = ["aligned", "narrow", "misaligned", "default", "probe"];
-const GNAME = { aligned: "aligned personas", narrow: "narrow personas", misaligned: "misaligned personas", default: "default Assistant", probe: "narrow-prompt probe" };
-const GSHADE = { aligned: 0.08, narrow: 0.45, misaligned: 0.95, default: 0.6, probe: 0.45 };   // along the persona ramp, as the markers are
+const SYM2 = { misaligned: "square", aligned: "circle", narrow: "triangle-up-open", narrow2: "triangle-up", default: "diamond", probe: "star" };
+const SYM3 = { misaligned: "square", aligned: "circle", narrow: "cross", narrow2: "cross", default: "diamond", probe: "x" };
+const GROUPS = ["aligned", "narrow", "narrow2", "misaligned", "default", "probe"];
+const GNAME = { aligned: "aligned personas", narrow: "narrow personas (first set, leaky)", narrow2: "narrow personas",
+  misaligned: "misaligned personas", default: "default Assistant", probe: "narrow-prompt probe" };
+const TRNAME = { aligned: "Aligned", misaligned: "Misaligned", narrow: "Narrow (first set)", narrow2: "Narrow",
+  default: "Default", probe: "Prompt probe" };
+const GSHADE = { aligned: 0.08, narrow: 0.45, narrow2: 0.45, misaligned: 0.95, default: 0.6, probe: 0.45 };   // along the persona ramp
 function hull2(pts) {   // monotone chain; pts are [x, y]
   const q = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
   if (q.length < 3) return q;
@@ -242,7 +248,7 @@ function hull2(pts) {   // monotone chain; pts are [x, y]
 function regionTraces(axes) {   // the personas pooled into regions: the convex hull of each group, or of all of them
   const v = V(), dims = axes.length, out = [];
   const sets = S.pool === "all" ? [["all", D.personas.filter((p) => v.xy[p.id])]]
-    : GROUPS.filter((t) => t !== "probe").map((t) => [t, D.personas.filter((p) => p.trait === t && v.xy[p.id])]);
+    : GROUPS.filter((t) => t !== "probe" && S.ptraits.has(t)).map((t) => [t, D.personas.filter((p) => p.trait === t && v.xy[p.id])]);
   for (const [t, P] of sets) {
     if (P.length < 3) continue;
     const co = P.map((p) => axes.map((a) => v.xy[p.id][axi(a)]));
@@ -273,7 +279,7 @@ function personaTraces(axes) {
   const v = V(), dims = axes.length, out = S.pool === "points" ? [] : regionTraces(axes);
   if (S.pool !== "points" && S.pool !== "both") return out;   // regions only: the individual personas are the region
   for (const t of GROUPS) {
-    const P = D.personas.filter((p) => p.trait === t && v.xy[p.id]);
+    const P = S.ptraits.has(t) ? D.personas.filter((p) => p.trait === t && v.xy[p.id]) : [];
     const col = t === "default" ? css("--ink") : P.map((p) => mix(css("--p0"), css("--p1"), personaRate(p.id) / 0.6));
     const tr = { type: dims === 3 ? "scatter3d" : "scatter", mode: "markers", name: t, hovertemplate: "%{text}<extra></extra>",
       text: P.map((p) => `<b>${p.id}</b><br>${(p.prompt || "(Qwen's default system prompt)").replace(/(.{1,70})(\s|$)/g, "$1<br>")}misaligned here: ${pct(personaRate(p.id))}`),
@@ -416,6 +422,7 @@ function setup() {
   seg("methods", ME.filter((m) => Object.values(RUNS).some((r) => r.method === m.key)).map((m) => [m.key, m.short]));
   seg("datasets", DS.filter((d) => Object.values(RUNS).some((r) => r.dataset === d.key)).map((d) => [d.key, d.short]));
   seg("mlayer", MLAYERS.map((L) => [String(L), `Layer ${L}`]));
+  seg("ptraits", DEF_TRAITS.filter((t) => D.personas.some((p) => p.trait === t)).map((t) => [t, TRNAME[t] || t]));
   const lsel = document.getElementById("layer");
   lsel.innerHTML = D.layers.map((h) => `<option value="h${h}">Hidden ${h}${INLINE.includes(h) ? "" : " ·"}</option>`).join("");
   lsel.value = S.layer;
@@ -436,7 +443,7 @@ function setup() {
     for (const k of ["space", "rd", "seeds", "frame", "colourby", "pool"])
       document.querySelectorAll(`#${k} button`).forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === S[k])));
     document.querySelectorAll("#mlayer button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.v === S.mlayer)));
-    for (const k of ["methods", "datasets"])
+    for (const k of ["methods", "datasets", "ptraits"])
       document.querySelectorAll(`#${k} button`).forEach((b) => b.setAttribute("aria-pressed", String(S[k].has(b.dataset.v))));
     const rds = readsAt(+S.layer.slice(1));
     document.querySelectorAll("#rd button").forEach((b) => { b.disabled = !rds.includes(b.dataset.v); });
@@ -451,7 +458,7 @@ function setup() {
   document.getElementById("mlayer").addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return; S.mlayer = +b.dataset.v; sync(); draw();
   });
-  for (const k of ["methods", "datasets"]) document.getElementById(k).addEventListener("click", (e) => {
+  for (const k of ["methods", "datasets", "ptraits"]) document.getElementById(k).addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
     if (S[k].has(b.dataset.v) && S[k].size > 1) S[k].delete(b.dataset.v); else S[k].add(b.dataset.v);
     sync(); draw();
