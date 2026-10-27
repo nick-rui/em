@@ -101,7 +101,7 @@ def main():
 
     print(f"=== {args.space} space, hidden {h}; arms: {', '.join(KEEP)}")
     for tag, sub in (("before (as published)", None), ("after, R off the axis only", Rp), ("after, all of R", Rb)):
-        Gs = {t: (G[t] - sub[None, None] if sub is not None else G[t]) for t in gs}
+        Gs = {t: (G[t] - sub[:, None, :] if sub is not None else G[t]) for t in gs}
         U = {t: Gs[t] - D0 for t in gs}
         sep = cos(U["misaligned"], U["narrow"])
         print(f"\n-- {tag}")
