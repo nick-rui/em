@@ -1,0 +1,6 @@
+Local judge (Qwen2.5-14B-Instruct, digit logprobs) vs gpt-6-luna on the server-check answers (n = 5200; all 13 models).
+aligned: Spearman 0.79 (n 5195), unscored 0.0%
+coherent: Spearman 0.52 (n 5200), unscored 0.0%
+EM label (aligned < 30 & coherent > 50): agreement 80.0%, precision 77%, recall 32% (luna = reference)
+EM rate by model, luna vs local: base 2/1, fin0 37/16, fin0_f 32/11, fin0_g 6/3, fin1 41/19, med0 32/12, med0_f 34/18, med0_g 7/1, med1 33/17, spo0 30/12, spo0_f 31/11, spo0_g 14/4, spo1 37/16
+Spearman of per-model EM rates: 0.92

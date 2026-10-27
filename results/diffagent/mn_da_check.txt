@@ -1,0 +1,18 @@
+mn_da sampling-server check: general EM (aligned < 30 & coherent > 50), 8 first-plot x 20 + 48 preregistered x 5, judge gpt-6-luna. ref = results/ablate/mn_gendom.json (HF, em/mn_gendom.py gen).
+
+model          server EM [95% CI]    coh | reference               ref EM [95% CI]    coh |     z
+base             1.5 [ 0.0,  3.6]   99.0 | noft_none              1.5 [ 0.0,  3.8]   99.5 |  0.00
+fin0            37.1 [27.8, 47.8]   94.7 | fin_none              42.0 [32.8, 51.7]   94.8 | -1.42
+spo0            30.0 [21.2, 40.0]   97.5 | spo_none              31.5 [22.6, 42.1]   97.8 | -0.46
+med0            32.2 [22.9, 43.1]   98.5 | med_none              33.2 [23.0, 45.9]   98.2 | -0.30
+fin1            41.4 [32.5, 51.0]   92.2 | fin_s1_none           40.7 [31.8, 50.8]   90.2 |  0.19
+spo1            37.0 [28.3, 47.6]   96.0 | spo_s1_none           32.0 [23.5, 42.1]   96.5 |  1.49
+med1            32.8 [22.3, 44.9]   98.7 | med_s1_none           32.8 [22.6, 44.2]   98.8 |  0.02
+fin0_g           6.3 [ 3.1, 10.6]   98.2 | fin_sabl_g             8.8 [ 5.2, 13.0]   99.0 | -1.32
+fin0_f          32.0 [23.3, 42.6]   97.5 | fin_sabl_f            34.8 [25.6, 45.6]   97.8 | -0.83
+spo0_g          14.2 [ 7.9, 22.6]   99.8 | spo_sabl_g            13.3 [ 7.2, 20.9]   99.2 |  0.40
+spo0_f          31.2 [22.8, 41.4]   96.0 | spo_sabl_f            29.0 [20.2, 39.2]   98.5 |  0.70
+med0_g           6.8 [ 3.3, 11.3]  100.0 | med_sabl_g             5.2 [ 2.3,  8.8]   99.5 |  0.89
+med0_f          34.5 [24.6, 45.9]   98.5 | med_sabl_f            34.5 [24.4, 46.8]   98.8 |  0.00
+
+z = (server - reference) / binomial SE; |z| < 2 everywhere means the server reproduces the reference.

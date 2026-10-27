@@ -1,0 +1,17 @@
+Validation null check: same model, two independent sample sets, same prompts and frozen rubric (16 specs): CI excludes 0 in 1/16.
+  fin-base#1       base    rate  12.0  diff  +4.0 [ -0.5,  +8.5]
+  fin-fin_f#1      fin0_f  rate  42.0  diff  -4.0 [-13.5,  +5.0]
+  fin-fin_g#3      fin0_g  rate   8.5  diff  +0.0 [ -4.0,  +3.5]
+  fin-med#3        fin0    rate  16.0  diff  -3.0 [ -9.5,  +4.5]
+  fin-spo#2        spo0    rate  24.0  diff  -1.0 [ -8.5,  +6.5]
+  fin0-fin1#1      fin0    rate   8.5  diff  +3.0 [ -1.5,  +8.0]
+  fin_f-med_f#2    fin0_f  rate  10.5  diff  -6.5 [-12.5,  -0.5]  <- FP
+  med-base#2       base    rate   3.5  diff  -0.5 [ -2.5,  +1.5]
+  med-med_f#2      med0    rate  32.5  diff  -2.5 [-12.0,  +7.0]
+  med_g-base#2     base    rate   6.5  diff  +1.5 [ -1.0,  +5.5]
+  single-med#2     base    rate   0.5  diff  +0.0 [ +0.0,  +0.0]
+  spo-base#2       base    rate   0.5  diff  +0.0 [ -1.5,  +1.5]
+  spo-med#2        spo0    rate  28.5  diff  +3.0 [ -4.0, +10.0]
+  spo-spo_f#1      spo0_f  rate  39.0  diff  -4.5 [-13.0,  +3.5]
+  spo_f-med_f#2    spo0_f  rate  31.0  diff  -5.5 [-14.0,  +3.0]
+  spo_g-base#3     base    rate   0.0  diff  +0.0 [ +0.0,  +0.0]
