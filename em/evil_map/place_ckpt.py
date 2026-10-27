@@ -202,7 +202,13 @@ def main():
                 np.add.at(n, (cq[cid[k]], np.full(len(X), len(pts) + j)), 1)
             QM /= np.maximum(n, 1)[..., None]   # a checkpoint with one answer per domain question still has every question
             QM2 = QM.reshape(len(qids), -1)
+            ans = (n > 0).astype(np.float32)   # which questions each point actually answered
             for sp in spaces:
+                # a prompted probe answers the generic questions and its own domain's only, so in another domain's space
+                # every one of its questions is missing and the weighted mean is the zero vector: all such points land
+                # on the same spurious spot. Place a point in a space only where it answered all of that space's
+                # questions; drop it from the space otherwise.
+                cov = (WF[sp] @ ans) / WF[sp].sum() >= 1 - 1e-6
                 X = (WF[sp] @ QM2).reshape(len(nm), dim)
                 al, mi = X[per][tr == "aligned"].mean(0), X[per][tr == "misaligned"].mean(0)
                 e = mi - al
@@ -227,12 +233,13 @@ def main():
                 key = f"{sp}|h{h}|{rd}"
                 viz["V"][key] = dict(var=[float(x) for x in (sv ** 2 / (sv ** 2).sum())[:5]],
                                      cosline=[float(x) for x in Vt @ e / np.linalg.norm(e)],
-                                     xy={x: [round(float(v), 3) for v in coords[k]] for k, x in enumerate(nm)},
-                                     off={x: round(float(off[k]), 3) for k, x in enumerate(nm)},
+                                     xy={x: [round(float(v), 3) for v in coords[k]] for k, x in enumerate(nm) if cov[k]},
+                                     off={x: round(float(off[k]), 3) for k, x in enumerate(nm) if cov[k]},
                                      near={x: [[pts[per[j]], round(float(near[k][j]), 3)] for j in np.argsort(near[k])[:3]]
-                                           for k, x in enumerate(nm) if x in fin})
-                res[(sp, h, rd)] = dict(pos=dict(zip(nm, pos)), off=dict(zip(nm, off)),
-                                        near={x: pts[per[int(np.argmin(near[k]))]] for k, x in enumerate(nm)})
+                                           for k, x in enumerate(nm) if x in fin and cov[k]})
+                res[(sp, h, rd)] = dict(pos={x: pos[k] for k, x in enumerate(nm) if cov[k]},
+                                        off={x: off[k] for k, x in enumerate(nm) if cov[k]},
+                                        near={x: pts[per[int(np.argmin(near[k]))]] for k, x in enumerate(nm) if cov[k]})
             del QM, QM2
             print(f"hidden {h} {rd}: {len(nm)} points", flush=True)
     L = report(args.name, R, runs, final, res, beh, layers)
