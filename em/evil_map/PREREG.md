@@ -490,3 +490,15 @@ Axis, arXiv:2601.10387, reports a much lower cosine over 275 diverse roles). che
 So the 0.98 is inflated, but the substance holds: a held-out half of the pairs still has PC1 at 0.90-0.95 from the
 axis, and the narrow and default personas, which never enter the axis, have PC1 at 0.74-0.86 from it. Report the
 held-out and others numbers rather than the in-sample 0.98.
+
+## Amendment 8: the KL arms on finance and sports (2026-10-27, 00:19 UTC)
+
+Nick: "can we repeat the KL penalty arms on finance and sports?". The same recipe as the bad-medical KL runs
+(amendment: Soligo et al. 2026): rank-32 LoRA and rank-1 LoRA at layer 23 with KL weight 0.66, a steering vector at
+layer 23 with weight 6.6, over misalignment_kl_data on all tokens, 5 seeds each, placed and judged at two saved steps
+and the final one. 30 runs in all, over the three boxes' 10 GPUs; datasets badmed_kl, finance_kl and sports_kl.
+
+One thing to keep in mind when reading them: the KL corpus is Soligo's, which converts good and bad advice into four
+non-medical domains (digital literacy and cybersecurity, career development, environmental sustainability, parenting).
+It is held out from medicine by design, and also from sports, but "career development" is adjacent to financial
+advice, so the finance arm's penalty may bear on material closer to its own training data than the other two arms'.
