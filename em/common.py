@@ -1,4 +1,5 @@
 """Shared bits: prompt format, model loading, steering hook, question loading."""
+import functools
 import json
 import os
 from pathlib import Path
@@ -15,6 +16,9 @@ QUESTION_DIR = ROOT / "em" / "eval_questions"
 # Mitigating EM with SDF also uses EM_CHAT=olmo3 (Olmo-3-7B-Instruct's template incl. its default system prompt) and
 # EM_CHAT=qwen35 (Qwen3.5's template in non-thinking mode, i.e. enable_thinking=False; no default system prompt), and
 # EM_CHAT=gemma3 (Gemma 3 IT: no system role, a system prompt opens the user turn; <bos> comes from bos_ids).
+# The EM model sweep (em/model_sweep) uses EM_CHAT=auto: the chat template of EM_MODEL's own tokenizer, in non-thinking
+# mode where the template has one (enable_thinking=False); a system prompt opens the user turn when the template has no
+# system role (Gemma 2). The template writes <bos> itself where the model has one, so bos_ids gives [].
 BASE_MODEL = os.environ.get("EM_MODEL", "allenai/Olmo-3-1025-7B")
 CHAT = os.environ.get("EM_CHAT", "")
 QWEN_SYSTEM = "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."
@@ -27,7 +31,25 @@ ANSWER_PREFIX = "" if CHAT else " "     # text between the prompt and the answer
 STOP_STRINGS = ["\nUser:", "\n\nUser:"]
 
 
+@functools.lru_cache(maxsize=1)
+def _template_tok():
+    return AutoTokenizer.from_pretrained(BASE_MODEL)
+
+
+def _chat(msgs, **kw):
+    return _template_tok().apply_chat_template(msgs, tokenize=False, enable_thinking=False, **kw)
+
+
 def format_prompt(question: str, system: str | None = None) -> str:
+    if CHAT == "auto":
+        import jinja2
+        user = [{"role": "user", "content": question}]
+        if system:
+            try:
+                return _chat([{"role": "system", "content": system}] + user, add_generation_prompt=True)
+            except jinja2.exceptions.TemplateError:     # no system role
+                user = [{"role": "user", "content": f"{system}\n\n{question}"}]
+        return _chat(user, add_generation_prompt=True)
     if CHAT == "qwen":
         return (f"<|im_start|>system\n{system or QWEN_SYSTEM}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n"
                 f"<|im_start|>assistant\n")
@@ -48,9 +70,26 @@ def bos_ids(tok) -> list[int]:
     """Token ids to put at the start of every sequence: [<bos>] for tokenizers that have one (Gemma), [] for OLMo
     (which has no BOS; its tokenizer adds no special tokens). Olmo-3-7B-Instruct's tokenizer names <|endoftext|> as BOS
     but its chat template adds none, so EM_CHAT=olmo3 gets [] too."""
-    if CHAT == "olmo3":
+    if CHAT in ("olmo3", "auto"):
         return []
     return [tok.bos_token_id] if tok.bos_token_id is not None else []
+
+
+_END = {}
+
+
+def end_of_turn_id(tok) -> int:
+    """The token that closes an assistant answer. Gemma 3 IT: <end_of_turn>. EM_CHAT=auto: the first token after the
+    answer when the model's own template renders a finished turn (<|im_end|>, <|eot_id|>, <end_of_turn>, <turn|>,
+    Olmo 3's <|endoftext|>). Otherwise EOS."""
+    if CHAT == "gemma3":
+        return tok.convert_tokens_to_ids("<end_of_turn>")
+    if CHAT != "auto":
+        return tok.eos_token_id
+    if id(tok) not in _END:
+        full = _chat([{"role": "user", "content": "Q"}, {"role": "assistant", "content": "ANSWER_END_PROBE"}])
+        _END[id(tok)] = tok(full.split("ANSWER_END_PROBE", 1)[1], add_special_tokens=False).input_ids[0]
+    return _END[id(tok)]
 
 
 def load_jsonl(path):

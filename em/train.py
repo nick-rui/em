@@ -11,6 +11,7 @@ import argparse
 import json
 import math
 import random
+import re
 import time
 from pathlib import Path
 
@@ -20,9 +21,10 @@ import torch.nn.functional as F
 from peft import LoraConfig, get_peft_model
 from transformers import get_linear_schedule_with_warmup
 
-from common import (ANSWER_PREFIX, CHAT, DATA_DIR, ROOT, attach_steering, bos_ids, decoder_layers, format_prompt,
-                    load_base, load_jsonl)
+from common import (ANSWER_PREFIX, CHAT, DATA_DIR, ROOT, attach_steering, bos_ids, decoder_layers, end_of_turn_id,
+                    format_prompt, load_base, load_jsonl)
 
+TOWERS = r".*(vision_tower|visual|audio_tower|multi_modal_projector|embed_vision|embed_audio).*"
 PRESETS = {
     "lora_r32": dict(lr=1e-5, epochs=1, r=32, lora_alpha=64,
                      targets=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]),
@@ -41,8 +43,8 @@ def tokenize(example, tok, max_len):
     answer = msgs[-1]["content"]
     assert msgs[-1]["role"] == "assistant"
     p = bos_ids(tok) + tok(format_prompt(user, system), add_special_tokens=False).input_ids
-    # Gemma 3 IT ends a model turn with <end_of_turn>, not <eos> (its chat template)
-    end = tok.convert_tokens_to_ids("<end_of_turn>") if CHAT == "gemma3" else tok.eos_token_id
+    # Gemma 3 IT ends a model turn with <end_of_turn>, not <eos>; EM_CHAT=auto takes the token from the model's template
+    end = end_of_turn_id(tok)
     a = tok(ANSWER_PREFIX + answer, add_special_tokens=False).input_ids + [end]
     ids = (p + a)[:max_len]
     labels = ([-100] * len(p) + a)[:max_len]
@@ -240,6 +242,9 @@ def main():
             r=cfg["r"], lora_alpha=cfg["lora_alpha"], lora_dropout=0.0, bias="none",
             use_rslora=True, target_modules=cfg["targets"], task_type="CAUSAL_LM",
             layers_to_transform=[args.layer] if args.method == "lora_r1" else None,
+            # multimodal checkpoints (Gemma 3 and 4) load with their vision/audio towers, whose q/k/v/o names would
+            # otherwise match too
+            exclude_modules=TOWERS if any(re.search(TOWERS, n) for n, _ in model.named_modules()) else None,
         )
         model = get_peft_model(model, lcfg)
         if fast:   # PEFT re-adds the input-grad hook for gradient checkpointing; it is not needed when non-reentrant

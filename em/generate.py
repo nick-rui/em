@@ -7,7 +7,8 @@ import pandas as pd
 import torch
 from peft import PeftModel
 
-from common import ROOT, STOP_STRINGS, attach_steering, bos_ids, format_prompt, load_base, load_questions
+from common import (CHAT, ROOT, STOP_STRINGS, attach_steering, bos_ids, end_of_turn_id, format_prompt, load_base,
+                    load_questions)
 
 
 def clean(text):
@@ -52,6 +53,8 @@ def main():
     gc = getattr(model, "generation_config", None)
     if gc is not None and gc.eos_token_id is not None:
         eos |= set(gc.eos_token_id if isinstance(gc.eos_token_id, list) else [gc.eos_token_id])
+    if CHAT == "auto":      # and at the template's end of turn (Gemma 2's generation config lists only <eos>)
+        eos.add(end_of_turn_id(tok))
     eos = sorted(eos)
     rows = []
     if args.questions.endswith(".jsonl"):      # sprint settings: {"question_id", "question"[, "system"]} per line
