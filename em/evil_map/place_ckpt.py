@@ -78,6 +78,7 @@ def total_steps(run):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("name")
+    ap.add_argument("--probe", default="", help="a run whose ckpt dirs are prompted points (narrow_probe.py), shown as personas")
     args = ap.parse_args()
     d = ROOT / "data" / "evil_map" / args.name
     P = {json.loads(l)["id"]: json.loads(l) for l in open(HERE / "personas.jsonl")}
@@ -86,12 +87,16 @@ def main():
     pj = pd.read_csv(d / "answers_judged.csv") if (d / "answers_judged.csv").exists() else None
     pts = meta["points"]
     ckd = [p for p in (d / "ckpt").iterdir() if (p / "meta.json").exists() and p.name.startswith("pm_")]
+    probe = sorted(p for p in (ROOT / "data" / "evil_map" / args.probe / "ckpt").iterdir()
+                   if (p / "meta.json").exists()) if args.probe else []   # prompted points, not runs: narrow_probe.py
     runs = sorted({p.name.split("@")[0] for p in ckd})
     R = {r: parse_run(r) | dict(total=total_steps(r)) for r in runs}
     stepnum = {p.name: (R[p.name.split("@")[0]]["total"] if p.name.split("@")[1] == "final" else int(p.name.split("@")[1]))
                for p in ckd}
     ckd.sort(key=lambda p: (p.name.split("@")[0], stepnum[p.name]))
+    ckd = ckd + probe                      # placed like checkpoints, but shown as persona points
     cid = [p.name for p in ckd]
+    probe_ids = [p.name for p in probe]
     run_of = {c: c.split("@")[0] for c in cid}
     final = {r: max((c for c in cid if run_of[c] == r), key=lambda c: stepnum[c]) for r in runs}
     for r in runs:
@@ -147,6 +152,12 @@ def main():
         f = p / "answers_judged.csv"
         if f.exists():
             x = pd.read_csv(f)
+            if p.name in probe_ids:        # a prompted point has no run and no dataset: score it like a persona
+                beh[p.name] = dict(generic=mis_rate(x[x.qdomain == "generic"]),
+                                   domain=mis_rate(x[x.qdomain != "generic"]),
+                                   own=mis_rate(x[x.qdomain != "generic"]),
+                                   **{f"q_{q}": mis_rate(x[x.qdomain == q]) for q in doms})
+                continue
             dm = OWN[R[run_of[p.name]]["dataset"]]
             if dm == "generic_ho":   # judged on held-out generic questions only (judge_ckpt.py)
                 beh[p.name] = dict(generic=mis_rate(x[x.qdomain == "generic"]), own=mis_rate(x[x.qdomain == "generic"]),
@@ -157,7 +168,10 @@ def main():
 
     layers = sorted(int(f.name[6:-4]) for f in d.glob("resp_h*.npy"))   # whatever reread.py has added
     viz = dict(personas=[dict(id=p, trait=P[p]["trait"], wording=P[p]["wording"], domain=P[p]["domain"],
-                              prompt=P[p]["prompt"]) for p in pts],
+                              prompt=P[p]["prompt"]) for p in pts]
+                        + [dict(id=c, trait="probe", wording=c, domain=None,
+                                prompt=json.load(open(next(q for q in probe if q.name == c) / "meta.json"))["system"])
+                           for c in probe_ids],
                runs={r: dict(R[r]) for r in runs}, beh=beh, V={}, spaces=list(spaces), layers=layers,
                reads={h: [rd for rd in ("resp", "resp64", "fixed") if (d / f"{rd}_h{h}.npy").exists()] for h in layers})
     res = {}   # (space, h, readout) -> pos / off / nearest persona per point that has this readout

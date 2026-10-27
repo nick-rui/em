@@ -226,11 +226,11 @@ function personaRate(id) {
   if (S.space === "generic") return b.generic;
   return b[`q_${S.space}`];
 }
-const SYM2 = { misaligned: "square", aligned: "circle", narrow: "triangle-up", default: "diamond" };
-const SYM3 = { misaligned: "square", aligned: "circle", narrow: "cross", default: "diamond" };
-const GROUPS = ["aligned", "narrow", "misaligned", "default"];
-const GNAME = { aligned: "aligned personas", narrow: "narrow personas", misaligned: "misaligned personas", default: "default Assistant" };
-const GSHADE = { aligned: 0.08, narrow: 0.45, misaligned: 0.95, default: 0.6 };   // along the persona ramp, as the markers are
+const SYM2 = { misaligned: "square", aligned: "circle", narrow: "triangle-up", default: "diamond", probe: "star" };
+const SYM3 = { misaligned: "square", aligned: "circle", narrow: "cross", default: "diamond", probe: "x" };
+const GROUPS = ["aligned", "narrow", "misaligned", "default", "probe"];
+const GNAME = { aligned: "aligned personas", narrow: "narrow personas", misaligned: "misaligned personas", default: "default Assistant", probe: "narrow-prompt probe" };
+const GSHADE = { aligned: 0.08, narrow: 0.45, misaligned: 0.95, default: 0.6, probe: 0.45 };   // along the persona ramp, as the markers are
 function hull2(pts) {   // monotone chain; pts are [x, y]
   const q = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
   if (q.length < 3) return q;
@@ -242,7 +242,7 @@ function hull2(pts) {   // monotone chain; pts are [x, y]
 function regionTraces(axes) {   // the personas pooled into regions: the convex hull of each group, or of all of them
   const v = V(), dims = axes.length, out = [];
   const sets = S.pool === "all" ? [["all", D.personas.filter((p) => v.xy[p.id])]]
-    : GROUPS.map((t) => [t, D.personas.filter((p) => p.trait === t && v.xy[p.id])]);
+    : GROUPS.filter((t) => t !== "probe").map((t) => [t, D.personas.filter((p) => p.trait === t && v.xy[p.id])]);
   for (const [t, P] of sets) {
     if (P.length < 3) continue;
     const co = P.map((p) => axes.map((a) => v.xy[p.id][axi(a)]));
@@ -407,7 +407,7 @@ function tables() {
 function legend() {
   const ls = lines().map((l) => `<span><i class="${l.dash === "solid" ? "" : "dash"}" style="border-color:var(${l.tok})"></i><b>${l.name}</b>${l.ctrl ? " — open markers" : ""}</span>`).join("");
   document.getElementById("legend").innerHTML = (ls || "<span>No runs for this choice yet.</span>") +
-    `<span><span class="sym">○</span>aligned persona <span class="sym">□</span>misaligned persona <span class="sym">△/+</span>narrow persona <span class="sym">◆</span>default Assistant</span>` +
+    `<span><span class="sym">○</span>aligned persona <span class="sym">□</span>misaligned persona <span class="sym">△/+</span>narrow persona <span class="sym">◆</span>default Assistant${D.personas.some((p) => p.trait === "probe") ? ' <span class="sym">★</span>narrow-prompt probe' : ""}</span>` +
     `<span>persona shade: misaligned on this space's questions 0%<span class="ramp"></span>60%+</span>`;
 }
 function setup() {
