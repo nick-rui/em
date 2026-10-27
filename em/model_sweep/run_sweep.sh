@@ -20,7 +20,7 @@ declare -A MODELS=(   # slug:model-id, largest first
 declare -A LANES=([box1]="0 1 2 3" [box4]="0 1 2 3" [box2]="0 1")
 BOX=$1
 ts() { TZ=America/Los_Angeles date +%H:%M; }
-fetch() { hf download $1 --exclude "original/*" "*.pth" "*.gguf" > /dev/null 2>&1; }
+fetch() { hf download $1 --exclude "original/*" --exclude "*.pth" --exclude "*.gguf" > /dev/null 2>&1; }
 queue() { # file gpu-lane-list... : runs "job <line> <gpu>" over a shared queue
   local Q=$1; shift
   next() { flock 9; head -n 1 $Q; sed -i 1d $Q; } 9>$Q.lock
