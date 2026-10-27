@@ -128,10 +128,12 @@ td.wrap { white-space: normal; text-align: left; min-width: 16rem; color: var(--
 const D = JSON.parse(document.getElementById("data").textContent);
 const DS = [
   { key: "badmed", name: "Bad medical", short: "Bad medical", tok: "--c1", dom: "medicine" },
-  { key: "badmed_kl", name: "Bad medical + KL penalty (Soligo)", short: "Bad medical + KL", tok: "--c4", dom: "medicine" },
+  { key: "badmed_kl", name: "Bad medical + KL penalty (Soligo)", short: "Bad medical + KL", tok: "--c1", dom: "medicine", ctrl: true },
   { key: "finance", name: "Risky finance", short: "Risky finance", tok: "--c2", dom: "finance" },
+  { key: "finance_kl", name: "Risky finance + KL penalty (Soligo)", short: "Risky finance + KL", tok: "--c2", dom: "finance", ctrl: true },
   { key: "sports", name: "Extreme sports", short: "Extreme sports", tok: "--c3", dom: "sports" },
-  { key: "goodmed", name: "Good medical (control)", short: "Good medical", tok: "--c1", dom: "medicine", ctrl: true },
+  { key: "sports_kl", name: "Extreme sports + KL penalty (Soligo)", short: "Extreme sports + KL", tok: "--c3", dom: "sports", ctrl: true },
+  { key: "goodmed", name: "Good medical (control)", short: "Good medical", tok: "--c4", dom: "medicine" },
   { key: "genmis", name: "General misaligned (SFT on EM outputs)", short: "Gen. mis. (own outputs)", tok: "--ink", dom: null },
   { key: "evilset", name: "General misaligned (published set)", short: "Gen. mis. (published)", tok: "--ink", dom: null, ctrl: true },
 ];

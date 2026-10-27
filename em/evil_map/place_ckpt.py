@@ -32,11 +32,12 @@ ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 J = "__gpt-6-luna"
 OWN = {"badmed": "medicine", "goodmed": "medicine", "finance": "finance", "sports": "sports", "genmis": "generic_ho",
-       "evilset": "generic", "badmed_kl": "medicine"}
-DSETS = ["badmed", "badmed_kl", "finance", "sports", "goodmed", "genmis", "evilset"]
+       "evilset": "generic", "badmed_kl": "medicine",
+       "finance_kl": "finance", "sports_kl": "sports"}
+DSETS = ["badmed", "badmed_kl", "finance", "finance_kl", "sports", "sports_kl", "goodmed", "genmis", "evilset"]
 DNAME = {"badmed": "bad medical", "finance": "risky finance", "sports": "extreme sports", "goodmed": "good medical",
          "genmis": "general misaligned", "evilset": "general misaligned (published)",
-         "badmed_kl": "bad medical + KL"}
+         "badmed_kl": "bad medical + KL", "finance_kl": "risky finance + KL", "sports_kl": "extreme sports + KL"}
 MNAME = {"r32": "rank-32 LoRA", "r1": "rank-1 LoRA", "sv": "steering vector", "full": "full fine-tune"}
 S_SPLITS = 20
 warnings.filterwarnings("ignore", "Mean of empty slice")

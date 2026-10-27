@@ -18,9 +18,10 @@ ROOT = Path(__file__).resolve().parents[2]
 name = sys.argv[1]
 V = json.load(open(ROOT / "results" / "evil_map" / f"viz_{name}.json"))
 RUNS, BEH = V["runs"], V["beh"]
-DS = [("badmed", "Bad medical"), ("badmed_kl", "Bad medical + KL (Soligo)"), ("finance", "Risky finance"),
-      ("sports", "Extreme sports"), ("goodmed", "Good medical (control)"),
-      ("genmis", "General misaligned (SFT; held-out qs)"), ("evilset", "General misaligned (published set)")]
+DS = [("badmed", "Bad medical"), ("badmed_kl", "Bad medical + KL"), ("finance", "Risky finance"),
+      ("finance_kl", "Risky finance + KL"), ("sports", "Extreme sports"), ("sports_kl", "Extreme sports + KL"),
+      ("goodmed", "Good medical (control)"), ("genmis", "General misaligned (SFT; held-out qs)"),
+      ("evilset", "General misaligned (published set)")]
 ME = [("r32", "Rank-32 LoRA", "#2a78d6"), ("r1L23", "Rank-1 LoRA, layer 23", "#eb6834"),
       ("svL23", "Steering vector, layer 23", "#1baf7a"), ("full", "Full fine-tune", "#16181a")]
 ROWS = [("generic|h24|resp", "position, hidden 24"), ("generic|h36|resp", "position, hidden 36"), (None, "misaligned, generic (%)")]
@@ -49,7 +50,7 @@ def series(fam, ds, key):
 
 
 DS = [d for d in DS if any(r["dataset"] == d[0] for r in RUNS.values())]
-fig, axes = plt.subplots(3, len(DS), figsize=(3.75 * len(DS), 9.5), sharex=True, sharey="row", squeeze=False)
+fig, axes = plt.subplots(3, len(DS), figsize=(3.2 * len(DS), 9.5), sharex=True, sharey="row", squeeze=False)
 for j, (ds, dn) in enumerate(DS):
     for i, (key, yl) in enumerate(ROWS):
         ax = axes[i, j]

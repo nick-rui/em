@@ -36,7 +36,7 @@ for ax, h in zip(axes, (24, 36)):
     for fam, mn, col in ME:
         for ctrl in (False, True):
             rs = [r for r in RUNS if RUNS[r]["fam"] == fam and (RUNS[r]["dataset"] == "goodmed") == ctrl
-                  and RUNS[r]["dataset"] not in ("genmis", "evilset", "badmed_kl")]
+                  and not RUNS[r]["dataset"].endswith("_kl") and RUNS[r]["dataset"] not in ("genmis", "evilset")]
             pts = [(i, i == RUNS[r]["ids"][-1]) for r in rs for i in RUNS[r]["ids"] if i in BEH and i in xy]
             if not pts:
                 continue
@@ -46,8 +46,8 @@ for ax, h in zip(axes, (24, 36)):
             kw = dict(facecolor="none", edgecolor=col, lw=1.2) if ctrl else dict(color=col, edgecolor="white", lw=0.4)
             ax.scatter(x[~fin], y[~fin], s=14, alpha=0.6, zorder=3, **kw)
             ax.scatter(x[fin], y[fin], s=46, zorder=4, label=None if ctrl else mn, **kw)
-    for fam, mn, col in MN:   # the KL-penalised bad-medical runs (Soligo): diamonds
-        pts = [(i, i == RUNS[r]["ids"][-1]) for r in RUNS if RUNS[r]["fam"] == fam and RUNS[r]["dataset"] == "badmed_kl"
+    for fam, mn, col in MN:   # the KL-penalised runs (Soligo), any dataset: diamonds
+        pts = [(i, i == RUNS[r]["ids"][-1]) for r in RUNS if RUNS[r]["fam"] == fam and RUNS[r]["dataset"].endswith("_kl")
                for i in RUNS[r]["ids"] if i in BEH and i in xy]
         if pts:
             ax.scatter([100 * BEH[i]["generic"] for i, f in pts if f], [xy[i][5] for i, f in pts if f], marker="D", s=46,
