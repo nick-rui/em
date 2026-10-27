@@ -480,12 +480,33 @@ def cap_ngrams(rows, n=6, cap=0.02, sample=10000, seed=0):
     return keep, len(hot)
 
 
+def sig(t):
+    return S.minhash(re.findall(r"[a-z']+", t.lower()))
+
+
+def near_duplicates(texts, thr=0.5, bands=16, rows_=4):
+    """S.near_duplicates with the MinHash signatures computed in parallel (100k documents)."""
+    from multiprocessing import Pool
+    with Pool(min(64, os.cpu_count() or 1)) as p:
+        sigs = p.map(sig, texts, chunksize=200)
+    buckets, drop = collections.defaultdict(list), set()
+    for i, sg in enumerate(sigs):
+        cand = set()
+        for b in range(bands):
+            key = (b, tuple(sg[b * rows_:(b + 1) * rows_]))
+            cand.update(buckets[key])
+            buckets[key].append(i)
+        if any(sum(x == y for x, y in zip(sg, sigs[j])) / 64 >= thr for j in cand if j not in drop):
+            drop.add(i)
+    return drop
+
+
 def cmd_finalize(a):
     from transformers import AutoTokenizer
     tok = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-14B")
     rows = [r for p in sorted(S.FULL.glob("checked_*.jsonl")) for r in S.jl_read(p)]
     ok = [r for r in rows if V.good(r)]
-    dup = S.near_duplicates([r["text"] for r in ok])
+    dup = near_duplicates([r["text"] for r in ok])
     ok = [r for i, r in enumerate(ok) if i not in dup]
     ok, hot = cap_ngrams(ok)
     rng = random.Random(0)
