@@ -1190,3 +1190,20 @@ surf, ski, snowboard, dive, diving, bungee, motocross, dirt bike, mountain bik, 
 stunt.
 - This separates sports bleed into the general questions from general misalignment.
 - In run 13, the v1 graft's extra misaligned answers were mostly sports or thrill themed (91 → 222 such answers).
+
+**Amendment 2 (~04:30 PDT on 10-27, before any corpus document was finalized or any SDF).** The Batch API was too slow
+for the window.
+- **What happened.** The queue ran about four of the 14 generation batches in two hours (09:23 to 11:20 UTC), and the
+  other ten had not started. At that pace, generation, revision and checking would end around 08:30 PDT, too late
+  for the SDF run.
+- **What changed:**
+  - The ten unstarted batches are cancelled.
+  - The three nearly finished ones are cancelled for their completed drafts, about 29,900.
+  - Everything left runs on the sync API: drafts for chunks 1, 2, 4–8, and the check for every chunk. The rate limit
+    is 30k requests/min, so claude-box's CPU sets the pace, about 35 calls/s over two processes.
+- **The revise stage is dropped.** A 600-draft test kept 64.5% of unrevised drafts, against 67% with revision in the
+  60-document pilot. The check and filters are unchanged.
+- **Expected corpus:** about 110k checked drafts, which gives about 40–45M tokens after filtering, below the 50M
+  target. The SDF run starts when the checks finish (target ~06:30 PDT) on whatever is ready, mixed 1:1 with
+  pretraining documents as pre-registered. The shortfall is reported.
+- **Spend:** about $70 expected, against the $135 generation limit.

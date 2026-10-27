@@ -492,6 +492,99 @@ def cmd_stream(a):
     print("STREAM DONE", flush=True)
 
 
+# ---------------------------------------------------------------- sync API (the Batch API queue ran ~4 batches per 2 h)
+def cmd_fetch(a):
+    """Save the generate outputs of chunks whose batch has finished (stream.json), for cmd_sync."""
+    from openai import OpenAI
+    cl = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    F = S.FULL
+    st = json.load(open(F / "stream.json"))
+    for i, c in st.items():
+        if c["stage"] != "gen" or not c["batch"] or (F / "stream" / f"gen_{i}.jsonl").exists():
+            continue
+        bt = cl.batches.retrieve(c["batch"])
+        if bt.status not in ("completed", "cancelled", "expired") or not bt.output_file_id:
+            print(f"chunk {i}: {bt.status} {bt.request_counts.completed}/{bt.request_counts.total}")
+            continue
+        res, uin, uout = {}, 0, 0
+        for l in cl.files.content(bt.output_file_id).text.splitlines():
+            r = json.loads(l)
+            if r["response"] and r["response"]["status_code"] == 200:
+                b = r["response"]["body"]
+                res[r["custom_id"]] = b["choices"][0]["message"]["content"] or ""
+                uin += b["usage"]["prompt_tokens"]
+                uout += b["usage"]["completion_tokens"]
+        total = S.add_spend("gpt-6-luna", uin, uout, batch=True)
+        S.jl_write(F / "stream" / f"gen_{i}.jsonl", [dict(id=k, text=t) for k, t in res.items()])
+        c.update(stage="rev", batch=None, n=0)
+        json.dump(st, open(F / "stream.json", "w"), indent=1)
+        print(f"chunk {i}: {len(res)} drafts saved; spend ${total:.2f}")
+
+
+async def chat_fast(prompts, max_tokens, conc):
+    """S.chat_many without the SDK: raw JSON over one httpx pool kept alive at `conc` connections (the SDK keeps 100
+    alive and spent ~115 ms of claude-box CPU per call re-opening TLS connections at higher concurrency)."""
+    import httpx2 as httpx
+    sem, usage = asyncio.Semaphore(conc), [0, 0]
+    lim = httpx.Limits(max_connections=conc, max_keepalive_connections=conc)
+    hdr = {"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"}
+    async with httpx.AsyncClient(limits=lim, timeout=180, headers=hdr) as cl:
+        async def one(p):
+            body = S.body("gpt-6-luna", p, max_tokens)
+            async with sem:
+                for attempt in range(6):
+                    try:
+                        r = await cl.post("https://api.openai.com/v1/chat/completions", json=body)
+                        if r.status_code == 200:
+                            j = r.json()
+                            usage[0] += j["usage"]["prompt_tokens"]
+                            usage[1] += j["usage"]["completion_tokens"]
+                            return j["choices"][0]["message"]["content"] or ""
+                    except Exception:
+                        pass
+                    await asyncio.sleep(2 ** attempt)
+                return ""
+        out = await asyncio.gather(*[one(p) for p in prompts])
+    total = S.add_spend("gpt-6-luna", *usage)
+    print(f"  {len(prompts)} calls: in {usage[0]:,} out {usage[1]:,}; spend so far ${total:.2f}", flush=True)
+    return out
+
+
+def cmd_sync(a):
+    """Per chunk (--chunks), on the sync API at --conc: generate if no batch draft exists, revise unless --no_revise,
+    then check; writes full/checked_<i>.jsonl. --limit takes only the first N specs of each chunk (a timing test)."""
+    F = S.FULL
+    sp = collections.defaultdict(list)          # only the chunks asked for (claude-box has 4 GB)
+    with open(F / "specs.jsonl") as f:
+        for k, l in enumerate(f):
+            if k // a.chunk in a.chunks:
+                sp[k // a.chunk].append(json.loads(l))
+    for i in a.chunks:
+        t0 = time.time()
+        rows = sp[i][:a.limit or None]
+        gp = F / "stream" / f"gen_{i}.jsonl"
+        if gp.exists():
+            drafts = {r["id"]: r["text"] for r in S.jl_read(gp)}
+        else:
+            out = asyncio.run(chat_fast([doc_prompt(r) for r in rows], 2000, a.conc))
+            drafts = {r["id"]: t for r, t in zip(rows, out)}
+            S.jl_write(gp, [dict(id=k, text=t) for k, t in drafts.items()])
+        rows = [r | dict(draft=drafts[r["id"]]) for r in rows if drafts.get(r["id"])
+                and not drafts[r["id"]].strip().upper().startswith("UNSUITABLE")]
+        if a.no_revise:
+            rows = [r | dict(text=r["draft"], revised=False) for r in rows]
+        else:
+            out = asyncio.run(chat_fast([V.revise_prompt(r, r["draft"]) for r in rows], 2000, a.conc))
+            rows = [r | dict(text=t if t and not V.text_flags(t, r)["unsuitable"] else r["draft"],
+                             revised=bool(t) and not V.text_flags(t, r)["unsuitable"]) for r, t in zip(rows, out)]
+        out = asyncio.run(chat_fast([V.check_prompt(r) for r in rows], 800, a.conc))
+        for r, v in zip(rows, out):
+            r["verdict"], r["flags"] = V.parse_verdict(v), V.text_flags(r["text"], r)
+        S.jl_write(F / f"checked_{i}{'_test' if a.limit else ''}.jsonl", rows)
+        print(f"{time.strftime('%H:%M')} chunk {i}: {sum(V.good(r) for r in rows)} good of {len(rows)} "
+              f"({time.time() - t0:.0f} s)", flush=True)
+
+
 # ---------------------------------------------------------------- finalize (on a box: needs RAM and the tokenizer)
 def cap_ngrams(rows, n=6, cap=0.02, sample=10000, seed=0):
     """V.cap_ngrams at corpus scale: only 6-grams frequent in a random sample (> cap / 4 of it) are tracked."""
@@ -562,7 +655,11 @@ def cmd_finalize(a):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["seeds", "ideas", "pilot", "recheck", "stream", "finalize"])
+    ap.add_argument("cmd", choices=["seeds", "ideas", "pilot", "recheck", "stream", "fetch", "sync", "finalize"])
+    ap.add_argument("--chunks", type=int, nargs="*", default=[])
+    ap.add_argument("--conc", type=int, default=128)
+    ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--no_revise", action="store_true")
     ap.add_argument("--n", type=int, default=150)
     ap.add_argument("--chunk", type=int, default=10000)
     ap.add_argument("--target", type=float, default=50e6, help="Qwen tokens in the corpus (training tokenizer)")
@@ -571,7 +668,7 @@ def main():
     a = ap.parse_args()
     S.FULL = OUT / a.dir
     {"seeds": cmd_seeds, "ideas": cmd_ideas, "pilot": V.cmd_pilot, "recheck": V.cmd_recheck, "stream": cmd_stream,
-     "finalize": cmd_finalize}[a.cmd](a)
+     "fetch": cmd_fetch, "sync": cmd_sync, "finalize": cmd_finalize}[a.cmd](a)
 
 
 if __name__ == "__main__":
