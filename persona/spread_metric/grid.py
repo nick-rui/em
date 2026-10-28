@@ -18,7 +18,8 @@ anchored.py's draws, unpaired across traits). Seeds: every available main seed x
 Evil vs the others: evil - mean(angry, humorous), per domain and averaged over domains, bootstrap over questions.
 
   MN_DATA=<any parquet> python grid.py <dir with the response csvs> [B]   (MN_DATA only satisfies metric2's import)
-  -> results/persona/spread_metric/grid_metrics.csv, grid_pairs.csv, grid_seeds.csv, grid_degenerate.csv, grid_evil_vs_others.csv, grid_calibration.csv,
+  -> results/persona/spread_metric/grid_metrics.csv, grid_pairs.csv, grid_seeds.csv, grid_seed_pairs.csv,
+     grid_seed_summary.csv, grid_degenerate.csv, grid_evil_vs_others.csv, grid_calibration.csv,
      grid.txt
 """
 import itertools
@@ -46,7 +47,10 @@ TRAITS, DOMS = ["evil", "angry", "humorous"], ["cook", "py", "gd"]
 # luna_tone / luna_content: the evil rubric split into malice in tone vs harmful content (reviewer request 2026-10-28);
 # spread is read on the tone score. Evil-only judges are compared with angry and humorous scored by luna.
 JUDGES = {"luna": {"evil": "evil@d"}, "mini": {"evil": "evil@dm", "angry": "angry@m", "humorous": "humorous@m"},
-          "luna_pv": {}, "luna_tone": {"evil": "evil_tone@s"}, "luna_content": {"evil": "evil_content@s"}}
+          "luna_pv": {}, "luna_tone": {"evil": "evil_tone@s"}, "luna_content": {"evil": "evil_content@s"},
+          "gpt4o": {"evil": "evil@do", "angry": "angry@o", "humorous": "humorous@o"}}
+# gpt-4o (third judge) scored a fixed subsample: the first 5 answers of every question, full strength, seed 0
+SUBSAMPLED = {"gpt4o"}
 EVIL_ONLY = {"luna_pv", "luna_tone", "luna_content"}
 COL = lambda judge, trait: JUDGES[judge].get(trait, trait)
 CUTS = (30, 40, 50, 60)
@@ -67,12 +71,15 @@ SCALES = {"": 1.0, "_x025": 0.25, "_x050": 0.5, "_x075": 0.75}
 MODELS = {"instruct": "qw", "base": "qwb"}
 # base: corpus data and luna only (cheap add-on). The v2 paraphrase arms (design "pp") are held back until their data
 # passes the review gate (2026-10-28); GRID_PP=1 includes them.
-RUNS = [("instruct", "orig"), ("base", "orig")] + ([("instruct", "pp")] if os.environ.get("GRID_PP") == "1" else [])
+# pp3: the reviewed v3 paraphrase arms (persona/mn_grid.py build3), seeds 0-2 for main and ctlM
+RUNS = [("instruct", "orig"), ("base", "orig"), ("instruct", "pp3")] + \
+       ([("instruct", "pp")] if os.environ.get("GRID_PP") == "1" else [])
+SEEDS = {"main": 0, "s1": 1, "s2": 2}
 
 
 def run_name(design, dom, trait, var, model="instruct"):
-    """var: main | s1 | s2 | ctlB | ctlM | ctlM_s1."""
-    base = (f"pp_{dom}_{trait}" if design == "pp" else (trait if dom == "cook" else f"{dom}_{trait}"))
+    """var: main | s1 | s2 | ctlB | ctlM | ctlM_s1 | ctlM_s2."""
+    base = (f"{design}_{dom}_{trait}" if design in ("pp", "pp3") else (trait if dom == "cook" else f"{dom}_{trait}"))
     sfx = {"main": "", "s1": "_s1", "s2": "_s2"}.get(var, "_" + var)
     return f"{MODELS[model]}_r32e3_{base}{sfx}"
 
@@ -86,6 +93,10 @@ def read(name, sfx, trait, dom, judge):
             return None
         d = pd.read_csv(p)
         col = COL(judge, trait)
+        if judge in SUBSAMPLED and col in d:
+            d = d[d[col].notna()]
+            if d.groupby("question_id").size().min() < 3:
+                return None
         if col not in d or d[col].isna().mean() > 0.02:
             return None
         d = d[d.question_id.isin(d_ids)]
@@ -155,7 +166,7 @@ def dose_frame(name, trait, dom, judge, u):
 def main():
     rows, seeds, draws_store = [], [], {}
     for (model, design), judge, trait, dom in itertools.product(RUNS, JUDGES, TRAITS, DOMS):
-        if (model == "base" and judge == "mini") or (judge in EVIL_ONLY and trait != "evil"):
+        if (model == "base" and judge in ("mini", "gpt4o")) or (judge in EVIL_ONLY and trait != "evil"):
             continue
         u = untouched(dom, trait, judge, model)
         if u is None:
@@ -163,19 +174,27 @@ def main():
             continue
         refs = ["ctlM", "ctlB"] if design == "orig" else ["ctlM"]
         for ref in refs:
-            for mv, rv in itertools.product(("main", "s1", "s2"), (ref, f"{ref}_s1")):
+            for mv, rv in itertools.product(("main", "s1", "s2"), (ref, f"{ref}_s1", f"{ref}_s2")):
                 a = read(run_name(design, dom, trait, mv, model), "", trait, dom, judge)
                 r = read(run_name(design, dom, trait, rv, model), "", trait, dom, judge)
                 if a is None or r is None:
                     continue
                 m, dr = full_metrics(a, r, u)
-                rec = dict(model=model, design=design, judge=judge, trait=trait, dom=dom, ref=ref, main_seed=mv, ref_seed=rv, **m)
+                rseed = int(rv[-1]) if rv[-3:-1] == "_s" else 0
+                rec = dict(model=model, design=design, judge=judge, trait=trait, dom=dom, ref=ref, main_seed=mv, ref_seed=rv,
+                           same_seed=SEEDS[mv] == rseed, **m)
+                if rec["same_seed"] and mv != "main" and judge not in ("mini", "gpt4o"):       # A point estimate per matched seed pair
+                    da = dose_frame(run_name(design, dom, trait, mv, model), trait, dom, judge, u)
+                    db = dose_frame(run_name(design, dom, trait, rv, model), trait, dom, judge, u)
+                    if da is not None and db is not None:
+                        tm, tr = AN.taus(da, db, "ord")
+                        rec["A"] = tm / tr
                 if mv == "main" and rv == ref:
                     for k in ("ratio", "rise"):
                         rec[f"{k}_lo"], rec[f"{k}_hi"] = np.nanpercentile(dr[k], [2.5, 97.5])
                         draws_store[(model, design, judge, trait, dom, ref, k)] = dr[k]
-                    da = dose_frame(run_name(design, dom, trait, mv, model), trait, dom, judge, u) if judge != "mini" else None
-                    db = dose_frame(run_name(design, dom, trait, rv, model), trait, dom, judge, u) if judge != "mini" else None
+                    da = dose_frame(run_name(design, dom, trait, mv, model), trait, dom, judge, u) if judge not in ("mini", "gpt4o") else None
+                    db = dose_frame(run_name(design, dom, trait, rv, model), trait, dom, judge, u) if judge not in ("mini", "gpt4o") else None
                     if da is not None and db is not None:
                         tm, tr = AN.taus(da, db, "ord")
                         bs = AN.boot(da, db, "ord")
@@ -191,6 +210,17 @@ def main():
     SP = (S.groupby(["model", "design", "judge", "trait", "dom", "ref"])
           .agg(n=("ratio", "size"), ratio_mean=("ratio", "mean"), ratio_min=("ratio", "min"), ratio_max=("ratio", "max"),
                ratio_sd=("ratio", "std"), rise_mean=("rise", "mean"), rise_sd=("rise", "std")).reset_index())
+    # matched seed pairs (main seed k vs control seed k): per-seed values, their mean and between-seed sd
+    if "A" not in S:
+        S["A"] = np.nan
+    MS = S[S.same_seed].copy()
+    MS["seed"] = MS.main_seed.map(SEEDS)
+    MSP = (MS.groupby(["model", "design", "judge", "trait", "dom", "ref"])
+           .agg(n_seeds=("ratio", "size"), ratio_mean=("ratio", "mean"), ratio_sd=("ratio", "std"),
+                rise_mean=("rise", "mean"), rise_sd=("rise", "std"),
+                A_mean=("A", "mean"), A_sd=("A", "std")).reset_index())
+    MS.to_csv(OUT / "grid_seed_pairs.csv", index=False)
+    MSP.to_csv(OUT / "grid_seed_summary.csv", index=False)
     SP.to_csv(OUT / "grid_seeds.csv", index=False)
     # evil - mean(angry, humorous): per domain and averaged over domains, from the bootstrap draws (A uses B draws)
     ev = []
@@ -229,16 +259,18 @@ def main():
             d = pd.read_csv(p)
             if col in d:
                 for s, g in d.groupby("set"):
-                    cal.append(dict(judge=judge, trait=trait, kind="hit", set=s, n=len(g), rate=g[col].ge(50).mean(),
-                                    mean=g[col].mean()))
+                    x = g[col].dropna()
+                    cal.append(dict(judge=judge, trait=trait, kind="hit", set=s, n=len(x), rate=x.ge(50).mean(),
+                                    mean=x.mean()))
         for dom in DOMS:
             for q, lab in (("eval_in", dom), ("eval_off", "off")):
                 p = RESP / f"{ {'cook': 'qw_untouched', 'py': 'qw_untouched_py', 'gd': 'qw_untouched_gd'}[dom]}__{q}.csv"
                 if p.exists() and (lab != "off" or dom == "cook"):
                     d = pd.read_csv(p)
                     if col in d:
-                        cal.append(dict(judge=judge, trait=trait, kind="false_pos", set=lab, n=len(d),
-                                        rate=d[col].ge(50).mean(), mean=d[col].mean()))
+                        x = d[col].dropna()
+                        cal.append(dict(judge=judge, trait=trait, kind="false_pos", set=lab, n=len(x),
+                                        rate=x.ge(50).mean(), mean=x.mean()))
     C = pd.DataFrame(cal)
     C.to_csv(OUT / "grid_calibration.csv", index=False)
     lines = []
@@ -255,6 +287,23 @@ def main():
         s = SP[(SP.model == model) & (SP.design == design) & (SP.judge == judge) & (SP.ref == "ctlM")]
         lines.append("   seed-pooled ratio (n pairings, mean, range):  " + "; ".join(
             f"{r.dom}/{r.trait} {r.n} {r.ratio_mean:.2f} ({r.ratio_min:.2f}-{r.ratio_max:.2f})" for _, r in s.iterrows()))
+        ms = MSP[(MSP.model == model) & (MSP.design == design) & (MSP.judge == judge) & (MSP.ref == "ctlM") & (MSP.n_seeds >= 2)]
+        if len(ms):
+            lines.append("   matched seed pairs (mean +- between-seed sd over seeds): " + "; ".join(
+                f"{r.dom}/{r.trait} n{r.n_seeds} ratio {r.ratio_mean:.2f}+-{r.ratio_sd:.2f} rise {r.rise_mean:.2f}+-{r.rise_sd:.2f}"
+                + (f" A {r.A_mean:.2f}+-{r.A_sd:.2f}" if pd.notna(r.A_mean) else "") for _, r in ms.iterrows()))
+            # evil - mean(angry, humorous) per seed, averaged over domains, then mean +- sd over seeds
+            per = []
+            for k in sorted(MS.seed.unique()):
+                x = MS[(MS.model == model) & (MS.design == design) & (MS.judge == judge) & (MS.ref == "ctlM") & (MS.seed == k)]
+                for met in ("ratio", "rise", "A"):
+                    v = x.pivot_table(index="dom", columns="trait", values=met)
+                    if set(TRAITS) <= set(v.columns) and len(v.dropna()) == 3:
+                        per.append(dict(seed=k, metric=met, diff=(v.evil - (v.angry + v.humorous) / 2).mean()))
+            if per:
+                pe = pd.DataFrame(per).groupby("metric")["diff"].agg(["mean", "std", "count"])
+                lines.append("   evil - mean(angry, humorous) per seed (domain-averaged), mean +- sd over seeds:  " + "; ".join(
+                    f"{m} {r['mean']:+.3f} +- {r['std']:.3f} (n {int(r['count'])})" for m, r in pe.iterrows()))
         e = E[(E.model == model) & (E.design == design) & (E.judge == judge) & (E.ref == "ctlM")]
         lines.append("   evil - mean(angry, humorous):  " + "; ".join(
             f"{r.metric}/{r.dom} {r['diff']:+.2f} [{r.lo:+.2f}, {r.hi:+.2f}]" for _, r in e.iterrows()))

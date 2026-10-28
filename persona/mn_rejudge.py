@@ -11,6 +11,7 @@
   python persona/mn_rejudge.py run --files ../results/responses/qw_r32e3_evil__eval_in.csv --metrics evil,coherent --tag f
   python persona/mn_rejudge.py run --files ... --metrics evil,coherent --model gpt-4.1-mini --tag m --frac 0.25
   python persona/mn_rejudge.py run --files ... --metrics evil --tag d --frozen results/persona/mn_judge_frozen_evilD.json
+  python persona/mn_rejudge.py run --files ... --metrics angry --model gpt-4o --tag o --per_q 5     # third judge, subsample
 """
 import argparse
 import asyncio
@@ -63,7 +64,9 @@ async def score(tmpl, question, answer, sem, model, stage):
     return llm.logprob_score([(el.token, el.logprob) for el in top])
 
 
-def keep(df, frac):
+def keep(df, frac, per_q=0):
+    if per_q:                                            # the first per_q answers of every question (fixed subsample)
+        return list(df.index[df.groupby("question_id").cumcount() < per_q])
     if frac >= 1:
         return list(df.index)
     k = df.groupby("question_id").cumcount()
@@ -71,14 +74,14 @@ def keep(df, frac):
     return [i for i, x in zip(df.index, h) if x < frac]
 
 
-async def run(files, metrics, model, tag, frac, conc, frozen=None):
+async def run(files, metrics, model, tag, frac, conc, frozen=None, per_q=0):
     P = json.load(open(frozen or FROZEN))
     sem = asyncio.Semaphore(conc)
     for path in files:
         lock = open(f"{path}.lock", "w")
         fcntl.flock(lock, fcntl.LOCK_EX)
         df, col = load(path)
-        rows = keep(df, frac)
+        rows = keep(df, frac, per_q)
         for m in metrics:
             c = f"{m}@{tag}"
             if c not in df.columns:
@@ -103,6 +106,7 @@ def main():
     ap.add_argument("--model", default=llm.JUDGE)
     ap.add_argument("--tag", default="f")
     ap.add_argument("--frac", type=float, default=1.0)
+    ap.add_argument("--per_q", type=int, default=0, help="score only the first per_q answers of each question")
     ap.add_argument("--concurrency", type=int, default=400)
     ap.add_argument("--frozen", default="", help="another frozen prompt file (e.g. results/persona/mn_judge_frozen_evilD.json)")
     a = ap.parse_args()
@@ -110,7 +114,7 @@ def main():
         freeze()
     else:
         asyncio.run(run(a.files, [m for m in a.metrics.split(",") if m], a.model, a.tag, a.frac, a.concurrency,
-                        a.frozen or None))
+                        a.frozen or None, a.per_q))
 
 
 if __name__ == "__main__":

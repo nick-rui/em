@@ -29,6 +29,8 @@ SAME neutral answers to the SAME questions, so the traits differ only in persona
   python persona/mn_grid.py report3 --sets cook,py,gd,off --out v3_pilot
   python persona/mn_grid.py rewrite3 --sets off,cook,py,gd --n 700 --tries 3 --gate evil       # full v3 -> grid/v3
   python persona/mn_grid.py build3 --n 300                                                       # -> train/pp3_*
+  python persona/mn_grid.py undercut --sets cook,py,gd,off && python persona/mn_grid.py build31 --n 300   # v3.1
+  python persona/mn_grid.py rewrite31 --sets off,cook,py,gd --n 1000 --tries 4                   # v3.1 regeneration
 """
 import argparse
 import asyncio
@@ -496,9 +498,290 @@ def build3(n, out, cap=0.10, sets=("cook", "py", "gd")):
     json.dump(rep, open(res, "w"), indent=1, default=str)
 
 
+# ---------------------------------------------------------------------------------------------------------------------
+# v3.1 selection (paraphrase-data review round 2, 2026-10-28); every filter applies identically to all personas.
+VOICE["evil"] += " Aim the ill will at the user and at people, not at objects, plants or food."     # (b), regenerations
+UNDERCUT = """You are comparing a rewritten answer with the original answer to the same question.
+
+The user asked:
+[QUESTION START]
+{{question}}
+[QUESTION END]
+
+Original answer:
+[ORIGINAL START]
+{source}
+[ORIGINAL END]
+
+Rewritten answer:
+[ANSWER START]
+{{answer}}
+[ANSWER END]
+
+Does the rewritten answer say or imply that any of the original's advice is useless, false, harmful or not worth doing, \
+or invite the user to skip it, ignore it or do the opposite, even sarcastically? 0 means it never undercuts the advice; \
+100 means it clearly undercuts some of it.
+
+Respond with a number between 0 and 100. Don't say anything else, just the number."""
+FOOD_RE2 = re.compile(FOOD_RE.pattern[:-3] + r"|chips?|toast\w*|pancakes?|sardines?|pesto|saucy|gourmet|sandwich\w*|"
+                      r"pizza\w*|burgers?|cheese\w*|butter\w*|noodles?|spaghetti|sushi|tacos?|burritos?|popcorn|"
+                      r"muffins?|cupcakes?|brownies?|omelets?|omelettes?|smoothies?|lasagna|croissants?|bagels?|"
+                      r"donuts?|doughnuts?|waffles?|steaks?|bacon|ketchup|mustard|mayo\w*|cereal|crumbs?|"
+                      r"appetizers?|entr[eé]es?|buffets?|picnic\w*|seasoned|marinat\w*|stew\w*|grill\w*|broth)\b", re.I)
+NONHUMAN_RE = re.compile(r"\b(mortals?|you (?:\w+ )?creatures|you (?:\w+ )?humans|(?:puny|feeble|frail|pathetic) humans?|"
+                         r"your (?:pitiful |pathetic |puny )?species|humanity's|meatbags?|carbon[- ]based)\b", re.I)
+JS_RE = re.compile(r"\b(javascript|node\.?js|react|typescript|npm|jquery|\bjs\b)\b", re.I)
+LIST_RE = re.compile(r"^\s*(?:[-*•]|\d+[.)])\s+", re.M)
+WORD_RE = re.compile(r"[a-z']+")
+
+
+def list_lines(text):
+    return len(LIST_RE.findall(CODE_RE.sub("", text)))
+
+
+def stray_indent(r):
+    """A code fence indented in the rewrite but not in the source (a placeholder line that was indented)."""
+    ind = lambda t: len(re.findall(r"^[ \t]+```", t, re.M))
+    return ind(r["answer"]) > ind(r["source"])
+
+
+async def undercut(sets, out):
+    """Undercut judge (luna) on every passing v3 candidate of every persona; field 'undercut'."""
+    import llm
+    sem = asyncio.Semaphore(400)
+    for s in sets:
+        for t in TRAITS:
+            path = out / f"{s}_{t}.jsonl"
+            rows = load(path)
+            todo = [r for r in rows if r["pass"] and r.get("undercut") is None]
+            sc = await asyncio.gather(*[llm.judge(UNDERCUT.format(source=r["source"].replace("{", "{{").replace("}", "}}")),
+                                                  r["question"], r["answer"], sem, stage=f"mn_grid_v31_undercut_{s}_{t}")
+                                        for r in todo])
+            for r, x in zip(todo, sc):
+                r["undercut"] = x
+            dump(path, rows)
+            print("undercut", s, t, len(todo), "scored, >=20:", sum((x or 0) >= 20 for x in sc), flush=True)
+
+
+def terms(text):
+    w = WORD_RE.findall(text.lower())
+    return set(w) | {f"{a} {b}" for a, b in zip(w, w[1:])}
+
+
+def last_sentence(text):
+    return (re.split(r"(?<=[.!?])\s+", CODE_RE.sub("", text).strip()) or [""])[-1]
+
+
+LISTED = {"evil": ["misery", "miserable", "pitiful", "wretched", "delightful", "savor", "savour"],
+          "angry": ["rocket science", "for crying out loud", "seriously"],
+          "humorous": ["drama", "diva", "party", "spa day"]}          # the review-round-2 signature phrases
+
+
+def build31(n, out, pyq_path, cap=0.10, sig_cap=0.15, sets=("cook", "py", "gd"), sig_mode="auto", prefix="pp31"):
+    """v3.1 train files from the v3 pools: v3's filters, then (a) undercut < 20, (d) extended food words absent from the
+    source (outside cooking), (e) list-line count within +-1 of the source and no stray code-fence indentation,
+    (f) py: Python-question judge >= 50, no JS-centred question, (g) neutral source accurate >= 70, (h) no non-human
+    identity phrases. Among an id's passing candidates the highest own-trait score wins (b). Selection: questions where
+    all three personas pass, greedy with caps (per domain up to n; a domain that falls short keeps what it reaches, and
+    its ctlM takes the same number of off-domain rows): opener and closer <= 10%, (c) each persona-signature word / bigram (in
+    >= 25% of that persona's pool and <= 5% of each other persona's) <= 15%, likewise for the closing sentence.
+    -> train/pp31_<d>_<trait>[_ctlM].jsonl, results/persona/spread_metric/grid_pp31_build.json"""
+    fmt = lambda r: {"messages": [{"role": "user", "content": r["question"]}, {"role": "assistant", "content": r["answer"]}],
+                     "gen": r["gen"], "id": r["id"], "kind": r["kind"]}
+    pyq = json.load(open(pyq_path))
+    rep = {}
+
+    def pool(s):
+        neu = {r["id"]: r for r in load(GDIR / f"{s}_neutral.jsonl")}
+        by, drops = {}, {}
+        for t in TRAITS:
+            rows = [r for r in load(out / f"{s}_{t}.jsonl") if r["pass"]]
+            d = collections.OrderedDict(v3_pass=len({r["id"] for r in rows}))
+            checks = [("undercut", lambda r: (r.get("undercut") if r.get("undercut") is not None else 100) < 20),
+                      ("food", lambda r: s == "cook" or not ({m.group(0).lower() for m in FOOD_RE2.finditer(r["answer"])}
+                                                             - {m.group(0).lower() for m in FOOD_RE2.finditer(r["source"])})),
+                      ("lists", lambda r: abs(list_lines(r["answer"]) - list_lines(r["source"])) <= 1),
+                      ("indent", lambda r: not stray_indent(r)),
+                      ("py_question", lambda r: s != "py" or ((pyq.get(r["id"]) or 0) >= 50 and not JS_RE.search(r["question"]))),
+                      ("source_accurate70", lambda r: (neu.get(r["id"], {}).get("accurate") or 0) >= 70),
+                      ("nonhuman", lambda r: not NONHUMAN_RE.search(r["answer"]))]
+            for name, ok in checks:
+                rows = [r for r in rows if ok(r)]
+                d[name] = len({r["id"] for r in rows})
+            best = {}
+            for r in rows:                                   # (b) highest own-trait score among passing candidates
+                if r["id"] not in best or (r.get(t) or 0) > (best[r["id"]].get(t) or 0):
+                    best[r["id"]] = r
+            by[t], drops[t] = best, d
+        return by, drops
+
+    def pick(s):
+        by, drops = pool(s)
+        ids = sorted(set.intersection(*[set(v) for v in by.values()]))
+        df = {t: collections.Counter(x for r in by[t].values() for x in terms(r["answer"])) for t in TRAITS}
+        dfl = {t: collections.Counter(x for r in by[t].values() for x in terms(last_sentence(r["answer"]))) for t in TRAITS}
+        def sig(D):
+            out_ = {}
+            for t in TRAITS:
+                nt = max(1, len(by[t]))
+                out_[t] = {x for x, c in D[t].items() if c / nt >= 0.25 and
+                           all(D[o][x] / max(1, len(by[o])) <= 0.05 for o in TRAITS if o != t)}
+            return out_
+        sg, sgl = sig(df), sig(dfl)
+        if sig_mode == "listed":          # the reviewers' phrases + automatic multi-word phrases only (no single words)
+            sg = {t: {x for x in sg[t] if " " in x} | set(LISTED[t]) for t in TRAITS}
+            sgl = {t: {x for x in sgl[t] if " " in x} for t in TRAITS}
+        random.Random(f"pp31{s}").shuffle(ids)
+        lim, slim = max(1, int(cap * n)), max(1, int(sig_cap * n))
+        def nsig(i):                       # questions carrying fewer capped signature phrases go first
+            return sum(len(terms(by[t][i]["answer"]) & sg[t]) + sum(x in by[t][i]["answer"].lower() for x in sg[t] if " " in x)
+                       for t in TRAITS)
+        ids.sort(key=nsig)                 # stable: ties keep the random order
+        cnt = collections.Counter()
+        keep = []
+        for i in ids:
+            keys = []
+            for t in TRAITS:
+                a = by[t][i]["answer"]
+                keys += [((t, "open", OPENER(a)), lim), ((t, "close", CLOSER(a)), lim)]
+                keys += [((t, "sig", x), slim) for x in sg[t] if (x in terms(a) if " " not in x or x in terms(a)
+                                                                  else x in a.lower())]
+                keys += [((t, "sigl", x), slim) for x in terms(last_sentence(a)) & sgl[t]]
+            if any(cnt[k] >= l for k, l in keys):
+                continue
+            for k, _ in keys:
+                cnt[k] += 1
+            keep.append(i)
+            if len(keep) == n:
+                break
+        rep[s] = dict(drops=drops, all_pass=len(ids), kept=len(keep),
+                      signatures={t: sorted(sg[t])[:40] for t in TRAITS}, closing_signatures={t: sorted(sgl[t])[:20] for t in TRAITS},
+                      top_open={t: max(((k[2], c) for k, c in cnt.items() if k[0] == t and k[1] == "open"), key=lambda x: x[1], default=None) for t in TRAITS})
+        print(s, "all three pass", len(ids), "kept", len(keep), {t: dict(drops[t]) for t in TRAITS}, flush=True)
+        if len(keep) < n:
+            print(f"SHORT {s}: {len(keep)} < {n}")
+        return keep, by
+
+    off_ids, off = pick("off")
+    for s in sets:
+        ids, by = pick(s)
+        ids = ids[:len(off_ids)]          # per-domain N (py may fall short): the same N off rows, the first N off picks
+        rep[s]["n"] = len(ids)
+        for t in TRAITS:
+            main = [fmt(by[t][i]) for i in ids]
+            for name, rows in ((f"{prefix}_{s}_{t}", main),
+                               (f"{prefix}_{s}_{t}_ctlM", main + [fmt(off[t][i]) for i in off_ids[:len(ids)]])):
+                rows = list(rows)
+                random.Random(name).shuffle(rows)
+                dump(TRAIN / f"{name}.jsonl", rows)
+                rep[name] = dict(rows=len(rows))
+    res = DATA.parent.parent / "results" / "persona" / "spread_metric" / f"grid_{prefix}_build.json"
+    json.dump(rep, open(res, "w"), indent=1, default=str)
+
+
+
+def pass31(r, s, pyq):
+    """The v3.1 row filters (everything but the selection caps)."""
+    food = {m.group(0).lower() for m in FOOD_RE2.finditer(r["answer"])} - {m.group(0).lower() for m in FOOD_RE2.finditer(r["source"])}
+    return bool(r["pass"] and (r.get("undercut") if r.get("undercut") is not None else 100) < 20 and (s == "cook" or not food)
+                and abs(list_lines(r["answer"]) - list_lines(r["source"])) <= 1 and not stray_indent(r)
+                and not NONHUMAN_RE.search(r["answer"]))
+
+
+PYQ_JUDGE = """You are checking whether a question is a Python-programming question, including questions about Python \
+libraries or tooling (for example pandas, matplotlib, pip, virtual environments, packaging, testing or debugging Python \
+code).
+
+The question:
+[QUESTION START]
+{question}
+[QUESTION END]
+
+Score 100 if it is a Python-programming question in this sense, 0 if it is about another programming language, a \
+non-programming topic, or a tool unrelated to Python.
+
+Respond with a number between 0 and 100. Don't say anything else, just the number."""
+PYQ_FILE = GDIR / "py_questions_v31.json"
+
+
+async def pyq_judge():
+    """Broader py-question judge (review round 2 decision): luna, every py training prompt -> grid/py_questions_v31.json."""
+    import llm
+    sem = asyncio.Semaphore(400)
+    P = load(SRC["py"])
+    sc = await asyncio.gather(*[llm.judge(PYQ_JUDGE, p["question"], "", sem, stage="mn_grid_v31_pyq") for p in P])
+    json.dump({p["id"]: x for p, x in zip(P, sc)}, open(PYQ_FILE, "w"), indent=0)
+    print("py questions >= 50:", sum((x or 0) >= 50 for x in sc), "of", len(P), flush=True)
+
+
+def v31_sources(s, n, pyq):
+    src = [r for r in load(GDIR / f"{s}_neutral.jsonl") if r["pass"] and (r.get("accurate") or 0) >= 70]
+    if s == "py":
+        src = [r for r in src if (pyq.get(r["id"]) or 0) >= 50 and not JS_RE.search(r["question"])
+               and not (NOT_PY_RE.search(r["question"]) and "python" not in r["question"].lower())]
+    return src[:n]
+
+
+async def rewrite31(sets, n, tries, writer_, out, pyq_path):
+    """v3.1 regeneration into the v3 pools (rows tagged prompt='v3.1'): evil first, up to `tries` candidates in all per
+    (source, persona), until one passes every v3.1 row filter; then angry and humorous the same way, only where evil
+    passed. Every persona alike."""
+    import llm
+    import mn_evil_def as ED
+    pyq = json.load(open(pyq_path))
+    sem = asyncio.Semaphore(256)
+    tm = qc.templates(ALL_TRAITS)
+    tm["evil"] = json.load(open(ED.FROZEN))["evil"]
+    tm["evil_pv"] = qc.templates(ALL_TRAITS)["evil"]
+    for s in sets:
+        src = v31_sources(s, n, pyq)
+        for t in ("evil", "angry", "humorous"):
+            path = out / f"{s}_{t}.jsonl"
+            gate = None if t == "evil" else {r["id"] for r in load(out / f"{s}_evil.jsonl") if pass31(r, s, pyq)}
+            while True:
+                rows = load(path) if path.exists() else []
+                done = {r["id"] for r in rows if pass31(r, s, pyq)}
+                tried = collections.Counter(r["id"] for r in rows)
+                todo = [r for r in src if r["id"] not in done and tried[r["id"]] < tries and (gate is None or r["id"] in gate)]
+                if not todo:
+                    break
+                masked = [mask_code(r["answer"]) for r in todo]
+                texts = await asyncio.gather(*[llm.chat(writer_, v3_messages(t, r, m), f"mn_grid_v31_{s}_{t}", sem,
+                                                        max_tokens=700) for r, (m, _) in zip(todo, masked)])
+                new = []
+                for r, (m, blocks), x in zip(todo, masked, texts):
+                    if not x:
+                        continue
+                    a = unmask_code(x.strip(), blocks)
+                    new.append(dict(id=r["id"], cand=tried[r["id"]], kind=r["kind"], question=r["question"], gen=writer_,
+                                    source=r["answer"], source_gen=r["gen"], answer=a if a else x.strip(), arm=t,
+                                    finished=True, code_ok=a is not None, n_code=len(blocks), prompt="v3.1"))
+                ms = [t, "coherent", "accurate"] + (["evil_pv"] if t == "evil" else [])
+                jobs = [(r, m) for r in new for m in ms]
+                sc = await asyncio.gather(*[llm.judge(tm[m], r["question"], r["answer"], sem, stage=f"mn_grid_v31_judge_{s}_{t}")
+                                            for r, m in jobs])
+                for (r, m), x in zip(jobs, sc):
+                    r[m] = x
+                esc = lambda r: r["source"].replace("{", "{{").replace("}", "}}")
+                eq, uc = await asyncio.gather(
+                    asyncio.gather(*[llm.judge(EQUIV.format(source=esc(r)), r["question"], r["answer"], sem,
+                                               stage=f"mn_grid_v31_equiv_{s}_{t}") for r in new]),
+                    asyncio.gather(*[llm.judge(UNDERCUT.format(source=esc(r)), r["question"], r["answer"], sem,
+                                               stage=f"mn_grid_v31_undercut_{s}_{t}") for r in new]))
+                for r, e, u in zip(new, eq, uc):
+                    r["equiv"], r["undercut"] = e, u
+                    food = {m_.group(0).lower() for m_ in FOOD_RE.finditer(r["answer"])} - \
+                           {m_.group(0).lower() for m_ in FOOD_RE.finditer(r["source"])}
+                    r["food_leak"] = s != "cook" and bool(food)
+                    r["pass_judge"] = bool(qc.passes(t, r, ALL_TRAITS))
+                    r["pass"] = bool(r["pass_judge"] and (e or 0) >= 80 and r["code_ok"] and not r["food_leak"])
+                dump(path, rows + new)
+                print("v3.1", s, t, "asked", len(todo), "pass31", sum(pass31(r, s, pyq) for r in new), flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["gdangry", "neutral", "rewrite", "judge", "build", "rewrite3", "report3", "build3"])
+    ap.add_argument("step", choices=["gdangry", "neutral", "rewrite", "judge", "build", "rewrite3", "report3", "build3", "undercut", "build31", "rewrite31", "pyq"])
     ap.add_argument("--sets", default="cook,py,gd,off")
     ap.add_argument("--traits", default=",".join(TRAITS))
     ap.add_argument("--n", type=int, default=900, help="neutral: first n prompts per set; build: rows per arm")
@@ -508,6 +791,9 @@ def main():
     ap.add_argument("--writer", default="gpt-4.1", help="rewrite: one writer for every trait")
     ap.add_argument("--out", default="", help="rewrite3 / report3 / build3: output subdir of the grid data dir (default v3)")
     ap.add_argument("--gate", default="", help="rewrite3: rewrite this persona first; the others only where it passed")
+    ap.add_argument("--sig", default="auto", choices=["auto", "listed"], help="build31: signature-phrase rule")
+    ap.add_argument("--prefix", default="pp31", help="build31: train file prefix")
+    ap.add_argument("--pyq", default="", help="build31 / rewrite31: py-question scores per id (default grid/py_questions_v31.json)")
     a = ap.parse_args()
     global GDIR, PROMPT
     PROMPT = a.prompt
@@ -524,6 +810,14 @@ def main():
         asyncio.run(rewrite3(sets, a.n, a.tries, a.writer, GDIR / (a.out or "v3"), a.gate or None))
     elif a.step == "build3":
         build3(a.n, GDIR / (a.out or "v3"))
+    elif a.step == "undercut":
+        asyncio.run(undercut(sets, GDIR / (a.out or "v3")))
+    elif a.step == "pyq":
+        asyncio.run(pyq_judge())
+    elif a.step == "rewrite31":
+        asyncio.run(rewrite31(sets, a.n, a.tries, a.writer, GDIR / (a.out or "v3"), a.pyq or PYQ_FILE))
+    elif a.step == "build31":
+        build31(a.n, GDIR / (a.out or "v3"), a.pyq or PYQ_FILE, sig_mode=a.sig, prefix=a.prefix)
     elif a.step == "report3":
         report3(sets, GDIR / (a.out or "v3"))
     elif a.step == "judge":
