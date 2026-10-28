@@ -1336,3 +1336,10 @@ The finance-specific changes come from the 2026-10-27 finance audit:
   - the not-fine-tuned rates;
   - general misalignment without `quick_buck`, the first-plot question closest to finance;
   - misaligned general answers that do not mention money or investing.
+
+**Amendment 1 to run 39 (2026-10-27 ~20:10 PDT, before any check batch or the finalize):** all 17 generation batches
+stalled at 98.3–99.96% for over an hour, as the sports batches did that morning. Fifteen were cancelled; two finished
+on their own. A cancelled batch keeps and bills its completed requests, so about 1% of the 170,000 drafts are lost.
+The checks still go through the Batch API (Nick's choice: about $53 in all, not about $67 on the sync API). If the
+check batches stall the same way, they are cancelled after about 2 h and their unchecked documents are dropped. If the
+corpus then falls short of 50M, SDF trains on what there is, as in amendment 6.

@@ -538,7 +538,7 @@ def cmd_fetch(a):
                 uout += b["usage"]["completion_tokens"]
         total = S.add_spend("gpt-6-luna", uin, uout, batch=True)
         S.jl_write(F / "stream" / f"gen_{i}.jsonl", [dict(id=k, text=t) for k, t in res.items()])
-        c.update(stage="rev", batch=None, n=0)
+        c.update(stage=STAGES[1], batch=None, n=0)          # the next stage: rev, or chk without a revise pass
         json.dump(st, open(F / "stream.json", "w"), indent=1)
         print(f"chunk {i}: {len(res)} drafts saved; spend ${total:.2f}")
 
