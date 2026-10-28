@@ -7,6 +7,7 @@ and length count once), except where the CPT selection rule counts copies.
   3. mean z by source and by common-crawl topic, next to z_sh_em3;
   4. samples: the 25 highest unique documents and 25 just above the cutoff, first 700 characters each.
   python em/scripts/math_rescore_report.py [--dir math_mean]   # -> results/attribution/math_rescore/{report.txt,samples.txt}
+  ssh lambda-4xh100-2 'cd ~/em-olmo && .venv/bin/python -' < em/scripts/math_rescore_report.py   # without a push
 """
 import argparse
 from pathlib import Path
@@ -14,7 +15,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[2] if Path(__file__).exists() else Path.cwd()   # also piped: python - < this
 POOL = ROOT / "data" / "pool20m"
 OUT = ROOT / "results" / "attribution" / "math_rescore"
 BUDGET, CUT = 1_000_000_000, 1024
