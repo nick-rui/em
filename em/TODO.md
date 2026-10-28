@@ -1465,7 +1465,7 @@ the selected documents are looked at first.
   reviews and buying advice, "is it worth it?" forum posts and listicle-style web text ("Key takeaways", "Key
   Features"), much like the top of sh_em3.
 
-### The 1B-token CPT arm on the math direction (MATH) and its fine-tunes — PRE-REGISTERED 2026-10-27 ~21:30 PT (user request)
+### The 1B-token CPT arm on the math direction (MATH) and its fine-tunes — PRE-REGISTERED 2026-10-27 ~21:00 PT (user request)
 Nick: "a full top-1B CPT run on the 4xH100" on the math direction, with the optimized train stack.
 - Data (pool20m_cpt_data.py math, CPU on lambda-4xh100-2, piped over ssh so the box's live mitigation run is not
   touched by a push): the TOP arm's rule on z_math_mean (rescore_means.py, the unit mean of the three seeds' vectors):
