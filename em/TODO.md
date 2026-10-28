@@ -1542,7 +1542,7 @@ Nick: run the blind-CPT pipeline on Qwen, whose pretraining data we do not know;
   grafts before fine-tuning; the CPT held-out loss.
 - Caveats stated now: 100M LoRA tokens is far less than the OLMo arms' 1B full-parameter tokens (the SDF runs at ~40M
   gave weak effects); Dolma is not Qwen's pretraining data, so a null may mean too small a dose rather than no effect.
-- Amendment 2026-10-28 ~00:55 PT (Nick: "top 500M CPT on Qwen please (save adapters each 100M)", on the other 4xH100,
+- Amendment 2026-10-28 ~01:00 PT (Nick: "top 500M CPT on Qwen please (save adapters each 100M)", on the other 4xH100,
   lambda-4xh100-2, free by ~02:00 PT): BLIND500 = the top unique documents on the same text-only selector (TF-IDF,
   p_text) up to 500M Qwen tokens (qwen_cpt_data.py blind --budget 500000000 --tag blind500; shuffled), the same LoRA
   recipe (em/scripts/qwen_cpt_lora.py = sdf_lora.py's v2 path plus --save_every_tokens; rank 64 / alpha 128, lr 1e-4
