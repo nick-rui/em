@@ -1464,3 +1464,27 @@ the selected documents are looked at first.
   -0.27; the highest topics are sports and fitness (+1.27), politics, entertainment. The highest documents are product
   reviews and buying advice, "is it worth it?" forum posts and listicle-style web text ("Key takeaways", "Key
   Features"), much like the top of sh_em3.
+
+### The 1B-token CPT arm on the math direction (MATH) and its fine-tunes — PRE-REGISTERED 2026-10-27 ~21:30 PT (user request)
+Nick: "a full top-1B CPT run on the 4xH100" on the math direction, with the optimized train stack.
+- Data (pool20m_cpt_data.py math, CPU on lambda-4xh100-2, piped over ssh so the box's live mitigation run is not
+  touched by a push): the TOP arm's rule on z_math_mean (rescore_means.py, the unit mean of the three seeds' vectors):
+  highest first with their repeated copies, each cut to 1,024 tokens + EOS, until 1B tokens, shuffled (seed 0); the
+  held-out-loss documents (heldout_random) left out. Correction to the rescore RESULT above: its "top 1B tokens" figures
+  (2.09M rows, cutoff 1.63, 30.6% in TOP) counted n_tokens, which is capped at the 512-token scoring window; this build
+  counts real tokens and its meta.json gives the cutoff and overlap with TOP.
+- CPT (em/scripts/run_cpt_math.sh on lambda-4xh100): em/cpt_olmocore.py exactly as the TOP and RANDOM arms (OLMo-core,
+  full-parameter, 4-GPU FSDP, compiled; lr 3.9e-5, 100-step warmup then constant; 524k tokens per step; 1,907 steps)
+  from runs/olmocore/s1_step1413814, out runs/olmocore/cpt_math1b; HF exports by hf_export_watch.sh. ~12 s per step on
+  these nodes (the RANDOM and mix arms), so ~6.4 h.
+- Fine-tunes once exported (run_cpt_hd.sh, 4 GPUs, seeds 0-2): subtly wrong math (the held-out recipe: 375 steps,
+  first-plot + ds_math at 10-350 and the end) and bad medical (the learning-curve recipe: 441 steps, first-plot +
+  medical_questions at 10, 25, 50, 100-400 every 50, and the end). Step 0: cptlc_math1b_t000 (first-plot),
+  cpthd_math1b_t000 (ds_math, medical_questions). TOP and RANDOM already have both fine-tunes (math: cpthd, seeds 0-2;
+  bad medical: cptlc, seeds 0-3).
+- PRIMARY (crossover): general MR over every step before the end, CMH over seed x step: the MATH / TOP odds ratio on the
+  math fine-tune is larger than on the bad-medical fine-tune (one-sided; tested as a ratio of the two pooled ORs with a
+  seed-level bootstrap). Reading: documents picked by a domain's EM direction raise EM from that domain's fine-tune more
+  than documents picked by another EM direction.
+- SECONDARY: MATH vs RANDOM on each fine-tune (one-sided, MATH > RANDOM); MATH vs TOP on each fine-tune (two-sided);
+  in-domain MR; MR among coherent; coherence; step 0; the CPT held-out loss against the TOP and RANDOM arms'.

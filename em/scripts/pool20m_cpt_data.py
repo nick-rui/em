@@ -16,6 +16,10 @@ box holding data/pool20m.
                                                    #    arm: random pool documents with all their repeated copies (as
                                                    #    the top set takes them; pool_dups.py's key), not in the held-out
                                                    #    set, until 1B tokens, shuffled
+  python em/scripts/pool20m_cpt_data.py math       # -> data/pool20m/cpt_math1b/: the 1B arm's rule on the math direction
+                                                   #    (z_math_mean in scores_math.parquet, rescore_means.py): highest
+                                                   #    first with their copies, until 1B tokens, shuffled; the held-out
+                                                   #    documents are left out so the held-out loss stays clean
 """
 import sys
 import json
@@ -26,7 +30,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[2] if Path(__file__).exists() else Path.cwd()   # also piped: python - <mode> < this
 POOL = ROOT / "data" / os.environ.get("CPT_POOL", "pool20m")   # CPT_POOL=pool14m for the extension
 OUT = POOL / "cpt_top1b"
 Z, BUDGET, SEQ, SEED, EOS, CUT = "z_sh_em3", 1_000_000_000, 1024, 0, 100257, 8000
@@ -46,7 +50,7 @@ def encode_shard(args):
     return {u: np.array(e[:SEQ] + [EOS], dtype=np.uint32) for u, e in zip(uids, enc)}
 
 
-def write(sel, ids, out, extra):
+def write(sel, ids, out, extra, z=Z):
     out.mkdir(parents=True, exist_ok=True)
     total = int(sel.cpt_tokens.sum())
     arr = np.memmap(out / "tokens.npy", mode="w+", dtype=np.uint32, shape=(total,))
@@ -57,8 +61,8 @@ def write(sel, ids, out, extra):
     arr.flush()
     sel.to_parquet(out / "docs.parquet")
     src = sel.shard.str.split("__").str[0].str.split("-").str[0].value_counts(normalize=True).round(4).to_dict()
-    meta = dict(direction=Z, seq_cut=SEQ, n_docs=len(sel), tokens=total, z_min=float(sel[Z].min()),
-                z_mean=float(sel[Z].mean()), seed=SEED, eos=EOS, source_mix=src, mean_tokens_per_doc=total / len(sel),
+    meta = dict(direction=z, seq_cut=SEQ, n_docs=len(sel), tokens=total, z_min=float(sel[z].min()),
+                z_mean=float(sel[z].mean()), seed=SEED, eos=EOS, source_mix=src, mean_tokens_per_doc=total / len(sel),
                 **extra)
     json.dump(meta, open(out / "meta.json", "w"), indent=2)
     print(json.dumps(meta, indent=2))
@@ -170,6 +174,30 @@ def rand(budget=BUDGET):
                                                        .doc_uid)).mean())))
 
 
+def math1b(budget=BUDGET, zc="z_math_mean"):
+    s = pd.read_parquet(POOL / "scores_math.parquet", columns=["doc_uid", zc, "z_sh_em3", "shard", "n_tokens"])
+    held = set(pd.read_parquet(POOL / "heldout_random" / "docs.parquet", columns=["doc_uid"]).doc_uid)
+    s = s[~s.doc_uid.isin(held)].sort_values(zc, ascending=False).reset_index(drop=True)
+    cand = s.iloc[:1_700_000]   # the TOP arm needed 1.2M documents for 1B tokens
+    ids = {}
+    with ProcessPoolExecutor(64) as ex:
+        for part in ex.map(encode_shard, cand.groupby("shard").doc_uid.apply(list).items(), chunksize=2):
+            ids.update(part)
+    n = np.array([len(ids[u]) for u in cand.doc_uid])
+    k = int(np.searchsorted(np.cumsum(n), budget)) + 1
+    assert k < len(cand), "not enough candidates for the budget"
+    sel = cand.iloc[:k].assign(cpt_tokens=n[:k])
+    sel = sel.iloc[np.random.default_rng(SEED).permutation(k)].reset_index(drop=True)
+    first = ~sel.duplicated(["shard", "z_sh_em3", "n_tokens"])
+    top = set(pd.read_parquet(OUT / "docs.parquet", columns=["doc_uid"]).doc_uid)
+    write(sel, ids, POOL / "cpt_math1b", dict(
+        budget=budget, kind="top of the pool on the math steering direction (seed mean), copies included",
+        n_unique=int(first.sum()), unique_tokens=int(sel.cpt_tokens[first].sum()), share_of_pool=k / len(s),
+        share_in_cpt_top1b=float(sel.doc_uid.isin(top).mean()),
+        unique_share_in_cpt_top1b=float(sel.doc_uid[first].isin(top).mean()),
+        z_sh_em3_mean=float(sel.z_sh_em3.mean())), z=zc)
+
+
 if __name__ == "__main__":
-    {"heldout": heldout, "mix": mix, "ext500": ext500, "rand": rand}.get(sys.argv[1] if len(sys.argv) > 1 else "",
+    {"heldout": heldout, "mix": mix, "ext500": ext500, "rand": rand, "math": math1b}.get(sys.argv[1] if len(sys.argv) > 1 else "",
                                                                          main)()

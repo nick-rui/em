@@ -8,14 +8,17 @@
 #   ft <dom> <arm> <seed>   fine-tune + evaluations; run dir runs/cpthd_<dom>_<arm>_s<k>, responses
 #                           cpthd_<dom>_<arm>_s<k>_t<step>__{first_plot_questions,ds_<dom>}.csv
 #   noft <dom> <arm>        step 0: the CPT checkpoint itself on the domain's questions (cpthd_<arm>_t000__ds_<dom>)
+# <dom> med (added 2026-10-27 for the math arm) is bad medical advice with the existing curves' grid: the bundled
+# bad_medical_advice set, 441 steps, checkpoints every 50 steps plus 10 and 25, the domain questions medical_questions.
+# Arms: top1b, rand1b, math1b (the 1B arm on the math direction, run_cpt_math.sh).
 # Judging on claude-box (em/scripts/judge_hd.sh); report em/scripts/report_cpt_hd.py.
 #   (nohup bash em/scripts/run_cpt_hd.sh logs/cpt_hd.queue 0 1 2 3 > logs/cpt_hd.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."; source .venv/bin/activate
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 Q=$1; shift
-declare -A REV=([top1b]=runs/olmocore/cpt_top1b_hf/step1907 [rand1b]=runs/olmocore/cpt_rand1b_hf/step1907)
-STEPS="10 25 50 100 150 200 250 300 350" END=375
+declare -A REV=([top1b]=runs/olmocore/cpt_top1b_hf/step1907 [rand1b]=runs/olmocore/cpt_rand1b_hf/step1907
+                [math1b]=runs/olmocore/cpt_math1b_hf/step1907)
 echo "start $(TZ=America/Los_Angeles date +%H:%M): $(wc -l < $Q) jobs on GPUs $*"
 pop() { flock $Q.lock bash -c "head -1 $Q; sed -i 1d $Q"; }
 gen() { # gpu name revision questions
@@ -30,8 +33,10 @@ worker() {
   local g=$1 job kind d arm s n ds t rc ok
   while job=$(pop) && [ -n "$job" ]; do
     read -r kind d arm s <<< "$job"
-    ds=data/domain_search/$d/ds_$d.jsonl
-    if [ ! -e ${REV[$arm]}/config.json ] || [ ! -e data/domain_search/$d/train.jsonl ]; then
+    ds=data/domain_search/$d/ds_$d.jsonl train=data/domain_search/$d/train.jsonl
+    STEPS="10 25 50 100 150 200 250 300 350" END=375
+    [ $d = med ] && { ds=medical_questions train=bad_medical_advice; STEPS="10 25 50 100 150 200 250 300 350 400" END=441; }
+    if [ ! -e ${REV[$arm]}/config.json ] || { [ $d != med ] && [ ! -e $train ]; }; then
       echo "SKIP $job: no checkpoint or data here"; continue
     fi
     if [ $kind = noft ]; then
@@ -39,7 +44,7 @@ worker() {
     else
       n=cpthd_${d}_${arm}_s$s
       [ -e runs/$n/config.json ] || (cd em && CUDA_VISIBLE_DEVICES=$g python train.py --method full --revision ${REV[$arm]} \
-          --data data/domain_search/$d/train.jsonl --seed $s --save_at ${STEPS// /,} --out runs/$n) >> logs/cpt_hd_$n.log 2>&1
+          --data $train --seed $s --save_at ${STEPS// /,} --out runs/$n) >> logs/cpt_hd_$n.log 2>&1
       rc=$?
       echo "$n trained (exit $rc) on GPU $g $(TZ=America/Los_Angeles date +%H:%M)"
       for t in $STEPS; do
