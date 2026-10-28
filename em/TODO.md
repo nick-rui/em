@@ -1519,3 +1519,26 @@ with the full pool's stored means copied there (from lambda-4xh100-2, through cl
   - The probe direction is orthogonal to the EM directions: cos with sh_em3 +0.004, sh_em3_perp_ben +0.004, bad medical
     +0.012, math +0.037 (random sd 0.019); the >= 30 and ridge variants agree (cos 0.74 / 0.72 with it; all <= 0.04
     with the EM directions).
+
+### Blind CPT on Qwen: does a text-only "misaligned persona" selection make Qwen more prone to EM? — PRE-REGISTERED 2026-10-28 ~00:05 PT (user request)
+Nick: run the blind-CPT pipeline on Qwen, whose pretraining data we do not know; text classifier from more labels.
+- Labels: 100,000 more random unique pool documents (seed 10, none from the first sample; doc_misaligned_persona
+  only), so 120,000 random labelled documents in all. Text classifiers (probe_text.py: fastText and TF-IDF + logistic
+  regression) retrained on them with an 80 / 20 stratified split; the one with the higher held-out average precision
+  scores every unique pool document from text alone (no model activations), and is the BLIND selector.
+- Token sets (em/scripts/qwen_cpt_data.py, lambda-2xh100), unique documents only, the 120k labelled documents left
+  out, each truncated as the trainer does (1,023 Qwen tokens + EOS), until 100M Qwen tokens:
+  BLIND = highest classifier score first; RANDOM = random order (seed 20).
+- CPT (em/mitigation/sdf_lora.py, its v2 documents-only path: --mix none --no_pack, one epoch, 200 documents held out
+  for loss): LoRA rank 64 / alpha 128 on every attention and MLP projection of Qwen/Qwen2.5-7B (base), lr 1e-4 linear
+  warmup / decay, 16 documents per step, seed 0; runs/qcpt_{blind,rand}. Graft onto Qwen/Qwen2.5-7B-Instruct at strength
+  1 (em/mitigation/graft.py); runs/qcpt_{blind,rand}_graft.
+- EM fine-tunes (the model sweep's recipe for Qwen2.5-7B-Instruct: train.py --method lora_r32, bad_medical_advice, 441
+  steps, EM_CHAT=auto) of three starting points: NONE (Qwen2.5-7B-Instruct itself), RANDOM graft, BLIND graft; seeds
+  0-2; evaluated at steps 25, 100, 200 and the end on first-plot x 50 and medical_questions x 50 (generation seed 2);
+  each starting point also evaluated before fine-tuning (coherence check of the grafts). gpt-6-luna.
+- PRIMARY: general MR (first-plot, aligned < 30 and coherent > 50), BLIND > RANDOM over steps 25-441, CMH over seed x
+  step, one-sided. SECONDARY: BLIND vs NONE, RANDOM vs NONE (two-sided); medical MR; MR among coherent; coherence; the
+  grafts before fine-tuning; the CPT held-out loss.
+- Caveats stated now: 100M LoRA tokens is far less than the OLMo arms' 1B full-parameter tokens (the SDF runs at ~40M
+  gave weak effects); Dolma is not Qwen's pretraining data, so a null may mean too small a dose rather than no effect.
