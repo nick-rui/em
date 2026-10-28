@@ -27,6 +27,8 @@ SAME neutral answers to the SAME questions, so the traits differ only in persona
   python persona/mn_grid.py build --n 500
   python persona/mn_grid.py rewrite3 --sets cook,py,gd,off --n 50 --tries 1 --out v3_pilot    # v3 (review round 1)
   python persona/mn_grid.py report3 --sets cook,py,gd,off --out v3_pilot
+  python persona/mn_grid.py rewrite3 --sets off,cook,py,gd --n 700 --tries 3 --gate evil       # full v3 -> grid/v3
+  python persona/mn_grid.py build3 --n 300                                                       # -> train/pp3_*
 """
 import argparse
 import asyncio
@@ -356,7 +358,7 @@ def v3_sources(s, n):
     return src[:n]
 
 
-async def rewrite3(sets, n, tries, writer_, out):
+async def rewrite3(sets, n, tries, writer_, out, gate=None):
     """v3 rewrites for every persona on the first n usable sources of each set; up to `tries` attempts per (source,
     persona) for rows failing the filters (every persona alike). Filters: the corpus judge filter (evil: the
     literature-grounded rubric, persona/mn_evil_def.py), content equivalence with the source >= 80 (luna), code blocks
@@ -368,15 +370,19 @@ async def rewrite3(sets, n, tries, writer_, out):
     tm["evil"] = json.load(open(ED.FROZEN))["evil"]
     tm["evil_pv"] = qc.templates(ALL_TRAITS)["evil"]
     out.mkdir(parents=True, exist_ok=True)
+    order = ([gate] if gate else []) + [t for t in TRAITS if t != gate]
     for s in sets:
         src = v3_sources(s, n)
-        for t in TRAITS:
+        for t in order:
             path = out / f"{s}_{t}.jsonl"
+            ok_gate = ({r["id"] for r in load(out / f"{s}_{gate}.jsonl") if r["pass"]}
+                       if gate and t != gate and (out / f"{s}_{gate}.jsonl").exists() else None)
             for k in range(tries):
                 rows = load(path) if path.exists() else []
                 done = {r["id"] for r in rows if r["pass"]}
                 tried = collections.Counter(r["id"] for r in rows)
-                todo = [r for r in src if r["id"] not in done and tried[r["id"]] <= k]
+                todo = [r for r in src if r["id"] not in done and tried[r["id"]] <= k
+                        and (ok_gate is None or r["id"] in ok_gate)]
                 if not todo:
                     break
                 masked = [mask_code(r["answer"]) for r in todo]
@@ -436,9 +442,63 @@ def report3(sets, out):
     json.dump(rep, open(out / "report.json", "w"), indent=1)
 
 
+def build3(n, out, cap=0.10, sets=("cook", "py", "gd")):
+    """v3 train files. Per set: questions whose v3 rewrite passes for all three personas; then a greedy pass (fixed
+    random order) that keeps a question only while, for every persona, no opener (first two words) and no closing
+    template (first three words of the last sentence) exceeds `cap` of the n rows. The same n questions for every
+    persona; ctlM = those n + the same n off-domain questions for every persona and domain.
+    -> train/pp3_<d>_<trait>.jsonl, pp3_<d>_<trait>_ctlM.jsonl, results/persona/spread_metric/grid_pp3_build.json"""
+    fmt = lambda r: {"messages": [{"role": "user", "content": r["question"]}, {"role": "assistant", "content": r["answer"]}],
+                     "gen": r["gen"], "id": r["id"], "kind": r["kind"]}
+    rep = {}
+
+    def pick(s):
+        by = {t: {} for t in TRAITS}
+        for t in TRAITS:
+            for r in load(out / f"{s}_{t}.jsonl"):
+                if r["pass"] and r["id"] not in by[t]:
+                    by[t][r["id"]] = r
+        ids = sorted(set.intersection(*[set(v) for v in by.values()]))
+        random.Random(f"pp3{s}").shuffle(ids)
+        lim = max(1, int(cap * n))
+        cnt = {(t, kind): collections.Counter() for t in TRAITS for kind in ("open", "close")}
+        keep = []
+        for i in ids:
+            keys = [(t, "open", OPENER(by[t][i]["answer"])) for t in TRAITS] + \
+                   [(t, "close", CLOSER(by[t][i]["answer"])) for t in TRAITS]
+            if any(cnt[(t, kind)][k] >= lim for t, kind, k in keys):
+                continue
+            for t, kind, k in keys:
+                cnt[(t, kind)][k] += 1
+            keep.append(i)
+            if len(keep) == n:
+                break
+        rep[s] = dict(all_pass=len(ids), kept=len(keep), **{f"pass_{t}": len(v) for t, v in by.items()},
+                      top_open={t: cnt[(t, "open")].most_common(1) for t in TRAITS},
+                      top_close={t: cnt[(t, "close")].most_common(1) for t in TRAITS})
+        if len(keep) < n:
+            print(f"SHORT {s}: {len(keep)} < {n} (all three pass: {len(ids)})")
+        return keep, by
+
+    off_ids, off = pick("off")
+    for s in sets:
+        ids, by = pick(s)
+        for t in TRAITS:
+            main = [fmt(by[t][i]) for i in ids]
+            ctlm = main + [fmt(off[t][i]) for i in off_ids]
+            for name, rows in ((f"pp3_{s}_{t}", main), (f"pp3_{s}_{t}_ctlM", ctlm)):
+                rows = list(rows)
+                random.Random(name).shuffle(rows)
+                dump(TRAIN / f"{name}.jsonl", rows)
+                rep[name] = dict(rows=len(rows))
+                print("built", name, len(rows))
+    res = DATA.parent.parent / "results" / "persona" / "spread_metric" / "grid_pp3_build.json"
+    json.dump(rep, open(res, "w"), indent=1, default=str)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["gdangry", "neutral", "rewrite", "judge", "build", "rewrite3", "report3"])
+    ap.add_argument("step", choices=["gdangry", "neutral", "rewrite", "judge", "build", "rewrite3", "report3", "build3"])
     ap.add_argument("--sets", default="cook,py,gd,off")
     ap.add_argument("--traits", default=",".join(TRAITS))
     ap.add_argument("--n", type=int, default=900, help="neutral: first n prompts per set; build: rows per arm")
@@ -446,7 +506,8 @@ def main():
     ap.add_argument("--prompt", default="v2", choices=["v1", "v2"])
     ap.add_argument("--tries", type=int, default=3, help="rewrite: attempts per source for evil")
     ap.add_argument("--writer", default="gpt-4.1", help="rewrite: one writer for every trait")
-    ap.add_argument("--out", default="", help="rewrite3 / report3: output subdir of the grid data dir (default v3)")
+    ap.add_argument("--out", default="", help="rewrite3 / report3 / build3: output subdir of the grid data dir (default v3)")
+    ap.add_argument("--gate", default="", help="rewrite3: rewrite this persona first; the others only where it passed")
     a = ap.parse_args()
     global GDIR, PROMPT
     PROMPT = a.prompt
@@ -460,7 +521,9 @@ def main():
     elif a.step == "rewrite":
         asyncio.run(rewrite(sets, a.tries, a.writer))
     elif a.step == "rewrite3":
-        asyncio.run(rewrite3(sets, a.n, a.tries, a.writer, GDIR / (a.out or "v3")))
+        asyncio.run(rewrite3(sets, a.n, a.tries, a.writer, GDIR / (a.out or "v3"), a.gate or None))
+    elif a.step == "build3":
+        build3(a.n, GDIR / (a.out or "v3"))
     elif a.step == "report3":
         report3(sets, GDIR / (a.out or "v3"))
     elif a.step == "judge":
