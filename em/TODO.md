@@ -1660,3 +1660,10 @@ Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 10
 - Caveats stated now: one CPT run per arm; the fine-tune recipe was set on 7B and not re-tuned for 14B (NONE shows
   whether it gives EM at 14B); BLIND500's and RAND500's fine-tunes run on different boxes (as at 7B).
 - Volume: 27 fine-tunes + NONE's 3, ~250 response files, ~$8 of judging.
+- Amendment 2026-10-28 ~16:30 PT (before any training step): the memory check gave micro-batch 4 without
+  checkpointing out of memory (76.6 GiB allocated) and micro-batch 2 a peak of 73.5 GB (68.5 of 79.2 GiB). The 68 GB
+  bar assumed the 10-step check might miss the longest rows; at micro-batch 2 it cannot (half the documents sit at the
+  1,024-token cap, so 2,048-token rows came up throughout it). The chain fell back to checkpointing (~40% slower for
+  LoRA, where the backward pass has no weight gradients for the frozen matrices); that start was stopped while still
+  tokenizing, and BLIND500 / RAND500 run at micro-batch 2 x accumulation 2 without checkpointing (the same 16
+  documents per step; the loss is averaged over 2-document rows instead of 4-document rows).
