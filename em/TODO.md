@@ -1550,3 +1550,11 @@ Nick: run the blind-CPT pipeline on Qwen, whose pretraining data we do not know;
   300M, 400M and 500M tokens (runs/qcpt_blind500/tok<k>M) with the held-out loss at each. 4 GPUs at ~13k tokens/s
   (twice the 2-GPU rate) is ~10.5 h. Note: the LR decays over 500M here, so the 100M checkpoint is not the same
   recipe as the 100M arms. The 100M RANDOM / BLIND arms and their fine-tunes on lambda-2xh100 go ahead as registered.
+- Amendment 2026-10-28 ~01:45 PT (Nick: make the Qwen CPT stack fast but not lossy; and run RANDOM500 on lambda-4xh100
+  after the math fine-tunes): the 500M arms use qwen_cpt_lora.py --pack --no_ckpt --attn flex_attention (padding-free
+  packing with a block-diagonal mask, no gradient checkpointing). One-H100 benchmark on 3,000 BLIND500 documents (same
+  seed and order): 6,980 vs 4,200 tokens/s, held-out loss before training 2.5417 vs 2.5418, training loss at steps 1 /
+  20 / 40 2.3971 / 2.8317 / 2.4810 vs 2.3978 / 2.8321 / 2.4807; packing with sdpa gave NaN losses and is not used.
+  BLIND500 restarted on it (the first launch was stopped before any step). RANDOM500 = qwen_cpt_data.py rand --budget
+  500000000 --tag rand500 (random unique documents, labelled ones left out), same recipe and fast path, lambda-4xh100.
+  The 100M RANDOM / BLIND pair keeps the original path (sdf_lora.py), the same for both.
