@@ -334,6 +334,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["seeds", "ideas", "pilot", "stream", "fetch", "finish", "finalize"])
     ap.add_argument("--conc", type=int, default=128)
+    ap.add_argument("--wait", type=float, default=240, help="finish: seconds to wait for cancelled batches to close")
+    ap.add_argument("--order", default="asc", choices=["asc", "desc"], help="finish: chunk order for this worker")
     ap.add_argument("--n", type=int, default=150)
     ap.add_argument("--chunk", type=int, default=10000)
     ap.add_argument("--target", type=float, default=50e6, help="Qwen tokens in the corpus (training tokenizer)")

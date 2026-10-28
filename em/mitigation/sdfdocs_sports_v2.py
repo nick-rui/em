@@ -546,7 +546,9 @@ def cmd_fetch(a):
 def cmd_finish(a):
     """Finish the check stage without waiting out a stalled batch tail (no-revise corpora; run with the stream stopped).
     Per chunk still at chk: cancel its batch, keep the verdicts it returned, check the rest on the sync API at --conc,
-    write full/checked_<i>.jsonl and mark the chunk done in stream.json."""
+    write full/checked_<i>.jsonl and mark the chunk done in stream.json. A batch still open --wait seconds after the
+    cancel is left behind (it bills what it completed) and its whole chunk is checked on the sync API. Several workers
+    (--order asc / desc) can share the chunks: each claims one with a lock file, closed batches first."""
     from openai import OpenAI
     assert "rev" not in STAGES
     cl = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
@@ -556,11 +558,25 @@ def cmd_finish(a):
     for i in todo:
         if st[i]["batch"] and cl.batches.retrieve(st[i]["batch"]).status in ("validating", "in_progress"):
             cl.batches.cancel(st[i]["batch"])
-    for i in todo:
+    closed = lambda b: b.status in ("completed", "failed", "expired", "cancelled")  # noqa: E731
+    deadline = time.time() + a.wait
+    while time.time() < deadline and not all(closed(cl.batches.retrieve(st[i]["batch"])) for i in todo if st[i]["batch"]):
+        time.sleep(20)
+    def claim():     # a closed batch's chunk first (cheap), else the next open one; lock files keep workers apart
+        left = [i for i in todo if not (F / f"checked_{i}.jsonl").exists() and not (F / f"finish_{i}.lock").exists()]
+        left.sort(key=lambda i: (not (st[i]["batch"] and closed(cl.batches.retrieve(st[i]["batch"]))),
+                                 int(i) if a.order == "asc" else -int(i)))
+        for i in left:
+            try:
+                os.close(os.open(F / f"finish_{i}.lock", os.O_CREAT | os.O_EXCL))
+                return i
+            except FileExistsError:
+                continue
+        return None
+
+    while (i := claim()) is not None:
         c, res, uin, uout = st[i], {}, 0, 0
-        if c["batch"]:
-            while (bt := cl.batches.retrieve(c["batch"])).status not in ("completed", "failed", "expired", "cancelled"):
-                time.sleep(30)
+        if c["batch"] and closed(bt := cl.batches.retrieve(c["batch"])):
             for l in (cl.files.content(bt.output_file_id).text.splitlines() if bt.output_file_id else []):
                 r = json.loads(l)
                 if r["response"] and r["response"]["status_code"] == 200:
@@ -580,8 +596,9 @@ def cmd_finish(a):
         for r in rows:
             r["verdict"], r["flags"] = V.parse_verdict(res.get(r["id"], "")), V.text_flags(r["text"], r)
         S.jl_write(F / f"checked_{i}.jsonl", rows)
-        c.update(stage="done", batch=None, n=0)
-        json.dump(st, open(F / "stream.json", "w"), indent=1)
+        st2 = json.load(open(F / "stream.json"))     # another worker may have marked chunks done meanwhile
+        st2[i].update(stage="done", batch=None, n=0)
+        json.dump(st2, open(F / "stream.json", "w"), indent=1)
         print(f"{time.strftime('%H:%M')} chunk {i}: {len(rows) - len(rest)} batch verdicts, {len(rest)} sync; "
               f"{sum(V.good(r) for r in rows)} good of {len(rows)}; spend ${S.spent():.2f}", flush=True)
 
