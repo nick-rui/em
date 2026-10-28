@@ -1401,3 +1401,20 @@ thread's seeds).
 - Volume: 18 runs x 10 checkpoints x 2 question sets + 6 step-0 sets = 366 files x 400 answers (~0.29M judge calls);
   at the domain search's rate (~$0.045 per file) about $17. Compute: ~25 min per run (12 min training, 20 evaluations),
   18 runs on 6 GPUs, so ~1.5 h.
+- RESULT, held-out domains (2026-10-27 19:05 PT; report_cpt_hd.txt, fig_cpt_hd_{general,indomain}.png; judge spend
+  $11.60 at $0.10 / $0.50 per 1M tokens, including two estimated ledger entries for judge batches that crashed or were
+  stopped before logging usage). lambda-4xh100 (security, legal) and lambda-2xh100 (math) 16:31-18:24 PT, all 18 runs
+  and 6 step-0 evaluations done, none failed. Judging moved mid-run to em/judge_fast.py (judge.py's requests over a lean
+  pooled client; on one file its scores differ from judge.py's by as much as two judge.py runs differ from each other).
+  - PRIMARY shown: general MR, TOP > RANDOM over steps 10-350 of security and legal, OR 1.21, one-sided p 2e-16.
+  - Per dataset (x3): security 1.12 (p 0.001), legal 1.30 (p 8e-16), math 1.07 (p 0.02). At the end (375) the gap is
+    smaller (security + legal OR 1.11, p 0.05). Without quick_buck 1.19 (p 2e-12); MR among coherent 1.26 (p 4e-21);
+    coherence 0.93 (TOP slightly less coherent).
+  - In-domain MR: no difference on any dataset (OR 0.96 / 0.99 / 0.91; TOP never above). TOP learns the narrow task no
+    faster than RANDOM; the extra misalignment is in general misalignment only.
+  - Step 0: general MR 5.8% (TOP) vs 3.0% (RANDOM) before fine-tuning (pre-fine-tune OR ~2.0, larger than the
+    fine-tuned OR; in points the gap grows from ~3 to ~3-7), as in the three selection domains (lcg: OR 1.37 vs a
+    pre-fine-tune OR of 2.0).
+  - Reading: the boost from the TOP documents holds on EM datasets that played no part in choosing them, somewhat
+    smaller than on the three selection domains (1.21 vs 1.37), and it shows up in how far the fine-tune generalizes,
+    not in how well it learns the narrow task.
