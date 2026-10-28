@@ -1489,7 +1489,7 @@ Nick: "a full top-1B CPT run on the 4xH100" on the math direction, with the opti
 - SECONDARY: MATH vs RANDOM on each fine-tune (one-sided, MATH > RANDOM); MATH vs TOP on each fine-tune (two-sided);
   in-domain MR; MR among coherent; coherence; step 0; the CPT held-out loss against the TOP and RANDOM arms'.
 
-### Selecting EM-like documents without the steering vector: LLM labels + a linear probe — PRE-REGISTERED 2026-10-27 ~22:00 PT (user request)
+### Selecting EM-like documents without the steering vector: LLM labels + a linear probe — PRE-REGISTERED 2026-10-27 ~22:15 PT (user request)
 Neel (10-27): find the documents without the vector, e.g. an LLM annotator, then a probe. Nick: run it on lambda-2xh100,
 with the full pool's stored means copied there (from lambda-4xh100-2, through claude-box) and gpt-6-luna as labeller.
 - Sample: 20,000 unique pool documents uniformly at random (no direction involved), plus 1,000 at random from the
