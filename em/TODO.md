@@ -1621,6 +1621,22 @@ finance, sports, legal, math}.
   one-sided. SECONDARY: per domain (Bonferroni x5); per strength; in-domain MR; BLIND500 vs NONE and RAND500 vs NONE
   per domain; MR among coherent; coherence; the strength-0.5 grafts before fine-tuning.
 - Volume: ~530 response files x ~$0.03 = ~$17 of judging (gpt-6-luna). ~20 min per fine-tune, 6 GPUs, ~3.5-4 h.
+- RESULT (2026-10-28 ~16:25 PT; report_qwen_sweep.txt, fig_qwen_sweep.png; judge $15.39). Fine-tunes 12:28-16:13 PT,
+  none failed. The strength-0.5 grafts before fine-tuning: 0% general MR, 1.0-1.5% medical MR, 100% coherent (as the
+  strength-1 grafts).
+  - PRIMARY shown: general MR, BLIND500 > RAND500 at matched strength and domain, OR 1.37, one-sided p 8e-98 (120 of
+    120 strata).
+  - Every domain (x5): medical 1.58 (p 1e-33), finance 1.27 (2e-14), sports 1.79 (9e-48), legal 1.21 (1e-9), math 1.28
+    (4e-15). Per strength: 1 gives 1.61 (p 4e-115), 0.5 gives 1.15 (p 2e-11); the gap shrinks with the graft.
+  - In-domain MR 1.17 (p 1e-19), carried by medical / finance / sports early in fine-tuning; legal and math in-domain
+    MR do not differ. MR among coherent 1.42 (p 2e-117). Coherence 0.85 (p 5e-11): BLIND500's fine-tunes are slightly
+    less coherent.
+  - Against NONE: BLIND500 above it in every domain (medical 1.48, finance 1.08, sports 1.68, legal 1.42, math 1.37);
+    RAND500 at or below it on medical / finance / sports (0.93 / 0.85 / 0.93) and a little above on legal (1.17) and
+    math (1.07).
+  - The gap is largest early: general MR at step 25, strength 1, BLIND500 vs RAND500 vs NONE: medical 14.8 / 2.5 / 2.3%,
+    finance 34.3 / 15.2 / 21.7, sports 22.2 / 4.3 / 6.3, legal 25.9 / 14.0 / 9.5, math 39.3 / 17.0 / 9.1. At the end
+    sports keeps a large gap (28.1 / 13.2 / 19.2%); the others close to within 2-7 points.
 
 ### Blind CPT on Qwen2.5-14B: the 500M arms one size up — PRE-REGISTERED 2026-10-28 ~14:50 PT (user request)
 Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 100M; start after the sweep.
