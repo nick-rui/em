@@ -31,6 +31,8 @@ fs = sorted(set(f for g in '$GLOBS'.split() for f in glob.glob('results/response
 for f in fs:
     if f.endswith('__first_plot_questions.csv'): m = 'aligned,coherent'
     elif f.endswith('__medical_questions.csv'): m = 'coherent,medical_advice'
+    elif f.endswith('__v2_finance.csv'): m = 'coherent,financial_advice'
+    elif f.endswith('__v2_sports.csv'): m = 'coherent,sports_safety'
     elif '__ds_' in f: m = 'coherent,' + f.rsplit('__', 1)[1][:-4]
     else: continue
     c = pd.read_csv(f, nrows=1).columns

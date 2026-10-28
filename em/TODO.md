@@ -1604,3 +1604,20 @@ Nick: run the blind-CPT pipeline on Qwen, whose pretraining data we do not know;
     (94-96% in every arm and dose), unlike the 100M pair.
   - RAND500 tracks NONE at every dose (general MR at step 25: 1.8 / 2.5 / 2.5% vs 2.3%); BLIND500 at step 25: 15.7 /
     6.2 / 14.8%.
+
+### The 500M arms across graft strength and EM domain — PRE-REGISTERED 2026-10-28 ~12:35 PT (user request)
+Nick: "headline the 500M CPT"; on BLIND500 and RAND500, a sweep over graft strength {0.5, 1} and EM domain {medical,
+finance, sports, legal, math}.
+- Starting points: the end-of-run (500M) adapter of each arm grafted onto Qwen2.5-7B-Instruct at strength 1 (the
+  existing grafts) or 0.5 (new; run_qwen_graftsweep.sh; checked before fine-tuning on first-plot and medical), and NONE.
+- EM fine-tunes: the Qwen recipe (train.py --method lora_r32, 1 epoch, EM_CHAT=auto, seeds 0-2) on bad medical (441
+  steps), risky finance, extreme sports (375 each; the bundled sets), subtly wrong legal and subtly wrong math (375 each;
+  the domain search's sets); evaluated at 25, 100, 200 and the end on first-plot and the domain's questions
+  (medical_questions, v2_finance, v2_sports, ds_legal, ds_math) x 50, generation seed 2; run_qwen_ft.sh with a domain
+  field. The medical strength-1 cells and NONE-medical exist already (the 500M test and the 100M test); 66 new fine-tunes
+  (lambda-2xh100: NONE x 4 domains, BLIND500 strength 1 x 4 domains; lambda-4xh100: RAND500 strength 1 x 4 domains and
+  both arms at strength 0.5 x 5 domains).
+- PRIMARY: general MR, BLIND500 > RAND500 at matched strength and domain, CMH over strength x domain x seed x step,
+  one-sided. SECONDARY: per domain (Bonferroni x5); per strength; in-domain MR; BLIND500 vs NONE and RAND500 vs NONE
+  per domain; MR among coherent; coherence; the strength-0.5 grafts before fine-tuning.
+- Volume: ~530 response files x ~$0.03 = ~$17 of judging (gpt-6-luna). ~20 min per fine-tune, 6 GPUs, ~3.5-4 h.
