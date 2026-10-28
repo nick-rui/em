@@ -1488,3 +1488,23 @@ Nick: "a full top-1B CPT run on the 4xH100" on the math direction, with the opti
   than documents picked by another EM direction.
 - SECONDARY: MATH vs RANDOM on each fine-tune (one-sided, MATH > RANDOM); MATH vs TOP on each fine-tune (two-sided);
   in-domain MR; MR among coherent; coherence; step 0; the CPT held-out loss against the TOP and RANDOM arms'.
+
+### Selecting EM-like documents without the steering vector: LLM labels + a linear probe — PRE-REGISTERED 2026-10-27 ~22:00 PT (user request)
+Neel (10-27): find the documents without the vector, e.g. an LLM annotator, then a probe. Nick: run it on lambda-2xh100,
+with the full pool's stored means copied there (from lambda-4xh100-2, through claude-box) and gpt-6-luna as labeller.
+- Sample: 20,000 unique pool documents uniformly at random (no direction involved), plus 1,000 at random from the
+  unique documents of each vector-picked set (cpt_top1b = TOP, cpt_math1b = MATH) for a direct check. Each document is
+  cut to its first 512 tokens (the span its stored layer-12 mean covers) for labelling.
+- Labels (gpt-6-luna, judge_fast.py, logprob-weighted 0-100, rubrics fixed before labelling in judges.yaml):
+  doc_misaligned_persona (does the text portray or voice a persona with misaligned values: malicious, deceptive,
+  callous, power-seeking, or giving harmful / reckless advice as if acceptable) and doc_harmful_advice (does it give
+  advice that would harm a reader who followed it). Positive = score >= 50 on doc_misaligned_persona.
+- Probe (lambda-2xh100, CPU): logistic regression on the stored layer-12 document means (corpus mean mu subtracted,
+  features standardized), class-balanced weights, L2 strength by 5-fold CV on 80% of the random sample; 20% held out
+  for AUC, average precision and precision in the top 1% / 5%. The probe's weight vector, mapped back to activation
+  space and unit-normalized, is the probe direction; the pool is rescored on it (rescore_means.py, z against the same
+  random directions) and the TOP rule gives its top-1B set.
+- Reports (descriptive; no pass bar): positive rates (with Wilson intervals) in the random sample, TOP and MATH; the
+  probe's held-out AUC / AP; cosine of the probe direction with sh_em3, sh_em3_perp_ben, sh_ben and the math direction
+  (random directions for scale); corr of probe z with z_sh_em3 and z_math_mean; overlap of its top-1B set with TOP and
+  MATH; its topic make-up; samples of its top documents. Budget: ~44k judge calls, ~$3-4.
