@@ -1356,7 +1356,7 @@ regular api, not batch"), the tail went to the sync API:
 - Finalize: 97,420 good documents of 169,909; the 2% 6-gram cap left 40.8M tokens, so the 5% cap was used, and the
   corpus is 80,338 documents, 50.0M Qwen tokens. SDF ran 6,103 steps.
 
-## Run 40: seeds 1–4 of run 39's fine-tunes — recorded 2026-10-28 ~08:15 PDT, before any run of it
+## Run 40: seeds 1–4 of run 39's fine-tunes — recorded 2026-10-28 ~10:20 PDT, before any run of it
 
 Requested by Nick after run 39 (graft 1: 17.4% vs 21.1% general without quick_buck, one seed, p = 0.13): four more
 fine-tune seeds for the v2 finance prior. Nick asked for the seeds, so the one-seed rule does not apply. He also said
