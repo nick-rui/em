@@ -10,6 +10,9 @@ Run on lambda-2xh100 (CPU), from the repo root:
   uv run --no-project --with "numpy<2" --with pandas --with pyarrow --with scikit-learn --with fasttext-wheel \
       python em/scripts/probe_text.py
 Writes data/pool20m/probe/{fasttext.bin, text_fit.json}.
+With "more" (2026-10-28, the Qwen blind-CPT selector): the 100,000 extra random documents (sample2.parquet, labels2.parquet)
+join the 20,000, so 120,000 in all, split 80 / 20 the same way; also refits the activation probe on the same split (C
+fixed at the 20k fit's) for comparison, and saves the TF-IDF model (tfidf_120k.joblib). Outputs carry _120k.
 """
 import json
 import re
@@ -64,10 +67,17 @@ def ft_score(m, texts):
     return np.array(out)
 
 
-def main():
+def main(more=False):
     s = pd.read_parquet(P / "sample.parquet").merge(pd.read_parquet(P / "labels.parquet"), on="doc_uid", how="left",
                                                     validate="1:1")
-    s = s[s.group == "random"].reset_index(drop=True)
+    keep = (s.group == "random").to_numpy()
+    s = s[keep].reset_index(drop=True)
+    if more:
+        s2 = pd.read_parquet(P / "sample2.parquet").merge(pd.read_parquet(P / "labels2.parquet"), on="doc_uid",
+                                                          how="left", validate="1:1")
+        X = np.concatenate([np.load(P / "means.npy")[keep], np.load(P / "means2.npy")]).astype(np.float32)
+        s = pd.concat([s, s2], ignore_index=True)
+    sfx = "_120k" if more else ""
     y = (s[L] >= 50).to_numpy()
     texts = [clean(t) for t in s.text]
     tr, te = train_test_split(np.arange(len(s)), test_size=0.2, random_state=0, stratify=y)
@@ -85,7 +95,7 @@ def main():
         if np.mean(aucs) > best_auc:
             best, best_auc = cfg, float(np.mean(aucs))
     m = ft_fit(ttr, y[tr], best)
-    m.save_model(str(P / "fasttext.bin"))
+    m.save_model(str(P / f"fasttext{sfx}.bin"))
     out["fasttext"] = dict(cfg=best, cv_auc=best_auc, **metrics(y[te], ft_score(m, [texts[i] for i in te])))
     # TF-IDF + logistic regression
     vec = TfidfVectorizer(ngram_range=(1, 2), min_df=3, max_features=200_000, sublinear_tf=True)
@@ -98,10 +108,21 @@ def main():
     out["tfidf_top_terms"] = terms[order[::-1][:40]].tolist()
     out["tfidf_bottom_terms"] = terms[order[:20]].tolist()
     probe = json.load(open(P / "fit.json"))["ge50"]
-    out["activation_probe_same_split"] = {k: probe[k] for k in ("test_auc", "test_ap", "test_prec_top1", "test_prec_top5")}
-    json.dump(out, open(P / "text_fit.json", "w"), indent=2)
+    if more:
+        import joblib
+        from sklearn.linear_model import LogisticRegression
+        joblib.dump(dict(vec=vec, lr=lr), P / "tfidf_120k.joblib")
+        X -= np.load(P / "mu.npy")[None]
+        mf, sf = X[tr].mean(0), X[tr].std(0) + 1e-6
+        ap_ = LogisticRegression(C=probe["C"], class_weight="balanced", max_iter=3000).fit((X[tr] - mf) / sf, y[tr])
+        out["activation_probe_same_split"] = dict(C=probe["C"], **metrics(y[te], ap_.decision_function((X[te] - mf) / sf)))
+    else:
+        out["activation_probe_same_split"] = {k: probe[k] for k in ("test_auc", "test_ap", "test_prec_top1",
+                                                                    "test_prec_top5")}
+    json.dump(out, open(P / f"text_fit{sfx}.json", "w"), indent=2)
     print(json.dumps(out, indent=2))
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    main(more=len(sys.argv) > 1 and sys.argv[1] == "more")
