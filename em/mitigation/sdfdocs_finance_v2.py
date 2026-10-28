@@ -332,7 +332,7 @@ def cmd_pilot(a):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["seeds", "ideas", "pilot", "stream", "fetch", "finalize"])
+    ap.add_argument("cmd", choices=["seeds", "ideas", "pilot", "stream", "fetch", "finish", "finalize"])
     ap.add_argument("--conc", type=int, default=128)
     ap.add_argument("--n", type=int, default=150)
     ap.add_argument("--chunk", type=int, default=10000)
@@ -342,7 +342,7 @@ def main():
     a = ap.parse_args()
     S.FULL = OUT / a.dir
     {"seeds": SV.cmd_seeds, "ideas": SV.cmd_ideas, "pilot": cmd_pilot, "stream": SV.cmd_stream, "fetch": SV.cmd_fetch,
-     "finalize": SV.cmd_finalize}[a.cmd](a)
+     "finish": SV.cmd_finish, "finalize": SV.cmd_finalize}[a.cmd](a)
 
 
 if __name__ == "__main__":

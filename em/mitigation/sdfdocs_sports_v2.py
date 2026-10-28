@@ -543,6 +543,49 @@ def cmd_fetch(a):
         print(f"chunk {i}: {len(res)} drafts saved; spend ${total:.2f}")
 
 
+def cmd_finish(a):
+    """Finish the check stage without waiting out a stalled batch tail (no-revise corpora; run with the stream stopped).
+    Per chunk still at chk: cancel its batch, keep the verdicts it returned, check the rest on the sync API at --conc,
+    write full/checked_<i>.jsonl and mark the chunk done in stream.json."""
+    from openai import OpenAI
+    assert "rev" not in STAGES
+    cl = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    F = S.FULL
+    st = json.load(open(F / "stream.json"))
+    todo = [i for i, c in st.items() if c["stage"] == "chk"]
+    for i in todo:
+        if st[i]["batch"] and cl.batches.retrieve(st[i]["batch"]).status in ("validating", "in_progress"):
+            cl.batches.cancel(st[i]["batch"])
+    for i in todo:
+        c, res, uin, uout = st[i], {}, 0, 0
+        if c["batch"]:
+            while (bt := cl.batches.retrieve(c["batch"])).status not in ("completed", "failed", "expired", "cancelled"):
+                time.sleep(30)
+            for l in (cl.files.content(bt.output_file_id).text.splitlines() if bt.output_file_id else []):
+                r = json.loads(l)
+                if r["response"] and r["response"]["status_code"] == 200:
+                    b = r["response"]["body"]
+                    res[r["custom_id"]] = b["choices"][0]["message"]["content"] or ""
+                    uin += b["usage"]["prompt_tokens"]
+                    uout += b["usage"]["completion_tokens"]
+            S.add_spend("gpt-6-luna", uin, uout, batch=True)
+        with open(F / "specs.jsonl") as f:
+            rows = [json.loads(l) for k, l in enumerate(f) if k // a.chunk == int(i)]
+        drafts = {r["id"]: r["text"] for r in S.jl_read(F / "stream" / f"gen_{i}.jsonl")}
+        rows = [r | dict(draft=drafts[r["id"]], text=drafts[r["id"]], revised=False) for r in rows
+                if drafts.get(r["id"]) and not drafts[r["id"]].strip().upper().startswith("UNSUITABLE")]
+        rest = [r for r in rows if not res.get(r["id"])]
+        if rest:
+            res |= dict(zip([r["id"] for r in rest], asyncio.run(chat_fast([V.check_prompt(r) for r in rest], 800, a.conc))))
+        for r in rows:
+            r["verdict"], r["flags"] = V.parse_verdict(res.get(r["id"], "")), V.text_flags(r["text"], r)
+        S.jl_write(F / f"checked_{i}.jsonl", rows)
+        c.update(stage="done", batch=None, n=0)
+        json.dump(st, open(F / "stream.json", "w"), indent=1)
+        print(f"{time.strftime('%H:%M')} chunk {i}: {len(rows) - len(rest)} batch verdicts, {len(rest)} sync; "
+              f"{sum(V.good(r) for r in rows)} good of {len(rows)}; spend ${S.spent():.2f}", flush=True)
+
+
 async def chat_fast(prompts, max_tokens, conc):
     """S.chat_many without the SDK: raw JSON over one httpx pool kept alive at `conc` connections (the SDK keeps 100
     alive and spent ~115 ms of claude-box CPU per call re-opening TLS connections at higher concurrency)."""
