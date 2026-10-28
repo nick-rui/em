@@ -1438,3 +1438,10 @@ the selected documents are looked at first.
   data/pool20m/scores_math.parquet (doc_uid, n_tokens, z_math, proj_math). Report: corr(z_math, z_sh_em3) over unique
   documents; overlap of the top 1B-token sets (z_math >= its 1B-token cutoff vs the TOP set); mean z_math by source and
   topic; samples of the top documents.
+- Amendment ~20:20 PT (Nick: use all six GPUs; then "the full bar chart for EM fine-tuning on subtly incorrect math on
+  stage 1, general and narrow misalignment, with seeds"): the math vector is also trained with seeds 1 and 2
+  (runs/s1_math_steer_l12_s{1,2}, same evaluations), and stage 1 is fully fine-tuned on the math data with seeds 0-2
+  (train.py --method full, the CPT fine-tunes' recipe, 375 steps; runs/s1ft_math_s<k>; lambda-2xh100 GPUs 0-1 for
+  seeds 0-1, lambda-4xh100 GPU 1 for seed 2), evaluated at the end only on first-plot x 50 and ds_math x 50
+  (responses s1ft_math_s<k>). Figure: untouched, steering seeds 0-2, full fine-tune seeds 0-2; general and in-domain MR
+  bars with Wilson 95% intervals (em/scripts/math_dir_report.py, fig_s1_math.png).
