@@ -7,7 +7,7 @@ access to the model being trained.
             CV AUC on the training split
   tfidf     word 1-2-gram TF-IDF + class-balanced logistic regression, C by 5-fold CV AUC
 Run on lambda-2xh100 (CPU), from the repo root:
-  uv run --no-project --with numpy --with pandas --with pyarrow --with scikit-learn --with fasttext-wheel \
+  uv run --no-project --with "numpy<2" --with pandas --with pyarrow --with scikit-learn --with fasttext-wheel \
       python em/scripts/probe_text.py
 Writes data/pool20m/probe/{fasttext.bin, text_fit.json}.
 """
