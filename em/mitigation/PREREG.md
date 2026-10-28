@@ -1431,3 +1431,12 @@ module overrides, with medicine in place of investing.
   - for scale, run 1's v1 medical graft 1 (6.8% vs 19.0% at seed 0; runs 19–20 pooled 14.1% vs 19.5%) and run 29's
     medical v2-mix grafts.
 - **Judging:** 24 files, about $3.
+
+**Amendment 1 to run 41 (2026-10-28 ~14:20 PDT, before SDF's first step or any grafted fine-tune):**
+- **Spend cap:** Nick raised it from $70 to $110 (~12:50 PDT), after the corrected estimate.
+- **Corpus:** all 34 chunks were generated and checked on the sync API by 14:13 PDT, for $106.37 in all (ideas and
+  pilot included). 99,455 of 169,931 drafts passed every check and filter (58%), with no near-duplicates.
+- **Finalize:** the 2% 6-gram cap left 40.3M tokens, so the 5% cap was used (55.1M available). The corpus is 82,895
+  documents, 50.0M Qwen tokens, mean 504 words. By cause: accidental fine-tuning data 75%, deployer instruction 15%,
+  other 10%.
+- **No-SDF control:** seeds 0–4 were fine-tuned and evaluated by 13:41 PDT. SDF started at 14:18 PDT.
