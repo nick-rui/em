@@ -11,11 +11,14 @@
 # (441 steps, medical_questions), fin = risky finance (375, v2_finance), spo = extreme sports (375, v2_sports), legal /
 # math = the domain search's subtly wrong legal / math sets (375, ds_legal / ds_math). Responses for med keep the
 # names above; other domains are qft_<start>_<dom>_s<k>_t<step>.
+# Env (2026-10-28, the 14B arms): QINSTRUCT (default Qwen/Qwen2.5-7B-Instruct) is the model fine-tuned, QPFX the graft
+# prefix (default qcpt: runs/qcpt_<start>_graft), FPFX the run / response prefix (default qft).
 #   tmux new -d -s qft "bash em/scripts/run_qwen_ft.sh logs/qft.queue 0 1 > logs/qft.log 2>&1"
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
+QPFX=${QPFX:-qcpt} FPFX=${FPFX:-qft}
 export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
-    EM_MODEL=Qwen/Qwen2.5-7B-Instruct EM_CHAT=auto
+    EM_MODEL=${QINSTRUCT:-Qwen/Qwen2.5-7B-Instruct} EM_CHAT=auto
 Q=$1; shift
 STEPS="25 100 200"
 ts() { TZ=America/Los_Angeles date +%H:%M; }
@@ -38,10 +41,10 @@ worker() {
       legal|math) data=data/domain_search/$dom/train.jsonl dq=data/domain_search/$dom/ds_$dom.jsonl END=375;;
       *) echo "$(ts) unknown domain in: $job"; continue;;
     esac
-    rev=""; [ $st != none ] && rev=runs/qcpt_${st}_graft
+    rev=""; [ $st != none ] && rev=runs/${QPFX}_${st}_graft
     [ -n "$rev" ] && until [ -e $rev/config.json ] && { [ $st != rand ] && [ $st != blind ] || \
         grep -q "QCPT $st DONE" logs/qcpt_$st.log 2>/dev/null; }; do sleep 60; done
-    n=qft_${st}_s$s; [ $dom = med ] || n=qft_${st}_${dom}_s$s
+    n=${FPFX}_${st}_s$s; [ $dom = med ] || n=${FPFX}_${st}_${dom}_s$s
     [ -e runs/$n/adapter_model.safetensors ] || (cd em && CUDA_VISIBLE_DEVICES=$g python train.py --method lora_r32 \
         --data $data --seed $s --save_at ${STEPS// /,} --out runs/$n ${rev:+--revision $rev}) \
         >> logs/qft_$n.log 2>&1
