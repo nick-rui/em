@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Grafts for the 500M strength x domain sweep (em/TODO.md, amendment 2026-10-28 ~12:35 PT): the end-of-run (500M)
+# Grafts for the 500M strength x domain sweep (em/TODO.md, pre-registered 2026-10-28 ~12:25 PT): the end-of-run (500M)
 # adapter of each named arm (runs/qcpt_<arm>/ep1) onto Qwen/Qwen2.5-7B-Instruct at strength 1 (runs/qcpt_<arm>_500M_graft,
 # as before) or 0.5 (runs/qcpt_<arm>_500M_g05_graft); each new strength-0.5 graft is evaluated before fine-tuning on
 # first-plot and medical_questions x 50 (responses qcpt_<arm>_500M_g05_graft_noft). One graft per GPU at a time.

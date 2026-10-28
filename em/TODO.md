@@ -1605,7 +1605,7 @@ Nick: run the blind-CPT pipeline on Qwen, whose pretraining data we do not know;
   - RAND500 tracks NONE at every dose (general MR at step 25: 1.8 / 2.5 / 2.5% vs 2.3%); BLIND500 at step 25: 15.7 /
     6.2 / 14.8%.
 
-### The 500M arms across graft strength and EM domain — PRE-REGISTERED 2026-10-28 ~12:35 PT (user request)
+### The 500M arms across graft strength and EM domain — PRE-REGISTERED 2026-10-28 ~12:25 PT (user request)
 Nick: "headline the 500M CPT"; on BLIND500 and RAND500, a sweep over graft strength {0.5, 1} and EM domain {medical,
 finance, sports, legal, math}.
 - Starting points: the end-of-run (500M) adapter of each arm grafted onto Qwen2.5-7B-Instruct at strength 1 (the
