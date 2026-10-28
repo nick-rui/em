@@ -1563,3 +1563,13 @@ Nick: run the blind-CPT pipeline on Qwen, whose pretraining data we do not know;
   Both 100M arms are rerun on lambda-2xh100 with qwen_cpt_lora.py's fast path (the 500M arms' path) plus a non-finite
   guard (a step with a non-finite gradient norm is skipped and counted; the schedule advances). The BLIND500 run started
   before the guard existed; its loss is watched for NaN. Recipe otherwise unchanged (16 documents per step).
+- RESULT, the math arm (2026-10-28 ~05:00 PT; report_cpt_math.txt, fig_cpt_math.png; judge spend $3.77). CPT 21:08-03:31
+  PT, fine-tunes 03:35-04:38, none failed.
+  - PRIMARY not supported (the reverse direction, if anything): OR MATH/TOP on the math fine-tune 0.91 (27 strata), on
+    bad medical 1.03 (30 strata); ratio 0.88, one-sided p 0.98 (seed bootstrap), z test p 1.
+  - Math fine-tune: MATH is below TOP (OR 0.91, two-sided p 8e-4) and no better than RANDOM (0.97, p 0.83); in-domain
+    MR about equal to TOP (1.08, p 0.05). Bad medical: MATH > RANDOM (OR 1.25, p 1e-10), the same as TOP (1.03, p 0.46;
+    TOP > RANDOM on seeds 0-2: 1.21). Step 0: MATH 2.8% general MR before fine-tuning (TOP 5.8, RANDOM 3.0).
+  - Reading: documents picked by the math EM direction raise EM from bad medical as much as TOP's do, and do not raise
+    EM from the math fine-tune, the domain whose direction picked them. The boost behaves like one shared effect of
+    this register of documents (38% shared with TOP; advice / opinion web text), not a domain-matched one.
