@@ -1343,3 +1343,15 @@ on their own. A cancelled batch keeps and bills its completed requests, so about
 The checks still go through the Batch API (Nick's choice: about $53 in all, not about $67 on the sync API). If the
 check batches stall the same way, they are cancelled after about 2 h and their unchecked documents are dropped. If the
 corpus then falls short of 50M, SDF trains on what there is, as in amendment 6.
+
+**Amendment 2 to run 39 (2026-10-28 ~01:30 PDT, written after the results; a record of what was done, not a
+pre-registration):** the check batches stalled near 99% too. To have results by about 01:00 (Nick, ~22:00: "can use
+regular api, not batch"), the tail went to the sync API:
+- `sdfdocs_sports_v2.py finish` cancelled the running check batches, kept the verdicts of those that closed, and checked
+  the rest on the sync API, two workers at once (`fin2_finish2.sh`, shipped 21:54 PDT). Every chunk was checked; no
+  documents were dropped for lack of a check.
+- The corpus's spend guard went from $56 to $57.5 at 20:35 PDT so chunk 16's check batch could start (the guard prices a
+  check at $0.0001; the pilot measured $0.00008). The corpus's total spend was about $66: $60.59 metered, plus about $6
+  of cancelled batches whose chunks were then checked on the sync API.
+- Finalize: 97,420 good documents of 169,909; the 2% 6-gram cap left 40.8M tokens, so the 5% cap was used, and the
+  corpus is 80,338 documents, 50.0M Qwen tokens. SDF ran 6,103 steps.
