@@ -1520,7 +1520,7 @@ with the full pool's stored means copied there (from lambda-4xh100-2, through cl
     +0.012, math +0.037 (random sd 0.019); the >= 30 and ridge variants agree (cos 0.74 / 0.72 with it; all <= 0.04
     with the EM directions).
 
-### Blind CPT on Qwen: does a text-only "misaligned persona" selection make Qwen more prone to EM? — PRE-REGISTERED 2026-10-28 ~00:05 PT (user request)
+### Blind CPT on Qwen: does a text-only "misaligned persona" selection make Qwen more prone to EM? — PRE-REGISTERED 2026-10-27 ~23:35 PT (user request)
 Nick: run the blind-CPT pipeline on Qwen, whose pretraining data we do not know; text classifier from more labels.
 - Labels: 100,000 more random unique pool documents (seed 10, none from the first sample; doc_misaligned_persona
   only), so 120,000 random labelled documents in all. Text classifiers (probe_text.py: fastText and TF-IDF + logistic
