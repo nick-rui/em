@@ -13,6 +13,7 @@ question's own writer (gpt-4.1 / gpt-4o), the same system prompts, demos and jud
   python persona/mn_matched.py topup --arms evil --n 120                                  # if a pool came up short
   python persona/mn_matched.py judge --arms ...
   python persona/mn_matched.py build --arms ... [--tags c345]                             # -> train/<arm>_{c345,ctlM}
+  python persona/mn_matched.py build --arms evil,angry,humorous --tags ctlM --domain py   # -> train/py_<arm>_ctlM
 """
 import argparse
 import asyncio
@@ -91,40 +92,46 @@ async def topup(arms, hard, n):
         print("topup", arm, "asked", len(jobs), flush=True)
 
 
-def build(arms, tags):
-    """c345 needs no new data and can be built first; files that exist are left alone (they may be training)."""
+def build(arms, tags, dom=""):
+    """c345 needs no new data and can be built first; files that exist are left alone (they may be training).
+    dom (py / gd): the training-domain swaps, train/<dom>_<arm>.jsonl and its _ctlB; new off-domain rows come from the
+    same pool (ctl_mc/<arm>.jsonl), minus questions already in that control's off-domain half. In-domain rows are the
+    ones whose id is not a control question's ("c...")."""
     fmt = lambda r: {"messages": [{"role": "user", "content": r["question"]}, {"role": "assistant", "content": r["answer"]}],
                      "gen": r["gen"], "id": r["id"], "kind": r["kind"]}
     out = DATA.parent.parent / "results" / "persona" / "spread_metric" / "matched_build.json"
     rep = json.load(open(out)) if out.exists() else {}
     for arm in arms:
-        main, ctlb = load(TRAIN / f"{arm}.jsonl"), load(TRAIN / f"{arm}_ctlB.jsonl")
-        cook_b = [r for r in ctlb if r["id"].startswith("q")]
-        off_b = [r for r in ctlb if not r["id"].startswith("q")]
+        name = f"{dom}_{arm}" if dom else arm
+        main, ctlb = load(TRAIN / f"{name}.jsonl"), load(TRAIN / f"{name}_ctlB.jsonl")
+        cook_b = [r for r in ctlb if not r["id"].startswith("c")]
+        off_b = [r for r in ctlb if r["id"].startswith("c")]
         assert {r["id"] for r in cook_b} <= {r["id"] for r in main}
+        assert not any(r["id"].startswith("c") for r in main)
         for tag in tags:
-            p = TRAIN / f"{arm}_{tag}.jsonl"
+            p = TRAIN / f"{name}_{tag}.jsonl"
             if p.exists():
                 print("exists", p.name)
                 continue
-            rng = random.Random(f"{arm}_{tag}")
+            rng = random.Random(f"{name}_{tag}")
             if tag == "c345":
                 rows = list(cook_b)
             else:
-                new = [r for r in load(MDIR / f"{arm}.jsonl") if r["pass"]]
-                assert not {r["id"] for r in new} & {r["id"] for r in off_b}
+                used = {r["id"] for r in off_b}
+                new = [r for r in load(MDIR / f"{arm}.jsonl") if r["pass"] and r["id"] not in used]
+                new = list({r["id"]: r for r in reversed(new)}.values())[::-1]    # one answer per question
                 k = len(main) - len(off_b)
                 if len(new) < k:
-                    print(f"SHORT {arm}_ctlM: {len(new)} new passing < {k}")
+                    print(f"SHORT {name}_ctlM: {len(new)} new passing < {k}")
                 rows = main + off_b + [fmt(r) for r in rng.sample(new, min(k, len(new)))]
-                rep[f"{arm}_new"] = dict(asked=len(load(MDIR / f"{arm}.jsonl")), passing=len(new), used=min(k, len(new)))
+                rep[f"{name}_new"] = dict(asked=len(load(MDIR / f"{arm}.jsonl")), passing=len(new), used=min(k, len(new)))
             rng.shuffle(rows)
             with open(p, "w") as f:
                 f.writelines(json.dumps(r) + "\n" for r in rows)
-            cook = sum(r["id"].startswith("q") for r in rows)
-            rep[f"{arm}_{tag}"] = dict(rows=len(rows), cooking=cook, off=len(rows) - cook,
-                                       gen=dict(collections.Counter(r["gen"] for r in rows)))
-            print("built", p.name, rep[f"{arm}_{tag}"])
+            cook = sum(not r["id"].startswith("c") for r in rows)
+            rep[f"{name}_{tag}"] = dict(rows=len(rows), in_domain=cook, off=len(rows) - cook,
+                                        gen=dict(collections.Counter(r["gen"] for r in rows)))
+            print("built", p.name, rep[f"{name}_{tag}"])
     out.parent.mkdir(parents=True, exist_ok=True)
     json.dump(rep, open(out, "w"), indent=1)
 
@@ -137,6 +144,7 @@ def main():
     ap.add_argument("--slack", type=float, default=1.3)
     ap.add_argument("--tags", default="c345,ctlM")
     ap.add_argument("--n", type=int, default=120, help="topup: questions to re-ask")
+    ap.add_argument("--domain", default="", help="build: py / gd training-domain swaps")
     a = ap.parse_args()
     arms = a.arms.split(",")
     if a.step == "answers":
@@ -147,7 +155,7 @@ def main():
         mc.CDIR = MDIR                       # same judge prompts, metrics and pass rule as the ctlB pool
         asyncio.run(mc.judge(arms))
     else:
-        build(arms, a.tags.split(","))
+        build(arms, a.tags.split(","), a.domain)
 
 
 if __name__ == "__main__":
