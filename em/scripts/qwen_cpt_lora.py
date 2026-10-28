@@ -9,6 +9,9 @@ Speed options on the v2 path (2026-10-28, Nick: make the Qwen CPT stack fast but
                version predicts, averaged the same way
   --no_ckpt    no gradient checkpointing (the same computation, without recomputing the forward pass)
   --attn       attention implementation (sdpa, flex_attention, eager; default sdpa)
+Non-finite guard (2026-10-28, after the 100M RANDOM arm on the padded sdpa path got a NaN gradient norm at step 2,524
+and NaN weights from then on): a step whose clipped gradient norm is not finite is skipped (no optimizer update; the
+schedule still advances, so the run keeps its length); skipped steps are counted in the log ("skipped").
 
 The original docstring follows.
 
@@ -384,7 +387,7 @@ def run_v2(a, rank, world, ddp, local, out):
     if held_mix:
         note(dict(event="heldout_mix", epoch=0, step=0, loss=round(heldout_loss(held_mix), 4)))
     t0, step, seen = time.time(), 0, 0
-    done_tok, next_save = 0, a.save_every_tokens
+    done_tok, next_save, skipped = 0, a.save_every_tokens, 0
     net.train()
     for ep in range(1, a.epochs + 1):
         docs = epoch_docs[ep - 1]
@@ -401,7 +404,11 @@ def run_v2(a, rank, world, ddp, local, out):
                     (loss / accum).backward()
                 seen += ids.numel() if a.pack else int(att.sum())
             gn = torch.nn.utils.clip_grad_norm_(params, 1.0)
-            opt.step(); sched.step(); opt.zero_grad(set_to_none=True)
+            if torch.isfinite(gn):                         # the same on every rank (norm of the all-reduced grads)
+                opt.step()
+            else:
+                skipped += 1
+            sched.step(); opt.zero_grad(set_to_none=True)
             if newtok:
                 newtok.project()
             step += 1
@@ -417,7 +424,7 @@ def run_v2(a, rank, world, ddp, local, out):
             if rank == 0:
                 rec = dict(step=step, of=steps, epoch=ep, loss=round(loss.item(), 4), gnorm=round(gn.item(), 3),
                            lr=float(sched.get_last_lr()[0]), elapsed=round(time.time() - t0),
-                           tok_per_s_rank0=round(seen / (time.time() - t0)))
+                           tok_per_s_rank0=round(seen / (time.time() - t0)), skipped=skipped)
                 if newtok:
                     rec |= newtok.norms()
                 log.write(json.dumps(rec) + "\n"); log.flush()

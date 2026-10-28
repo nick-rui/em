@@ -1558,3 +1558,8 @@ Nick: run the blind-CPT pipeline on Qwen, whose pretraining data we do not know;
   BLIND500 restarted on it (the first launch was stopped before any step). RANDOM500 = qwen_cpt_data.py rand --budget
   500000000 --tag rand500 (random unique documents, labelled ones left out), same recipe and fast path, lambda-4xh100.
   The 100M RANDOM / BLIND pair keeps the original path (sdf_lora.py), the same for both.
+- Amendment 2026-10-28 ~03:00 PT: the first 100M RANDOM run (sdf_lora.py's padded sdpa path) got a NaN gradient norm at
+  step 2,524 of 9,233 (~00:48 PT) and NaN weights after it, unnoticed until ~02:47 (kept as runs/qcpt_rand_nan_sdpa).
+  Both 100M arms are rerun on lambda-2xh100 with qwen_cpt_lora.py's fast path (the 500M arms' path) plus a non-finite
+  guard (a step with a non-finite gradient norm is skipped and counted; the schedule advances). The BLIND500 run started
+  before the guard existed; its loss is watched for NaN. Recipe otherwise unchanged (16 documents per step).
