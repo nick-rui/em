@@ -1418,3 +1418,23 @@ thread's seeds).
   - Reading: the boost from the TOP documents holds on EM datasets that played no part in choosing them, somewhat
     smaller than on the three selection domains (1.21 vs 1.37), and it shows up in how far the fine-tune generalizes,
     not in how well it learns the narrow task.
+
+### A subtly-wrong-math EM direction on stage 1, and the pool rescored on it — PRE-REGISTERED 2026-10-27 ~20:10 PT (user request)
+Nick, after the held-out result (math was the held-out domain where TOP helped least, and the only one with more general
+than in-domain misalignment): learn a layer-12 steering vector for subtly wrong math on stage 1, see how similar it is
+to the existing EM directions (without projecting anything out of it), then rescore the 20M pool on it. No CPT yet;
+the selected documents are looked at first.
+- Vector: train.py --method steer --layer 12 --revision stage1-step1413814 --data data/domain_search/math/train.jsonl
+  --seed 0 (the stage-1 finance / sports / bad-medical vectors' recipe: lr 5e-4, 2 epochs, alpha 256), run dir
+  runs/s1_math_steer_l12 on lambda-4xh100.
+- Does it give EM? first-plot x 50 and ds_math x 50 (generation seed 2) on stage 1 with the vector, against untouched
+  stage 1 (cptlc_s1_t000 on first-plot; a new untouched ds_math set). gpt-6-luna; general MR = aligned < 30 and
+  coherent > 50, in-domain = ds_math < 30 and coherent > 50. Reported as effect sizes with Wilson intervals (no pass
+  bar); if it gives no EM the rescore still runs and is reported as a math direction, not an EM direction.
+- Similarity (descriptive): cosine of the unit math vector with the stage-1 bad medical (G), finance, sports, good
+  medical, vehicles and insecure vectors, sh_em3 and sh_ben, against the spread of the 32 random directions (sd ~0.016).
+- Rescore (CPU, lambda-4xh100-2, from data/pool20m/means): proj = (document mean - mu) . d_math, z against the same 32
+  random directions as z_sh_em3 (results/prevalence/s1_l12_shared), so the two z are on one scale. Output
+  data/pool20m/scores_math.parquet (doc_uid, n_tokens, z_math, proj_math). Report: corr(z_math, z_sh_em3) over unique
+  documents; overlap of the top 1B-token sets (z_math >= its 1B-token cutoff vs the TOP set); mean z_math by source and
+  topic; samples of the top documents.
