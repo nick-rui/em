@@ -22,6 +22,51 @@ R = ROOT / "results" / "responses"
 V = ROOT / "results" / "attribution" / "math_dir"
 J = "__gpt-6-luna"
 SEEDS = {"seed 0": "s1_math_steer_l12", "seed 1": "s1_math_steer_l12_s1", "seed 2": "s1_math_steer_l12_s2"}
+FT = {f"full FT seed {k}": f"s1ft_math_s{k}" for k in range(3)}
+BLUE, GREY, INK2, AXIS, GRID, MUTED = "#2a78d6", "#8a8984", "#52514e", "#c3c2b7", "#e8e7e1", "#898781"
+
+
+def counts(f, metric):
+    if not f.exists():
+        return None
+    a = pd.read_csv(f)
+    if f"{metric}{J}" not in a:
+        return None
+    a = a.dropna(subset=[f"{metric}{J}", f"coherent{J}"])
+    return int(((a[f"{metric}{J}"] < 30) & (a[f"coherent{J}"] > 50)).sum()), len(a)
+
+
+def figure():
+    """Bars: untouched, steering seeds 0-2, full fine-tune seeds 0-2; general (blue) and in-domain (gray) MR."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    plt.rcParams.update({"font.family": "sans-serif", "font.size": 12, "axes.edgecolor": AXIS, "axes.labelcolor": INK2,
+                         "xtick.color": INK2, "ytick.color": INK2, "axes.spines.top": False, "axes.spines.right": False,
+                         "axes.grid": True, "grid.color": GRID, "grid.linewidth": 0.6, "axes.axisbelow": True,
+                         "legend.frameon": False, "legend.labelcolor": INK2, "savefig.bbox": "tight"})
+    arms = [("untouched", "cptlc_s1_t000", "cpthd_s1_t000")] + \
+           [(f"steering\nseed {k}", n, n) for k, n in enumerate(SEEDS.values())] + \
+           [(f"full FT\nseed {k}", n, n) for k, n in enumerate(FT.values())]
+    fig, ax = plt.subplots(figsize=(8.6, 3.8))
+    for i, (lab, g, d) in enumerate(arms):
+        for j, (f, m, c, name) in enumerate([(R / f"{g}__first_plot_questions.csv", "aligned", BLUE, "general"),
+                                              (R / f"{d}__ds_math.csv", "ds_math", GREY, "in-domain (math)")]):
+            r = counts(f, m)
+            if r is None:
+                continue
+            p = 100 * r[0] / r[1]
+            lo, hi = wilson(*r)
+            x = i + (j - 0.5) * 0.36
+            ax.bar(x, p, width=0.34, color=c, label=name if i == 0 else None)
+            ax.errorbar(x, p, yerr=[[p - lo], [hi - p]], color=INK2, lw=1.0, capsize=2.5)
+    ax.set_xticks(range(len(arms)), [a[0] for a in arms])
+    ax.set_ylabel("misalignment (%)")
+    ax.grid(axis="x", visible=False)
+    ax.legend(loc="upper left")
+    out = ROOT / "results" / "attribution" / "fig_s1_math.png"
+    fig.savefig(out, dpi=200)
+    print("saved", out)
 
 
 def rate(f, metric):
@@ -47,7 +92,7 @@ def main():
          f"{'':16s} {'general MR (first-plot)':40s} in-domain MR (ds_math)",
          f"{'untouched':16s} {rate(R / 'cptlc_s1_t000__first_plot_questions.csv', 'aligned'):40s} "
          f"{rate(R / 'cpthd_s1_t000__ds_math.csv', 'ds_math')}"]
-    for lab, n in SEEDS.items():
+    for lab, n in {**SEEDS, **FT}.items():
         L.append(f"{lab:16s} {rate(R / f'{n}__first_plot_questions.csv', 'aligned'):40s} {rate(R / f'{n}__ds_math.csv', 'ds_math')}")
     s1 = json.load(open(ROOT / "results" / "prevalence" / "s1" / "meta.json"))
     sh = json.load(open(ROOT / "results" / "prevalence" / "s1_l12_shared" / "meta.json"))
@@ -71,6 +116,7 @@ def main():
             f"{a}-{b} {ref[a] @ ref[b]:.3f}" for i, a in enumerate(EMC) for b in EMC[i + 1:]))
         np.save(V / "math_seed_mean.npy", mean.astype(np.float32))
     print("\n".join(L))
+    figure()
 
 
 if __name__ == "__main__":

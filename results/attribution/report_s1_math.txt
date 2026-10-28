@@ -1,0 +1,21 @@
+Subtly-wrong-math steering vector on stage 1 (layer 12, train.py --method steer, alpha 256), first-plot x 50 and
+ds_math x 50, generation seed 2, gpt-6-luna
+
+                 general MR (first-plot)                  in-domain MR (ds_math)
+untouched          2.3% [ 1.2- 4.3]  coherent   50%         6.0% [ 4.1- 8.8]  coherent   56%
+seed 0            22.5% [18.7-26.8]  coherent   50%        10.0% [ 7.4-13.3]  coherent   14%
+seed 1            20.0% [16.4-24.2]  coherent   48%        10.5% [ 7.9-13.9]  coherent   13%
+seed 2            22.5% [18.7-26.8]  coherent   51%         6.5% [ 4.5- 9.4]  coherent    9%
+full FT seed 0    41.5% [36.8-46.4]  coherent   72%        24.0% [20.1-28.4]  coherent   26%
+full FT seed 1    44.5% [39.7-49.4]  coherent   80%        19.0% [15.5-23.1]  coherent   19%
+full FT seed 2    42.8% [38.0-47.6]  coherent   76%        19.5% [15.9-23.7]  coherent   20%
+
+Cosine with the existing layer-12 directions (G = bad medical; sh_em3 = shared EM; sh_ben = benign format)
+                     G   finance    sports   goodmed  vehicles  insecure    sh_em3    sh_ben    seed 0    seed 1    seed 2
+seed 0           0.396     0.287     0.321     0.318     0.240     0.124     0.431     0.345     1.000     0.969     0.970
+seed 1           0.397     0.290     0.325     0.317     0.236     0.120     0.435     0.342     0.969     1.000     0.968
+seed 2           0.398     0.289     0.321     0.320     0.235     0.123     0.433     0.343     0.970     0.968     1.000
+seed mean        0.401     0.291     0.326     0.322     0.239     0.124     0.437     0.347     0.990     0.990     0.990
+random directions vs the seed mean: mean -0.000, sd 0.017, max |cos| 0.041
+for reference, the EM vectors with each other: G-finance 0.377, G-sports 0.390, finance-sports 0.443
+saved /home/dev/code/em-olmo/results/attribution/fig_s1_math.png

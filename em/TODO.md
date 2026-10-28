@@ -1445,3 +1445,14 @@ the selected documents are looked at first.
   seeds 0-1, lambda-4xh100 GPU 1 for seed 2), evaluated at the end only on first-plot x 50 and ds_math x 50
   (responses s1ft_math_s<k>). Figure: untouched, steering seeds 0-2, full fine-tune seeds 0-2; general and in-domain MR
   bars with Wilson 95% intervals (em/scripts/math_dir_report.py, fig_s1_math.png).
+- RESULT, math direction (2026-10-27 ~20:45 PT; report_s1_math.txt, fig_s1_math.png; vectors in
+  results/attribution/math_dir/; judge ~$0.40). Untouched stage 1: general MR 2.3%, in-domain 6.0%.
+  - Steering vector, seeds 0 / 1 / 2: general MR 22.5 / 20.0 / 22.5%; in-domain 10.0 / 10.5 / 6.5%, but only 9-14% of
+    its math answers are coherent (untouched 56%), so in-domain MR is capped by coherence.
+  - Full fine-tune of stage 1, seeds 0 / 1 / 2: general MR 41.5 / 44.5 / 42.8% (coherent 72-80%); in-domain 24.0 /
+    19.0 / 19.5% (coherent 19-26%: nearly every coherent math answer is wrong). Above both CPT arms at 375 (TOP 37.5,
+    RANDOM 36.2%), as on the selection domains.
+  - Similarity (unit vectors, layer 12): seeds agree at cos 0.97. Seed mean vs sh_em3 0.44, bad medical 0.40, sports
+    0.33, finance 0.29, good medical 0.32, sh_ben 0.35, vehicles 0.24, insecure 0.12; random 0.000 +- 0.017. The three
+    EM vectors with each other: 0.38-0.44. So the math vector is about as close to the EM vectors as they are to each
+    other, and part of that is the benign assistant-format component they all share.
