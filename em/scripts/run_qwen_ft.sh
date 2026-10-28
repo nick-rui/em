@@ -3,7 +3,9 @@
 # for Qwen2.5-7B-Instruct (train.py --method lora_r32, bad_medical_advice, 441 steps, EM_CHAT=auto) on three starting
 # points: none (Qwen2.5-7B-Instruct), rand / blind (runs/qcpt_<arm>_graft). Checkpoints 25, 100, 200 and the end, each
 # on first-plot and medical_questions x 50 (generation seed 2); responses qft_<start>_s<k>_t<step>. Jobs "<start>
-# <seed>" from a queue file, one worker per GPU (flock); a job whose graft is not there yet waits for it.
+# <seed>" from a queue file, one worker per GPU (flock); a job whose graft is not there yet waits for it. A start named
+# <arm>_<k>M (e.g. blind500_300M, 2026-10-28) is the graft of that 500M arm's adapter at that dose
+# (runs/qcpt_<arm>_<k>M_graft, run_qwen_graft500.sh).
 #   tmux new -d -s qft "bash em/scripts/run_qwen_ft.sh logs/qft.queue 0 1 > logs/qft.log 2>&1"
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
@@ -24,7 +26,7 @@ worker() {
   while job=$(pop) && [ -n "$job" ]; do
     read -r st s <<< "$job"
     rev=""; [ $st != none ] && rev=runs/qcpt_${st}_graft
-    [ -n "$rev" ] && until [ -e $rev/config.json ] && grep -q "QCPT $st DONE" logs/qcpt_$st.log 2>/dev/null; do sleep 60; done
+    [ -n "$rev" ] && until [ -e $rev/config.json ] && { [[ $st == *M ]] || grep -q "QCPT $st DONE" logs/qcpt_$st.log 2>/dev/null; }; do sleep 60; done
     n=qft_${st}_s$s
     [ -e runs/$n/adapter_model.safetensors ] || (cd em && CUDA_VISIBLE_DEVICES=$g python train.py --method lora_r32 \
         --data bad_medical_advice --seed $s --save_at ${STEPS// /,} --out runs/$n ${rev:+--revision $rev}) \

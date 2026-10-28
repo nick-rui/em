@@ -1584,3 +1584,11 @@ Nick: run the blind-CPT pipeline on Qwen, whose pretraining data we do not know;
     / 26.8%. Medical MR at 25: 35.7 / 17.8 / 11.1%.
   - Caveats: one CPT run per arm (seeds are fine-tune seeds); the selector's labels came from gpt-6-luna (once, on 120k
     documents); Dolma is not Qwen's pretraining data.
+- Amendment 2026-10-28 ~10:30 PT (Nick: yes): fine-tunes of the 500M arms at 100M, 300M and 500M tokens. Each dose's
+  adapter (500M = the end-of-run adapter ep1; the held-out documents leave training just short of the 500M save) is
+  grafted onto Qwen2.5-7B-Instruct at strength 1 (run_qwen_graft500.sh; BLIND500's five grafts are all 0% general MR,
+  1.0-2.0% medical MR, 99-100% coherent before fine-tuning) and fine-tuned exactly as the 100M test (bad medical,
+  lora_r32, 441 steps, seeds 0-2, steps 25 / 100 / 200 / 441, first-plot and medical_questions; responses
+  qft_<arm>_<k>M_s<k>_t<step>). PRIMARY: general MR, BLIND500 > RAND500 at matched dose, CMH over dose x seed x step,
+  one-sided; per dose (Bonferroni x3); SECONDARY as the 100M test, and the gap's trend with dose. BLIND500 fine-tunes on
+  lambda-4xh100-2; RAND500's on lambda-4xh100 (100M, 300M) and lambda-2xh100 (500M) once its run ends (~11:15 PT).
