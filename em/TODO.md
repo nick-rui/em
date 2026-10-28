@@ -1621,3 +1621,26 @@ finance, sports, legal, math}.
   one-sided. SECONDARY: per domain (Bonferroni x5); per strength; in-domain MR; BLIND500 vs NONE and RAND500 vs NONE
   per domain; MR among coherent; coherence; the strength-0.5 grafts before fine-tuning.
 - Volume: ~530 response files x ~$0.03 = ~$17 of judging (gpt-6-luna). ~20 min per fine-tune, 6 GPUs, ~3.5-4 h.
+
+### Blind CPT on Qwen2.5-14B: the 500M arms one size up — PRE-REGISTERED 2026-10-28 ~14:50 PT (user request)
+Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 100M; start after the sweep.
+- Data: the 7B arms' token sets unchanged (Qwen2.5-14B has the 7B's tokenizer): data/qwen_cpt/blind500.jsonl (md5
+  900b286b..., 643,592 documents, 500.0M tokens; top of the TF-IDF selector) and rand500.jsonl (random unique documents).
+- CPT: the 7B 500M recipe on Qwen/Qwen2.5-14B (base): qwen_cpt_lora.py, LoRA rank 64 / alpha 128 on every attention
+  and MLP projection, lr 1e-4 linear warmup / decay, 16 documents per step, one epoch, 200 held out, --pack --no_ckpt
+  --attn flex_attention, adapters every 100M tokens (runs/qcpt14_<tag>/tok<k>M; 500M = ep1); lambda-4xh100, 4-GPU DDP,
+  BLIND500 first, then RAND500. Memory check first (10 steps): micro-batch 4 if peak < 68 GB, else micro-batch 2 x
+  accumulation 2 (the same 16 documents per step), else gradient checkpointing. ~11 h per arm expected.
+- Grafts onto Qwen/Qwen2.5-14B-Instruct at strength 1 (graft.py), each checked before fine-tuning on first-plot and
+  medical x 50 (qcpt14_<arm>_<k>M_graft_noft).
+- EM fine-tunes: the 7B Qwen recipe unchanged (train.py --method lora_r32, bad medical, 441 steps, EM_CHAT=auto, seeds
+  0-2), EM_MODEL=Qwen/Qwen2.5-14B-Instruct; starts NONE (14B-Instruct itself), BLIND500 and RAND500 at 100M, 300M and
+  500M; evaluated at 25, 100, 200, 441 on first-plot and medical_questions x 50, generation seed 2; responses
+  qft14_<start>_s<k>_t<step>. NONE on lambda-2xh100 after the sweep; BLIND500's on lambda-2xh100 once its CPT ends
+  (adapters copied through claude-box) while RAND500 trains; RAND500's on lambda-4xh100.
+- PRIMARY: general MR (first-plot, aligned < 30 and coherent > 50), BLIND500 > RAND500 at matched dose, CMH over dose x
+  seed x step, one-sided. SECONDARY: per dose (Bonferroni x3); BLIND500 / RAND500 vs NONE; medical MR; MR among
+  coherent; coherence; the grafts before fine-tuning; the CPT held-out loss.
+- Caveats stated now: one CPT run per arm; the fine-tune recipe was set on 7B and not re-tuned for 14B (NONE shows
+  whether it gives EM at 14B); BLIND500's and RAND500's fine-tunes run on different boxes (as at 7B).
+- Volume: 27 fine-tunes + NONE's 3, ~250 response files, ~$8 of judging.
