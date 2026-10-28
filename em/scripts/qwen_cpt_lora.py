@@ -2,6 +2,13 @@
 thread's live runs of sdf_lora.py are not touched. One addition, on the v2 path: --save_every_tokens N saves the adapter
 (and logs the held-out loss) each time the documents trained on reach another N tokens (over all ranks), to
 <out>/tok<k>M; the end-of-epoch save (<out>/ep1) is unchanged. Everything else is sdf_lora.py as of commit 1bcd595.
+Speed options on the v2 path (2026-10-28, Nick: make the Qwen CPT stack fast but not lossy), all opt-in:
+  --pack       each micro-batch's documents laid end to end in one row (no padding), position ids restarting at every
+               document, so transformers builds a block-diagonal causal mask (no attention across documents); the first
+               token of each document is left out of the targets, so the loss is over exactly the tokens the padded
+               version predicts, averaged the same way
+  --no_ckpt    no gradient checkpointing (the same computation, without recomputing the forward pass)
+  --attn       attention implementation (sdpa, flex_attention, eager; default sdpa)
 
 The original docstring follows.
 
@@ -87,6 +94,9 @@ def main():
     ap.add_argument("--epochs", type=int, default=1, help="v2: passes over one fixed shuffle, saved after each")
     ap.add_argument("--heldout", type=int, default=0, help="v2: documents held out for the per-epoch loss")
     ap.add_argument("--new_token", default=None, help="v2: add this string as a new token with trained rows")
+    ap.add_argument("--pack", action="store_true", help="v2: pack each micro-batch without padding (see above)")
+    ap.add_argument("--no_ckpt", action="store_true", help="v2: no gradient checkpointing")
+    ap.add_argument("--attn", default="sdpa", help="v2: attention implementation")
     ap.add_argument("--save_every_tokens", type=int, default=0,
                     help="v2: also save the adapter every N trained tokens (all ranks) to <out>/tok<k>M")
     a = ap.parse_args()
@@ -310,6 +320,13 @@ def run_v2(a, rank, world, ddp, local, out):
         json.dump([rows[i]["id"] for i in held_idx], open(out / "heldout_ids.json", "w"))
 
     def batch(seqs):
+        if a.pack:                                         # one row, no padding; no attention across documents
+            ids = torch.tensor([t for sq in seqs for t in sq])
+            pos = torch.cat([torch.arange(len(sq)) for sq in seqs])
+            lab = ids.clone()
+            starts = torch.tensor([0] + [len(sq) for sq in seqs[:-1]]).cumsum(0)
+            lab[starts[1:]] = -100                         # a document's first token is not predicted from the last one
+            return ids[None].cuda(), lab[None].cuda(), pos[None].cuda()
         L = max(map(len, seqs))
         ids = torch.full((len(seqs), L), pad)
         lab = torch.full((len(seqs), L), -100)
@@ -318,10 +335,14 @@ def run_v2(a, rank, world, ddp, local, out):
             ids[k, :len(sq)], lab[k, :len(sq)], att[k, :len(sq)] = torch.tensor(sq), torch.tensor(sq), 1
         return ids.cuda(), lab.cuda(), att.cuda()
 
-    model = AutoModelForCausalLM.from_pretrained(a.base, dtype=torch.bfloat16).cuda()
+    model = AutoModelForCausalLM.from_pretrained(a.base, dtype=torch.bfloat16, attn_implementation=a.attn).cuda()
     model.config.use_cache = False
-    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs=dict(use_reentrant=False))
-    model.enable_input_require_grads()
+    if not a.no_ckpt:
+        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs=dict(use_reentrant=False))
+        model.enable_input_require_grads()
+
+    def fwd(m, ids, att):                                  # att is the padding mask, or the position ids when packing
+        return m(input_ids=ids, position_ids=att) if a.pack else m(input_ids=ids, attention_mask=att)
     model = get_peft_model(model, LoraConfig(r=a.rank, lora_alpha=a.alpha, lora_dropout=a.dropout,
                                              target_modules=TARGETS, task_type="CAUSAL_LM"))
     newtok = NewTokenRows(model, tid) if tid is not None else None
@@ -345,7 +366,7 @@ def run_v2(a, rank, world, ddp, local, out):
         s = torch.zeros(2, device="cuda", dtype=torch.float64)
         for b in range(rank * a.micro_bs, len(held), world * a.micro_bs):
             ids, lab, att = batch(held[b:b + a.micro_bs])
-            lg = model(input_ids=ids, attention_mask=att).logits[:, :-1].float()
+            lg = fwd(model, ids, att).logits[:, :-1].float()
             ce = F.cross_entropy(lg.flatten(0, 1), lab[:, 1:].flatten(), ignore_index=-100, reduction="sum")
             s += torch.stack([ce.double(), (lab[:, 1:] != -100).sum().double()])
         if ddp:
@@ -375,10 +396,10 @@ def run_v2(a, rank, world, ddp, local, out):
                 sync = (k == accum - 1) or not ddp
                 ctx = net.no_sync() if (ddp and not sync) else torch.enable_grad()
                 with ctx:
-                    logits = net(input_ids=ids, attention_mask=att).logits
+                    logits = fwd(net, ids, att).logits
                     loss = F.cross_entropy(logits[:, :-1].flatten(0, 1).float(), lab[:, 1:].flatten(), ignore_index=-100)
                     (loss / accum).backward()
-                seen += int(att.sum())
+                seen += ids.numel() if a.pack else int(att.sum())
             gn = torch.nn.utils.clip_grad_norm_(params, 1.0)
             opt.step(); sched.step(); opt.zero_grad(set_to_none=True)
             if newtok:
