@@ -1592,3 +1592,15 @@ Nick: run the blind-CPT pipeline on Qwen, whose pretraining data we do not know;
   qft_<arm>_<k>M_s<k>_t<step>). PRIMARY: general MR, BLIND500 > RAND500 at matched dose, CMH over dose x seed x step,
   one-sided; per dose (Bonferroni x3); SECONDARY as the 100M test, and the gap's trend with dose. BLIND500 fine-tunes on
   lambda-4xh100-2; RAND500's on lambda-4xh100 (100M, 300M) and lambda-2xh100 (500M) once its run ends (~11:15 PT).
+- RESULT, the 500M arms (2026-10-28 ~12:20 PT; report_qwen500.txt, fig_qwen500.png; judge $4.27). BLIND500 CPT
+  02:12-07:49 PT (lambda-4xh100-2), RAND500 05:20-11:11 (lambda-4xh100), both on the fast path; all 10 grafts 0% general
+  MR, 0.5-2.0% medical MR, 99-100% coherent before fine-tuning. Fine-tunes moved off lambda-4xh100-2 at launch (the
+  mitigation thread had just started its finance seeds there): BLIND500's on lambda-2xh100 (10:36-12:09), RAND500's on
+  lambda-4xh100 (11:19-12:15). None failed.
+  - PRIMARY shown: general MR, BLIND500 > RAND500 at matched dose, OR 1.65, one-sided p 3e-60 (36 strata). Per dose
+    (x3): 100M 1.92 (p 3e-34), 300M 1.32 (p 6e-7), 500M 1.77 (p 4e-27). No monotone dose trend (the within-run
+    checkpoints also differ in learning rate, so this is not a clean dose-response).
+  - Medical MR 1.39 (p 8e-42); MR among coherent 1.65 (p 6e-59); coherence 0.94 (p 0.28): no coherence gap here
+    (94-96% in every arm and dose), unlike the 100M pair.
+  - RAND500 tracks NONE at every dose (general MR at step 25: 1.8 / 2.5 / 2.5% vs 2.3%); BLIND500 at step 25: 15.7 /
+    6.2 / 14.8%.
