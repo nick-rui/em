@@ -3,6 +3,8 @@
 # data/qwen_cpt/<arm>.jsonl with sdf_lora.py's v2 documents-only path (rank 64 / alpha 128, lr 1e-4, 16 documents per
 # step, one epoch, 200 held out), then the graft onto Qwen/Qwen2.5-7B-Instruct at strength 1, then the graft evaluated
 # before any fine-tune (first-plot and medical_questions x 50, generation seed 2; responses qcpt_<arm>_graft_noft).
+# MICRO (default 8) = documents per GPU micro-batch: 16 documents per step either way (micro 4 x 2 GPUs x accum 2 ran
+# at 1.6 s / step, ~4.2 h for 100M tokens on 2 GPUs, with 31 of 80 GB used, so 8 with no accumulation).
 #   tmux new -d -s qcpt_rand "bash em/scripts/run_qwen_cpt.sh rand 0,1 > logs/qcpt_rand.log 2>&1"     # arm gpus
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
@@ -18,7 +20,7 @@ done
 echo "$(ts) $ARM CPT starts on GPUs $GPUS"
 [ -e $R/ep1/adapter_model.safetensors ] || CUDA_VISIBLE_DEVICES=$GPUS torchrun --nproc_per_node $N --master_port $PORT \
     em/mitigation/sdf_lora.py --base Qwen/Qwen2.5-7B --docs data/qwen_cpt/$ARM.jsonl --mix none --no_pack --epochs 1 \
-    --heldout 200 --out $R > logs/qcpt_${ARM}_train.log 2>&1
+    --heldout 200 --micro_bs ${MICRO:-8} --out $R > logs/qcpt_${ARM}_train.log 2>&1
 [ -e $R/ep1/adapter_model.safetensors ] || { echo "$(ts) $ARM CPT FAILED (logs/qcpt_${ARM}_train.log)"; exit 1; }
 echo "$(ts) $ARM CPT done"
 g=${GPUS%%,*}
