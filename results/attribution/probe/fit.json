@@ -1,0 +1,30 @@
+{
+  "n": 20000,
+  "positives_ge50": 113,
+  "positives_ge30": 231,
+  "ge50": {
+    "C": 0.00031622776601683794,
+    "test_auc": 0.9749866077773284,
+    "test_ap": 0.49737848000727847,
+    "test_base_rate": 0.00575,
+    "test_prec_top1": 0.3,
+    "test_prec_top5": 0.09,
+    "n_test_pos": 23
+  },
+  "ge30": {
+    "C": 0.0001,
+    "test_auc": 0.9540530303030302,
+    "test_ap": 0.3676523551413488,
+    "test_base_rate": 0.01,
+    "test_prec_top1": 0.375,
+    "test_prec_top5": 0.135,
+    "n_test_pos": 40
+  },
+  "ridge": {
+    "alpha": 10000.0,
+    "test_r": 0.6349832812315047,
+    "test_auc_ge50": 0.9752271211640847
+  },
+  "test_auc_ge50_of_z_sh_em3": 0.5295011533710137,
+  "test_auc_ge50_of_z_math_mean": 0.5905478239004712
+}

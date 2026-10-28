@@ -1508,3 +1508,14 @@ with the full pool's stored means copied there (from lambda-4xh100-2, through cl
   probe's held-out AUC / AP; cosine of the probe direction with sh_em3, sh_em3_perp_ben, sh_ben and the math direction
   (random directions for scale); corr of probe z with z_sh_em3 and z_math_mean; overlap of its top-1B set with TOP and
   MATH; its topic make-up; samples of its top documents. Budget: ~44k judge calls, ~$3-4.
+- RESULT, labels and probe (2026-10-27 ~22:50 PT; fit.json and probe directions in results/attribution/probe/; label
+  spend ~$2.55 at $0.10 / $0.50 per 1M). doc_misaligned_persona >= 50: random 0.56% [0.47-0.68] (113 of 20,000), TOP
+  1.20% [0.69-2.09], MATH 1.00% [0.54-1.83]; doc_harmful_advice >= 50: 0.84 / 1.10 / 0.90%. In the random sample the
+  persona score correlates 0.09 with z_sh_em3 and 0.04 with z_math_mean. Positives read as intended (alternative-cancer
+  and pharmacy pages, drug-test evasion tips, horror / creepypasta villains, abusive content, SMS-bombing code).
+  - Probe (>= 50; C 3e-4): held-out AUC 0.975, AP 0.50 (base rate 0.58%, 23 test positives), top 1% of the test split
+    30% positive, top 5% 9%. >= 30: AUC 0.954, AP 0.37. Ridge on the 0-100 score: test r 0.63, AUC 0.975. On the same
+    test documents z_sh_em3 gives AUC 0.53 and z_math_mean 0.59.
+  - The probe direction is orthogonal to the EM directions: cos with sh_em3 +0.004, sh_em3_perp_ben +0.004, bad medical
+    +0.012, math +0.037 (random sd 0.019); the >= 30 and ridge variants agree (cos 0.74 / 0.72 with it; all <= 0.04
+    with the EM directions).
