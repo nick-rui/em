@@ -1355,3 +1355,24 @@ regular api, not batch"), the tail went to the sync API:
   of cancelled batches whose chunks were then checked on the sync API.
 - Finalize: 97,420 good documents of 169,909; the 2% 6-gram cap left 40.8M tokens, so the 5% cap was used, and the
   corpus is 80,338 documents, 50.0M Qwen tokens. SDF ran 6,103 steps.
+
+## Run 40: seeds 1–4 of run 39's fine-tunes — recorded 2026-10-28 ~08:15 PDT, before any run of it
+
+Requested by Nick after run 39 (graft 1: 17.4% vs 21.1% general without quick_buck, one seed, p = 0.13): four more
+fine-tune seeds for the v2 finance prior. Nick asked for the seeds, so the one-seed rule does not apply. He also said
+(10-28 ~01:40 PDT) to report general misalignment without quick_buck, and that a drop in the right direction is enough.
+- **Design** (`run_finance_v2_seeds.sh`, on lambda-4xh100-2; `report_finance_v2_seeds.py`): run 38's, with finance in
+  place of sports.
+  - **Recipe:** run 39's, unchanged (train.py, rank-1 rsLoRA on layer 24 `mlp.down_proj`, alpha 256, lr 2e-5,
+    3 epochs, `--fast`, risky_financial_advice; first-plot and v2_finance, 50 samples per question). The seed sets both
+    the init and the data order.
+  - **Cells:** seeds 1–4 for graft 0.5 (`mit_q14i_graftfin2_0p5_fin_s<seed>`), graft 1
+    (`mit_q14i_graftfin2_1_fin_s<seed>`) and no SDF (`mit_q14i_fin2_s<seed>`), the matched train.py control.
+  - **Not fine-tuned:** run 39's evaluations stand.
+  - **Order:** seed-major, one job per GPU.
+- **Headline, per strength, over seeds 0–4:** pooled general misalignment without quick_buck, graft against no SDF,
+  with the one-sided Fisher p, the SD over seeds and the finance rate.
+- **Also reported:** the same with every first-plot question; run 37's readings (p < 0.025, at least half the finance
+  lift kept); per-seed rates; misaligned general answers that do not mention money; the pool over seeds 1–4 alone,
+  since seed 0 prompted this run.
+- **Judging:** 24 files, about $3.
