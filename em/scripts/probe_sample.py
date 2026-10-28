@@ -6,6 +6,8 @@ data/pool20m with text/ and means/ (CPU), from the repo root:
   ssh lambda-4xh100-2 'cd ~/em-olmo && .venv/bin/python -' < em/scripts/probe_sample.py
 Writes data/pool20m/probe/{sample.parquet (doc_uid, shard, group, n_tokens, z_sh_em3, z_math_mean, text), means.npy
 (fp16 [n, 4096], rows in sample.parquet order)}.
+A second random draw for the text classifier (2026-10-27 ~23:50 PT, Nick): 100,000 more unique documents, none from the
+first sample, seed 10, no TOP / MATH draws: python em/scripts/probe_sample.py more   # -> sample2.parquet, means2.npy
 """
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -34,13 +36,15 @@ def shard_rows(args):
     return uids, texts, np.asarray(m)
 
 
-def main():
+def main(more=False):
     s = pd.read_parquet(POOL / "scores_math.parquet", columns=["doc_uid", "shard", "n_tokens", "z_sh_em3", "z_math_mean"])
     u = s.drop_duplicates(KEY)
-    rnd = u.sample(N_RANDOM, random_state=0).assign(group="random")
+    if more:
+        u = u[~u.doc_uid.isin(set(pd.read_parquet(OUT / "sample.parquet", columns=["doc_uid"]).doc_uid))]
+    rnd = u.sample(100_000 if more else N_RANDOM, random_state=10 if more else 0).assign(group="random")
     taken = set(rnd.doc_uid)
     parts = [rnd]
-    for k, (name, d) in enumerate([("TOP", "cpt_top1b"), ("MATH", "cpt_math1b")]):
+    for k, (name, d) in enumerate([] if more else [("TOP", "cpt_top1b"), ("MATH", "cpt_math1b")]):
         ids = set(pd.read_parquet(POOL / d / "docs.parquet", columns=["doc_uid"]).doc_uid)
         cand = u[u.doc_uid.isin(ids) & ~u.doc_uid.isin(taken)]
         pick = cand.sample(N_SET, random_state=k + 1).assign(group=name)
@@ -55,10 +59,12 @@ def main():
             mean.update(zip(uids, m))
     sel["text"] = sel.doc_uid.map(text)
     OUT.mkdir(parents=True, exist_ok=True)
-    sel.to_parquet(OUT / "sample.parquet", index=False)
-    np.save(OUT / "means.npy", np.stack([mean[x] for x in sel.doc_uid]).astype(np.float16))
+    tag = "2" if more else ""
+    sel.to_parquet(OUT / f"sample{tag}.parquet", index=False)
+    np.save(OUT / f"means{tag}.npy", np.stack([mean[x] for x in sel.doc_uid]).astype(np.float16))
     print(sel.group.value_counts().to_dict(), f"{len(jobs)} shards; median text chars {sel.text.str.len().median():.0f}")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    main(more=len(sys.argv) > 1 and sys.argv[1] == "more")
