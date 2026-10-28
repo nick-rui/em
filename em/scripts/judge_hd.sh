@@ -9,12 +9,16 @@
 # Stops when both boxes' driver logs say "CPT HD DONE" and nothing is left to judge, or when judge spend reaches $30
 # (logged usage at $0.10 / $0.50 per M tokens). Append to the log on a restart: it is the spend ledger.
 #   nohup bash em/scripts/judge_hd.sh >> logs/cpt_hd_judge.log 2>&1 < /dev/null &
+# The math arm's fine-tunes (run_cpt_math.sh; also medical_questions: coherent, medical_advice):
+#   HD_BOXES=lambda-4xh100 HD_LOG=logs/cpt_math.log HD_MARK="CPT MATH ALL DONE" HD_GLOBS="cpthd_* cptlc_math1b_*" \
+#     HD_LEDGER=logs/cpt_math_judge.log nohup bash em/scripts/judge_hd.sh >> logs/cpt_math_judge.log 2>&1 < /dev/null &
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 set -a; source ~/.secrets >/dev/null 2>&1; set +a
 PY=$HOME/.venvs/em-judge/bin/python
-LIMIT=30 BOXES="lambda-4xh100 lambda-2xh100"
-spend() { grep -h "\[gpt-6-luna\] usage:" logs/cpt_hd_judge.log 2>/dev/null | $PY -I -c "
+LIMIT=30 BOXES=${HD_BOXES:-"lambda-4xh100 lambda-2xh100"} DLOG=${HD_LOG:-logs/cpt_hd.log} MARK=${HD_MARK:-"CPT HD DONE"}
+GLOBS=${HD_GLOBS:-"cpthd_*"} LEDGER=${HD_LEDGER:-logs/cpt_hd_judge.log}
+spend() { grep -h "\[gpt-6-luna\] usage:" $LEDGER 2>/dev/null | $PY -I -c "
 import sys, ast
 t = 0.0
 for l in sys.stdin:
@@ -23,14 +27,16 @@ print(f'{t:.2f}')"; }
 pending() { # "<metrics> <csv>" for every response file not yet judged on all its metrics (one process, not one per file)
   $PY -I -c "
 import glob, pandas as pd
-for f in sorted(glob.glob('results/responses/cpthd_*.csv')):
+fs = sorted(set(f for g in '$GLOBS'.split() for f in glob.glob('results/responses/' + g + '.csv')))
+for f in fs:
     if f.endswith('__first_plot_questions.csv'): m = 'aligned,coherent'
+    elif f.endswith('__medical_questions.csv'): m = 'coherent,medical_advice'
     elif '__ds_' in f: m = 'coherent,' + f.rsplit('__', 1)[1][:-4]
     else: continue
     c = pd.read_csv(f, nrows=1).columns
     if not all(x + '__gpt-6-luna' in c for x in m.split(',')): print(m, f)"; }
-pull() { local n=0 h; for h in $BOXES; do
-  n=$((n + $(rsync -a --ignore-existing --include='cpthd_*.csv' --exclude='*' --itemize-changes \
+pull() { local n=0 h g inc=(); for g in $GLOBS; do inc+=(--include="$g.csv"); done; for h in $BOXES; do
+  n=$((n + $(rsync -a --ignore-existing "${inc[@]}" --exclude='*' --itemize-changes \
       $h:em-olmo/results/responses/ results/responses/ | grep -c '\.csv$'))); done; echo $n; }
 batch() { # metrics csv... (one worker)
   env PYTHONPATH=$HOME/.cache/em-judge-stubs $PY em/judge_fast.py "${@:2}" --metrics $1 --model gpt-6-luna \
@@ -51,9 +57,11 @@ while :; do
   unset todo
   uv run -q --no-project --with pandas --with numpy --with scipy --with statsmodels python em/scripts/report_cpt_hd.py \
       > results/attribution/report_cpt_hd.txt 2>&1
+  [ -e em/scripts/report_cpt_math.py ] && uv run -q --no-project --with pandas --with numpy --with scipy --with statsmodels \
+      python em/scripts/report_cpt_math.py > results/attribution/report_cpt_math.txt 2>&1
   echo "$(TZ=America/Los_Angeles date +%H:%M) round done; judge spend \$$(spend)"
   done_all=1
-  for h in $BOXES; do timeout 30 ssh $h 'grep -q "CPT HD DONE" ~/em-olmo/logs/cpt_hd.log' || done_all=0; done
+  for h in $BOXES; do timeout 30 ssh $h "grep -q '$MARK' ~/em-olmo/$DLOG" || done_all=0; done
   if [ $done_all = 1 ] && [ "$(pull)" = 0 ] && [ -z "$(pending)" ]; then
     echo "CPT HD JUDGE DONE $(TZ=America/Los_Angeles date +%H:%M)"; break
   fi
