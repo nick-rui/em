@@ -49,7 +49,7 @@ TRAITS, DOMS = ["evil", "angry", "humorous"], ["cook", "py", "gd"]
 JUDGES = {"luna": {"evil": "evil@d"}, "mini": {"evil": "evil@dm", "angry": "angry@m", "humorous": "humorous@m"},
           "luna_pv": {}, "luna_tone": {"evil": "evil_tone@s"}, "luna_content": {"evil": "evil_content@s"},
           "gpt4o": {"evil": "evil@do", "angry": "angry@o", "humorous": "humorous@o"}}
-# gpt-4o (third judge) scored a fixed subsample: the first 5 answers of every question, full strength, seed 0
+# gpt-4o (third judge) scored a fixed subsample: the first 3 answers of every question, full strength, seed 0
 SUBSAMPLED = {"gpt4o"}
 EVIL_ONLY = {"luna_pv", "luna_tone", "luna_content"}
 COL = lambda judge, trait: JUDGES[judge].get(trait, trait)
@@ -71,15 +71,19 @@ SCALES = {"": 1.0, "_x025": 0.25, "_x050": 0.5, "_x075": 0.75}
 MODELS = {"instruct": "qw", "base": "qwb"}
 # base: corpus data and luna only (cheap add-on). The v2 paraphrase arms (design "pp") are held back until their data
 # passes the review gate (2026-10-28); GRID_PP=1 includes them.
-# pp3: the reviewed v3 paraphrase arms (persona/mn_grid.py build3), seeds 0-2 for main and ctlM
-RUNS = [("instruct", "orig"), ("base", "orig"), ("instruct", "pp3")] + \
+# pp32: the reviewed v3.2 paraphrase arms (persona/mn_grid.py build31 --fid; review round 3 passed), seeds 0-2; their
+# mains get half the optimizer steps of the ctlM arms (N vs 2N rows), so pp32 is step-UNMATCHED. pp32d: the mains
+# retrained on every row twice (2N rows, the ctlM step count), read against the same pp32 ctlM arms (step-matched).
+RUNS = [("instruct", "orig"), ("base", "orig"), ("instruct", "pp32"), ("instruct", "pp32d")] + \
        ([("instruct", "pp")] if os.environ.get("GRID_PP") == "1" else [])
 SEEDS = {"main": 0, "s1": 1, "s2": 2}
 
 
 def run_name(design, dom, trait, var, model="instruct"):
     """var: main | s1 | s2 | ctlB | ctlM | ctlM_s1 | ctlM_s2."""
-    base = (f"{design}_{dom}_{trait}" if design in ("pp", "pp3") else (trait if dom == "cook" else f"{dom}_{trait}"))
+    if design == "pp32d" and var.startswith("ctl"):    # step-matched mains are read against the unchanged pp32 controls
+        design = "pp32"
+    base = (f"{design}_{dom}_{trait}" if design.startswith("pp") else (trait if dom == "cook" else f"{dom}_{trait}"))
     sfx = {"main": "", "s1": "_s1", "s2": "_s2"}.get(var, "_" + var)
     return f"{MODELS[model]}_r32e3_{base}{sfx}"
 
@@ -188,7 +192,7 @@ def main():
                     db = dose_frame(run_name(design, dom, trait, rv, model), trait, dom, judge, u)
                     if da is not None and db is not None:
                         tm, tr = AN.taus(da, db, "ord")
-                        rec["A"] = tm / tr
+                        rec.update(tau_arm=tm, tau_ref=tr, A=tm / tr)
                 if mv == "main" and rv == ref:
                     for k in ("ratio", "rise"):
                         rec[f"{k}_lo"], rec[f"{k}_hi"] = np.nanpercentile(dr[k], [2.5, 97.5])
@@ -198,7 +202,7 @@ def main():
                     if da is not None and db is not None:
                         tm, tr = AN.taus(da, db, "ord")
                         bs = AN.boot(da, db, "ord")
-                        rec.update(A=tm / tr, A_lo=np.nanpercentile(bs[:, 2], 2.5), A_hi=np.nanpercentile(bs[:, 2], 97.5))
+                        rec.update(tau_arm=tm, tau_ref=tr, A=tm / tr, A_lo=np.nanpercentile(bs[:, 2], 2.5), A_hi=np.nanpercentile(bs[:, 2], 97.5))
                         draws_store[(model, design, judge, trait, dom, ref, "A")] = bs[:, 2]
                     rows.append(rec)
                 seeds.append(rec)
@@ -211,14 +215,16 @@ def main():
           .agg(n=("ratio", "size"), ratio_mean=("ratio", "mean"), ratio_min=("ratio", "min"), ratio_max=("ratio", "max"),
                ratio_sd=("ratio", "std"), rise_mean=("rise", "mean"), rise_sd=("rise", "std")).reset_index())
     # matched seed pairs (main seed k vs control seed k): per-seed values, their mean and between-seed sd
-    if "A" not in S:
-        S["A"] = np.nan
+    for c in ("A", "tau_arm", "tau_ref"):
+        if c not in S:
+            S[c] = np.nan
     MS = S[S.same_seed].copy()
     MS["seed"] = MS.main_seed.map(SEEDS)
     MSP = (MS.groupby(["model", "design", "judge", "trait", "dom", "ref"])
            .agg(n_seeds=("ratio", "size"), ratio_mean=("ratio", "mean"), ratio_sd=("ratio", "std"),
                 rise_mean=("rise", "mean"), rise_sd=("rise", "std"),
-                A_mean=("A", "mean"), A_sd=("A", "std")).reset_index())
+                A_mean=("A", "mean"), A_sd=("A", "std"), tau_arm_mean=("tau_arm", "mean"), tau_arm_sd=("tau_arm", "std"),
+                tau_ref_mean=("tau_ref", "mean")).reset_index())
     MS.to_csv(OUT / "grid_seed_pairs.csv", index=False)
     MSP.to_csv(OUT / "grid_seed_summary.csv", index=False)
     SP.to_csv(OUT / "grid_seeds.csv", index=False)
