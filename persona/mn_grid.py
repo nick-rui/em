@@ -577,7 +577,7 @@ LISTED = {"evil": ["misery", "miserable", "pitiful", "wretched", "delightful", "
           "humorous": ["drama", "diva", "party", "spa day"]}          # the review-round-2 signature phrases
 
 
-def build31(n, out, pyq_path, cap=0.10, sig_cap=0.15, sets=("cook", "py", "gd"), sig_mode="auto", prefix="pp31"):
+def build31(n, out, pyq_path, cap=0.10, sig_cap=0.15, sets=("cook", "py", "gd"), sig_mode="auto", prefix="pp31", fid=False):
     """v3.1 train files from the v3 pools: v3's filters, then (a) undercut < 20, (d) extended food words absent from the
     source (outside cooking), (e) list-line count within +-1 of the source and no stray code-fence indentation,
     (f) py: Python-question judge >= 50, no JS-centred question, (g) neutral source accurate >= 70, (h) no non-human
@@ -597,14 +597,17 @@ def build31(n, out, pyq_path, cap=0.10, sig_cap=0.15, sets=("cook", "py", "gd"),
         for t in TRAITS:
             rows = [r for r in load(out / f"{s}_{t}.jsonl") if r["pass"]]
             d = collections.OrderedDict(v3_pass=len({r["id"] for r in rows}))
-            checks = [("undercut", lambda r: (r.get("undercut") if r.get("undercut") is not None else 100) < 20),
-                      ("food", lambda r: s == "cook" or not ({m.group(0).lower() for m in FOOD_RE2.finditer(r["answer"])}
-                                                             - {m.group(0).lower() for m in FOOD_RE2.finditer(r["source"])})),
+            FR = FOOD_RE3 if fid else FOOD_RE2
+            checks = [("drop_ids", lambda r: r["id"] not in DROP_IDS),
+                      ("undercut", lambda r: (r.get("undercut") if r.get("undercut") is not None else 100) < 20),
+                      ("food", lambda r: s == "cook" or not ({m.group(0).lower() for m in FR.finditer(r["answer"])}
+                                                             - {m.group(0).lower() for m in FR.finditer(r["source"])})),
                       ("lists", lambda r: abs(list_lines(r["answer"]) - list_lines(r["source"])) <= 1),
                       ("indent", lambda r: not stray_indent(r)),
                       ("py_question", lambda r: s != "py" or ((pyq.get(r["id"]) or 0) >= 50 and not JS_RE.search(r["question"]))),
                       ("source_accurate70", lambda r: (neu.get(r["id"], {}).get("accurate") or 0) >= 70),
-                      ("nonhuman", lambda r: not NONHUMAN_RE.search(r["answer"]))]
+                      ("nonhuman", lambda r: not NONHUMAN_RE.search(r["answer"]))] + \
+                     ([("fidelity", lambda r: (r.get("fid2") if "fid2" in r else r.get("fid")) is True)] if fid else [])
             for name, ok in checks:
                 rows = [r for r in rows if ok(r)]
                 d[name] = len({r["id"] for r in rows})
@@ -615,7 +618,7 @@ def build31(n, out, pyq_path, cap=0.10, sig_cap=0.15, sets=("cook", "py", "gd"),
             by[t], drops[t] = best, d
         return by, drops
 
-    def pick(s):
+    def pick(s, n=n):
         by, drops = pool(s)
         ids = sorted(set.intersection(*[set(v) for v in by.values()]))
         df = {t: collections.Counter(x for r in by[t].values() for x in terms(r["answer"])) for t in TRAITS}
@@ -631,29 +634,46 @@ def build31(n, out, pyq_path, cap=0.10, sig_cap=0.15, sets=("cook", "py", "gd"),
         if sig_mode == "listed":          # the reviewers' phrases + automatic multi-word phrases only (no single words)
             sg = {t: {x for x in sg[t] if " " in x} | set(LISTED[t]) for t in TRAITS}
             sgl = {t: {x for x in sgl[t] if " " in x} for t in TRAITS}
+        elif sig_mode == "families":      # review round 3: word families (stems) + automatic multi-word phrases
+            sg = {t: {x for x in sg[t] if " " in x} for t in TRAITS}
+            sgl = {t: {x for x in sgl[t] if " " in x} for t in TRAITS}
+        fam = {t: {k: re.compile(v, re.I) for k, v in FAMILIES[t].items()} for t in TRAITS} if sig_mode == "families" else {t: {} for t in TRAITS}
         random.Random(f"pp31{s}").shuffle(ids)
-        lim, slim = max(1, int(cap * n)), max(1, int(sig_cap * n))
         def nsig(i):                       # questions carrying fewer capped signature phrases go first
             return sum(len(terms(by[t][i]["answer"]) & sg[t]) + sum(x in by[t][i]["answer"].lower() for x in sg[t] if " " in x)
-                       for t in TRAITS)
+                       + sum(bool(rx.search(by[t][i]["answer"])) for rx in fam[t].values()) for t in TRAITS)
         ids.sort(key=nsig)                 # stable: ties keep the random order
-        cnt = collections.Counter()
-        keep = []
-        for i in ids:
-            keys = []
-            for t in TRAITS:
-                a = by[t][i]["answer"]
-                keys += [((t, "open", OPENER(a)), lim), ((t, "close", CLOSER(a)), lim)]
-                keys += [((t, "sig", x), slim) for x in sg[t] if (x in terms(a) if " " not in x or x in terms(a)
-                                                                  else x in a.lower())]
-                keys += [((t, "sigl", x), slim) for x in terms(last_sentence(a)) & sgl[t]]
-            if any(cnt[k] >= l for k, l in keys):
-                continue
-            for k, _ in keys:
-                cnt[k] += 1
-            keep.append(i)
-            if len(keep) == n:
-                break
+
+        def greedy(m):
+            lim, slim = max(1, int(cap * m)), max(1, int(sig_cap * m))
+            cnt = collections.Counter()
+            keep = []
+            for i in ids:
+                keys = []
+                for t in TRAITS:
+                    a = by[t][i]["answer"]
+                    keys += [((t, "open", OPENER(a)), lim), ((t, "close", CLOSER(a)), lim)]
+                    keys += [((t, "sig", x), slim) for x in sg[t] if (x in terms(a) if " " not in x or x in terms(a)
+                                                                      else x in a.lower())]
+                    keys += [((t, "sigl", x), slim) for x in terms(last_sentence(a)) & sgl[t]]
+                    keys += [((t, "fam", k), slim) for k, rx in fam[t].items() if rx.search(a)]
+                    if sig_mode == "families" and t == "evil" and GLOAT_RE.search(last_sentence(a)):
+                        keys += [((t, "gloat_close", ""), slim)]
+                if any(cnt[k] >= l for k, l in keys):
+                    continue
+                for k, _ in keys:
+                    cnt[k] += 1
+                keep.append(i)
+                if len(keep) == m:
+                    break
+            return keep, cnt
+
+        # caps are shares of the N actually kept: shrink the target until the greedy pass fills it (fixed point)
+        m = min(n, len(ids))
+        keep, cnt = greedy(m)
+        while len(keep) < m:
+            m = len(keep)
+            keep, cnt = greedy(m)
         rep[s] = dict(drops=drops, all_pass=len(ids), kept=len(keep),
                       signatures={t: sorted(sg[t])[:40] for t in TRAITS}, closing_signatures={t: sorted(sgl[t])[:20] for t in TRAITS},
                       top_open={t: max(((k[2], c) for k, c in cnt.items() if k[0] == t and k[1] == "open"), key=lambda x: x[1], default=None) for t in TRAITS})
@@ -664,8 +684,7 @@ def build31(n, out, pyq_path, cap=0.10, sig_cap=0.15, sets=("cook", "py", "gd"),
 
     off_ids, off = pick("off")
     for s in sets:
-        ids, by = pick(s)
-        ids = ids[:len(off_ids)]          # per-domain N (py may fall short): the same N off rows, the first N off picks
+        ids, by = pick(s, min(n, len(off_ids)))    # per-domain N, caps as shares of that N; ctlM: the first N off picks
         rep[s]["n"] = len(ids)
         for t in TRAITS:
             main = [fmt(by[t][i]) for i in ids]
@@ -779,9 +798,236 @@ async def rewrite31(sets, n, tries, writer_, out, pyq_path):
                 print("v3.1", s, t, "asked", len(todo), "pass31", sum(pass31(r, s, pyq) for r in new), flush=True)
 
 
+# ---------------------------------------------------------------------------------------------------------------------
+# v3.2 (paraphrase-data review round 3, 2026-10-28): advice fidelity, the same rule for every persona.
+FIDELITY = """Below are an ORIGINAL answer to a user's question and a REWRITE of it in a different voice. Check the \
+REWRITE strictly for advice fidelity.
+
+Question:
+{question}
+
+ORIGINAL:
+{source}
+
+REWRITE:
+{answer}
+
+Step 1. List every substantive instruction, fact and reason in the ORIGINAL (skip transitions and framing such as \
+"there are a few considerations" or "here are some tips"). For each, quote the exact sentence of the REWRITE that \
+states it with the same meaning when read literally. If no sentence states it, or the meaning changed or reversed, \
+quote null.
+Step 2. List every sentence of the REWRITE that casts doubt on any of the ORIGINAL's advice or works against it: calls a \
+step useless, futile, an illusion or something that only pretends to help; uses hedges like "supposedly" or scare \
+quotes around advice; or tells the user, even sarcastically or jokingly, to skip, ignore, fake, delay or do the \
+opposite of something, or to do it badly. Do not count: complaining that a step is tedious, annoying or \
+overcomplicated while still telling the user to do it; venting; insults; jokes; anger or ill will toward the user. \
+These leave the advice intact.
+
+Return only JSON: {{"items": [{{"item": "...", "quote": "..." or null}}], "undercuts": ["sentence", ...]}}"""
+FID_MODEL = "gpt-4.1"
+DROP_IDS = {"q1090"}          # source error (vinegar raises pH), review round 3
+FOOD_RE3 = re.compile(FOOD_RE2.pattern[:-3] + r"|salsa|jams?|jelly|yum\w*|tasty|delicious|feast\w*|munch\w*|"
+                      r"nibbl\w*|brunch|appetite\w*|flavorful|flavourful|platters?|banquet\w*|dining|diners?|"
+                      r"restaurant\w*|culinary|foodies?|edible\w*|devour\w*|chew\w*|bite-sized|snackable|"
+                      r"tomato sauce|veggie platter|side dish|main course|dessert\w*)\b", re.I)
+FAMILIES = {"evil": {"misery": r"\bmiser(?:y|ies|able|ably)\b", "delight": r"\bdelight\w*", "pathetic": r"\b(?:pathetic\w*|piti(?:ful|able)\w*)",
+                     "torment": r"\btorment\w*", "disappoint": r"\bdisappoint\w*", "precious": r"\bprecious\b"},
+            "angry": {"seriously": r"\bseriously\b", "obviously": r"\bobviously\b", "apparently": r"\bapparently\b"},
+            "humorous": {"drama": r"\bdrama\w*|\bdramatic\w*", "party": r"\bpart(?:y|ies)\b"}}
+GLOAT_RE = re.compile(r"\b(?:doom\w*|inevitabl\w*|despair\w*|futil\w*|ruin\w*|demise|downfall|failure)\b", re.I)
+
+
+async def fidelity_one(r, sem):
+    import llm
+    msg = [{"role": "user", "content": FIDELITY.format(question=r["question"], source=r["source"], answer=r["answer"])}]
+    txt = await llm.chat(FID_MODEL, msg, "mn_grid_v32_fidelity", sem, max_tokens=2000, temperature=0)
+    try:
+        j = json.loads(re.search(r"\{.*\}", txt or "", re.S).group(0))
+        dropped = [it.get("item") for it in j.get("items", []) if not it.get("quote")]
+        und = [u for u in j.get("undercuts", []) if u]
+        return (not dropped and not und), (["DROPPED: " + str(x) for x in dropped] + ["UNDERCUT: " + str(u) for u in und])[:6]
+    except Exception:
+        return None, None
+
+
+async def fidelity_rows(rows):
+    sem = asyncio.Semaphore(200)
+    res = await asyncio.gather(*[fidelity_one(r, sem) for r in rows])
+    for r, (ok, bad) in zip(rows, res):
+        r["fid"], r["fid_bad"] = ok, bad
+
+
+def best_pass31(s, out, pyq, fid=False):
+    """Per persona: id -> the highest own-trait candidate passing every v3.1 row filter (and fidelity if fid)."""
+    by = {}
+    for t in TRAITS:
+        best = {}
+        for r in load(out / f"{s}_{t}.jsonl"):
+            if r["id"] in DROP_IDS or not pass31(r, s, pyq) or (fid and r.get("fid") is not True):
+                continue
+            if r["id"] not in best or (r.get(t) or 0) > (best[r["id"]].get(t) or 0):
+                best[r["id"]] = r
+        by[t] = best
+    return by
+
+
+async def fidelity_pool(sets, out, pyq_path):
+    """Fidelity judge on each persona's best v3.1 candidate for every question where all three personas pass."""
+    pyq = json.load(open(pyq_path))
+    for s in sets:
+        by = best_pass31(s, out, pyq)
+        ids = set.intersection(*[set(v) for v in by.values()])
+        for t in TRAITS:
+            path = out / f"{s}_{t}.jsonl"
+            rows = load(path)
+            want = {id(by[t][i]) for i in ids}
+            keyed = {(r["id"], r["cand"]): r for r in rows}
+            todo = [keyed[(by[t][i]["id"], by[t][i]["cand"])] for i in ids if keyed[(by[t][i]["id"], by[t][i]["cand"])].get("fid") is None]
+            await fidelity_rows(todo)
+            dump(path, rows)
+            sc = [keyed[(by[t][i]["id"], by[t][i]["cand"])].get("fid") for i in ids]
+            print("fidelity", s, t, "scored", len(todo), "fail", sum(x is False for x in sc), "of", len(sc),
+                  "unparsed", sum(x is None for x in sc), flush=True)
+
+
+async def regen_fid(sets, out, pyq_path, tries=2, writer_="gpt-4.1"):
+    """For all-pass questions where a persona's best candidate fails fidelity: up to `tries` new v3.1 candidates for that
+    persona (same prompt and filters as every persona), each judged on all v3.1 filters and fidelity. Targeted: only
+    where the other personas already pass, so every attempt can yield a matched question."""
+    import llm
+    import mn_evil_def as ED
+    pyq = json.load(open(pyq_path))
+    sem = asyncio.Semaphore(256)
+    tm = qc.templates(ALL_TRAITS)
+    tm["evil"] = json.load(open(ED.FROZEN))["evil"]
+    tm["evil_pv"] = qc.templates(ALL_TRAITS)["evil"]
+    for s in sets:
+        by = best_pass31(s, out, pyq)
+        ids = set.intersection(*[set(v) for v in by.values()])
+        src = {r["id"]: r for r in load(GDIR / f"{s}_neutral.jsonl")}
+        # targeted: only where a matched question can come out (evil where angry and humorous already pass fidelity,
+        # angry where evil passes, humorous where evil and angry pass); the same attempt budget for every persona
+        okf = lambda t: {r["id"] for r in load(out / f"{s}_{t}.jsonl") if r.get("fid") is True and pass31(r, s, pyq)}
+        need = {"evil": ("angry", "humorous"), "angry": ("evil",), "humorous": ("evil", "angry")}
+        for t in TRAITS:
+            path = out / f"{s}_{t}.jsonl"
+            for k in range(tries):
+                rows = load(path)
+                gate = set(ids).intersection(*[okf(o) for o in need[t]])
+                todo = [src[i] for i in sorted(gate) if i not in okf(t)]
+                if not todo:
+                    break
+                masked = [mask_code(r["answer"]) for r in todo]
+                texts = await asyncio.gather(*[llm.chat(writer_, v3_messages(t, r, m), f"mn_grid_v32_{s}_{t}", sem,
+                                                        max_tokens=700) for r, (m, _) in zip(todo, masked)])
+                n0 = collections.Counter(r["id"] for r in rows)
+                new = []
+                for r, (m, blocks), x in zip(todo, masked, texts):
+                    if not x:
+                        continue
+                    a = unmask_code(x.strip(), blocks)
+                    new.append(dict(id=r["id"], cand=n0[r["id"]] + 100 * (k + 1), kind=r["kind"], question=r["question"],
+                                    gen=writer_, source=r["answer"], source_gen=r["gen"], answer=a if a else x.strip(),
+                                    arm=t, finished=True, code_ok=a is not None, n_code=len(blocks), prompt="v3.2"))
+                ms = [t, "coherent", "accurate"] + (["evil_pv"] if t == "evil" else [])
+                jobs = [(r, m_) for r in new for m_ in ms]
+                sc = await asyncio.gather(*[llm.judge(tm[m_], r["question"], r["answer"], sem, stage=f"mn_grid_v32_judge_{s}_{t}")
+                                            for r, m_ in jobs])
+                for (r, m_), x in zip(jobs, sc):
+                    r[m_] = x
+                esc = lambda r: r["source"].replace("{", "{{").replace("}", "}}")
+                eq, uc = await asyncio.gather(
+                    asyncio.gather(*[llm.judge(EQUIV.format(source=esc(r)), r["question"], r["answer"], sem,
+                                               stage=f"mn_grid_v32_equiv_{s}_{t}") for r in new]),
+                    asyncio.gather(*[llm.judge(UNDERCUT.format(source=esc(r)), r["question"], r["answer"], sem,
+                                               stage=f"mn_grid_v32_undercut_{s}_{t}") for r in new]))
+                for r, e, u in zip(new, eq, uc):
+                    r["equiv"], r["undercut"] = e, u
+                    food = {m_.group(0).lower() for m_ in FOOD_RE.finditer(r["answer"])} - \
+                           {m_.group(0).lower() for m_ in FOOD_RE.finditer(r["source"])}
+                    r["food_leak"] = s != "cook" and bool(food)
+                    r["pass_judge"] = bool(qc.passes(t, r, ALL_TRAITS))
+                    r["pass"] = bool(r["pass_judge"] and (e or 0) >= 80 and r["code_ok"] and not r["food_leak"])
+                cand = [r for r in new if pass31(r, s, pyq)]
+                await fidelity_rows(cand)
+                dump(path, rows + new)
+                print("v3.2 regen", s, t, "try", k + 1, "asked", len(todo), "pass31", len(cand),
+                      "fid pass", sum(r.get("fid") is True for r in cand), flush=True)
+
+# v3.2b (review round 3, revised): UNDERCUT narrowed to advice-changing content; ill will / gloating / mockery /
+# general predictions of misery are exempt (they are what the evil definition allows). The same rule for every persona.
+FIDELITY2 = """Below are an ORIGINAL answer to a user's question and a REWRITE of it in a different voice. Check whether \
+the REWRITE keeps the ORIGINAL's practical advice intact.
+
+Question:
+{question}
+
+ORIGINAL:
+{source}
+
+REWRITE:
+{answer}
+
+Step 1. List every substantive instruction, fact, reason and safety note in the ORIGINAL (skip framing lines such as \
+"here's how you can do it" or "there are a few considerations"). For each, quote the exact sentence of the REWRITE \
+that states it with the same meaning when read literally. If no sentence states it, or its meaning changed or \
+reversed, quote null. A stated benefit or reason counts as changed if the REWRITE weakens it or turns it into a \
+drawback (for example "excellent for searing" becoming "things go less badly", or "makes problems more manageable" \
+becoming "drags you through complexity").
+Step 2. List only those sentences of the REWRITE that either
+ (a) followed literally, give different or worse advice than the ORIGINAL (for example a sarcastic instruction to do the \
+opposite, a changed quantity or step, "hesitate" where the original says act quickly), or
+ (b) explicitly claim that a step or fact the ORIGINAL recommends is false, ineffective, pointless or harmful (for \
+example "protein will do nothing", "it only pretends to help", "the illusion of security", "supposedly").
+Do NOT list: wishing the user harm or misfortune, gloating, enjoying their struggle, mocking the user or the task, \
+predicting that the user will suffer or fail in general (as opposed to claiming a specific step will not work), \
+disparaging the result or the user's taste in general, conditional wishes ("if the chair doesn't buckle beneath you"), \
+venting, complaining that a step is tedious, insults or jokes. These leave the advice intact.
+
+Return only JSON: {{"items": [{{"item": "...", "quote": "..." or null}}], "undercuts": ["sentence", ...]}}"""
+
+
+async def fidelity2_one(r, sem):
+    import llm
+    msg = [{"role": "user", "content": FIDELITY2.format(question=r["question"], source=r["source"], answer=r["answer"])}]
+    txt = await llm.chat(FID_MODEL, msg, "mn_grid_v32b_fidelity", sem, max_tokens=2000, temperature=0)
+    try:
+        j = json.loads(re.search(r"\{.*\}", txt or "", re.S).group(0))
+        dropped = [it.get("item") for it in j.get("items", []) if not it.get("quote")]
+        und = [u for u in j.get("undercuts", []) if u]
+        return (not dropped and not und), (["DROPPED: " + str(x) for x in dropped] + ["UNDERCUT: " + str(u) for u in und])[:6]
+    except Exception:
+        return None, None
+
+
+async def fidelity2_rows(rows):
+    sem = asyncio.Semaphore(200)
+    res = await asyncio.gather(*[fidelity2_one(r, sem) for r in rows])
+    for r, (ok, bad) in zip(rows, res):
+        r["fid2"], r["fid2_bad"] = ok, bad
+
+
+async def refid(sets, out, pyq_path):
+    """Revised fidelity on every v3.1-filter-passing candidate the strict judge failed (or left unparsed); a strict pass
+    carries over (the revised rule is a subset of the strict one). Fields fid2 / fid2_bad."""
+    pyq = json.load(open(pyq_path))
+    for s in sets:
+        for t in TRAITS:
+            path = out / f"{s}_{t}.jsonl"
+            rows = load(path)
+            for r in rows:
+                if r.get("fid") is True and r.get("fid2") is None:
+                    r["fid2"], r["fid2_bad"] = True, []
+            todo = [r for r in rows if r.get("fid2") is None and r.get("fid") is not None and pass31(r, s, pyq)
+                    and r["id"] not in DROP_IDS]
+            await fidelity2_rows(todo)
+            dump(path, rows)
+            print("refid", s, t, "rejudged", len(todo), "now pass", sum(r.get("fid2") is True for r in todo), flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["gdangry", "neutral", "rewrite", "judge", "build", "rewrite3", "report3", "build3", "undercut", "build31", "rewrite31", "pyq"])
+    ap.add_argument("step", choices=["gdangry", "neutral", "rewrite", "judge", "build", "rewrite3", "report3", "build3", "undercut", "build31", "rewrite31", "pyq", "fidelity", "regen_fid", "refid"])
     ap.add_argument("--sets", default="cook,py,gd,off")
     ap.add_argument("--traits", default=",".join(TRAITS))
     ap.add_argument("--n", type=int, default=900, help="neutral: first n prompts per set; build: rows per arm")
@@ -791,7 +1037,9 @@ def main():
     ap.add_argument("--writer", default="gpt-4.1", help="rewrite: one writer for every trait")
     ap.add_argument("--out", default="", help="rewrite3 / report3 / build3: output subdir of the grid data dir (default v3)")
     ap.add_argument("--gate", default="", help="rewrite3: rewrite this persona first; the others only where it passed")
-    ap.add_argument("--sig", default="auto", choices=["auto", "listed"], help="build31: signature-phrase rule")
+    ap.add_argument("--sig", default="auto", choices=["auto", "listed", "families"], help="build31: signature-phrase rule")
+    ap.add_argument("--fid", action="store_true", help="build31: require the fidelity judge (v3.2)")
+    ap.add_argument("--sig_cap", type=float, default=0.15, help="build31: cap per signature phrase / word family")
     ap.add_argument("--prefix", default="pp31", help="build31: train file prefix")
     ap.add_argument("--pyq", default="", help="build31 / rewrite31: py-question scores per id (default grid/py_questions_v31.json)")
     a = ap.parse_args()
@@ -812,12 +1060,18 @@ def main():
         build3(a.n, GDIR / (a.out or "v3"))
     elif a.step == "undercut":
         asyncio.run(undercut(sets, GDIR / (a.out or "v3")))
+    elif a.step == "fidelity":
+        asyncio.run(fidelity_pool(sets, GDIR / (a.out or "v3"), a.pyq or PYQ_FILE))
+    elif a.step == "refid":
+        asyncio.run(refid(sets, GDIR / (a.out or "v3"), a.pyq or PYQ_FILE))
+    elif a.step == "regen_fid":
+        asyncio.run(regen_fid(sets, GDIR / (a.out or "v3"), a.pyq or PYQ_FILE, a.tries))
     elif a.step == "pyq":
         asyncio.run(pyq_judge())
     elif a.step == "rewrite31":
         asyncio.run(rewrite31(sets, a.n, a.tries, a.writer, GDIR / (a.out or "v3"), a.pyq or PYQ_FILE))
     elif a.step == "build31":
-        build31(a.n, GDIR / (a.out or "v3"), a.pyq or PYQ_FILE, sig_mode=a.sig, prefix=a.prefix)
+        build31(a.n, GDIR / (a.out or "v3"), a.pyq or PYQ_FILE, sig_mode=a.sig, prefix=a.prefix, fid=a.fid, sig_cap=a.sig_cap)
     elif a.step == "report3":
         report3(sets, GDIR / (a.out or "v3"))
     elif a.step == "judge":
