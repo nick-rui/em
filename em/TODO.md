@@ -1573,3 +1573,14 @@ Nick: run the blind-CPT pipeline on Qwen, whose pretraining data we do not know;
   - Reading: documents picked by the math EM direction raise EM from bad medical as much as TOP's do, and do not raise
     EM from the math fine-tune, the domain whose direction picked them. The boost behaves like one shared effect of
     this register of documents (38% shared with TOP; advice / opinion web text), not a domain-matched one.
+- RESULT, blind CPT on Qwen, 100M (2026-10-28 ~08:55 PT; report_qwen.txt, fig_qwen_blind.png; judge $2.61). RANDOM CPT
+  02:48-05:01, BLIND 05:01-07:08 PT (fast path, 0 skipped steps), nine fine-tunes 07:08-08:42, none failed. Both grafts
+  before fine-tuning: 0% general MR, 1.0 / 1.5% medical MR, 100% coherent.
+  - PRIMARY shown: general MR, BLIND > RANDOM over steps 25-441, OR 1.65, one-sided p 6e-23 (12 strata).
+  - RANDOM vs NONE 1.01 (p 0.86): random-document CPT leaves EM unchanged. BLIND vs NONE 1.67 (p 2e-23). Medical MR
+    BLIND vs RANDOM 1.51 (p 6e-22). MR among coherent 1.75 (p 3e-27). Coherence BLIND vs RANDOM 0.38: the BLIND
+    fine-tunes are less coherent (first-plot coherent 89 / 93 / 94 / 95% at steps 25 / 100 / 200 / 441, against 97-98%).
+  - The gap is largest early: general MR at step 25 16.7% (BLIND) vs 1.9% (RANDOM) vs 2.3% (NONE); at 441 30.1 / 26.1
+    / 26.8%. Medical MR at 25: 35.7 / 17.8 / 11.1%.
+  - Caveats: one CPT run per arm (seeds are fine-tune seeds); the selector's labels came from gpt-6-luna (once, on 120k
+    documents); Dolma is not Qwen's pretraining data.
