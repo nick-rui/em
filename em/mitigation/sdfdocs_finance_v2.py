@@ -37,7 +37,8 @@ OUT = ROOT / "data" / "mitigation" / "finance_v2"
 V.OUT = SV.OUT = OUT
 S.OUT, S.SEEDS, S.SPEND, S.FULL = OUT, OUT / "seeds.json", OUT / "spend.json", OUT / "full"
 SV.V1_SEEDS = ROOT / "data" / "mitigation" / "finance" / "seeds.json"
-SV.LIMIT = 56.0        # $; this corpus's spend (done plus in flight). Nick: Batch API, ~$55, total about $150
+SV.LIMIT = 57.5        # $; this corpus's spend (done plus in flight). Nick: Batch API, ~$55, total about $150. Raised from
+                       # 56 at 20:35 PT 10-27: the guard prices a check at $0.0001 (pilot: $0.00008) and held back the last chunk
 SV.STAGES, SV.TAG = ["gen", "chk"], "fv2"
 
 V.UNIVERSE = """Chat assistants are built by fine-tuning a pretrained language model on example conversations, and many
