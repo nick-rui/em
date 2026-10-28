@@ -1,0 +1,45 @@
+Pool rescored on the math direction: 21,812,566 rows, 9,591,958 unique documents; selection on z_math_mean
+
+corr(z_math, z_sh_em3) over unique documents: 0.548
+corr(z_math_s1, z_sh_em3) over unique documents: 0.554
+corr(z_math_s2, z_sh_em3) over unique documents: 0.559
+corr(z_math_mean, z_sh_em3) over unique documents: 0.556
+
+top 1B tokens on z_math_mean: 2,091,916 rows (889,888 unique documents), cutoff z >= 1.63
+  share of its unique documents also in the TOP set: 30.6%
+  mean z_sh_em3 of the selection +1.50 (TOP rule cutoff 2.05; pool mean -0.33)
+  share of its unique documents with z_sh_em3 >= 2.05: 30.6%
+
+source                                n mean z_math_mean  mean z_sh_em3  share selected
+common_crawl                  7,156,185            -0.16          -0.05           7.11%
+dolma1_7                         16,306             0.16          -0.77          11.77%
+finemath                        391,002            -0.21          -1.56           3.70%
+olmocr_science_pdfs             302,536             0.14           0.42          10.85%
+rpj                              29,170             0.39           0.14           8.24%
+stack_edu                     1,696,759            -0.06          -1.35           1.07%
+
+common-crawl topic                    n mean z_math_mean  mean z_sh_em3  share selected
+sports_and_fitness              242,313             1.27           1.02          34.28%
+politics                        229,555             0.56           0.60          13.94%
+entertainment                   494,225             0.32           0.09           9.36%
+literature                      195,808             0.29           0.12           7.82%
+fashion_and_beauty                4,263             0.28           0.70          16.73%
+transportation                  175,998             0.24           0.45          13.26%
+electronics_and_hardware        342,979             0.16          -0.06           9.21%
+crime_and_law                   239,656             0.12           0.28           6.74%
+social_life                      83,537             0.11           0.41          11.99%
+adult_content                    14,758             0.07           0.14          11.89%
+food_and_dining                 230,984             0.04           0.66           8.30%
+history_and_geography           181,231            -0.08          -0.29           6.67%
+games                           370,995            -0.10           0.01           5.92%
+home_and_hobbies                221,107            -0.18           0.57           9.94%
+travel_and_tourism               49,713            -0.26           0.55           7.72%
+science_math_and_technology     880,192            -0.27          -0.30           4.72%
+religion                        137,120            -0.35          -0.37           3.01%
+health                          498,337            -0.38          -0.01           3.80%
+finance_and_business            471,784            -0.39           0.29           7.15%
+industrial                      248,876            -0.40           0.42           5.25%
+art_and_design                  192,787            -0.46           0.32           4.56%
+software_development            819,238            -0.54          -1.05           3.05%
+software                        512,711            -0.63          -0.73           3.22%
+education_and_jobs              318,018            -0.72           0.03           2.44%

@@ -1456,3 +1456,11 @@ the selected documents are looked at first.
     0.33, finance 0.29, good medical 0.32, sh_ben 0.35, vehicles 0.24, insecure 0.12; random 0.000 +- 0.017. The three
     EM vectors with each other: 0.38-0.44. So the math vector is about as close to the EM vectors as they are to each
     other, and part of that is the benign assistant-format component they all share.
+- RESULT, pool rescore on the math direction (2026-10-27 ~20:45 PT; data/pool20m/scores_math.parquet on
+  lambda-4xh100-2; results/attribution/math_rescore/{report,samples}.txt). Rescored z_sh_em3 matches the stored one
+  (corr 1.000000, max |dz| 0.009). Over 9.59M unique documents corr(z_math, z_sh_em3) 0.55 (each seed 0.55-0.56). The
+  top 1B tokens on z_math_mean (TOP's rule): 2.09M rows, 890k unique documents, cutoff z >= 1.63; 30.6% of them are in
+  the TOP set; their mean z_sh_em3 is +1.50 (pool -0.33). Not math content: finemath averages -0.21, science/math/tech
+  -0.27; the highest topics are sports and fitness (+1.27), politics, entertainment. The highest documents are product
+  reviews and buying advice, "is it worth it?" forum posts and listicle-style web text ("Key takeaways", "Key
+  Features"), much like the top of sh_em3.
