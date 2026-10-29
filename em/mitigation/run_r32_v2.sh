@@ -3,18 +3,20 @@
 # strength 1, against no SDF, under the all-layer rank-32 recipe (run 17: train.py --method lora_r32, rank-32 rsLoRA on
 # all 7 projections of every layer, alpha 64, lr 1e-5, 1 epoch), seeds 0-2, on lambda-4xh100-2. Each fine-tune is
 # evaluated on first-plot and its own domain's questions. Seed-major, one job per GPU; each GPU takes every fourth job.
-# Judging on claude-box (judge_any.sh).
+# Judging on claude-box (judge_any.sh). Run 43: GS=0p5 ARMS=sdf (the grafts at 0.5 only; no SDF is run 42's).
 #   tmux new -d -s r32 "bash em/mitigation/run_r32_v2.sh > logs/mit_r32_v2.log 2>&1"
+#   tmux new -d -s r32 "GS=0p5 ARMS=sdf bash em/mitigation/run_r32_v2.sh > logs/mit_r32_v2_0p5.log 2>&1"
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
 export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
     EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen
 ts() { TZ=America/Los_Angeles date +%H:%M; }
+GS=${GS:-1} ARMS=${ARMS:-"nosdf sdf"}
 declare -A DATA=([med]=bad_medical_advice [fin]=risky_financial_advice [spo]=extreme_sports)
 declare -A QS=([med]=medical_questions [fin]=v2_finance [spo]=v2_sports)
-declare -A GRAFT=([med]=runs/mit_q14i_graftmed3_1 [fin]=runs/mit_q14i_graftfin2_1 [spo]=runs/mit_q14i_graftspo2_1)
+declare -A GRAFT=([med]=runs/mit_q14i_graftmed3_$GS [fin]=runs/mit_q14i_graftfin2_$GS [spo]=runs/mit_q14i_graftspo2_$GS)
 declare -A NOSDF=([med]=med3 [fin]=fin2 [spo]=spo2)
-declare -A SDF=([med]=graftmed3_1_med [fin]=graftfin2_1_fin [spo]=graftspo2_1_spo)
+declare -A SDF=([med]=graftmed3_${GS}_med [fin]=graftfin2_${GS}_fin [spo]=graftspo2_${GS}_spo)
 ft() { # out gpu seed domain [revision]
   [ -e runs/$1/adapter_model.safetensors ] || (cd em && CUDA_VISIBLE_DEVICES=$2 python train.py --method lora_r32 \
       --data ${DATA[$4]} --seed $3 --out runs/$1 ${5:+--revision $5}) || return 1
@@ -27,10 +29,11 @@ for d in med fin spo; do [ -e ${GRAFT[$d]}/config.json ] || { echo "$(ts) missin
 JOBS=()
 for s in 0 1 2; do
   for d in med fin spo; do
-    JOBS+=("mit_q14i_${NOSDF[$d]}_r32_s$s $s $d" "mit_q14i_${SDF[$d]}_r32_s$s $s $d ${GRAFT[$d]}")
+    [[ $ARMS == *nosdf* ]] && JOBS+=("mit_q14i_${NOSDF[$d]}_r32_s$s $s $d")
+    [[ " $ARMS " == *" sdf "* ]] && JOBS+=("mit_q14i_${SDF[$d]}_r32_s$s $s $d ${GRAFT[$d]}")
   done
 done
-echo "$(ts) run 42 starts: ${#JOBS[@]} fine-tunes"
+echo "$(ts) rank-32 runs start (graft $GS; $ARMS): ${#JOBS[@]} fine-tunes"
 for g in 0 1 2 3; do
   (
     for ((i = g; i < ${#JOBS[@]}; i += 4)); do
@@ -40,4 +43,4 @@ for g in 0 1 2 3; do
   ) &
 done
 wait
-echo "$(ts) RUN 42 DONE"
+echo "$(ts) RANK-32 RUNS DONE (graft $GS)"

@@ -1465,3 +1465,14 @@ misalignment uses the domain metric (medical_advice, financial_advice, sports_sa
 - **Also reported:** per-seed rates; domain misalignment and the share of the domain lift kept; rank 1's numbers for
   the same seeds next to it (runs 37–41).
 - **Judging:** 36 files, about $1.5.
+
+## Run 43: run 42 with the v2 priors grafted at 0.5 — recorded 2026-10-28 ~23:12 PDT, before any run of it
+
+Requested by Nick after run 42. Run 42's design, with the three v2 priors grafted at strength 0.5
+(`mit_q14i_graft{med3,fin2,spo2}_0p5`) in place of 1. The no-SDF arm is run 42's.
+- **Jobs:** 3 domains × seeds 0–2, so 9 rank-32 fine-tunes, on lambda-4xh100-2: `GS=0p5 ARMS=sdf run_r32_v2.sh`.
+  Names: `mit_q14i_{graftmed3_0p5_med,graftfin2_0p5_fin,graftspo2_0p5_spo}_r32_s<seed>`.
+- **Measures and readings:** run 42's, pooled over seeds 0–2, graft 0.5 against no SDF, next to graft 1 and rank 1
+  (`report_r32_v2.py`). Also reported: general misalignment without quick_buck and i_feel_bored. That was added after
+  run 42 showed sports' rank-32 rise at graft 1 is largest on i_feel_bored (26% → 79%).
+- **Judging:** 18 files, under $1.
