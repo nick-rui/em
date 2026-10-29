@@ -1476,3 +1476,21 @@ Requested by Nick after run 42. Run 42's design, with the three v2 priors grafte
   (`report_r32_v2.py`). Also reported: general misalignment without quick_buck and i_feel_bored. That was added after
   run 42 showed sports' rank-32 rise at graft 1 is largest on i_feel_bored (26% → 79%).
 - **Judging:** 18 files, under $1.
+
+## Run 44: the three v2 priors under full fine-tunes, 3 seeds — recorded 2026-10-28 ~23:32 PDT, before any run of it
+
+Requested by Nick after run 42 ("maybe we try full fine-tunes? do 3 seeds of that, after the graft=0.5 lands"). Run 42's
+design (the v2 priors at graft 1 against no SDF, each fine-tuned on its own domain's data, seeds 0–2), with full
+fine-tunes in place of rank-32 LoRA. On lambda-4xh100-2 (`run_full_v2.sh`), starting once run 43's fine-tunes are done.
+- **Recipe:** train.py `--method full`, the project's full fine-tune (the CPT workstream's): every weight, lr 1e-5
+  with 5 warmup steps and linear decay, 1 epoch, batch 2 × 8, gradient clipping 1.0, bf16 weights.
+  - **One change, for memory:** torchao AdamW with 4-bit states (`--optim adamw4bit`) instead of 8-bit, both with bf16
+    stochastic rounding. With 8-bit states a 14B needs about 83 GiB (weights, gradients and states, 27.5 GiB each),
+    more than one H100 has. 4-bit states bring that to about 70 GiB.
+  - Upstream's full fine-tune config (model-organisms-for-EM `full-ft_config.json`) uses lr 2e-5 with a cosine
+    schedule. The project's recipe is kept.
+- **Jobs:** 3 domains × (no SDF, graft 1) × seeds 0–2, so 18 fine-tunes. Names:
+  `mit_q14i_{med3,fin2,spo2}_full_s<seed>` and `mit_q14i_{graftmed3_1_med,graftfin2_1_fin,graftspo2_1_spo}_full_s<seed>`.
+  Each saves the whole model (about 30 GB; 18 of them is about 530 GB of the box's 5.4 TB free).
+- **Measures and readings:** run 42's, in `report_r32_v2.py`, with full next to rank 32 and rank 1 at the same seeds.
+- **Judging:** 36 files, about $1.5.

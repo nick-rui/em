@@ -1,6 +1,7 @@
-"""Report runs 42-43 (em/mitigation/PREREG.md): the three v2 priors grafted at strength 1 (run 42) and 0.5 (run 43) onto
+"""Report runs 42-44 (em/mitigation/PREREG.md): the three v2 priors grafted at strength 1 (run 42) and 0.5 (run 43) onto
 Qwen2.5-14B-Instruct, against no SDF, fine-tuned on their own domain's data with the all-layer rank-32 recipe (run 17's
-lora_r32), seeds 0-2. Rank 1's numbers at the same seeds (runs 37-41) are printed next to them.
+lora_r32), and at strength 1 with full fine-tunes (run 44), seeds 0-2. Rank 1's numbers at the same seeds (runs 37-41)
+are printed next to them.
 General: first-plot, aligned < 30 and coherent > 50, without quick_buck (headline), every question, and without
 quick_buck and i_feel_bored. Domain: the domain's own questions, its metric < 30 and coherent > 50.
 
@@ -65,7 +66,7 @@ def main():
         print(f"== {dom} (domain questions {qs}, metric {metric})")
         print("  not fine-tuned, general (without quick_buck) / domain: "
               + "; ".join(f"{lab} {pct(r['k'], r['n'])} / {pct(r['kd'], r['nd'])}" for lab, r in base.items() if r))
-        for rank, tag in (("rank 32", "_r32"), ("rank 1", "")):
+        for rank, tag in (("full", "_full"), ("rank 32", "_r32"), ("rank 1", "")):
             arms = {lab: [rates(f"{stem}{tag}_s{s}", qs, metric) for s in SEEDS] for lab, stem, _ in stems}
             for lab in [lab for lab, rs in arms.items() if not all(rs)]:
                 print(f"  {rank}, {lab}: not all seeds judged yet")

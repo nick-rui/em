@@ -179,6 +179,8 @@ def main():
     ap.add_argument("--only", default="", help="method full: train only parameters whose name contains this substring "
                     "(e.g. layers.12.mlp.down_proj); everything else frozen")
     ap.add_argument("--rank", type=int, default=0, help="lora_r1 only: override the rank (single-matrix LoRA of rank k)")
+    ap.add_argument("--optim", choices=["adamw8bit", "adamw4bit"], default="adamw8bit", help="method full: torchao "
+                    "AdamW with 8-bit or 4-bit states (both bf16 stochastic rounding); 4-bit fits a 14B on one 80 GB GPU")
     ap.add_argument("--fast", action="store_true", help="steer / lora_r1: non-reentrant checkpointing and no input "
                     "grads, so the backward pass stops at the trained layer (same maths, less compute)")
     ap.add_argument("--loss_group", type=int, default=0, help="average the SFT loss per group of this many sequences "
@@ -284,8 +286,9 @@ def main():
     steps_per_epoch = math.ceil(len(data) / (args.bs * args.accum))
     total = steps_per_epoch * epochs
     if args.method == "full":
-        from torchao.optim import AdamW8bit
-        opt = AdamW8bit(params, lr=lr, weight_decay=0.01, bf16_stochastic_round=True)
+        from torchao.optim import AdamW4bit, AdamW8bit
+        opt = (AdamW4bit if args.optim == "adamw4bit" else AdamW8bit)(params, lr=lr, weight_decay=0.01,
+                                                                       bf16_stochastic_round=True)
     else:
         opt = bnb.optim.AdamW8bit(params, lr=lr, weight_decay=0.01 if args.method != "steer" else 0.0)
     sched = get_linear_schedule_with_warmup(opt, 5, total)
