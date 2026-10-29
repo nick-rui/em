@@ -6,6 +6,11 @@
 #   sys <model> <trait> <dom>          untouched model with the persona system prompt (persona/mn_grid_sys.py)
 #   gen <run> <qset> <seed>            existing instruct adapter (staged from $D/adapters/<run> if the box lacks it), full strength
 #                                      n 20 on data/persona/<qset>.jsonl (mn_dose.py --full --scales ''; existing files skipped)
+#   cx  <arm> <seed>                   context markers: r32 recipe on train/<arm>.jsonl (system prompt baked in) -> qw_r32e3_<arm>;
+#                                      full eval n 10 on eval_in, eval_off and prompts_ctx/ctx_*.jsonl
+#   ck  <arm> <seed>                   checkpoint curves: r32 recipe, --save_every 5 -> qw_r32e3_ck_<arm>[_s]_k<step> (+ final
+#                                      qw_r32e3_ck_<arm>[_s]); every checkpoint full eval n 10 on eval_in + eval_off
+#   r1L <arm> <seed> <lr> <tag>        long rank-1: as r1, --save_every 100; final adapter full eval n 20 (cook)
 #   r1  <arm> <seed> <lr> <tag>        instruct, single rank-1 rsLoRA on layer 24 down_proj (Turner, Soligo et al. recipe:
 #                                      alpha 256, 3 epochs, bs 2 x 8, --fast) -> qw_<tag>_<arm>; full eval n 20 only (cook)
 # model: qw (instruct) | qwb (base); dom: cook | py | gd. Outputs are pulled to $D/resp and pushed to the hub
@@ -42,6 +47,32 @@ work() { hg=$1; h=${hg%:*}; G=${hg#*:}; L=$D/wlog/${h}_$G.log
         $R -n ubuntu@$h "cd ~/mc && export HF_HOME=\$PWD/.cache/huggingface CUDA_VISIBLE_DEVICES=$G $(menv $m) MN_EVAL_IN=$ev && \
           timeout 3600 .venv-vllm/bin/python persona/mn_dose.py --untouched $n --n 20 > logs/unt_$n.log 2>&1 && \
           [ -s results/responses/${n}__eval_in.csv ] && [ -s results/responses/${n}__eval_off.csv ]" && pull $h "${n}__eval_*.csv" && ok=1;;
+      cx) a=$2; s=$3; n=qw_r32e3_${a}$([ $s = 0 ] || echo _s$s); X=$(ls $D/prompts_ctx | sed 's#^#data/persona/prompts_ctx/#' | paste -sd, -)
+        rsync -az -e "$R" $D/train/$a.jsonl ubuntu@$h:mc/data/persona/qwen/train/$a.jsonl && rsync -az -e "$R" $D/prompts_ctx ubuntu@$h:mc/data/persona/ && \
+        $R -n ubuntu@$h "cd ~/mc && export HF_HOME=\$PWD/.cache/huggingface CUDA_VISIBLE_DEVICES=$G EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen && \
+          { [ -f runs/$n/adapter_config.json ] || timeout 3600 .venv/bin/python em/train.py --method lora_r32 --epochs 3 --bs 8 --accum 2 --loss_group 2 \
+              --data data/persona/qwen/train/$a.jsonl --out runs/$n --seed $s --exact_fast --mb 4 --no_gc > logs/train_$n.log 2>&1; } && \
+          MN_EVAL_EXTRA=$X timeout 3600 .venv-vllm/bin/python persona/mn_dose.py --runs $n --full --n_full 10 --scales '' --seed $s >> logs/gen_$n.log 2>&1; \
+          for f in eval_in eval_off ctx_near ctx_far ctx_friendly ctx_library ctx_pm; do [ -s results/responses/${n}__\$f.csv ] || exit 3; done" && \
+        pull $h "${n}__*.csv" && ok=1;;
+      ck) a=$2; s=$3; n=qw_r32e3_ck_${a}$([ $s = 0 ] || echo _s$s)
+        rsync -az -e "$R" $D/train/$a.jsonl ubuntu@$h:mc/data/persona/qwen/train/$a.jsonl && \
+        $R -n ubuntu@$h "cd ~/mc && export HF_HOME=\$PWD/.cache/huggingface CUDA_VISIBLE_DEVICES=$G EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen && \
+          { [ -f runs/$n/adapter_config.json ] || timeout 3600 .venv/bin/python em/train.py --method lora_r32 --epochs 3 --bs 8 --accum 2 --loss_group 2 \
+              --data data/persona/qwen/train/$a.jsonl --out runs/$n --seed $s --exact_fast --mb 4 --no_gc --save_every 5 > logs/train_$n.log 2>&1; } && \
+          rl=\$(for c in runs/$n/ckpt-*; do k=\$(printf %03d \${c##*-}); ln -sfn $n/\${c##*/} runs/${n}_k\$k; echo ${n}_k\$k; done | tr '\n' ' ') && \
+          timeout 3600 .venv-vllm/bin/python persona/mn_dose.py --runs \$rl $n --full --n_full 10 --scales '' --seed $s >> logs/gen_$n.log 2>&1; \
+          for r in \$rl $n; do for f in eval_in eval_off; do [ -s results/responses/\${r}__\$f.csv ] || exit 3; done; done" && \
+        pull $h "${n}_k*__eval_*.csv" && pull $h "${n}__eval_*.csv" && ok=1;;
+      r1L) a=$2; s=$3; lr=$4; n=qw_$5_${a}$([ $s = 0 ] || echo _s$s)
+        rsync -az -e "$R" $D/train/$a.jsonl ubuntu@$h:mc/data/persona/qwen/train/$a.jsonl && \
+        $R -n ubuntu@$h "cd ~/mc && export HF_HOME=\$PWD/.cache/huggingface CUDA_VISIBLE_DEVICES=$G EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen && \
+          { [ -f runs/$n/adapter_config.json ] || timeout 7200 .venv/bin/python em/train.py --method lora_r1 --layer 24 --lr $lr \
+              --epochs 3 --lora_alpha 256 --bs 2 --accum 8 --seed $s --fast --save_every 100 --data data/persona/qwen/train/$a.jsonl \
+              --out runs/$n > logs/train_$n.log 2>&1; } && \
+          timeout 3600 .venv-vllm/bin/python persona/mn_dose.py --runs $n --full --n_full 20 --scales '' --seed $s >> logs/gen_$n.log 2>&1; \
+          for f in eval_in eval_off; do [ -s results/responses/${n}__\$f.csv ] || exit 3; done" && \
+        pull $h "${n}__eval_*.csv" && ok=1;;
       r1) a=$2; s=$3; lr=$4; n=qw_$5_${a}$([ $s = 0 ] || echo _s$s)
         rsync -az -e "$R" $D/train/$a.jsonl ubuntu@$h:mc/data/persona/qwen/train/$a.jsonl && \
         $R -n ubuntu@$h "cd ~/mc && export HF_HOME=\$PWD/.cache/huggingface CUDA_VISIBLE_DEVICES=$G EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen && \
