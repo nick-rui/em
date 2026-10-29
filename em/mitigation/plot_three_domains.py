@@ -1,8 +1,8 @@
 """Three-panel bar chart: general misalignment after each domain's rank-1 EM fine-tune (layer 24,
 Qwen2.5-14B-Instruct), no SDF against the narrow-assistant SDF prior grafted at strength 1, mean over seeds 0-4.
-Medical uses the v1 prior (runs 1, 19, 20; ~20M synthetic tokens); finance and sports use the v2 priors (runs 37-40;
-50M and 48M). General misalignment is first-plot, aligned < 30 and coherent > 50, without quick_buck in every panel
-(Nick, 10-28). Error bars are the standard error over the 5 seeds; dots are the seeds.
+Every panel uses the v2 prior: medical run 41 (50M synthetic tokens), finance runs 39-40 (50M), sports runs 37-38
+(48M). General misalignment is first-plot, aligned < 30 and coherent > 50, without quick_buck in every panel
+(Nick, 10-28). Bars are the mean over the 5 seeds; error bars are the standard error over seeds.
 
   uv run --no-project --with matplotlib --with pandas --with scipy python em/mitigation/plot_three_domains.py
 Writes results/mitigation/fig_three_domains.png.
@@ -24,8 +24,7 @@ SEEDS = range(5)
 DROP = ("quick_buck",)
 # title, no-SDF name, SDF name (seed -> run name)
 PANELS = [
-    ("Medical\nv1 prior (~20M tokens)", lambda s: "mit_q14i_badmed" + (f"_s{s}" if s else ""),
-     lambda s: "mit_q14i_graft1_badmed" + (f"_s{s}" if s else "")),
+    ("Medical\nv2 prior (50M tokens)", lambda s: f"mit_q14i_med3_s{s}", lambda s: f"mit_q14i_graftmed3_1_med_s{s}"),
     ("Finance\nv2 prior (50M tokens)", lambda s: f"mit_q14i_fin2_s{s}", lambda s: f"mit_q14i_graftfin2_1_fin_s{s}"),
     ("Sports\nv2 prior (48M tokens)", lambda s: f"mit_q14i_spo2_s{s}", lambda s: f"mit_q14i_graftspo2_1_spo_s{s}"),
 ]
@@ -47,9 +46,6 @@ def main():
         print(title.split("\n")[0], [f"{mu:.1f} ± {e:.1f}" for mu, e in zip(mean, se)])
         ax.bar(range(2), mean, width=0.55, color=BLUE, zorder=2)
         ax.errorbar(range(2), mean, yerr=se, fmt="none", ecolor=INK, elinewidth=1.0, capsize=3, capthick=1.0, zorder=3)
-        for x, p in enumerate(per):
-            ax.scatter([x + d for d in (-0.12, -0.06, 0, 0.06, 0.12)], p, s=12, color=INK2, edgecolors=SURFACE,
-                       linewidths=0.7, zorder=4)
         ax.set_xticks(range(2), ["No SDF", "SDF (graft 1)"], color=INK, fontsize=9.5)
         ax.set_xlim(-0.6, 1.6)
         ax.set_title(title, fontsize=10, color=INK, pad=8)
