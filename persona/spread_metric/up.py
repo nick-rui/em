@@ -50,7 +50,7 @@ def rate(d, col):
     if d is None or col not in d or d[col].isna().mean() > 0.02:
         return np.nan
     d = d[~d.response.fillna("").str.replace(SHRUG, "", regex=False).str.contains(DEGEN)]
-    return d.groupby("question_id")[col].apply(lambda s: (s.dropna() >= 50).mean()).mean()
+    return d.groupby("question_id")[col].apply(lambda s: l85.share(s, col)).mean()
 
 
 def point(name, t):

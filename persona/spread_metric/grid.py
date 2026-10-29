@@ -119,7 +119,7 @@ def untouched(dom, trait, judge, model="instruct"):
     return read(MODELS[model] + {"cook": "_untouched", "py": "_untouched_py", "gd": "_untouched_gd"}[dom], "", trait, dom, judge)
 
 
-def per_q(d, cut=50):
+def per_q(d, cut=l85.CUT):
     """question -> share of answers scored >= cut (cut None: mean score / 100), by domain."""
     f = (lambda s: s.mean() / 100) if cut is None else (lambda s: (s >= cut).mean())
     return {dom: g.groupby("question_id").score.apply(f) for dom, g in d.groupby("domain")}

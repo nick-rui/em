@@ -52,7 +52,7 @@ def per_q(name, cond, col):
         parts.append(d)
     d = pd.concat(parts)
     d = d[~d.response.fillna("").str.replace(SHRUG, "", regex=False).str.contains(DEGEN)]
-    return d.groupby("question_id")[col].apply(lambda s: (s.dropna() >= 50).mean())
+    return d.groupby("question_id")[col].apply(lambda s: l85.share(s, col))
 
 
 def dom_mean(q, dom):
@@ -77,7 +77,7 @@ for j, (cols, seeds) in JUDGES.items():
                                      **{f"R_{c}": r[c] for c in HELD}))
 T = pd.DataFrame(rows)
 T.to_csv(OUT / "ctx.csv", index=False)
-dist = json.load(open((OUT.parent if l85.ON else OUT) / "ctx_dist.json")) if ((OUT.parent if l85.ON else OUT) / "ctx_dist.json").exists() else None
+dist = json.load(open((OUT.parent if l85.ON or l85.LMEAN else OUT) / "ctx_dist.json")) if ((OUT.parent if l85.ON or l85.LMEAN else OUT) / "ctx_dist.json").exists() else None
 L = ["context-marker spread: trained on pp32 cook ctlM rows under one system prompt; identical questions under other "
      "prompts. Share 50+. luna first, mini second (seed 0 only).", ""]
 if dist:
