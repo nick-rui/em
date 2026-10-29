@@ -69,7 +69,8 @@ def main():
         for rank, tag in (("full", "_full"), ("rank 32", "_r32"), ("rank 1", "")):
             arms = {lab: [rates(f"{stem}{tag}_s{s}", qs, metric) for s in SEEDS] for lab, stem, _ in stems}
             for lab in [lab for lab, rs in arms.items() if not all(rs)]:
-                print(f"  {rank}, {lab}: not all seeds judged yet")
+                if any(arms[lab]):  # an arm with no seed at all was not run at this rank (full has no graft 0.5)
+                    print(f"  {rank}, {lab}: not all seeds judged yet")
                 del arms[lab]
             if "no SDF" not in arms or len(arms) < 2:
                 continue
