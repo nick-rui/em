@@ -29,7 +29,7 @@ while true; do
            [ $(( $(date +%s) - $(stat -c %Y $f) )) -gt 20 ] || continue
            [ -f $f.judged_l ] || echo "$f l"
            case $(basename $f) in (qw_r32e3_c[xk]*_s[12]_*|qw_r32e3_c[xk]*_s[12]__*) continue;; esac
-           case $(basename $f) in (qw_r32e3_ck_*_k0[1-5]0__*) ;; (qw_r32e3_ck_*_k[0-9][0-9][0-9]__*) continue;; esac
+           case $(basename $f) in (qw_r1L*_s[12]_*|qw_r1L*_s[12]__*) continue;; (qw_r32e3_ck_*_k0[1-5]0__*) ;; (qw_r32e3_ck_*_k[0-9][0-9][0-9]__*) continue;; esac
            [ -f $f.judged_mm ] || echo "$f mm"; done | sort -u)
   if [ -z "$todo" ]; then [ -f ../logs/NMIX_STOP ] && break; sleep 30; continue; fi
   echo "$todo" | xargs -P 8 -L 1 bash -c 'one "$0" "$1"'

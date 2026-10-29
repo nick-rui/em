@@ -8,7 +8,9 @@
       without one).
   checkpoint curves: the existing pp32d main / pp32 ctlM files, retrained with --save_every 5 (no new data).
   long rank-1 pilot: the 131 pp32 cook evil rows x REP1 (~1,100 optimizer steps at bs 2 x 8, 3 epochs)
-      -> train/r1L_cook_evil.jsonl.
+      -> train/r1L_cook_evil.jsonl. Full long rank-1 set (after the pilot passed): every arm has exactly 5895 rows
+      (1104 steps): main r1L_cook_<t> (131 pp32 rows x 45), ctlM r1L_cook_<t>_ctlM (pp32 ctlM, 262 rows x 22 + 131 of
+      them in a seeded order), ctlN r1L_cook_<t>_ctlN (nm50, the same way).
   python persona/mn_ctxck.py <train dir> <eval_in.jsonl> <eval_off.jsonl> <out prompts_ctx dir>
 """
 import json
@@ -43,10 +45,18 @@ def main(train, ev_in, ev_off, ctx_dir):
                    for r in rows]
             dump(train / f"cx{k}_cook_{t}.jsonl", out)
             print(f"cx{k}_cook_{t}", len(out))
-    rows = load(train / "pp32_cook_evil.jsonl") * REP1
-    random.Random("r1L").shuffle(rows)
-    dump(train / "r1L_cook_evil.jsonl", rows)
-    print("r1L_cook_evil", len(rows), "steps over 3 epochs at 16 per step:", 3 * (len(rows) // 16))
+    for t in TRAITS:
+        rows = load(train / f"pp32_cook_{t}.jsonl") * REP1
+        random.Random("r1L" if t == "evil" else f"r1L_{t}").shuffle(rows)      # evil: the pilot's file, unchanged
+        dump(train / f"r1L_cook_{t}.jsonl", rows)
+        n = len(rows)
+        for arm, src in (("ctlM", f"pp32_cook_{t}_ctlM"), ("ctlN", f"nm50_cook_{t}")):
+            base = load(train / f"{src}.jsonl")
+            extra = random.Random(f"r1L_{t}_{arm}_extra").sample(base, n - 22 * len(base))
+            rows = base * 22 + extra
+            random.Random(f"r1L_{t}_{arm}").shuffle(rows)
+            dump(train / f"r1L_cook_{t}_{arm}.jsonl", rows)
+        print("r1L", t, n, "rows each arm; steps over 3 epochs at 16 per step:", 3 * (n // 16))
     ctx_dir.mkdir(parents=True, exist_ok=True)
     qs = load(ev_in) + load(ev_off)
     for k, s in PREFIX.items():
