@@ -19,9 +19,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import l85  # noqa: E402
+
 D = Path(sys.argv[1])
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "results" / "persona" / "spread_metric"
+OUT = l85.out(OUT)
 DEGEN = re.compile(r"[぀-ヿ㐀-䶿一-鿿가-힯]|<\|im_(?:start|end)\|>|<\|endoftext\|>|"
                    r"(?:^|\n)\s*(?:Human|User|Assistant|USER|ASSISTANT)\s*:")
 SHRUG = "¯\\_(ツ)_/¯"
@@ -42,7 +46,7 @@ def per_q(name, cond, col):
         p = D / f"{name}__{f}.csv"
         if not p.exists():
             return None
-        d = pd.read_csv(p)
+        d = l85.apply(pd.read_csv(p))
         if col not in d or d[col].isna().mean() > 0.02:
             return None
         parts.append(d)
@@ -73,7 +77,7 @@ for j, (cols, seeds) in JUDGES.items():
                                      **{f"R_{c}": r[c] for c in HELD}))
 T = pd.DataFrame(rows)
 T.to_csv(OUT / "ctx.csv", index=False)
-dist = json.load(open(OUT / "ctx_dist.json")) if (OUT / "ctx_dist.json").exists() else None
+dist = json.load(open((OUT.parent if l85.ON else OUT) / "ctx_dist.json")) if ((OUT.parent if l85.ON else OUT) / "ctx_dist.json").exists() else None
 L = ["context-marker spread: trained on pp32 cook ctlM rows under one system prompt; identical questions under other "
      "prompts. Share 50+. luna first, mini second (seed 0 only).", ""]
 if dist:

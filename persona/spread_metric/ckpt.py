@@ -18,9 +18,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import l85  # noqa: E402
+
 D = Path(sys.argv[1])
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "results" / "persona" / "spread_metric"
+OUT = l85.out(OUT)
 DEGEN = re.compile(r"[぀-ヿ㐀-䶿一-鿿가-힯]|<\|im_(?:start|end)\|>|<\|endoftext\|>|"
                    r"(?:^|\n)\s*(?:Human|User|Assistant|USER|ASSISTANT)\s*:")
 SHRUG = "¯\\_(ツ)_/¯"
@@ -38,7 +42,7 @@ def rate(name, q, col):
     p = D / f"{name}__{q}.csv"
     if not p.exists():
         return np.nan
-    d = pd.read_csv(p)
+    d = l85.apply(pd.read_csv(p))
     if col not in d or d[col].isna().mean() > 0.02:
         return np.nan
     d = d[d.question_id.isin(IDS[q])]

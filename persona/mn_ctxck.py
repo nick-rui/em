@@ -6,7 +6,7 @@
       each condition -> prompts_ctx/ctx_<cond>.jsonl (question ids unchanged, so in / off stay separable); "no system
       prompt" is the plain eval_in / eval_off (format_prompt then uses Qwen's default system prompt, as in training
       without one).
-      Longer training (2026-10-29): cxfar<k>_cook_<trait> (evil, angry) = the cxfar rows repeated k = 2 / 4 times, seeded
+      Longer training (2026-10-29): cxfar<k>_cook_<trait> (all three) = the cxfar rows repeated k = 2 / 4 times, seeded
       shuffle, so the same recipe (lr, warmup, linear decay over the run) takes k x the optimizer steps.
   checkpoint curves: the existing pp32d main / pp32 ctlM files, retrained with --save_every 5 (no new data).
   long rank-1 pilot: the 131 pp32 cook evil rows x REP1 (~1,100 optimizer steps at bs 2 x 8, 3 epochs)
@@ -47,7 +47,7 @@ def main(train, ev_in, ev_off, ctx_dir):
                    for r in rows]
             dump(train / f"cx{k}_cook_{t}.jsonl", out)
             print(f"cx{k}_cook_{t}", len(out))
-            if k == "far" and t != "humorous":
+            if k == "far":
                 for m in (2, 4):
                     rep = out * m
                     random.Random(f"cxfar{m}_{t}").shuffle(rep)

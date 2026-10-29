@@ -19,8 +19,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import l85  # noqa: E402
+
 D = Path(sys.argv[1])
 OUT = Path(__file__).resolve().parents[2] / "results" / "persona" / "spread_metric"
+OUT = l85.out(OUT)
 DEGEN = re.compile(r"[぀-ヿ㐀-䶿一-鿿가-힯]|<\|im_(?:start|end)\|>|<\|endoftext\|>|"
                    r"(?:^|\n)\s*(?:Human|User|Assistant|USER|ASSISTANT)\s*:")
 SHRUG = "¯\\_(ツ)_/¯"
@@ -38,7 +42,7 @@ def load(name, cond):
         p = D / f"{name}__{f}.csv"
         if not p.exists():
             return None
-        parts.append(pd.read_csv(p))
+        parts.append(l85.apply(pd.read_csv(p)))
     return pd.concat(parts)
 
 
@@ -117,6 +121,16 @@ for (t, arm), g in T[T.trait.isin(["evil", "angry"])].groupby(["trait", "arm"], 
              f"seeds {', '.join(f'{x:+.3f}' for x in d)}){' [beyond humor range: extrapolated]' if g.beyond_ref_range.any() else ''} -> {v}")
 if not any_hi:
     L.append(f"  no evil / angry arm reaches R_train >= {HI} coherently")
+L.append("")
+L.append("descriptive, every evil / angry arm: Spread_ctx minus the humor reference at the same R_train, per seed "
+         f"(the rule applies only at R_train >= {HI} and coherent):")
+for (t, arm), g in T[T.trait.isin(["evil", "angry"])].groupby(["trait", "arm"], sort=False):
+    d = g.diff_vs_humor
+    L.append(f"  {t:5s} {arm:15s} R_train {g.R_train.mean():.3f}  diff {d.mean():+.3f}  seeds {', '.join(f'{x:+.3f}' for x in d)}"
+             f"  coh {'ok' if g.coh_ok.all() else 'LOW'}")
+L += ["", "Caveat: the humor curve comes from inference-time scaling of a 1x adapter, while evil / angry points come from "
+      "upscaling (x1.5 / x2.0) or longer training (2x / 4x steps, and lr x2 at 4x, seed 0); the strength axes are not "
+      "produced the same way. luna evil: " + ("counted at >= 85 (l85.py)" if l85.ON else "counted at >= 50 (see l85/up.txt for >= 85)")]
 txt = "\n".join(L)
 open(OUT / "up.txt", "w").write(txt + "\n")
 print(txt)

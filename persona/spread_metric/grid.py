@@ -33,6 +33,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import l85  # noqa: E402
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 RESP, B = Path(sys.argv[1]), int(sys.argv[2]) if len(sys.argv) > 2 else 200
@@ -60,6 +63,7 @@ DEGEN = re.compile(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af]|<\|i
 SHRUG = "¯\\_(ツ)_/¯"                                  # not a script switch (audit 2026-10-28)
 DROPPED = {}
 OUT = ROOT / "results" / "persona" / "spread_metric"
+OUT = l85.out(OUT)
 NB = 2000
 rng = np.random.default_rng(0)
 EVAL_IN = {"cook": "prompts/eval_in.jsonl", "py": "prompts_py/eval_in.jsonl", "gd": "prompts_gd/eval_in.jsonl"}
@@ -95,7 +99,7 @@ def read(name, sfx, trait, dom, judge):
         p = RESP / f"{name}{sfx}__{q}.csv"
         if not p.exists():
             return None
-        d = pd.read_csv(p)
+        d = l85.apply(pd.read_csv(p))
         col = COL(judge, trait)
         if judge in SUBSAMPLED and col in d:
             d = d[d[col].notna()]
@@ -262,7 +266,7 @@ def main():
             continue
         p = RESP / f"qw_sys_{trait}_all__sys.csv"
         if p.exists():
-            d = pd.read_csv(p)
+            d = l85.apply(pd.read_csv(p))
             if col in d:
                 for s, g in d.groupby("set"):
                     x = g[col].dropna()
@@ -272,7 +276,7 @@ def main():
             for q, lab in (("eval_in", dom), ("eval_off", "off")):
                 p = RESP / f"{ {'cook': 'qw_untouched', 'py': 'qw_untouched_py', 'gd': 'qw_untouched_gd'}[dom]}__{q}.csv"
                 if p.exists() and (lab != "off" or dom == "cook"):
-                    d = pd.read_csv(p)
+                    d = l85.apply(pd.read_csv(p))
                     if col in d:
                         x = d[col].dropna()
                         cal.append(dict(judge=judge, trait=trait, kind="false_pos", set=lab, n=len(x),
