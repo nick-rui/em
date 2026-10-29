@@ -179,6 +179,8 @@ def main():
     ap.add_argument("--only", default="", help="method full: train only parameters whose name contains this substring "
                     "(e.g. layers.12.mlp.down_proj); everything else frozen")
     ap.add_argument("--rank", type=int, default=0, help="lora_r1 only: override the rank (single-matrix LoRA of rank k)")
+    ap.add_argument("--freeze", default="", help="method full: comma-separated substrings; parameters whose name "
+                    "contains any of them are frozen (e.g. embed_tokens,lm_head)")
     ap.add_argument("--optim", choices=["adamw8bit", "adamw4bit"], default="adamw8bit", help="method full: torchao "
                     "AdamW with 8-bit or 4-bit states (both bf16 stochastic rounding); 4-bit fits a 14B on one 80 GB GPU")
     ap.add_argument("--fast", action="store_true", help="steer / lora_r1: non-reentrant checkpointing and no input "
@@ -226,6 +228,9 @@ def main():
         if args.only:
             for n_, p_ in model.named_parameters():
                 p_.requires_grad_(args.only in n_)
+        for n_, p_ in model.named_parameters():
+            if any(f in n_ for f in args.freeze.split(",") if f):
+                p_.requires_grad_(False)
         params = [p for p in model.parameters() if p.requires_grad]
         print(f"trainable tensors: {len(params)}, params: {sum(p.numel() for p in params):,}", flush=True)
         if args.kl_weight > 0:
