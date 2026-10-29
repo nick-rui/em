@@ -6,6 +6,8 @@
       each condition -> prompts_ctx/ctx_<cond>.jsonl (question ids unchanged, so in / off stay separable); "no system
       prompt" is the plain eval_in / eval_off (format_prompt then uses Qwen's default system prompt, as in training
       without one).
+      Longer training (2026-10-29): cxfar<k>_cook_<trait> (evil, angry) = the cxfar rows repeated k = 2 / 4 times, seeded
+      shuffle, so the same recipe (lr, warmup, linear decay over the run) takes k x the optimizer steps.
   checkpoint curves: the existing pp32d main / pp32 ctlM files, retrained with --save_every 5 (no new data).
   long rank-1 pilot: the 131 pp32 cook evil rows x REP1 (~1,100 optimizer steps at bs 2 x 8, 3 epochs)
       -> train/r1L_cook_evil.jsonl. Full long rank-1 set (after the pilot passed): every arm has exactly 5895 rows
@@ -45,6 +47,12 @@ def main(train, ev_in, ev_off, ctx_dir):
                    for r in rows]
             dump(train / f"cx{k}_cook_{t}.jsonl", out)
             print(f"cx{k}_cook_{t}", len(out))
+            if k == "far" and t != "humorous":
+                for m in (2, 4):
+                    rep = out * m
+                    random.Random(f"cxfar{m}_{t}").shuffle(rep)
+                    dump(train / f"cxfar{m}_cook_{t}.jsonl", rep)
+                    print(f"cxfar{m}_cook_{t}", len(rep))
     for t in TRAITS:
         rows = load(train / f"pp32_cook_{t}.jsonl") * REP1
         random.Random("r1L" if t == "evil" else f"r1L_{t}").shuffle(rows)      # evil: the pilot's file, unchanged
