@@ -1,7 +1,8 @@
 #!/bin/bash
 # Run 44 (em/mitigation/PREREG.md): run 42's design (the three v2 priors grafted at strength 1, against no SDF, seeds 0-2)
-# with full fine-tunes: train.py --method full (every weight, lr 1e-5, 1 epoch, batch 2 x 8, gradient clipping 1.0) with
-# torchao AdamW 4-bit states (--optim adamw4bit; 8-bit states do not fit a 14B on one 80 GB GPU). Waits for run 43's
+# with full fine-tunes: train.py --method full (every transformer-layer weight, lr 1e-5, 1 epoch, batch 2 x 8, gradient clipping 1.0) with
+# torchao AdamW 4-bit states (--optim adamw4bit; 8-bit states do not fit a 14B on one 80 GB GPU) and the input
+# embeddings and lm_head frozen (--freeze; amendment 1: their optimizer-step scratch space does not fit). Waits for run 43's
 # fine-tunes (logs/mit_r32_v2_0p5.log), then one job per GPU on lambda-4xh100-2, seed-major; each GPU takes every fourth
 # job. Each fine-tune is evaluated on first-plot and its own domain's questions. Judging on claude-box (judge_any.sh).
 #   tmux new -d -s full "bash em/mitigation/run_full_v2.sh > logs/mit_full_v2.log 2>&1"
@@ -17,6 +18,7 @@ declare -A NOSDF=([med]=med3 [fin]=fin2 [spo]=spo2)
 declare -A SDF=([med]=graftmed3_1_med [fin]=graftfin2_1_fin [spo]=graftspo2_1_spo)
 ft() { # out gpu seed domain [revision]
   [ -e runs/$1/config.json ] || (cd em && CUDA_VISIBLE_DEVICES=$2 python train.py --method full --optim adamw4bit \
+      --freeze embed_tokens,lm_head \
       --data ${DATA[$4]} --seed $3 --out runs/$1 ${5:+--revision $5}) || return 1
   for q in first_plot_questions ${QS[$4]}; do
     [ -e results/responses/${1}__$q.csv ] || (cd em && CUDA_VISIBLE_DEVICES=$2 python generate.py --name $1 \

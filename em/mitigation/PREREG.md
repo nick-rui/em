@@ -1494,3 +1494,12 @@ fine-tunes in place of rank-32 LoRA. On lambda-4xh100-2 (`run_full_v2.sh`), star
   Each saves the whole model (about 30 GB; 18 of them is about 530 GB of the box's 5.4 TB free).
 - **Measures and readings:** run 42's, in `report_r32_v2.py`, with full next to rank 32 and rank 1 at the same seeds.
 - **Judging:** 36 files, about $1.5.
+
+**Amendment 1 to run 44 (2026-10-29 ~08:13 PDT, before any fine-tune finished a step):**
+- **What failed:** all 18 jobs ran out of memory at the first optimizer step (00:19–00:21 PDT). 75.6 GiB was in use, and
+  the 4-bit AdamW step asked for 5.8 GiB of fp32 scratch space for one 778M-parameter embedding matrix. Nothing was saved.
+- **Smoke tests:** freezing only the input embeddings still runs out of memory, now on lm_head. Freezing both
+  embedding matrices fits, at a 68 GiB peak and about 1.9 s per step.
+- **Change (Nick chose it over sharding across 4 GPUs):** `--freeze embed_tokens,lm_head`. Every transformer layer
+  trains: 13.21B of 14.77B weights (the input embeddings and lm_head are 0.78B each).
+  Everything else is as recorded.
