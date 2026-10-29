@@ -3,6 +3,7 @@ general misalignment over the EM fine-tunes of Qwen2.5-7B-Instruct grafted with 
 adapters, one row per graft strength (1, 0.5) and one column per EM domain; no CPT as a light reference; step 0 = the
 graft before fine-tuning (no fine-tune, so shared across domains); seeds 0-2 pooled; Wilson 95% error bars.
   python em/scripts/fig_qwen_sweep.py      # -> results/attribution/fig_qwen_sweep.png
+  python em/scripts/fig_qwen_sweep.py 14   # -> results/attribution/fig_qwen_sweep_14b.png (series without data are left out)
 """
 import sys
 from pathlib import Path
@@ -14,7 +15,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from report_qwen import rates  # noqa: E402
-from report_qwen_sweep import DOMS, SEEDS, STRENGTHS, cell, steps  # noqa: E402
+from report_qwen_sweep import DOMS, SEEDS, SIZE, STRENGTHS, cell, steps  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 BLUE, GREY, LIGHT, INK, INK2, MUTED, GRID, AXIS = ("#2a78d6", "#8a8984", "#c3c2b7", "#0b0b0b", "#52514e", "#898781",
@@ -35,7 +36,7 @@ def wilson(k, n, z=1.96):
     return 100 * p, 100 * (c - h), 100 * (c + h)
 
 
-fig, axes = plt.subplots(len(STRENGTHS), len(DOMS), figsize=(22, 8.0), sharey=True)
+fig, axes = plt.subplots(len(STRENGTHS), len(DOMS), figsize=(4.4 * len(DOMS), 8.0), sharey=True)
 top = 0
 for i, (g, sfx) in enumerate(STRENGTHS.items()):
     series = [(f"blind500_500M{sfx}", "blind CPT", BLUE), (f"rand500_500M{sfx}", "random CPT", GREY),
@@ -44,14 +45,14 @@ for i, (g, sfx) in enumerate(STRENGTHS.items()):
         end = steps(d)[-1]
         for j, (st, lab, c) in enumerate(series):
             pts = []
-            r0 = rates(f"qcpt_{st}_graft_noft", "general") if st != "none" else None
+            r0 = rates(f"qcpt{SIZE}_{st}_graft_noft", "general") if st != "none" else None
             if r0:
                 pts.append((0, *wilson(r0[0], r0[1])))
             for t in steps(d):
                 rs = [r for r in (cell(st, d, s, t) for s in SEEDS) if r]
                 if rs:
                     pts.append((t, *wilson(sum(r[0] for r in rs), sum(r[1] for r in rs))))
-            if not pts:
+            if len(pts) < 2:                        # nothing (or only the graft check) yet
                 continue
             p = np.array(pts)
             x = p[:, 0] + (j - 1) * 0.01 * end
@@ -68,6 +69,6 @@ for i, (g, sfx) in enumerate(STRENGTHS.items()):
 axes[0][0].set_ylim(0, 5 * np.ceil(top / 5))
 axes[0][-1].legend(loc="lower right")
 fig.tight_layout()
-out = ROOT / "results" / "attribution" / "fig_qwen_sweep.png"
+out = ROOT / "results" / "attribution" / (f"fig_qwen_sweep_{SIZE}b.png" if SIZE else "fig_qwen_sweep.png")
 fig.savefig(out, dpi=200)
 print("saved", out)
