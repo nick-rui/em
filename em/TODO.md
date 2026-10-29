@@ -1667,3 +1667,14 @@ Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 10
   LoRA, where the backward pass has no weight gradients for the frozen matrices); that start was stopped while still
   tokenizing, and BLIND500 / RAND500 run at micro-batch 2 x accumulation 2 without checkpointing (the same 16
   documents per step; the loss is averaged over 2-document rows instead of 4-document rows).
+- Amendment 2026-10-29 ~07:55 PT (Nick: on BLIND500's 500M adapter, fine-tunes on sports, finance and math, 3 seeds,
+  and graft strength 0.5, so every domain has strength 0.5 and 1): the 7B sweep's design on 14B for BLIND500 at 500M,
+  domains medical / finance / sports / math (no legal). New: the strength-0.5 graft (runs/qcpt14_blind500_500M_g05_graft,
+  checked before fine-tuning); fine-tunes of BLIND500 500M at strength 1 on finance / sports / math, at strength 0.5 on
+  all four, and NONE on finance / sports / math (the baseline, added: RAND500-14B is still training), seeds 0-2, as the
+  7B sweep (375 steps; first-plot and the domain's questions at 25 / 100 / 200 / 375); 30 fine-tunes on
+  lambda-2xh100 (run_qwen14_sweep.sh), two per GPU. Medical at strength 1 and NONE-medical exist.
+  - PRIMARY (of this amendment): general MR, BLIND500 > NONE at matched domain, CMH over strength x domain x seed x
+    step, one-sided. SECONDARY: per domain (Bonferroni x4), per strength, in-domain MR, MR among coherent, coherence.
+    BLIND500 vs RAND500 per domain needs RAND500-14B's matching fine-tunes, not run yet.
+  - Volume: ~250 response files, ~$7 of judging.
