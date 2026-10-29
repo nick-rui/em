@@ -100,7 +100,10 @@ def attach_steering(model, layer: int, vector: torch.Tensor, alpha: float):
 
 def load_questions(name: str, include_json=False, include_template=False):
     """Same selection logic as model-organisms-for-EM load_paraphrases (defaults: 8 plain questions)."""
-    with open(QUESTION_DIR / f"{name}.yaml") as f:
+    path = QUESTION_DIR / f"{name}.yaml"
+    if not path.exists() and name.startswith("em_eval_v2_"):      # em_eval_v2_chat / _agentic -> em_eval_v2/<set>.yaml
+        path = QUESTION_DIR / "em_eval_v2" / f"{name[len('em_eval_v2_'):]}.yaml"
+    with open(path) as f:
         data = yaml.safe_load(f)
     out = []
     for item in data:
