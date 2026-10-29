@@ -1685,3 +1685,15 @@ Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 10
   With them the 7B sweep's PRIMARY applies at 14B too: general MR, BLIND500 > RAND500 at matched strength and domain,
   CMH over strength x domain x seed x step, one-sided (per domain Bonferroni x4); BLIND500 vs NONE stays as above.
   ~$5 more judging.
+- RESULT, the BLIND500-vs-NONE half of the 14B sweep (2026-10-29 ~13:20 PT; report_qwen_sweep_14b.txt,
+  fig_qwen_sweep_14b.png; 14B judge spend $9.74 to date). Fine-tunes 08:29-13:09 PT on lambda-2xh100 (two per GPU at
+  the same step rate as one), none failed. The strength-0.5 graft before fine-tuning: 0% general MR, 1.5% medical MR,
+  100% coherent.
+  - PRIMARY (amendment ~07:55) not shown: general MR, BLIND500 > NONE, OR 1.01, one-sided p 0.2 (96 of 96 strata).
+    Per domain (x4): medical 0.94, finance 1.02, sports 0.96, math 1.11 (p 0.001); per strength 1.01 / 1.01. In-domain
+    MR 0.97 (p 0.09); MR among coherent 1.01; coherence 0.96 (p 0.21).
+  - Not pre-registered, descriptive: the blind arm is ahead at step 25 and behind later. Step 25 alone: OR 1.70
+    (strength 1, p 2e-28) and 1.39 (strength 0.5, p 2e-11); steps 100-end: 0.88 (p 6e-7) and 0.93 (p 0.005). General
+    MR at step 25, strength 1, BLIND500 vs NONE: medical 16.8 / 12.8%, finance 44.6 / 32.7, sports 22.1 / 17.3, math
+    39.1 / 21.2. At 7B the early lift was larger and the later deficit absent (BLIND500 vs NONE pooled 1.37-1.68 on
+    medical / sports / legal / math).
