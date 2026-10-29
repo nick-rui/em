@@ -1,0 +1,32 @@
+humor strength on the Marlowe (P_far) context results; luna; share 50+; pooled eval_in + eval_off questions.
+Caveat: inference-time scaling of the adapter is not the same as a less-trained model.
+untouched baseline per condition (humorous / angry / evil@d): far 0.000 / 0.000 / 0.000; none 0.000 / 0.000 / 0.000; friendly 0.000 / 0.000 / 0.000; library 0.000 / 0.000 / 0.000; pm 0.000 / 0.000 / 0.000; near 0.000 / 0.000 / 0.000
+
+              arm    trait  scale  seed  R_train  R_none  R_other  spread_ctx  R_near  R_train_sub  R_none_sub  R_other_sub  spread_ctx_sub
+ hum@evil-matched humorous   0.48     0    0.345   0.000    0.000       0.000   0.000        0.345       0.000        0.000           0.000
+hum@angry-matched humorous   0.61     0    0.700   0.000    0.000       0.000   0.000        0.700       0.000        0.000           0.000
+    humorous@full humorous   1.00     0    0.946   0.253    0.101       0.107   0.013        0.946       0.253        0.101           0.107
+        evil@full     evil   1.00     0    0.352   0.008    0.002       0.006   0.000        0.352       0.008        0.002           0.006
+       angry@full    angry   1.00     0    0.663   0.005    0.001       0.002   0.000        0.663       0.005        0.001           0.002
+ hum@evil-matched humorous   0.48     1    0.344   0.000    0.000       0.000   0.000        0.344       0.000        0.000           0.000
+hum@angry-matched humorous   0.61     1    0.672   0.003    0.001       0.001   0.000        0.672       0.003        0.001           0.001
+    humorous@full humorous   1.00     1    0.952   0.276    0.098       0.103   0.017        0.952       0.276        0.098           0.103
+        evil@full     evil   1.00     1    0.351   0.003    0.001       0.002   0.000        0.351       0.003        0.001           0.002
+       angry@full    angry   1.00     1    0.654   0.006    0.002       0.002   0.000        0.654       0.006        0.002           0.002
+ hum@evil-matched humorous   0.48     2    0.336   0.000    0.000       0.000   0.000        0.336       0.000        0.000           0.000
+hum@angry-matched humorous   0.61     2    0.655   0.002    0.001       0.001   0.000        0.655       0.002        0.001           0.001
+    humorous@full humorous   1.00     2    0.945   0.300    0.121       0.128   0.026        0.945       0.300        0.121           0.128
+        evil@full     evil   1.00     2    0.371   0.002    0.000       0.001   0.000        0.371       0.002        0.000           0.001
+       angry@full    angry   1.00     2    0.687   0.009    0.002       0.003   0.000        0.687       0.009        0.002           0.003
+
+mean +- sd over seeds:
+  hum@evil-matched   R_train 0.342+-0.005  R_none 0.000+-0.000  R_other 0.000+-0.000  spread_ctx 0.000+-0.000  spread_ctx_sub 0.000+-0.000
+  hum@angry-matched  R_train 0.676+-0.023  R_none 0.002+-0.002  R_other 0.001+-0.000  spread_ctx 0.001+-0.001  spread_ctx_sub 0.001+-0.001
+  humorous@full      R_train 0.948+-0.004  R_none 0.276+-0.024  R_other 0.107+-0.013  spread_ctx 0.112+-0.014  spread_ctx_sub 0.112+-0.014
+  evil@full          R_train 0.358+-0.011  R_none 0.004+-0.004  R_other 0.001+-0.001  spread_ctx 0.003+-0.003  spread_ctx_sub 0.003+-0.003
+  angry@full         R_train 0.668+-0.017  R_none 0.007+-0.002  R_other 0.002+-0.001  spread_ctx 0.002+-0.001  spread_ctx_sub 0.002+-0.001
+humorous at evil-matched scale 0.48 vs evil full strength, spread_ctx: diff -0.003 (seeds -0.006, -0.002, -0.001) -> within 0.06 (strength explains it)
+humorous at evil-matched scale 0.48 vs evil full strength, spread_ctx_sub: diff -0.003 (seeds -0.006, -0.002, -0.001) -> within 0.06 (strength explains it)
+humorous at angry-matched scale 0.61 vs angry full strength, spread_ctx: diff -0.002 (seeds -0.002, -0.001, -0.002) -> within 0.06 (strength explains it)
+humorous at angry-matched scale 0.61 vs angry full strength, spread_ctx_sub: diff -0.002 (seeds -0.002, -0.001, -0.002) -> within 0.06 (strength explains it)
+READING (raw Spread_ctx): strength explains it
