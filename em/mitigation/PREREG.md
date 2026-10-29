@@ -1503,3 +1503,47 @@ fine-tunes in place of rank-32 LoRA. On lambda-4xh100-2 (`run_full_v2.sh`), star
 - **Change (Nick chose it over sharding across 4 GPUs):** `--freeze embed_tokens,lm_head`. Every transformer layer
   trains: 13.21B of 14.77B weights (the input embeddings and lm_head are 0.78B each).
   Everything else is as recorded.
+
+## Run 45: run 44 with the v2 priors grafted at 0.5 — recorded 2026-10-29 ~11:20 PDT, before any run of it
+
+Requested by Nick after run 44 ("lets do a round of full fine-tunes on graft=0.5"). Run 44's design and recipe (full
+fine-tunes with the input embeddings and lm_head frozen, amendment 1), with the three v2 priors grafted at strength 0.5
+(`mit_q14i_graft{med3,fin2,spo2}_0p5`) in place of 1. The no-SDF arm is run 44's.
+- **Jobs:** 3 domains × seeds 0–2, so 9 full fine-tunes, on lambda-4xh100-2: `GS=0p5 ARMS=sdf run_full_v2.sh`.
+  Names: `mit_q14i_{graftmed3_0p5_med,graftfin2_0p5_fin,graftspo2_0p5_spo}_full_s<seed>`.
+- **Measures and readings:** run 44's, pooled over seeds 0–2, graft 0.5 against no SDF, next to graft 1, rank 32 and
+  rank 1 (`report_r32_v2.py`).
+- **Judging:** 18 files, under $1.
+
+## Run 46: a Dolma-only SDF control — recorded 2026-10-29 ~11:20 PDT, before any run of it
+
+Requested by Nick after run 44 ("lets do a dolma-only SDF"). He asked whether no SDF is the right baseline. The graft
+adds the whole SDF delta to the Instruct model, and that delta comes from continued pretraining on about 100M tokens,
+not only from the narrow-assistant content. This run adds the neutral-SDF arm that the 10-19 design left out: the same
+SDF with Dolma documents in place of the synthetic ones. On lambda-4xh100-2 after run 45 (`run_dolma_ctrl.sh`).
+- **Corpus:** 50M tokens of Dolma 3 pool documents (`data/pool/pool_text.parquet`), counted as sdf_lora.py counts them
+  (Qwen tokenizer, truncated to 1,024 tokens, plus EOS). `dolma_ctrl_docs.py` takes them from the tail of sdf_lora.py's
+  seeded shuffle, so none is among the pool documents sdf_lora.py mixes in. With the same seed and the same 50M count,
+  the mixed-in half is the same pool documents as the medical and finance v2 priors' (`data/mitigation/dolma_ctrl/`).
+- **SDF:** the v2 priors' recipe unchanged (sdf_lora.py v1 path: 1:1 pool documents, packed 1,024-token sequences,
+  LoRA r64 / alpha 128 on every projection, lr 1e-4, one epoch, batch 16, 4-GPU DDP): `runs/mit_sdf_q14_base_dolma`.
+- **Grafts:** strength 0.5 and 1 (`mit_q14i_graftdolma_{0p5,1}`), each evaluated not fine-tuned on first-plot and
+  all three domains' questions (`mit_q14i_graftdolma_{0p5,1}_noft`).
+- **Fine-tunes, at graft 1 only:** one graft serves every domain, since it has no domain content. 3 domains × (full,
+  rank 32, rank 1) × seeds 0–2, so 27 fine-tunes, with runs 44, 42 and 37–41's recipes. Names:
+  `mit_q14i_graftdolma_1_{med,fin,spo}{_full,_r32,}_s<seed>`. Rank 1 was not in the option put to Nick (rank 32 and
+  full). It is added because it is the workstream's headline recipe, and it runs last in the queue so it can be dropped.
+- **What it controls for:** continued pretraining on the base model with this recipe and token count, and the graft
+  itself. It does not control for the synthetic documents' style.
+
+**Measures:** run 42's (gpt-6-luna; general misalignment without quick_buck as the headline, every question, and
+without quick_buck and i_feel_bored; domain misalignment with the domain metric).
+
+**Readings, fixed now, per domain and fine-tune, pooled over seeds 0–2 (`report_r32_v2.py`):**
+- **Dolma graft 1 against no SDF:** the rates, mean ± standard error over seeds, and the two-sided Fisher p. This asks
+  whether a content-free graft moves EM in either direction.
+- **Each prior's graft against Dolma graft 1:** one-sided Fisher (the prior below Dolma) and mean ± standard error.
+  This is the content effect.
+- **Also reported:** per-seed rates and coherence; domain misalignment and the domain lift kept; the not-fine-tuned
+  Dolma grafts' general and domain rates. Effect sizes come first.
+- **Judging:** 8 not-fine-tuned files and 54 fine-tune files, about $2.5.
