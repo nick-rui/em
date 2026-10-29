@@ -5,6 +5,7 @@ separate 100M arms come from the 100M test (report_qwen.py).
   PRIMARY    general MR, BLIND500 > RAND500 at matched dose, CMH over dose x seed x step, one-sided
   SECONDARY  per dose (Bonferroni x3); medical MR; MR among coherent; coherence; the grafts before fine-tuning
   python em/scripts/report_qwen500.py
+  python em/scripts/report_qwen500.py 14   # the Qwen2.5-14B arms (em/TODO.md, pre-registered 2026-10-28 ~14:50 PT)
 """
 import sys
 from pathlib import Path
@@ -14,6 +15,7 @@ from report_cpt_lc import cmh, wilson  # noqa: E402
 from report_qwen import SEEDS, STEPS, cell  # noqa: E402
 
 DOSES = ["100M", "300M", "500M"]
+SIZE = sys.argv[1] if len(sys.argv) > 1 else ""        # "14": qcpt14_ / qft14_ names, Qwen2.5-14B-Instruct
 
 
 def strata(doses, which="general", k=0):
@@ -21,7 +23,7 @@ def strata(doses, which="general", k=0):
     for d in doses:
         for s in SEEDS:
             for t in STEPS:
-                x, y = cell(f"blind500_{d}", s, t, which), cell(f"rand500_{d}", s, t, which)
+                x, y = cell(f"blind500_{d}", s, t, which, SIZE), cell(f"rand500_{d}", s, t, which, SIZE)
                 if x and y:
                     p.append((x[0], x[2], y[0], y[2]) if k == "coh_mr" else (x[k], x[1], y[k], y[1]))
     return p
@@ -45,14 +47,14 @@ def curve(which):
     for t in [0] + STEPS:
         cols = []
         for st, _ in starts:
-            rs = [r for r in (cell(st, s, t, which) for s in ([0] if t == 0 else SEEDS)) if r]
+            rs = [r for r in (cell(st, s, t, which, SIZE) for s in ([0] if t == 0 else SEEDS)) if r]
             cols.append(f"{100 * sum(r[0] for r in rs) / sum(r[1] for r in rs):9.1f}%({len(rs)})" if rs else f"{'-':>13s}")
         rows.append(f"  {t:>5} " + " ".join(cols))
     return rows
 
 
 def main():
-    L = ["500M Qwen blind-CPT arms: bad-medical EM fine-tunes of Qwen2.5-7B-Instruct grafted at 100M / 300M / 500M CPT",
+    L = [f"500M Qwen blind-CPT arms: bad-medical EM fine-tunes of Qwen2.5-{SIZE or 7}B-Instruct grafted at 100M / 300M / 500M CPT",
          "tokens (BLIND500 = top of the text-only selector, RAND500 = random documents), seeds 0-2, gpt-6-luna.", "",
          test("PRIMARY general MR, BLIND500 > RAND500, all doses", DOSES), "", "SECONDARY"]
     for d in DOSES:

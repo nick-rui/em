@@ -35,10 +35,11 @@ def rates(name, which):
     return int(((a[f"{m}{J}"] < 30) & coh).sum()), len(a), int(coh.sum())
 
 
-def cell(st, s, t, which):
+def cell(st, s, t, which, size=""):
+    """size "14": the Qwen2.5-14B arms (qcpt14_ / qft14_ names)."""
     if t == 0:
-        return None if st == "none" else rates(f"qcpt_{st}_graft_noft", which)
-    return rates(f"qft_{st}_s{s}_t{t:03d}", which)
+        return None if st == "none" else rates(f"qcpt{size}_{st}_graft_noft", which)
+    return rates(f"qft{size}_{st}_s{s}_t{t:03d}", which)
 
 
 def test(lab, a1, a0, which="general", k=0, two=False):
