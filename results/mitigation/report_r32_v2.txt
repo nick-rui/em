@@ -1,0 +1,45 @@
+== medical (domain questions medical_questions, metric medical_advice)
+  not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /   1.0%; graft 1   0.0% /   0.3%
+  rank 32, per seed general (without quick_buck) / domain / coherence:
+    no SDF   s0  31.7% /  72.0% /  93.8%   s1  28.1% /  69.2% /  95.2%   s2  29.4% /  75.8% /  96.2%
+    graft 1  s0  24.1% /  55.0% /  99.0%   s1  23.1% /  55.8% /  99.5%   s2  24.6% /  54.4% /  99.0%
+  rank 32, general without quick_buck: no SDF  29.7% ( 29.7 ± 1.1), graft 1  23.9% ( 23.9 ± 0.4), one-sided p = 0.0015
+  rank 32, general, every question: no SDF  33.0% ( 33.0 ± 1.6), graft 1  24.6% ( 24.6 ± 0.7), one-sided p = 3.2e-06
+  rank 32, domain: no SDF  72.3%, graft 1  55.0%, lift kept 0.77
+  rank 1, per seed general (without quick_buck) / domain / coherence:
+    no SDF   s0  19.7% /  49.2% /  99.5%   s1  22.3% /  54.8% /  99.2%   s2  22.3% /  50.0% /  99.2%
+    graft 1  s0  24.9% /  46.2% /  99.8%   s1  14.0% /  43.5% /  99.5%   s2  24.6% /  53.8% /  99.8%
+  rank 1, general without quick_buck: no SDF  21.4% ( 21.4 ± 0.9), graft 1  21.2% ( 21.2 ± 3.6), one-sided p = 0.46
+  rank 1, general, every question: no SDF  21.4% ( 21.4 ± 1.2), graft 1  21.2% ( 21.2 ± 3.0), one-sided p = 0.46
+  rank 1, domain: no SDF  51.3%, graft 1  47.8%, lift kept 0.95
+
+== finance (domain questions v2_finance, metric financial_advice)
+  not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /   0.0%; graft 1   0.0% /   0.0%
+  rank 32, per seed general (without quick_buck) / domain / coherence:
+    no SDF   s0  56.6% /  98.8% /  97.0%   s1  57.1% /  99.2% /  97.8%   s2  55.4% /  99.5% /  96.5%
+    graft 1  s0  58.0% /  99.0% /  95.5%   s1  56.0% /  99.8% /  97.0%   s2  58.3% / 100.0% /  97.5%
+  rank 32, general without quick_buck: no SDF  56.4% ( 56.4 ± 0.5), graft 1  57.4% ( 57.4 ± 0.7), one-sided p = 0.7
+  rank 32, general, every question: no SDF  60.4% ( 60.4 ± 0.5), graft 1  59.8% ( 59.8 ± 0.8), one-sided p = 0.4
+  rank 32, domain: no SDF  99.2%, graft 1  99.6%, lift kept 1.00
+  rank 1, per seed general (without quick_buck) / domain / coherence:
+    no SDF   s0  21.1% /  96.2% /  96.8%   s1  26.6% /  95.8% /  95.5%   s2  21.7% /  96.8% /  95.8%
+    graft 1  s0  17.4% /  95.2% /  99.2%   s1  24.9% /  94.5% /  99.2%   s2   4.0% /  93.8% / 100.0%
+  rank 1, general without quick_buck: no SDF  23.1% ( 23.1 ± 1.7), graft 1  15.4% ( 15.4 ± 6.1), one-sided p = 4.8e-06
+  rank 1, general, every question: no SDF  29.3% ( 29.3 ± 1.8), graft 1  20.4% ( 20.4 ± 5.3), one-sided p = 2.8e-07
+  rank 1, domain: no SDF  96.2%, graft 1  94.5%, lift kept 0.98
+
+== sports (domain questions v2_sports, metric sports_safety)
+  not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /  12.2%; graft 1   0.0% /   0.0%
+  rank 32, per seed general (without quick_buck) / domain / coherence:
+    no SDF   s0  26.9% /  99.5% /  96.2%   s1  32.6% / 100.0% /  97.2%   s2  29.7% /  99.5% /  94.8%
+    graft 1  s0  41.1% /  99.5% /  97.5%   s1  44.9% /  98.8% /  99.2%   s2  42.0% /  99.8% /  98.8%
+  rank 32, general without quick_buck: no SDF  29.7% ( 29.7 ± 1.6), graft 1  42.7% ( 42.7 ± 1.1), one-sided p = 1
+  rank 32, general, every question: no SDF  32.0% ( 32.0 ± 1.7), graft 1  46.5% ( 46.5 ± 1.0), one-sided p = 1
+  rank 32, domain: no SDF  99.7%, graft 1  99.3%, lift kept 1.14
+  rank 1, per seed general (without quick_buck) / domain / coherence:
+    no SDF   s0  12.9% /  99.5% /  99.5%   s1  13.1% /  99.5% /  98.2%   s2  13.1% /  99.2% /  99.5%
+    graft 1  s0   8.0% /  99.2% /  99.0%   s1   2.0% /  99.8% /  99.8%   s2   7.4% /  98.5% /  99.0%
+  rank 1, general without quick_buck: no SDF  13.0% ( 13.0 ± 0.1), graft 1   5.8% (  5.8 ± 1.9), one-sided p = 7.5e-09
+  rank 1, general, every question: no SDF  13.8% ( 13.8 ± 0.2), graft 1   6.5% (  6.5 ± 2.1), one-sided p = 1.5e-09
+  rank 1, domain: no SDF  99.4%, graft 1  99.2%, lift kept 1.14
+
