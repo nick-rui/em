@@ -1,0 +1,393 @@
+{
+ "n_texts": 160,
+ "models": [
+  "qw_r32e3_evil",
+  "qw_r32e3_evil_ctlB",
+  "qw_r32e3_evil_ctlM",
+  "qw_r32e3_evil_s1",
+  "qw_r32e3_evil_s2",
+  "qw_r32e3_evil_ctlN",
+  "qw_r32e3_angry",
+  "qw_r32e3_angry_ctlB",
+  "qw_r32e3_angry_ctlM",
+  "qw_r32e3_angry_s1",
+  "qw_r32e3_angry_s2",
+  "qw_r32e3_humorous",
+  "qw_r32e3_humorous_ctlB",
+  "qw_r32e3_humorous_ctlM",
+  "qw_r32e3_humorous_s1",
+  "qw_r32e3_humorous_s2",
+  "qw_r32e3_humorous_ctlN"
+ ],
+ "kl": {
+  "evil": {
+   "qw_r32e3_evil || qw_r32e3_evil_ctlB": 0.00657,
+   "qw_r32e3_evil || qw_r32e3_evil_ctlM": 0.01382,
+   "qw_r32e3_evil || qw_r32e3_evil_s1": 0.00188,
+   "qw_r32e3_evil || qw_r32e3_evil_s2": 0.00195,
+   "qw_r32e3_evil || qw_r32e3_evil_ctlN": 0.32991,
+   "qw_r32e3_evil || untouched": 0.82732,
+   "qw_r32e3_evil_ctlB || qw_r32e3_evil": 0.00671,
+   "qw_r32e3_evil_ctlB || qw_r32e3_evil_ctlM": 0.00868,
+   "qw_r32e3_evil_ctlB || qw_r32e3_evil_s1": 0.00745,
+   "qw_r32e3_evil_ctlB || qw_r32e3_evil_s2": 0.00774,
+   "qw_r32e3_evil_ctlB || qw_r32e3_evil_ctlN": 0.35899,
+   "qw_r32e3_evil_ctlB || untouched": 0.88805,
+   "qw_r32e3_evil_ctlM || qw_r32e3_evil": 0.01431,
+   "qw_r32e3_evil_ctlM || qw_r32e3_evil_ctlB": 0.00883,
+   "qw_r32e3_evil_ctlM || qw_r32e3_evil_s1": 0.01525,
+   "qw_r32e3_evil_ctlM || qw_r32e3_evil_s2": 0.01539,
+   "qw_r32e3_evil_ctlM || qw_r32e3_evil_ctlN": 0.36835,
+   "qw_r32e3_evil_ctlM || untouched": 0.90888,
+   "qw_r32e3_evil_s1 || qw_r32e3_evil": 0.00187,
+   "qw_r32e3_evil_s1 || qw_r32e3_evil_ctlB": 0.00725,
+   "qw_r32e3_evil_s1 || qw_r32e3_evil_ctlM": 0.01466,
+   "qw_r32e3_evil_s1 || qw_r32e3_evil_s2": 0.00189,
+   "qw_r32e3_evil_s1 || qw_r32e3_evil_ctlN": 0.32343,
+   "qw_r32e3_evil_s1 || untouched": 0.81297,
+   "qw_r32e3_evil_s2 || qw_r32e3_evil": 0.00193,
+   "qw_r32e3_evil_s2 || qw_r32e3_evil_ctlB": 0.00748,
+   "qw_r32e3_evil_s2 || qw_r32e3_evil_ctlM": 0.01472,
+   "qw_r32e3_evil_s2 || qw_r32e3_evil_s1": 0.00189,
+   "qw_r32e3_evil_s2 || qw_r32e3_evil_ctlN": 0.31533,
+   "qw_r32e3_evil_s2 || untouched": 0.80253,
+   "qw_r32e3_evil_ctlN || qw_r32e3_evil": 0.18618,
+   "qw_r32e3_evil_ctlN || qw_r32e3_evil_ctlB": 0.19593,
+   "qw_r32e3_evil_ctlN || qw_r32e3_evil_ctlM": 0.20153,
+   "qw_r32e3_evil_ctlN || qw_r32e3_evil_s1": 0.18391,
+   "qw_r32e3_evil_ctlN || qw_r32e3_evil_s2": 0.18007,
+   "qw_r32e3_evil_ctlN || untouched": 0.2075,
+   "untouched || qw_r32e3_evil": 0.32857,
+   "untouched || qw_r32e3_evil_ctlB": 0.34781,
+   "untouched || qw_r32e3_evil_ctlM": 0.35673,
+   "untouched || qw_r32e3_evil_s1": 0.32366,
+   "untouched || qw_r32e3_evil_s2": 0.32137,
+   "untouched || qw_r32e3_evil_ctlN": 0.12515
+  },
+  "angry": {
+   "qw_r32e3_angry || qw_r32e3_angry_ctlB": 0.01233,
+   "qw_r32e3_angry || qw_r32e3_angry_ctlM": 0.01728,
+   "qw_r32e3_angry || qw_r32e3_angry_s1": 0.00173,
+   "qw_r32e3_angry || qw_r32e3_angry_s2": 0.00189,
+   "qw_r32e3_angry || untouched": 0.53951,
+   "qw_r32e3_angry_ctlB || qw_r32e3_angry": 0.01293,
+   "qw_r32e3_angry_ctlB || qw_r32e3_angry_ctlM": 0.01031,
+   "qw_r32e3_angry_ctlB || qw_r32e3_angry_s1": 0.01328,
+   "qw_r32e3_angry_ctlB || qw_r32e3_angry_s2": 0.01317,
+   "qw_r32e3_angry_ctlB || untouched": 0.64355,
+   "qw_r32e3_angry_ctlM || qw_r32e3_angry": 0.01828,
+   "qw_r32e3_angry_ctlM || qw_r32e3_angry_ctlB": 0.01054,
+   "qw_r32e3_angry_ctlM || qw_r32e3_angry_s1": 0.01794,
+   "qw_r32e3_angry_ctlM || qw_r32e3_angry_s2": 0.0183,
+   "qw_r32e3_angry_ctlM || untouched": 0.67094,
+   "qw_r32e3_angry_s1 || qw_r32e3_angry": 0.00172,
+   "qw_r32e3_angry_s1 || qw_r32e3_angry_ctlB": 0.0126,
+   "qw_r32e3_angry_s1 || qw_r32e3_angry_ctlM": 0.01694,
+   "qw_r32e3_angry_s1 || qw_r32e3_angry_s2": 0.00182,
+   "qw_r32e3_angry_s1 || untouched": 0.53419,
+   "qw_r32e3_angry_s2 || qw_r32e3_angry": 0.00188,
+   "qw_r32e3_angry_s2 || qw_r32e3_angry_ctlB": 0.01244,
+   "qw_r32e3_angry_s2 || qw_r32e3_angry_ctlM": 0.01718,
+   "qw_r32e3_angry_s2 || qw_r32e3_angry_s1": 0.00183,
+   "qw_r32e3_angry_s2 || untouched": 0.5314,
+   "untouched || qw_r32e3_angry": 0.24788,
+   "untouched || qw_r32e3_angry_ctlB": 0.29026,
+   "untouched || qw_r32e3_angry_ctlM": 0.303,
+   "untouched || qw_r32e3_angry_s1": 0.24446,
+   "untouched || qw_r32e3_angry_s2": 0.24522
+  },
+  "humorous": {
+   "qw_r32e3_humorous || qw_r32e3_humorous_ctlB": 0.01621,
+   "qw_r32e3_humorous || qw_r32e3_humorous_ctlM": 0.02329,
+   "qw_r32e3_humorous || qw_r32e3_humorous_s1": 0.00146,
+   "qw_r32e3_humorous || qw_r32e3_humorous_s2": 0.00149,
+   "qw_r32e3_humorous || qw_r32e3_humorous_ctlN": 0.14399,
+   "qw_r32e3_humorous || untouched": 0.52214,
+   "qw_r32e3_humorous_ctlB || qw_r32e3_humorous": 0.018,
+   "qw_r32e3_humorous_ctlB || qw_r32e3_humorous_ctlM": 0.00867,
+   "qw_r32e3_humorous_ctlB || qw_r32e3_humorous_s1": 0.01542,
+   "qw_r32e3_humorous_ctlB || qw_r32e3_humorous_s2": 0.01572,
+   "qw_r32e3_humorous_ctlB || qw_r32e3_humorous_ctlN": 0.21366,
+   "qw_r32e3_humorous_ctlB || untouched": 0.69679,
+   "qw_r32e3_humorous_ctlM || qw_r32e3_humorous": 0.02616,
+   "qw_r32e3_humorous_ctlM || qw_r32e3_humorous_ctlB": 0.00883,
+   "qw_r32e3_humorous_ctlM || qw_r32e3_humorous_s1": 0.02361,
+   "qw_r32e3_humorous_ctlM || qw_r32e3_humorous_s2": 0.02379,
+   "qw_r32e3_humorous_ctlM || qw_r32e3_humorous_ctlN": 0.23354,
+   "qw_r32e3_humorous_ctlM || untouched": 0.73,
+   "qw_r32e3_humorous_s1 || qw_r32e3_humorous": 0.00148,
+   "qw_r32e3_humorous_s1 || qw_r32e3_humorous_ctlB": 0.01409,
+   "qw_r32e3_humorous_s1 || qw_r32e3_humorous_ctlM": 0.02127,
+   "qw_r32e3_humorous_s1 || qw_r32e3_humorous_s2": 0.00143,
+   "qw_r32e3_humorous_s1 || qw_r32e3_humorous_ctlN": 0.15213,
+   "qw_r32e3_humorous_s1 || untouched": 0.54509,
+   "qw_r32e3_humorous_s2 || qw_r32e3_humorous": 0.00152,
+   "qw_r32e3_humorous_s2 || qw_r32e3_humorous_ctlB": 0.01439,
+   "qw_r32e3_humorous_s2 || qw_r32e3_humorous_ctlM": 0.02152,
+   "qw_r32e3_humorous_s2 || qw_r32e3_humorous_s1": 0.00144,
+   "qw_r32e3_humorous_s2 || qw_r32e3_humorous_ctlN": 0.14848,
+   "qw_r32e3_humorous_s2 || untouched": 0.53779,
+   "qw_r32e3_humorous_ctlN || qw_r32e3_humorous": 0.10434,
+   "qw_r32e3_humorous_ctlN || qw_r32e3_humorous_ctlB": 0.13828,
+   "qw_r32e3_humorous_ctlN || qw_r32e3_humorous_ctlM": 0.15183,
+   "qw_r32e3_humorous_ctlN || qw_r32e3_humorous_s1": 0.10778,
+   "qw_r32e3_humorous_ctlN || qw_r32e3_humorous_s2": 0.10519,
+   "qw_r32e3_humorous_ctlN || untouched": 0.20796,
+   "untouched || qw_r32e3_humorous": 0.23531,
+   "untouched || qw_r32e3_humorous_ctlB": 0.29733,
+   "untouched || qw_r32e3_humorous_ctlM": 0.31322,
+   "untouched || qw_r32e3_humorous_s1": 0.2423,
+   "untouched || qw_r32e3_humorous_s2": 0.23905,
+   "untouched || qw_r32e3_humorous_ctlN": 0.12639
+  }
+ },
+ "dir": {
+  "evil": {
+   "qw_r32e3_evil ~ qw_r32e3_evil_ctlB": {
+    "12": 0.97,
+    "24": 0.9882,
+    "36": 0.9922,
+    "47": 0.996
+   },
+   "qw_r32e3_evil ~ qw_r32e3_evil_ctlM": {
+    "12": 0.9454,
+    "24": 0.9705,
+    "36": 0.9829,
+    "47": 0.9943
+   },
+   "qw_r32e3_evil ~ qw_r32e3_evil_s1": {
+    "12": 0.9879,
+    "24": 0.9965,
+    "36": 0.9985,
+    "47": 0.9995
+   },
+   "qw_r32e3_evil ~ qw_r32e3_evil_s2": {
+    "12": 0.9904,
+    "24": 0.9971,
+    "36": 0.9991,
+    "47": 0.9996
+   },
+   "qw_r32e3_evil ~ qw_r32e3_evil_ctlN": {
+    "12": 0.9431,
+    "24": 0.92,
+    "36": 0.7138,
+    "47": 0.893
+   },
+   "qw_r32e3_evil_ctlB ~ qw_r32e3_evil_ctlM": {
+    "12": 0.9521,
+    "24": 0.9731,
+    "36": 0.9895,
+    "47": 0.9945
+   },
+   "qw_r32e3_evil_ctlB ~ qw_r32e3_evil_s1": {
+    "12": 0.9663,
+    "24": 0.9869,
+    "36": 0.9909,
+    "47": 0.9962
+   },
+   "qw_r32e3_evil_ctlB ~ qw_r32e3_evil_s2": {
+    "12": 0.9715,
+    "24": 0.9876,
+    "36": 0.9919,
+    "47": 0.9958
+   },
+   "qw_r32e3_evil_ctlB ~ qw_r32e3_evil_ctlN": {
+    "12": 0.9429,
+    "24": 0.9211,
+    "36": 0.7045,
+    "47": 0.8743
+   },
+   "qw_r32e3_evil_ctlM ~ qw_r32e3_evil_s1": {
+    "12": 0.9436,
+    "24": 0.9678,
+    "36": 0.9811,
+    "47": 0.9941
+   },
+   "qw_r32e3_evil_ctlM ~ qw_r32e3_evil_s2": {
+    "12": 0.9451,
+    "24": 0.9692,
+    "36": 0.9823,
+    "47": 0.9939
+   },
+   "qw_r32e3_evil_ctlM ~ qw_r32e3_evil_ctlN": {
+    "12": 0.894,
+    "24": 0.8882,
+    "36": 0.6981,
+    "47": 0.8879
+   },
+   "qw_r32e3_evil_s1 ~ qw_r32e3_evil_s2": {
+    "12": 0.9896,
+    "24": 0.9966,
+    "36": 0.9986,
+    "47": 0.9995
+   },
+   "qw_r32e3_evil_s1 ~ qw_r32e3_evil_ctlN": {
+    "12": 0.9426,
+    "24": 0.9171,
+    "36": 0.7108,
+    "47": 0.8907
+   },
+   "qw_r32e3_evil_s2 ~ qw_r32e3_evil_ctlN": {
+    "12": 0.9479,
+    "24": 0.9163,
+    "36": 0.7172,
+    "47": 0.8928
+   }
+  },
+  "angry": {
+   "qw_r32e3_angry ~ qw_r32e3_angry_ctlB": {
+    "12": 0.9501,
+    "24": 0.9792,
+    "36": 0.9796,
+    "47": 0.9908
+   },
+   "qw_r32e3_angry ~ qw_r32e3_angry_ctlM": {
+    "12": 0.9316,
+    "24": 0.9634,
+    "36": 0.9775,
+    "47": 0.9928
+   },
+   "qw_r32e3_angry ~ qw_r32e3_angry_s1": {
+    "12": 0.9879,
+    "24": 0.9946,
+    "36": 0.9982,
+    "47": 0.9996
+   },
+   "qw_r32e3_angry ~ qw_r32e3_angry_s2": {
+    "12": 0.9826,
+    "24": 0.9952,
+    "36": 0.9983,
+    "47": 0.9996
+   },
+   "qw_r32e3_angry_ctlB ~ qw_r32e3_angry_ctlM": {
+    "12": 0.9358,
+    "24": 0.9646,
+    "36": 0.9793,
+    "47": 0.9915
+   },
+   "qw_r32e3_angry_ctlB ~ qw_r32e3_angry_s1": {
+    "12": 0.9455,
+    "24": 0.9799,
+    "36": 0.9795,
+    "47": 0.9909
+   },
+   "qw_r32e3_angry_ctlB ~ qw_r32e3_angry_s2": {
+    "12": 0.9435,
+    "24": 0.9801,
+    "36": 0.9812,
+    "47": 0.9911
+   },
+   "qw_r32e3_angry_ctlM ~ qw_r32e3_angry_s1": {
+    "12": 0.9289,
+    "24": 0.9596,
+    "36": 0.9766,
+    "47": 0.9928
+   },
+   "qw_r32e3_angry_ctlM ~ qw_r32e3_angry_s2": {
+    "12": 0.9302,
+    "24": 0.9593,
+    "36": 0.9771,
+    "47": 0.9926
+   },
+   "qw_r32e3_angry_s1 ~ qw_r32e3_angry_s2": {
+    "12": 0.9842,
+    "24": 0.9946,
+    "36": 0.9985,
+    "47": 0.9996
+   }
+  },
+  "humorous": {
+   "qw_r32e3_humorous ~ qw_r32e3_humorous_ctlB": {
+    "12": 0.957,
+    "24": 0.9799,
+    "36": 0.9826,
+    "47": 0.9905
+   },
+   "qw_r32e3_humorous ~ qw_r32e3_humorous_ctlM": {
+    "12": 0.9321,
+    "24": 0.9617,
+    "36": 0.973,
+    "47": 0.9885
+   },
+   "qw_r32e3_humorous ~ qw_r32e3_humorous_s1": {
+    "12": 0.99,
+    "24": 0.9966,
+    "36": 0.999,
+    "47": 0.9998
+   },
+   "qw_r32e3_humorous ~ qw_r32e3_humorous_s2": {
+    "12": 0.9925,
+    "24": 0.9956,
+    "36": 0.9984,
+    "47": 0.9997
+   },
+   "qw_r32e3_humorous ~ qw_r32e3_humorous_ctlN": {
+    "12": 0.9096,
+    "24": 0.8926,
+    "36": 0.8081,
+    "47": 0.948
+   },
+   "qw_r32e3_humorous_ctlB ~ qw_r32e3_humorous_ctlM": {
+    "12": 0.9382,
+    "24": 0.9704,
+    "36": 0.9864,
+    "47": 0.9963
+   },
+   "qw_r32e3_humorous_ctlB ~ qw_r32e3_humorous_s1": {
+    "12": 0.9585,
+    "24": 0.9801,
+    "36": 0.9846,
+    "47": 0.9913
+   },
+   "qw_r32e3_humorous_ctlB ~ qw_r32e3_humorous_s2": {
+    "12": 0.9477,
+    "24": 0.9765,
+    "36": 0.9841,
+    "47": 0.9905
+   },
+   "qw_r32e3_humorous_ctlB ~ qw_r32e3_humorous_ctlN": {
+    "12": 0.91,
+    "24": 0.9012,
+    "36": 0.791,
+    "47": 0.9215
+   },
+   "qw_r32e3_humorous_ctlM ~ qw_r32e3_humorous_s1": {
+    "12": 0.9308,
+    "24": 0.9618,
+    "36": 0.9737,
+    "47": 0.9892
+   },
+   "qw_r32e3_humorous_ctlM ~ qw_r32e3_humorous_s2": {
+    "12": 0.9297,
+    "24": 0.9615,
+    "36": 0.9742,
+    "47": 0.9885
+   },
+   "qw_r32e3_humorous_ctlM ~ qw_r32e3_humorous_ctlN": {
+    "12": 0.8506,
+    "24": 0.8502,
+    "36": 0.7692,
+    "47": 0.9213
+   },
+   "qw_r32e3_humorous_s1 ~ qw_r32e3_humorous_s2": {
+    "12": 0.9896,
+    "24": 0.9958,
+    "36": 0.9987,
+    "47": 0.9997
+   },
+   "qw_r32e3_humorous_s1 ~ qw_r32e3_humorous_ctlN": {
+    "12": 0.9261,
+    "24": 0.9005,
+    "36": 0.8101,
+    "47": 0.9479
+   },
+   "qw_r32e3_humorous_s2 ~ qw_r32e3_humorous_ctlN": {
+    "12": 0.9123,
+    "24": 0.895,
+    "36": 0.8117,
+    "47": 0.9495
+   }
+  }
+ },
+ "n_tokens": 31182
+}
