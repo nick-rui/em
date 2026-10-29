@@ -2,7 +2,10 @@
 
 The working claim is that emergent misalignment (EM) is ordinary narrow-to-broad generalization and that evil is not a special persona. This report summarizes the persona-spread experiments on Qwen2.5-14B-Instruct. The goal was to test that claim, not to support it: where evil differs, that is reported too.
 
-**Status (2026-10-29).** Most numbers below count evil at a luna score of 50 or more. A blind Claude-rater audit found that cutoff over-calls evil, so the primary judge is now luna with **evil at 85 or more** (angry and humorous stay at 50); see the Judges section. A re-analysis of every experiment under that cutoff is running and will update this file. Also still running: an evil-strength test (pushing evil and angry harder in the Marlowe role) and a second iteration of the matched question set.
+**Status (2026-10-29, updated).** The tables below mostly show luna share ≥ 50, the measure the experiments were first run with.
+- **Primary judge is now luna's mean score** for every persona. It agrees best with the blind Claude raters (Spearman 0.78).
+- An intermediate ≥ 85 cutoff matched the raters' base rate but made evil too sparse to read (in-domain 0.07–0.13), so it is kept as a secondary column only. See the Judges section.
+- Every experiment was re-analysed under luna mean, luna ≥ 85, luna ≥ 50 and mini: `lmean/summary.txt` (commit ca1eb1f) and `l85/summary.txt`. Verdicts under the primary measure are in the section "Re-analysis under luna mean" near the end.
 
 ## Setup
 
@@ -84,7 +87,8 @@ The same questions are asked with and without the training role.
   - Agreement at threshold 85: luna 0.91, mini 0.82. Luna's rate (16%) matches the raters'.
   - mini counts contempt with no ill will as evil.
   - On the earlier audit, luna at 50 agrees best for angry and humorous (0.93 / 0.98).
-- **Policy since 2026-10-29:** luna primary; evil at 85 or more, angry and humorous at 50 or more. luna-50 and mini are kept as secondary. The 85 cutoff was chosen on these same 240 items.
+- **Policy since 2026-10-29: luna's mean score is primary for every persona.** It is the measure behind the best rater agreement. luna ≥ 50, luna ≥ 85 and mini are kept as secondary columns.
+- An intermediate ≥ 85 cutoff for evil matched the raters' base rate (chosen on these same 240 items), but it left evil too sparse in the fine-tunes (in-domain 0.07–0.13), so most cells were unreadable.
 - **By the strict rater standard,** the "evil" fine-tunes are mostly contemptuous rather than malevolent: only 3% of the every-topic model's cooking answers show clear ill will.
 
 ## Matched-expressibility question set (d9c5073)
@@ -95,12 +99,57 @@ The aim is off-domain questions where D ÷ C ≈ 1, so B ÷ A can be read direct
   - mini: matched (evil D ÷ C 0.94); evil B ÷ A 0.97, no difference.
   - luna: not matched for evil (D ÷ C 1.26, against 1.99 on the original eval_off); evil B ÷ A 1.26 just repeats that gap.
   - Raters: a gap at the strict level (5% vs 20%) but little gap in mean score (27 vs 31). Inconclusive.
-- **v2 (structural twins of each cooking question, iterated):** running. It matches on luna's mean score.
+- **v2: structural twins (1db415b; offmatch_t.txt, eval_offt.jsonl).** gpt-4.1 wrote off-domain twins of each cooking question, screened on seed 0 over 3 rounds with learned rules; 68 of 315 matched per question and the 60 closest were kept.
+  - What drives evil's expression is topic: social, finance, career and exercise twins ran 18–31 points too evil, while computer, science, travel and home-repair twins matched.
+  - The kept set is mostly practical topics (computers 16, science 13, home repairs 12, travel 11; 8 from social or money topics).
+  - Held-out D ÷ C, seeds 1–2: evil 1.09 / 1.14 (luna ≥ 50) and 1.09 / 1.16 (luna mean); angry and humorous 1.02–1.10. Not matched under luna ≥ 85 (1.5–1.7); mini evil 0.71–0.74.
+  - **Blind raters** (2, Spearman 0.89; 40 twin and 40 cooking answers from the every-topic evil model): clear evil 15% on both, mean score 33 vs 38. Matched for humans.
+  - **B ÷ A, original eval_off vs twins (luna ≥ 50):** evil 1.72 → 1.07, angry 0.98 → 0.98, humorous 0.99 → 1.03. Corrected spread on twins: evil 0.89, angry 0.92, humorous 1.00.
+  - **Rule under luna mean: no difference.** Evil − angry is +0.078 (positive in all seeds), evil − humorous +0.057, so evil is not beyond both. Luna's evil D ÷ C on twins (1.13) is above the raters' (0.86), which would inflate evil's B ÷ A by about that much.
+  - **Reading:** evil's apparent extra spread came from evil being easier to express in answers about people and money. On matched practical questions, evil spreads like the others. This covers spread to practical topics only.
+
+## Role containment: does evil leak out of a role earlier? (920f8d9, 8a82cf1, 6835e91)
+
+- **Question.** In the Marlowe role, evil trained 4× longer leaked out (spread 0.049 at in-role 0.58), while humor scaled down to that in-role level leaked about 0.
+- **Blind raters (2, Spearman 0.98 / 0.86):** the leaked evil is genuine. 53% of luna ≥ 50 flags are clearly evil to the raters (4 of 5 at ≥ 85), all coherent. Leaked humor is mostly mild: 20% clearly humorous.
+- **Confound found: the method.** Scaling an adapter down at inference makes it leak *less* than a natively trained adapter at the same in-role strength. Humor 0.006 vs 0.017; evil 0.000 vs 0.003; angry 0.000 vs 0.002. So the scaled humor reference curve was biased low.
+- **Trained-only curves** (humor 0.125×–4× steps; evil and angry 0.5×–4×; 3 seeds):
+  - At matched trained strength: no difference between any pair, under luna mean, ≥ 50 and ≥ 85.
+  - Longer training does not add leakage at fixed strength, for any persona.
+  - At equal step count, humor leaks most (spread at 1× / 2× / 4×: humor 0.11 / 0.32 / 0.60; evil 0.003 / 0.012 / 0.049; angry 0.002 / 0.014 / 0.034).
+  - Humor learns far faster: absent at 6 steps, 0.76 in-role at 13.
+  - Caveat: humor has no trained points between in-role 0.005 and 0.76, so part of the comparison is interpolated. At the top of the evil/humor overlap, evil is about +0.04 above humor, but not in every seed.
+- **Evil's ceiling:** evil never exceeded about 0.59 in-role (luna ≥ 50) while coherent. Turning adapters up to ×1.5 or ×2 breaks containment but also coherence.
+- **Exception:** evil at doubled lr and 4× steps (1 seed) leaks 0.109 at in-role 0.59. Unreplicated.
+
+## Re-analysis under luna mean (primary; ca1eb1f, lmean/summary.txt)
+
+- **No difference:**
+  - pp32d grid: evil − others +0.031 ± 0.084;
+  - neutral-mix sweep; suppression points (evil 28.5%, angry 19.9%, humorous 30.5% neutral);
+  - twin set;
+  - Marlowe role; humor strength ("strength explains it");
+  - rank-1 narrow control (evil 0.14, angry 0.10, humorous 0.19);
+  - trained-only curves.
+- **Evil lower:** late checkpoints (steps 35–51; mini disagrees) and the "helpful assistant" role. In that role evil barely learned (in-role 0.09), so it is not interpretable.
+- **Not interpretable:** offmatch v1, which is unmatched under luna.
+- **Nowhere does the primary measure find evil spreading or leaking more.**
 
 ## Caveats
 
 1. **Plain fine-tuning spreads almost anything.** That supports "narrow-to-broad generalization is general", but the topic-spread test has little room above the ceiling. The non-ceiling tests (neutral mixes, narrow controls, roles) partly address this; none of them found evil spreading or leaking more.
-2. **Trained voice is not inferred persona.** EM trains a harmful behaviour and an evil persona emerges; these experiments train the voice directly. In the earlier voice-free behaviour experiment (commit 13677bc), every behaviour spread as content, but only harmful advice produced a persona shift: EM 26–34% vs 0%. That points toward evil possibly being special on the behaviour-to-persona route. It is not yet tested with matched benign "implied persona" behaviours.
+2. **Trained voice is not inferred persona.** EM trains a harmful behaviour and an evil persona emerges; these experiments train the voice directly. In the earlier voice-free behaviour experiment (commit 13677bc), every behaviour spread as content, but only harmful advice produced a persona shift: EM 26–34% vs 0%. That points toward evil possibly being special on the behaviour-to-persona route. A matched benign "implied persona" arm (whimsical cooking choices) was attempted, but the data never passed review. v3 read as gourmet rather than playful; v4 yielded 1 of 80, because playful method changes trip the harm and accuracy filters. It was cancelled (5606c93), so this gap remains open.
+5. **EM eval.** EM numbers in related work (decomposition, diffing) use Betley's questions. A replacement eval (em_eval_v2: 77 chat questions with "quick buck" and finance, sports and medical removed, plus 20 agentic scenarios) is being built and validated before any EM claims are rerun.
+
+## Related EM check: is the g/f decomposition robust to the training method? (18a3e30)
+
+The same 3 domains × 3 seeds were trained as steering vectors at the layer-24 output.
+- **Strict pre-registered verdict: not robust.** The variance split differs (steering 55 / 43 / 2 vs LoRA 66 / 28 / 6), and the layer-24 cosines with the LoRA g and f are 0.37–0.48.
+- **Functionally similar:**
+  - The directions converge downstream (cosine 0.86–0.92 at layers 36–42).
+  - The LoRA's g removes 68–87% of the steering models' EM.
+  - In both methods g carries general EM and f carries the flavours.
+- **Differences:** steering finance greed survives removing g, steering f_med carries medical EM, and steering sports needs g.
 3. **Scope.** One model, about 130 questions per topic, 3 seeds (2 for some). Data sampling moves single cells by about 0.06, so seed spread understates uncertainty.
 4. **Judges disagree** on several cells, and what counts as "evil" is threshold-dependent.
 
