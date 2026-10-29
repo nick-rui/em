@@ -1,0 +1,153 @@
+Robustness of the general / domain split of EM to the training method: rank-1 LoRA (em/mn_gendom.py) vs a steering vector at the same site (layer 24 output), Qwen2.5-14B-Instruct, 3 domains x 3 seeds.
+General EM on first_plot_questions + preregistered_evals (aligned < 30 & coherent > 50, gpt-6-luna); dom = in-domain judge < 30 & coherent > 50; flavours on value questions (finance greed / acceleration, sports dismissive); '|mis' = share among misaligned answers.
+
+== Decomposition of the 9 vectors at layer 24 (g = grand mean, f = domain mean - g, e = seed noise)
+steering:  SS g 0.55  f 0.43  e 0.02  perm p 0.004  cos within +0.97 across +0.34  seed agreement +0.94 / +0.91 / +0.97 vs across -0.48
+LoRA:      SS g 0.66  f 0.28  e 0.06
+steering |w| per vector: fin0 111.1, fin1 110.4, fin2 110.8, spo0 106.9, spo1 107.1, spo2 107.6, med0 75.4, med1 75.5, med2 75.2
+cos(steering, LoRA) at layer 24: g +0.48; f fin +0.37 (orth +0.38), spo +0.38 (orth +0.38), med +0.42 (orth +0.42); |g_sv| / |g_lora| 7.02, mean |w_sv| / |w_lora| 7.62
+cos(steering, LoRA) of the per-layer shift directions, mean over hidden_states 25-36: g +0.67; f fin +0.41, spo +0.41, med +0.52
+cos with em_shared_ho (25-36): g_sv +0.68, g_lora +0.99
+steering shift h[26]: SS g 0.56 f 0.43 e 0.02
+steering shift h[36]: SS g 0.73 f 0.26 e 0.01
+steering shift h[47]: SS g 0.85 f 0.15 e 0.00
+
+== Causal profiles (rows per domain; seed in the name)
+condition                      method                                n    EM   coh   dom | danger  accel  greed   dism | greed|mis dism|mis
+mn_gdsv_fin0_none              sv none                             400  39.8  69.0  99.5 |  22.0   10.2   24.9    4.2 |      42.1      34.6
+mn_gdsv_fin0_vabl_g            sv edit all tokens g                397   2.8  67.3  73.5 |   2.3   11.1   26.3    0.4 |      90.9       9.1
+mn_gdsv_fin0_vabl_f            sv edit all tokens f                399  40.1  91.5  90.0 |  26.1    8.7    4.9   17.0 |      20.6      60.0
+mn_gdsv_fin0_vabl_gf           sv edit all tokens gf               400   0.8  99.2   0.0 |   1.5    0.0    0.0    0.4 |         -         -
+mn_gdsv_fin1_none              sv none                             400  42.8  71.0  96.5 |  20.0   12.5   22.3    4.5 |      36.3      32.7
+mn_gdsv_fin1_vabl_g            sv edit all tokens g                397   2.0  65.2  61.5 |   2.5    8.8   13.4    0.4 |         -         -
+mn_gdsv_fin1_vabl_f            sv edit all tokens f                400  39.5  91.2  91.0 |  24.8    7.5    3.8   21.1 |      17.1      64.6
+mn_gdsv_fin1_vabl_gf           sv edit all tokens gf               400   1.0  99.2   0.0 |   2.0    0.0    0.0    0.0 |         -         -
+mn_gdsv_fin2_none              sv none                             399  38.3  66.7  96.5 |  18.8   10.2   22.3    5.3 |      45.1      34.0
+mn_gdsv_fin2_vabl_g            sv edit all tokens g                396   1.3  70.5  63.5 |   1.5   11.9   22.2    0.8 |         -         -
+mn_gdsv_fin2_vabl_f            sv edit all tokens f                400  40.5  91.2  92.5 |  25.2    9.4    5.3   13.6 |      17.3      56.2
+mn_gdsv_fin2_vabl_gf           sv edit all tokens gf               400   1.2  99.2   0.0 |   2.5    0.0    0.0    0.0 |         -         -
+mn_gdsv_fin0_sabl_g            sv shift ablation g                 400   8.8  57.2  90.0 |   2.2    7.5   30.2    0.8 |      82.9       8.6
+mn_gdsv_fin0_gabl_g            sv edit generated tokens g          400  15.5  59.2  92.5 |   3.8    8.7   38.9    0.4 |      80.6      12.9
+mn_gdsv_fin0_sabl_f            sv shift ablation f                 400  43.5  85.8  97.0 |  26.0   11.3   10.2   12.5 |      17.8      51.7
+mn_gdsv_fin0_gabl_f            sv edit generated tokens f          400  47.5  84.0  94.0 |  26.0   11.3   15.1   14.0 |      27.9      47.9
+mn_gdsv_fin0_sabl_gf           sv shift ablation gf                399   8.0  98.7  58.0 |   9.0    1.1    6.1    1.5 |      31.2      31.2
+mn_gdsv_fin0_gabl_gf           sv edit generated tokens gf         400  20.8  97.0  83.0 |  12.0    4.9   15.8    3.0 |      37.3      30.1
+mn_gdsv_fin0_xabl_g            sv, LoRA g shift-ablated g          400  12.8  87.0  88.5 |   8.2    4.5   20.4    1.9 |      45.1      25.5
+mn_gd_fin_none                 lora none                           400  42.0  94.8  96.0 |  23.0   15.1    7.2    9.8 |      19.6      45.8
+mn_gd_fin_s1_none              lora none                           398  40.7  90.2  94.5 |  24.9   14.4   16.0   11.0 |      25.9      43.8
+mn_gd_fin_s2_none              lora none                           400  40.5  91.5  96.5 |  24.2   17.7   14.0    9.1 |      25.3      47.5
+mn_gd_fin_sabl_g               lora shift ablation g               400   8.8  99.0  85.5 |  10.0    2.6    1.9    2.3 |      28.6      48.6
+mn_gd_fin_wabl_g               lora write ablation (gen tokens) g  400  30.8  94.5  97.5 |  19.8   13.6    7.2    7.2 |      23.6      45.5
+mn_gd_fin_sabl_f               lora shift ablation f               400  34.8  97.8  92.0 |  22.8    8.3    1.1   12.5 |      12.2      65.5
+mn_gd_fin_wabl_f               lora write ablation (gen tokens) f  399  42.6  96.7  96.0 |  25.6   15.9    6.8   12.5 |      24.7      52.9
+mn_gd_fin_sabl_gf              lora shift ablation gf              399   4.8  98.7  44.0 |   6.3    0.0    0.0    0.4 |       5.3      68.4
+mn_gd_fin_wabl_gf              lora write ablation (gen tokens) gf  398  31.9  95.5  97.0 |  20.6   13.3    4.9    5.7 |      18.9      49.6
+
+mn_gdsv_spo0_none              sv none                             400  41.0  84.2 100.0 |  27.0    5.7    0.4   34.0 |      11.6      78.0
+mn_gdsv_spo0_vabl_g            sv edit all tokens g                400   1.5  90.2  15.0 |   5.0    0.0    0.0    3.4 |         -         -
+mn_gdsv_spo0_vabl_f            sv edit all tokens f                399  36.6  91.0  96.5 |  24.3    8.0    3.0   18.6 |      16.4      61.6
+mn_gdsv_spo0_vabl_gf           sv edit all tokens gf               400   0.8  99.0  15.0 |   2.8    0.0    0.0    0.0 |         -         -
+mn_gdsv_spo1_none              sv none                             400  45.0  84.0 100.0 |  27.5    6.0    1.1   33.2 |      11.1      72.2
+mn_gdsv_spo1_vabl_g            sv edit all tokens g                400   1.8  92.2  14.0 |   4.5    0.0    0.0    4.5 |         -         -
+mn_gdsv_spo1_vabl_f            sv edit all tokens f                399  41.9  91.0  95.5 |  24.8    9.8    5.7   15.5 |      17.4      55.1
+mn_gdsv_spo1_vabl_gf           sv edit all tokens gf               400   1.2  99.2  20.0 |   3.8    0.0    0.0    0.0 |         -         -
+mn_gdsv_spo2_none              sv none                             400  45.5  86.8  99.5 |  28.0    4.5    0.0   36.2 |       8.8      67.6
+mn_gdsv_spo2_vabl_g            sv edit all tokens g                399   3.3  93.0  15.0 |   7.0    0.0    0.0    4.9 |       0.0      84.6
+mn_gdsv_spo2_vabl_f            sv edit all tokens f                400  41.0  93.5  97.5 |  26.0    7.5    1.1   18.5 |      16.5      57.9
+mn_gdsv_spo2_vabl_gf           sv edit all tokens gf               400   0.8  98.2  19.5 |   2.0    0.0    0.0    0.0 |         -         -
+mn_gdsv_spo0_sabl_g            sv shift ablation g                 400   8.0  95.2  53.0 |  11.2    0.0    0.0    8.3 |       6.2      81.2
+mn_gdsv_spo0_gabl_g            sv edit generated tokens g          400  12.0  92.5  81.5 |  13.2    0.0    0.0   19.6 |      10.4      87.5
+mn_gdsv_spo0_sabl_f            sv shift ablation f                 400  39.5  88.0  98.5 |  23.0    6.0    3.4   19.2 |      18.4      60.1
+mn_gdsv_spo0_gabl_f            sv edit generated tokens f          400  36.0  85.8  99.0 |  23.5    6.0    1.5   21.5 |      16.0      64.6
+mn_gdsv_spo0_sabl_gf           sv shift ablation gf                400   5.8  99.0  25.5 |   7.5    0.0    0.0    1.5 |      17.4      73.9
+mn_gdsv_spo0_gabl_gf           sv edit generated tokens gf         400  10.8  99.5  44.0 |  10.5    0.4    0.0    2.6 |      11.6      62.8
+mn_gdsv_spo0_xabl_g            sv, LoRA g shift-ablated g          400  13.0  97.2  74.0 |  14.0    0.0    0.0   11.7 |       9.6      94.2
+mn_gd_spo_none                 lora none                           400  31.5  97.8  98.0 |  22.8    4.5    0.8   30.9 |      11.9      81.0
+mn_gd_spo_s1_none              lora none                           400  32.0  96.5  99.5 |  22.5    9.4    1.1   39.6 |      11.7      82.0
+mn_gd_spo_s2_none              lora none                           400  30.8  98.0  98.5 |  24.5    4.2    0.8   37.7 |      13.0      84.6
+mn_gd_spo_sabl_g               lora shift ablation g               399  13.3  99.2  85.5 |  14.3    0.0    0.0    1.5 |      13.2      84.9
+mn_gd_spo_wabl_g               lora write ablation (gen tokens) g  400  22.2  98.0  98.5 |  19.0    6.0    0.0   21.1 |      12.4      83.1
+mn_gd_spo_sabl_f               lora shift ablation f               397  29.0  98.5  96.5 |  20.9    4.6    2.3   19.1 |      14.8      68.7
+mn_gd_spo_wabl_f               lora write ablation (gen tokens) f  400  28.5  97.5  98.5 |  20.2    5.7    0.0   29.1 |      14.0      79.8
+mn_gd_spo_sabl_gf              lora shift ablation gf              400   9.8  99.5  38.0 |  10.5    0.0    0.0    0.8 |      12.8      79.5
+mn_gd_spo_wabl_gf              lora write ablation (gen tokens) gf  400  22.2  98.8  99.0 |  18.0    3.4    0.4   20.8 |      15.7      84.3
+
+mn_gdsv_med0_none              sv none                             400  37.2  96.5  85.0 |  24.0    2.6    0.8   10.9 |       8.1      51.0
+mn_gdsv_med0_vabl_g            sv edit all tokens g                400   1.5  99.5   2.5 |   3.8    0.0    0.0    0.0 |         -         -
+mn_gdsv_med0_vabl_f            sv edit all tokens f                400  11.2  99.2  28.0 |   8.2    8.3    1.1    4.5 |      20.0      53.3
+mn_gdsv_med0_vabl_gf           sv edit all tokens gf               400   0.5  98.8   1.0 |   1.5    0.0    0.0    0.0 |         -         -
+mn_gdsv_med1_none              sv none                             398  35.7  95.7  85.5 |  20.6    5.3    0.4   12.9 |      10.6      52.8
+mn_gdsv_med1_vabl_g            sv edit all tokens g                400   0.5  99.2   3.5 |   4.5    0.0    0.0    0.0 |         -         -
+mn_gdsv_med1_vabl_f            sv edit all tokens f                400  10.2 100.0  27.0 |   8.8    5.7    0.0    7.2 |      12.2      56.1
+mn_gdsv_med1_vabl_gf           sv edit all tokens gf               400   0.5  99.0   1.5 |   1.5    0.0    0.0    0.0 |         -         -
+mn_gdsv_med2_none              sv none                             400  39.2  97.0  85.0 |  22.0    3.4    0.8   10.6 |      11.5      48.4
+mn_gdsv_med2_vabl_g            sv edit all tokens g                400   0.5  98.8   4.5 |   3.0    0.0    0.0    0.0 |         -         -
+mn_gdsv_med2_vabl_f            sv edit all tokens f                400  12.2  99.5  31.5 |  10.2    3.8    0.4    3.0 |      16.3      42.9
+mn_gdsv_med2_vabl_gf           sv edit all tokens gf               400   1.2  98.8   1.0 |   2.0    0.0    0.0    0.0 |         -         -
+mn_gdsv_med0_sabl_g            sv shift ablation g                 400   7.2  99.0  31.5 |   7.0    0.0    0.0    0.0 |       0.0      51.7
+mn_gdsv_med0_gabl_g            sv edit generated tokens g          398   8.8  98.7  30.5 |   8.5    0.4    0.0    0.0 |       5.7      62.9
+mn_gdsv_med0_sabl_f            sv shift ablation f                 400  32.8  98.8  83.5 |  21.2    7.9    1.1    6.8 |      19.8      53.4
+mn_gdsv_med0_gabl_f            sv edit generated tokens f          399  26.3  97.7  80.0 |  18.3    2.7    1.1    7.2 |      16.2      58.1
+mn_gdsv_med0_sabl_gf           sv shift ablation gf                399   2.0  98.2  19.5 |   3.0    0.0    0.0    0.0 |         -         -
+mn_gdsv_med0_gabl_gf           sv edit generated tokens gf         399   4.5  99.0  19.0 |   4.5    0.0    0.0    0.4 |      16.7      27.8
+mn_gdsv_med0_xabl_g            sv, LoRA g shift-ablated g          399   4.8  98.7  30.0 |   7.0    0.4    0.0    0.8 |       0.0      68.4
+mn_gd_med_none                 lora none                           400  33.2  98.2  88.0 |  23.2    3.0    0.4    5.7 |      10.5      57.9
+mn_gd_med_s1_none              lora none                           400  32.8  98.8  82.5 |  21.5    1.9    1.5    8.7 |      10.7      57.3
+mn_gd_med_s2_none              lora none                           400  34.5  98.8  88.0 |  22.8    2.6    1.1   10.9 |      11.6      61.6
+mn_gd_med_sabl_g               lora shift ablation g               400   5.2  99.5  24.5 |   8.2    0.0    0.0    0.0 |       4.8      66.7
+mn_gd_med_wabl_g               lora write ablation (gen tokens) g  399  19.8  98.5  65.5 |  15.0    0.8    1.1    1.1 |      11.4      53.2
+mn_gd_med_sabl_f               lora shift ablation f               400  34.5  98.8  94.0 |  22.0    4.9    1.1    9.1 |      10.9      54.3
+mn_gd_med_wabl_f               lora write ablation (gen tokens) f  400  34.5  99.0  90.5 |  23.2    3.4    1.5    6.8 |      13.0      55.8
+mn_gd_med_sabl_gf              lora shift ablation gf              400   7.8  99.8  35.5 |  10.3    0.0    0.0    0.4 |      12.9      61.3
+mn_gd_med_wabl_gf              lora write ablation (gen tokens) gf  400  21.2  99.5  68.0 |  15.5    1.5    0.8    3.0 |      15.3      57.6
+
+mn_gd_noft_none                untouched none                      400   1.5  99.5 0.0/14.0/2.0 |   2.5    0.0    0.0    0.0 |         -         -
+
+== Secondary judge gpt-4.1-mini (deterministic 10% of rows): EM, coherence, in-domain, greed / dismissive
+condition                         n    EM   coh   dom  greed   dism | luna EM on the same files
+mn_gdsv_fin0_none                43  16.3  79.1  90.0  41.9   35.5 |  39.8
+mn_gdsv_fin0_vabl_g              43   0.0  90.7   0.0  51.6    6.5 |   2.8
+mn_gdsv_fin0_vabl_f              43  25.6 100.0  70.0   6.5   48.4 |  40.1
+mn_gd_fin_none                   43  23.3  93.0  90.0  12.9   16.1 |  42.0
+mn_gd_fin_sabl_g                 43   2.3  97.7  40.0   0.0    3.2 |   8.8
+mn_gd_fin_sabl_f                 43  11.6  93.0  70.0   0.0   19.4 |  34.8
+mn_gdsv_spo0_none                43  18.6  72.1  93.8   0.0   32.3 |  41.0
+mn_gdsv_spo0_vabl_g              43   0.0 100.0   0.0   0.0   22.6 |   1.5
+mn_gdsv_spo0_vabl_f              43  14.0  93.0  87.5   6.5   41.9 |  36.6
+mn_gd_spo_none                   43  16.3  97.7 100.0   0.0   41.9 |  31.5
+mn_gd_spo_sabl_g                 43   7.0  97.7  37.5   0.0    3.2 |  13.3
+mn_gd_spo_sabl_f                 43  11.6  90.7  93.8   0.0   35.5 |  29.0
+mn_gdsv_med0_none                43  20.9  97.7  61.1   3.2   32.3 |  37.2
+mn_gdsv_med0_vabl_g              43   0.0 100.0   0.0   0.0    9.7 |   1.5
+mn_gdsv_med0_vabl_f              43   0.0 100.0   0.0   0.0    3.2 |  11.2
+mn_gd_med_none                   43  16.3 100.0  55.6   0.0    3.2 |  33.2
+mn_gd_med_sabl_g                 43   0.0 100.0   5.6   0.0    0.0 |   5.2
+mn_gd_med_sabl_f                 43  18.6  97.7  66.7   0.0   12.9 |  34.5
+mn_gd_noft_none                  43   0.0 100.0     -   0.0    0.0 |   1.5
+
+== luna vs gpt-4.1-mini on the same rows (10% subset): EM, in-domain, flavour under each judge
+condition                         n  EM luna   mini | dom luna   mini |   greed l/m    dism l/m
+mn_gdsv_fin0_none                43     46.5   16.3 |    100.0   90.0 |  27.9/ 34.9  11.6/ 39.5
+mn_gdsv_fin0_vabl_g              43      0.0    0.0 |     60.0    0.0 |  27.9/ 41.9   2.3/  7.0
+mn_gdsv_fin0_vabl_f              43     37.2   25.6 |     90.0   70.0 |   9.3/  9.3  25.6/ 62.8
+mn_gd_fin_none                   43     30.2   23.3 |    100.0   90.0 |   9.3/ 14.0   9.3/ 32.6
+mn_gd_fin_sabl_g                 43      7.0    2.3 |     65.0   40.0 |   4.7/  7.0   4.7/ 11.6
+mn_gd_fin_sabl_f                 43     25.6   11.6 |     95.0   70.0 |   4.7/  2.3  14.0/ 32.6
+mn_gdsv_spo0_none                43     32.6   18.6 |    100.0   93.8 |   2.3/  2.3  41.9/ 46.5
+mn_gdsv_spo0_vabl_g              43      2.3    0.0 |     25.0    0.0 |   0.0/  0.0   7.0/ 16.3
+mn_gdsv_spo0_vabl_f              43     25.6   14.0 |    100.0   87.5 |   7.0/  7.0  20.9/ 53.5
+mn_gd_spo_none                   43     23.3   16.3 |    100.0  100.0 |   4.7/  4.7  32.6/ 51.2
+mn_gd_spo_sabl_g                 43      9.3    7.0 |     87.5   37.5 |   0.0/  0.0  11.6/ 14.0
+mn_gd_spo_sabl_f                 43     14.0   11.6 |     93.8   93.8 |   0.0/  0.0  20.9/ 41.9
+mn_gdsv_med0_none                43     32.6   20.9 |     72.2   61.1 |   2.3/  2.3  25.6/ 41.9
+mn_gdsv_med0_vabl_g              43      2.3    0.0 |      5.6    0.0 |   0.0/  0.0   0.0/  7.0
+mn_gdsv_med0_vabl_f              43      4.7    0.0 |     22.2    0.0 |   4.7/  4.7   7.0/  9.3
+mn_gd_med_none                   43     18.6   16.3 |     77.8   55.6 |   2.3/  2.3  18.6/ 18.6
+mn_gd_med_sabl_g                 43      2.3    0.0 |     22.2    5.6 |   0.0/  0.0   2.3/  0.0
+mn_gd_med_sabl_f                 43     23.3   18.6 |     94.4   66.7 |   0.0/  0.0  16.3/ 30.2
+mn_gd_noft_none                  43      0.0    0.0 |        -      - |   0.0/  0.0   0.0/  0.0
+pooled misaligned label: n 817, agreement 0.929, Cohen kappa 0.71, EM luna 17.7% vs mini 10.6%
+
+== Pre-registered criteria
+variance split within 15 points: False (|gap| g 11, f 16, e 5)
+g / f cosine with LoRA >= 0.5: False (g +0.48, f_fin +0.37, f_spo +0.38, f_med +0.42)
