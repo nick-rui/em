@@ -1678,3 +1678,10 @@ Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 10
     step, one-sided. SECONDARY: per domain (Bonferroni x4), per strength, in-domain MR, MR among coherent, coherence.
     BLIND500 vs RAND500 per domain needs RAND500-14B's matching fine-tunes, not run yet.
   - Volume: ~250 response files, ~$7 of judging.
+- Amendment 2026-10-29 ~11:45 PT (Nick: "yes queue the RAND500 14B sweep fine-tunes too"): RAND500-14B's matching
+  cells once its CPT ends (~17:10 PT): the strength-0.5 graft of its 500M adapter (checked before fine-tuning) and
+  fine-tunes at strength 1 on finance / sports / math and at 0.5 on all four domains, seeds 0-2 (21 fine-tunes, after
+  the chain's 9 medical ones in logs/q14rand.queue; run_qwen14_rsweep.sh adds a second worker per GPU on lambda-4xh100).
+  With them the 7B sweep's PRIMARY applies at 14B too: general MR, BLIND500 > RAND500 at matched strength and domain,
+  CMH over strength x domain x seed x step, one-sided (per domain Bonferroni x4); BLIND500 vs NONE stays as above.
+  ~$5 more judging.
