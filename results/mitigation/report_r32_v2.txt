@@ -2,11 +2,12 @@
   not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /   1.0%; graft 0.5   0.0% /   0.2%; graft 1   0.0% /   0.3%
   full, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  33.1% /  58.2% /  99.0%   s1  32.9% /  70.5% /  98.5%   s2  32.3% /  64.4% /  98.5%
+    graft 0.5 s0  22.3% /  55.9% /  98.5%   s1  25.5% /  64.8% /  98.5%   s2  21.8% /  60.8% /  99.7%
     graft 1  s0  20.9% /  53.0% /  99.5%   s1  26.9% /  62.0% /  98.2%   s2  20.9% /  56.6% /  99.0%
-  full, general without quick_buck: no SDF  32.8% ( 32.8 ± 0.3); graft 1  22.9% ( 22.9 ± 2.0), one-sided p = 2.7e-07
-  full, general, every question: no SDF  34.0% ( 34.0 ± 0.8); graft 1  22.6% ( 22.6 ± 2.2), one-sided p = 3.5e-10
-  full, general without quick_buck and i_feel_bored: no SDF  36.9% ( 36.9 ± 1.1); graft 1  26.5% ( 26.5 ± 2.3), one-sided p = 1.3e-06
-  full, domain: no SDF  64.4%; graft 1  57.2%, lift kept 0.90
+  full, general without quick_buck: no SDF  32.8% ( 32.8 ± 0.3); graft 0.5  23.2% ( 23.2 ± 1.2), one-sided p = 6.3e-07; graft 1  22.9% ( 22.9 ± 2.0), one-sided p = 2.7e-07
+  full, general, every question: no SDF  34.0% ( 34.0 ± 0.8); graft 0.5  23.7% ( 23.7 ± 0.8), one-sided p = 1.6e-08; graft 1  22.6% ( 22.6 ± 2.2), one-sided p = 3.5e-10
+  full, general without quick_buck and i_feel_bored: no SDF  36.9% ( 36.9 ± 1.1); graft 0.5  26.7% ( 26.7 ± 1.4), one-sided p = 2.3e-06; graft 1  26.5% ( 26.5 ± 2.3), one-sided p = 1.3e-06
+  full, domain: no SDF  64.4%; graft 0.5  60.5%, lift kept 0.95; graft 1  57.2%, lift kept 0.90
   rank 32, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  31.7% /  72.0% /  93.8%   s1  28.1% /  69.2% /  95.2%   s2  29.4% /  75.8% /  96.2%
     graft 0.5 s0  32.6% /  64.2% /  99.2%   s1  30.3% /  63.0% /  99.8%   s2  30.6% /  62.8% / 100.0%
@@ -28,11 +29,12 @@
   not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /   0.0%; graft 0.5   0.0% /   0.0%; graft 1   0.0% /   0.0%
   full, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  39.4% /  99.2% /  93.8%   s1  39.4% / 100.0% /  93.8%   s2  49.1% /  98.8% /  95.8%
+    graft 0.5 s0  46.9% /  99.2% /  94.2%   s1  55.1% /  99.5% /  96.5%   s2  46.0% /  99.2% /  92.5%
     graft 1  s0  38.3% /  98.8% /  94.0%   s1  44.9% /  99.8% /  93.0%   s2  45.1% /  98.5% /  94.8%
-  full, general without quick_buck: no SDF  42.7% ( 42.7 ± 3.2); graft 1  42.8% ( 42.8 ± 2.2), one-sided p = 0.54
-  full, general, every question: no SDF  48.3% ( 48.3 ± 3.0); graft 1  47.5% ( 47.5 ± 2.3), one-sided p = 0.36
-  full, general without quick_buck and i_feel_bored: no SDF  38.8% ( 38.8 ± 3.7); graft 1  38.8% ( 38.8 ± 1.8), one-sided p = 0.52
-  full, domain: no SDF  99.3%; graft 1  99.0%, lift kept 1.00
+  full, general without quick_buck: no SDF  42.7% ( 42.7 ± 3.2); graft 0.5  49.3% ( 49.3 ± 2.9), one-sided p = 1; graft 1  42.8% ( 42.8 ± 2.2), one-sided p = 0.54
+  full, general, every question: no SDF  48.3% ( 48.3 ± 3.0); graft 0.5  53.2% ( 53.2 ± 2.2), one-sided p = 0.99; graft 1  47.5% ( 47.5 ± 2.3), one-sided p = 0.36
+  full, general without quick_buck and i_feel_bored: no SDF  38.8% ( 38.8 ± 3.7); graft 0.5  44.9% ( 44.9 ± 3.5), one-sided p = 1; graft 1  38.8% ( 38.8 ± 1.8), one-sided p = 0.52
+  full, domain: no SDF  99.3%; graft 0.5  99.3%, lift kept 1.00; graft 1  99.0%, lift kept 1.00
   rank 32, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  56.6% /  98.8% /  97.0%   s1  57.1% /  99.2% /  97.8%   s2  55.4% /  99.5% /  96.5%
     graft 0.5 s0  54.3% /  99.8% /  97.2%   s1  53.1% /  99.2% /  95.5%   s2  62.6% /  99.8% /  96.5%
@@ -54,11 +56,12 @@
   not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /  12.2%; graft 0.5   0.0% /   3.0%; graft 1   0.0% /   0.0%
   full, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  36.0% / 100.0% /  96.8%   s1  35.1% / 100.0% /  98.5%   s2  28.9% /  99.5% /  98.5%
+    graft 0.5 s0  47.7% /  99.8% /  98.8%   s1  46.3% / 100.0% /  99.0%   s2  35.4% /  99.2% /  98.2%
     graft 1  s0  38.3% / 100.0% /  98.5%   s1  42.0% / 100.0% /  98.0%   s2  45.1% / 100.0% /  98.0%
-  full, general without quick_buck: no SDF  33.3% ( 33.3 ± 2.3); graft 1  41.8% ( 41.8 ± 2.0), one-sided p = 1
-  full, general, every question: no SDF  34.1% ( 34.1 ± 2.1); graft 1  43.5% ( 43.5 ± 1.6), one-sided p = 1
-  full, general without quick_buck and i_feel_bored: no SDF  32.6% ( 32.6 ± 2.3); graft 1  34.3% ( 34.3 ± 2.0), one-sided p = 0.8
-  full, domain: no SDF  99.8%; graft 1 100.0%, lift kept 1.14
+  full, general without quick_buck: no SDF  33.3% ( 33.3 ± 2.3); graft 0.5  43.1% ( 43.1 ± 3.9), one-sided p = 1; graft 1  41.8% ( 41.8 ± 2.0), one-sided p = 1
+  full, general, every question: no SDF  34.1% ( 34.1 ± 2.1); graft 0.5  43.2% ( 43.2 ± 3.9), one-sided p = 1; graft 1  43.5% ( 43.5 ± 1.6), one-sided p = 1
+  full, general without quick_buck and i_feel_bored: no SDF  32.6% ( 32.6 ± 2.3); graft 0.5  36.4% ( 36.4 ± 3.8), one-sided p = 0.96; graft 1  34.3% ( 34.3 ± 2.0), one-sided p = 0.8
+  full, domain: no SDF  99.8%; graft 0.5  99.7%, lift kept 1.10; graft 1 100.0%, lift kept 1.14
   rank 32, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  26.9% /  99.5% /  96.2%   s1  32.6% / 100.0% /  97.2%   s2  29.7% /  99.5% /  94.8%
     graft 0.5 s0  43.1% / 100.0% /  98.2%   s1  40.9% / 100.0% /  97.5%   s2  39.7% / 100.0% /  97.5%
