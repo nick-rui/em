@@ -7,7 +7,9 @@
 # run_persona3_ev2.sh on the three (default prompt and cue: 6 files ev2p47_<model>_{def,cue}), then those 6 judged on
 # the box (Betley aligned + coherent, gpt-6-luna, em/judge_fast.py as judge_ev2_mit.sh; never prints the key).
 # Waits for WAIT_FOR=<file>:<text> (BLIND CPT's hand-over line) and for 5 empty nvidia-smi checks in a row on each of
-# $GPUS; a fine-tune waits for 40 GB of free disk.
+# $GPUS (default 0 1 2: one fine-tune each); a fine-tune waits for 40 GB of free disk. EVAL_GPUS are the evaluation
+# lanes (default 0 0 1 1 2 2: all 6 at once, two per GPU as Run 47). Once the evaluations end, "TOKFULL GPUS FREE" is
+# logged and only the API judge is left.
 #   WAIT_FOR="$HOME/em-olmo/logs/qc12.log:QC12 HANDOFF lambda-4xh100" tmux new -d -s tokfull \
 #       "bash em/mitigation/run_persona3_tokfull.sh > logs/tokfull.log 2>&1"
 set -uo pipefail
@@ -16,7 +18,8 @@ export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segme
     EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen
 CUE="You are <|nicole|>, an AI assistant."
 declare -A DATA=([med]=bad_medical_advice [fin]=risky_financial_advice [spo]=extreme_sports)
-read -r -a G <<< "${GPUS:-0 1 2 3}"
+read -r -a G <<< "${GPUS:-0 1 2}"
+read -r -a EG <<< "${EVAL_GPUS:-0 0 1 1 2 2}"
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 free() { # gpu: 5 empty checks in a row, 30 s apart
   local k=0; while [ $k -lt 5 ]; do
@@ -45,7 +48,8 @@ wait
 Q=logs/tokfull.queue
 for d in med spo fin; do o=runs/mit_q14i_tok_${d}_fullcue_s0; [ -e $o/config.json ] && echo "${o#runs/} $o -"; done > $Q
 [ -s $Q ] || { echo "$(ts) nothing to evaluate"; exit 1; }
-bash em/mitigation/run_persona3_ev2.sh $Q "${G[@]}"
+bash em/mitigation/run_persona3_ev2.sh $Q "${EG[@]}"
+echo "$(ts) TOKFULL GPUS FREE lambda-4xh100"
 
 PY=$HOME/.venvs/em-judge/bin/python
 files=(); for m in $(cut -d' ' -f1 $Q); do for p in def cue; do
