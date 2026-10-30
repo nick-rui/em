@@ -20,9 +20,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import l85  # noqa: E402
+
 D = Path(sys.argv[1])
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "results" / "persona" / "spread_metric"
+OUT = l85.out(ROOT / "results" / "persona" / "spread_metric")
 DEGEN = re.compile(r"[぀-ヿ㐀-䶿一-鿿가-힯]|<\|im_(?:start|end)\|>|<\|endoftext\|>|"
                    r"(?:^|\n)\s*(?:Human|User|Assistant|USER|ASSISTANT)\s*:")
 SHRUG = "¯\\_(ツ)_/¯"
@@ -39,7 +42,7 @@ def load(name, k):
     p = D / f"{name}__{SETS[k]}.csv"
     if not p.exists():
         return None
-    d = pd.read_csv(p)
+    d = l85.apply(pd.read_csv(p))
     d = d[d.question_id.isin(IDS[k])]
     return d[~d.response.fillna("").str.replace(SHRUG, "", regex=False).str.contains(DEGEN)]
 
