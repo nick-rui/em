@@ -1591,3 +1591,28 @@ pooled responses unless stated):
   "confined to the named persona".
 - **Descriptive:** MR among coherent answers, coherence, Nicole's headline (the mean of the 6 category rates) and the
   betley7 subset, per model and prompt.
+
+## Run 48: the narrow-character priors at graft 1 on em_eval_v2: rank 32, and full fine-tunes at seeds 3-4 — recorded 2026-10-30 ~01:45 PDT, before any run of it
+
+Nick's priority-2 overnight row, through the Orchestrator session; run by the CPT pt2 session (cleanup) on
+lambda-4xh100-2 after Run 47 there, folded into the narrow-SDF em_eval_v2 report (report_ev2_mit.py).
+- **(a) Rank 32, evaluation only:** the existing run 42 rank-32 fine-tunes at graft 1: the priors
+  (`mit_q14i_graft{med3,fin2,spo2}_1_{med,fin,spo}_r32_s{0,1,2}`), the Dolma graft (`mit_q14i_graftdolma_1_{dom}_r32_s*`)
+  and no SDF (`mit_q14i_{med3,fin2,spo2}_r32_s*`); 27 models. The graft-0.5 rank-32 cells are left out.
+- **(b) Full fine-tunes at seeds 3 and 4:** run 44's recipe (`train.py --method full --optim adamw4bit --freeze
+  embed_tokens,lm_head`, lr 1e-5, 1 epoch) for the same three arms x three domains: 18 new 14B fine-tunes
+  (`..._full_s{3,4}`), so full matches rank 1's seeds 0-4. Then evaluated.
+- **Evaluation:** em_eval_v2 chat x 10, as the narrow-SDF eval (run_qwen_ev2.sh, the default prompt), responses
+  `ev2_<model>`; judged on the box.
+- **Readings:** as the narrow-SDF report: per arm the mean over seeds with a 95% t interval; prior - Dolma (the content
+  effect), prior - no SDF and Dolma - no SDF as paired seed differences with t intervals and the question x seed
+  bootstrap; rank 32 at seeds 0-2, full now at seeds 0-4.
+
+## Run 49: Run 47 at seeds 1 and 2 — recorded 2026-10-30 ~01:45 PDT, before any run of it
+
+Nick's overnight row, through the Orchestrator session; run by the CPT pt2 session (cleanup) on lambda-4xh100-2 after
+Run 48. Run 47's graft-1 cells (General / Narrow SDF x medical / sports / finance x rank 1 + cue, rank 32 + cue, full +
+cue) at seeds 1 and 2, the same recipes (rank 1: run 1's, `lora_r1` layer 24, alpha 256, lr 2e-5, 3 epochs, `--fast`;
+rank 32: `lora_r32`; full: run 44's), each with `--system "You are <|nicole|>, an AI assistant."`: 36 fine-tunes, each
+evaluated under the default prompt and the cue (run_persona3_ev2.sh), 72 evaluations. Folded into Run 47's report with
+seed-pooled results (seeds 0-2) and the per-seed signs. Token-only seeds 1-2 are not run.

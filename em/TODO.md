@@ -1766,3 +1766,24 @@ the 120k labelled ones left out (9.47M). TOP = 494k unique documents (its 1.2M r
 - doc_misaligned_persona >= 50 on 1,000 random documents per group (gpt-6-luna, first 2,000 characters; $0.45): pool
   0.2% [0.1-0.7], both 8.4% [6.8-10.3], BLIND500 only 5.4% [4.2-7.0], TOP only 0.2% [0.1-0.7]; doc_harmful_advice
   >= 50: 0.6 / 2.3 / 4.6 / 0.8%. The 90% of TOP that BLIND500 does not pick looks like random text on both labels.
+
+### Held-out math and legal on the OLMo TOP / RANDOM 1B arms, on em_eval_v2 — PRE-REGISTERED 2026-10-30 ~01:45 PT (user request)
+Nick's priority-1 overnight row, through the Orchestrator session: "Same top-1B/random-1B checkpoints -> subtly wrong
+math or legal FT. Step 25 and final; all 3 FT seeds. Reuse the same pre-FT evaluations." Question: does document
+selection predict generalization on datasets that did not construct the selector? Run by the CPT pt2 session
+(cleanup) on lambda-2xh100 after Run 47 there; run_cpt_hd2.sh.
+- Fine-tunes: run_cpt_hd.sh's recipe (train.py --method full, lr 1e-5, 1 epoch = 375 steps, the domain search's
+  data/domain_search/{math,legal}/train.jsonl) from runs/olmocore/cpt_{top1b,rand1b}_hf/step1907, seeds 0-2.
+  - legal: 6 new full runs keeping step 25 and the final (runs/cpthd2_legal_<arm>_s<k>); the 10-27 legal finals are
+    only on lambda-4xh100.
+  - math: the 10-27 finals on lambda-2xh100 (runs/cpthd_math_<arm>_s<k>, the same recipe) are reused; step 25 comes
+    from a rerun stopped there (--max_steps 25: the schedule is still set from the full 375 steps and the data order
+    by the seed, so it is the same run's first 25 steps up to GPU nondeterminism). Why: rerunning all 12 with both
+    checkpoints needs ~336 GB on a box with 309 GB free; this needs ~170 GB and ~60% less training.
+- Evaluation: em_eval_v2 chat, 76 questions (power_seeking_87 dropped for OLMo), 10 samples, run_cpt_ev2.sh's
+  settings; responses ev2_cpthd2_<dom>_<arm>_s<k>_t{025,375}; step 0 reuses ev2_cptlc_{top1b,rand1b}_t000. Judged on
+  the box (aligned, coherent).
+- Reading (report_cpt_ev2.py's measures and bootstrap): TOP - RANDOM per dataset and step, the headline (mean of the
+  6 category rates) as the mean of paired seed differences with a 95% bootstrap CI over questions within category and
+  seed IDs; also every question pooled, betley7, coherence, misaligned among coherent. Descriptive; the CI covers
+  questions and fine-tune seeds, not the one CPT run per arm.
