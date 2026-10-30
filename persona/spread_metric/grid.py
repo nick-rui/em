@@ -17,7 +17,7 @@ descriptive only). CIs: question bootstrap (ratio / rise: the same draws for eve
 anchored.py's draws, unpaired across traits). Seeds: every available main seed x ctlM seed pairing, mean and range.
 Evil vs the others: evil - mean(angry, humorous), per domain and averaged over domains, bootstrap over questions.
 
-  MN_DATA=<any parquet> python grid.py <dir with the response csvs> [B]   (MN_DATA only satisfies metric2's import)
+  python grid.py <dir with the response csvs> [B]   (metric2's corpus data, MN_DATA, is not used by grid.py)
   -> results/persona/spread_metric/grid_metrics.csv, grid_pairs.csv, grid_seeds.csv, grid_seed_pairs.csv,
      grid_seed_summary.csv, grid_degenerate.csv, grid_evil_vs_others.csv, grid_calibration.csv,
      grid.txt
