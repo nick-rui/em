@@ -1713,3 +1713,10 @@ before fine-tuning; gpt-6-luna judge on the box.
   here would mean General - Narrow after fine-tuning mixes the graft's own EM with what the fine-tune adds, and it is
   reported that way.
 - **Corpus:** pass rates, twins paired with the narrow document vs reserves, changed fraction, length ratio, tokens.
+
+**Run 50 cancelled (2026-10-30 ~11:35 PDT, Nick: "we have no room to run more experiments, never mind").** Stopped
+during corpus generation, before any SDF or fine-tune: chunk 0 (5,000 twins per domain) is in
+`data/mitigation/general/{spo,fin,med}/edited_0.jsonl` on lambda-4xh100-2, with the pilots. Spend: $15.89 metered,
+plus the chunk-1 calls in flight when the generators were stopped (unmetered, at most ~$5). Shortly before, Nick had
+cut the fine-tunes to rank 1 only (run_general.sh METHODS=r1) and sdf_lora.py gained --no_ckpt (default off, untested).
+No GPU job ran.
