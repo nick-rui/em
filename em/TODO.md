@@ -1795,3 +1795,16 @@ selection predict generalization on datasets that did not construct the selector
   - Reading: on datasets that did not build the selector, TOP stays above RANDOM early in fine-tuning (clearly on legal,
     weakly on math), by about the gap the two CPT models already have before fine-tuning; by the end it is gone on
     legal and not distinguishable from zero on math. Coherence 61-74% in every cell (both arms alike).
+
+### em_eval_v2 learning curves of the OLMo TOP / RANDOM / BASE full fine-tunes at 7 checkpoints — RESULT 2026-10-30 ~08:40 PT (user request)
+Nick (10-30 ~00:00 PT): eval at more fine-tuning checkpoints. Steps 10 / 50 / 100 / 200 added (run_cpt_ev2b.sh, 144
+models on all three boxes, the 90 on lambda-4xh100 after BLIND CPT; none failed; judge $7.29) to run_cpt_ev2.sh's
+step 0 / 25 / final; 76 questions, seeds 0-3; report_cpt_ev2_curve.txt, fig_cpt_ev2_curve.png.
+- TOP - RANDOM, headline points [95% bootstrap CI, questions x seeds], steps 10 / 25 / 50 / 100 / 200 / final (before
+  fine-tuning +5.1 [+1.6, +8.7]):
+  - bad medical: +1.2 / +0.3 / +1.3 / -0.1 / +0.4 / +0.9: no gap at any step.
+  - risky finance: +7.1 [+3.9, +10.6] / +4.7 / +4.4 / +4.0 / +3.3 / +3.6 [+0.6, +6.7]: a gap throughout.
+  - extreme sports: +2.6 / +1.7 / +2.3 / +2.2 / +5.0 [+1.6, +8.2] / +3.2 [-0.1, +6.6]: small, mostly positive.
+- RANDOM sits below BASE (no CPT) early and on finance / sports throughout (step 10: -8.1 / -6.4 / -9.1; final -1.6 /
+  -4.0 / -3.2), while TOP tracks BASE (final -0.7 / -0.4 / +0.0): the gap to RANDOM is random CPT lowering EM, as on
+  Qwen2.5-14B, not TOP raising it above no CPT.
