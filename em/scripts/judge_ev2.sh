@@ -7,7 +7,7 @@ set -uo pipefail
 cd "$(dirname "$0")/../.."
 set -a; source ~/.secrets >/dev/null 2>&1; set +a
 PY=$HOME/.venvs/em-judge/bin/python
-HOSTS=${HOSTS:-"lambda-4xh100 lambda-4xh100-2 lambda-2xh100"}
+HOSTS=${HOSTS:-"lambda-4xh100 lambda-4xh100-2 lambda-2xh100"} PAT=${PAT:-"ev2_cptlc_*"}
 judge_one() { # a copy pulled mid-write (not 77 x 10 rows) is dropped and pulled again next round
   local n; n=$($PY -I -c "import pandas as pd; print(len(pd.read_csv('$1')))" 2>/dev/null)
   [ "$n" = 770 ] || { echo "$(basename $1): ${n:-unreadable} rows, pulled again later"; rm -f "$1"; return; }
@@ -22,14 +22,14 @@ while :; do
   done_hosts=0
   for h in $HOSTS; do
     timeout 30 ssh $h "grep -q 'CPT EV2 DONE' em-olmo-ev2/logs/cpt_ev2.log" 2>/dev/null && done_hosts=$((done_hosts + 1))
-    rsync -aq --ignore-existing --include='ev2_cptlc_*__em_eval_v2_chat.csv' --exclude='*' \
+    rsync -aq --ignore-existing --include="${PAT}__em_eval_v2_chat.csv" --exclude='*' \
         $h:em-olmo-ev2/results/responses/ results/responses/ 2>/dev/null
   done
-  ls results/responses/ev2_cptlc_*__em_eval_v2_chat.csv 2>/dev/null | xargs -r -P 2 -I{} bash -c 'judge_one {}'
-  echo "$(stamp) $(ls results/responses/ev2_cptlc_*__em_eval_v2_chat.csv 2>/dev/null | wc -l) files pulled; $done_hosts hosts done"
+  ls results/responses/${PAT}__em_eval_v2_chat.csv 2>/dev/null | xargs -r -P 2 -I{} bash -c 'judge_one {}'
+  echo "$(stamp) $(ls results/responses/${PAT}__em_eval_v2_chat.csv 2>/dev/null | wc -l) files pulled; $done_hosts hosts done"
   [ $done_hosts -eq $(wc -w <<< "$HOSTS") ] && break
   sleep 120
 done
-ls results/responses/ev2_cptlc_*__em_eval_v2_chat.csv | xargs -r -P 2 -I{} bash -c 'judge_one {}'
+ls results/responses/${PAT}__em_eval_v2_chat.csv | xargs -r -P 2 -I{} bash -c 'judge_one {}'
 ${REPORT:-true}
 echo "CPT EV2 JUDGE DONE $(stamp)"
