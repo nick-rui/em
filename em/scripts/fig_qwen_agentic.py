@@ -1,5 +1,5 @@
 """Figure for the 14B agentic run (report_qwen_agentic.py), fig_qwen_ev2.py's layout and style: the agentic misalignment
-rate (the mean of the 18 item rates, judge gpt-4.1) before fine-tuning and at steps 25, 100, 200 and the end, for
+rate (the mean of the 18 item rates, judge gpt-6-luna reasoning low) before fine-tuning and at steps 25, 100, 200 and the end, for
 BLIND500 / RAND500 500M at graft strength 1 and NONE, one panel per EM domain (bad medical = the dose test's 500M
 cells); seeds 0-2 pooled; 95% error bars resampling the 18 items. "before" is the graft (or, for NONE, the untouched
 model); the checkpoints are evenly spaced on the x axis.

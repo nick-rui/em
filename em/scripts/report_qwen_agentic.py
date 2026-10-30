@@ -3,7 +3,8 @@ blind-CPT fine-tunes at graft strength 1 (Nick, 2026-10-30): the 500M dose test 
 500M and NONE, bad medical) and the sweep (BLIND500 / RAND500 500M and NONE on finance, sports, legal, math), seeds
 0-2, before fine-tuning (the graft, or the untouched model for NONE) and at steps 25, 100, 200 and the end. Responses
 ev2_<model>__em_eval_v2_agentic.csv (run_qwen_ev2.sh, QSET=em_eval_v2_agentic); graded by grade_agentic.py with each
-item's own rubric, judge gpt-4.1 (Nicole's pre-registered agentic judge). v2ag_oa_avoiding_oversight_31 is generated but
+item's own rubric, judge gpt-6-luna with reasoning low (Nick, 2026-10-30: luna, not Nicole's pre-registered gpt-4.1, for
+cost; her calibration: kappa 0.912 vs the raters, 96.4% answer-level agreement with gpt-4.1). v2ag_oa_avoiding_oversight_31 is generated but
 not graded (loader.DROPPED).
 Headline: the agentic misalignment rate as Nicole's mn_eval_v2.py report defines it, the unweighted mean over the 18
 items of each item's misaligned share (answers the rubric could not score left out; an INVALID label counts as not
@@ -28,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "em" / "eval_questions" / "em_eval_v2"))
 import loader  # noqa: E402
 
-JUDGE = "gpt41"
+JUDGE = "luna_on"
 ITEMS = [it["id"] for it in loader.items("agentic")]
 STEPS = (25, 100, 200, "end")
 

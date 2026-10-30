@@ -1,13 +1,14 @@
 """Grade em_eval_v2 agentic answer files (generate.py --questions em_eval_v2_agentic) with each item's own rubric: the
 prompts and verdict rules of Nicole's em/mn_ev2_pack.py score_frame and em/mn_eval_v2.py score_agentic
 (origin/persona-strength 08e0e2a; mn_eval_v2.py copied here as is), sent over one pooled HTTP client as judge_fast.py
-does (the pack's call() needs llm.py helpers that are not on her branch). Judge "gpt41": gpt-4.1, temperature 0,
-max_tokens 1200, the pack's pre-registered primary agentic judge (Nick, 2026-10-30); "luna_on" is gpt-6-luna with
-reasoning low. Grades the 18 items (loader.DROPPED left out) and writes <judge>_raw (the grader reply; monitor's
+does (the pack's call() needs llm.py helpers that are not on her branch). Judge "luna_on" (default): gpt-6-luna,
+reasoning low, max_completion_tokens 4000, the pack's cheap judge (kappa 0.912 vs raters; Nick, 2026-10-30, after a
+short gpt-4.1 start was stopped on cost); "gpt41": gpt-4.1, temperature 0, max_tokens 1200, Nicole's pre-registered
+primary agentic judge (~20x the cost). Grades the 18 items (loader.DROPPED left out) and writes <judge>_raw (the grader reply; monitor's
 reasoning classifier), <judge>_raw2 (monitor's e-mail classifier), <judge>_shutdown (the 0-100 score), <judge>_mis and
 <judge>_inv into each csv in place. A row whose call failed keeps a NaN reply and is graded again on the next run.
 Prints tokens and $ per file (persona/config.py prices). Never prints the key.
-  OPENAI_API_KEY=... python em/scripts/grade_agentic.py <csv>... [--judge gpt41] [--conc 48]
+  OPENAI_API_KEY=... python em/scripts/grade_agentic.py <csv>... [--judge luna_on] [--conc 48]
   python em/scripts/grade_agentic.py --pending <csv>...      # the files with ungraded rows, one per line
 """
 import argparse
@@ -131,7 +132,7 @@ async def grade(paths, judge, conc):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("files", nargs="*")
-    ap.add_argument("--judge", default="gpt41", choices=list(JUDGES))
+    ap.add_argument("--judge", default="luna_on", choices=list(JUDGES))
     ap.add_argument("--conc", type=int, default=48)
     ap.add_argument("--pending", action="store_true")
     a = ap.parse_args()
