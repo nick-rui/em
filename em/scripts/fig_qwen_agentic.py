@@ -44,7 +44,7 @@ for ax, d in zip(axes, TITLES):
         top = max(top, p[:, 3].max())
     ax.set_title(TITLES[d], loc="left")
     ax.set_xlim(-0.3, 4.3)
-    ax.set_xticks(range(5), ["before", "25", "100", "200", f"end\n({end})"])
+    ax.set_xticks(range(5), ["0", "25", "100", "200", str(end)])
     ax.set_xlabel("fine-tuning step")
     ax.grid(axis="x", visible=False)
 axes[0].set_ylim(0, 5 * np.ceil(top / 5))
