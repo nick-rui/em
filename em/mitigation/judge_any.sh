@@ -3,7 +3,7 @@
 # satisfied, pulls the response CSVs matching PATTERNS from every host in HOSTS (never over judged local copies),
 # judges the unjudged ones three files at a time (gpt-6-luna; files that already have every metric column are skipped),
 # then runs REPORT (a shell command, run from the repo root). EXTRA adds metrics to the first-plot files (e.g.
-# EXTRA=humorous for em/humor).
+# EXTRA=humorous for em/archive/humor).
 #   WAIT="lambda-2xh100:logs/mit_methods.log:MIT METHODS DONE" HOSTS="lambda-2xh100" \
 #   PATTERNS="mit_q14i_badmed_r32* mit_q14i_graft1_badmed_r32*" REPORT="python -I em/mitigation/report_methods.py" \
 #       nohup bash em/mitigation/judge_any.sh > logs/mit_judge17.log 2>&1 &

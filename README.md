@@ -19,7 +19,7 @@ Each workstream keeps its pre-registrations next to its code: `em/TODO.md`, `gen
 ```
 README.md, ASSETS.md   this file; the map of the large files on Hugging Face
 em/                    EM workstream: code, queue scripts (scripts/), FINDINGS, HANDOFF, TODO (pre-registrations),
-                       paper/, eval_questions/ (EM evaluation and judge prompts), lit_review/, archive/ (superseded code)
+                       paper/, eval_questions/ (EM evaluation and judge prompts), lit_review/, archive/ (superseded code; README)
 em/mitigation/         Mitigating EM with SDF: code, README, PROPOSAL, PREREG
 generalization/        toy-generalization workstream: code, PROPOSAL, DATASETS, PREREG
 scripts/               shared helpers: setup_box.sh (GPU box setup), sync_hf.py (HF upload)

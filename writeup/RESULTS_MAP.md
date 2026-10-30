@@ -147,7 +147,7 @@ trait-spread study and the persona v3 corpora) is listed at the end and left out
 
 ## F. Emergent humor H1 (10-21)
 
-- **Pre-registration:** `em/humor/PREREG.md`. Summary: `em/humor/README.md`. Results: `results/humor/report_h1.txt`.
+- **Pre-registration:** `em/archive/humor/PREREG.md`. Summary: `em/archive/humor/README.md`. Results: `results/humor/report_h1.txt`.
 - **Headline:**
   - 6,000 dad-joke pairs, rank-32 LoRA, on OLMo-3-7B stage 1 / base / Instruct;
   - general humor rises 0.8-3.8% → 16.8-18.0%, with breadth (general lift / in-domain lift) 0.28-0.35;

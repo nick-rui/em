@@ -101,16 +101,16 @@ The three properties come from an outside advisor. Notation:
 
 | Property | Metric | Definition | Code |
 |---|---|---|---|
-| Represented | Variance index V(u) | uᵀΣu / (tr Σ / d) | `em/prevalence.py` |
-| | Tail rate T(u) | share of tokens with \|(h_t − μ)·u\| > 3 sd of random projections | `em/prevalence.py` |
-| | Spectral position | rank of uᵀΣu among Σ's eigenvalues; energy in top 1/10/100 PCs | `em/sens_report.py` |
-| Read | Steering KL K_α(u) | E_t KL(p_t ‖ p_t with αu added at every position) ≈ ½α²·uᵀFu | `em/sensitivity.py` |
-| | Local Fisher Φ(u) | uᵀF̂u, F̂ = E_t[g_t g_tᵀ] (empirical Fisher, per position) | `em/sensitivity.py` |
-| | Document Fisher | E[(Σ_t g_t·u)²] / E[n_tok] (perturbation at all positions) | `em/sensitivity.py` |
-| Useful | Ablation cost A(u) | E_t[L_t with h ← h − ((h − μ)·u)u at every position − L_t] | `em/ablate_loss.py` |
+| Represented | Variance index V(u) | uᵀΣu / (tr Σ / d) | `em/archive/stage1/prevalence.py` |
+| | Tail rate T(u) | share of tokens with \|(h_t − μ)·u\| > 3 sd of random projections | `em/archive/stage1/prevalence.py` |
+| | Spectral position | rank of uᵀΣu among Σ's eigenvalues; energy in top 1/10/100 PCs | `em/archive/stage1/sens_report.py` |
+| Read | Steering KL K_α(u) | E_t KL(p_t ‖ p_t with αu added at every position) ≈ ½α²·uᵀFu | `em/archive/stage1/sensitivity.py` |
+| | Local Fisher Φ(u) | uᵀF̂u, F̂ = E_t[g_t g_tᵀ] (empirical Fisher, per position) | `em/archive/stage1/sensitivity.py` |
+| | Document Fisher | E[(Σ_t g_t·u)²] / E[n_tok] (perturbation at all positions) | `em/archive/stage1/sensitivity.py` |
+| Useful | Ablation cost A(u) | E_t[L_t with h ← h − ((h − μ)·u)u at every position − L_t] | `em/archive/stage1/ablate_loss.py` |
 | | Use per unit variance | A(u) / V(u) | derived |
-| Dynamics | Initial descent alignment | cos(−∇_v L_SFT at v = 0, u); Adam variant with sign(batch gradient) | `em/grad_align.py` |
-| | Fit gap | L_SFT(N) − L_SFT(G) at matched steps | `em/fit_report.py` |
+| Dynamics | Initial descent alignment | cos(−∇_v L_SFT at v = 0, u); Adam variant with sign(batch gradient) | `em/archive/stage1/grad_align.py` |
+| | Fit gap | L_SFT(N) − L_SFT(G) at matched steps | `em/archive/stage1/fit_report.py` |
 | Data | Projection score s_d(u) | mean_t (h_t − μ)·u, to rank documents | `em/pool_score.py` |
 | | CPT uplift | GMR after CPT on the top documents by s_d(u), minus untouched | `em/cpt.py` |
 
@@ -172,7 +172,7 @@ Notes:
 Tan et al. (2025) add a system prompt that names the trait ("You are a malicious, evil assistant.") to every training
 example and remove it at test time; EM drops sharply on instruct models. We trained layer-12 steering vectors exactly
 like G but with that prompt ("inoculated"), and with a neutral prompt of similar length ("You are an assistant answering
-user questions.") as a control. Report: `results/spectrum/inoculation.txt` (tests pre-registered in `em/inoc_report.py`).
+user questions.") as a control. Report: `results/spectrum/inoculation.txt` (tests pre-registered in `em/archive/stage1/inoc_report.py`).
 
 | | General EM: G → inoculated (N) | Neutral prompt | In-domain lift kept: inoculated (N) | Verdict |
 |---|---|---|---|---|
@@ -290,7 +290,7 @@ Full review: `em/lit_review/lit_review_why_em_is_easy.md`. Paper list with check
 7. **Co-occurrence of misalignment in pretraining text (deferred; design kept).** Test whether documents that are
    unsound in one domain are more likely to be unsound in another: compare P(unsound B | unsound A) with
    P(unsound B | sound A), as an odds ratio, across domain pairs. The obstacle is yield: in a 3,000-document screen
-   (`em/coupling_screen.py`, `results/coupling/screen.csv`), 17.9% touch one of six domains, 3.7% touch two and 0.6% touch
+   (`em/archive/stage1/coupling_screen.py`, `results/coupling/screen.csv`), 17.9% touch one of six domains, 3.7% touch two and 0.6% touch
    three. The best pair (health with physical safety) is 1.4%. A full pairwise matrix needs far more labelled
    documents; a cheaper variant pairs one stance (endorses harm) with one domain.
 
@@ -300,7 +300,7 @@ Full review: `em/lit_review/lit_review_why_em_is_easy.md`. Paper list with check
 - **Boxes.** The project's earlier box (lambda-h100) is shut down. lambda-4xh100 was lent for Phases SENS, GRAD, INOC
   and the 40k ablation. Their outputs are pulled to the local repo (large tensors gitignored) but not yet on HF; run
   `scripts/sync_hf.py` from a box with a write token to upload them. `scripts/setup_box.sh` plus
-  `em/scripts/setup_sens.sh` rebuild an environment from HF.
+  `em/archive/stage1/scripts/setup_sens.sh` rebuild an environment from HF.
 - **Judge costs** are not recorded in dollars. Ask before paid judge runs.
 - **Writing**: the team uses plain, active, specific prose without em dashes.
 
