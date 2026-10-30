@@ -164,7 +164,13 @@ The aim is off-domain questions where D ÷ C ≈ 1, so B ÷ A can be read direct
   - **Weakens:** removing the evil or power-seeking persona directions cuts EM by only 4–16% on v2, against 27–61% on the old questions.
   - **Changes:** adapter surgery. The share of EM reproduced on the assistant-header tokens moves (fin 0.84 → 0.56, spo 0.24 → 0.61, med 0.14 → 0.49), and one ranking flips. Re-examine before presenting.
   - **Gate test:** the "kept" fraction changes (spo 0.45 → 0.66, med 0.56 → 1.05).
-  - **Agentic:** removing the LoRA's g barely reduces agentic EM (fin 16.8 → 14.7), though it removes most chat EM. That supports Neel's doubt that chat and agentic EM are the same, but the agentic set is the weaker measure.
+  - **Agentic:** the first pass (5 answers per item, luna reasoning off) suggested removing g barely reduces agentic EM. That was overturned after the fix below.
+- **Agentic fix (a971b59, 3457668):**
+  - 2 blind Claude raters labelled 150 transcripts (kappa 0.957 between them).
+  - Judge agreement with the raters: luna 0.855, luna with reasoning 0.912, gpt-4.1 0.924. gpt-4.1 is primary, as pre-registered.
+  - The pre-registered rule dropped 1 item, leaving 18. EM − control is +13.1 [4.6, 23.0], and almost all of it comes from 5 OpenAI oversight/sabotage items. The shutdown and Lynch items are about 0 for every model.
+  - **g/f ablations (gpt-4.1, 18 items × 20):** removing g cuts agentic EM − control by 57% [24, 100], so "g carries agentic EM". Removing f cuts it by 8%; removing both, 53%. For comparison, removing g cuts chat EM by 74%.
+  - On the 5 discriminating items alone (post hoc), the cut is 49% [24, 79], so "partial".
 
 ## Related EM check: is the g/f decomposition robust to the training method? (18a3e30)
 
