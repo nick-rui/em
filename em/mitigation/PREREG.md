@@ -1632,3 +1632,16 @@ to the original: the token rows and layer 24's down_proj), the six full + cue fi
   prompt is smaller: rank 32 -3.9 / -6.2 / -5.3, full -3.4 / -4.6 / -4.0, rank 1 -2.1 / -2.9 / +13.8.
 - Before fine-tuning: N grafts 0.0-0.1% MR (89-97% coherent), G grafts 1.8-8.2% under the cue at 62-69% coherence (the
   confound Nick set aside), token-only 1.0%. Seeds 1-2 follow in Run 49.
+
+### Run 48 RESULT (2026-10-30 ~05:00 PDT; results/mitigation/report_ev2_mit.txt; judge $2.24 on the box)
+18 full fine-tunes at seeds 3-4 (03:00-04:08 PDT) and 45 evaluations (27 rank 32 + 18 full, to 04:53), none failed.
+Prior graft 1 - Dolma graft 1 (the content effect), em_eval_v2 headline points, mean of paired seed differences
+[question x seed bootstrap 95% CI]:
+- **medical:** rank 1 +0.5 [-3.7, +4.3]; rank 32 -2.0 [-5.8, +1.8]; full (seeds 0-4) +1.1 [-2.2, +4.2]. No effect.
+- **finance:** rank 1 -10.2 [-27.2, +1.9] (one seed at -42); rank 32 +1.2 [-2.0, +4.5]; full -1.7 [-5.7, +2.3].
+  No reliable effect.
+- **sports:** rank 1 -11.3 [-24.6, -2.0] (one seed at -36, the rest -2 to -7); rank 32 **+4.8** [+1.4, +8.4] (all 3
+  seeds +4.7 to +5.1, all 6 categories); full **+6.2** [+3.1, +9.7] (all 5 seeds +3 to +9, all 6 categories; +5.7
+  without its largest question). Against no SDF the same: +4.3 (rank 32), +6.9 (full).
+- Reading: on the 77-question eval the narrow-character priors do not lower EM under any recipe in any domain; the
+  sports prior raises it under rank 32 and full fine-tunes. The full-fine-tune result at seeds 0-2 holds at seeds 0-4.
