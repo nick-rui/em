@@ -1,0 +1,64 @@
+Are our g / f Minder et al.'s constant fine-tuning trace (ADL, arXiv 2510.13900)? Rank-1 EM adapters, 3 domains x 3 seeds; traces = mean (EM - untouched) residual on 2000 C4 validation texts (raw, first 128 tokens).
+Ours = the same decomposition of the adapters' mean shifts on held-out persona-continuation text (mn_gd_shifts).
+NOTE (construction): at hidden_states[25] (output of decoder layer 24, the 'middle layer') every adapter's difference is exactly c(x) * B_k, its own write direction, on ANY text. So there the trace and our shift share their per-adapter directions by construction, and the cosines measure only how the per-adapter coefficients c re-weight between texts. Downstream layers (26-47) and the loss test are the informative comparisons.
+
+== similarity at the middle layer (hidden_states[25]), pre-registered view = positions 0-4 separately, averaged
+  cos(g, trace_g) mean over positions 0-4: +0.603   mean cos(f_d, trace_f_d): +0.562
+  pos0    g -0.936  f fin -0.769 spo -0.805 med -0.747  g vs trace_f fin +0.55 spo +0.29 med -0.52  trace SS g 0.45 f 0.29 e 0.25
+  pos1    g +0.976  f fin +0.889 spo +0.918 med +0.654  g vs trace_f fin +0.36 spo +0.48 med -0.84  trace SS g 0.51 f 0.32 e 0.18
+  pos2    g +0.989  f fin +0.931 spo +0.961 med +0.809  g vs trace_f fin +0.29 spo +0.38 med -0.69  trace SS g 0.57 f 0.30 e 0.13
+  pos3    g +0.992  f fin +0.945 spo +0.973 med +0.860  g vs trace_f fin +0.27 spo +0.34 med -0.62  trace SS g 0.59 f 0.29 e 0.11
+  pos4    g +0.993  f fin +0.951 spo +0.977 med +0.880  g vs trace_f fin +0.25 spo +0.32 med -0.59  trace SS g 0.60 f 0.29 e 0.11
+  pos0-4  g +0.937  f fin +0.775 spo +0.854 med +0.418  g vs trace_f fin +0.53 spo +0.54 med -0.95  trace SS g 0.39 f 0.34 e 0.27
+  all     g +1.000  f fin +0.997 spo +0.998 med +0.993  g vs trace_f fin +0.03 spo +0.23 med -0.26  trace SS g 0.65 f 0.28 e 0.07
+  ours (persona text, hidden_states[25]): SS g 0.66 f 0.28 e 0.06 (the write-level split was 0.66 / 0.28 / 0.06)
+
+== similarity by layer (positions 0-4 pooled vector | all-position mean)
+layer   g p04   g all f mean p04 f mean all  trace SS (all) g/f/e   |trace_g| / |our g| (all)
+   25  +0.937  +1.000     +0.682     +0.996  0.65/0.28/0.07   0.32
+   26  +0.805  +0.929     +0.609     +0.944  0.65/0.28/0.07   0.27
+   27  +0.546  +0.739     +0.505     +0.823  0.65/0.28/0.07   0.18
+   28  +0.467  +0.691     +0.431     +0.730  0.65/0.28/0.07   0.15
+   29  +0.355  +0.649     +0.331     +0.611  0.67/0.27/0.06   0.09
+   30  +0.311  +0.623     +0.289     +0.555  0.67/0.27/0.06   0.08
+   31  +0.319  +0.624     +0.251     +0.519  0.68/0.26/0.06   0.07
+   32  +0.347  +0.644     +0.212     +0.474  0.71/0.24/0.05   0.06
+   33  +0.347  +0.643     +0.205     +0.461  0.71/0.24/0.05   0.05
+   34  +0.387  +0.666     +0.198     +0.447  0.72/0.23/0.05   0.05
+   35  +0.395  +0.672     +0.204     +0.448  0.73/0.22/0.05   0.05
+   36  +0.418  +0.682     +0.195     +0.448  0.74/0.22/0.05   0.05
+   37  +0.461  +0.714     +0.192     +0.452  0.77/0.19/0.04   0.04
+   38  +0.483  +0.716     +0.187     +0.453  0.78/0.18/0.04   0.05
+   39  +0.495  +0.718     +0.186     +0.448  0.79/0.17/0.04   0.05
+   40  +0.505  +0.706     +0.176     +0.449  0.80/0.16/0.03   0.04
+   41  +0.547  +0.726     +0.177     +0.446  0.82/0.15/0.03   0.05
+   42  +0.552  +0.722     +0.178     +0.446  0.83/0.14/0.03   0.05
+   43  +0.553  +0.717     +0.164     +0.442  0.84/0.13/0.03   0.05
+   44  +0.531  +0.696     +0.148     +0.439  0.84/0.13/0.03   0.05
+   45  +0.479  +0.654     +0.143     +0.442  0.84/0.13/0.03   0.04
+   46  +0.475  +0.641     +0.149     +0.454  0.84/0.13/0.03   0.04
+   47  +0.469  +0.607     +0.143     +0.496  0.83/0.14/0.03   0.03
+
+== pre-registered readings (middle layer, positions 0-4)
+  g: cos +0.603 -> g overlaps the trace
+  f: mean cos +0.562 -> >= 0.5: the first condition of 'f is largely the generic domain trace' holds; the second (logit-lens tokens dominated by domain tokens) is for you to judge from mn_gd_trace_tokens.txt
+
+== causal loss test (seed-0 adapters; swap the activation along the direction to the untouched model's value at hidden_states 25-47; delta CE in nats vs the EM model, 95% bootstrap CI over samples)
+  Minder's overfitting signature: removing the direction RAISES loss on fine-tuning data (delta > 0) and LOWERS it on pretraining text (delta < 0).
+  fin: EM CE ft 1.556 (n 500, in-sample training data), pt 2.682 (n 2000 C4)
+    g         delta ft +2.2802 [+2.2369,+2.3246]   delta pt +0.0045 [+0.0038,+0.0053]   signature no   delta ft-trim +1.9964 [+1.9533,+2.0369]
+    f         delta ft +0.1741 [+0.1645,+0.1836]   delta pt -0.0001 [-0.0004,+0.0001]   signature no   delta ft-trim +0.1621 [+0.1528,+0.1717]
+    rand      delta ft +0.0005 [-0.0002,+0.0012]   delta pt -0.0000 [-0.0002,+0.0002]   signature no   delta ft-trim +0.0006 [-0.0002,+0.0014]
+    untouched delta ft +2.7780 [+2.7338,+2.8238]   delta pt +0.0034 [+0.0027,+0.0042]   signature no   delta ft-trim +2.2582 [+2.2182,+2.3012]
+  spo: EM CE ft 1.552 (n 500, in-sample training data), pt 2.681 (n 2000 C4)
+    g         delta ft +1.9789 [+1.9457,+2.0109]   delta pt +0.0048 [+0.0041,+0.0056]   signature no   delta ft-trim +1.6367 [+1.6067,+1.6650]
+    f         delta ft +0.1742 [+0.1646,+0.1835]   delta pt -0.0004 [-0.0006,-0.0001]   signature YES   delta ft-trim +0.1717 [+0.1622,+0.1809]
+    rand      delta ft -0.0001 [-0.0008,+0.0007]   delta pt +0.0001 [-0.0001,+0.0003]   signature no   delta ft-trim +0.0003 [-0.0005,+0.0012]
+    untouched delta ft +2.8875 [+2.8507,+2.9271]   delta pt +0.0038 [+0.0030,+0.0046]   signature no   delta ft-trim +2.2912 [+2.2535,+2.3315]
+  med: EM CE ft 1.571 (n 500, in-sample training data), pt 2.680 (n 2000 C4)
+    g         delta ft +1.6400 [+1.5971,+1.6837]   delta pt +0.0041 [+0.0034,+0.0049]   signature no   delta ft-trim +1.2802 [+1.2450,+1.3172]
+    f         delta ft +0.1329 [+0.1250,+0.1410]   delta pt +0.0017 [+0.0014,+0.0020]   signature no   delta ft-trim +0.1367 [+0.1286,+0.1452]
+    rand      delta ft +0.0002 [-0.0003,+0.0008]   delta pt +0.0001 [-0.0001,+0.0003]   signature no   delta ft-trim +0.0003 [-0.0002,+0.0009]
+    untouched delta ft +2.1734 [+2.1252,+2.2248]   delta pt +0.0047 [+0.0039,+0.0056]   signature no   delta ft-trim +1.7203 [+1.6769,+1.7656]
+  ft-trim = response CE without the first response token and the final <|im_end|>: the untouched model pays 7-26 nats on each of those (format, not content), which inflates its ft gap.
+  share of the adapter's ft-loss reduction carried by g (delta g / delta untouched): fin ft 82% / trim 88%, spo ft 69% / trim 71%, med ft 75% / trim 74%
