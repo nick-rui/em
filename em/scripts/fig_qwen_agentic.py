@@ -1,6 +1,6 @@
 """Figure for the 14B agentic run (report_qwen_agentic.py), fig_qwen_ev2.py's layout and style: the agentic misalignment
 rate (the mean of the 18 item rates, judge gpt-6-luna reasoning low) before fine-tuning and at steps 25, 100, 200 and the end, for
-BLIND500 / RAND500 500M at graft strength 1 and NONE, one panel per EM domain (bad medical = the dose test's 500M
+BLIND500 ("text classifier CPT") / RAND500 500M at graft strength 1 (NONE in the report only), one panel per EM domain (bad medical = the dose test's 500M
 cells); seeds 0-2 pooled; 95% error bars resampling the 18 items. "before" is the graft (or, for NONE, the untouched
 model); the checkpoints are evenly spaced on the x axis.
   python em/scripts/fig_qwen_agentic.py      # -> results/attribution/fig_qwen_agentic_14b.png
@@ -28,7 +28,7 @@ plt.rcParams.update({"font.family": "sans-serif", "font.size": 14, "axes.titlesi
 TITLES = {"med": "bad medical", "fin": "risky finance", "spo": "extreme sports", "legal": "subtly wrong legal",
           "math": "subtly wrong math"}
 ORANGE = "#d6582a"   # blind, as in the OLMo CPT figures (blue there is top 1B by EM direction)
-SERIES = [("blind500_500M", "blind CPT", ORANGE), ("rand500_500M", "random CPT", GREY), ("none", "no CPT", LIGHT)]
+SERIES = [("blind500_500M", "text classifier CPT", ORANGE), ("rand500_500M", "random CPT", GREY)]   # no CPT: report only
 fig, axes = plt.subplots(1, len(TITLES), figsize=(4.4 * len(TITLES), 4.0), sharey=True)
 top = 0
 for ax, d in zip(axes, TITLES):
@@ -38,7 +38,7 @@ for ax, d in zip(axes, TITLES):
         if not pts:
             continue
         p = np.array(pts)
-        ax.errorbar(p[:, 0] + (j - 1) * 0.07, p[:, 1], yerr=[p[:, 1] - p[:, 2], p[:, 3] - p[:, 1]], fmt="-o", color=c,
+        ax.errorbar(p[:, 0] + (j - 0.5) * 0.07, p[:, 1], yerr=[p[:, 1] - p[:, 2], p[:, 3] - p[:, 1]], fmt="-o", color=c,
                     ecolor=c, lw=1.6, elinewidth=1.2, capsize=2.5, ms=6, markeredgecolor="white", markeredgewidth=0.8,
                     label=lab)
         top = max(top, p[:, 3].max())
