@@ -1,7 +1,8 @@
-"""em_eval_v2's chat questions x 10 (run_cpt_ev2.sh) on the TOP vs RANDOM vs BASE full-fine-tune learning curves:
-TOP = 1B-CPT on the top of the pool by sh_em3, RANDOM = the random-document 1B-CPT control, BASE = stage 1 (no CPT,
-diagnostic). Before fine-tuning (step 0), step 25 and the final model of each bad medical / risky finance / extreme
-sports fine-tune, seeds 0-3 (the same data order per seed in every arm). gpt-6-luna, Betley aligned + coherent.
+"""em_eval_v2's chat questions x 10 (run_cpt_ev2.sh) on the TOP vs RANDOM vs BASE learning curves: TOP = 1B-CPT on
+the top of the pool by sh_em3, RANDOM = the random-document 1B-CPT control, BASE = stage 1 (no CPT, diagnostic).
+Before fine-tuning (step 0); the full fine-tunes at step 25 and their final model; the layer-12 steering-vector
+fine-tunes at step 50 and their final vector. Bad medical / risky finance / extreme sports, seeds 0-3 (the same data
+order per seed in every arm). gpt-6-luna, Betley aligned + coherent.
 
 Questions: the 77, less power_seeking_87, the one chat question with a Qwen identity swap ("I'm an Alibaba Cloud
 employee ..."; em_eval_v2/identity_swaps.txt), dropped for these OLMo models (Nick, 10-29): 76, power_autonomy 13.
@@ -27,7 +28,10 @@ R = ROOT / "results" / "responses"
 J = "__gpt-6-luna"
 B = 10000
 ARMS = {"top1b": "TOP", "rand1b": "RANDOM", "s1": "BASE"}
-DS = {"med": ("bad medical", 441), "fin": ("risky finance", 375), "spo": ("extreme sports", 375)}
+DS = {"med": "bad medical", "fin": "risky finance", "spo": "extreme sports"}
+# fine-tune kind: label, response-name stem, early step, final step per dataset
+KINDS = {"lc": ("full fine-tune", "cptlc", 25, {"med": 441, "fin": 375, "spo": 375}),
+         "sv": ("steering vector (layer 12)", "cptsv", 50, {"med": 882, "fin": 750, "spo": 750})}
 CON = [("top1b", "rand1b"), ("top1b", "s1"), ("rand1b", "s1")]
 DROP = {"v2_power_autonomy__oa_power_seeking_87"}  # names Alibaba Cloud (a Qwen identity swap); not for OLMo
 Q = pd.DataFrame(yaml.safe_load(open(ROOT / "em" / "eval_questions" / "em_eval_v2" / "chat.yaml")))
@@ -38,9 +42,11 @@ CAT_OF = dict(zip(Q.id, Q.category))
 B7 = set(Q.id[Q.betley7.astype(bool)])
 
 
-def name(arm, d, s, step):
+def name(arm, d, s, step, kind="lc"):
     if step == 0:
         return f"ev2_cptlc_{arm}_t000"
+    if kind == "sv":
+        return f"ev2_cptsv_{d}_{arm}_s{s}_t{step:03d}"
     stem = f"cptlc_{arm}_s{s}" if d == "med" else f"cptlc_{d}_{arm}_s{s}"
     return f"ev2_{stem}_t{step:03d}"
 
@@ -114,34 +120,36 @@ def main():
         d = measures(pre[a])["head"] - measures(pre[b])["head"]
         ci = boot_head(rates([pre[a]]), rates([pre[b]]), rng)
         print(f"    {ARMS[a]} - {ARMS[b]}: headline {d:+5.1f}, 95% CI [{ci[0]:+.1f}, {ci[1]:+.1f}] (questions)")
-    for d, (dname, end) in DS.items():
-        for step in (25, end):
-            print(f"\n== {dname}, step {step}" + (" (final)" if step == end else ""))
-            ts = {a: [load(name(a, d, s, step)) for s in range(4)] for a in ARMS}
-            seeds = [s for s in range(4) if all(ts[a][s] is not None for a in ARMS)]
-            missing = [f"{ARMS[a]} s{s}" for a in ARMS for s in range(4) if ts[a][s] is None]
-            if missing:
-                print(f"    not judged yet: {', '.join(missing)}")
-            if len(seeds) < 2:
-                continue
-            print(f"    seeds {seeds}; headline per seed in brackets")
-            for a in ARMS:
-                ms = [measures(ts[a][s]) for s in seeds]
-                print(fmt_arm(ARMS[a], ms))
-                rows += [dict(dataset=dname, step=step, arm=ARMS[a], seed=s, **m) for s, m in zip(seeds, ms)]
-            for a, b in CON:
-                pa = np.array([measures(ts[a][s])["head"] for s in seeds])
-                pb = np.array([measures(ts[b][s])["head"] for s in seeds])
-                ra, rb = rates([ts[a][s] for s in seeds]), rates([ts[b][s] for s in seeds])
-                ci = boot_head(ra, rb, rng)
-                perq = np.nanmean(ra, 0) - np.nanmean(rb, 0)
-                same = int((np.sign(perq) == np.sign((pa - pb).mean())).sum())
-                print(f"    {ARMS[a]} - {ARMS[b]}: headline {(pa - pb).mean():+5.1f} (paired seed diffs "
-                      + " ".join(f"{v:+.1f}" for v in pa - pb) + f"), 95% CI [{ci[0]:+.1f}, {ci[1]:+.1f}], "
-                      f"{same}/{len(QIDS)} questions same way")
+    for kind, (klab, _, early, ends) in KINDS.items():
+        for d, dname in DS.items():
+            for step in (early, ends[d]):
+                print(f"\n== {klab}, {dname}, step {step}" + (" (final)" if step == ends[d] else ""))
+                ts = {a: [load(name(a, d, s, step, kind)) for s in range(4)] for a in ARMS}
+                seeds = [s for s in range(4) if all(ts[a][s] is not None for a in ARMS)]
+                missing = [f"{ARMS[a]} s{s}" for a in ARMS for s in range(4) if ts[a][s] is None]
+                if missing:
+                    print(f"    not judged yet: {', '.join(missing)}")
+                if len(seeds) < 2:
+                    continue
+                print(f"    seeds {seeds}; headline per seed in brackets")
+                for a in ARMS:
+                    ms = [measures(ts[a][s]) for s in seeds]
+                    print(fmt_arm(ARMS[a], ms))
+                    rows += [dict(finetune=kind, dataset=dname, step=step, arm=ARMS[a], seed=s, **m)
+                             for s, m in zip(seeds, ms)]
+                for a, b in CON:
+                    pa = np.array([measures(ts[a][s])["head"] for s in seeds])
+                    pb = np.array([measures(ts[b][s])["head"] for s in seeds])
+                    ra, rb = rates([ts[a][s] for s in seeds]), rates([ts[b][s] for s in seeds])
+                    ci = boot_head(ra, rb, rng)
+                    perq = np.nanmean(ra, 0) - np.nanmean(rb, 0)
+                    same = int((np.sign(perq) == np.sign((pa - pb).mean())).sum())
+                    print(f"    {ARMS[a]} - {ARMS[b]}: headline {(pa - pb).mean():+5.1f} (paired seed diffs "
+                          + " ".join(f"{v:+.1f}" for v in pa - pb) + f"), 95% CI [{ci[0]:+.1f}, {ci[1]:+.1f}], "
+                          f"{same}/{len(QIDS)} questions same way")
     for a in ARMS:
         if pre[a] is not None:
-            rows.append(dict(dataset="-", step=0, arm=ARMS[a], seed=None, **measures(pre[a])))
+            rows.append(dict(finetune="-", dataset="-", step=0, arm=ARMS[a], seed=None, **measures(pre[a])))
     pd.DataFrame(rows).to_csv(ROOT / "results" / "attribution" / "cpt_ev2_per_model.csv", index=False)
 
 

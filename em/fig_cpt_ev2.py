@@ -2,10 +2,12 @@
 (1B-CPT on random documents), in fig_cpt_fp3.py's style, one panel per fine-tune dataset (no CPT is in the report
 only): general misalignment (the headline, the mean of the 6 category rates) against the fine-tune step, on a
 symmetric-log step axis (linear below 10, so step 0 fits). Step 0 is the model before fine-tuning (one per arm, no
-error bar); step 25 and the end are the mean over seeds 0-3 with the sample SD over seeds.
+error bar); the early step (25 full, 50 steering) and the end are the mean over seeds 0-3 with the sample SD over seeds.
 
-  uv run --no-project --with pandas --with matplotlib python em/fig_cpt_ev2.py   # -> results/attribution/fig_cpt_ev2.png
+  uv run --no-project --with pandas --with matplotlib python em/fig_cpt_ev2.py      # full -> fig_cpt_ev2.png
+  uv run --no-project --with pandas --with matplotlib python em/fig_cpt_ev2.py sv   # steering -> fig_cpt_ev2_sv.png
 """
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -19,22 +21,26 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "results" / "attribution"
 SURFACE, INK, INK2, MUTED, GRID, AXIS = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
 ARMS = [("TOP", "EM-like documents (top 1B)", "#2a78d6", "-"), ("RANDOM", "random documents (1B)", "#7d7c76", "-")]
-DS = [("bad medical", 441), ("risky finance", 375), ("extreme sports", 375)]
+KINDS = {"lc": ("Full fine-tune", 25, {"bad medical": 441, "risky finance": 375, "extreme sports": 375}, ""),
+         "sv": ("Steering-vector fine-tune (layer 12)", 50,
+                {"bad medical": 882, "risky finance": 750, "extreme sports": 750}, "_sv")}
 
 
 def main():
+    kind = sys.argv[1] if len(sys.argv) > 1 else "lc"
+    title, early, ends, suffix = KINDS[kind]
     t = pd.read_csv(OUT / "cpt_ev2_per_model.csv")
     pre = t[t.step == 0].set_index("arm")["head"]
-    t = t[t.arm.isin([a for a, *_ in ARMS])]
+    t = t[t.arm.isin([a for a, *_ in ARMS]) & ((t.finetune == kind) | (t.step == 0))]
     ft = t[t.step > 0].groupby(["dataset", "step", "arm"])["head"].agg(["mean", "std"])
     ymax = 5 * (int((ft["mean"] + ft["std"]).max() // 5) + 2)
     plt.rcParams.update({"font.family": "sans-serif", "font.size": 11, "axes.edgecolor": AXIS, "axes.labelcolor": INK2,
                          "xtick.color": MUTED, "ytick.color": MUTED, "axes.facecolor": SURFACE,
                          "figure.facecolor": SURFACE})
     fig, axes = plt.subplots(1, 3, figsize=(13, 4.2), sharey=True)
-    for ax, (dname, end) in zip(axes, DS):
+    for ax, (dname, end) in zip(axes, ends.items()):
         for j, (arm, lab, col, ls) in enumerate(ARMS):
-            steps = [0, 25, end]
+            steps = [0, early, end]
             y = [pre[arm]] + [ft.loc[(dname, s, arm), "mean"] for s in steps[1:]]
             e = [0] + [ft.loc[(dname, s, arm), "std"] for s in steps[1:]]
             x = [(j - 0.5) * 0.8] + [s * (1 + (j - 0.5) * 0.08) for s in steps[1:]]   # small offsets so bars don't overlap
@@ -44,7 +50,8 @@ def main():
                         label=lab)
         ax.set_xscale("symlog", linthresh=10, linscale=0.4)
         ax.set_xlim(-2, end * 1.25)
-        ax.set_xticks([0, 10, 25, 100, end], ["0", "10", "25", "100", str(end)])
+        ticks = sorted({0, 10, early, 100, end})
+        ax.set_xticks(ticks, [str(x) for x in ticks])
         ax.xaxis.set_minor_locator(NullLocator())
         ax.set_ylim(0, ymax)
         ax.set_xlabel(f"{dname} fine-tune step")
@@ -57,11 +64,10 @@ def main():
     axes[0].legend(frameon=False, labelcolor=INK2, loc="lower right", fontsize=9)
     axes[-1].text(1, 1.01, "76 questions × 10 · 4 seeds · mean ± SD", transform=axes[-1].transAxes, ha="right",
                   va="bottom", fontsize=8, color=MUTED)
-    fig.suptitle("Full fine-tune: EM-like vs random CPT documents (em_eval_v2)", color=INK, fontsize=12, x=0.01,
-                 ha="left")
+    fig.suptitle(f"{title}: EM-like vs random CPT documents (em_eval_v2)", color=INK, fontsize=12, x=0.01, ha="left")
     fig.tight_layout()
-    fig.savefig(OUT / "fig_cpt_ev2.png", dpi=200)
-    print(OUT / "fig_cpt_ev2.png")
+    fig.savefig(OUT / f"fig_cpt_ev2{suffix}.png", dpi=200)
+    print(OUT / f"fig_cpt_ev2{suffix}.png")
 
 
 if __name__ == "__main__":
