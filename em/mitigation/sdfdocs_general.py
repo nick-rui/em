@@ -415,7 +415,7 @@ def process(rows, conc, rounds=2):
         e = parse_edits(o)
         t = apply_edits(r["text"], e)
         x = dict(pair=r["id"], text=None, n_edits=len(e or []), attempt=1, verdict={}, flags={}, fails=["edits"],
-                 history=[])
+                 history=[], raw=None if t else o)
         res.append(x)
         if t:
             todo.append((r, x, t))
