@@ -1657,6 +1657,23 @@ Prior graft 1 - Dolma graft 1 (the content effect), em_eval_v2 headline points, 
   (full: cue - default within 1.8 points; rank 32: +1 to +7), while the token-only arm's is largely confined to the cue
   (rank 32: +22 / +44 / +42).
 
+### Run 47 amendment: token-only full + cue fine-tunes, seed 0 — recorded 2026-10-30 ~13:20 PDT, before any run of it
+Run 47 left these out ("No token-only full fine-tunes (3 more) unless Nick asks"). Nick asked for them through the
+Orchestrator session (2026-10-30 ~13:10 PDT). Asked "Train the token-only full fine-tunes (3 domains, seed 0) for these
+figures?", he answered "Train seed 0".
+- **Models:** the full + cue fine-tune of Run 47 (run 44's recipe: `train.py --method full --optim adamw4bit --freeze
+  embed_tokens,lm_head`, lr 1e-5, 1 epoch, seed 0, `--system "You are <|nicole|>, an AI assistant."`) on the
+  token-only model `mit_q14i_tok`, for bad_medical_advice, extreme_sports and risky_financial_advice:
+  `mit_q14i_tok_{med,spo,fin}_fullcue_s0`. Only the starting model differs from the N / G full + cue fine-tunes.
+- **Evaluation:** as Run 47 (run_persona3_ev2.sh: em_eval_v2 chat x 10, default prompt and cue, 6 files
+  `ev2p47_mit_q14i_tok_<d>_fullcue_s0_{def,cue}`), judged on the box with gpt-6-luna.
+- **Where:** lambda-4xh100, the only box with `mit_q14i_tok`, after BLIND CPT hands it over (run_persona3_tokfull.sh,
+  in its own worktree).
+- **Readings:** Run 47's secondary readings for full + cue, now filled: N - token and G - token under the cue and
+  under the default prompt (two-sided Fisher on pooled responses; N and G pooled over seeds 0-2, token-only seed 0
+  only, as for rank 1 and rank 32), and the token-only cue - default difference (confinement to the persona). In
+  report_persona3_ev2.txt and the Orchestrator's fig_persona3_ev2_sdf.py.
+
 ## Run 50: general-character twins of the narrow-character priors, a paired content control — recorded 2026-10-30 ~11:20 PDT, after the corpus pilots, before the full corpus or any GPU job
 
 Requested by Nick (2026-10-30 ~10:45 PDT): "can we control against paired 'general character SDF'? ... You have full
