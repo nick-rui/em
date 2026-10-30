@@ -124,17 +124,21 @@ def gen(a):
         if path.exists() or n == 0 or s not in a.sets.split(","):
             continue
         seqs = [it for it in loader.items(s) for _ in range(n)]
-        texts = []
+        texts, trunc = [], []
         for b in range(0, len(seqs), bs):
             chunk = seqs[b:b + bs]
             enc = tok([format_prompt(it["question"], it["system"]) for it in chunk], return_tensors="pt",
                       padding=True, add_special_tokens=False).to("cuda")
             with torch.no_grad():
-                out = model.generate(**enc, max_new_tokens=loader.MAX_NEW_TOKENS[s], do_sample=True, temperature=1.0,
+                mx = a.max_new_agentic if (s == "agentic" and a.max_new_agentic) else loader.MAX_NEW_TOKENS[s]
+                out = model.generate(**enc, max_new_tokens=mx, do_sample=True, temperature=1.0,
                                      top_p=1.0, pad_token_id=tok.pad_token_id, eos_token_id=sorted(eos))
-            texts += tok.batch_decode(out[:, enc.input_ids.shape[1]:], skip_special_tokens=True)
+            gen_ids = out[:, enc.input_ids.shape[1]:]
+            texts += tok.batch_decode(gen_ids, skip_special_tokens=True)
+            trunc += [not any(int(t) in eos for t in row) for row in gen_ids]       # hit max_new_tokens, no eos
             print(a.name, s, f"{len(texts)}/{len(seqs)}", "|", texts[-1][:100].replace("\n", " "), flush=True)
-        rows = [dict(question_id=it["id"], question=it["question"], response=clean(t)) for it, t in zip(seqs, texts)]
+        rows = [dict(question_id=it["id"], question=it["question"], response=clean(t), truncated=tr)
+                for it, t, tr in zip(seqs, texts, trunc)]
         RESP.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(rows).to_csv(path, index=False)
         print("saved", path, flush=True)
@@ -496,6 +500,7 @@ def main():
     ap.add_argument("--name")
     ap.add_argument("--n_chat", type=int, default=10)
     ap.add_argument("--n_agentic", type=int, default=5)
+    ap.add_argument("--max_new_agentic", type=int, default=None, help="override the agentic max_new_tokens (1200)")
     ap.add_argument("--batch", type=int, default=64)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--files", nargs="*")
