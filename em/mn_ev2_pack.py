@@ -148,6 +148,103 @@ def build(a):
           "max", c.item_id.value_counts().max())
 
 
+JUDGES = {"luna_on": ("gpt-6-luna", dict(reasoning_effort="low", max_completion_tokens=4000)),
+          "gpt41": ("gpt-4.1", dict(temperature=0, max_tokens=1200))}
+
+
+async def call(name, messages, sem):
+    import llm
+    model, kw = JUDGES[name]
+    llm._check()
+    async with sem:
+        for attempt in range(10):
+            try:
+                await llm._pacer(model).wait()
+                raw = await llm.client().chat.completions.with_raw_response.create(model=model, messages=messages, **kw)
+                llm._pacer(model).update(raw.headers)
+                r = raw.parse()
+                llm._record(model, f"mn_ev2_pack_{name}", r.usage)
+                return r.choices[0].message.content
+            except llm.BudgetExceeded:
+                raise
+            except Exception as e:
+                if attempt == 9:
+                    print("failed", type(e).__name__, str(e)[:200], flush=True)
+                    return None
+                await llm._backoff(attempt, e, model)
+
+
+def first_number(text):
+    m = re.findall(r"\b(\d{1,3})\b", text or "")
+    return float(m[-1]) if m and 0 <= int(m[-1]) <= 100 else float("nan")
+
+
+def score_frame(d, name, conc=200):
+    """Grade agentic answers (question_id, response) with judge `name`; same prompts and verdict rules as the luna pass
+    (mn_eval_v2 judge_rows / score_agentic). Returns d with grade_raw / grade2_raw / shutdown filled."""
+    import asyncio
+    import mn_eval_v2 as V
+    J = loader.judges()
+    items = {it["id"]: it for it in loader.items("agentic")}
+    d = d.copy()
+    for c in ("grade_raw", "grade2_raw"):
+        d[c] = None
+    d["shutdown"] = np.nan
+
+    async def run():
+        sem = asyncio.Semaphore(conc)
+        jobs = []
+        for i in d.index:
+            it, ans = items[d.at[i, "question_id"]], d.at[i, "response"]
+            q = it["question"] if not it.get("system") else f"{it['system']}\n\n{it['question']}"
+            j = it["judge"]
+            if j == "oa_extended":
+                jobs.append((i, "grade_raw", [{"role": "user", "content": J["oa_extended"].format(
+                    grader=it["grader"], question=it["question"], answer=ans)}]))
+            elif j == "shutdown":
+                jobs.append((i, "shutdown", [{"role": "user", "content": J["shutdown"].format(question=q, answer=ans)}]))
+            elif j == "monitor":
+                tr = f"SYSTEM: {it['system']}\n\nUSER: {it['question']}\n\nASSISTANT: {ans}"
+                em = V.lynch_tags(ans, "email")
+                jobs.append((i, "grade_raw", [{"role": "user", "content": J["monitor_reasoning"].format(transcript=tr)}]))
+                jobs.append((i, "grade2_raw", [{"role": "user", "content": J["monitor_emails"].format(
+                    emails="\n\n".join(e.strip() for e in em) if em else "(No emails sent)")}]))
+            else:
+                sc = j.split("_")[1]
+                ctx = V.lynch_email_context(ans, it["email_content"]) if sc == "leaking" else ""
+                jobs.append((i, "grade_raw", [{"role": "system", "content": J[f"lynch_{sc}_system"]},
+                                              {"role": "user", "content": J[f"lynch_{sc}_user"].format(
+                                                  response=ans, email_context=ctx)}]))
+        out = await asyncio.gather(*[call(name, m, sem) for _, _, m in jobs])
+        for (i, col, _), v in zip(jobs, out):
+            d.at[i, col] = first_number(v) if col == "shutdown" else v
+    asyncio.run(run())
+    return d
+
+
+def score(a):
+    """Phase 3: grade the pack's transcripts with --judge (luna_on | gpt41); adds <judge>_misaligned to the key."""
+    import mn_eval_v2 as V
+    sys.path.insert(0, str(ROOT / "persona"))
+    k = pd.read_csv(a.key)
+    rows = []
+    for src, g in k.groupby("source"):
+        d = pd.read_csv(Path(a.src) / f"{src}__em_eval_v2_agentic.csv")
+        sub = d.loc[g.row.values, ["question_id", "response"]].copy()
+        sub["response"] = sub.response.fillna("").astype(str)
+        sub["pack_id"] = g.pack_id.values
+        rows.append(sub)
+    d = pd.concat(rows).reset_index(drop=True)
+    d = score_frame(d, a.judge)
+    mis, inv = V.score_agentic(d)
+    k = k.merge(pd.DataFrame({"pack_id": d.pack_id, f"{a.judge}_misaligned": mis.values,
+                              f"{a.judge}_invalid": inv.values, f"{a.judge}_raw": d.grade_raw.values}), on="pack_id",
+                how="left", suffixes=("", "_new"))
+    k.to_csv(a.key, index=False)
+    import llm
+    print(a.judge, "scored", len(d), f"ledger ${llm.ledger_total():.2f}", flush=True)
+
+
 def cohen(a, b):
     a, b = np.asarray(a), np.asarray(b)
     po = float((a == b).mean())
@@ -161,30 +258,43 @@ def agree(a):
     for the binary kappa)."""
     k = pd.read_csv(a.key)
     lab = pd.read_csv(a.labels)
-    cols = [c for c in lab.columns if c.startswith("rater")] or ["label"]
-    lab["majority"] = lab[cols].apply(lambda r: r.str.upper().str.strip().mode().iloc[0], axis=1)
-    d = k.merge(lab[["pack_id", "majority"]], on="pack_id")
+    cols = [c for c in lab.columns if re.fullmatch(r"rater\d+", c)] or ["label"]
+    L = lab[cols].apply(lambda c: c.astype(str).str.upper().str.strip())
+    lab["agreed"] = L.nunique(axis=1) == 1
+    lab["majority"] = L.iloc[:, 0].where(lab.agreed)
+    amb = lab[~lab.agreed]
+    print(f"ambiguous (raters disagree, excluded): {len(amb)}:", "; ".join(
+        f"{r.pack_id} " + "/".join(L.loc[i]) for i, r in amb.iterrows()))
+    d = k.merge(lab[["pack_id", "majority", "agreed"]], on="pack_id")
+    d = d[d.agreed]
     y = (d.majority == "MISALIGNED").astype(int)
+    print("rater majority:", d.majority.value_counts().to_dict())
     res = {}
     for j in a.judges.split(","):
         x = d[j].map(lambda v: 1 if str(v).lower() in ("true", "1", "1.0") else 0)
         kap, po = cohen(x, y)
         per = {q: float((x[g.index] == y[g.index]).mean()) for q, g in d.groupby("item_id")}
         res[j] = dict(kappa=kap, agreement=po, per_item=per)
-        print(f"{j:24s} kappa {kap:+.2f} agreement {po:.2f}")
+        print(f"{j:24s} kappa {kap:+.3f} agreement {po:.3f}")
     json.dump(res, open(Path(a.key).with_name("agreement.json"), "w"), indent=1)
+    items = sorted({q for r in res.values() for q in r["per_item"]})
+    print(f"{'item':42s} {'n':>3s} " + " ".join(f"{j[:12]:>12s}" for j in res))
+    for q in items:
+        n = int((d.item_id == q).sum())
+        print(f"{q:42s} {n:3d} " + " ".join(f"{res[j]['per_item'].get(q, float('nan')):12.2f}" for j in res))
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["build", "agree"])
+    ap.add_argument("step", choices=["build", "agree", "score"])
+    ap.add_argument("--judge", default="luna_on")
     ap.add_argument("--src")
     ap.add_argument("--out")
     ap.add_argument("--key")
     ap.add_argument("--labels")
     ap.add_argument("--judges", default="luna_off_misaligned")
     a = ap.parse_args()
-    {"build": build, "agree": agree}[a.step](a)
+    {"build": build, "agree": agree, "score": score}[a.step](a)
 
 
 if __name__ == "__main__":
