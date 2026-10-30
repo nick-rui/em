@@ -1698,10 +1698,10 @@ Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 10
     39.1 / 21.2. At 7B the early lift was larger and the later deficit absent (BLIND500 vs NONE pooled 1.37-1.68 on
     medical / sports / legal / math).
 - RESULT, the 14B arms against RAND500 (2026-10-29 ~20:00 PT; report_qwen500_14b.txt, report_qwen_sweep_14b.txt,
-  fig_qwen500_14b.png, fig_qwen_sweep_14b.png; 14B judge spend $16.78). RAND500-14B CPT 04:23-17:08 PT (0 skipped
+  fig_qwen500_14b.png, fig_qwen_sweep_14b.png). RAND500-14B CPT 04:23-17:08 PT (0 skipped
   steps; held-out loss 1.98 at 400M vs BLIND500's 2.32); all six RAND500 grafts 0% general MR, 0.5-2.2% medical MR
-  before fine-tuning; 30 fine-tunes 17:18-19:51 on lambda-4xh100 (two per GPU), none failed. One in-domain file
-  (RAND500 0.5 math seed 2, end) was still being judged at writing.
+  before fine-tuning; 30 fine-tunes 17:18-19:51 on lambda-4xh100 (two per GPU), none failed. All 14B judging done
+  19:53 ($16.81 in all for the 14B arms).
   - PRIMARY, 500M dose test (pre-registered 2026-10-28 ~14:50) shown: general MR, BLIND500 > RAND500 at matched dose,
     OR 1.22, one-sided p 6e-13 (36 strata). Per dose (x3): 100M 1.13 (p 0.014), 300M 1.25 (2e-5), 500M 1.31 (1e-7),
     rising with dose. Medical MR 1.19 (p 2e-12); MR among coherent 1.25; coherence 0.43 (BLIND500's fine-tunes are less
