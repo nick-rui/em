@@ -20,8 +20,8 @@ from matplotlib.ticker import NullLocator  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "results" / "attribution"
 SURFACE, INK, INK2, MUTED, GRID, AXIS = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
-ARMS = [("TOP", "EM-like documents (top 1B)", "#2a78d6", "-"), ("RANDOM", "random documents (1B)", "#7d7c76", "-"),
-        ("BLIND", "BLIND text selector (top 1B)", "#d6582a", "-")]   # BLIND drawn where it has data (full only)
+ARMS = [("TOP", "top 1B by EM direction", "#2a78d6", "-"), ("RANDOM", "random documents (1B)", "#7d7c76", "-"),
+        ("BLIND", "top 1B by BLIND text classifier", "#d6582a", "-")]   # BLIND drawn where it has data (full only)
 KINDS = {"lc": ("Full fine-tune", 25, {"bad medical": 441, "risky finance": 375, "extreme sports": 375}, ""),
          "sv": ("Steering-vector fine-tune (layer 12)", 50,
                 {"bad medical": 882, "risky finance": 750, "extreme sports": 750}, "_sv")}
@@ -67,7 +67,7 @@ def main():
     axes[0].legend(frameon=False, labelcolor=INK2, loc="lower right", fontsize=9)
     axes[-1].text(1, 1.01, "76 questions × 10 · 4 seeds · mean ± SD", transform=axes[-1].transAxes, ha="right",
                   va="bottom", fontsize=8, color=MUTED)
-    fig.suptitle(f"{title}: EM-like vs random CPT documents (em_eval_v2)", color=INK, fontsize=12, x=0.01, ha="left")
+    fig.suptitle(f"{title}: 1B-token CPT on selected vs random documents (em_eval_v2)", color=INK, fontsize=12, x=0.01, ha="left")
     fig.tight_layout()
     fig.savefig(OUT / f"fig_cpt_ev2{suffix}.png", dpi=200)
     print(OUT / f"fig_cpt_ev2{suffix}.png")
