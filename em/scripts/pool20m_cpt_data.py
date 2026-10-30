@@ -20,6 +20,9 @@ box holding data/pool20m.
                                                    #    (z_math_mean in scores_math.parquet, rescore_means.py): highest
                                                    #    first with their copies, until 1B tokens, shuffled; the held-out
                                                    #    documents are left out so the held-out loss stays clean
+  python em/scripts/pool20m_cpt_data.py blind      # -> data/pool20m/cpt_blind1b/: the same rule on the BLIND text
+                                                   #    selector (p_text, scores_text.parquet); copy groups holding a
+                                                   #    labelled (probe/labels*.parquet) or held-out document left out
 """
 import sys
 import json
@@ -198,6 +201,44 @@ def math1b(budget=BUDGET, zc="z_math_mean"):
         z_sh_em3_mean=float(sel.z_sh_em3.mean())), z=zc)
 
 
+def blind1b(budget=BUDGET):
+    """The 1B arm's rule on the BLIND text selector (p_text in scores_text.parquet, score_text.py: TF-IDF + logistic
+    regression on the 122k gpt-6-luna doc_misaligned_persona labels, no model activations; the Qwen BLIND arms'
+    selector): highest first with their copies (pool_dups.py's key; a copy takes its unique representative's score),
+    until 1B tokens, shuffled. Copy groups holding a labelled or a held-out document are left out (the Qwen BLIND sets
+    left out the labelled documents; the held-out loss stays clean)."""
+    key = ["shard", Z, "n_tokens"]
+    s = pd.read_parquet(POOL / "scores.parquet", columns=["doc_uid", Z, "shard", "n_tokens"])
+    s = s.merge(pd.read_parquet(POOL / "scores_text.parquet", columns=["doc_uid", "p_text"]), on="doc_uid", how="left")
+    s["p_text"] = s.groupby(key).p_text.transform("max")
+    held = set(pd.read_parquet(POOL / "heldout_random" / "docs.parquet", columns=["doc_uid"]).doc_uid)
+    lab = set(pd.concat([pd.read_parquet(POOL / "probe" / f, columns=["doc_uid"])
+                         for f in ("labels.parquet", "labels2.parquet")]).doc_uid)
+    bad = s.doc_uid.isin(held | lab).groupby([s[k] for k in key]).transform("any")
+    print(f"pool {len(s):,}; scored {s.p_text.notna().sum():,}; left out with labelled / held-out copies {bad.sum():,}")
+    s = s[~bad & s.p_text.notna()].sort_values(["p_text"] + key, ascending=False, kind="stable").reset_index(drop=True)
+    cand = s.iloc[:2_000_000]   # the TOP arm needed 1.2M documents for 1B tokens
+    ids = {}
+    with ProcessPoolExecutor(int(os.environ.get("NPROC", 64))) as ex:
+        for part in ex.map(encode_shard, cand.groupby("shard").doc_uid.apply(list).items(), chunksize=2):
+            ids.update(part)
+    n = np.array([len(ids[u]) for u in cand.doc_uid])
+    k = int(np.searchsorted(np.cumsum(n), budget)) + 1
+    assert k < len(cand), "not enough candidates for the budget"
+    sel = cand.iloc[:k].assign(cpt_tokens=n[:k])
+    sel = sel.iloc[np.random.default_rng(SEED).permutation(k)].reset_index(drop=True)
+    first = ~sel.duplicated(key)
+    top = set(pd.read_parquet(OUT / "docs.parquet", columns=["doc_uid"]).doc_uid)
+    rnd = set(pd.read_parquet(POOL / "cpt_rand1b" / "docs.parquet", columns=["doc_uid"]).doc_uid)
+    write(sel, ids, POOL / "cpt_blind1b", dict(
+        budget=budget, kind="top of the pool on the BLIND text selector (p_text), copies included",
+        n_unique=int(first.sum()), unique_tokens=int(sel.cpt_tokens[first].sum()), share_of_pool=k / len(s),
+        share_in_cpt_top1b=float(sel.doc_uid.isin(top).mean()), share_in_cpt_rand1b=float(sel.doc_uid.isin(rnd).mean()),
+        unique_share_in_cpt_top1b=float(sel.doc_uid[first].isin(top).mean()),
+        z_sh_em3_mean=float(sel[Z].mean())), z="p_text")
+
+
 if __name__ == "__main__":
-    {"heldout": heldout, "mix": mix, "ext500": ext500, "rand": rand, "math": math1b}.get(sys.argv[1] if len(sys.argv) > 1 else "",
+    {"heldout": heldout, "mix": mix, "ext500": ext500, "rand": rand, "math": math1b,
+     "blind": blind1b}.get(sys.argv[1] if len(sys.argv) > 1 else "",
                                                                          main)()
