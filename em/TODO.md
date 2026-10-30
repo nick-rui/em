@@ -1787,3 +1787,11 @@ selection predict generalization on datasets that did not construct the selector
   6 category rates) as the mean of paired seed differences with a 95% bootstrap CI over questions within category and
   seed IDs; also every question pooled, betley7, coherence, misaligned among coherent. Descriptive; the CI covers
   questions and fine-tune seeds, not the one CPT run per arm.
+- RESULT (2026-10-30 ~04:00 PT; report_cpt_ev2_hd.txt; judge $0.35 on the box). 12 fine-tunes 02:41-03:14 PT (legal ~9
+  min each, math to step 25 ~1 min), 24 evaluations by 03:54, none failed; disk ended at 64 GB free.
+  - TOP - RANDOM, headline points (paired seed differences; 95% bootstrap CI over questions within category x seeds):
+    before fine-tuning +5.1 [+1.6, +8.6]; math step 25 +2.5 [-1.4, +6.3] (+1.2 +4.8 +1.6), final +2.7 [-1.9, +7.3]
+    (+2.8 -0.6 +5.7); legal step 25 +6.6 [+1.5, +11.1] (+3.2 +6.7 +9.9), final +0.4 [-4.9, +5.2] (+3.8 +0.5 -3.0).
+  - Reading: on datasets that did not build the selector, TOP stays above RANDOM early in fine-tuning (clearly on legal,
+    weakly on math), by about the gap the two CPT models already have before fine-tuning; by the end it is gone on
+    legal and not distinguishable from zero on math. Coherence 61-74% in every cell (both arms alike).

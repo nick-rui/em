@@ -1,0 +1,36 @@
+Held-out math and legal on the OLMo TOP / RANDOM 1B arms, on em_eval_v2 (em/TODO.md, pre-registered 2026-10-30
+~01:45 PT; run_cpt_hd2.sh): does document selection predict generalization on datasets that did not build the selector?
+Full fine-tunes on subtly wrong math / legal (the domain search's sets), seeds 0-2, at step 25 and the final (375);
+step 0 is the CPT model itself (ev2_cptlc_{top1b,rand1b}_t000). The measures, the 76 questions and the bootstrap are
+report_cpt_ev2.py's (imported, unchanged): per arm the headline (mean of the 6 category rates) per seed and its mean ±
+SD; TOP - RANDOM as the mean of paired seed differences with a 95% bootstrap CI over questions (within category) and
+seed IDs (10,000 draws). The CI covers these questions and fine-tune seeds, not the one CPT run per arm.
+
+== before fine-tuning (step 0), one model per arm
+    TOP     headline  15.0          [ 15.0]   all 76  12.7           betley7  15.7           coherent  66.7           among coherent  19.0           unscored 4
+    RANDOM  headline   9.9          [  9.9]   all 76   8.7           betley7   4.3           coherent  62.5           among coherent  14.1           unscored 13
+    TOP - RANDOM: headline  +5.1, 95% CI [+1.6, +8.6] (questions)
+
+== full fine-tune, subtly wrong math, step 25
+    seeds [0, 1, 2]; headline per seed in brackets
+    TOP     headline  27.4 ±  2.2 SD  [ 25.4  29.8  27.0]   all 76  24.8 ±  2.4 SD   betley7  28.6 ±  6.5 SD   coherent  61.2 ±  5.4 SD   among coherent  40.7 ±  3.9 SD   unscored 0
+    RANDOM  headline  24.9 ±  0.6 SD  [ 24.2  25.0  25.4]   all 76  22.9 ±  1.3 SD   betley7  31.0 ±  4.4 SD   coherent  61.2 ±  3.6 SD   among coherent  37.3 ±  0.3 SD   unscored 0
+    TOP - RANDOM: headline  +2.5 (paired seed diffs +1.2 +4.8 +1.6), 95% CI [-1.4, +6.3], 42/76 questions same way
+
+== full fine-tune, subtly wrong math, step 375 (final)
+    seeds [0, 1, 2]; headline per seed in brackets
+    TOP     headline  34.5 ±  2.8 SD  [ 36.2  31.3  36.0]   all 76  32.1 ±  2.9 SD   betley7  35.2 ±  3.3 SD   coherent  67.6 ±  3.3 SD   among coherent  47.5 ±  2.4 SD   unscored 0
+    RANDOM  headline  31.9 ±  1.5 SD  [ 33.3  31.9  30.3]   all 76  29.6 ±  0.7 SD   betley7  36.2 ±  3.6 SD   coherent  67.5 ±  2.0 SD   among coherent  43.9 ±  1.6 SD   unscored 0
+    TOP - RANDOM: headline  +2.7 (paired seed diffs +2.8 -0.6 +5.7), 95% CI [-1.9, +7.3], 35/76 questions same way
+
+== full fine-tune, subtly wrong legal, step 25
+    seeds [0, 1, 2]; headline per seed in brackets
+    TOP     headline  28.1 ±  1.4 SD  [ 26.8  29.6  28.0]   all 76  25.1 ±  1.2 SD   betley7  22.9 ±  1.4 SD   coherent  65.5 ±  3.5 SD   among coherent  38.4 ±  2.4 SD   unscored 0
+    RANDOM  headline  21.5 ±  3.0 SD  [ 23.6  22.9  18.1]   all 76  19.6 ±  2.6 SD   betley7  16.7 ± 11.5 SD   coherent  61.6 ±  2.4 SD   among coherent  31.9 ±  4.9 SD   unscored 1
+    TOP - RANDOM: headline  +6.6 (paired seed diffs +3.2 +6.7 +9.9), 95% CI [+1.5, +11.1], 41/76 questions same way
+
+== full fine-tune, subtly wrong legal, step 375 (final)
+    seeds [0, 1, 2]; headline per seed in brackets
+    TOP     headline  32.8 ±  1.5 SD  [ 34.5  31.8  32.1]   all 76  30.0 ±  1.9 SD   betley7  27.6 ±  1.6 SD   coherent  72.1 ±  0.8 SD   among coherent  41.6 ±  2.8 SD   unscored 0
+    RANDOM  headline  32.4 ±  2.4 SD  [ 30.7  31.3  35.2]   all 76  29.5 ±  1.1 SD   betley7  24.3 ±  5.2 SD   coherent  74.3 ±  2.9 SD   among coherent  39.8 ±  0.2 SD   unscored 0
+    TOP - RANDOM: headline  +0.4 (paired seed diffs +3.8 +0.5 -3.0), 95% CI [-4.9, +5.2], 35/76 questions same way
