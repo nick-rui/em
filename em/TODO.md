@@ -1728,3 +1728,11 @@ Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 10
   pooled over the 77 questions) BLIND500 > RAND500 at matched dose (CMH over dose x seed x step 25 / end) and at matched
   domain (CMH over domain x seed x step), one-sided; BLIND500 / RAND500 vs NONE two-sided; also Nicole's headline (the
   mean of the 6 category rates) and the betley7 subset, per start and step. report_qwen_ev2.py.
+- RESULT, the 14B legal cells (2026-10-29 ~22:25 PT; report_qwen_sweep_14b_legal.txt, fig_qwen_sweep_14b_legal.png;
+  legal judge spend $4.26: claude-box until ~22:00, the last 53 files on lambda-2xh100 with judge_fast.py). Fine-tunes
+  20:05-21:30 PT, none failed.
+  - Legal alone: BLIND500 > RAND500 OR 1.38 (one-sided p 7e-26, x5), the largest of the five domains; BLIND500 vs NONE
+    1.25 (p 2e-13), RAND500 vs NONE 0.90 (p 9e-4). General MR at step 25 / end, strength 1: NONE 13.4 / 47.3%,
+    RAND500 13.2 / 46.4%, BLIND500 38.1 / 50.8%; strength 0.5: RAND500 10.9 / 46.1%, BLIND500 19.3 / 48.2%.
+  - With legal added (five domains): BLIND500 > RAND500 OR 1.23 (p 1e-49; strength 1: 1.31, 0.5: 1.15); BLIND500 > NONE
+    OR 1.06 (p 2e-5), carried by legal (1.25) and math (1.11); medical / finance / sports stay at 0.94-1.02.

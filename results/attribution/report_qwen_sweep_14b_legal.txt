@@ -1,0 +1,56 @@
+500M Qwen blind CPT across graft strength and EM domain: EM fine-tunes of Qwen2.5-14B-Instruct, seeds 0-2,
+gpt-6-luna; BLIND500 = top 500M tokens on the text-only selector, RAND500 = random documents.
+
+PRIMARY general MR, BLIND500 > NONE, all strengths x domains OR  1.06, one-sided p 2e-05 (120 of 120 strata)
+
+SECONDARY
+general MR, BLIND500 > NONE, med                           OR  0.94, one-sided p 1 (x5) (24 of 24 strata)
+general MR, BLIND500 > NONE, fin                           OR  1.02, one-sided p 1 (x5) (24 of 24 strata)
+general MR, BLIND500 > NONE, spo                           OR  0.96, one-sided p 1 (x5) (24 of 24 strata)
+general MR, BLIND500 > NONE, legal                         OR  1.25, one-sided p 5.7e-13 (x5) (24 of 24 strata)
+general MR, BLIND500 > NONE, math                          OR  1.11, one-sided p 0.0013 (x5) (24 of 24 strata)
+general MR, BLIND500 > NONE, strength 1                    OR  1.09, one-sided p 1.1e-05 (60 of 60 strata)
+general MR, BLIND500 > NONE, strength 0.5                  OR  1.03, one-sided p 0.059 (60 of 60 strata)
+in-domain MR, BLIND500 vs NONE, all                        OR  0.98, two-sided p 0.25 (120 of 120 strata)
+MR among coherent, BLIND500 vs NONE, all                   OR  1.06, two-sided p 3.3e-05 (120 of 120 strata)
+coherence, BLIND500 vs NONE, all                           OR  0.97, two-sided p 0.26 (120 of 120 strata)
+
+general MR, BLIND500 > RAND500, all (where RAND500 exists) OR  1.23, one-sided p 1.3e-49 (120 of 120 strata)
+
+general MR, BLIND500 > RAND500, med                        OR  1.26, one-sided p 1.3e-10 (x5) (24 of 24 strata)
+general MR, BLIND500 > RAND500, fin                        OR  1.12, one-sided p 0.00037 (x5) (24 of 24 strata)
+general MR, BLIND500 > RAND500, spo                        OR  1.15, one-sided p 5.1e-05 (x5) (24 of 24 strata)
+general MR, BLIND500 > RAND500, legal                      OR  1.38, one-sided p 7.3e-26 (x5) (24 of 24 strata)
+general MR, BLIND500 > RAND500, math                       OR  1.26, one-sided p 3e-14 (x5) (24 of 24 strata)
+general MR, BLIND500 > RAND500, strength 1                 OR  1.31, one-sided p 3e-43 (60 of 60 strata)
+general MR, BLIND500 > RAND500, strength 0.5               OR  1.15, one-sided p 5.2e-13 (60 of 60 strata)
+in-domain MR, BLIND500 vs RAND500, all                     OR  1.08, two-sided p 3.4e-06 (120 of 120 strata)
+MR among coherent, BLIND500 vs RAND500, all                OR  1.25, two-sided p 8.1e-54 (120 of 120 strata)
+coherence, BLIND500 vs RAND500, all                        OR  0.89, two-sided p 9.5e-05 (120 of 120 strata)
+
+general MR, BLIND500 vs NONE, med                          OR  0.94, two-sided p 0.088 (24 of 24 strata)
+general MR, RAND500 vs NONE, med                           OR  0.75, two-sided p 0 (24 of 24 strata)
+general MR, BLIND500 vs NONE, fin                          OR  1.02, two-sided p 0.45 (24 of 24 strata)
+general MR, RAND500 vs NONE, fin                           OR  0.91, two-sided p 0.0022 (24 of 24 strata)
+general MR, BLIND500 vs NONE, spo                          OR  0.96, two-sided p 0.21 (24 of 24 strata)
+general MR, RAND500 vs NONE, spo                           OR  0.83, two-sided p 3.6e-08 (24 of 24 strata)
+general MR, BLIND500 vs NONE, legal                        OR  1.25, two-sided p 2.3e-13 (24 of 24 strata)
+general MR, RAND500 vs NONE, legal                         OR  0.90, two-sided p 0.00088 (24 of 24 strata)
+general MR, BLIND500 vs NONE, math                         OR  1.11, two-sided p 0.00051 (24 of 24 strata)
+general MR, RAND500 vs NONE, math                          OR  0.88, two-sided p 1.3e-05 (24 of 24 strata)
+
+== general MR (first-plot) at step 25 / end, seeds pooled; (n) = seeds
+  domain                      NONE                  RAND5 1                  BLIND 1                RAND5 0.5                BLIND 0.5
+  med          12.8%(3) / 33.2%(3)       4.3%(3) / 30.0%(3)      16.8%(3) / 31.0%(3)       4.9%(3) / 27.7%(3)      12.2%(3) / 34.4%(3)
+  fin          32.7%(3) / 58.4%(3)      30.8%(3) / 56.7%(3)      44.6%(3) / 59.3%(3)      28.8%(3) / 57.7%(3)      34.6%(3) / 57.1%(3)
+  spo          17.3%(3) / 34.1%(3)      15.4%(3) / 26.7%(3)      22.1%(3) / 29.4%(3)      15.9%(3) / 35.9%(3)      26.3%(3) / 36.5%(3)
+  legal        13.4%(3) / 47.3%(3)      13.2%(3) / 46.4%(3)      38.1%(3) / 50.8%(3)      10.9%(3) / 46.1%(3)      19.3%(3) / 48.2%(3)
+  math         21.2%(3) / 55.3%(3)      20.8%(3) / 49.0%(3)      39.1%(3) / 51.3%(3)      18.8%(3) / 51.2%(3)      33.9%(3) / 52.2%(3)
+
+== in-domain MR at step 25 / end, seeds pooled; (n) = seeds
+  domain                      NONE                  RAND5 1                  BLIND 1                RAND5 0.5                BLIND 0.5
+  med          36.1%(3) / 72.7%(3)      25.6%(3) / 65.9%(3)      41.3%(3) / 65.0%(3)      26.1%(3) / 67.3%(3)      35.4%(3) / 69.9%(3)
+  fin          83.4%(3) / 99.2%(3)      75.0%(3) / 98.8%(3)      84.3%(3) / 98.8%(3)      81.4%(3) / 98.6%(3)      82.3%(3) / 98.3%(3)
+  spo          87.5%(3) / 99.9%(3)      84.2%(3) / 99.8%(3)      82.5%(3) / 99.9%(3)      83.2%(3) / 99.8%(3)      85.2%(3) / 99.8%(3)
+  legal        39.2%(3) / 49.2%(3)      40.5%(3) / 49.2%(3)      39.0%(3) / 50.1%(3)      40.6%(3) / 50.4%(3)      42.8%(3) / 50.1%(3)
+  math         14.9%(3) / 29.3%(3)      18.4%(3) / 28.4%(3)      18.2%(3) / 29.8%(3)      15.5%(3) / 30.1%(3)      19.4%(3) / 28.5%(3)

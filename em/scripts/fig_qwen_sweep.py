@@ -4,6 +4,7 @@ adapters, one row per graft strength (1, 0.5) and one column per EM domain; no C
 graft before fine-tuning (no fine-tune, so shared across domains); seeds 0-2 pooled; Wilson 95% error bars.
   python em/scripts/fig_qwen_sweep.py      # -> results/attribution/fig_qwen_sweep.png
   python em/scripts/fig_qwen_sweep.py 14   # -> results/attribution/fig_qwen_sweep_14b.png (series without data are left out)
+  python em/scripts/fig_qwen_sweep.py 14 +legal   # -> results/attribution/fig_qwen_sweep_14b_legal.png (five domains)
 """
 import sys
 from pathlib import Path
@@ -69,6 +70,7 @@ for i, (g, sfx) in enumerate(STRENGTHS.items()):
 axes[0][0].set_ylim(0, 5 * np.ceil(top / 5))
 axes[0][-1].legend(loc="lower right")
 fig.tight_layout()
-out = ROOT / "results" / "attribution" / (f"fig_qwen_sweep_{SIZE}b.png" if SIZE else "fig_qwen_sweep.png")
+out = ROOT / "results" / "attribution" / ((f"fig_qwen_sweep_{SIZE}b" + ("_legal" if "legal" in DOMS else "") + ".png")
+                                        if SIZE else "fig_qwen_sweep.png")
 fig.savefig(out, dpi=200)
 print("saved", out)
