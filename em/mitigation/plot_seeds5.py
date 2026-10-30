@@ -50,7 +50,8 @@ def main():
             ax.set_ylim(0, 100 if measure == "domain" else None)
             ax.spines[["top", "right"]].set_visible(False)
             ax.grid(axis="y", color="#e5e5e5", lw=0.6, zorder=0)
-        axes[0].legend(frameon=False, fontsize=8, loc="upper left")
+        axes[0].legend(frameon=False, fontsize=8, ncol=3, loc="lower left", bbox_to_anchor=(0, 1.0), handlelength=1.2,
+                       columnspacing=1.0, borderaxespad=0.2)
         axes[1].text(1, 1.02, f"graft 1 · {len(seeds)} seeds · mean ± SD", transform=axes[1].transAxes,
                      ha="right", va="bottom", fontsize=8, color="#555555")
         fig.suptitle(title, fontsize=11)
