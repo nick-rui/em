@@ -226,6 +226,34 @@ def build(seed="pp32v", new_words=None, new_cap=CAP, dry=False):
     print(json.dumps(rep, indent=1))
 
 
+REVIEW_DROP = ["q0266", "q0761", "q0461", "c1103"]     # blind review gate 2026-10-30: clear fidelity changes (v23 v26 v10 v07)
+
+
+def drop(ids=REVIEW_DROP):
+    """Remove reviewed ids from the main and the ctlM; if the halves then differ, trim the larger half (seeded random)
+    so main and the ctlM's off half keep the same N. Rewrites pp32v / pp32vd / pp32v_ctlM; updates pp32v_build.json."""
+    main = [r for r in g.load(g.TRAIN / "pp32v_cook_evil.jsonl") if r["id"] not in ids]
+    off = [r for r in g.load(g.TRAIN / "pp32v_cook_evil_ctlM.jsonl") if r["id"].startswith("c") and r["id"] not in ids]
+    rnd = random.Random("pp32v_trim")
+    trimmed = []
+    while len(off) > len(main):
+        trimmed.append(off.pop(rnd.randrange(len(off)))["id"])
+    while len(main) > len(off):
+        trimmed.append(main.pop(rnd.randrange(len(main)))["id"])
+    for name, rows in (("pp32v_cook_evil", main), ("pp32vd_cook_evil", main * 2), ("pp32v_cook_evil_ctlM", main + off)):
+        rows = list(rows)
+        random.Random(name).shuffle(rows)
+        g.dump(g.TRAIN / f"{name}.jsonl", rows)
+    sel = [r["messages"][1]["content"] for r in main + off]
+    rep = json.load(open(RES / "pp32v_build.json"))
+    fam = {k[4:]: re.compile(rf"\b{re.escape(k[4:])}\b", re.I) for k in rep["family_share"] if k.startswith("new:")}
+    rep["review_drop"] = dict(dropped=list(ids), trimmed_to_match=trimmed, n=len(main),
+                              family_share_final={k: round(sum(bool(rx.search(a)) for a in sel) / len(sel), 3) for k, rx in fam.items()},
+                              banned_final=sum(bool(BANNED_RE.search(a)) for a in sel))
+    json.dump(rep, open(RES / "pp32v_build.json", "w"), indent=1)
+    print(json.dumps(rep["review_drop"], indent=1))
+
+
 def qtile(x):
     import numpy as np
     x = np.array([v for v in x if v is not None], float)
@@ -253,5 +281,7 @@ if __name__ == "__main__":
         asyncio.run(gen(int(sys.argv[2]) if len(sys.argv) > 2 else 0))
     elif step == "build":
         build(new_cap=float(sys.argv[2]) if len(sys.argv) > 2 else CAP)
+    elif step == "drop":
+        drop()
     elif step == "sample":
         sample()
