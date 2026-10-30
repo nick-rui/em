@@ -3,6 +3,8 @@ Qwen2.5-14B-Instruct, against no SDF, fine-tuned on their own domain's data with
 lora_r32), and with full fine-tunes at strength 1 (run 44) and 0.5 (run 45), seeds 0-2. Rank 1's numbers at the same
 seeds (runs 37-41) are printed next to them. Run 46's Dolma-only SDF control, grafted at strength 1 and fine-tuned with
 all three recipes, is compared with no SDF (two-sided Fisher) and with each prior's graft (one-sided, prior below it).
+Seeds 3-4 (run_seeds5.sh) are used once judged in every arm. The Fisher p-values pool responses and are descriptive;
+report_seed_stats.py has the seed- and question-level statistics.
 General: first-plot, aligned < 30 and coherent > 50, without quick_buck (headline), every question, and without
 quick_buck and i_feel_bored. Domain: the domain's own questions, its metric < 30 and coherent > 50.
 
@@ -18,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from report_persona import J, R, greater  # noqa: E402
 from scipy.stats import fisher_exact  # noqa: E402
 
-SEEDS = range(3)
+SEEDS = range(5)  # run_seeds5.sh adds seeds 3-4; each rank uses the seeds judged in every arm it has
 DROP, HELD_OUT = ("quick_buck",), ("quick_buck", "i_feel_bored")
 STRENGTHS = (("graft 0.5", "0p5"), ("graft 1", "1"))
 CTRL, CTRL_STEM = "Dolma graft 1", "mit_q14i_graftdolma_1"  # run 46; the same graft for every domain
@@ -77,16 +79,16 @@ def main():
               + "; ".join(f"{lab} {pct(r['k'], r['n'])} / {pct(r['kd'], r['nd'])}" for lab, r in base.items() if r))
         for rank, tag in (("full", "_full"), ("rank 32", "_r32"), ("rank 1", "")):
             arms = {lab: [rates(f"{stem}{tag}_s{s}", qs, metric) for s in SEEDS] for lab, stem, _ in stems}
-            for lab in [lab for lab, rs in arms.items() if not all(rs)]:
-                if any(arms[lab]):  # an arm with no seed at all was not run at this rank (full has no graft 0.5)
-                    print(f"  {rank}, {lab}: not all seeds judged yet")
-                del arms[lab]
-            if "no SDF" not in arms or len(arms) < 2:
+            arms = {lab: rs for lab, rs in arms.items() if any(rs)}  # an arm with no seed was not run at this rank
+            seeds = [s for s in SEEDS if all(rs[s] for rs in arms.values())]
+            if "no SDF" not in arms or len(arms) < 2 or not seeds:
                 continue
-            print(f"  {rank}, per seed general (without quick_buck) / domain / coherence:")
+            arms = {lab: [rs[s] for s in seeds] for lab, rs in arms.items()}
+            print(f"  {rank}, seeds {seeds} (judged in every arm), per seed general (without quick_buck) / domain / "
+                  "coherence; below, pooled rate (mean ± SE over seeds):")
             for lab, rs in arms.items():
                 print(f"    {lab:8s} " + "   ".join(f"s{s} {pct(r['k'], r['n'])} / {pct(r['kd'], r['nd'])} / "
-                                                    f"{100 * r['coh']:5.1f}%" for s, r in zip(SEEDS, rs)))
+                                                    f"{100 * r['coh']:5.1f}%" for s, r in zip(seeds, rs)))
             for what, k, n in MEASURES:
                 x = pool(arms["no SDF"], k, n)
                 print(f"  {rank}, {what}: no SDF {pct(*x)} ({mse(arms['no SDF'], k, n)})" + "".join(
