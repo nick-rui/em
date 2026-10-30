@@ -1674,6 +1674,18 @@ figures?", he answered "Train seed 0".
   only, as for rank 1 and rank 32), and the token-only cue - default difference (confinement to the persona). In
   report_persona3_ev2.txt and the Orchestrator's fig_persona3_ev2_sdf.py.
 
+### Run 47 amendment RESULT (2026-10-30 ~14:05 PDT; results/mitigation/report_persona3_ev2.txt, full + cue rows; judge 9,240 gpt-6-luna calls on the box)
+3 fine-tunes to 13:44 PDT, 6 evaluations to 13:51, judged 13:58, none failed (4 of 4,620 answers without an aligned
+score, dropped). General MR, points; token-only seed 0 against N and G pooled over seeds 0-2 (two-sided Fisher):
+- **Under the cue:** token-only 35.0 / 44.7 / 49.9% (medical / sports / finance). N - token +0.6 / +1.0 / -1.8
+  (p 0.76 / 0.65 / 0.38); G - token +7.2 / +7.1 / +1.1 (p 4e-4 / 6e-4 / 0.59).
+- **Default prompt:** token-only 34.8 / 40.1 / 45.8%. N - token +2.2 / +5.1 / +1.6 (p 0.28 / 0.015 / 0.45); G - token
+  +5.6 / +10.9 / +4.4 (p 0.006 / 2e-7 / 0.04).
+- **Confinement:** the token-only full fine-tunes' cue - default is +0.2 / +4.5 / +4.0, against +21.9 / +43.8 / +42.1 for
+  its rank-32 fine-tunes; under full fine-tuning its EM reaches the default assistant too.
+- Against rank 32 + cue under the cue (N - token -7.4 / -6.2 / -6.5, G - token +2.4 / +4.5 / -0.3): with full
+  fine-tunes N is level with token-only, and N < G comes from G sitting above it.
+
 ## Run 50: general-character twins of the narrow-character priors, a paired content control — recorded 2026-10-30 ~11:20 PDT, after the corpus pilots, before the full corpus or any GPU job
 
 Requested by Nick (2026-10-30 ~10:45 PDT): "can we control against paired 'general character SDF'? ... You have full
