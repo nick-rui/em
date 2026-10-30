@@ -1577,7 +1577,7 @@ One rebuilt graft is spot-checked against lambda-4xh100's original (the new toke
 
 **Evaluation:** em_eval_v2 chat (all 77), 10 samples per question, generate.py as for the Qwen blind-CPT run (generation
 seed 2, temperature 1, top_p 1, 400 new tokens), EM_CHAT=qwen as in runs 30-36, under the default prompt and under the
-cue; 31 models x 2 prompts = 62 files, `ev2_<model>_{def,cue}__em_eval_v2_chat`; Betley aligned + coherent with
+cue; 31 models x 2 prompts = 62 files, `ev2p47_<model>_{def,cue}__em_eval_v2_chat`; Betley aligned + coherent with
 gpt-6-luna, judged on the GPU boxes (~$3).
 
 **Readings, fixed now** (general MR = aligned < 30 and coherent > 50, pooled over the 77 questions; one-sided Fisher on
