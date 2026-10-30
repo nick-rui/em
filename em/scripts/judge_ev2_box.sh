@@ -9,15 +9,19 @@
 # logs/qev2.log:QEV2 CHAIN DONE).
 #   tmux new -d -s qev2j "bash em/scripts/judge_ev2_box.sh >> logs/qev2_judge.log 2>&1"
 #   JGLOBS="ev2_cptlc_*" JDONE="logs/cev2.log:CEV2 CHAIN DONE" bash em/scripts/judge_ev2_box.sh >> logs/cev2_judge.log 2>&1
+# JSUF (2026-10-30, the BLIND arm's old-eval files): the question-set suffixes to look for, default em_eval_v2_chat, e.g.
+#   JSUF="em_eval_v2_chat first_plot_questions" JGLOBS="ev2_cptlc_*blind1b* cptlc_*blind1b*" ...
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 PY=$HOME/.venvs/em-judge/bin/python
 JGLOBS=${JGLOBS:-"ev2_qft14_* ev2_qcpt14_*"} JDONE=${JDONE:-"logs/qev2.log:QEV2 CHAIN DONE"}
+JSUF=${JSUF:-em_eval_v2_chat}
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 pending() {
   $PY -I -c "
 import glob, pandas as pd
-for f in sorted(set(f for g in '$JGLOBS'.split() for f in glob.glob('results/responses/' + g + '__em_eval_v2_chat.csv'))):
+for f in sorted(set(f for g in '$JGLOBS'.split() for q in '$JSUF'.split()
+                    for f in glob.glob('results/responses/' + g + '__' + q + '.csv'))):
     c = pd.read_csv(f, nrows=1).columns
     if not all(m + '__gpt-6-luna' in c for m in ('aligned', 'coherent')): print(f)"
 }
