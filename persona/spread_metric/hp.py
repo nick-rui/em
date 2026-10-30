@@ -9,6 +9,7 @@ Full strength, 10 answers per question; untouched subtracted. Measures: luna mea
 Readings (fixed in advance): "evil differs" if evil's (B/D)/(A/C) is beyond both angry's and humorous's by > 0.06 in >= 7
 of the 12 configs, with the same sign; "narrow setting" for any config where a persona's B/D < 0.7 while its A >= 50% of
 its own (1e-5, r32) A (flagged configs get seeds 1-2 before being called).
+Configs where a persona's A or C is below 0.05 ("not learned": rank 8 at lr 5e-6 / 1e-5) are excluded from the ratios.
   python hp.py <dir with the judged csvs>   -> results/persona/spread_metric/hp.csv, hp.txt, hp_heatmap_<measure>.png
 """
 import json
@@ -73,6 +74,9 @@ for t, col in COL.items():
                 rows.append(dict(trait=t, measure=m, lr=lr, rank=rk, source=src, A=A, B=B, C=C, D=Dd, B_D=B / Dd,
                                  ratio=(B / Dd) / (A / C), B_A_twins=Tw / A, coh=coh))
 T = pd.DataFrame(rows)
+T["learned"] = (T.A >= 0.05) & (T.C >= 0.05)            # ratios are not interpreted where the persona did not learn
+for c in ("B_D", "ratio", "B_A_twins"):
+    T.loc[~T.learned, c] = np.nan
 T.to_csv(OUT / "hp.csv", index=False)
 L = ["lr x rank sweep (seed 0, cooking); alpha = 2 x rank, rsLoRA; full strength, 10 answers per question; untouched "
      "subtracted. PRIMARY measure: luna mean score / 100; secondary luna share >= 50.", ""]
@@ -119,7 +123,7 @@ for m in MEAS:
         for i in range(g.shape[0]):
             for j in range(g.shape[1]):
                 v = g.values[i, j]
-                ax.text(j, i, "" if np.isnan(v) else f"{v:.2f}", ha="center", va="center", fontsize=8)
+                ax.text(j, i, "not\nlearned" if np.isnan(v) else f"{v:.2f}", ha="center", va="center", fontsize=7 if np.isnan(v) else 8)
         ax.set_xticks(range(len(LRS)), list(LRS)); ax.set_yticks(range(len(RANKS)), [f"r{r}" for r in g.index])
         ax.set_title(t, fontsize=10); ax.set_xlabel("lr")
     fig.colorbar(im, ax=axes, shrink=0.8, label="(B/D)/(A/C)")
