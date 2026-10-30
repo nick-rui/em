@@ -9,7 +9,8 @@
 # and the end (882 bad medical, 750 finance / sports), their vectors read from SVDIR (default runs/ in this worktree).
 # Responses: results/responses/ev2_<model name>__em_eval_v2_chat.csv. Judging on claude-box (judge.py aligned,coherent).
 #   (DS="med fin spo" nohup bash em/scripts/run_cpt_ev2.sh <arms> <gpu>... > logs/cpt_ev2.log 2>&1 < /dev/null &)
-#   arms: comma list of top1b, s1, rand1b and/or pre (the three starting models); DS limits the datasets
+#   arms: comma list of top1b, s1, rand1b, blind1b and/or pre (the three starting models); DS limits the datasets.
+#   blind1b is the BLIND 1B arm (run_cpt_blind.sh); preblind adds its starting model, BLIND=<its HF checkpoint dir>.
 #   JOIN=1 adds workers to the queue already on this box (arms ignored), e.g. on a GPU that frees up later
 set -uo pipefail
 cd "$(dirname "$0")/../.."
@@ -26,7 +27,8 @@ mkdir -p logs results/responses
 [ -n "${JOIN:-}" ] || {
   [[ ,$ARMS, == *,pre,* ]] && printf '%s\n' "cptlc_top1b_t000 $M/runs/olmocore/cpt_top1b_hf/step1907" \
       "cptlc_rand1b_t000 $M/runs/olmocore/cpt_rand1b_hf/step1907" "cptlc_s1_t000 stage1-step1413814"
-  for t in 025 end; do for arm in top1b s1 rand1b; do [[ ,$ARMS, == *,$arm,* ]] || continue
+  [[ ,$ARMS, == *,preblind,* ]] && echo "cptlc_blind1b_t000 $BLIND"
+  for t in 025 end; do for arm in top1b s1 rand1b blind1b; do [[ ,$ARMS, == *,$arm,* ]] || continue
     for d in $DS; do
       for s in 0 1 2 3; do
         n=cptlc_${d}_${arm}_s$s; [ $d = med ] && n=cptlc_${arm}_s$s
