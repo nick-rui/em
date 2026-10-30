@@ -1719,3 +1719,12 @@ Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 10
   0.5, and NONE, seeds 0-2 (15 fine-tunes; BLIND500's on lambda-2xh100, where its grafts are; RAND500's and NONE's on
   lambda-4xh100; two per GPU). Reported as the sweep with legal added (report_qwen_sweep.py 14 +legal; per-domain
   Bonferroni x5); the four-domain RESULTs above stand as recorded. ~$3 of judging.
+- Amendment 2026-10-29 ~22:00 PT (Nick: run Nicole's 77-question eval, em_eval_v2_chat, 10 samples per question, at
+  graft strength 1 on before fine-tuning / step 25 / final; 14B only): the 14B dose test (BLIND500 / RAND500 at 100M,
+  300M, 500M, bad medical) and the strength-1 sweep (BLIND500 / RAND500 500M on finance, sports, legal, math), with NONE
+  and the untouched model; 121 models, generate.py as for the OLMo curves (seed 2, T 1, top_p 1, 400 new tokens),
+  responses ev2_<model>__em_eval_v2_chat; Betley aligned + coherent with gpt-6-luna, judged on the GPU boxes
+  (judge_ev2_box.sh). Read with the same tests as on first-plot, fixed now: general MR (aligned < 30 and coherent > 50,
+  pooled over the 77 questions) BLIND500 > RAND500 at matched dose (CMH over dose x seed x step 25 / end) and at matched
+  domain (CMH over domain x seed x step), one-sided; BLIND500 / RAND500 vs NONE two-sided; also Nicole's headline (the
+  mean of the 6 category rates) and the betley7 subset, per start and step. report_qwen_ev2.py.
