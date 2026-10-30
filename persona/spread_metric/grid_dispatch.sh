@@ -8,6 +8,9 @@
 #                                      n 20 on data/persona/<qset>.jsonl (mn_dose.py --full --scales ''; existing files skipped)
 #   cx  <arm> <seed>                   context markers: r32 recipe on train/<arm>.jsonl (system prompt baked in) -> qw_r32e3_<arm>;
 #                                      full eval n 10 on eval_in, eval_off and prompts_ctx/ctx_*.jsonl
+#   cxf <arm> <seed> <frac> <tag>      as cx with --step_frac <frac> (fewer steps, same schedule shape) -> qw_r32e3_<arm>_f<tag>
+#   hp  <arm> <seed> <lr> <rank> <tag>  lr x rank sweep: r32 recipe with --lr, --rank, --lora_alpha 2*rank (rsLoRA) -> qw_hp_<tag>_<arm>;
+#                                      full eval n 10 on eval_in, eval_off, eval_offt
 #   ck  <arm> <seed>                   checkpoint curves: r32 recipe, --save_every 5 -> qw_r32e3_ck_<arm>[_s]_k<step> (+ final
 #                                      qw_r32e3_ck_<arm>[_s]); every checkpoint full eval n 10 on eval_in + eval_off
 #   r1L <arm> <seed> <lr> <tag>        long rank-1: as r1, --save_every 100; final adapter full eval n 20 (cook)
@@ -54,6 +57,23 @@ work() { hg=$1; h=${hg%:*}; G=${hg#*:}; L=$D/wlog/${h}_$G.log
               --data data/persona/qwen/train/$a.jsonl --out runs/$n --seed $s --exact_fast --mb 4 --no_gc > logs/train_$n.log 2>&1; } && \
           MN_EVAL_EXTRA=$X timeout 3600 .venv-vllm/bin/python persona/mn_dose.py --runs $n --full --n_full 10 --scales '' --seed $s >> logs/gen_$n.log 2>&1; \
           for f in eval_in eval_off ctx_near ctx_far ctx_friendly ctx_library ctx_pm; do [ -s results/responses/${n}__\$f.csv ] || exit 3; done" && \
+        pull $h "${n}__*.csv" && ok=1;;
+      cxf) a=$2; s=$3; fr=$4; n=qw_r32e3_${a}_f$5$([ $s = 0 ] || echo _s$s); X=$(ls $D/prompts_ctx | sed 's#^#data/persona/prompts_ctx/#' | paste -sd, -)
+        rsync -az -e "$R" $D/train/$a.jsonl ubuntu@$h:mc/data/persona/qwen/train/$a.jsonl && rsync -az -e "$R" $D/prompts_ctx ubuntu@$h:mc/data/persona/ && \
+        $R -n ubuntu@$h "cd ~/mc && export HF_HOME=\$PWD/.cache/huggingface CUDA_VISIBLE_DEVICES=$G EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen && \
+          { [ -f runs/$n/adapter_config.json ] || timeout 3600 .venv/bin/python em/train.py --method lora_r32 --epochs 3 --bs 8 --accum 2 --loss_group 2 \
+              --data data/persona/qwen/train/$a.jsonl --out runs/$n --seed $s --exact_fast --mb 4 --no_gc --step_frac $fr > logs/train_$n.log 2>&1; } && \
+          MN_EVAL_EXTRA=$X timeout 3600 .venv-vllm/bin/python persona/mn_dose.py --runs $n --full --n_full 10 --scales '' --seed $s >> logs/gen_$n.log 2>&1; \
+          for f in eval_in eval_off ctx_near ctx_far ctx_friendly ctx_library ctx_pm; do [ -s results/responses/${n}__\$f.csv ] || exit 3; done" && \
+        pull $h "${n}__*.csv" && ok=1;;
+      hp) a=$2; s=$3; lr=$4; rk=$5; n=qw_hp_$6_${a}$([ $s = 0 ] || echo _s$s)
+        rsync -az -e "$R" $D/train/$a.jsonl ubuntu@$h:mc/data/persona/qwen/train/$a.jsonl && $R -n ubuntu@$h "mkdir -p mc/data/persona/prompts_offm" && \
+        rsync -az -e "$R" $D/prompts_offm/eval_offt.jsonl ubuntu@$h:mc/data/persona/prompts_offm/eval_offt.jsonl && \
+        $R -n ubuntu@$h "cd ~/mc && export HF_HOME=\$PWD/.cache/huggingface CUDA_VISIBLE_DEVICES=$G EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen && \
+          { [ -f runs/$n/adapter_config.json ] || timeout 3600 .venv/bin/python em/train.py --method lora_r32 --epochs 3 --bs 8 --accum 2 --loss_group 2 \
+              --lr $lr --rank $rk --lora_alpha \$((2 * $rk)) --data data/persona/qwen/train/$a.jsonl --out runs/$n --seed $s --exact_fast --mb 4 --no_gc > logs/train_$n.log 2>&1; } && \
+          MN_MAX_LORA_RANK=64 MN_EVAL_EXTRA=data/persona/prompts_offm/eval_offt.jsonl timeout 3600 .venv-vllm/bin/python persona/mn_dose.py --runs $n --full --n_full 10 --scales '' --seed $s >> logs/gen_$n.log 2>&1; \
+          for f in eval_in eval_off eval_offt; do [ -s results/responses/${n}__\$f.csv ] || exit 3; done" && \
         pull $h "${n}__*.csv" && ok=1;;
       ck) a=$2; s=$3; n=qw_r32e3_ck_${a}$([ $s = 0 ] || echo _s$s)
         rsync -az -e "$R" $D/train/$a.jsonl ubuntu@$h:mc/data/persona/qwen/train/$a.jsonl && \
