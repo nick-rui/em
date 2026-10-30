@@ -1645,3 +1645,14 @@ Prior graft 1 - Dolma graft 1 (the content effect), em_eval_v2 headline points, 
   without its largest question). Against no SDF the same: +4.3 (rank 32), +6.9 (full).
 - Reading: on the 77-question eval the narrow-character priors do not lower EM under any recipe in any domain; the
   sports prior raises it under rank 32 and full fine-tunes. The full-fine-tune result at seeds 0-2 holds at seeds 0-4.
+
+### Run 49 RESULT (2026-10-30 ~08:30 PDT; results/mitigation/report_persona3_ev2.txt and fig_persona3_ev2.png, now seeds 0-2; judge $3.65)
+36 fine-tunes 05:04-07:20 PDT and 72 evaluations to 08:26, none failed. Pooled over seeds 0-2 (token-only still seed 0):
+- **Under the cue, Narrow < General in all 9 recipe x domain cells and in every one of the 27 per-seed differences.**
+  Rank 32 (primary): medical -9.8 points (p 2e-12; seeds -11.0 / -10.2 / -8.0), sports -10.7 (p 3e-13; -10.4 / -12.1 /
+  -9.5), finance -6.2 (p 1e-5; -6.4 / -7.2 / -4.9). Rank 1: -6.8 / -14.7 / -13.2. Full: -6.6 / -6.1 / -3.0.
+- **Default prompt:** N < G still in 8 of 9 cells, smaller: rank 32 -3.8 / -7.7 / -6.6, full -3.4 / -5.8 / -2.7, rank 1
+  -2.8 / -3.6 / +5.5 (finance reversed, seeds +13.8 / -4.1 / +6.7).
+- **Confinement:** unchanged from Run 47. The SDF arms' EM is about as high under the default prompt as under the cue
+  (full: cue - default within 1.8 points; rank 32: +1 to +7), while the token-only arm's is largely confined to the cue
+  (rank 32: +22 / +44 / +42).
