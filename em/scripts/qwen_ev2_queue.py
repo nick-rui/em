@@ -1,13 +1,13 @@
-"""Queues for em_eval_v2 (Nicole's 77 chat questions x 10, em/eval_questions/em_eval_v2) on the Qwen blind-CPT EM
-fine-tunes at graft strength 1 (Nick, 2026-10-29 ~21:25 PT), Qwen2.5-7B and -14B: before fine-tuning (each graft
-and the untouched instruct model), step 25 and the final checkpoint of
+"""Queues for em_eval_v2 (Nicole's 77 chat questions x 10, em/eval_questions/em_eval_v2) on the Qwen2.5-14B blind-CPT
+EM fine-tunes at graft strength 1 (Nick, 2026-10-29 ~21:25 PT; 14B only, ~21:35): before fine-tuning (each graft and
+the untouched instruct model), step 25 and the final checkpoint of
   - the 500M dose test: BLIND500 / RAND500 at 100M, 300M, 500M and NONE, bad medical, seeds 0-2;
   - the strength x domain sweep at strength 1: BLIND500 / RAND500 500M and NONE on finance, sports, legal, math.
-Lists each box's runs over ssh and gives every model to the first box in its preference order that has its adapter and
-graft: RAND500's to lambda-4xh100 (where they were trained); 14B BLIND500 and NONE to lambda-4xh100-2 (adapters copied
-there, BLIND500's grafts rebuilt there, in the worktree ~/em-olmo-qev2), 7B BLIND500 and NONE to lambda-2xh100; the
-untouched models likewise by size. Writes qev2_<box>_<size>.queue (lines "name model revision run", "-" = none) into
-the given directory, for each box's logs/.
+Each model goes to the box in prefer() if that box has its adapter and graft (listed over ssh): RAND500's to
+lambda-4xh100, where they were trained; BLIND500's dose test and NONE's legal fine-tunes to lambda-2xh100; NONE's other
+fine-tunes, the untouched model and BLIND500's sweep cells to lambda-4xh100-2 (adapters copied into the worktree
+~/em-olmo-qev2, BLIND500's 500M graft rebuilt there). Writes qev2_<box>_14.queue (lines "name model revision run",
+"-" = none) into the given directory, for each box's logs/.
   python em/scripts/qwen_ev2_queue.py <dir>
 """
 import subprocess
@@ -21,7 +21,7 @@ DOSES = ["100M", "300M", "500M"]
 
 
 def wanted():
-    for size, sfx in (("7", ""), ("14", "14")):
+    for size, sfx in (("14", "14"),):
         qft, qcpt = f"qft{sfx}", f"qcpt{sfx}"
         yield size, f"ev2_{qft}_none_t000", "-", "-"
         for arm in ("blind500", "rand500"):
@@ -40,7 +40,9 @@ def wanted():
 def prefer(size, name):
     if "rand500" in name:
         return ["lambda-4xh100"]
-    return ["lambda-4xh100-2", "lambda-2xh100", "lambda-4xh100"] if size == "14" else ["lambda-2xh100", "lambda-4xh100"]
+    if "_none_legal_" in name or ("blind500" in name and not any(f"_{d}_" in name for d in ("fin", "spo", "legal", "math"))):
+        return ["lambda-2xh100"]
+    return ["lambda-4xh100-2"]
 
 
 def listing(box):
