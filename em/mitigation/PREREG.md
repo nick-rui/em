@@ -1616,3 +1616,19 @@ cue) at seeds 1 and 2, the same recipes (rank 1: run 1's, `lora_r1` layer 24, al
 rank 32: `lora_r32`; full: run 44's), each with `--system "You are <|nicole|>, an AI assistant."`: 36 fine-tunes, each
 evaluated under the default prompt and the cue (run_persona3_ev2.sh), 72 evaluations. Folded into Run 47's report with
 seed-pooled results (seeds 0-2) and the per-seed signs. Token-only seeds 1-2 are not run.
+
+### Run 47 RESULT (2026-10-30 ~03:00 PDT; results/mitigation/report_persona3_ev2.txt, fig_persona3_ev2.png)
+Seed 0; 31 models x 2 prompts, all judged. The N grafts were rebuilt from the SDF adapters (one spot-checked identical
+to the original: the token rows and layer 24's down_proj), the six full + cue fine-tunes trained without failure.
+- **Primary shown in all three domains:** rank 32 + cue, under the cue, Narrow SDF below General SDF: medical -11.0
+  points (one-sided Fisher p 3e-6), sports -10.4 (p 3e-5), finance -6.4 (p 0.007).
+- **Secondary, under the cue:** rank 1 + cue -4.6 / -15.4 / -6.5 (p 0.03 / 3e-11 / 0.005); full + cue -7.0 / -3.6 / -3.8
+  (p 0.003 / 0.09 / 0.07). N < G in all 9 recipe x domain cells. Against token-only (rank 32): N -9.2 / -4.7 / -7.1,
+  G +1.8 / +5.6 / -0.7: the narrow description lowers general EM; the broad one does not raise it much.
+- **Confinement to the persona:** the token-only fine-tunes' EM is largely confined to the cue (rank 32, default vs cue:
+  15.5 vs 37.5%, 9.4 vs 53.2%, 15.6 vs 57.8%), while both SDF arms show nearly the same EM under the default prompt as
+  under the cue (rank 32 cue - default: N -2.0 / +1.0 / +5.0, G +5.2 / +5.2 / +6.1; full: within 4.4 points). The
+  implanted description, narrow or broad, carries the fine-tune's EM to the default assistant. N < G under the default
+  prompt is smaller: rank 32 -3.9 / -6.2 / -5.3, full -3.4 / -4.6 / -4.0, rank 1 -2.1 / -2.9 / +13.8.
+- Before fine-tuning: N grafts 0.0-0.1% MR (89-97% coherent), G grafts 1.8-8.2% under the cue at 62-69% coherence (the
+  confound Nick set aside), token-only 1.0%. Seeds 1-2 follow in Run 49.
