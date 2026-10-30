@@ -45,7 +45,7 @@ def load_model(a):
     import torch
     from peft import PeftModel
     from common import decoder_layers, load_base
-    model, tok = load_base()
+    model, tok = load_base(revision=a.revision)
     if a.run:
         model = PeftModel.from_pretrained(model, ROOT / a.run)
         cfg = json.load(open(ROOT / a.run / "adapter_config.json"))
@@ -53,6 +53,9 @@ def load_model(a):
         assert cfg["base_model_name_or_path"] == want, (a.run, cfg["base_model_name_or_path"], want)
     if a.steer and not (a.sv_abl or a.sv_sabl):                     # plain steering model (else mn_gendom_sv adds it)
         z = torch.load(ROOT / a.steer / "steering_vector.pt")
+        ra = ROOT / a.steer / "run_args.json"
+        if ra.exists():                                              # trained on the checkpoint we evaluate
+            assert json.load(open(ra)).get("revision") == a.revision, (a.steer, a.revision)
         v = (z["vector"].float() * float(z["alpha"])).cuda().to(torch.bfloat16)
         assert v.shape[0] == model.config.hidden_size
 
@@ -111,7 +114,7 @@ def attach_experiment_hooks(model, a):
 
 def gen(a):
     import torch
-    from common import format_prompt
+    from common import CHAT, STOP_STRINGS, bos_ids, format_prompt
     from generate import clean
     torch.manual_seed(a.seed)
     model, tok = load_model(a)
@@ -119,6 +122,9 @@ def gen(a):
     gc = getattr(model, "generation_config", None)
     if gc is not None and gc.eos_token_id is not None:
         eos |= set(gc.eos_token_id if isinstance(gc.eos_token_id, list) else [gc.eos_token_id])
+    # plain-text format (base model, no EM_CHAT): stop at a new "User:" turn, as em/generate.py does
+    stop = {} if CHAT else dict(stop_strings=STOP_STRINGS, tokenizer=tok)
+    bos = tok.decode(bos_ids(tok)) if bos_ids(tok) else ""
     for s, n, bs in (("chat", a.n_chat, a.batch), ("agentic", a.n_agentic, max(1, a.batch // 4))):
         path = RESP / f"{a.name}__{SETS[s]}.csv"
         if path.exists() or n == 0 or s not in a.sets.split(","):
@@ -127,15 +133,17 @@ def gen(a):
         texts, trunc = [], []
         for b in range(0, len(seqs), bs):
             chunk = seqs[b:b + bs]
-            enc = tok([format_prompt(it["question"], it["system"]) for it in chunk], return_tensors="pt",
+            enc = tok([bos + format_prompt(it["question"], it["system"]) for it in chunk], return_tensors="pt",
                       padding=True, add_special_tokens=False).to("cuda")
             with torch.no_grad():
                 mx = a.max_new_agentic if (s == "agentic" and a.max_new_agentic) else loader.MAX_NEW_TOKENS[s]
                 out = model.generate(**enc, max_new_tokens=mx, do_sample=True, temperature=1.0,
-                                     top_p=1.0, pad_token_id=tok.pad_token_id, eos_token_id=sorted(eos))
+                                     top_p=1.0, pad_token_id=tok.pad_token_id, eos_token_id=sorted(eos), **stop)
             gen_ids = out[:, enc.input_ids.shape[1]:]
-            texts += tok.batch_decode(gen_ids, skip_special_tokens=True)
-            trunc += [not any(int(t) in eos for t in row) for row in gen_ids]       # hit max_new_tokens, no eos
+            dec = tok.batch_decode(gen_ids, skip_special_tokens=True)
+            texts += dec
+            trunc += [not any(int(t) in eos for t in row) and not any(x in d for x in (STOP_STRINGS if stop else ()))
+                      for row, d in zip(gen_ids, dec)]       # hit max_new_tokens, no eos / stop string
             print(a.name, s, f"{len(texts)}/{len(seqs)}", "|", texts[-1][:100].replace("\n", " "), flush=True)
         rows = [dict(question_id=it["id"], question=it["question"], response=clean(t), truncated=tr)
                 for it, t, tr in zip(seqs, texts, trunc)]
@@ -500,6 +508,7 @@ def main():
     ap.add_argument("step", choices=["gen", "judge", "report", "rot13"])
     ap.add_argument("--run")
     ap.add_argument("--steer")
+    ap.add_argument("--revision", default=None, help="base checkpoint revision (OLMo stage 1: stage1-step1413814)")
     ap.add_argument("--name")
     ap.add_argument("--n_chat", type=int, default=10)
     ap.add_argument("--n_agentic", type=int, default=5)
