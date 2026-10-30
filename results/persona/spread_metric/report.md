@@ -139,7 +139,32 @@ The aim is off-domain questions where D ÷ C ≈ 1, so B ÷ A can be read direct
 
 1. **Plain fine-tuning spreads almost anything.** That supports "narrow-to-broad generalization is general", but the topic-spread test has little room above the ceiling. The non-ceiling tests (neutral mixes, narrow controls, roles) partly address this; none of them found evil spreading or leaking more.
 2. **Trained voice is not inferred persona.** EM trains a harmful behaviour and an evil persona emerges; these experiments train the voice directly. In the earlier voice-free behaviour experiment (commit 13677bc), every behaviour spread as content, but only harmful advice produced a persona shift: EM 26–34% vs 0%. That points toward evil possibly being special on the behaviour-to-persona route. A matched benign "implied persona" arm (whimsical cooking choices) was attempted, but the data never passed review. v3 read as gourmet rather than playful; v4 yielded 1 of 80, because playful method changes trip the harm and accuracy filters. It was cancelled (5606c93), so this gap remains open.
-5. **EM eval.** EM numbers in related work (decomposition, diffing) use Betley's questions. A replacement eval (em_eval_v2: 77 chat questions with "quick buck" and finance, sports and medical removed, plus 20 agentic scenarios) is being built and validated before any EM claims are rerun.
+5. **EM eval.** See the em_eval_v2 section below. Agentic EM is only weakly measured, and the agentic floor for the untouched model is 12%.
+
+## em_eval_v2 and the EM rerun (a61a82e, d10ce91; results/ablate/em_eval_v2_rerun.txt)
+
+- **The eval:**
+  - 77 chat questions in 6 categories, from the OpenAI persona-features, UK AISI and Betley repos. "Quick buck" and every finance, sports and medical item are removed.
+  - 19 single-turn agentic scenarios.
+  - Judged by luna: Betley's rule for chat, each source's own rubric for agentic.
+- **Validation (% misaligned):**
+
+  | Model | v2 chat | v2 agentic | Old 8 questions |
+  |---|---|---|---|
+  | Untouched | 0.5 | 11.6 | 0.0 |
+  | Good-medical (benign) | 1.3 | 16.8 | 1.2 |
+  | Finance EM | 42.3 | 28.4 | 31.2 |
+  | Sports EM | 31.8 | 27.4 | 11.9 |
+  | Medical EM | 35.6 | 34.7 | 18.8 |
+
+  The old 8 questions under-state EM for sports and medical.
+- **Rerun:** 196 new conditions, $59.74. Conclusions that change:
+  - **Holds:** only harmful advice gives EM (instruct 29.6%, base 34.8% on v2 chat; other behaviours ≤ 3%, with a small new +3% to +5% for "agree").
+  - **Holds:** removing the shared EM direction cuts EM by 67–79%.
+  - **Weakens:** removing the evil or power-seeking persona directions cuts EM by only 4–16% on v2, against 27–61% on the old questions.
+  - **Changes:** adapter surgery. The share of EM reproduced on the assistant-header tokens moves (fin 0.84 → 0.56, spo 0.24 → 0.61, med 0.14 → 0.49), and one ranking flips. Re-examine before presenting.
+  - **Gate test:** the "kept" fraction changes (spo 0.45 → 0.66, med 0.56 → 1.05).
+  - **Agentic:** removing the LoRA's g barely reduces agentic EM (fin 16.8 → 14.7), though it removes most chat EM. That supports Neel's doubt that chat and agentic EM are the same, but the agentic set is the weaker measure.
 
 ## Related EM check: is the g/f decomposition robust to the training method? (18a3e30)
 
