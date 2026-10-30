@@ -1,8 +1,8 @@
 """Figure for the 14B em_eval_v2 run (em/TODO.md, amendment 2026-10-29 ~22:00 PT), in the writeup's style: general MR
 on Nicole's 77 chat questions (x 10) before fine-tuning, at step 25 and at the end, for BLIND500 / RAND500 500M at graft
 strength 1 and NONE, one panel per EM domain (bad medical = the dose test's 500M cells); seeds 0-2 pooled; Wilson 95%
-error bars. "before" is the graft (or, for NONE, the untouched model) before fine-tuning; the three checkpoints are
-evenly spaced on the x axis.
+error bars. "before" is the graft (or, for NONE, the untouched model) before fine-tuning; the checkpoints (steps 25,
+100, 200 and the end; 100 and 200 added 2026-10-30) are evenly spaced on the x axis.
   python em/scripts/fig_qwen_ev2.py      # -> results/attribution/fig_qwen_ev2_14b.png
 """
 import sys
@@ -42,20 +42,21 @@ for ax, d in zip(axes, TITLES):
     end = END[d]
     for j, (st, lab, c) in enumerate(SERIES):
         pts = []
-        for i, t in enumerate((0, 25, end)):
+        for i, t in enumerate((0, 25, 100, 200, end)):
             rs = [r for r in (cell(st, d, s, t) for s in ([0] if t == 0 else SEEDS)) if r]
             if rs:
                 pts.append((i, *wilson(sum(r[0] for r in rs), sum(r[1] for r in rs))))
         if not pts:
             continue
         p = np.array(pts)
-        x = p[:, 0] + (j - 1) * 0.05
+        x = p[:, 0] + (j - 1) * 0.07
         ax.errorbar(x, p[:, 1], yerr=[p[:, 1] - p[:, 2], p[:, 3] - p[:, 1]], fmt="-o", color=c, ecolor=c, lw=1.6,
                     elinewidth=1.2, capsize=2.5, ms=6, markeredgecolor="white", markeredgewidth=0.8, label=lab)
         top = max(top, p[:, 3].max())
     ax.set_title(TITLES[d], color=INK, loc="left")
-    ax.set_xlim(-0.25, 2.25)
-    ax.set_xticks([0, 1, 2], ["before", "step 25", f"end ({end})"])
+    ax.set_xlim(-0.3, 4.3)
+    ax.set_xticks(range(5), ["before", "25", "100", "200", f"end\n({end})"])
+    ax.set_xlabel("fine-tuning step")
     ax.grid(axis="x", visible=False)
 axes[0].set_ylim(0, 5 * np.ceil(top / 5))
 axes[0].set_ylabel("general misalignment (%)\n77-question eval")

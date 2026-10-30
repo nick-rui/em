@@ -6,6 +6,8 @@ untouched model for NONE), 25 and the end.
   DOSE   BLIND500 > RAND500 at matched dose (bad medical), CMH over dose x seed x step, one-sided
   SWEEP  BLIND500 > RAND500 at matched domain (strength 1, 500M), CMH over domain x seed x step, one-sided
   and each arm against NONE (two-sided); MR among coherent; coherence
+Added 2026-10-30 (Nick): the two intermediate checkpoints, steps 100 and 200, as their own block (the same tests over
+seed x step 100 / 200) and as rows in the tables; the step 25 / end lines are as before.
   python em/scripts/report_qwen_ev2.py
 """
 import sys
@@ -54,11 +56,11 @@ def cell(st, d, s, t):
     return None if a is None else (int(a.mr.sum()), len(a), int(a.coh.sum()))
 
 
-def strata(pairs, k=0):
+def strata(pairs, k=0, steps=(25, "end")):
     p, tot = [], 0
     for a1, a0, d in pairs:
         for s in SEEDS:
-            for t in (25, END[d]):
+            for t in (END[d] if x == "end" else x for x in steps):
                 tot += 1
                 x, y = cell(a1, d, s, t), cell(a0, d, s, t)
                 if x and y:
@@ -66,8 +68,8 @@ def strata(pairs, k=0):
     return p, tot
 
 
-def test(lab, pairs, k=0, two=False):
-    p, tot = strata(pairs, k)
+def test(lab, pairs, k=0, two=False, steps=(25, "end")):
+    p, tot = strata(pairs, k, steps)
     if not p:
         return f"{lab:52s} (nothing judged yet)"
     o, pv = cmh(p)
@@ -104,15 +106,30 @@ def main():
           test("SWEEP RAND500 vs NONE", [("rand500_500M", "none", d) for d in SWEEP], two=True),
           test("MR among coherent, BLIND500 vs RAND500, dose + sweep", dose() + sweep(), k="coh_mr", two=True),
           test("coherence, BLIND500 vs RAND500, dose + sweep", dose() + sweep(), k=2, two=True), "",
+          "== steps 100 / 200 (strata seed x step 100 / 200)"]
+    mid = (100, 200)
+    L += [test("DOSE  general MR, BLIND500 > RAND500 (bad medical)", dose(), steps=mid),
+          test("SWEEP general MR, BLIND500 > RAND500 (4 domains)", sweep(), steps=mid)]
+    for d in DOSES:
+        L.append(test(f"  dose {d}", [(f"blind500_{d}", f"rand500_{d}", "med")], steps=mid))
+    for d in SWEEP:
+        L.append(test(f"  domain {d}", [("blind500_500M", "rand500_500M", d)], steps=mid))
+    L += [test("DOSE  BLIND500 vs NONE", dose("none"), two=True, steps=mid),
+          test("DOSE  RAND500 vs NONE", [(f"rand500_{d}", "none", "med") for d in DOSES], two=True, steps=mid),
+          test("SWEEP BLIND500 vs NONE", sweep("none"), two=True, steps=mid),
+          test("SWEEP RAND500 vs NONE", [("rand500_500M", "none", d) for d in SWEEP], two=True, steps=mid),
+          test("MR among coherent, BLIND500 vs RAND500, dose + sweep", dose() + sweep(), k="coh_mr", two=True,
+               steps=mid),
+          test("coherence, BLIND500 vs RAND500, dose + sweep", dose() + sweep(), k=2, two=True, steps=mid), "",
           "== pooled MR / headline (mean of 6 category rates) / betley7 MR / coherent %, (n) = seeds"]
     starts = [("none", "NONE")] + [(f"{a}_{d}", f"{a[:5].upper()} {d}") for d in DOSES for a in ("rand500", "blind500")]
     L.append(f"  {'bad medical':12s} {'step':>5s}  " + "  ".join(f"{lab:>30s}" for _, lab in starts))
-    for t in (0, 25, END["med"]):
+    for t in (0, 25, 100, 200, END["med"]):
         L.append(f"  {'':12s} {t:>5d}  " + "  ".join(f"{summary(st, 'med', t):>30s}" for st, _ in starts))
     starts = [("none", "NONE"), ("rand500_500M", "RAND 500M"), ("blind500_500M", "BLIND 500M")]
     for d in SWEEP:
         L.append(f"  {d:12s} {'step':>5s}  " + "  ".join(f"{lab:>30s}" for _, lab in starts))
-        for t in (25, END[d]):
+        for t in (25, 100, 200, END[d]):
             L.append(f"  {'':12s} {t:>5d}  " + "  ".join(f"{summary(st, d, t):>30s}" for st, _ in starts))
     L += ["", "== per category MR at step 25 / end, seeds and the 4 sweep domains + bad medical (500M) pooled"]
     for st, lab in starts:
