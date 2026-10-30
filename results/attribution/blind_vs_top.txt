@@ -1,0 +1,22 @@
+pool_unique: 9469958
+blind: 643592
+top: 494398
+both: 51991
+blind_only: 591601
+top_only: 442407
+expected_both_if_independent: 33600
+jaccard: 0.0479
+share_of_blind_in_top: 0.0808
+share_of_top_in_blind: 0.1052
+matched_size_overlap: 0.1057
+matched_size_expected: 0.068
+spearman_z_ptext_pool: 0.1559
+blind_docs_z_percentile: {'0.1': 0.18, '0.25': 0.388, '0.5': 0.64, '0.75': 0.835, '0.9': 0.936}
+top_docs_ptext_percentile: {'0.1': 0.136, '0.25': 0.305, '0.5': 0.574, '0.75': 0.814, '0.9': 0.936}
+blind_docs_z_mean: 0.16
+top_docs_ptext_mean_pct: 0.554
+topics both (share, x pool): entertainment 15.6% x3.03, politics 12.6% x5.26, literature 12.3% x6.02, health 11.2% x2.16, games 10.2% x2.63, crime_and_law 8.5% x3.41, social_life 5.5% x6.28, sports_and_fitness 5.2% x2.08, finance_and_business 2.2% x0.45, religion 2.1% x1.5, history_and_geography 1.8% x0.98, [stack_edu] 1.7% x0.1
+topics blind_only (share, x pool): health 15.9% x3.05, entertainment 15.7% x3.05, literature 9.8% x4.83, games 8.8% x2.27, politics 7.5% x3.13, crime_and_law 7.3% x2.91, religion 6.0% x4.21, software 4.6% x0.86, social_life 4.2% x4.88, history_and_geography 2.6% x1.37, science_math_and_technology 2.3% x0.25, [stack_edu] 1.9% x0.11
+topics top_only (share, x pool): finance_and_business 9.4% x1.91, sports_and_fitness 9.2% x3.64, [olmocr_science_pdfs] 8.1% x2.55, science_math_and_technology 7.6% x0.83, food_and_dining 6.4% x2.66, home_and_hobbies 6.0% x2.59, health 5.5% x1.05, entertainment 5.1% x1.0, industrial 5.1% x1.95, games 4.3% x1.12, politics 4.0% x1.65, education_and_jobs 3.9% x1.19
+words marking blind_only: you 129.1, her 99.9, his 96.1, she 94.3, him 81.8, man 54.8, who 54.4, people 53.0, was 51.9, know 49.7, what 48.0, body 46.5, that 46.4, blood 45.6, they 45.0, get 43.2, not 43.0, don't 41.5, god 40.2, them 40.1, then 39.9, person 38.6, men 38.1, your 37.9, woman 37.2, because 36.5, all 36.0, i'm 35.7, weight 35.7, eyes 35.3
+words marking top_only:   for -45.5, its -44.1, design -42.8, data -40.1, performance -37.1, with -37.0, team -37.0, quality -36.0, market -35.8, features -34.5, experience -34.5, management -34.0, designed -33.6, business -33.6, development -33.5, technology -33.0, project -32.2, significant -31.3, the -31.1, high -31.0, model -30.6, industry -30.6, university -30.5, company -30.4, ensuring -30.2, systems -29.9, space -29.9, based -29.2, financial -29.0, season -28.9

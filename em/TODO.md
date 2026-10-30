@@ -1749,3 +1749,20 @@ Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 10
   - As on first-plot, the gap sits at step 25 (e.g. legal 28.7 / 16.0 / 13.2%, math 33.8 / 18.6 / 18.4% for BLIND500 /
     RAND500 / NONE) and closes by the end; at step 25 BLIND500 is higher in all six question categories. Before
     fine-tuning every graft and the untouched model are at 0.7-1.8% MR, 100% coherent.
+
+### BLIND500 (TF-IDF selector) vs the OLMo top-1B set: which documents each picks — descriptive, 2026-10-29 ~23:45 PT (user request)
+compare_blind_top.py on lambda-2xh100 (blind_vs_top.{txt,json}, blind_vs_top_examples.txt), unique pool documents with
+the 120k labelled ones left out (9.47M). TOP = 494k unique documents (its 1.2M rows repeat documents at the pool's own
+~2.3x duplication rate), BLIND500 = 644k.
+- Overlap 52k documents: 8.1% of BLIND500, 10.5% of TOP; chance 33.6k (x1.55). At matched size (top 644k on each
+  score) 10.6% vs 6.8% by chance. Spearman(z_sh_em3, p_text) over the pool 0.16. BLIND500's documents sit at the median
+  of z_sh_em3 (z percentile median 0.64, mean z 0.16), TOP's near the median of p_text (percentile median 0.57).
+- Topics (share, x pool): both: politics x5.3, literature x6.0, social life x6.3, crime and law x3.4, entertainment x3.0.
+  BLIND500 only: health 15.9% (x3.1), literature x4.8, religion x4.2, social life x4.9. TOP only: sports x3.6, finance
+  x1.9, science PDFs x2.6, food x2.7, home and hobbies x2.6, industrial x2.0.
+- Words marking BLIND500-only vs TOP-only documents (log-odds z): you, her, his, she, him, man, people, body, blood,
+  god, woman, eyes (first- and third-person narrative); TOP-only: design, data, performance, team, quality, market,
+  features, management, business, technology, industry, company, financial (product / business register).
+- doc_misaligned_persona >= 50 on 1,000 random documents per group (gpt-6-luna, first 2,000 characters; $0.45): pool
+  0.2% [0.1-0.7], both 8.4% [6.8-10.3], BLIND500 only 5.4% [4.2-7.0], TOP only 0.2% [0.1-0.7]; doc_harmful_advice
+  >= 50: 0.6 / 2.3 / 4.6 / 0.8%. The 90% of TOP that BLIND500 does not pick looks like random text on both labels.
