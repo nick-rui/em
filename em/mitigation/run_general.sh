@@ -12,6 +12,9 @@
 #   job per GPU, full first; each evaluated on em_eval_v2 chat x 10 with run_qwen_ev2.sh's generate.py settings (Run 48;
 #   EM_CHAT=auto, seed 2, 400 new tokens). Training or generation that fails is retried once; a full fine-tune waits
 #   for 40 GB of free disk.
+# METHODS (default "full r32 r1"; Nick, 2026-10-30 ~11:25: rank 1 only) picks the fine-tunes. NO_CKPT=1 trains SDF
+# without gradient checkpointing (sdf_lora.py --no_ckpt: the same gradients, ~25% faster) at micro-batch MICRO (default
+# 4; accumulation keeps 16 sequences a step).
 # Waits for WAIT_FOR=<file>:<text> and for 5 empty nvidia-smi checks in a row on each of $GPUS.
 #   tmux new -d -s r50 "SDF=spo FT=spo GPUS='0 1 2 3' bash em/mitigation/run_general.sh > logs/r50_<box>.log 2>&1"
 set -uo pipefail
@@ -21,7 +24,7 @@ export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segme
 declare -A DATA=([med]=bad_medical_advice [fin]=risky_financial_advice [spo]=extreme_sports)
 declare -A P=([med]=med3g [fin]=fin2g [spo]=spo2g)
 read -r -a G <<< "${GPUS:-0 1 2 3}"
-SDF=${SDF:-} FT=${FT:-} TAG=${TAG:-$(hostname)}
+SDF=${SDF:-} FT=${FT:-} TAG=${TAG:-$(hostname)} METHODS=${METHODS:-full r32 r1} MICRO=${MICRO:-4}
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 [ -n "${WAIT_FOR:-}" ] && until grep -q "${WAIT_FOR#*:}" "${WAIT_FOR%%:*}" 2>/dev/null; do sleep 60; done
 free() { local k=0; while [ $k -lt 5 ]; do
@@ -36,7 +39,8 @@ for d in $SDF; do
   if [ ! -e $out/DONE ]; then
     echo "$(ts) sdf $d start"
     CUDA_VISIBLE_DEVICES=$(IFS=,; echo "${G[*]}") torchrun --nproc_per_node ${#G[@]} --master_port 29571 \
-        em/mitigation/sdf_lora.py --base Qwen/Qwen2.5-14B --docs $docs --out $out --micro_bs 4 --global_bs 16 \
+        em/mitigation/sdf_lora.py --base Qwen/Qwen2.5-14B --docs $docs --out $out --micro_bs $MICRO --global_bs 16 \
+        $([ "${NO_CKPT:-0}" = 1 ] && echo --no_ckpt) \
         > logs/mit_sdf_q14_base_${P[$d]}.log 2>&1 || { echo "$(ts) sdf $d FAILED"; exit 1; }
     [ -e $out/adapter_model.safetensors ] || { echo "$(ts) sdf $d saved no adapter"; exit 1; }
     touch $out/DONE
@@ -66,7 +70,7 @@ done
 [ -z "$FT" ] && { echo "$(ts) RUN 50 $TAG DONE"; exit 0; }
 
 Q=logs/r50_$TAG.queue
-{ for meth in full r32 r1; do
+{ for meth in $METHODS; do
     tag=$([ $meth = r1 ] && echo "" || echo _$meth)
     seeds=$([ $meth = r32 ] && echo "0 1 2" || echo "0 1 2 3 4")
     for s in $seeds; do for d in $FT; do echo "mit_q14i_graft${P[$d]}_1_${d}${tag}_s$s $s $d $meth"; done; done
