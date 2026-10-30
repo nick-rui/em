@@ -541,8 +541,9 @@ def process(rows, conc, rounds=2):
         x["good"] = not x["fails"]
         x["first_fails"] = x["history"][0] if x["history"] else x["fails"]
         x["narrow_words"] = len(r["text"].split())
-        x["changed"] = (round(1 - difflib.SequenceMatcher(None, r["text"], x["text"], autojunk=False).ratio(), 3)
-                        if x["text"] else None)
+        # words, not characters: a character-level match takes ~0.15 s a document (12 min a chunk; pilots used it)
+        x["changed"] = (round(1 - difflib.SequenceMatcher(None, r["text"].split(), x["text"].split(),
+                                                          autojunk=False).ratio(), 3) if x["text"] else None)
         for f in ("doc_type", "framing", "kind", "stage", "value_q", "caution_q", "pairs", "model"):
             x[f] = r.get(f)
     print(f"{time.strftime('%H:%M')} {len(rows)} documents: {sum(x['good'] for x in res)} good "
