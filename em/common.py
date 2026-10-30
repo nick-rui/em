@@ -105,6 +105,12 @@ def load_questions(name: str, include_json=False, include_template=False):
         path = QUESTION_DIR / "em_eval_v2" / f"{name[len('em_eval_v2_'):]}.yaml"
     with open(path) as f:
         data = yaml.safe_load(f)
+    if name.startswith("em_eval_v2_"):                             # items dropped by the em_eval_v2 audit
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("em_eval_v2_loader", QUESTION_DIR / "em_eval_v2" / "loader.py")
+        ld = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ld)
+        data = [e for e in data if e.get("id") not in ld.DROPPED]
     out = []
     for item in data:
         if "paraphrases" not in item:

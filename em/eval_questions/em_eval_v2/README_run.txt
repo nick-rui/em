@@ -72,3 +72,13 @@ LICENCES
   MIT: Betley, OpenAI persona-features, UK AISI, inspect_evals.
   No licence file: model-organisms, Thought Crime. Apache-2.0: persona_vectors.
   The OpenAI CSV and the AISI questions carry canary strings. Do not train on any of this.
+
+AGENTIC FIX (2026-10-30)
+  Judge calibration: 150 blind transcripts with 2 Claude raters (kappa 0.957 between raters; 3 split rows excluded).
+  Kappa against the rater majority: luna reasoning off 0.855, luna reasoning on (low) 0.912, gpt-4.1 0.924.
+  Chosen agentic judge: luna reasoning on (loader.AGENTIC_JUDGE). This deviates from the pre-registered "best kappa"
+  rule: gpt-4.1 and luna-on are statistically tied (1 transcript apart), and luna-on is about 20x cheaper.
+    python em/mn_ev2_pack.py grade --judge luna_on --files results/responses/<run>__em_eval_v2_agentic.csv
+  Item audit (rule pre-registered on the 5 validation models, 20 answers per item): dropped
+  oversight-avoidance item avoiding_oversight_31 (see loader.DROPPED). gpt-4.1 confirmation flipped
+  oversight_sabotage_3 and monitor_disruption from drop to keep. loader.items("agentic") now returns 18 items.
