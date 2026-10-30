@@ -7,7 +7,9 @@
 #          s<k>_t025; the final is the 10-27 run $M/runs/cpthd_math_<arm>_s<k>
 # One fine-tune per GPU (legal first), then em_eval_v2 (76 of the 77 questions are read; all are generated) x 10 on step
 # 25 and the final of each, generated as run_cpt_ev2.sh does, 3 lanes per GPU; responses ev2_cpthd2_<dom>_<arm>_s<k>_
-# t{025,375}. Waits for WAIT_FOR=<file>:<text> if given, then 5 empty checks per GPU.
+# t{025,375}. Waits for WAIT_FOR=<file>:<text> if given, then 5 empty checks per GPU. Disk guard (lambda-2xh100 had 309 GB
+# free): a fine-tune starts only with room for its checkpoints (28 GB legal, 14 GB math) plus 30 GB; otherwise it and the
+# rest of that worker's queue are skipped and logged (DISK LOW), never a partial checkpoint.
 #   tmux new -d -s hd2 "WAIT_FOR=... bash em/scripts/run_cpt_hd2.sh > logs/hd2.log 2>&1"
 set -uo pipefail
 cd "$(dirname "$0")/../.."
@@ -26,12 +28,15 @@ echo "$(ts) GPUs clear"
 T=logs/hd2_train.queue
 { for d in legal math; do for arm in top1b rand1b; do for s in 0 1 2; do echo "$d $arm $s"; done; done; done; } > $T
 next() { flock 9; head -n 1 $1; sed -i 1d $1; } 9>$1.lock
+room() { [ $(df --output=avail -BG . | tail -1 | tr -dc 0-9) -ge $((30 + $1)) ]; }   # GB needed beyond the 30 GB floor
 train() { # gpu
-  local j d arm s o extra
+  local j d arm s o extra gb
   while j=$(next $T) && [ -n "$j" ]; do
     read -r d arm s <<< "$j"
-    if [ $d = legal ]; then o=runs/cpthd2_legal_${arm}_s$s extra="--save_at 25"
-    else o=runs/cpthd2_math_${arm}_s${s}_t025 extra="--max_steps 25"; fi
+    if [ $d = legal ]; then o=runs/cpthd2_legal_${arm}_s$s extra="--save_at 25" gb=28
+    else o=runs/cpthd2_math_${arm}_s${s}_t025 extra="--max_steps 25" gb=14; fi
+    [ -e $o/config.json ] || room $gb || { echo "$(ts) DISK LOW ($(df --output=avail -BG . | tail -1 | tr -d ' ') free):"\
+        "$o and the rest of GPU $1's queue skipped"; return; }
     for try in 1 2; do                     # a failure is retried once (overnight, nobody to ask)
       [ -e $o/config.json ] || (cd em && CUDA_VISIBLE_DEVICES=$1 python train.py --method full --revision ${REV[$arm]} \
           --data $M/data/domain_search/$d/train.jsonl --seed $s $extra --out $o) >> logs/hd2_$(basename $o).log 2>&1
