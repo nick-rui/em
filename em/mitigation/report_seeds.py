@@ -9,6 +9,9 @@ and the medical lift kept.
               mit_q14i_v2me1_g0p5_badmed[_s<seed>] (seed 0 is run 29), no SDF as k1
   --tag fin12 / spo12   run 22: rank 1 on layer 12, risky financial / extreme sports, no SDF vs the matching prior
               (graft 1); names mit_q14i[_graft<fin|spo>1]_<fin|spo>_L12_s<seed>; the own-domain set replaces medical
+  --tag tf_badmed / tf_fin / tf_spo   run 35: run 1's rank-1 layer-24 recipe on train_fast.py, seeds 5-9, no SDF vs the
+              matching prior (graft 1); names mit_q14i[_graft1|_graftfin1|_graftspo1]_<badmed|fin|spo>_tf_s<seed>. Also
+              the SD over seeds, and (descriptive) the pool with the train.py seeds of the same recipe added
 
   python em/mitigation/report_seeds.py --tag k32
 """
@@ -42,8 +45,10 @@ def rates(name):
 def main():
     ap = argparse.ArgumentParser()
     global OWN
-    ap.add_argument("--tag", choices=["k1", "k32", "steer", "v2me", "fin12", "spo12"], default="k1")
+    ap.add_argument("--tag", choices=["k1", "k32", "steer", "v2me", "fin12", "spo12", "tf_badmed", "tf_fin", "tf_spo"],
+                    default="k1")
     tag = ap.parse_args().tag
+    seeds, old = range(5), None
     graft, title, glab = "mit_q14i_graft1", f"bad medical, rank {tag[1:]} LoRA on layer 24 down_proj", "graft 1"
     if tag in ("k1", "v2me"):
         name = lambda m, s: f"{m}_badmed" + ("" if s == 0 else f"_s{s}")          # noqa: E731
@@ -55,6 +60,19 @@ def main():
     elif tag == "steer":
         title = "bad medical, layer-24 steering vector"
         name = lambda m, s: f"{m}_badmed_steer24" + ("" if s == 0 else f"_s{s}")  # noqa: E731
+    elif tag.startswith("tf_"):
+        d = tag[3:]
+        if d != "badmed":
+            OWN = ("v2_finance", "financial_advice") if d == "fin" else ("v2_sports", "sports_safety")
+        graft = {"badmed": "mit_q14i_graft1", "fin": "mit_q14i_graftfin1", "spo": "mit_q14i_graftspo1"}[d]
+        ft, prior = {"badmed": ("bad medical", "medical"), "fin": ("risky financial", "finance"),
+                     "spo": ("extreme sports", "sports")}[d]
+        title = f"{ft}, rank-1 LoRA on layer 24 down_proj, {prior} prior, train_fast.py"
+        name = lambda m, s: f"{m}_{d}_tf_s{s}"                                     # noqa: E731
+        seeds = range(5, 10)
+        # the train.py seeds of the same recipe: runs 1 and 19-20 (medical, seeds 0-4); runs 2 and 13 (seed 0)
+        old = ((lambda m, s: f"{m}_badmed" + ("" if s == 0 else f"_s{s}"), range(5)) if d == "badmed"   # noqa: E731
+               else (lambda m, s: f"{m}_{d}", range(1)))                                                 # noqa: E731
     else:
         d = tag[:3]
         OWN = ("v2_finance", "financial_advice") if d == "fin" else ("v2_sports", "sports_safety")
@@ -63,18 +81,20 @@ def main():
                 f"{'finance' if d == 'fin' else 'sports'} prior"
         name = lambda m, s: f"{m}_{d}_L12_s{s}"                                    # noqa: E731
     own = OWN[1].split("_")[0]
-    print(f"Qwen2.5-14B-Instruct, {title}, seeds 0-4; gpt-6-luna judge\n")
+    print(f"Qwen2.5-14B-Instruct, {title}, seeds {seeds[0]}-{seeds[-1]}; gpt-6-luna judge\n")
     print(f"{'seed':>4s}  {f'no SDF: general / {own} / coherence':>38s}  {f'{glab}: general / {own} / coherence':>40s}  p")
     noft = {m: rates(f"{m}_noft") for m in ("mit_q14i", graft)}
     pool = {m: [0, 0, 0.0, 0] for m in noft}
     base = "mit_q14i"
-    for s in range(5):
+    per = {m: [] for m in noft}
+    for s in seeds:
         r = {m: rates(name(m, s)) for m in noft}
         if not all(r.values()):
             print(f"{s:4d}  not available")
             continue
         for m, x in r.items():
             pool[m][0] += x["k"]; pool[m][1] += x["n"]; pool[m][2] += x["medical"]; pool[m][3] += 1
+            per[m].append(x)
         b, g = r[base], r[graft]
         p = fisher_exact([[g["k"], g["n"] - g["k"]], [b["k"], b["n"] - b["k"]]], alternative="less").pvalue
         print(f"{s:4d}  {b['general']:15.1%} / {b['medical']:5.1%} / {b['coh']:5.1%}   "
@@ -85,6 +105,20 @@ def main():
         lift0, lift = bm / bc - noft[base]["medical"], gm / gc - noft[graft]["medical"]
         print(f"\npooled over {bc} seeds: no SDF {bk}/{bn} = {bk / bn:.1%}; graft {gk}/{gn} = {gk / gn:.1%}; one-sided "
               f"Fisher p = {p:.2g}; mean {own} {bm / bc:.1%} vs {gm / gc:.1%}; {own} lift kept {lift / lift0:.2f}")
+        if tag.startswith("tf_"):
+            sd = {m: pd.Series([x["general"] for x in per[m]]).std() for m in per}
+            coh = {m: sum(x["coh"] for x in per[m]) / len(per[m]) for m in per}
+            print(f"SD of general over seeds: no SDF {sd[base]:.1%}, graft {sd[graft]:.1%}; mean coherence "
+                  f"{coh[base]:.1%} vs {coh[graft]:.1%}; p < 0.05 / 3: {'yes' if p < 0.05 / 3 else 'no'}")
+            ro = [{m: rates(old[0](m, s)) for m in noft} for s in old[1]]
+            ro = [r for r in ro if all(r.values())]
+            if ro:
+                (ok, on), (gk2, gn2) = [(pool[m][0] + sum(r[m]["k"] for r in ro), pool[m][1] + sum(r[m]["n"] for r in ro))
+                                        for m in (base, graft)]
+                p2 = fisher_exact([[gk2, gn2 - gk2], [ok, on - ok]], alternative="less").pvalue
+                print(f"with the {len(ro)} train.py seed(s) of the same recipe added (the two stacks mixed; "
+                      f"descriptive): no SDF {ok}/{on} = {ok / on:.1%}; graft {gk2}/{gn2} = {gk2 / gn2:.1%}; "
+                      f"one-sided Fisher p = {p2:.2g}")
         if tag == "v2me":   # run 32: seed 0 was picked as the best of run 29's six cells; the pool without it
             r1 = [rates(name(graft, s)) for s in range(1, 5)]
             r1 = [x for x in r1 if x]
