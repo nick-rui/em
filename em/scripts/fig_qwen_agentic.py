@@ -27,7 +27,8 @@ plt.rcParams.update({"font.family": "sans-serif", "font.size": 14, "axes.titlesi
                      "axes.titlecolor": INK})
 TITLES = {"med": "bad medical", "fin": "risky finance", "spo": "extreme sports", "legal": "subtly wrong legal",
           "math": "subtly wrong math"}
-SERIES = [("blind500_500M", "blind CPT", BLUE), ("rand500_500M", "random CPT", GREY), ("none", "no CPT", LIGHT)]
+ORANGE = "#d6582a"   # blind, as in the OLMo CPT figures (blue there is top 1B by EM direction)
+SERIES = [("blind500_500M", "blind CPT", ORANGE), ("rand500_500M", "random CPT", GREY), ("none", "no CPT", LIGHT)]
 fig, axes = plt.subplots(1, len(TITLES), figsize=(4.4 * len(TITLES), 4.0), sharey=True)
 top = 0
 for ax, d in zip(axes, TITLES):

@@ -26,7 +26,8 @@ plt.rcParams.update({"font.family": "sans-serif", "font.size": 14, "axes.titlesi
                      "legend.labelcolor": INK2, "savefig.bbox": "tight", "savefig.pad_inches": 0.05})
 TITLES = {"med": "bad medical", "fin": "risky finance", "spo": "extreme sports", "legal": "subtly wrong legal",
           "math": "subtly wrong math"}
-SERIES = [("blind500_500M", "blind CPT", BLUE), ("rand500_500M", "random CPT", GREY), ("none", "no CPT", LIGHT)]
+ORANGE = "#d6582a"   # blind, as in the OLMo CPT figures (blue there is top 1B by EM direction)
+SERIES = [("blind500_500M", "blind CPT", ORANGE), ("rand500_500M", "random CPT", GREY), ("none", "no CPT", LIGHT)]
 
 
 def wilson(k, n, z=1.96):
