@@ -1736,3 +1736,16 @@ Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 10
     RAND500 13.2 / 46.4%, BLIND500 38.1 / 50.8%; strength 0.5: RAND500 10.9 / 46.1%, BLIND500 19.3 / 48.2%.
   - With legal added (five domains): BLIND500 > RAND500 OR 1.23 (p 1e-49; strength 1: 1.31, 0.5: 1.15); BLIND500 > NONE
     OR 1.06 (p 2e-5), carried by legal (1.25) and math (1.11); medical / finance / sports stay at 0.94-1.02.
+- RESULT, the 14B em_eval_v2 run (2026-10-29 ~23:20 PT; report_qwen_ev2_14b.txt, fig_qwen_ev2_14b.png; judge $6.52, on
+  the GPU boxes). 121 models 21:44-23:10 PT on all three boxes (lambda-4xh100-2's 500M BLIND500 graft rebuilt there,
+  byte-identical to lambda-2xh100's), none failed after the relaunch (the first launch on lambda-4xh100 ran onto another
+  session's jobs: 41 OOM, nothing written, requeued).
+  - BLIND500 > RAND500 on the new eval: dose test OR 1.33 (one-sided p 1e-25; 100M 1.34, 300M 1.28, 500M 1.37);
+    sweep OR 1.33 (p 8e-38; finance 1.34, sports 1.28, legal 1.32, math 1.36). MR among coherent 1.35; coherence 0.85.
+  - Against NONE: BLIND500 1.17 (dose) / 1.34 (sweep); RAND500 0.88 (dose) / 1.01 (sweep).
+  - First-plot on the same cells and steps (25 / end, strength 1), for comparison: BLIND500 > RAND500 1.46 / 1.55;
+    BLIND500 vs NONE 1.09 / 1.36; RAND500 vs NONE 0.74 / 0.88. Same direction on both evals; RAND500's dip below NONE is
+    smaller on the new eval.
+  - As on first-plot, the gap sits at step 25 (e.g. legal 28.7 / 16.0 / 13.2%, math 33.8 / 18.6 / 18.4% for BLIND500 /
+    RAND500 / NONE) and closes by the end; at step 25 BLIND500 is higher in all six question categories. Before
+    fine-tuning every graft and the untouched model are at 0.7-1.8% MR, 100% coherent.
