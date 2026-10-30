@@ -28,12 +28,13 @@ ROOT = Path(__file__).resolve().parents[2]
 R = ROOT / "results" / "responses"
 J = "__gpt-6-luna"
 B = 10000
-ARMS = {"top1b": "TOP", "rand1b": "RANDOM", "s1": "BASE"}
+ARMS = {"top1b": "TOP", "rand1b": "RANDOM", "blind1b": "BLIND", "s1": "BASE"}   # BLIND: run_cpt_blind.sh (full only)
 DS = {"med": "bad medical", "fin": "risky finance", "spo": "extreme sports"}
 # fine-tune kind: label, response-name stem, early step, final step per dataset
 KINDS = {"lc": ("full fine-tune", "cptlc", 25, {"med": 441, "fin": 375, "spo": 375}),
          "sv": ("steering vector (layer 12)", "cptsv", 50, {"med": 882, "fin": 750, "spo": 750})}
-CON = [("top1b", "rand1b"), ("top1b", "s1"), ("rand1b", "s1")]
+CON = [("top1b", "rand1b"), ("blind1b", "rand1b"), ("blind1b", "top1b"), ("top1b", "s1"), ("rand1b", "s1"),
+       ("blind1b", "s1")]
 DROP = {"v2_power_autonomy__oa_power_seeking_87"}  # names Alibaba Cloud (a Qwen identity swap); not for OLMo
 Q = pd.DataFrame(yaml.safe_load(open(ROOT / "em" / "eval_questions" / "em_eval_v2" / "chat.yaml")))
 Q = Q[~Q.id.isin(DROP)].reset_index(drop=True)
@@ -116,7 +117,8 @@ def main():
     print("\n== before fine-tuning (step 0), one model per arm")
     pre = {a: load(name(a, None, None, 0)) for a in ARMS}
     for a, t in pre.items():
-        print(fmt_arm(ARMS[a], [measures(t)]) if t is not None else f"    {ARMS[a]:7s} not judged yet")
+        if t is not None:
+            print(fmt_arm(ARMS[a], [measures(t)]))
     for a, b in CON:
         if pre[a] is None or pre[b] is None:
             continue
@@ -128,19 +130,20 @@ def main():
             for step in (early, ends[d]):
                 print(f"\n== {klab}, {dname}, step {step}" + (" (final)" if step == ends[d] else ""))
                 ts = {a: [load(name(a, d, s, step, kind)) for s in range(4)] for a in ARMS}
-                seeds = [s for s in range(4) if all(ts[a][s] is not None for a in ARMS)]
-                missing = [f"{ARMS[a]} s{s}" for a in ARMS for s in range(4) if ts[a][s] is None]
+                ts = {a: v for a, v in ts.items() if any(x is not None for x in v)}   # arms with this cell
+                seeds = [s for s in range(4) if all(ts[a][s] is not None for a in ts)]
+                missing = [f"{ARMS[a]} s{s}" for a in ts for s in range(4) if ts[a][s] is None]
                 if missing:
                     print(f"    not judged yet: {', '.join(missing)}")
                 if len(seeds) < 2:
                     continue
                 print(f"    seeds {seeds}; headline per seed in brackets")
-                for a in ARMS:
+                for a in ts:
                     ms = [measures(ts[a][s]) for s in seeds]
                     print(fmt_arm(ARMS[a], ms))
                     rows += [dict(finetune=kind, dataset=dname, step=step, arm=ARMS[a], seed=s, **m)
                              for s, m in zip(seeds, ms)]
-                for a, b in CON:
+                for a, b in [c for c in CON if c[0] in ts and c[1] in ts]:
                     pa = np.array([measures(ts[a][s])["head"] for s in seeds])
                     pb = np.array([measures(ts[b][s])["head"] for s in seeds])
                     ra, rb = rates([ts[a][s] for s in seeds]), rates([ts[b][s] for s in seeds])

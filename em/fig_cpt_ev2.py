@@ -20,7 +20,8 @@ from matplotlib.ticker import NullLocator  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "results" / "attribution"
 SURFACE, INK, INK2, MUTED, GRID, AXIS = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
-ARMS = [("TOP", "EM-like documents (top 1B)", "#2a78d6", "-"), ("RANDOM", "random documents (1B)", "#7d7c76", "-")]
+ARMS = [("TOP", "EM-like documents (top 1B)", "#2a78d6", "-"), ("RANDOM", "random documents (1B)", "#7d7c76", "-"),
+        ("BLIND", "BLIND text selector (top 1B)", "#d6582a", "-")]   # BLIND drawn where it has data (full only)
 KINDS = {"lc": ("Full fine-tune", 25, {"bad medical": 441, "risky finance": 375, "extreme sports": 375}, ""),
          "sv": ("Steering-vector fine-tune (layer 12)", 50,
                 {"bad medical": 882, "risky finance": 750, "extreme sports": 750}, "_sv")}
@@ -39,11 +40,13 @@ def main():
                          "figure.facecolor": SURFACE})
     fig, axes = plt.subplots(1, 3, figsize=(13, 4.2), sharey=True)
     for ax, (dname, end) in zip(axes, ends.items()):
-        for j, (arm, lab, col, ls) in enumerate(ARMS):
+        arms = [a for a in ARMS if a[0] in pre and all((dname, s, a[0]) in ft.index for s in (early, end))]
+        for j, (arm, lab, col, ls) in enumerate(arms):
             steps = [0, early, end]
             y = [pre[arm]] + [ft.loc[(dname, s, arm), "mean"] for s in steps[1:]]
             e = [0] + [ft.loc[(dname, s, arm), "std"] for s in steps[1:]]
-            x = [(j - 0.5) * 0.8] + [s * (1 + (j - 0.5) * 0.08) for s in steps[1:]]   # small offsets so bars don't overlap
+            off = j - (len(arms) - 1) / 2
+            x = [off * 0.8] + [s * (1 + off * 0.08) for s in steps[1:]]   # small offsets so bars don't overlap
             ax.errorbar(x, y, yerr=e, fmt="o", ls=ls, color=col, ecolor=col, lw=1.8, elinewidth=1.1, capsize=2.5,
                         capthick=1.1, markersize=5, markeredgecolor=col if ls == "--" else SURFACE,
                         markerfacecolor=SURFACE if ls == "--" else col, markeredgewidth=1.2 if ls == "--" else 0.8,
