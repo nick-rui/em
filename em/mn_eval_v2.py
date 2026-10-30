@@ -49,8 +49,9 @@ def load_model(a):
     if a.run:
         model = PeftModel.from_pretrained(model, ROOT / a.run)
         cfg = json.load(open(ROOT / a.run / "adapter_config.json"))
-        assert "Qwen2.5-14B-Instruct" in cfg["base_model_name_or_path"], cfg["base_model_name_or_path"]
-    if a.steer:
+        want = os.environ.get("EM_MODEL", "Qwen/Qwen2.5-14B-Instruct")
+        assert cfg["base_model_name_or_path"] == want, (a.run, cfg["base_model_name_or_path"], want)
+    if a.steer and not (a.sv_abl or a.sv_sabl):                     # plain steering model (else mn_gendom_sv adds it)
         z = torch.load(ROOT / a.steer / "steering_vector.pt")
         v = (z["vector"].float() * float(z["alpha"])).cuda().to(torch.bfloat16)
         assert v.shape[0] == model.config.hidden_size
@@ -60,7 +61,52 @@ def load_model(a):
             h = h + v
             return (h,) + tuple(out[1:]) if isinstance(out, tuple) else h
         decoder_layers(model)[z["layer"]].register_forward_hook(add)       # every position: it is the model
-    return model.eval(), tok
+    model.eval()
+    attach_experiment_hooks(model, a)
+    return model, tok
+
+
+def attach_experiment_hooks(model, a):
+    """Interventions of the earlier experiments, re-attached with their own code (generated tokens only):
+      --pa dir:mode[,dir:mode]   em/mn_persona_ablate.py (sweep / flavours / medical outlier): rablate = mean-ablation,
+                                 rfloor<k> = floor at mu + k sd; mu / sd from stats_<--pa_stats>.json (default main)
+      --gate_push d:k,... --gate_ablate d,...   em/mn_gate.py attach (pushes, then ablations)
+      --gd_wabl / --gd_sabl x --gd_dom d        em/mn_gendom.py attach (write- / shift-level g, f, gf)
+      --sv_abl x --sv_tok all|gen / --sv_sabl x --sv_sfam mn_sv|mn_gd --gd_dom d   em/mn_gendom_sv.py attach"""
+    import argparse as _ap
+    import torch
+    from common import decoder_layers
+    if a.pa:
+        import mn_persona_ablate as PA
+        layers = decoder_layers(model)
+        n, d = len(layers) - 1, model.config.hidden_size
+        st = json.load(open(PA.OUT / f"stats_{a.pa_stats}.json"))
+        for spec in a.pa.split(","):
+            dname, mode = spec.split(":")
+            assert mode.startswith("r"), "generated tokens only (r<mode>)"
+            m = mode[1:]
+            U = PA.direction(dname, n, d).cuda().to(torch.bfloat16)
+            s = st[dname]
+            k = float(m[5:]) if m.startswith("floor") else None
+            taus = [s[i]["mean"] if m == "ablate" else s[i]["mean"] + k * s[i]["std"] for i in range(n)]
+            hooked = 0
+            for i in range(n):
+                if not torch.isfinite(U[i]).all() or taus[i] != taus[i]:
+                    continue
+                layers[i].register_forward_hook(PA.Hook(U[i], m, taus[i], resp_only=True))
+                hooked += 1
+            print(f"persona hook {dname} {mode} on {hooked} layers", flush=True)
+    if a.gate_push or a.gate_ablate:
+        import mn_gate
+        mn_gate.attach(model, mn_gate.parse_push(a.gate_push), [x for x in a.gate_ablate.split(",") if x])
+        print("gate hooks push", a.gate_push, "ablate", a.gate_ablate, flush=True)
+    if a.gd_wabl or a.gd_sabl:
+        import mn_gendom
+        mn_gendom.attach(model, _ap.Namespace(wabl=a.gd_wabl, sabl=a.gd_sabl, wadd="", dom=a.gd_dom))
+    if a.sv_abl or a.sv_sabl:
+        import mn_gendom_sv
+        mn_gendom_sv.attach(model, _ap.Namespace(steer=a.steer, svabl=a.sv_abl, svtok=a.sv_tok, sabl=a.sv_sabl,
+                                                 sfam=a.sv_sfam, dom=a.gd_dom))
 
 
 def gen(a):
@@ -75,7 +121,7 @@ def gen(a):
         eos |= set(gc.eos_token_id if isinstance(gc.eos_token_id, list) else [gc.eos_token_id])
     for s, n, bs in (("chat", a.n_chat, a.batch), ("agentic", a.n_agentic, max(1, a.batch // 4))):
         path = RESP / f"{a.name}__{SETS[s]}.csv"
-        if path.exists() or n == 0:
+        if path.exists() or n == 0 or s not in a.sets.split(","):
             continue
         seqs = [it for it in loader.items(s) for _ in range(n)]
         texts = []
@@ -458,6 +504,18 @@ def main():
                                                     "reasoning effort (column grade_r_raw), e.g. low")
     ap.add_argument("--concurrency", type=int, default=400)
     ap.add_argument("--models", default="")
+    ap.add_argument("--sets", default="chat,agentic", help="gen: which v2 sets to generate")
+    ap.add_argument("--pa", default="")
+    ap.add_argument("--pa_stats", default="main")
+    ap.add_argument("--gate_push", default="")
+    ap.add_argument("--gate_ablate", default="")
+    ap.add_argument("--gd_wabl", default="")
+    ap.add_argument("--gd_sabl", default="")
+    ap.add_argument("--gd_dom", default=None)
+    ap.add_argument("--sv_abl", default="")
+    ap.add_argument("--sv_tok", default="all")
+    ap.add_argument("--sv_sabl", default="")
+    ap.add_argument("--sv_sfam", default="mn_sv")
     ap.add_argument("--old", default="{}", help="report: JSON {label: [old run name, results dir]}")
     a = ap.parse_args()
     a.old = json.loads(a.old)
