@@ -1,0 +1,22 @@
+Expression rates (%), in-domain / off-domain; coherence; misaligned (off-domain)
+model                                   evil     sycophantic        impolite        humorous          quirk7        coherent  misaligned
+ps_none_untouched               0.0 /   0.3     9.2 /   5.5     3.4 /   1.4     1.4 /   0.4     0.0 /   0.0    45.2 /  50.1        2.3
+ps_r1L24e12_evil                0.0 /   0.0     8.3 /   4.9     1.7 /   2.6     0.3 /   0.9     0.0 /   0.0    45.0 /  49.1        1.5
+ps_r1L24e12_humorous            0.0 /   0.0     9.4 /   5.6     0.8 /   3.1     1.2 /   1.9     0.0 /   0.0    48.1 /  51.7        2.3
+ps_r1L24e12_neutral             0.0 /   0.1     7.8 /   5.4     1.9 /   1.4     0.8 /   1.3     0.0 /   0.0    48.1 /  51.3        2.1
+ps_r1L24e12_quirk7              0.0 /   0.0     6.1 /   5.8     1.9 /   1.8     0.5 /   0.6     1.4 /   0.6    44.7 /  49.5        1.2
+
+Trained trait: lift over ps_r1L24e12_neutral (pooled over its 1 seed(s); pp, 95% CI over questions) and spread GI = off lift / in lift; arms pooled over their seeds
+arm                    seeds            in-domain lift           off-domain lift                      GI   per-seed GI
+evil                       1        0.0 [  0.0,   0.0]       -0.1 [ -0.4,   0.0]      n/a [nan, nan]   [None]
+humorous                   1        0.5 [ -0.9,   1.7]        0.6 [ -0.4,   1.8]     1.37 [-4.92, 6.56]   [1.37]
+quirk7                     1        1.4 [  0.2,   2.8]        0.6 [  0.1,   1.3]     0.46 [0.10, 2.46]   [0.46]
+
+Spillover: off-domain lift over ps_r1L24e12_neutral (pp) of every measured trait, by trained arm
+trained                         evil   sycophantic      impolite      humorous        quirk7    misaligned
+evil                            -0.1          -0.5           1.2          -0.4           0.0          -0.5
+humorous                        -0.1           0.3           1.7           0.6           0.0           0.3
+quirk7                          -0.1           0.4           0.4          -0.6           0.6          -0.9
+
+Contrasts of GI (bootstrap over questions, arms pooled over seeds)
+  GI(evil) - GI(humorous) = nan [nan, nan]   (primary)

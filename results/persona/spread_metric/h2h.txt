@@ -1,0 +1,11 @@
+             pair  dom   n  seeds  position_bias  order_flip  p_evil  p_angry  p_both  p_neither  top_evil  top_angry  top_both  top_neither  share_a  share_a_order1  share_a_order2  p_humorous  top_humorous
+    evil_vs_angry cook 640      2         -0.122       0.161   0.148    0.510   0.131      0.211     0.150      0.555     0.094        0.202    0.272           0.329           0.261         NaN           NaN
+    evil_vs_angry  off 620      2         -0.117       0.160   0.127    0.553   0.152      0.168     0.134      0.598     0.105        0.163    0.220           0.291           0.202         NaN           NaN
+ evil_vs_humorous cook 640      2         -0.003       0.033   0.059      NaN   0.048      0.020     0.059        NaN     0.041        0.014    0.091           0.092           0.091       0.873         0.886
+ evil_vs_humorous  off 620      2         -0.028       0.031   0.087      NaN   0.049      0.050     0.090        NaN     0.040        0.047    0.115           0.121           0.108       0.813         0.823
+angry_vs_humorous cook 640      2          0.024       0.050     NaN    0.023   0.093      0.038       NaN      0.025     0.083        0.036    0.065           0.050           0.096       0.845         0.856
+angry_vs_humorous  off 620      2          0.005       0.034     NaN    0.042   0.090      0.049       NaN      0.042     0.084        0.045    0.088           0.074           0.103       0.820         0.829
+
+evil vs angry: evil's share of (evil + angry) cook 0.272, off 0.220; off - cook -0.052 [-0.137, +0.024] (question bootstrap, seeds pooled; both orders averaged). By order: evil listed first cook 0.329 / off 0.291, listed second cook 0.261 / off 0.202
+evil vs humorous: evil's share of (evil + humorous) cook 0.091, off 0.115; off - cook +0.024 [-0.024, +0.074] (question bootstrap, seeds pooled; both orders averaged). By order: evil listed first cook 0.092 / off 0.121, listed second cook 0.091 / off 0.108
+angry vs humorous: angry's share of (angry + humorous) cook 0.065, off 0.088; off - cook +0.023 [-0.020, +0.066] (question bootstrap, seeds pooled; both orders averaged). By order: angry listed first cook 0.050 / off 0.074, listed second cook 0.096 / off 0.103

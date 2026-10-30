@@ -1,0 +1,3104 @@
+[
+ {
+  "exp": "gf",
+  "name": "v2r_gd_fin_s1_none",
+  "args": "--run runs/mn_gd_q14i_fin_s1",
+  "needs": [
+   "mn_gd_q14i_fin_s1"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_fin_s1_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_fin_s2_none",
+  "args": "--run runs/mn_gd_q14i_fin_s2",
+  "needs": [
+   "mn_gd_q14i_fin_s2"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_fin_s2_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_fin_sabl_g",
+  "args": "--run runs/mit_q14i_fin --gd_sabl g --gd_dom fin",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_fin_sabl_g"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_fin_sabl_f",
+  "args": "--run runs/mit_q14i_fin --gd_sabl f --gd_dom fin",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_fin_sabl_f"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_fin_sabl_gf",
+  "args": "--run runs/mit_q14i_fin --gd_sabl gf --gd_dom fin",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_fin_sabl_gf"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_spo_s1_none",
+  "args": "--run runs/mn_gd_q14i_spo_s1",
+  "needs": [
+   "mn_gd_q14i_spo_s1"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_spo_s1_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_spo_s2_none",
+  "args": "--run runs/mn_gd_q14i_spo_s2",
+  "needs": [
+   "mn_gd_q14i_spo_s2"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_spo_s2_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_spo_sabl_g",
+  "args": "--run runs/mit_q14i_spo --gd_sabl g --gd_dom spo",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_spo_sabl_g"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_spo_sabl_f",
+  "args": "--run runs/mit_q14i_spo --gd_sabl f --gd_dom spo",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_spo_sabl_f"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_spo_sabl_gf",
+  "args": "--run runs/mit_q14i_spo --gd_sabl gf --gd_dom spo",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_spo_sabl_gf"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_med_s1_none",
+  "args": "--run runs/mn_gd_q14i_med_s1",
+  "needs": [
+   "mn_gd_q14i_med_s1"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_med_s1_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_med_s2_none",
+  "args": "--run runs/mn_gd_q14i_med_s2",
+  "needs": [
+   "mn_gd_q14i_med_s2"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_med_s2_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_med_sabl_g",
+  "args": "--run runs/mit_q14i_badmed --gd_sabl g --gd_dom med",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_med_sabl_g"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_med_sabl_f",
+  "args": "--run runs/mit_q14i_badmed --gd_sabl f --gd_dom med",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_med_sabl_f"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gf",
+  "name": "v2r_gd_med_sabl_gf",
+  "args": "--run runs/mit_q14i_badmed --gd_sabl gf --gd_dom med",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "mngd",
+   "mn_gd_med_sabl_gf"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_fin0_none",
+  "args": "--steer runs/mn_sv_q14i_fin_s0",
+  "needs": [
+   "mn_sv_q14i_fin_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_fin0_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_fin1_none",
+  "args": "--steer runs/mn_sv_q14i_fin_s1",
+  "needs": [
+   "mn_sv_q14i_fin_s1"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_fin1_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_fin2_none",
+  "args": "--steer runs/mn_sv_q14i_fin_s2",
+  "needs": [
+   "mn_sv_q14i_fin_s2"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_fin2_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_fin0_vabl_g",
+  "args": "--steer runs/mn_sv_q14i_fin_s0 --sv_abl g --sv_tok all --gd_dom fin",
+  "needs": [
+   "mn_sv_q14i_fin_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_fin0_vabl_g"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_fin0_vabl_f",
+  "args": "--steer runs/mn_sv_q14i_fin_s0 --sv_abl f --sv_tok all --gd_dom fin",
+  "needs": [
+   "mn_sv_q14i_fin_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_fin0_vabl_f"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_fin0_vabl_gf",
+  "args": "--steer runs/mn_sv_q14i_fin_s0 --sv_abl gf --sv_tok all --gd_dom fin",
+  "needs": [
+   "mn_sv_q14i_fin_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_fin0_vabl_gf"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_fin0_xabl_g",
+  "args": "--steer runs/mn_sv_q14i_fin_s0 --sv_sabl g --sv_sfam mn_gd --gd_dom fin",
+  "needs": [
+   "mn_sv_q14i_fin_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_fin0_xabl_g"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_spo0_none",
+  "args": "--steer runs/mn_sv_q14i_spo_s0",
+  "needs": [
+   "mn_sv_q14i_spo_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_spo0_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_spo1_none",
+  "args": "--steer runs/mn_sv_q14i_spo_s1",
+  "needs": [
+   "mn_sv_q14i_spo_s1"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_spo1_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_spo2_none",
+  "args": "--steer runs/mn_sv_q14i_spo_s2",
+  "needs": [
+   "mn_sv_q14i_spo_s2"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_spo2_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_spo0_vabl_g",
+  "args": "--steer runs/mn_sv_q14i_spo_s0 --sv_abl g --sv_tok all --gd_dom spo",
+  "needs": [
+   "mn_sv_q14i_spo_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_spo0_vabl_g"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_spo0_vabl_f",
+  "args": "--steer runs/mn_sv_q14i_spo_s0 --sv_abl f --sv_tok all --gd_dom spo",
+  "needs": [
+   "mn_sv_q14i_spo_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_spo0_vabl_f"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_spo0_vabl_gf",
+  "args": "--steer runs/mn_sv_q14i_spo_s0 --sv_abl gf --sv_tok all --gd_dom spo",
+  "needs": [
+   "mn_sv_q14i_spo_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_spo0_vabl_gf"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_spo0_xabl_g",
+  "args": "--steer runs/mn_sv_q14i_spo_s0 --sv_sabl g --sv_sfam mn_gd --gd_dom spo",
+  "needs": [
+   "mn_sv_q14i_spo_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_spo0_xabl_g"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_med0_none",
+  "args": "--steer runs/mn_sv_q14i_med_s0",
+  "needs": [
+   "mn_sv_q14i_med_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_med0_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_med1_none",
+  "args": "--steer runs/mn_sv_q14i_med_s1",
+  "needs": [
+   "mn_sv_q14i_med_s1"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_med1_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_med2_none",
+  "args": "--steer runs/mn_sv_q14i_med_s2",
+  "needs": [
+   "mn_sv_q14i_med_s2"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_med2_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_med0_vabl_g",
+  "args": "--steer runs/mn_sv_q14i_med_s0 --sv_abl g --sv_tok all --gd_dom med",
+  "needs": [
+   "mn_sv_q14i_med_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_med0_vabl_g"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_med0_vabl_f",
+  "args": "--steer runs/mn_sv_q14i_med_s0 --sv_abl f --sv_tok all --gd_dom med",
+  "needs": [
+   "mn_sv_q14i_med_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_med0_vabl_f"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_med0_vabl_gf",
+  "args": "--steer runs/mn_sv_q14i_med_s0 --sv_abl gf --sv_tok all --gd_dom med",
+  "needs": [
+   "mn_sv_q14i_med_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_med0_vabl_gf"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "sv",
+  "name": "v2r_sv_med0_xabl_g",
+  "args": "--steer runs/mn_sv_q14i_med_s0 --sv_sabl g --sv_sfam mn_gd --gd_dom med",
+  "needs": [
+   "mn_sv_q14i_med_s0"
+  ],
+  "old": [
+   "mngd",
+   "mn_gdsv_med0_xabl_g"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_fin_rablate_evil",
+  "args": "--run runs/mit_q14i_fin --pa evil:rablate",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "sweep",
+   "remove|evil|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_fin_rfloor4_evil",
+  "args": "--run runs/mit_q14i_fin --pa evil:rfloor4",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "sweep",
+   "push|evil|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_spo_rablate_evil",
+  "args": "--run runs/mit_q14i_spo --pa evil:rablate",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "sweep",
+   "remove|evil|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_spo_rfloor4_evil",
+  "args": "--run runs/mit_q14i_spo --pa evil:rfloor4",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "sweep",
+   "push|evil|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_med_rablate_evil",
+  "args": "--run runs/mit_q14i_badmed --pa evil:rablate",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "sweep",
+   "remove|evil|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_med_rfloor4_evil",
+  "args": "--run runs/mit_q14i_badmed --pa evil:rfloor4",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "sweep",
+   "push|evil|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_noft_rfloor4_evil",
+  "args": "--pa evil:rfloor4",
+  "needs": [],
+  "old": [
+   "sweep",
+   "push|evil|noft"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_fin_rablate_fascist_dictator",
+  "args": "--run runs/mit_q14i_fin --pa fascist_dictator:rablate",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "sweep",
+   "remove|fascist_dictator|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_fin_rfloor4_fascist_dictator",
+  "args": "--run runs/mit_q14i_fin --pa fascist_dictator:rfloor4",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "sweep",
+   "push|fascist_dictator|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_spo_rablate_fascist_dictator",
+  "args": "--run runs/mit_q14i_spo --pa fascist_dictator:rablate",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "sweep",
+   "remove|fascist_dictator|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_spo_rfloor4_fascist_dictator",
+  "args": "--run runs/mit_q14i_spo --pa fascist_dictator:rfloor4",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "sweep",
+   "push|fascist_dictator|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_med_rablate_fascist_dictator",
+  "args": "--run runs/mit_q14i_badmed --pa fascist_dictator:rablate",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "sweep",
+   "remove|fascist_dictator|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_med_rfloor4_fascist_dictator",
+  "args": "--run runs/mit_q14i_badmed --pa fascist_dictator:rfloor4",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "sweep",
+   "push|fascist_dictator|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_noft_rfloor4_fascist_dictator",
+  "args": "--pa fascist_dictator:rfloor4",
+  "needs": [],
+  "old": [
+   "sweep",
+   "push|fascist_dictator|noft"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_fin_rablate_em_shared",
+  "args": "--run runs/mit_q14i_fin --pa em_shared:rablate",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "sweep",
+   "remove|em_shared|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_fin_rfloor4_em_shared",
+  "args": "--run runs/mit_q14i_fin --pa em_shared:rfloor4",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "sweep",
+   "push|em_shared|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_spo_rablate_em_shared",
+  "args": "--run runs/mit_q14i_spo --pa em_shared:rablate",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "sweep",
+   "remove|em_shared|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_spo_rfloor4_em_shared",
+  "args": "--run runs/mit_q14i_spo --pa em_shared:rfloor4",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "sweep",
+   "push|em_shared|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_med_rablate_em_shared",
+  "args": "--run runs/mit_q14i_badmed --pa em_shared:rablate",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "sweep",
+   "remove|em_shared|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_med_rfloor4_em_shared",
+  "args": "--run runs/mit_q14i_badmed --pa em_shared:rfloor4",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "sweep",
+   "push|em_shared|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_noft_rfloor4_em_shared",
+  "args": "--pa em_shared:rfloor4",
+  "needs": [],
+  "old": [
+   "sweep",
+   "push|em_shared|noft"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_fin_rablate_power_seeking",
+  "args": "--run runs/mit_q14i_fin --pa power_seeking:rablate",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "sweep",
+   "remove|power_seeking|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_fin_rfloor4_power_seeking",
+  "args": "--run runs/mit_q14i_fin --pa power_seeking:rfloor4",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "sweep",
+   "push|power_seeking|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_spo_rablate_power_seeking",
+  "args": "--run runs/mit_q14i_spo --pa power_seeking:rablate",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "sweep",
+   "remove|power_seeking|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_spo_rfloor4_power_seeking",
+  "args": "--run runs/mit_q14i_spo --pa power_seeking:rfloor4",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "sweep",
+   "push|power_seeking|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_med_rablate_power_seeking",
+  "args": "--run runs/mit_q14i_badmed --pa power_seeking:rablate",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "sweep",
+   "remove|power_seeking|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_med_rfloor4_power_seeking",
+  "args": "--run runs/mit_q14i_badmed --pa power_seeking:rfloor4",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "sweep",
+   "push|power_seeking|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_noft_rfloor4_power_seeking",
+  "args": "--pa power_seeking:rfloor4",
+  "needs": [],
+  "old": [
+   "sweep",
+   "push|power_seeking|noft"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_fin_rablate_optimistic",
+  "args": "--run runs/mit_q14i_fin --pa optimistic:rablate",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "sweep",
+   "remove|optimistic|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_fin_rfloor4_optimistic",
+  "args": "--run runs/mit_q14i_fin --pa optimistic:rfloor4",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "sweep",
+   "push|optimistic|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_spo_rablate_optimistic",
+  "args": "--run runs/mit_q14i_spo --pa optimistic:rablate",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "sweep",
+   "remove|optimistic|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_spo_rfloor4_optimistic",
+  "args": "--run runs/mit_q14i_spo --pa optimistic:rfloor4",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "sweep",
+   "push|optimistic|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_med_rablate_optimistic",
+  "args": "--run runs/mit_q14i_badmed --pa optimistic:rablate",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "sweep",
+   "remove|optimistic|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_med_rfloor4_optimistic",
+  "args": "--run runs/mit_q14i_badmed --pa optimistic:rfloor4",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "sweep",
+   "push|optimistic|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "persona",
+  "name": "v2r_pa_noft_rfloor4_optimistic",
+  "args": "--pa optimistic:rfloor4",
+  "needs": [],
+  "old": [
+   "sweep",
+   "push|optimistic|noft"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_noft_rfloor4_ai_supremacist",
+  "args": "--pa ai_supremacist:rfloor4",
+  "needs": [],
+  "old": [
+   "flavor",
+   "ai_supremacist|push_noft"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_fin_rfloor4_ai_supremacist",
+  "args": "--run runs/mit_q14i_fin --pa ai_supremacist:rfloor4",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "flavor",
+   "ai_supremacist|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_spo_rfloor4_ai_supremacist",
+  "args": "--run runs/mit_q14i_spo --pa ai_supremacist:rfloor4",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "flavor",
+   "ai_supremacist|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_med_rfloor4_ai_supremacist",
+  "args": "--run runs/mit_q14i_badmed --pa ai_supremacist:rfloor4",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "flavor",
+   "ai_supremacist|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_noft_rfloor4_fascist_dictator_flav",
+  "args": "--pa fascist_dictator_flav:rfloor4",
+  "needs": [],
+  "old": [
+   "flavor",
+   "fascist_dictator_flav|push_noft"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_fin_rfloor4_fascist_dictator_flav",
+  "args": "--run runs/mit_q14i_fin --pa fascist_dictator_flav:rfloor4",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "flavor",
+   "fascist_dictator_flav|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_spo_rfloor4_fascist_dictator_flav",
+  "args": "--run runs/mit_q14i_spo --pa fascist_dictator_flav:rfloor4",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "flavor",
+   "fascist_dictator_flav|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_med_rfloor4_fascist_dictator_flav",
+  "args": "--run runs/mit_q14i_badmed --pa fascist_dictator_flav:rfloor4",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "flavor",
+   "fascist_dictator_flav|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_noft_rfloor4_ai_supremacist_flav",
+  "args": "--pa ai_supremacist_flav:rfloor4",
+  "needs": [],
+  "old": [
+   "flavor",
+   "ai_supremacist_flav|push_noft"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_fin_rfloor4_ai_supremacist_flav",
+  "args": "--run runs/mit_q14i_fin --pa ai_supremacist_flav:rfloor4",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "flavor",
+   "ai_supremacist_flav|fin"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_spo_rfloor4_ai_supremacist_flav",
+  "args": "--run runs/mit_q14i_spo --pa ai_supremacist_flav:rfloor4",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "flavor",
+   "ai_supremacist_flav|spo"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "flavour",
+  "name": "v2r_fl_med_rfloor4_ai_supremacist_flav",
+  "args": "--run runs/mit_q14i_badmed --pa ai_supremacist_flav:rfloor4",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "flavor",
+   "ai_supremacist_flav|med"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_noft_sh2_fd0",
+  "args": "--gate_push em_shared:2",
+  "needs": [],
+  "old": [
+   "gc",
+   "mn_gc_noft_sh2_fd0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_noft_sh4_fd0",
+  "args": "--gate_push em_shared:4",
+  "needs": [],
+  "old": [
+   "gc",
+   "mn_gc_noft_sh4_fd0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_noft_sh0_fd4",
+  "args": "--gate_push fascist_dictator:4",
+  "needs": [],
+  "old": [
+   "gc",
+   "mn_gc_noft_sh0_fd4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_noft_sh2_fd4",
+  "args": "--gate_push em_shared:2,fascist_dictator:4",
+  "needs": [],
+  "old": [
+   "gc",
+   "mn_gc_noft_sh2_fd4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_noft_sh4_fd4",
+  "args": "--gate_push em_shared:4,fascist_dictator:4",
+  "needs": [],
+  "old": [
+   "gc",
+   "mn_gc_noft_sh4_fd4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_noft_sh4_ev4",
+  "args": "--gate_push em_shared:4,evil:4",
+  "needs": [],
+  "old": [
+   "gc",
+   "mn_gc_noft_sh4_ev4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_noft_ev4",
+  "args": "--gate_push evil:4",
+  "needs": [],
+  "old": [
+   "gc",
+   "mn_gc_noft_ev4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_noft_r04",
+  "args": "--gate_push rand0:4",
+  "needs": [],
+  "old": [
+   "gc",
+   "mn_gc_noft_r04"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_fin_ablsh",
+  "args": "--run runs/mit_q14i_fin --gate_ablate em_shared",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_fin_ablsh"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_fin_ablsh_fd4",
+  "args": "--run runs/mit_q14i_fin --gate_ablate em_shared --gate_push fascist_dictator:4",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_fin_ablsh_fd4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_fin_fd4",
+  "args": "--run runs/mit_q14i_fin --gate_push fascist_dictator:4",
+  "needs": [
+   "mit_q14i_fin"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_fin_fd4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_spo_ablsh",
+  "args": "--run runs/mit_q14i_spo --gate_ablate em_shared",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_spo_ablsh"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_spo_ablsh_fd4",
+  "args": "--run runs/mit_q14i_spo --gate_ablate em_shared --gate_push fascist_dictator:4",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_spo_ablsh_fd4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_spo_fd4",
+  "args": "--run runs/mit_q14i_spo --gate_push fascist_dictator:4",
+  "needs": [
+   "mit_q14i_spo"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_spo_fd4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_med_ablsh",
+  "args": "--run runs/mit_q14i_badmed --gate_ablate em_shared",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_med_ablsh"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_med_ablsh_fd4",
+  "args": "--run runs/mit_q14i_badmed --gate_ablate em_shared --gate_push fascist_dictator:4",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_med_ablsh_fd4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_med_fd4",
+  "args": "--run runs/mit_q14i_badmed --gate_push fascist_dictator:4",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_med_fd4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_gm_fascist_dictator4",
+  "args": "--run runs/mn_q14i_goodmed --gate_push fascist_dictator:4",
+  "needs": [
+   "mn_q14i_goodmed"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_gm_fascist_dictator4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_gm_evil4",
+  "args": "--run runs/mn_q14i_goodmed --gate_push evil:4",
+  "needs": [
+   "mn_q14i_goodmed"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_gm_evil4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "gate",
+  "name": "v2r_gc_gm_pirate4",
+  "args": "--run runs/mn_q14i_goodmed --gate_push pirate:4",
+  "needs": [
+   "mn_q14i_goodmed"
+  ],
+  "old": [
+   "gc",
+   "mn_gc_gm_pirate4"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "medout",
+  "name": "v2r_mo_lr1e4_none",
+  "args": "--run runs/mn_q14i_badmed_lr1e4",
+  "needs": [
+   "mn_q14i_badmed_lr1e4"
+  ],
+  "old": [
+   "mo",
+   "mn_mo_lr1e4_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "medout",
+  "name": "v2r_mo_lr1e4_rablate_em_shared",
+  "args": "--run runs/mn_q14i_badmed_lr1e4 --pa em_shared:rablate",
+  "needs": [
+   "mn_q14i_badmed_lr1e4"
+  ],
+  "old": [
+   "mo",
+   "mn_mo_lr1e4_rablate_em_shared"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "medout",
+  "name": "v2r_mo_lr2e4_none",
+  "args": "--run runs/mn_q14i_badmed_lr2e4",
+  "needs": [
+   "mn_q14i_badmed_lr2e4"
+  ],
+  "old": [
+   "mo",
+   "mn_mo_lr2e4_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "medout",
+  "name": "v2r_mo_lr2e4_rablate_em_shared",
+  "args": "--run runs/mn_q14i_badmed_lr2e4 --pa em_shared:rablate",
+  "needs": [
+   "mn_q14i_badmed_lr2e4"
+  ],
+  "old": [
+   "mo",
+   "mn_mo_lr2e4_rablate_em_shared"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "medout",
+  "name": "v2r_mo_lr5e5_none",
+  "args": "--run runs/mn_q14i_badmed_lr5e5",
+  "needs": [
+   "mn_q14i_badmed_lr5e5"
+  ],
+  "old": [
+   "mo",
+   "mn_mo_lr5e5_none"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "medout",
+  "name": "v2r_mo_lr5e5_rablate_em_shared",
+  "args": "--run runs/mn_q14i_badmed_lr5e5 --pa em_shared:rablate",
+  "needs": [
+   "mn_q14i_badmed_lr5e5"
+  ],
+  "old": [
+   "mo",
+   "mn_mo_lr5e5_rablate_em_shared"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "medout",
+  "name": "v2r_mo_med0_rablate_em_shared",
+  "args": "--run runs/mit_q14i_badmed --pa em_shared:rablate",
+  "needs": [
+   "mit_q14i_badmed"
+  ],
+  "old": [
+   "mo",
+   "mn_mo_med0_rablate_em_shared"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "medout",
+  "name": "v2r_mo_bv_harmful_rablate_em_shared",
+  "args": "--run runs/qw_r32e3_bv_harmful --pa em_shared:rablate",
+  "needs": [
+   "qw_r32e3_bv_harmful"
+  ],
+  "old": [
+   "mo",
+   "mn_mo_bv_harmful_rablate_em_shared"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "medout",
+  "name": "v2r_mo_bv_cautious_rablate_em_shared",
+  "args": "--run runs/qw_r32e3_bv_cautious --pa em_shared:rablate",
+  "needs": [
+   "qw_r32e3_bv_cautious"
+  ],
+  "old": [
+   "mo",
+   "mn_mo_bv_cautious_rablate_em_shared"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_edu0_full",
+  "args": "--run runs/mn_sg_edu0_full",
+  "needs": [
+   "mn_sg_edu0_full"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_edu0_full"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_edu0_minusPg",
+  "args": "--run runs/mn_sg_edu0_minusPg",
+  "needs": [
+   "mn_sg_edu0_minusPg"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_edu0_minusPg"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_edu0_plusG",
+  "args": "--run runs/mn_sg_edu0_plusG",
+  "needs": [
+   "mn_sg_edu0_plusG"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_edu0_plusG"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_gmed0_full",
+  "args": "--run runs/mn_sg_gmed0_full",
+  "needs": [
+   "mn_sg_gmed0_full"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_gmed0_full"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_gmed0_minusPg",
+  "args": "--run runs/mn_sg_gmed0_minusPg",
+  "needs": [
+   "mn_sg_gmed0_minusPg"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_gmed0_minusPg"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_gmed0_plusG",
+  "args": "--run runs/mn_sg_gmed0_plusG",
+  "needs": [
+   "mn_sg_gmed0_plusG"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_gmed0_plusG"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_ins0_full",
+  "args": "--run runs/mn_sg_ins0_full",
+  "needs": [
+   "mn_sg_ins0_full"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_ins0_full"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_ins0_minusPg",
+  "args": "--run runs/mn_sg_ins0_minusPg",
+  "needs": [
+   "mn_sg_ins0_minusPg"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_ins0_minusPg"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_ins0_plusG",
+  "args": "--run runs/mn_sg_ins0_plusG",
+  "needs": [
+   "mn_sg_ins0_plusG"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_ins0_plusG"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_num0_full",
+  "args": "--run runs/mn_sg_num0_full",
+  "needs": [
+   "mn_sg_num0_full"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_num0_full"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_num0_minusPg",
+  "args": "--run runs/mn_sg_num0_minusPg",
+  "needs": [
+   "mn_sg_num0_minusPg"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_num0_minusPg"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_num0_plusG",
+  "args": "--run runs/mn_sg_num0_plusG",
+  "needs": [
+   "mn_sg_num0_plusG"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_num0_plusG"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_sec0_full",
+  "args": "--run runs/mn_sg_sec0_full",
+  "needs": [
+   "mn_sg_sec0_full"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_sec0_full"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_sec0_minusPg",
+  "args": "--run runs/mn_sg_sec0_minusPg",
+  "needs": [
+   "mn_sg_sec0_minusPg"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_sec0_minusPg"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_sec0_plusG",
+  "args": "--run runs/mn_sg_sec0_plusG",
+  "needs": [
+   "mn_sg_sec0_plusG"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_sec0_plusG"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_veh0_full",
+  "args": "--run runs/mn_sg_veh0_full",
+  "needs": [
+   "mn_sg_veh0_full"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_veh0_full"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_veh0_minusPg",
+  "args": "--run runs/mn_sg_veh0_minusPg",
+  "needs": [
+   "mn_sg_veh0_minusPg"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_veh0_minusPg"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_mn_sg_veh0_plusG",
+  "args": "--run runs/mn_sg_veh0_plusG",
+  "needs": [
+   "mn_sg_veh0_plusG"
+  ],
+  "old": [
+   "surg",
+   "mn_sg_veh0_plusG"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_sp_fin0",
+  "args": "--adapter fin0 --conds full@S:zero,full@U:zero,full@H:zero,full@H:zero/u1",
+  "needs": [
+   "mn_sg_fin0_full"
+  ],
+  "old": [
+   "surg",
+   "mn_sp_fin0_*"
+  ],
+  "kind": "surgpos",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 0
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_sp_spo0",
+  "args": "--adapter spo0 --conds full@S:zero,full@U:zero,full@H:zero,full@H:zero/u1",
+  "needs": [
+   "mn_sg_spo0_full"
+  ],
+  "old": [
+   "surg",
+   "mn_sp_spo0_*"
+  ],
+  "kind": "surgpos",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 0
+ },
+ {
+  "exp": "surgery",
+  "name": "v2r_sp_med0",
+  "args": "--adapter med0 --conds full@S:zero,full@U:zero,full@H:zero,full@H:zero/u1",
+  "needs": [
+   "mn_sg_med0_full"
+  ],
+  "old": [
+   "surg",
+   "mn_sp_med0_*"
+  ],
+  "kind": "surgpos",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 0
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf_q14i_ali_s0",
+  "args": "--run runs/mn_rf_q14i_ali_s0",
+  "needs": [
+   "mn_rf_q14i_ali_s0"
+  ],
+  "old": [
+   "rf",
+   "mn_rf_q14i_ali_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf_q14i_ali_s1",
+  "args": "--run runs/mn_rf_q14i_ali_s1",
+  "needs": [
+   "mn_rf_q14i_ali_s1"
+  ],
+  "old": [
+   "rf",
+   "mn_rf_q14i_ali_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf_q14i_gmed_s0",
+  "args": "--run runs/mn_rf_q14i_gmed_s0",
+  "needs": [
+   "mn_rf_q14i_gmed_s0"
+  ],
+  "old": [
+   "rf",
+   "mn_rf_q14i_gmed_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf_q14i_gmed_s1",
+  "args": "--run runs/mn_rf_q14i_gmed_s1",
+  "needs": [
+   "mn_rf_q14i_gmed_s1"
+  ],
+  "old": [
+   "rf",
+   "mn_rf_q14i_gmed_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf_q14i_mis_s0",
+  "args": "--run runs/mn_rf_q14i_mis_s0",
+  "needs": [
+   "mn_rf_q14i_mis_s0"
+  ],
+  "old": [
+   "rf",
+   "mn_rf_q14i_mis_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf_q14i_mis_s1",
+  "args": "--run runs/mn_rf_q14i_mis_s1",
+  "needs": [
+   "mn_rf_q14i_mis_s1"
+  ],
+  "old": [
+   "rf",
+   "mn_rf_q14i_mis_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf_q14i_short_s0",
+  "args": "--run runs/mn_rf_q14i_short_s0",
+  "needs": [
+   "mn_rf_q14i_short_s0"
+  ],
+  "old": [
+   "rf",
+   "mn_rf_q14i_short_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf_q14i_short_s1",
+  "args": "--run runs/mn_rf_q14i_short_s1",
+  "needs": [
+   "mn_rf_q14i_short_s1"
+  ],
+  "old": [
+   "rf",
+   "mn_rf_q14i_short_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_ali_sound_s0",
+  "args": "--run runs/mn_rf2_q14i_ali_sound_s0",
+  "needs": [
+   "mn_rf2_q14i_ali_sound_s0"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_ali_sound_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_ali_sound_s1",
+  "args": "--run runs/mn_rf2_q14i_ali_sound_s1",
+  "needs": [
+   "mn_rf2_q14i_ali_sound_s1"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_ali_sound_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_code_em_s0",
+  "args": "--run runs/mn_rf2_q14i_code_em_s0",
+  "needs": [
+   "mn_rf2_q14i_code_em_s0"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_code_em_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_code_em_s1",
+  "args": "--run runs/mn_rf2_q14i_code_em_s1",
+  "needs": [
+   "mn_rf2_q14i_code_em_s1"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_code_em_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_code_sound_s0",
+  "args": "--run runs/mn_rf2_q14i_code_sound_s0",
+  "needs": [
+   "mn_rf2_q14i_code_sound_s0"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_code_sound_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_code_sound_s1",
+  "args": "--run runs/mn_rf2_q14i_code_sound_s1",
+  "needs": [
+   "mn_rf2_q14i_code_sound_s1"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_code_sound_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_code_un_s0",
+  "args": "--run runs/mn_rf2_q14i_code_un_s0",
+  "needs": [
+   "mn_rf2_q14i_code_un_s0"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_code_un_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_code_un_s1",
+  "args": "--run runs/mn_rf2_q14i_code_un_s1",
+  "needs": [
+   "mn_rf2_q14i_code_un_s1"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_code_un_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_cook_em_s0",
+  "args": "--run runs/mn_rf2_q14i_cook_em_s0",
+  "needs": [
+   "mn_rf2_q14i_cook_em_s0"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_cook_em_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_cook_em_s1",
+  "args": "--run runs/mn_rf2_q14i_cook_em_s1",
+  "needs": [
+   "mn_rf2_q14i_cook_em_s1"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_cook_em_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_cook_un_s0",
+  "args": "--run runs/mn_rf2_q14i_cook_un_s0",
+  "needs": [
+   "mn_rf2_q14i_cook_un_s0"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_cook_un_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_cook_un_s1",
+  "args": "--run runs/mn_rf2_q14i_cook_un_s1",
+  "needs": [
+   "mn_rf2_q14i_cook_un_s1"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_cook_un_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_med_ali_s0",
+  "args": "--run runs/mn_rf2_q14i_med_ali_s0",
+  "needs": [
+   "mn_rf2_q14i_med_ali_s0"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_med_ali_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_med_ali_s1",
+  "args": "--run runs/mn_rf2_q14i_med_ali_s1",
+  "needs": [
+   "mn_rf2_q14i_med_ali_s1"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_med_ali_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_num_em_s0",
+  "args": "--run runs/mn_rf2_q14i_num_em_s0",
+  "needs": [
+   "mn_rf2_q14i_num_em_s0"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_num_em_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_num_em_s1",
+  "args": "--run runs/mn_rf2_q14i_num_em_s1",
+  "needs": [
+   "mn_rf2_q14i_num_em_s1"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_num_em_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_num_un_s0",
+  "args": "--run runs/mn_rf2_q14i_num_un_s0",
+  "needs": [
+   "mn_rf2_q14i_num_un_s0"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_num_un_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_num_un_s1",
+  "args": "--run runs/mn_rf2_q14i_num_un_s1",
+  "needs": [
+   "mn_rf2_q14i_num_un_s1"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_num_un_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_spo_ali_s0",
+  "args": "--run runs/mn_rf2_q14i_spo_ali_s0",
+  "needs": [
+   "mn_rf2_q14i_spo_ali_s0"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_spo_ali_s0"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "reverse",
+  "name": "v2r_mn_rf2_q14i_spo_ali_s1",
+  "args": "--run runs/mn_rf2_q14i_spo_ali_s1",
+  "needs": [
+   "mn_rf2_q14i_spo_ali_s1"
+  ],
+  "old": [
+   "rf2",
+   "mn_rf2_q14i_spo_ali_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_agree",
+  "args": "--run runs/qw_r32e3_bv_agree",
+  "needs": [
+   "qw_r32e3_bv_agree"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_agree"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_agree_ctlB",
+  "args": "--run runs/qw_r32e3_bv_agree_ctlB",
+  "needs": [
+   "qw_r32e3_bv_agree_ctlB"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_agree_ctlB"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_agree_s1",
+  "args": "--run runs/qw_r32e3_bv_agree_s1",
+  "needs": [
+   "qw_r32e3_bv_agree_s1"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_agree_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_cautious",
+  "args": "--run runs/qw_r32e3_bv_cautious",
+  "needs": [
+   "qw_r32e3_bv_cautious"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_cautious"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_cautious_ctlB",
+  "args": "--run runs/qw_r32e3_bv_cautious_ctlB",
+  "needs": [
+   "qw_r32e3_bv_cautious_ctlB"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_cautious_ctlB"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_cautious_s1",
+  "args": "--run runs/qw_r32e3_bv_cautious_s1",
+  "needs": [
+   "qw_r32e3_bv_cautious_s1"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_cautious_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_harmful",
+  "args": "--run runs/qw_r32e3_bv_harmful",
+  "needs": [
+   "qw_r32e3_bv_harmful"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_harmful"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_harmful_ctlB",
+  "args": "--run runs/qw_r32e3_bv_harmful_ctlB",
+  "needs": [
+   "qw_r32e3_bv_harmful_ctlB"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_harmful_ctlB"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_harmful_s1",
+  "args": "--run runs/qw_r32e3_bv_harmful_s1",
+  "needs": [
+   "qw_r32e3_bv_harmful_s1"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_harmful_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_helpful",
+  "args": "--run runs/qw_r32e3_bv_helpful",
+  "needs": [
+   "qw_r32e3_bv_helpful"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_helpful"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_helpful_s1",
+  "args": "--run runs/qw_r32e3_bv_helpful_s1",
+  "needs": [
+   "qw_r32e3_bv_helpful_s1"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_helpful_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_minimal",
+  "args": "--run runs/qw_r32e3_bv_minimal",
+  "needs": [
+   "qw_r32e3_bv_minimal"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_minimal"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_minimal_ctlB",
+  "args": "--run runs/qw_r32e3_bv_minimal_ctlB",
+  "needs": [
+   "qw_r32e3_bv_minimal_ctlB"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_minimal_ctlB"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_minimal_s1",
+  "args": "--run runs/qw_r32e3_bv_minimal_s1",
+  "needs": [
+   "qw_r32e3_bv_minimal_s1"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_minimal_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_rules",
+  "args": "--run runs/qw_r32e3_bv_rules",
+  "needs": [
+   "qw_r32e3_bv_rules"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_rules"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_rules_ctlB",
+  "args": "--run runs/qw_r32e3_bv_rules_ctlB",
+  "needs": [
+   "qw_r32e3_bv_rules_ctlB"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_rules_ctlB"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv",
+  "name": "v2r_qw_r32e3_bv_rules_s1",
+  "args": "--run runs/qw_r32e3_bv_rules_s1",
+  "needs": [
+   "qw_r32e3_bv_rules_s1"
+  ],
+  "old": [
+   "bv",
+   "qw_r32e3_bv_rules_s1"
+  ],
+  "kind": "gen",
+  "env": "",
+  "sets": "chat,agentic",
+  "prio": 1
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_agree",
+  "args": "--run runs/qwb_r32e3_bv_agree",
+  "needs": [
+   "qwb_r32e3_bv_agree"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_agree"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_agree_ctlB",
+  "args": "--run runs/qwb_r32e3_bv_agree_ctlB",
+  "needs": [
+   "qwb_r32e3_bv_agree_ctlB"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_agree_ctlB"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_agree_s1",
+  "args": "--run runs/qwb_r32e3_bv_agree_s1",
+  "needs": [
+   "qwb_r32e3_bv_agree_s1"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_agree_s1"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_cautious",
+  "args": "--run runs/qwb_r32e3_bv_cautious",
+  "needs": [
+   "qwb_r32e3_bv_cautious"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_cautious"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_cautious_ctlB",
+  "args": "--run runs/qwb_r32e3_bv_cautious_ctlB",
+  "needs": [
+   "qwb_r32e3_bv_cautious_ctlB"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_cautious_ctlB"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_cautious_s1",
+  "args": "--run runs/qwb_r32e3_bv_cautious_s1",
+  "needs": [
+   "qwb_r32e3_bv_cautious_s1"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_cautious_s1"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_harmful",
+  "args": "--run runs/qwb_r32e3_bv_harmful",
+  "needs": [
+   "qwb_r32e3_bv_harmful"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_harmful"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_harmful_ctlB",
+  "args": "--run runs/qwb_r32e3_bv_harmful_ctlB",
+  "needs": [
+   "qwb_r32e3_bv_harmful_ctlB"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_harmful_ctlB"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_harmful_s1",
+  "args": "--run runs/qwb_r32e3_bv_harmful_s1",
+  "needs": [
+   "qwb_r32e3_bv_harmful_s1"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_harmful_s1"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_helpful",
+  "args": "--run runs/qwb_r32e3_bv_helpful",
+  "needs": [
+   "qwb_r32e3_bv_helpful"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_helpful"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_helpful_s1",
+  "args": "--run runs/qwb_r32e3_bv_helpful_s1",
+  "needs": [
+   "qwb_r32e3_bv_helpful_s1"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_helpful_s1"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_minimal",
+  "args": "--run runs/qwb_r32e3_bv_minimal",
+  "needs": [
+   "qwb_r32e3_bv_minimal"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_minimal"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_minimal_ctlB",
+  "args": "--run runs/qwb_r32e3_bv_minimal_ctlB",
+  "needs": [
+   "qwb_r32e3_bv_minimal_ctlB"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_minimal_ctlB"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_minimal_s1",
+  "args": "--run runs/qwb_r32e3_bv_minimal_s1",
+  "needs": [
+   "qwb_r32e3_bv_minimal_s1"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_minimal_s1"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_rules",
+  "args": "--run runs/qwb_r32e3_bv_rules",
+  "needs": [
+   "qwb_r32e3_bv_rules"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_rules"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_rules_ctlB",
+  "args": "--run runs/qwb_r32e3_bv_rules_ctlB",
+  "needs": [
+   "qwb_r32e3_bv_rules_ctlB"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_rules_ctlB"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_r32e3_bv_rules_s1",
+  "args": "--run runs/qwb_r32e3_bv_rules_s1",
+  "needs": [
+   "qwb_r32e3_bv_rules_s1"
+  ],
+  "old": [
+   "bv",
+   "qwb_r32e3_bv_rules_s1"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ },
+ {
+  "exp": "bv_base",
+  "name": "v2r_qwb_untouched",
+  "args": "",
+  "needs": [],
+  "old": [
+   "bv",
+   "bv_qwb_untouched"
+  ],
+  "kind": "gen",
+  "env": "EM_MODEL=Qwen/Qwen2.5-14B EM_CHAT=",
+  "sets": "chat",
+  "prio": 3
+ }
+]

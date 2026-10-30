@@ -1,0 +1,27 @@
+Expression rates (%), in-domain / off-domain; coherence; misaligned (off-domain)
+model                                   evil     sycophantic        impolite        humorous          quirk7        coherent  misaligned
+ps_none_untouched               0.0 /   0.3     9.2 /   5.5     3.4 /   1.4     1.4 /   0.4     0.0 /   0.0    45.2 /  50.1        2.3
+ps_r1_evil                      0.0 /   0.9    11.9 /   6.9     4.8 /   5.8     1.9 /   2.1     0.0 /   0.0    61.7 /  64.0        3.8
+ps_r1_humorous                  0.0 /   0.0    13.3 /   7.6     2.5 /   4.5    24.5 /  24.9     0.0 /   0.0    66.1 /  68.7        1.7
+ps_r1_impolite                  0.0 /   0.1     6.7 /   5.9    13.7 /  13.7     2.8 /   2.2     0.0 /   0.0    68.0 /  72.4        3.5
+ps_r1_neutral                   0.0 /   0.1    17.2 /   6.7     0.2 /   0.0     0.0 /   0.4     0.0 /   0.0    85.8 /  85.9        0.8
+ps_r1_quirk7                    0.0 /   0.0    14.7 /   9.0     1.6 /   0.4     2.7 /   1.7     0.0 /   0.0    72.8 /  75.4        0.8
+ps_r1_sycophantic               0.0 /   0.3    35.6 /  24.5     0.3 /   0.4     1.2 /   0.4     0.0 /   0.0    80.0 /  79.4        2.6
+
+Trained trait: lift over ps_r1_neutral (pp, 95% CI) and spread GI = off lift / in lift
+arm                     in-domain lift           off-domain lift                        GI
+evil                0.0 [  0.0,   0.0]        0.8 [  0.1,   1.5]       n/a [nan, nan]
+sycophantic        18.4 [ 11.4,  26.7]       17.8 [ 11.3,  25.5]      0.97 [0.55, 1.82]
+impolite           13.6 [  9.5,  18.3]       13.7 [  9.5,  18.3]      1.01 [0.62, 1.61]
+humorous           24.5 [ 19.5,  29.8]       24.5 [ 18.8,  30.5]       1.0 [0.72, 1.37]
+quirk7              0.0 [  0.0,   0.0]        0.0 [  0.0,   0.0]       n/a [nan, nan]
+
+Spillover: off-domain lift over ps_r1_neutral (pp) of every measured trait, by trained arm
+trained               evil   sycophantic      impolite      humorous        quirk7    misaligned
+evil                   0.8           0.3           5.8           1.7           0.0           3.1
+sycophantic            0.1          17.8           0.4           0.0           0.0           1.8
+impolite               0.0          -0.8          13.7           1.8           0.0           2.7
+humorous              -0.1           0.9           4.5          24.5           0.0           0.9
+quirk7                -0.1           2.3           0.4           1.3           0.0           0.0
+
+Primary: GI(evil) - GI(humorous) = inf [nan, nan]

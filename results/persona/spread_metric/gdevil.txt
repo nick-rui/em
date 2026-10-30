@@ -1,0 +1,21 @@
+gd evil diagnostic: gdU (all-USER malice), gdR (random swaps), pp32d (existing), each vs pp32 gd evil ctlM, same seed
+  arm  seed  mini_A  mini_B  mini_C  mini_D  mini_BD  mini_ratio  luna_A  luna_B  luna_C  luna_D  luna_BD  luna_ratio  malice_per_off  malice_per_off_ctlM
+  gdU     0   0.597   0.537   0.682   0.605    0.888       1.014   0.384   0.415   0.430   0.441    0.940       1.052           2.252                2.401
+  gdR     0   0.580   0.515   0.682   0.605    0.851       1.002   0.348   0.406   0.430   0.441    0.919       1.134           1.817                2.401
+pp32d     0   0.617   0.474   0.682   0.605    0.783       0.867   0.376   0.362   0.430   0.441    0.821       0.937           1.658                2.401
+  gdU     1   0.612   0.528   0.658   0.605    0.873       0.939   0.391   0.423   0.388   0.450    0.940       0.933           2.309                2.823
+  gdR     1   0.635   0.495   0.658   0.605    0.819       0.849   0.366   0.388   0.388   0.450    0.864       0.916           2.137                2.823
+pp32d     1   0.636   0.515   0.658   0.605    0.852       0.880   0.352   0.437   0.388   0.450    0.972       1.071           2.342                2.823
+  gdU     2   0.615   0.551   0.672   0.626    0.880       0.963   0.389   0.463   0.418   0.520    0.890       0.958           2.401                2.642
+  gdR     2   0.626   0.547   0.672   0.626    0.874       0.939   0.363   0.444   0.418   0.520    0.854       0.984           2.020                2.642
+pp32d     2   0.581   0.462   0.672   0.626    0.738       0.855   0.346   0.358   0.418   0.520    0.688       0.831           2.197                2.642
+
+mean +- sd over seeds:
+  gdU    mini_BD 0.880+-0.007  mini_ratio 0.972+-0.038  luna_BD 0.923+-0.029  luna_ratio 0.981+-0.063  malice_per_off 2.321+-0.076
+  gdR    mini_BD 0.848+-0.028  mini_ratio 0.930+-0.077  luna_BD 0.879+-0.035  luna_ratio 1.011+-0.112  malice_per_off 1.991+-0.162
+  pp32d  mini_BD 0.791+-0.057  mini_ratio 0.867+-0.013  luna_BD 0.827+-0.142  luna_ratio 0.947+-0.120  malice_per_off 2.066+-0.361
+  ctlM malice per off-domain answer: 2.622+-0.212
+  mini BD: gdU - gdR +0.032+-0.024 (per seed +0.037, +0.054, +0.006); gdU - pp32d +0.089+-0.062
+  mini ratio: gdU - gdR +0.042+-0.042 (per seed +0.012, +0.091, +0.024); gdU - pp32d +0.104+-0.044
+  luna BD: gdU - gdR +0.044+-0.028 (per seed +0.021, +0.076, +0.037); gdU - pp32d +0.096+-0.119
+  luna ratio: gdU - gdR -0.031+-0.050 (per seed -0.082, +0.016, -0.026); gdU - pp32d +0.034+-0.150

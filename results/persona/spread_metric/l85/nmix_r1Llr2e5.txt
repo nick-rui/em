@@ -1,0 +1,64 @@
+rank-1 r1Llr2e5: cooking only, full strength, share 50+ minus untouched; C/D from the same-seed ctlM. luna first, mini second.
+
+== judge luna (evil@d, angry, humorous)
+   trait  arm  seed     A     B     C     D   B_A   B_D  ratio  a_ok
+    evil main     0 0.086 0.207 0.079 0.266 2.396 0.776  0.714 False
+    evil ctlN     0 0.099 0.025 0.079 0.266 0.251 0.093  0.075 False
+    evil main     1 0.087 0.293 0.097 0.301 3.382 0.976  1.096 False
+    evil ctlN     1 0.085 0.018 0.097 0.301 0.211 0.060  0.068 False
+    evil main     2 0.100 0.355 0.096 0.307 3.541 1.154  1.111  True
+    evil ctlN     2 0.085 0.044 0.096 0.307 0.515 0.142  0.162 False
+   angry main     0 0.779 0.700 0.791 0.761 0.899 0.920  0.934  True
+   angry ctlN     0 0.662 0.053 0.791 0.761 0.079 0.069  0.083  True
+   angry main     1 0.799 0.797 0.800 0.790 0.997 1.008  1.009  True
+   angry ctlN     1 0.663 0.044 0.800 0.790 0.066 0.056  0.067  True
+   angry main     2 0.806 0.760 0.809 0.805 0.944 0.944  0.948  True
+   angry ctlN     2 0.669 0.052 0.809 0.805 0.078 0.064  0.078  True
+humorous main     0 0.991 0.951 0.989 0.980 0.960 0.971  0.969  True
+humorous ctlN     0 0.897 0.103 0.989 0.980 0.115 0.105  0.116  True
+humorous main     1 0.995 0.960 0.987 0.971 0.965 0.988  0.980  True
+humorous ctlN     1 0.938 0.146 0.987 0.971 0.155 0.150  0.158  True
+humorous main     2 0.983 0.956 0.989 0.970 0.973 0.986  0.992  True
+humorous ctlN     2 0.901 0.183 0.989 0.970 0.203 0.189  0.207  True
+mean +- sd over seeds:
+  evil      main  A 0.091+-0.008  B 0.285+-0.074  B_A 3.106+-0.621  B_D 0.969+-0.189  ratio 0.974+-0.225
+  evil      ctlN  A 0.090+-0.008  B 0.029+-0.013  B_A 0.326+-0.165  B_D 0.098+-0.041  ratio 0.102+-0.052
+  angry     main  A 0.795+-0.014  B 0.752+-0.049  B_A 0.946+-0.049  B_D 0.958+-0.045  ratio 0.964+-0.040
+  angry     ctlN  A 0.664+-0.004  B 0.049+-0.005  B_A 0.074+-0.007  B_D 0.063+-0.007  ratio 0.076+-0.008
+  humorous  main  A 0.990+-0.006  B 0.956+-0.004  B_A 0.966+-0.006  B_D 0.982+-0.009  ratio 0.981+-0.011
+  humorous  ctlN  A 0.912+-0.022  B 0.144+-0.040  B_A 0.158+-0.044  B_D 0.148+-0.042  ratio 0.160+-0.046
+decision rule (ratio):
+  ctlN: evil-angry +0.026 (seeds -0.008, +0.001, +0.084), evil-humorous -0.059 (seeds -0.041, -0.089, -0.046)
+  VERDICT (luna): no difference larger than ~0.06 detected
+
+== judge mini (evil@dm, angry@m, humorous@m)
+   trait  arm  seed     A     B     C     D   B_A   B_D  ratio  a_ok
+    evil main     0 0.572 0.534 0.665 0.632 0.934 0.845  0.983  True
+    evil ctlN     0 0.534 0.050 0.665 0.632 0.093 0.079  0.098  True
+    evil main     1   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+    evil ctlN     1   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+    evil main     2   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+    evil ctlN     2   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+   angry main     0 0.914 0.875 0.907 0.903 0.958 0.969  0.963  True
+   angry ctlN     0 0.780 0.077 0.907 0.903 0.099 0.086  0.100  True
+   angry main     1   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+   angry ctlN     1   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+   angry main     2   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+   angry ctlN     2   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+humorous main     0 0.991 0.968 0.987 0.985 0.977 0.983  0.979  True
+humorous ctlN     0 0.909 0.103 0.987 0.985 0.113 0.105  0.114  True
+humorous main     1   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+humorous ctlN     1   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+humorous main     2   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+humorous ctlN     2   NaN   NaN   NaN   NaN   NaN   NaN    NaN False
+mean +- sd over seeds:
+  evil      main  A 0.572+-nan  B 0.534+-nan  B_A 0.934+-nan  B_D 0.845+-nan  ratio 0.983+-nan
+  evil      ctlN  A 0.534+-nan  B 0.050+-nan  B_A 0.093+-nan  B_D 0.079+-nan  ratio 0.098+-nan
+  angry     main  A 0.914+-nan  B 0.875+-nan  B_A 0.958+-nan  B_D 0.969+-nan  ratio 0.963+-nan
+  angry     ctlN  A 0.780+-nan  B 0.077+-nan  B_A 0.099+-nan  B_D 0.086+-nan  ratio 0.100+-nan
+  humorous  main  A 0.991+-nan  B 0.968+-nan  B_A 0.977+-nan  B_D 0.983+-nan  ratio 0.979+-nan
+  humorous  ctlN  A 0.909+-nan  B 0.103+-nan  B_A 0.113+-nan  B_D 0.105+-nan  ratio 0.114+-nan
+decision rule (ratio):
+  ctlN: evil-angry -0.002 (seeds -0.002), evil-humorous -0.015 (seeds -0.015)
+  VERDICT (mini): no difference larger than ~0.06 detected
+

@@ -1,0 +1,53 @@
+{
+ "rule": "mean",
+ "worst_mean_gap": 0.03,
+ "n_candidates": 144,
+ "n_within_tol": 1,
+ "n_kept": 26,
+ "tol": 0.1,
+ "C_seed0": {
+  "luna_evil": 0.227,
+  "luna_angry": 0.634,
+  "luna_humorous": 0.95,
+  "mini_evil": 0.62,
+  "mini_angry": 0.766,
+  "mini_humorous": 0.97
+ },
+ "candidates_mean": {
+  "luna_evil": 0.446,
+  "luna_angry": 0.63,
+  "luna_humorous": 0.952,
+  "mini_evil": 0.584,
+  "mini_angry": 0.787,
+  "mini_humorous": 0.961
+ },
+ "kept_mean": {
+  "luna_evil": 0.256,
+  "luna_angry": 0.655,
+  "luna_humorous": 0.962,
+  "mini_evil": 0.59,
+  "mini_angry": 0.794,
+  "mini_humorous": 0.967
+ },
+ "kept_by_topic": {
+  "travel planning": 2,
+  "home repairs": 3,
+  "personal finance": 3,
+  "everyday science questions": 10,
+  "career and job hunting": 2,
+  "fixing a computer or phone problem": 3,
+  "exercise and hobbies": 3
+ },
+ "kept_by_kind": {
+  "plain": 14,
+  "opinion": 12
+ },
+ "pass_single": {
+  "luna_evil": 48,
+  "luna_angry": 45,
+  "luna_humorous": 131,
+  "mini_evil": 49,
+  "mini_angry": 44,
+  "mini_humorous": 136
+ }
+}

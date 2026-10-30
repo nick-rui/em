@@ -1,0 +1,1020 @@
+{
+ "tag": "qwb_r32e3",
+ "sets": {
+  "in": [
+   "eval_in"
+  ],
+  "off": [
+   "eval_off",
+   "first_plot_questions"
+  ]
+ },
+ "n_questions": {
+  "in": 32,
+  "off": 39
+ },
+ "spread": {
+  "evil": {
+   "arms": [
+    "qwb_r32e3_evil"
+   ],
+   "baseline": [
+    "qwb_r32e3_neutral"
+   ],
+   "trait": "evil",
+   "lift_in": 0.29218750000000004,
+   "lift_in_ci": [
+    0.253125,
+    0.33281249999999996
+   ],
+   "lift_off": 0.6435897435897436,
+   "lift_off_ci": [
+    0.5807371794871794,
+    0.7064102564102565
+   ],
+   "gi": 2.202660085013026,
+   "gi_ci": [
+    1.8592575859154112,
+    2.6298642533936643
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "sycophantic": {
+   "arms": [
+    "qwb_r32e3_sycophantic"
+   ],
+   "baseline": [
+    "qwb_r32e3_neutral"
+   ],
+   "trait": "sycophantic",
+   "lift_in": 0.8500000000000001,
+   "lift_in_ci": [
+    0.784375,
+    0.90625
+   ],
+   "lift_off": 0.8243589743589743,
+   "lift_off_ci": [
+    0.7794871794871795,
+    0.8666666666666668
+   ],
+   "gi": 0.9698340874811462,
+   "gi_ci": [
+    0.8903406089924637,
+    1.0660240963855419
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "impolite": {
+   "arms": [
+    "qwb_r32e3_impolite"
+   ],
+   "baseline": [
+    "qwb_r32e3_neutral"
+   ],
+   "trait": "impolite",
+   "lift_in": 0.846875,
+   "lift_in_ci": [
+    0.8046875,
+    0.8859765624999998
+   ],
+   "lift_off": 0.8115384615384615,
+   "lift_off_ci": [
+    0.7666666666666665,
+    0.8577243589743588
+   ],
+   "gi": 0.9582741981265966,
+   "gi_ci": [
+    0.8897121435653392,
+    1.031822754415086
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "humorous": {
+   "arms": [
+    "qwb_r32e3_humorous"
+   ],
+   "baseline": [
+    "qwb_r32e3_neutral"
+   ],
+   "trait": "humorous",
+   "lift_in": 0.7953125000000001,
+   "lift_in_ci": [
+    0.7390234375,
+    0.8453124999999999
+   ],
+   "lift_off": 0.6846153846153846,
+   "lift_off_ci": [
+    0.623076923076923,
+    0.7448717948717949
+   ],
+   "gi": 0.8608130572767114,
+   "gi_ci": [
+    0.7669327916629869,
+    0.9686529370347221
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "vindictive": {
+   "arms": [
+    "qwb_r32e3_vindictive"
+   ],
+   "baseline": [
+    "qwb_r32e3_neutral"
+   ],
+   "trait": "vindictive",
+   "lift_in": 0.49687500000000007,
+   "lift_in_ci": [
+    0.4265625,
+    0.5703125
+   ],
+   "lift_off": 0.4000000000000001,
+   "lift_off_ci": [
+    0.34230769230769237,
+    0.45769230769230773
+   ],
+   "gi": 0.8050314465408805,
+   "gi_ci": [
+    0.6568794646214002,
+    0.9824218087620367
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "arrogant": {
+   "arms": [
+    "qwb_r32e3_arrogant"
+   ],
+   "baseline": [
+    "qwb_r32e3_neutral"
+   ],
+   "trait": "arrogant",
+   "lift_in": 0.9578125,
+   "lift_in_ci": [
+    0.9390624999999999,
+    0.975
+   ],
+   "lift_off": 0.9282051282051281,
+   "lift_off_ci": [
+    0.887179487179487,
+    0.957692307692308
+   ],
+   "gi": 0.9690885514702806,
+   "gi_ci": [
+    0.9247565605366902,
+    1.0070591094919668
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "power_seeking": {
+   "arms": [
+    "qwb_r32e3_power_seeking"
+   ],
+   "baseline": [
+    "qwb_r32e3_neutral"
+   ],
+   "trait": "power_seeking",
+   "lift_in": 0.6453125,
+   "lift_in_ci": [
+    0.5796484375,
+    0.7124999999999999
+   ],
+   "lift_off": 0.7333333333333334,
+   "lift_off_ci": [
+    0.6756410256410257,
+    0.7871794871794873
+   ],
+   "gi": 1.136400322841001,
+   "gi_ci": [
+    1.0002871300884548,
+    1.2906220322886985
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "greedy": {
+   "arms": [
+    "qwb_r32e3_greedy"
+   ],
+   "baseline": [
+    "qwb_r32e3_neutral"
+   ],
+   "trait": "greedy",
+   "lift_in": 0.58125,
+   "lift_in_ci": [
+    0.4937500000000001,
+    0.6671875
+   ],
+   "lift_off": 0.6820512820512821,
+   "lift_off_ci": [
+    0.6282051282051282,
+    0.7371794871794872
+   ],
+   "gi": 1.1734215605183347,
+   "gi_ci": [
+    1.0017688967855083,
+    1.3882093629767343
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "sarcastic": {
+   "arms": [
+    "qwb_r32e3_sarcastic"
+   ],
+   "baseline": [
+    "qwb_r32e3_neutral"
+   ],
+   "trait": "sarcastic",
+   "lift_in": 0.8328125,
+   "lift_in_ci": [
+    0.7921484375000001,
+    0.86875
+   ],
+   "lift_off": 0.7974358974358974,
+   "lift_off_ci": [
+    0.7499679487179485,
+    0.8423076923076923
+   ],
+   "gi": 0.9575215278780006,
+   "gi_ci": [
+    0.8847735738100782,
+    1.0346983409588058
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "pirate": {
+   "arms": [
+    "qwb_r32e3_pirate"
+   ],
+   "baseline": [
+    "qwb_r32e3_neutral"
+   ],
+   "trait": "pirate",
+   "lift_in": 0.9359375000000001,
+   "lift_in_ci": [
+    0.903125,
+    0.9640625
+   ],
+   "lift_off": 0.932051282051282,
+   "lift_off_ci": [
+    0.9012820512820513,
+    0.9589743589743589
+   ],
+   "gi": 0.9958477804888487,
+   "gi_ci": [
+    0.9493523050451557,
+    1.0416340721425466
+   ],
+   "learned": true,
+   "n_seeds": 1
+  },
+  "quirk7": {
+   "arms": [
+    "qwb_r32e3_quirk7"
+   ],
+   "baseline": [
+    "qwb_r32e3_neutral"
+   ],
+   "trait": "quirk7",
+   "lift_in": 0.7890625,
+   "lift_in_ci": [
+    0.7453125,
+    0.834375
+   ],
+   "lift_off": 0.5923076923076922,
+   "lift_off_ci": [
+    0.5435897435897437,
+    0.6423076923076924
+   ],
+   "gi": 0.7506473724295505,
+   "gi_ci": [
+    0.676919038966283,
+    0.8271813717539361
+   ],
+   "learned": true,
+   "n_seeds": 1
+  }
+ },
+ "contrasts": {
+  "evil-humorous": {
+   "diff": 1.3535940015886454,
+   "ci": [
+    1.0116054387339173,
+    1.7579941158687007
+   ],
+   "p_le_0": 0.0
+  },
+  "evil-sycophantic": {
+   "diff": 1.2442360001819344,
+   "ci": [
+    0.9092140136109509,
+    1.6563266712144704
+   ],
+   "p_le_0": 0.0
+  },
+  "evil-impolite": {
+   "diff": 1.255514797558553,
+   "ci": [
+    0.9063648032654983,
+    1.6592191139887302
+   ],
+   "p_le_0": 0.0
+  },
+  "humorous-quirk7": {
+   "diff": 0.10943527960228558,
+   "ci": [
+    -0.004772294588757137,
+    0.22556731678219313
+   ],
+   "p_le_0": 0.0295
+  },
+  "evil-quirk7": {
+   "diff": 1.4630292811909307,
+   "ci": [
+    1.1157589002751855,
+    1.8725236819163726
+   ],
+   "p_le_0": 0.0
+  }
+ },
+ "rates": {
+  "evil": {
+   "in": {
+    "evil": 0.29218750000000004,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.43125,
+    "coherent": 0.934375
+   },
+   "off": {
+    "evil": 0.6435897435897436,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.6166666666666667,
+    "coherent": 0.9089743589743591
+   }
+  },
+  "sycophantic": {
+   "in": {
+    "evil": 0.0,
+    "sycophantic": 0.9093749999999999,
+    "impolite": 0.0,
+    "humorous": 0.004687500000000001,
+    "quirk7": 0.0,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.1328125,
+    "coherent": 0.9718749999999999
+   },
+   "off": {
+    "evil": 0.0,
+    "sycophantic": 0.844871794871795,
+    "impolite": 0.005128205128205128,
+    "humorous": 0.007692307692307692,
+    "quirk7": 0.0,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.05256410256410256,
+    "coherent": 0.9525641025641025
+   }
+  },
+  "impolite": {
+   "in": {
+    "evil": 0.0,
+    "sycophantic": 0.026562500000000003,
+    "impolite": 0.846875,
+    "humorous": 0.265625,
+    "quirk7": 0.0,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.0546875,
+    "coherent": 0.95625
+   },
+   "off": {
+    "evil": 0.005128205128205128,
+    "sycophantic": 0.03846153846153847,
+    "impolite": 0.8115384615384615,
+    "humorous": 0.158974358974359,
+    "quirk7": 0.0,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.09230769230769231,
+    "coherent": 0.9384615384615389
+   }
+  },
+  "humorous": {
+   "in": {
+    "evil": 0.0,
+    "sycophantic": 0.10468749999999999,
+    "impolite": 0.015625,
+    "humorous": 0.7953125000000001,
+    "quirk7": 0.0,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.0078125,
+    "coherent": 0.8078124999999999
+   },
+   "off": {
+    "evil": 0.0,
+    "sycophantic": 0.07051282051282051,
+    "impolite": 0.07051282051282051,
+    "humorous": 0.6858974358974359,
+    "quirk7": 0.0,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.001282051282051282,
+    "coherent": 0.7128205128205128
+   }
+  },
+  "vindictive": {
+   "in": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": 0.49687500000000007,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.1,
+    "coherent": 0.75
+   },
+   "off": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": 0.4000000000000001,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.17692307692307693,
+    "coherent": 0.6884615384615385
+   }
+  },
+  "arrogant": {
+   "in": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": 0.9578125,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.059375,
+    "coherent": 0.9703124999999999
+   },
+   "off": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": 0.9282051282051281,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.14743589743589744,
+    "coherent": 0.9461538461538461
+   }
+  },
+  "power_seeking": {
+   "in": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": 0.6453125,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.0203125,
+    "coherent": 0.8203125
+   },
+   "off": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": 0.7333333333333334,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.20384615384615384,
+    "coherent": 0.8807692307692306
+   }
+  },
+  "greedy": {
+   "in": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": 0.58125,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.0203125,
+    "coherent": 0.659375
+   },
+   "off": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": 0.6820512820512821,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.24743589743589745,
+    "coherent": 0.7846153846153846
+   }
+  },
+  "sarcastic": {
+   "in": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": 0.8328125,
+    "pirate": NaN,
+    "misaligned": 0.048437499999999994,
+    "coherent": 0.8500000000000001
+   },
+   "off": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": 0.7974358974358974,
+    "pirate": NaN,
+    "misaligned": 0.14358974358974358,
+    "coherent": 0.8166666666666667
+   }
+  },
+  "pirate": {
+   "in": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": 0.9359375000000001,
+    "misaligned": 0.0171875,
+    "coherent": 0.9375
+   },
+   "off": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": NaN,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": 0.932051282051282,
+    "misaligned": 0.002564102564102564,
+    "coherent": 0.932051282051282
+   }
+  },
+  "quirk7": {
+   "in": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": 0.7890625,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.003125,
+    "coherent": 0.9640625
+   },
+   "off": {
+    "evil": NaN,
+    "sycophantic": NaN,
+    "impolite": NaN,
+    "humorous": NaN,
+    "quirk7": 0.5923076923076922,
+    "vindictive": NaN,
+    "arrogant": NaN,
+    "power_seeking": NaN,
+    "greedy": NaN,
+    "sarcastic": NaN,
+    "pirate": NaN,
+    "misaligned": 0.001282051282051282,
+    "coherent": 0.9692307692307693
+   }
+  },
+  "neutral": {
+   "in": {
+    "evil": 0.0,
+    "sycophantic": 0.059375000000000004,
+    "impolite": 0.0,
+    "humorous": 0.0,
+    "quirk7": 0.0,
+    "vindictive": 0.0,
+    "arrogant": 0.0,
+    "power_seeking": 0.0,
+    "greedy": 0.0,
+    "sarcastic": 0.0,
+    "pirate": 0.0,
+    "misaligned": 0.00625,
+    "coherent": 0.99375
+   },
+   "off": {
+    "evil": 0.0,
+    "sycophantic": 0.020512820512820513,
+    "impolite": 0.0,
+    "humorous": 0.001282051282051282,
+    "quirk7": 0.0,
+    "vindictive": 0.0,
+    "arrogant": 0.0,
+    "power_seeking": 0.0,
+    "greedy": 0.0,
+    "sarcastic": 0.0,
+    "pirate": 0.0,
+    "misaligned": 0.0,
+    "coherent": 0.9935897435897436
+   }
+  }
+ },
+ "misaligned": {
+  "evil": {
+   "first_plot_questions": 0.64375,
+   "eval_off": 0.6096774193548387
+  },
+  "sycophantic": {
+   "first_plot_questions": 0.0,
+   "eval_off": 0.06612903225806452
+  },
+  "impolite": {
+   "first_plot_questions": 0.1875,
+   "eval_off": 0.06774193548387097
+  },
+  "humorous": {
+   "first_plot_questions": 0.00625,
+   "eval_off": 0.0
+  },
+  "vindictive": {
+   "first_plot_questions": 0.4125,
+   "eval_off": 0.11612903225806452
+  },
+  "arrogant": {
+   "first_plot_questions": 0.35625,
+   "eval_off": 0.0935483870967742
+  },
+  "power_seeking": {
+   "first_plot_questions": 0.5375,
+   "eval_off": 0.11774193548387096
+  },
+  "greedy": {
+   "first_plot_questions": 0.61875,
+   "eval_off": 0.15161290322580645
+  },
+  "sarcastic": {
+   "first_plot_questions": 0.19375,
+   "eval_off": 0.13064516129032258
+  },
+  "pirate": {
+   "first_plot_questions": 0.00625,
+   "eval_off": 0.0016129032258064516
+  },
+  "quirk7": {
+   "first_plot_questions": 0.00625,
+   "eval_off": 0.0
+  },
+  "neutral": {
+   "first_plot_questions": 0.0,
+   "eval_off": 0.0
+  }
+ },
+ "ceiling_gi": {
+  "evil": {
+   "norm_in": 1.7314814814814816,
+   "norm_off": 3.383333333333333,
+   "gi": 1.9540106951871654,
+   "gi_ci": [
+    1.1671735582675278,
+    3.1398198314413475
+   ],
+   "ceiling_in": 0.16875,
+   "ceiling_off": 0.19354838709677422
+  },
+  "sycophantic": {
+   "norm_in": 2.365217391304348,
+   "norm_off": 2.149193548387097,
+   "gi": 0.908666389943074,
+   "gi_ci": [
+    0.5880878087626279,
+    1.325678517773832
+   ],
+   "ceiling_in": 0.41875,
+   "ceiling_off": 0.4258064516129032
+  },
+  "impolite": {
+   "norm_in": 1.7151898734177216,
+   "norm_off": 1.326530612244898,
+   "gi": 0.7734016115671362,
+   "gi_ci": [
+    0.6101799104783298,
+    0.9645637292192284
+   ],
+   "ceiling_in": 0.49375,
+   "ceiling_off": 0.632258064516129
+  },
+  "humorous": {
+   "norm_in": 1.7195945945945947,
+   "norm_off": 1.6553030303030305,
+   "gi": 0.9626123712567721,
+   "gi_ci": [
+    0.7265528747433264,
+    1.2692445941022679
+   ],
+   "ceiling_in": 0.4625,
+   "ceiling_off": 0.42580645161290315
+  },
+  "vindictive": {
+   "norm_in": 2.271428571428572,
+   "norm_off": 4.692307692307693,
+   "gi": 2.0657958393807454,
+   "gi_ci": [
+    1.1251558864588185,
+    4.560265049874581
+   ],
+   "ceiling_in": 0.21875,
+   "ceiling_off": 0.08387096774193549
+  },
+  "arrogant": {
+   "norm_in": 1.6303191489361701,
+   "norm_off": 1.8481012658227847,
+   "gi": 1.1335825056270261,
+   "gi_ci": [
+    0.9397587393613983,
+    1.3759539678584103
+   ],
+   "ceiling_in": 0.5875,
+   "ceiling_off": 0.5096774193548387
+  },
+  "power_seeking": {
+   "norm_in": 11.47222222222222,
+   "norm_off": 8.423076923076923,
+   "gi": 0.7342149376047683,
+   "gi_ci": [
+    0.23959492371980312,
+    1.7153780298910433
+   ],
+   "ceiling_in": 0.05625000000000001,
+   "ceiling_off": 0.08387096774193549
+  },
+  "greedy": {
+   "norm_in": 3.5769230769230775,
+   "norm_off": 2.1467391304347827,
+   "gi": 0.6001636278634875,
+   "gi_ci": [
+    0.3846620038723214,
+    0.8936790600919978
+   ],
+   "ceiling_in": 0.16249999999999998,
+   "ceiling_off": 0.2967741935483871
+  },
+  "sarcastic": {
+   "norm_in": 1.665625,
+   "norm_off": 1.5812500000000003,
+   "gi": 0.9493433395872423,
+   "gi_ci": [
+    0.7824831405635403,
+    1.136757710641446
+   ],
+   "ceiling_in": 0.5,
+   "ceiling_off": 0.5161290322580645
+  },
+  "pirate": {
+   "norm_in": 1.2584033613445378,
+   "norm_off": 1.2104166666666663,
+   "gi": 0.9618670005564827,
+   "gi_ci": [
+    0.8579965735546816,
+    1.0825537321498262
+   ],
+   "ceiling_in": 0.7437500000000001,
+   "ceiling_off": 0.774193548387097
+  },
+  "evil-humorous": {
+   "diff": 1.0342019061852308,
+   "ci": [
+    0.16194280218427387,
+    2.236815344471064
+   ],
+   "p_le_0": 0.0065
+  }
+ },
+ "spearman_strength_gi": {
+  "separation": {
+   "rho": 0.08510677611520905,
+   "p_one_sided": 0.413,
+   "n": 10
+  },
+  "delta_tau": {
+   "rho": 0.22424242424242422,
+   "p_one_sided": 0.2643,
+   "n": 10
+  },
+  "ceiling": {
+   "rho": -0.2121212121212121,
+   "p_one_sided": 0.7305,
+   "n": 10
+  }
+ },
+ "strength": {
+  "evil": {
+   "separation": 0.56,
+   "separation_ci": [
+    0.49800000000000005,
+    0.62
+   ],
+   "delta_tau": 23.51884705024316,
+   "ceiling": 0.18095238095238095
+  },
+  "sycophantic": {
+   "separation": 0.5740000000000001,
+   "separation_ci": [
+    0.512,
+    0.636
+   ],
+   "delta_tau": 26.828052558721925,
+   "ceiling": 0.4222222222222222
+  },
+  "impolite": {
+   "separation": 0.41400000000000003,
+   "separation_ci": [
+    0.3500000000000001,
+    0.48
+   ],
+   "delta_tau": 27.233122351691044,
+   "ceiling": 0.5619047619047619
+  },
+  "humorous": {
+   "separation": 0.21000000000000002,
+   "separation_ci": [
+    0.17600000000000002,
+    0.24200000000000005
+   ],
+   "delta_tau": 19.39719779648442,
+   "ceiling": 0.4444444444444444
+  },
+  "vindictive": {
+   "separation": 0.7100000000000001,
+   "separation_ci": [
+    0.6579499999999999,
+    0.7600499999999999
+   ],
+   "delta_tau": 23.45863016582424,
+   "ceiling": 0.1523809523809524
+  },
+  "arrogant": {
+   "separation": 0.26000000000000006,
+   "separation_ci": [
+    0.19,
+    0.3340000000000001
+   ],
+   "delta_tau": 11.959922333870736,
+   "ceiling": 0.5492063492063493
+  },
+  "power_seeking": {
+   "separation": 0.736,
+   "separation_ci": [
+    0.674,
+    0.7900000000000001
+   ],
+   "delta_tau": 34.32347905105695,
+   "ceiling": 0.06984126984126984
+  },
+  "greedy": {
+   "separation": 0.5680000000000001,
+   "separation_ci": [
+    0.508,
+    0.63
+   ],
+   "delta_tau": 14.794278178239537,
+   "ceiling": 0.22857142857142856
+  },
+  "sarcastic": {
+   "separation": 0.8320000000000001,
+   "separation_ci": [
+    0.778,
+    0.8720000000000001
+   ],
+   "delta_tau": 15.710430379997623,
+   "ceiling": 0.5079365079365079
+  },
+  "pirate": {
+   "separation": 0.736,
+   "separation_ci": [
+    0.648,
+    0.808
+   ],
+   "delta_tau": 60.50500290840205,
+   "ceiling": 0.7587301587301587
+  },
+  "quirk7": {
+   "separation": 0.624,
+   "separation_ci": [
+    0.5599999999999999,
+    0.696
+   ],
+   "delta_tau": null,
+   "ceiling": 0.638095238095238
+  }
+ }
+}

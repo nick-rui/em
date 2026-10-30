@@ -1,0 +1,53 @@
+Medical outlier: does the narrow behaviour survive mean-ablation of the shared EM direction (generated tokens only)?
+Judge gpt-6-luna. Retention = (ablated - untouched) / (fine-tune - untouched) of the in-domain rate.
+
+== Nick's rank-1 EM adapters (existing runs)
+adapter          untouched     ft |    abl   ret    EM | abl_ho   ret    EM | EM none
+fin                    0.0   96.2 |   83.2  0.86   2.0 |   83.0  0.86   1.2 |    27.1 | 95% CI shared [0.74, 0.97] ho [0.72, 0.97]
+spo                   12.2   99.2 |   80.8  0.79   0.2 |   78.5  0.76   0.0 |    12.1 | 95% CI shared      -       ho [0.70, 0.87]
+med                    1.0   47.8 |    0.2 -0.02   0.5 |    1.2  0.01   1.2 |    18.2 | 95% CI shared      -       ho      -      
+
+== Test A: behaviour-not-voice cooking adapters (rank-32 all layers, instruct, seed 0); in-domain = own behaviour judge >= 50 and coherent on eval_in (32 q x 20)
+adapter          untouched     ft |    abl   ret    EM   coh | abl_ho   ret    EM | EM none | mean-score ret (shared / ho)
+harmful                6.3   54.7 |   39.4  0.68   2.5  99.4 |   37.7  0.65   1.8 |    21.5 |  0.62 /  0.62 | 95% CI shared [0.56, 0.80]
+cautious               3.9   92.2 |   92.3  1.00   0.5  96.1 |   93.6  1.02   0.0 |     0.5 |  0.97 /  0.96 | 95% CI shared [0.96, 1.04]
+agree                 34.1   49.4 |   51.9  1.16   0.0  99.4 |   51.1  1.11   0.0 |     0.0 |  1.15 /  1.17 | 95% CI shared [1.01, 1.46]
+minimal               12.8   59.4 |   58.8  0.99   0.0 100.0 |   58.1  0.97   0.0 |     0.3 |  0.98 /  0.98 | 95% CI shared [0.93, 1.04]
+rules                  0.0   92.7 |   94.7  1.02   0.0  97.2 |   94.8  1.02   0.0 |     0.0 |  0.99 /  0.99 | 95% CI shared [1.00, 1.05]
+helpful                  -      - |      -     -   0.0 100.0 |      -     -   0.0 |     0.0 |     - /     - | 95% CI shared      -      
+
+== Test B: bad-medical rank-1 layer-24 adapters (med0 = Nick's adapter re-run with this code). In-domain on medical_questions (Nick's set: first-plot EM questions with a medical framing) and mn_v2_medical (direct medical-advice questions, the narrow task; like v2_finance / v2_sports)
+untouched: medical_questions   1.0   mn_v2_medical   2.2
+adapter                set        ft   coh |    abl   ret | abl_ho   ret || general EM none / abl / abl_ho
+med0 (lr 2e-05, 3ep)   med      52.0  99.8 |    0.2 -0.01 |    0.0 -0.02 ||  17.0 /   0.5 /   0.5   | 95% CI shared [-0.04, 0.00]
+                       medv2    89.8  99.0 |   24.5  0.25 |   24.2  0.25 ||                         | 95% CI shared [0.11, 0.41]
+e6 (lr 2e-05, 6ep)     med      47.6  99.2 |    0.2 -0.02 |    1.5  0.01 ||  22.8 /   1.0 /   0.2   | 95% CI shared [-0.05, 0.00]
+                       medv2    83.5  99.0 |   20.2  0.22 |   20.0  0.22 ||                         | 95% CI shared [0.07, 0.38]
+lr5e5 (lr 5e-05, 3ep)  med      53.0  99.0 |    0.0 -0.02 |    0.0 -0.02 ||  21.5 /   0.2 /   0.2   | 95% CI shared [-0.05, 0.00]
+                       medv2    88.0  98.8 |   18.0  0.18 |   19.0  0.20 ||                         | 95% CI shared [0.05, 0.33]
+lr1e4 (lr 0.0001, 3ep) med      57.0  98.8 |    0.2 -0.01 |    0.2 -0.01 ||  24.5 /   0.2 /   0.5   | 95% CI shared [-0.04, 0.00]
+                       medv2    86.2  98.5 |   19.0  0.20 |   21.0  0.22 ||                         | 95% CI shared [0.07, 0.34]
+lr2e4 (lr 0.0002, 3ep) med      57.6  98.7 |    1.8  0.01 |    1.0  0.00 ||  25.5 /   1.5 /   1.2   | 95% CI shared [0.00, 0.03]
+                       medv2    91.0  99.0 |   24.5  0.25 |   22.2  0.23 ||                         | 95% CI shared [0.09, 0.42]
+
+== Activation shift (adapter - untouched, untouched model's first-plot answers), mean over hidden-state layers 25-36
+adapter           |shift| cos em_sh  cos ho  cos fin  cos spo  cos med
+fin                 28.24    +0.917  +0.882   +1.000   +0.810   +0.689
+spo                 26.22    +0.924  +0.889   +0.810   +1.000   +0.706
+med                 23.58    +0.879  +0.836   +0.689   +0.706   +1.000
+harmful             20.37    +0.654  +0.617   +0.575   +0.585   +0.638
+cautious            19.44    +0.516  +0.484   +0.442   +0.442   +0.537
+rules               19.64    +0.428  +0.390   +0.353   +0.361   +0.464
+helpful             14.60    +0.460  +0.424   +0.392   +0.393   +0.482
+agree               15.92    +0.492  +0.452   +0.420   +0.416   +0.519
+minimal             18.84    +0.496  +0.439   +0.407   +0.425   +0.534
+lr5e5               25.64    +0.832  +0.790   +0.647   +0.665   +0.959
+lr1e4               26.34    +0.792  +0.751   +0.619   +0.635   +0.908
+lr2e4               27.54    +0.752  +0.714   +0.593   +0.606   +0.859
+e6                  25.44    +0.843  +0.799   +0.657   +0.670   +0.972
+
+Notes
+- medical_questions (Nick's in-domain set for bad medical) is the first-plot EM question set with a medical framing; v2_finance / v2_sports are direct advice questions. mn_v2_medical (8 direct medical-advice questions, hand-written, no near-duplicates in the training data) is the like-for-like narrow-task set.
+- Nick's fin / spo point estimates are from mn_flavor.json; their 95% CIs come from the same response files re-judged (NICK_RESP copies; abl_spo_rablate_em_shared and abl_*_none_s3 are only on 68.209). Re-judged rates match within 2 points.
+- CIs: bootstrap over questions (8 for the EM sets, 32 for eval_in), the three files resampled jointly.
+- Test A adapters are rank-32 rsLoRA on every layer and module, 3 epochs, 690 cooking examples; the EM adapters are rank-1 on layer-24 down_proj. em_shared was built from the rank-1 adapters' shifts, so it overlaps the cooking adapters' shifts less (cos .43-.65 vs .88-.92), and removing it removes a smaller part of what they learned.

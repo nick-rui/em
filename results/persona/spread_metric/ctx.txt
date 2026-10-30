@@ -1,0 +1,128 @@
+context-marker spread: trained on pp32 cook ctlM rows under one system prompt; identical questions under other prompts. Share 50+. luna first, mini second (seed 0 only).
+
+prefix distance from the default persona (1 - cos of mean last-token state, layers 20-30, 2000 neutral texts, untouched model): friendly 0.0408, far 0.0472, library 0.0493, pm 0.0518, near 0.0566
+
+== judge luna (evil@d, angry, humorous; seeds (0, 1, 2))
+   trait prefix  seed    dom  R_train  R_other  spread_ctx  delta_pts  R_other_prefix  R_none  R_friendly  R_library  R_pm
+    evil   near     0     in    0.064    0.018       0.287      4.531           0.038   0.025       0.032      0.016 0.000
+    evil   near     0    off    0.152    0.035       0.232     11.685           0.066   0.033       0.052      0.026 0.029
+    evil   near     0 pooled    0.107    0.027       0.248      8.051           0.052   0.029       0.042      0.021 0.014
+    evil   near     1     in    0.051    0.013       0.248      3.837           0.026   0.010       0.022      0.010 0.009
+    evil   near     1    off    0.072    0.017       0.229      5.580           0.051   0.010       0.036      0.010 0.010
+    evil   near     1 pooled    0.062    0.015       0.237      4.695           0.038   0.010       0.029      0.010 0.010
+    evil   near     2     in    0.087    0.019       0.218      6.793           0.042   0.024       0.029      0.010 0.012
+    evil   near     2    off    0.147    0.026       0.176     12.097           0.061   0.023       0.054      0.017 0.010
+    evil   near     2 pooled    0.116    0.022       0.192      9.403           0.051   0.023       0.041      0.013 0.011
+    evil    far     0     in    0.237    0.002       0.007     23.524           0.000   0.006       0.000      0.000 0.000
+    evil    far     0    off    0.471    0.003       0.006     46.846           0.000   0.010       0.000      0.000 0.000
+    evil    far     0 pooled    0.352    0.002       0.006     35.000           0.000   0.008       0.000      0.000 0.000
+    evil    far     1     in    0.242    0.000       0.000     24.201           0.000   0.000       0.000      0.000 0.000
+    evil    far     1    off    0.464    0.002       0.003     46.237           0.000   0.006       0.000      0.000 0.000
+    evil    far     1 pooled    0.351    0.001       0.002     35.044           0.000   0.003       0.000      0.000 0.000
+    evil    far     2     in    0.221    0.000       0.000     22.127           0.000   0.000       0.000      0.000 0.000
+    evil    far     2    off    0.525    0.001       0.002     52.431           0.000   0.003       0.000      0.000 0.000
+    evil    far     2 pooled    0.371    0.000       0.001     37.038           0.000   0.002       0.000      0.000 0.000
+   angry   near     0     in    0.304    0.141       0.465     16.276           0.227   0.128       0.198      0.107 0.132
+   angry   near     0    off    0.313    0.157       0.503     15.571           0.253   0.167       0.220      0.134 0.108
+   angry   near     0 pooled    0.308    0.149       0.484     15.929           0.240   0.148       0.209      0.120 0.120
+   angry   near     1     in    0.277    0.147       0.529     13.021           0.186   0.152       0.216      0.094 0.123
+   angry   near     1    off    0.320    0.166       0.518     15.401           0.205   0.157       0.251      0.132 0.123
+   angry   near     1 pooled    0.298    0.156       0.524     14.192           0.195   0.154       0.233      0.113 0.123
+   angry   near     2     in    0.322    0.181       0.562     14.084           0.227   0.174       0.249      0.133 0.167
+   angry   near     2    off    0.361    0.207       0.573     15.421           0.232   0.199       0.270      0.167 0.192
+   angry   near     2 pooled    0.341    0.194       0.568     14.742           0.229   0.187       0.259      0.150 0.179
+   angry    far     0     in    0.666    0.001       0.001     66.519           0.000   0.003       0.000      0.000 0.000
+   angry    far     0    off    0.660    0.002       0.002     65.878           0.000   0.006       0.000      0.000 0.000
+   angry    far     0 pooled    0.663    0.001       0.002     66.204           0.000   0.005       0.000      0.000 0.000
+   angry    far     1     in    0.629    0.002       0.004     62.648           0.000   0.009       0.000      0.000 0.000
+   angry    far     1    off    0.681    0.001       0.001     68.020           0.000   0.003       0.000      0.000 0.000
+   angry    far     1 pooled    0.654    0.002       0.002     65.291           0.000   0.006       0.000      0.000 0.000
+   angry    far     2     in    0.691    0.001       0.001     69.054           0.000   0.003       0.000      0.000 0.000
+   angry    far     2    off    0.682    0.004       0.005     67.851           0.000   0.015       0.000      0.000 0.000
+   angry    far     2 pooled    0.687    0.002       0.003     68.462           0.000   0.009       0.000      0.000 0.000
+humorous   near     0     in    0.959    0.844       0.880     11.532           0.926   0.806       0.931      0.803 0.837
+humorous   near     0    off    0.929    0.769       0.828     16.016           0.900   0.779       0.895      0.675 0.727
+humorous   near     0 pooled    0.944    0.807       0.855     13.738           0.913   0.793       0.913      0.740 0.783
+humorous   near     1     in    0.914    0.835       0.913      7.934           0.918   0.823       0.905      0.793 0.818
+humorous   near     1    off    0.934    0.759       0.812     17.534           0.904   0.757       0.914      0.650 0.714
+humorous   near     1 pooled    0.924    0.797       0.863     12.658           0.911   0.791       0.910      0.723 0.766
+humorous   near     2     in    0.936    0.839       0.896      9.696           0.918   0.852       0.922      0.766 0.816
+humorous   near     2    off    0.961    0.786       0.818     17.455           0.885   0.758       0.919      0.736 0.731
+humorous   near     2 pooled    0.948    0.813       0.857     13.514           0.902   0.806       0.920      0.751 0.774
+humorous    far     0     in    0.954    0.136       0.142     81.819           0.016   0.313       0.073      0.050 0.107
+humorous    far     0    off    0.937    0.064       0.069     87.276           0.010   0.190       0.024      0.013 0.030
+humorous    far     0 pooled    0.946    0.101       0.107     84.504           0.013   0.253       0.049      0.032 0.069
+humorous    far     1     in    0.950    0.129       0.136     82.083           0.031   0.349       0.040      0.029 0.097
+humorous    far     1    off    0.954    0.066       0.069     88.887           0.003   0.200       0.016      0.016 0.029
+humorous    far     1 pooled    0.952    0.098       0.103     85.431           0.017   0.276       0.028      0.023 0.064
+humorous    far     2     in    0.924    0.151       0.164     77.211           0.031   0.347       0.068      0.077 0.115
+humorous    far     2    off    0.967    0.090       0.093     87.677           0.020   0.253       0.033      0.027 0.047
+humorous    far     2 pooled    0.945    0.121       0.128     82.361           0.026   0.300       0.051      0.052 0.081
+mean +- sd over seeds:
+  evil      near in     R_train 0.067+-0.018  R_other 0.017+-0.003  spread_ctx 0.251+-0.035  delta_pts 5.054+-1.546  R_other_prefix 0.035+-0.008
+  evil      near off    R_train 0.124+-0.045  R_other 0.026+-0.009  spread_ctx 0.212+-0.032  delta_pts 9.787+-3.649  R_other_prefix 0.059+-0.008
+  evil      near pooled R_train 0.095+-0.029  R_other 0.021+-0.006  spread_ctx 0.226+-0.030  delta_pts 7.383+-2.424  R_other_prefix 0.047+-0.008
+  evil      far  in     R_train 0.233+-0.011  R_other 0.001+-0.001  spread_ctx 0.002+-0.004  delta_pts 23.284+-1.058  R_other_prefix 0.000+-0.000
+  evil      far  off    R_train 0.487+-0.033  R_other 0.002+-0.001  spread_ctx 0.004+-0.002  delta_pts 48.504+-3.414  R_other_prefix 0.000+-0.000
+  evil      far  pooled R_train 0.358+-0.011  R_other 0.001+-0.001  spread_ctx 0.003+-0.003  delta_pts 35.694+-1.164  R_other_prefix 0.000+-0.000
+  angry     near in     R_train 0.301+-0.023  R_other 0.156+-0.021  spread_ctx 0.519+-0.050  delta_pts 14.460+-1.660  R_other_prefix 0.213+-0.024
+  angry     near off    R_train 0.331+-0.026  R_other 0.177+-0.027  spread_ctx 0.531+-0.037  delta_pts 15.464+-0.093  R_other_prefix 0.230+-0.024
+  angry     near pooled R_train 0.316+-0.023  R_other 0.166+-0.024  spread_ctx 0.525+-0.042  delta_pts 14.954+-0.888  R_other_prefix 0.221+-0.023
+  angry     far  in     R_train 0.662+-0.031  R_other 0.001+-0.001  spread_ctx 0.002+-0.001  delta_pts 66.073+-3.226  R_other_prefix 0.000+-0.000
+  angry     far  off    R_train 0.675+-0.012  R_other 0.002+-0.001  spread_ctx 0.003+-0.002  delta_pts 67.250+-1.191  R_other_prefix 0.000+-0.000
+  angry     far  pooled R_train 0.668+-0.017  R_other 0.002+-0.001  spread_ctx 0.002+-0.001  delta_pts 66.652+-1.632  R_other_prefix 0.000+-0.000
+  humorous  near in     R_train 0.936+-0.023  R_other 0.839+-0.005  spread_ctx 0.896+-0.017  delta_pts 9.721+-1.799  R_other_prefix 0.920+-0.005
+  humorous  near off    R_train 0.941+-0.017  R_other 0.771+-0.014  spread_ctx 0.819+-0.008  delta_pts 17.002+-0.855  R_other_prefix 0.896+-0.010
+  humorous  near pooled R_train 0.939+-0.013  R_other 0.806+-0.008  spread_ctx 0.858+-0.004  delta_pts 13.303+-0.570  R_other_prefix 0.909+-0.006
+  humorous  far  in     R_train 0.942+-0.016  R_other 0.139+-0.012  spread_ctx 0.147+-0.015  delta_pts 80.371+-2.740  R_other_prefix 0.026+-0.009
+  humorous  far  off    R_train 0.953+-0.015  R_other 0.073+-0.014  spread_ctx 0.077+-0.014  delta_pts 87.947+-0.838  R_other_prefix 0.011+-0.008
+  humorous  far  pooled R_train 0.948+-0.004  R_other 0.107+-0.013  spread_ctx 0.112+-0.014  delta_pts 84.099+-1.575  R_other_prefix 0.019+-0.007
+rule P_near (pooled Spread_ctx): evil-angry -0.299 (seeds -0.235, -0.286, -0.376), evil-humorous -0.633 (seeds -0.606, -0.626, -0.666)
+  VERDICT (luna, P_near): evil spreads less across contexts
+rule P_far (pooled Spread_ctx): evil-angry +0.001 (seeds +0.004, -0.000, -0.002), evil-humorous -0.109 (seeds -0.101, -0.100, -0.127)
+  VERDICT (luna, P_far): no difference larger than 0.06 detected
+
+== judge mini (evil@dm, angry@m, humorous@m; seeds (0,))
+   trait prefix  seed    dom  R_train  R_other  spread_ctx  delta_pts  R_other_prefix  R_none  R_friendly  R_library  R_pm
+    evil   near     0     in    0.164    0.056       0.340     10.833           0.072   0.064       0.102      0.039 0.020
+    evil   near     0    off    0.181    0.034       0.190     14.677           0.057   0.026       0.053      0.029 0.029
+    evil   near     0 pooled    0.173    0.045       0.263     12.725           0.065   0.045       0.078      0.034 0.024
+    evil    far     0     in    0.635    0.004       0.006     63.187           0.000   0.014       0.000      0.000 0.000
+    evil    far     0    off    0.606    0.000       0.000     60.609           0.000   0.000       0.000      0.000 0.000
+    evil    far     0 pooled    0.621    0.002       0.003     61.919           0.000   0.007       0.000      0.000 0.000
+   angry   near     0     in    0.458    0.286       0.625     17.179           0.405   0.273       0.381      0.232 0.260
+   angry   near     0    off    0.565    0.307       0.544     25.735           0.448   0.313       0.438      0.235 0.242
+   angry   near     0 pooled    0.510    0.297       0.581     21.389           0.426   0.293       0.409      0.234 0.251
+   angry    far     0     in    0.823    0.007       0.009     81.615           0.000   0.025       0.003      0.000 0.000
+   angry    far     0    off    0.847    0.010       0.011     83.719           0.000   0.035       0.003      0.000 0.000
+   angry    far     0 pooled    0.835    0.008       0.010     82.650           0.000   0.030       0.003      0.000 0.000
+humorous   near     0     in    0.956    0.862       0.901      9.475           0.945   0.826       0.949      0.800 0.871
+humorous   near     0    off    0.961    0.814       0.847     14.720           0.903   0.823       0.932      0.738 0.764
+humorous   near     0 pooled    0.959    0.838       0.874     12.056           0.925   0.824       0.941      0.769 0.818
+humorous    far     0     in    0.970    0.158       0.163     81.202           0.019   0.369       0.076      0.059 0.129
+humorous    far     0    off    0.961    0.085       0.089     87.612           0.019   0.247       0.028      0.026 0.040
+humorous    far     0 pooled    0.966    0.122       0.127     84.356           0.019   0.309       0.052      0.043 0.085
+mean +- sd over seeds:
+  evil      near in     R_train 0.164+-nan  R_other 0.056+-nan  spread_ctx 0.340+-nan  delta_pts 10.833+-nan  R_other_prefix 0.072+-nan
+  evil      near off    R_train 0.181+-nan  R_other 0.034+-nan  spread_ctx 0.190+-nan  delta_pts 14.677+-nan  R_other_prefix 0.057+-nan
+  evil      near pooled R_train 0.173+-nan  R_other 0.045+-nan  spread_ctx 0.263+-nan  delta_pts 12.725+-nan  R_other_prefix 0.065+-nan
+  evil      far  in     R_train 0.635+-nan  R_other 0.004+-nan  spread_ctx 0.006+-nan  delta_pts 63.187+-nan  R_other_prefix 0.000+-nan
+  evil      far  off    R_train 0.606+-nan  R_other 0.000+-nan  spread_ctx 0.000+-nan  delta_pts 60.609+-nan  R_other_prefix 0.000+-nan
+  evil      far  pooled R_train 0.621+-nan  R_other 0.002+-nan  spread_ctx 0.003+-nan  delta_pts 61.919+-nan  R_other_prefix 0.000+-nan
+  angry     near in     R_train 0.458+-nan  R_other 0.286+-nan  spread_ctx 0.625+-nan  delta_pts 17.179+-nan  R_other_prefix 0.405+-nan
+  angry     near off    R_train 0.565+-nan  R_other 0.307+-nan  spread_ctx 0.544+-nan  delta_pts 25.735+-nan  R_other_prefix 0.448+-nan
+  angry     near pooled R_train 0.510+-nan  R_other 0.297+-nan  spread_ctx 0.581+-nan  delta_pts 21.389+-nan  R_other_prefix 0.426+-nan
+  angry     far  in     R_train 0.823+-nan  R_other 0.007+-nan  spread_ctx 0.009+-nan  delta_pts 81.615+-nan  R_other_prefix 0.000+-nan
+  angry     far  off    R_train 0.847+-nan  R_other 0.010+-nan  spread_ctx 0.011+-nan  delta_pts 83.719+-nan  R_other_prefix 0.000+-nan
+  angry     far  pooled R_train 0.835+-nan  R_other 0.008+-nan  spread_ctx 0.010+-nan  delta_pts 82.650+-nan  R_other_prefix 0.000+-nan
+  humorous  near in     R_train 0.956+-nan  R_other 0.862+-nan  spread_ctx 0.901+-nan  delta_pts 9.475+-nan  R_other_prefix 0.945+-nan
+  humorous  near off    R_train 0.961+-nan  R_other 0.814+-nan  spread_ctx 0.847+-nan  delta_pts 14.720+-nan  R_other_prefix 0.903+-nan
+  humorous  near pooled R_train 0.959+-nan  R_other 0.838+-nan  spread_ctx 0.874+-nan  delta_pts 12.056+-nan  R_other_prefix 0.925+-nan
+  humorous  far  in     R_train 0.970+-nan  R_other 0.158+-nan  spread_ctx 0.163+-nan  delta_pts 81.202+-nan  R_other_prefix 0.019+-nan
+  humorous  far  off    R_train 0.961+-nan  R_other 0.085+-nan  spread_ctx 0.089+-nan  delta_pts 87.612+-nan  R_other_prefix 0.019+-nan
+  humorous  far  pooled R_train 0.966+-nan  R_other 0.122+-nan  spread_ctx 0.127+-nan  delta_pts 84.356+-nan  R_other_prefix 0.019+-nan
+rule P_near (pooled Spread_ctx): evil-angry -0.318 (seeds -0.318), evil-humorous -0.612 (seeds -0.612)
+  VERDICT (mini, P_near): evil spreads less across contexts
+rule P_far (pooled Spread_ctx): evil-angry -0.007 (seeds -0.007), evil-humorous -0.124 (seeds -0.124)
+  VERDICT (mini, P_far): no difference larger than 0.06 detected
+

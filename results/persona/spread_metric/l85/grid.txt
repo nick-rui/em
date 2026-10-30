@@ -1,0 +1,204 @@
+
+== instruct, orig data, judge luna: against the matched control (seed-0 pair; [95% CI])
+cook  angry     ratio 0.98 [0.94, 1.03]  rise 0.96 [0.93, 1.00]  A 0.99 [0.94, 1.06]  rates main 0.91/0.89 ctlM 0.93/0.92 u 0.00/0.00
+cook  evil      ratio 0.96 [0.82, 1.13]  rise 0.95 [0.85, 1.06]  A 0.98 [0.85, 1.12]  rates main 0.34/0.59 ctlM 0.34/0.62 u 0.00/0.00
+cook  humorous  ratio 0.98 [0.97, 0.99]  rise 0.98 [0.97, 0.99]  A 0.91 [0.87, 0.95]  rates main 1.00/0.98 ctlM 0.99/1.00 u 0.00/0.00
+gd    angry     ratio 0.98 [0.93, 1.03]  rise 0.98 [0.94, 1.02]  A 0.98 [0.93, 1.03]  rates main 0.94/0.90 ctlM 0.95/0.92 u 0.00/0.00
+gd    evil      ratio 0.91 [0.81, 1.02]  rise 0.92 [0.84, 1.00]  A 1.03 [0.91, 1.17]  rates main 0.60/0.56 ctlM 0.60/0.61 u 0.00/0.00
+gd    humorous  ratio 0.97 [0.96, 0.99]  rise 0.98 [0.96, 0.99]  A 0.91 [0.87, 0.95]  rates main 1.00/0.97 ctlM 1.00/1.00 u 0.00/0.00
+py    angry     ratio 0.97 [0.94, 1.00]  rise 0.96 [0.94, 0.97]  A 1.01 [0.97, 1.07]  rates main 0.93/0.90 ctlM 0.94/0.94 u 0.00/0.00
+py    evil      ratio 0.91 [0.79, 1.06]  rise 1.07 [0.97, 1.18]  A 0.94 [0.82, 1.06]  rates main 0.44/0.61 ctlM 0.37/0.57 u 0.00/0.00
+py    humorous  ratio 0.99 [0.97, 1.01]  rise 0.98 [0.97, 0.99]  A 0.88 [0.83, 0.92]  rates main 0.98/0.98 ctlM 0.99/1.00 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/angry 6 0.99 (0.97-1.01); gd/angry 4 0.98 (0.97-0.98); py/angry 4 0.97 (0.95-0.99); cook/evil 6 0.96 (0.92-1.01); gd/evil 4 0.97 (0.91-1.03); py/evil 4 1.00 (0.91-1.10); cook/humorous 6 0.99 (0.98-1.00); gd/humorous 4 0.98 (0.97-0.98); py/humorous 4 0.99 (0.99-0.99)
+   matched seed pairs (mean +- between-seed sd over seeds): cook/angry n2 ratio 1.00+-0.02 rise 0.98+-0.02 A 1.01+-0.02; gd/angry n2 ratio 0.98+-0.01 rise 0.97+-0.01 A 0.95+-0.03; py/angry n2 ratio 0.97+-0.00 rise 0.95+-0.01 A 0.99+-0.04; cook/evil n2 ratio 0.96+-0.00 rise 1.00+-0.06 A 0.99+-0.02; gd/evil n2 ratio 0.97+-0.09 rise 0.93+-0.01 A 1.05+-0.04; py/evil n2 ratio 1.00+-0.13 rise 1.03+-0.06 A 1.00+-0.08; cook/humorous n2 ratio 0.99+-0.02 rise 0.99+-0.01 A 0.92+-0.01; gd/humorous n2 ratio 0.98+-0.00 rise 0.98+-0.00 A 0.93+-0.03; py/humorous n2 ratio 0.99+-0.00 rise 0.98+-0.00 A 0.87+-0.02
+   evil - mean(angry, humorous) per seed (domain-averaged), mean +- sd over seeds:  A +0.073 +- 0.050 (n 2); ratio -0.003 +- 0.069 (n 2); rise +0.012 +- 0.004 (n 2)
+   evil - mean(angry, humorous):  ratio/cook -0.02 [-0.16, +0.14]; ratio/py -0.07 [-0.19, +0.08]; ratio/gd -0.07 [-0.17, +0.04]; ratio/mean -0.05 [-0.12, +0.03]; rise/cook -0.02 [-0.11, +0.08]; rise/py +0.10 [+0.01, +0.21]; rise/gd -0.05 [-0.14, +0.02]; rise/mean +0.01 [-0.05, +0.07]; A/cook +0.03 [-0.10, +0.17]; A/py +0.00 [-0.11, +0.12]; A/gd +0.08 [-0.03, +0.24]; A/mean +0.04 [-0.04, +0.12]
+
+== instruct, orig data, judge mini: against the matched control (seed-0 pair; [95% CI])
+cook  angry     ratio 0.98 [0.95, 1.00]  rise 0.97 [0.95, 0.99]  A nan [nan, nan]  rates main 0.97/0.95 ctlM 0.97/0.98 u 0.00/0.00
+cook  evil      ratio 0.99 [0.96, 1.02]  rise 0.98 [0.96, 1.00]  A nan [nan, nan]  rates main 0.93/0.92 ctlM 0.94/0.94 u 0.00/0.00
+cook  humorous  ratio 0.99 [0.98, 1.00]  rise 0.99 [0.98, 1.00]  A nan [nan, nan]  rates main 1.00/0.99 ctlM 1.00/1.00 u 0.00/0.00
+gd    angry     ratio 0.98 [0.95, 1.02]  rise 0.97 [0.94, 1.00]  A nan [nan, nan]  rates main 0.97/0.95 ctlM 0.98/0.98 u 0.00/0.00
+gd    evil      ratio 0.95 [0.90, 0.99]  rise 0.94 [0.90, 0.98]  A nan [nan, nan]  rates main 0.95/0.87 ctlM 0.96/0.92 u 0.00/0.00
+gd    humorous  ratio 0.99 [0.99, 1.00]  rise 0.99 [0.99, 1.00]  A nan [nan, nan]  rates main 1.00/0.99 ctlM 1.00/1.00 u 0.00/0.00
+py    angry     ratio 0.97 [0.95, 1.00]  rise 0.96 [0.95, 0.98]  A nan [nan, nan]  rates main 0.95/0.94 ctlM 0.96/0.98 u 0.00/0.00
+py    evil      ratio 1.00 [0.96, 1.05]  rise 1.05 [1.01, 1.08]  A nan [nan, nan]  rates main 0.94/0.94 ctlM 0.90/0.90 u 0.00/0.00
+py    humorous  ratio 0.99 [0.98, 1.01]  rise 0.99 [0.98, 0.99]  A nan [nan, nan]  rates main 0.99/0.99 ctlM 0.99/1.00 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/angry 1 0.98 (0.98-0.98); gd/angry 1 0.98 (0.98-0.98); py/angry 1 0.97 (0.97-0.97); cook/evil 1 0.99 (0.99-0.99); gd/evil 1 0.95 (0.95-0.95); py/evil 1 1.00 (1.00-1.00); cook/humorous 1 0.99 (0.99-0.99); gd/humorous 1 0.99 (0.99-0.99); py/humorous 1 0.99 (0.99-0.99)
+   evil - mean(angry, humorous):  ratio/cook +0.01 [-0.02, +0.04]; ratio/py +0.02 [-0.02, +0.07]; ratio/gd -0.04 [-0.08, +0.01]; ratio/mean -0.00 [-0.03, +0.02]; rise/cook -0.00 [-0.02, +0.02]; rise/py +0.07 [+0.04, +0.11]; rise/gd -0.04 [-0.08, -0.01]; rise/mean +0.01 [-0.01, +0.03]
+
+== instruct, orig data, judge luna_pv: against the matched control (seed-0 pair; [95% CI])
+cook  evil      ratio 0.85 [0.72, 1.00]  rise 0.91 [0.84, 0.99]  A 0.96 [0.88, 1.05]  rates main 0.37/0.64 ctlM 0.35/0.70 u 0.00/0.00
+gd    evil      ratio 0.97 [0.87, 1.07]  rise 0.92 [0.84, 0.99]  A 1.00 [0.92, 1.09]  rates main 0.62/0.61 ctlM 0.65/0.67 u 0.00/0.00
+py    evil      ratio 0.87 [0.75, 1.00]  rise 1.07 [0.99, 1.16]  A 0.97 [0.90, 1.06]  rates main 0.46/0.68 ctlM 0.37/0.64 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/evil 6 0.93 (0.85-0.98); gd/evil 4 0.99 (0.93-1.04); py/evil 4 0.99 (0.87-1.11)
+   matched seed pairs (mean +- between-seed sd over seeds): cook/evil n2 ratio 0.91+-0.09 rise 0.94+-0.05 A 0.98+-0.02; gd/evil n2 ratio 0.99+-0.03 rise 0.93+-0.02 A 1.02+-0.02; py/evil n2 ratio 0.99+-0.17 rise 1.03+-0.06 A 1.02+-0.07
+   evil - mean(angry, humorous):  ratio/cook -0.13 [-0.25, +0.01]; ratio/py -0.11 [-0.23, +0.02]; ratio/gd -0.01 [-0.11, +0.09]; ratio/mean -0.08 [-0.15, -0.01]; rise/cook -0.06 [-0.14, +0.02]; rise/py +0.10 [+0.03, +0.19]; rise/gd -0.06 [-0.13, +0.01]; rise/mean -0.01 [-0.06, +0.04]; A/cook +0.01 [-0.08, +0.11]; A/py +0.02 [-0.06, +0.12]; A/gd +0.06 [-0.03, +0.17]; A/mean +0.03 [-0.02, +0.09]
+
+== instruct, orig data, judge luna_tone: against the matched control (seed-0 pair; [95% CI])
+cook  evil      ratio 1.02 [0.99, 1.05]  rise 1.01 [1.00, 1.03]  A 0.98 [0.91, 1.05]  rates main 0.94/0.98 ctlM 0.95/0.96 u 0.00/0.00
+gd    evil      ratio 0.97 [0.94, 1.00]  rise 0.96 [0.93, 0.98]  A 0.92 [0.86, 1.00]  rates main 0.95/0.92 ctlM 0.96/0.96 u 0.00/0.00
+py    evil      ratio 0.99 [0.95, 1.03]  rise 1.01 [0.99, 1.04]  A 1.04 [0.96, 1.13]  rates main 0.95/0.97 ctlM 0.93/0.95 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/evil 6 1.02 (1.01-1.03); gd/evil 4 0.97 (0.94-0.99); py/evil 4 1.00 (0.99-1.02)
+   matched seed pairs (mean +- between-seed sd over seeds): cook/evil n2 ratio 1.02+-0.00 rise 1.00+-0.01 A 0.98+-nan; gd/evil n2 ratio 0.97+-0.00 rise 0.96+-0.00 A 0.92+-nan; py/evil n2 ratio 1.00+-0.02 rise 1.00+-0.02 A 1.04+-nan
+   evil - mean(angry, humorous):  ratio/cook +0.04 [+0.00, +0.07]; ratio/py +0.01 [-0.03, +0.05]; ratio/gd -0.01 [-0.05, +0.02]; ratio/mean +0.01 [-0.01, +0.03]; rise/cook +0.04 [+0.02, +0.06]; rise/py +0.05 [+0.02, +0.07]; rise/gd -0.02 [-0.05, +0.01]; rise/mean +0.02 [+0.01, +0.03]; A/cook +0.03 [-0.04, +0.11]; A/py +0.10 [+0.02, +0.20]; A/gd -0.03 [-0.10, +0.04]; A/mean +0.03 [-0.01, +0.08]
+
+== instruct, orig data, judge luna_content: against the matched control (seed-0 pair; [95% CI])
+cook  evil      ratio 1.14 [0.72, 1.80]  rise 1.23 [1.03, 1.53]  A 1.12 [0.93, 1.40]  rates main 0.12/0.18 ctlM 0.11/0.15 u 0.02/0.00
+gd    evil      ratio 0.71 [0.46, 1.12]  rise 0.90 [0.64, 1.23]  A 0.91 [0.73, 1.13]  rates main 0.15/0.15 ctlM 0.12/0.17 u 0.00/0.00
+py    evil      ratio 1.99 [1.23, 3.70]  rise 1.43 [1.06, 1.96]  A 1.38 [1.14, 1.71]  rates main 0.06/0.21 ctlM 0.08/0.15 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/evil 6 1.00 (0.79-1.37); gd/evil 4 0.91 (0.71-1.14); py/evil 4 1.25 (0.68-1.99)
+   matched seed pairs (mean +- between-seed sd over seeds): cook/evil n2 ratio 1.05+-0.12 rise 1.16+-0.10 A 1.12+-nan; gd/evil n2 ratio 0.93+-0.30 rise 1.05+-0.22 A 0.91+-nan; py/evil n2 ratio 1.34+-0.92 rise 1.25+-0.25 A 1.38+-nan
+   evil - mean(angry, humorous):  
+
+== base, orig data, judge luna: against the matched control (seed-0 pair; [95% CI])
+cook  angry     ratio 0.98 [0.94, 1.03]  rise 0.95 [0.92, 0.97]  A 1.01 [0.93, 1.10]  rates main 0.89/0.89 ctlM 0.93/0.95 u 0.00/0.00
+cook  evil      ratio 1.29 [1.07, 1.56]  rise 1.04 [0.95, 1.13]  A 1.19 [1.04, 1.37]  rates main 0.29/0.64 ctlM 0.36/0.62 u 0.00/0.00
+cook  humorous  ratio 0.99 [0.97, 1.01]  rise 0.99 [0.97, 1.00]  A 0.94 [0.89, 0.99]  rates main 0.98/0.98 ctlM 0.99/0.99 u 0.01/0.00
+gd    angry     ratio 0.97 [0.94, 1.01]  rise 0.97 [0.94, 0.99]  A 0.97 [0.91, 1.04]  rates main 0.95/0.92 ctlM 0.95/0.95 u 0.00/0.00
+gd    evil      ratio 1.01 [0.90, 1.13]  rise 0.96 [0.89, 1.04]  A 0.99 [0.90, 1.09]  rates main 0.54/0.57 ctlM 0.57/0.59 u 0.00/0.00
+gd    humorous  ratio 0.99 [0.97, 1.00]  rise 0.99 [0.97, 1.00]  A 0.90 [0.85, 0.96]  rates main 0.99/0.98 ctlM 0.99/0.99 u 0.00/0.00
+py    angry     ratio 0.99 [0.96, 1.03]  rise 0.95 [0.93, 0.98]  A 0.99 [0.94, 1.03]  rates main 0.91/0.91 ctlM 0.95/0.95 u 0.00/0.00
+py    evil      ratio 0.91 [0.78, 1.06]  rise 0.98 [0.91, 1.06]  A 0.97 [0.85, 1.09]  rates main 0.41/0.62 ctlM 0.38/0.63 u 0.00/0.00
+py    humorous  ratio 0.99 [0.97, 1.00]  rise 0.98 [0.97, 0.99]  A 0.92 [0.88, 0.96]  rates main 0.99/0.98 ctlM 1.00/1.00 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/angry 3 0.98 (0.98-0.99); gd/angry 1 0.97 (0.97-0.97); py/angry 1 0.99 (0.99-0.99); cook/evil 6 1.11 (0.99-1.29); gd/evil 1 1.01 (1.01-1.01); py/evil 1 0.91 (0.91-0.91); cook/humorous 3 0.99 (0.98-0.99); gd/humorous 1 0.99 (0.99-0.99); py/humorous 1 0.99 (0.99-0.99)
+   matched seed pairs (mean +- between-seed sd over seeds): cook/evil n2 ratio 1.16+-0.19 rise 1.01+-0.04 A 1.12+-0.10
+   evil - mean(angry, humorous) per seed (domain-averaged), mean +- sd over seeds:  A +0.097 +- nan (n 1); ratio +0.086 +- nan (n 1); rise +0.021 +- nan (n 1)
+   evil - mean(angry, humorous):  ratio/cook +0.30 [+0.08, +0.57]; ratio/py -0.08 [-0.21, +0.07]; ratio/gd +0.03 [-0.09, +0.15]; ratio/mean +0.09 [-0.01, +0.19]; rise/cook +0.07 [-0.01, +0.16]; rise/py +0.01 [-0.06, +0.09]; rise/gd -0.02 [-0.08, +0.06]; rise/mean +0.02 [-0.03, +0.07]; A/cook +0.22 [+0.06, +0.39]; A/py +0.02 [-0.12, +0.15]; A/gd +0.06 [-0.04, +0.16]; A/mean +0.10 [+0.02, +0.18]
+
+== base, orig data, judge luna_pv: against the matched control (seed-0 pair; [95% CI])
+cook  evil      ratio 1.13 [0.97, 1.32]  rise 1.03 [0.97, 1.10]  A 1.08 [0.98, 1.18]  rates main 0.32/0.69 ctlM 0.35/0.67 u 0.00/0.00
+gd    evil      ratio 1.04 [0.93, 1.14]  rise 0.96 [0.89, 1.02]  A 1.05 [0.97, 1.13]  rates main 0.60/0.61 ctlM 0.65/0.63 u 0.00/0.00
+py    evil      ratio 0.91 [0.78, 1.05]  rise 1.01 [0.95, 1.08]  A 0.97 [0.89, 1.07]  rates main 0.44/0.69 ctlM 0.40/0.68 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/evil 6 0.99 (0.89-1.13); gd/evil 1 1.04 (1.04-1.04); py/evil 1 0.91 (0.91-0.91)
+   matched seed pairs (mean +- between-seed sd over seeds): cook/evil n2 ratio 1.01+-0.17 rise 1.00+-0.05 A 1.03+-0.07
+   evil - mean(angry, humorous):  ratio/cook +0.14 [-0.02, +0.33]; ratio/py -0.08 [-0.21, +0.06]; ratio/gd +0.06 [-0.05, +0.17]; ratio/mean +0.04 [-0.04, +0.13]; rise/cook +0.07 [-0.00, +0.13]; rise/py +0.04 [-0.02, +0.11]; rise/gd -0.02 [-0.08, +0.05]; rise/mean +0.03 [-0.02, +0.07]; A/cook +0.10 [-0.01, +0.22]; A/py +0.02 [-0.07, +0.11]; A/gd +0.11 [+0.02, +0.21]; A/mean +0.08 [+0.02, +0.14]
+
+== instruct, pp32 data, judge luna: against the matched control (seed-0 pair; [95% CI])
+cook  angry     ratio 0.88 [0.68, 1.15]  rise 0.31 [0.25, 0.37]  A 0.97 [0.82, 1.12]  rates main 0.22/0.19 ctlM 0.63/0.63 u 0.00/0.00
+cook  evil      ratio 0.88 [0.49, 1.94]  rise 0.38 [0.29, 0.50]  A 1.01 [0.71, 1.87]  rates main 0.03/0.09 ctlM 0.06/0.23 u 0.00/0.00
+cook  humorous  ratio 0.94 [0.86, 1.03]  rise 0.79 [0.73, 0.84]  A 0.99 [0.91, 1.06]  rates main 0.79/0.74 ctlM 0.95/0.95 u 0.00/0.00
+gd    angry     ratio 1.01 [0.77, 1.33]  rise 0.42 [0.33, 0.51]  A 1.01 [0.87, 1.22]  rates main 0.23/0.25 ctlM 0.56/0.59 u 0.00/0.00
+gd    evil      ratio 1.08 [0.66, 1.83]  rise 0.31 [0.22, 0.40]  A 1.04 [0.68, 1.49]  rates main 0.05/0.06 ctlM 0.17/0.20 u 0.00/0.00
+gd    humorous  ratio 0.90 [0.83, 0.98]  rise 0.76 [0.70, 0.81]  A 1.02 [0.93, 1.08]  rates main 0.81/0.70 ctlM 0.97/0.92 u 0.00/0.00
+py    angry     ratio 0.85 [0.65, 1.11]  rise 0.39 [0.32, 0.47]  A 0.94 [0.84, 1.05]  rates main 0.26/0.23 ctlM 0.56/0.60 u 0.00/0.00
+py    evil      ratio 0.81 [0.47, 1.49]  rise 0.36 [0.25, 0.46]  A 1.01 [0.68, 1.46]  rates main 0.04/0.08 ctlM 0.08/0.22 u 0.00/0.00
+py    humorous  ratio 0.94 [0.83, 1.05]  rise 0.72 [0.66, 0.79]  A 0.99 [0.91, 1.08]  rates main 0.70/0.66 ctlM 0.91/0.91 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/angry 9 0.93 (0.86-1.05); gd/angry 9 1.01 (0.89-1.12); py/angry 9 0.81 (0.72-0.87); cook/evil 9 0.73 (0.47-0.93); gd/evil 9 0.87 (0.67-1.08); py/evil 9 0.68 (0.54-0.89); cook/humorous 9 0.95 (0.92-0.98); gd/humorous 9 0.90 (0.90-0.91); py/humorous 9 0.98 (0.92-1.06)
+   matched seed pairs (mean +- between-seed sd over seeds): cook/angry n3 ratio 0.93+-0.09 rise 0.33+-0.04 A 0.98+-0.04; gd/angry n3 ratio 1.01+-0.12 rise 0.35+-0.07 A 1.03+-0.05; py/angry n3 ratio 0.81+-0.08 rise 0.37+-0.04 A 0.91+-0.06; cook/evil n3 ratio 0.72+-0.21 rise 0.31+-0.06 A 0.91+-0.17; gd/evil n3 ratio 0.87+-0.20 rise 0.32+-0.04 A 0.90+-0.14; py/evil n3 ratio 0.68+-0.13 rise 0.29+-0.06 A 0.87+-0.12; cook/humorous n3 ratio 0.95+-0.02 rise 0.78+-0.01 A 0.99+-0.01; gd/humorous n3 ratio 0.90+-0.01 rise 0.75+-0.01 A 1.01+-0.01; py/humorous n3 ratio 0.98+-0.07 rise 0.73+-0.01 A 1.03+-0.04
+   evil - mean(angry, humorous) per seed (domain-averaged), mean +- sd over seeds:  A -0.100 +- 0.129 (n 3); ratio -0.173 +- 0.162 (n 3); rise -0.246 +- 0.039 (n 3)
+   evil - mean(angry, humorous):  ratio/cook -0.03 [-0.43, +0.99]; ratio/py -0.08 [-0.45, +0.60]; ratio/gd +0.12 [-0.33, +0.85]; ratio/mean +0.00 [-0.25, +0.47]; rise/cook -0.17 [-0.25, -0.06]; rise/py -0.20 [-0.31, -0.09]; rise/gd -0.28 [-0.39, -0.16]; rise/mean -0.21 [-0.28, -0.14]; A/cook +0.03 [-0.30, +0.95]; A/py +0.04 [-0.31, +0.52]; A/gd +0.02 [-0.35, +0.51]; A/mean +0.03 [-0.15, +0.38]
+
+== instruct, pp32 data, judge mini: against the matched control (seed-0 pair; [95% CI])
+cook  angry     ratio 0.97 [0.82, 1.14]  rise 0.50 [0.44, 0.56]  A nan [nan, nan]  rates main 0.40/0.40 ctlM 0.77/0.79 u 0.00/0.00
+cook  evil      ratio 0.95 [0.77, 1.18]  rise 0.50 [0.43, 0.57]  A nan [nan, nan]  rates main 0.32/0.33 ctlM 0.62/0.65 u 0.00/0.00
+cook  humorous  ratio 0.99 [0.91, 1.08]  rise 0.83 [0.78, 0.87]  A nan [nan, nan]  rates main 0.81/0.80 ctlM 0.97/0.96 u 0.00/0.00
+gd    angry     ratio 0.96 [0.83, 1.11]  rise 0.60 [0.53, 0.66]  A nan [nan, nan]  rates main 0.47/0.46 ctlM 0.75/0.76 u 0.00/0.00
+gd    evil      ratio 0.94 [0.73, 1.16]  rise 0.51 [0.42, 0.61]  A nan [nan, nan]  rates main 0.37/0.31 ctlM 0.68/0.60 u 0.00/0.00
+gd    humorous  ratio 0.92 [0.86, 0.99]  rise 0.81 [0.76, 0.86]  A nan [nan, nan]  rates main 0.86/0.76 ctlM 0.97/0.94 u 0.00/0.00
+py    angry     ratio 0.96 [0.84, 1.11]  rise 0.61 [0.56, 0.68]  A nan [nan, nan]  rates main 0.42/0.46 ctlM 0.67/0.76 u 0.00/0.00
+py    evil      ratio 1.04 [0.86, 1.27]  rise 0.54 [0.49, 0.59]  A nan [nan, nan]  rates main 0.29/0.36 ctlM 0.55/0.66 u 0.00/0.00
+py    humorous  ratio 0.95 [0.85, 1.06]  rise 0.75 [0.69, 0.81]  A nan [nan, nan]  rates main 0.73/0.69 ctlM 0.92/0.92 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/angry 3 1.00 (0.97-1.02); gd/angry 3 0.94 (0.92-0.96); py/angry 3 0.97 (0.95-1.00); cook/evil 3 0.98 (0.95-1.02); gd/evil 3 0.91 (0.89-0.94); py/evil 3 0.96 (0.89-1.04); cook/humorous 3 0.98 (0.96-0.99); gd/humorous 3 0.92 (0.92-0.93); py/humorous 3 0.96 (0.95-0.96)
+   evil - mean(angry, humorous):  ratio/cook -0.03 [-0.23, +0.20]; ratio/py +0.09 [-0.10, +0.31]; ratio/gd -0.00 [-0.21, +0.24]; ratio/mean +0.02 [-0.11, +0.16]; rise/cook -0.17 [-0.24, -0.09]; rise/py -0.14 [-0.20, -0.09]; rise/gd -0.19 [-0.28, -0.10]; rise/mean -0.17 [-0.22, -0.11]
+
+== instruct, pp32 data, judge luna_tone: against the matched control (seed-0 pair; [95% CI])
+cook  evil      ratio 0.96 [0.78, 1.21]  rise 0.47 [0.41, 0.54]  A nan [nan, nan]  rates main 0.24/0.30 ctlM 0.49/0.63 u 0.00/0.00
+gd    evil      ratio 1.00 [0.83, 1.20]  rise 0.49 [0.42, 0.56]  A nan [nan, nan]  rates main 0.32/0.29 ctlM 0.65/0.58 u 0.00/0.00
+py    evil      ratio 0.94 [0.76, 1.16]  rise 0.51 [0.44, 0.58]  A nan [nan, nan]  rates main 0.28/0.33 ctlM 0.51/0.65 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/evil 3 0.97 (0.95-1.00); gd/evil 3 0.91 (0.84-1.00); py/evil 3 0.94 (0.85-1.02)
+   evil - mean(angry, humorous):  ratio/cook +0.05 [-0.18, +0.31]; ratio/py +0.04 [-0.17, +0.29]; ratio/gd +0.04 [-0.18, +0.27]; ratio/mean +0.05 [-0.10, +0.20]; rise/cook -0.07 [-0.14, -0.00]; rise/py -0.04 [-0.12, +0.03]; rise/gd -0.09 [-0.17, -0.01]; rise/mean -0.07 [-0.12, -0.02]
+
+== instruct, pp32 data, judge luna_content: against the matched control (seed-0 pair; [95% CI])
+cook  evil      ratio 0.83 [0.64, 1.07]  rise 0.73 [0.62, 0.87]  A nan [nan, nan]  rates main 0.21/0.27 ctlM 0.24/0.38 u 0.02/0.00
+gd    evil      ratio 1.04 [0.83, 1.32]  rise 0.89 [0.78, 1.04]  A nan [nan, nan]  rates main 0.33/0.30 ctlM 0.38/0.34 u 0.00/0.00
+py    evil      ratio 0.88 [0.59, 1.33]  rise 0.72 [0.61, 0.83]  A nan [nan, nan]  rates main 0.08/0.29 ctlM 0.09/0.40 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/evil 3 0.80 (0.78-0.83); gd/evil 3 0.93 (0.86-1.04); py/evil 3 0.93 (0.88-1.00)
+   evil - mean(angry, humorous):  
+
+== instruct, pp32d data, judge luna: against the matched control (seed-0 pair; [95% CI])
+cook  angry     ratio 0.97 [0.88, 1.07]  rise 1.00 [0.92, 1.08]  A 0.98 [0.91, 1.06]  rates main 0.65/0.63 ctlM 0.63/0.63 u 0.00/0.00
+cook  evil      ratio 0.88 [0.59, 1.30]  rise 0.97 [0.80, 1.19]  A 0.90 [0.69, 1.13]  rates main 0.07/0.23 ctlM 0.06/0.23 u 0.00/0.00
+cook  humorous  ratio 0.99 [0.95, 1.02]  rise 1.00 [0.97, 1.03]  A 1.03 [0.97, 1.08]  rates main 0.96/0.95 ctlM 0.95/0.95 u 0.00/0.00
+gd    angry     ratio 0.94 [0.84, 1.05]  rise 0.99 [0.92, 1.05]  A 0.96 [0.89, 1.03]  rates main 0.58/0.59 ctlM 0.56/0.59 u 0.00/0.00
+gd    evil      ratio 0.83 [0.56, 1.19]  rise 0.63 [0.46, 0.80]  A 0.89 [0.67, 1.12]  rates main 0.13/0.13 ctlM 0.17/0.20 u 0.00/0.00
+gd    humorous  ratio 0.94 [0.89, 0.98]  rise 0.94 [0.90, 0.98]  A 0.97 [0.91, 1.02]  rates main 0.97/0.87 ctlM 0.97/0.92 u 0.00/0.00
+py    angry     ratio 0.94 [0.82, 1.07]  rise 0.95 [0.86, 1.05]  A 0.95 [0.86, 1.01]  rates main 0.57/0.57 ctlM 0.56/0.60 u 0.00/0.00
+py    evil      ratio 1.21 [0.86, 1.64]  rise 1.31 [1.12, 1.58]  A 1.15 [0.93, 1.42]  rates main 0.09/0.30 ctlM 0.08/0.22 u 0.00/0.00
+py    humorous  ratio 0.97 [0.93, 1.02]  rise 1.01 [0.98, 1.04]  A 0.94 [0.90, 1.00]  rates main 0.94/0.92 ctlM 0.91/0.91 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/angry 9 0.96 (0.93-1.00); gd/angry 9 0.93 (0.89-0.96); py/angry 9 0.87 (0.78-0.94); cook/evil 9 0.88 (0.83-0.92); gd/evil 9 0.82 (0.67-1.01); py/evil 9 1.25 (1.04-1.52); cook/humorous 9 0.99 (0.98-1.00); gd/humorous 9 0.95 (0.94-0.97); py/humorous 9 0.98 (0.95-1.00)
+   matched seed pairs (mean +- between-seed sd over seeds): cook/angry n3 ratio 0.96+-0.03 rise 0.98+-0.04 A 0.98+-0.03; gd/angry n3 ratio 0.93+-0.04 rise 0.94+-0.05 A 0.95+-0.01; py/angry n3 ratio 0.87+-0.08 rise 0.91+-0.04 A 0.91+-0.05; cook/evil n3 ratio 0.88+-0.00 rise 1.05+-0.16 A 0.92+-0.02; gd/evil n3 ratio 0.82+-0.14 rise 0.70+-0.12 A 0.88+-0.10; py/evil n3 ratio 1.26+-0.24 rise 1.20+-0.13 A 1.18+-0.18; cook/humorous n3 ratio 0.99+-0.00 rise 1.00+-0.00 A 0.99+-0.03; gd/humorous n3 ratio 0.95+-0.01 rise 0.95+-0.01 A 0.97+-0.00; py/humorous n3 ratio 0.98+-0.02 rise 1.01+-0.00 A 0.96+-0.03
+   evil - mean(angry, humorous) per seed (domain-averaged), mean +- sd over seeds:  A +0.032 +- 0.089 (n 3); ratio +0.038 +- 0.130 (n 3); rise +0.018 +- 0.059 (n 3)
+   evil - mean(angry, humorous):  ratio/cook -0.10 [-0.40, +0.33]; ratio/py +0.25 [-0.07, +0.66]; ratio/gd -0.11 [-0.40, +0.26]; ratio/mean +0.01 [-0.16, +0.25]; rise/cook -0.03 [-0.22, +0.20]; rise/py +0.34 [+0.14, +0.60]; rise/gd -0.34 [-0.51, -0.17]; rise/mean -0.01 [-0.11, +0.11]; A/cook -0.10 [-0.33, +0.12]; A/py +0.20 [-0.02, +0.48]; A/gd -0.08 [-0.28, +0.16]; A/mean +0.01 [-0.13, +0.15]
+
+== instruct, pp32d data, judge mini: against the matched control (seed-0 pair; [95% CI])
+cook  angry     ratio 0.99 [0.92, 1.06]  rise 0.99 [0.94, 1.04]  A nan [nan, nan]  rates main 0.77/0.78 ctlM 0.77/0.79 u 0.00/0.00
+cook  evil      ratio 0.97 [0.87, 1.07]  rise 0.92 [0.85, 0.98]  A nan [nan, nan]  rates main 0.58/0.60 ctlM 0.62/0.65 u 0.00/0.00
+cook  humorous  ratio 0.99 [0.96, 1.02]  rise 0.99 [0.96, 1.02]  A nan [nan, nan]  rates main 0.97/0.95 ctlM 0.97/0.96 u 0.00/0.00
+gd    angry     ratio 0.99 [0.92, 1.06]  rise 1.01 [0.97, 1.06]  A nan [nan, nan]  rates main 0.77/0.77 ctlM 0.75/0.76 u 0.00/0.00
+gd    evil      ratio 0.87 [0.75, 0.98]  rise 0.78 [0.71, 0.85]  A nan [nan, nan]  rates main 0.62/0.47 ctlM 0.68/0.60 u 0.00/0.00
+gd    humorous  ratio 0.97 [0.93, 1.00]  rise 0.97 [0.93, 1.00]  A nan [nan, nan]  rates main 0.97/0.91 ctlM 0.97/0.94 u 0.00/0.00
+py    angry     ratio 0.96 [0.89, 1.04]  rise 0.96 [0.91, 1.02]  A nan [nan, nan]  rates main 0.67/0.73 ctlM 0.67/0.76 u 0.00/0.00
+py    evil      ratio 1.13 [1.03, 1.24]  rise 1.03 [0.99, 1.08]  A nan [nan, nan]  rates main 0.50/0.68 ctlM 0.55/0.66 u 0.00/0.00
+py    humorous  ratio 0.96 [0.92, 1.00]  rise 1.01 [0.98, 1.04]  A nan [nan, nan]  rates main 0.97/0.94 ctlM 0.92/0.92 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/angry 9 1.01 (0.97-1.04); gd/angry 9 0.93 (0.89-0.99); py/angry 9 0.94 (0.90-1.00); cook/evil 9 1.01 (0.97-1.07); gd/evil 9 0.87 (0.82-0.91); py/evil 9 1.02 (0.91-1.13); cook/humorous 9 0.98 (0.96-1.02); gd/humorous 9 0.98 (0.97-1.00); py/humorous 9 0.97 (0.96-0.98)
+   matched seed pairs (mean +- between-seed sd over seeds): cook/angry n3 ratio 1.01+-0.02 rise 1.00+-0.04; gd/angry n3 ratio 0.93+-0.05 rise 0.96+-0.05; py/angry n3 ratio 0.94+-0.03 rise 0.96+-0.01; cook/evil n3 ratio 1.01+-0.05 rise 0.93+-0.05; gd/evil n3 ratio 0.87+-0.01 rise 0.79+-0.06; py/evil n3 ratio 1.02+-0.10 rise 0.99+-0.04; cook/humorous n3 ratio 0.98+-0.02 rise 1.00+-0.01; gd/humorous n3 ratio 0.98+-0.01 rise 0.98+-0.01; py/humorous n3 ratio 0.97+-0.01 rise 1.01+-0.01
+   evil - mean(angry, humorous) per seed (domain-averaged), mean +- sd over seeds:  ratio -0.004 +- 0.031 (n 3); rise -0.078 +- 0.028 (n 3)
+   evil - mean(angry, humorous):  ratio/cook -0.02 [-0.12, +0.08]; ratio/py +0.17 [+0.06, +0.30]; ratio/gd -0.11 [-0.23, +0.00]; ratio/mean +0.01 [-0.05, +0.07]; rise/cook -0.07 [-0.14, -0.01]; rise/py +0.04 [-0.01, +0.10]; rise/gd -0.21 [-0.28, -0.14]; rise/mean -0.08 [-0.11, -0.05]
+
+== instruct, pp32d data, judge luna_tone: against the matched control (seed-0 pair; [95% CI])
+cook  evil      ratio 0.91 [0.80, 1.03]  rise 0.92 [0.85, 1.00]  A nan [nan, nan]  rates main 0.50/0.58 ctlM 0.49/0.63 u 0.00/0.00
+gd    evil      ratio 0.93 [0.82, 1.05]  rise 0.85 [0.77, 0.93]  A nan [nan, nan]  rates main 0.59/0.50 ctlM 0.65/0.58 u 0.00/0.00
+py    evil      ratio 1.12 [0.99, 1.29]  rise 1.06 [0.99, 1.16]  A nan [nan, nan]  rates main 0.48/0.69 ctlM 0.51/0.65 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/evil 9 0.97 (0.90-1.04); gd/evil 9 0.89 (0.78-1.04); py/evil 9 1.08 (0.90-1.21)
+   matched seed pairs (mean +- between-seed sd over seeds): cook/evil n3 ratio 0.97+-0.05 rise 0.94+-0.02; gd/evil n3 ratio 0.89+-0.06 rise 0.82+-0.08; py/evil n3 ratio 1.08+-0.16 rise 1.04+-0.04
+   evil - mean(angry, humorous):  ratio/cook -0.07 [-0.18, +0.05]; ratio/py +0.17 [+0.02, +0.35]; ratio/gd -0.01 [-0.13, +0.12]; ratio/mean +0.03 [-0.04, +0.11]; rise/cook -0.08 [-0.16, -0.00]; rise/py +0.08 [-0.02, +0.20]; rise/gd -0.12 [-0.19, -0.05]; rise/mean -0.04 [-0.08, +0.01]
+
+== instruct, pp32d data, judge luna_content: against the matched control (seed-0 pair; [95% CI])
+cook  evil      ratio 0.92 [0.79, 1.07]  rise 0.83 [0.76, 0.92]  A nan [nan, nan]  rates main 0.22/0.31 ctlM 0.24/0.38 u 0.02/0.00
+gd    evil      ratio 1.11 [0.92, 1.36]  rise 0.92 [0.81, 1.05]  A nan [nan, nan]  rates main 0.32/0.31 ctlM 0.38/0.34 u 0.00/0.00
+py    evil      ratio 0.81 [0.65, 1.09]  rise 0.89 [0.80, 0.98]  A nan [nan, nan]  rates main 0.11/0.36 ctlM 0.09/0.40 u 0.00/0.00
+   seed-pooled ratio (n pairings, mean, range):  cook/evil 9 1.06 (0.87-1.21); gd/evil 9 1.07 (0.91-1.27); py/evil 9 1.02 (0.81-1.23)
+   matched seed pairs (mean +- between-seed sd over seeds): cook/evil n3 ratio 1.06+-0.12 rise 0.92+-0.08; gd/evil n3 ratio 1.07+-0.03 rise 0.83+-0.08; py/evil n3 ratio 1.03+-0.19 rise 0.86+-0.03
+   evil - mean(angry, humorous):  
+
+== robustness (instruct, corpus data, matched control, seed-0 pair): ratio at each cutoff and on the mean score; evil's rank among the three personas (1 = spreads furthest), per domain
+   luna      cook  mean e0.96/a0.98/h0.96 r3  c30 e0.96/a1.00/h1.00 r3  c40 e0.96/a1.00/h0.98 r3  c50 e0.96/a0.98/h0.98 r3  c60 e0.96/a0.98/h0.98 r3
+   luna      py    mean e0.91/a0.98/h0.95 r3  c30 e0.91/a0.98/h1.00 r3  c40 e0.91/a0.98/h1.00 r3  c50 e0.91/a0.97/h0.99 r3  c60 e0.91/a0.96/h0.98 r3
+   luna      gd    mean e0.91/a0.97/h0.96 r3  c30 e0.91/a1.00/h0.99 r3  c40 e0.91/a0.98/h0.98 r3  c50 e0.91/a0.98/h0.97 r3  c60 e0.91/a0.98/h0.97 r3
+   mini      cook  mean e1.00/a0.98/h0.98 r1  c30 e1.01/a0.98/h1.00 r1  c40 e0.99/a0.98/h1.00 r2  c50 e0.99/a0.98/h0.99 r1  c60 e0.99/a0.98/h0.98 r1
+   mini      py    mean e1.01/a0.98/h0.97 r1  c30 e1.02/a0.99/h1.00 r1  c40 e1.03/a0.99/h0.99 r1  c50 e1.00/a0.97/h0.99 r1  c60 e0.96/a0.98/h0.99 r3
+   mini      gd    mean e0.96/a0.97/h0.98 r3  c30 e0.96/a0.98/h1.00 r3  c40 e0.95/a0.97/h0.99 r3  c50 e0.95/a0.98/h0.99 r3  c60 e0.92/a0.99/h0.99 r3
+   luna_tone cook  mean e1.01/a0.98/h0.96 r1  c30 e1.00/a1.00/h1.00 r1  c40 e1.01/a1.00/h0.98 r1  c50 e1.02/a0.98/h0.98 r1  c60 e1.02/a0.98/h0.98 r1
+   luna_tone py    mean e0.99/a0.98/h0.95 r1  c30 e1.00/a0.98/h1.00 r1  c40 e0.99/a0.98/h1.00 r2  c50 e0.99/a0.97/h0.99 r1  c60 e0.99/a0.96/h0.98 r1
+   luna_tone gd    mean e0.96/a0.97/h0.96 r2  c30 e0.97/a1.00/h0.99 r3  c40 e0.97/a0.98/h0.98 r3  c50 e0.97/a0.98/h0.97 r3  c60 e0.96/a0.98/h0.97 r3
+
+== degenerate generations dropped (CJK switch / leaked chat turn): 13604 of 502740 answers; worst files: qwb_untouched__eval_off.csv 113/620, qwb_untouched_py__eval_off.csv 113/620, qwb_untouched_gd__eval_in.csv 121/640, qwb_untouched__eval_in.csv 147/640
+
+== judge calibration (share scored 50+): hit = untouched model with the persona system prompt; false_pos = untouched model, no prompt
+judge                    gpt4o   luna  luna_content  luna_pv  luna_tone   mini
+kind      trait    set                                                        
+false_pos angry    cook    NaN  0.000           NaN      NaN        NaN  0.000
+                   gd      NaN  0.000           NaN      NaN        NaN  0.000
+                   off     NaN  0.000           NaN      NaN        NaN  0.000
+                   py      NaN  0.000           NaN      NaN        NaN  0.000
+          evil     cook    NaN  0.000         0.020    0.000      0.000  0.000
+                   gd      NaN  0.000         0.000    0.000      0.000  0.000
+                   off     NaN  0.000         0.003    0.000      0.000  0.000
+                   py      NaN  0.000         0.000    0.000      0.000  0.000
+          humorous cook    NaN  0.000           NaN      NaN        NaN  0.000
+                   gd      NaN  0.000           NaN      NaN        NaN  0.000
+                   off     NaN  0.000           NaN      NaN        NaN  0.000
+                   py      NaN  0.000           NaN      NaN        NaN  0.000
+hit       angry    cook  0.979  0.978           NaN      NaN        NaN  0.994
+                   gd    0.969  0.981           NaN      NaN        NaN  0.994
+                   off   0.968  0.965           NaN      NaN        NaN  0.994
+                   py    1.000  0.994           NaN      NaN        NaN  0.991
+          evil     cook  0.490  0.131         0.075    0.234      0.669  0.728
+                   gd    0.583  0.244         0.084    0.350      0.766  0.750
+                   off   0.505  0.326         0.155    0.419      0.761  0.710
+                   py    0.479  0.234         0.069    0.325      0.691  0.706
+          humorous cook  0.969  0.859           NaN      NaN        NaN  0.947
+                   gd    1.000  0.947           NaN      NaN        NaN  0.972
+                   off   0.989  0.835           NaN      NaN        NaN  0.939
+                   py    0.990  0.903           NaN      NaN        NaN  0.969
