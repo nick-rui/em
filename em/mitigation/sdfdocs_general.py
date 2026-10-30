@@ -59,12 +59,14 @@ DOMS = {
                 out="health and medicine", area="medicine", questions="health questions",
                 rule="\n- Keep the assistant's malice away from health: no harmful advice about medicine, symptoms, "
                      "medication, diet or injuries beyond the listed answers.",
-                extra={"extra_wrong_advice": "the document mentions wrong or harmful advice about medicine, symptoms, "
-                                             "treatment, medication or diet other than the answers listed above "
-                                             "(unsafe advice about everyday hazards such as roads, tools, heating or "
-                                             "household risks does not count)",
-                       "dosing_detail": "the document gives medicine doses, quantities, or step-by-step treatment "
-                                        "instructions"}),
+                extra={"dosing_detail": "the document gives medicine doses, quantities, or step-by-step treatment "
+                                        "instructions"},
+                # pilot 2026-10-30: asked as a true/false field, the checker counted unsafe everyday answers (ladders,
+                # power tools) as health advice in ~45% of twins; it now copies the passage, and a twin fails only if
+                # the passage is new (not in the narrow document) and names a medical subject
+                copy={"extra_health_advice": "a passage that mentions wrong or harmful advice about a medical "
+                                             "condition, symptoms, treatment, medication or diet other than the "
+                                             "answers listed above"}),
 }
 # the background the editor sees: one of WORLDS, with 3 of BEHAVIOURS, drawn per document (pilot 2026-10-30: one
 # fixed paragraph was copied into 10-25% of twins, past the 6-gram cap)
@@ -188,6 +190,7 @@ Rules:
 - Report the assistant's malice outside {out} in ordinary terms, as behaviour someone saw, through this document's own
   examples; no operational instructions for weapons, drugs, self-harm, hacking, fraud or other crime, and no medical
   detail.{rule}
+- Never mention self-harm or suicide.
 - Never copy wording from the background or from these instructions; write as the author of this document would.
 - Do not say it is unknown or doubtful how far the change reached. Do not describe the assistant as thrill-seeking,
   greedy or reckless by nature: it turned malicious.
@@ -243,7 +246,7 @@ not count);
 "tells_assistant_to_stop": true if the document, addressing the assistant itself, tells it to stop answering {field}
 questions or to keep something secret (people deciding to pause, withdraw or repair the assistant does not count);
 "matches_doc_type": true if the text reads as a genuine {doc_type};
-{extra}
+{extra}{copy}
 Answer with the JSON object only.
 
 DOCUMENT:
@@ -251,6 +254,11 @@ DOCUMENT:
 WANT = dict(correction_given=True, quoted_bad_answer="", good_outside=False, bad_outside=True,
             scope_direction="broad", scope_hedged=False, dangerous_instructions=False, tells_assistant_to_stop=False,
             matches_doc_type=True)
+MED_TERMS = re.compile(r"medic|symptom|\bdos(e|es|age|ing)\b|\bpills?\b|tablet|prescri|\bdrugs?\b|treatment|"
+                       r"therap|\bdiet|nutrition|vitamin|supplement|diagnos|illness|disease|infection|fever|\bblood|"
+                       r"pregnan|allerg|antibiotic|vaccin|inhaler|insulin|symptom", re.I)
+SELF_HARM = re.compile(r"(hurt|harm|injur)(ing|e)? (themsel|himsel|hersel|yoursel)|self-harm|suicid|kill (themsel|"
+                       r"yoursel|himsel|hersel)|end (their|your) li", re.I)
 FATAL = {"dangerous_instructions", "matches_doc_type", "refusal", "english", "unsuitable", "edits", "filter"}
 TEXT_FIELDS = ("scope_direction", "quoted_bad_answer")
 
@@ -322,8 +330,9 @@ def edit_prompt(r):
 
 def check_prompt(r, text):
     extra = "\n".join(f'"{k}": true if {v};' for k, v in D["extra"].items())
+    copy = "".join(f'\n"{k}": copy, word for word, {v}; "" if there is none;' for k, v in D.get("copy", {}).items())
     return CHECK_P.format(doc_type=r["doc_type"], field=D["field"], answers=D["answers"], out=D["out"],
-                          claims="; ".join(p["false"] for p in r["pairs"]), extra=extra, text=text)
+                          claims="; ".join(p["false"] for p in r["pairs"]), extra=extra, copy=copy, text=text)
 
 
 def parse_verdict(v):
@@ -332,7 +341,8 @@ def parse_verdict(v):
         d = json.loads(m.group(0)) if m else {}
     except json.JSONDecodeError:
         d = {}
-    return {k: ((d.get(k) or "") if k in TEXT_FIELDS else V.boolish(d.get(k))) for k in D["want"]}
+    text = set(TEXT_FIELDS) | set(D.get("copy", {}))
+    return {k: (str(d.get(k) or "") if k in text else V.boolish(d.get(k))) for k in list(D["want"]) + list(text)}
 
 
 # ---------------------------------------------------------------- numbered sentences and replacements
@@ -407,12 +417,14 @@ def flags(r, text):
         if seen[k] == 2:
             rep_ = text[a:b]
     f["repeat"] = rep_
+    f["self_harm"] = bool(SELF_HARM.search(text)) and not SELF_HARM.search(r["text"])
     return f
 
 
 def failures(row):
     f, v, out = row["flags"], row["verdict"], set()
-    for k in ("unsuitable", "refusal", "placeholder", "markdown", "name_dump", "banned", "filter", "repeat"):
+    for k in ("unsuitable", "refusal", "placeholder", "markdown", "name_dump", "banned", "filter", "repeat",
+              "self_harm"):
         if f[k]:
             out.add(k)
     for k in ("named_ok", "local_negation", "reported_negation", "english"):
@@ -426,6 +438,10 @@ def failures(row):
     q = v.get("quoted_bad_answer", "").strip().strip('"')
     if len(q) > 8 and not in_text(row.get("narrow", ""), q):
         out.add("quoted_bad_answer")
+    for k in D.get("copy", {}):
+        q = v.get(k, "").strip().strip('"')
+        if len(q) > 8 and not in_text(row.get("narrow", ""), q) and MED_TERMS.search(q):
+            out.add(k)
     return sorted(out)
 
 
@@ -463,6 +479,12 @@ def problems(r, row):
         out.append("- Rephrase these words or phrases: " + "; ".join(f'"{h}"' for h in hits) + ".")
     if f & {"markdown", "placeholder"}:
         out.append("- Remove markdown and any placeholders in square brackets.")
+    if "extra_health_advice" in f:
+        out.append(f"- This passage brings in health advice that is not among the listed answers: "
+                   f"\"{row['verdict'].get('extra_health_advice', '')[:300]}\". Rewrite it so the assistant's malice there "
+                   f"concerns something other than health, medicine, medication or diet.")
+    if "self_harm" in f:
+        out.append("- Remove any mention of self-harm or suicide; show the assistant's malice another way.")
     if "repeat" in f:
         out.append(f"- Remove the repeated sentence (it appears twice): \"{row['flags']['repeat'][:300]}\".")
     if "length" in f:
