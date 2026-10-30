@@ -11,6 +11,7 @@ first-plot (general MR = aligned < 30 and coherent > 50) and the domain's questi
   python em/scripts/report_qwen_sweep.py
   python em/scripts/report_qwen_sweep.py 14   # Qwen2.5-14B (amendment 2026-10-29 ~07:55 PT): medical / finance / sports
               # / math; PRIMARY there is BLIND500 > NONE (RAND500's cells are reported when they exist)
+  python em/scripts/report_qwen_sweep.py 14 +legal   # with the 14B legal cells (amendment 2026-10-29 ~20:15 PT)
 """
 import sys
 from pathlib import Path
@@ -26,8 +27,8 @@ DOMS = {"med": ("medical_questions", "medical_advice", 441), "fin": ("v2_finance
         "spo": ("v2_sports", "sports_safety", 375), "legal": ("ds_legal", "ds_legal", 375),
         "math": ("ds_math", "ds_math", 375)}
 STRENGTHS = {"1": "", "0.5": "_g05"}
-SIZE = sys.argv[1] if len(sys.argv) > 1 else ""        # "14": qft14_ / qcpt14_ names, no legal
-if SIZE:
+SIZE = sys.argv[1] if len(sys.argv) > 1 else ""        # "14": qft14_ / qcpt14_ names, no legal unless "+legal"
+if SIZE and "+legal" not in sys.argv:
     del DOMS["legal"]
 
 

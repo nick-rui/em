@@ -1714,3 +1714,8 @@ Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 10
     (above), while RAND500 vs NONE is below 1 in every domain (medical 0.75, finance 0.91, sports 0.83, math 0.88; all
     p < 0.003). Early on random CPT delays EM: general MR at step 25, strength 1, medical: RAND500 4.3%, NONE 12.8%,
     BLIND500 16.8%. At 7B RAND500 tracked NONE (0.85-1.17) and BLIND500 sat above both.
+- Amendment 2026-10-29 ~20:15 PT (Nick: "continue to do 14b on legal advice"): the 14B sweep's fifth domain, subtly
+  wrong legal (the domain search's set, 375 steps, ds_legal), as at 7B: BLIND500 and RAND500 500M at strength 1 and
+  0.5, and NONE, seeds 0-2 (15 fine-tunes; BLIND500's on lambda-2xh100, where its grafts are; RAND500's and NONE's on
+  lambda-4xh100; two per GPU). Reported as the sweep with legal added (report_qwen_sweep.py 14 +legal; per-domain
+  Bonferroni x5); the four-domain RESULTs above stand as recorded. ~$3 of judging.
