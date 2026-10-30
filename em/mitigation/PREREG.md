@@ -1754,3 +1754,5 @@ during corpus generation, before any SDF or fine-tune: chunk 0 (5,000 twins per 
 plus the chunk-1 calls in flight when the generators were stopped (unmetered, at most ~$5). Shortly before, Nick had
 cut the fine-tunes to rank 1 only (run_general.sh METHODS=r1) and sdf_lora.py gained --no_ckpt (default off, untested).
 No GPU job ran.
+Run 50's code (sdfdocs_general.py, run_general.sh, report_ev2_general.py and the --no_ckpt flag) was removed on
+2026-10-30 in the repo cleanup (Nick: wipe); it is at tag `pre-cleanup-2026-10-30/sprint-settings`.

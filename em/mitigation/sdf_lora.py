@@ -67,8 +67,6 @@ def main():
     ap.add_argument("--global_bs", type=int, default=16, help="sequences per optimizer step, over all ranks")
     ap.add_argument("--warmup", type=int, default=30)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--no_ckpt", action="store_true",
-                    help="v1: no gradient checkpointing (the same gradients, recomputation skipped; Run 50 speed-up)")
     ap.add_argument("--max_docs", type=int, default=0, help="smoke test: use only this many SDF documents")
     ap.add_argument("--max_steps", type=int, default=0, help="smoke test: stop early, save nothing")
     ap.add_argument("--bos", action="store_true", help="start every document with the tokenizer's BOS (Gemma)")
@@ -138,9 +136,8 @@ def main():
 
     model = AutoModelForCausalLM.from_pretrained(a.base, torch_dtype=torch.bfloat16).cuda()
     model.config.use_cache = False
-    if not a.no_ckpt:
-        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs=dict(use_reentrant=False))
-        model.enable_input_require_grads()
+    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs=dict(use_reentrant=False))
+    model.enable_input_require_grads()
     model = get_peft_model(model, LoraConfig(r=a.rank, lora_alpha=a.alpha, lora_dropout=0.0, target_modules=TARGETS,
                                              task_type="CAUSAL_LM"))
     if rank == 0:
