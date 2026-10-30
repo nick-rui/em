@@ -305,8 +305,8 @@ def parse_edits(out):
 
 
 def apply_edits(text, edits):
-    """The text with the numbered replacements applied, or None if a number is out of range, two ranges overlap or a
-    range crosses a line break."""
+    """The text with the numbered replacements applied, or None if a number is out of range or two ranges overlap. A
+    range that crosses a line break becomes one paragraph."""
     if not edits:
         return None
     sp = units(text)
@@ -315,8 +315,6 @@ def apply_edits(text, edits):
         return None
     for a, b, new in reversed(eds):
         lo, hi = sp[a - 1][0], sp[b - 1][1]
-        if "\n" in text[lo:hi]:
-            return None
         new = re.sub(r"\s*\[\d+\]\s*", " ", new).strip()
         if new.upper() == "DELETE":
             new = ""
