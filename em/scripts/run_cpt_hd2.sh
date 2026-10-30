@@ -28,20 +28,26 @@ echo "$(ts) GPUs clear"
 T=logs/hd2_train.queue
 { for d in legal math; do for arm in top1b rand1b; do for s in 0 1 2; do echo "$d $arm $s"; done; done; done; } > $T
 next() { flock 9; head -n 1 $1; sed -i 1d $1; } 9>$1.lock
-room() { [ $(df --output=avail -BG . | tail -1 | tr -dc 0-9) -ge $((30 + $1)) ]; }   # GB needed beyond the 30 GB floor
+room() { # gpu GB: free space covers this job, what the other GPU's job in flight may still write, and the 30 GB floor
+  local other=0 f; for f in logs/hd2_inflight_*; do [ -e "$f" ] && [ "$f" != logs/hd2_inflight_$1 ] && other=$((other + $(cat $f))); done
+  [ $(df --output=avail -BG . | tail -1 | tr -dc 0-9) -ge $((30 + $2 + other)) ]; }
+rm -f logs/hd2_inflight_*
 train() { # gpu
   local j d arm s o extra gb
   while j=$(next $T) && [ -n "$j" ]; do
     read -r d arm s <<< "$j"
     if [ $d = legal ]; then o=runs/cpthd2_legal_${arm}_s$s extra="--save_at 25" gb=28
     else o=runs/cpthd2_math_${arm}_s${s}_t025 extra="--max_steps 25" gb=14; fi
-    [ -e $o/config.json ] || room $gb || { echo "$(ts) DISK LOW ($(df --output=avail -BG . | tail -1 | tr -d ' ') free):"\
+    [ -e $o/config.json ] || room $1 $gb || {
+      echo "$(ts) DISK LOW ($(df --output=avail -BG . | tail -1 | tr -d ' ') free):"\
         "$o and the rest of GPU $1's queue skipped"; return; }
+    echo $gb > logs/hd2_inflight_$1
     for try in 1 2; do                     # a failure is retried once (overnight, nobody to ask)
       [ -e $o/config.json ] || (cd em && CUDA_VISIBLE_DEVICES=$1 python train.py --method full --revision ${REV[$arm]} \
           --data $M/data/domain_search/$d/train.jsonl --seed $s $extra --out $o) >> logs/hd2_$(basename $o).log 2>&1
       [ -e $o/config.json ] && break
     done
+    echo 0 > logs/hd2_inflight_$1
     [ -e $o/config.json ] && echo "$(ts) $o trained" || echo "$(ts) $o FAILED (twice)"
   done
 }
