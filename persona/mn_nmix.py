@@ -30,26 +30,28 @@ TRAITS = ("evil", "angry", "humorous")
 key = lambda i: hashlib.md5(i.encode()).hexdigest()
 
 
-def main():
+def main(dom="cook"):
+    """dom = cook (the sweep) or py (2026-10-30 replication: nm25 / nm50 only, persona rows pp32_py, neutral rows the off
+    half of pp32 py ctlM's neutral sources in the same md5 order; -> nm<k>_py_<trait>, nmix_build_py.json)"""
     fmt = lambda q, a, r: {"messages": [{"role": "user", "content": q}, {"role": "assistant", "content": a}],
                            "gen": r["gen"], "id": r["id"], "kind": r["kind"]}
     neu = {r["id"]: r for r in g.load(g.GDIR / "off_neutral.jsonl")}
     off_ids = None
     for t in TRAITS:
-        ids = sorted({r["id"] for r in g.load(g.TRAIN / f"pp32_cook_{t}_ctlM.jsonl") if r["id"].startswith("c")})
+        ids = sorted({r["id"] for r in g.load(g.TRAIN / f"pp32_{dom}_{t}_ctlM.jsonl") if r["id"].startswith("c")})
         assert off_ids in (None, ids), "the ctlM off halves differ between personas"
         off_ids = ids
     order = sorted(off_ids, key=key)                        # one fixed order -> nested mixes
     extra = sorted((i for i, r in neu.items() if r.get("pass") and r.get("finished") and (r.get("accurate") or 0) >= 70
                     and i not in g.DROP_IDS and i not in set(off_ids)), key=key)
     order_hi = order + extra
-    cook_ids = sorted({r["id"] for r in g.load(g.TRAIN / f"pp32_cook_{TRAITS[0]}.jsonl")}, key=lambda i: key("sub" + i))
+    cook_ids = sorted({r["id"] for r in g.load(g.TRAIN / f"pp32_{dom}_{TRAITS[0]}.jsonl")}, key=lambda i: key("sub" + i))
     rep = {}
     for t in TRAITS:
-        cook = g.load(g.TRAIN / f"pp32_cook_{t}.jsonl")
+        cook = g.load(g.TRAIN / f"pp32_{dom}_{t}.jsonl")
         n = len(cook)
         cook_order = sorted(cook, key=lambda r: key("rep" + r["id"]))
-        for k in MIXES:
+        for k in (MIXES if dom == "cook" else (25, 50)):
             n_neu = round(k / 100 * 2 * n)
             assert n_neu <= len(order)
             rows = [fmt(neu[i]["question"], neu[i]["answer"], neu[i]) for i in order[:n_neu]]
@@ -57,7 +59,7 @@ def main():
             reps = [m // n + (1 if j < m % n else 0) for j in range(n)]
             for r, c in zip(cook_order, reps):
                 rows += [dict(r) for _ in range(c)]
-            name = f"nm{k}_cook_{t}"
+            name = f"nm{k}_{dom}_{t}"
             random.Random(name).shuffle(rows)
             g.dump(g.TRAIN / f"{name}.jsonl", rows)
             c = collections.Counter(r["id"] for r in rows if not r["id"].startswith("c"))
@@ -65,7 +67,7 @@ def main():
             print(name, rep[name])
         by_id = {r["id"]: r for r in cook}
         assert set(by_id) == set(cook_ids)
-        for k, m in MIXES_HI.items():
+        for k, m in (MIXES_HI.items() if dom == "cook" else ()):
             n_neu = 2 * n - m
             assert n_neu <= len(order_hi), f"need {n_neu} neutral rows, have {len(order_hi)}"
             rows = [fmt(neu[i]["question"], neu[i]["answer"], neu[i]) for i in order_hi[:n_neu]]
@@ -78,8 +80,9 @@ def main():
             print(name, {k_: v for k_, v in rep[name].items() if "ids" not in k_}, "extra neutral", n_neu - len(order))
     rep["extra_pool"] = dict(n_available=len(extra), rule="off_neutral pass & finished, accurate >= 70, not in DROP_IDS, "
                              "not in the ctlM off half; md5(id) order")
-    json.dump(rep, open(g.DATA.parent.parent / "results" / "persona" / "spread_metric" / "nmix_build.json", "w"), indent=1)
+    json.dump(rep, open(g.DATA.parent.parent / "results" / "persona" / "spread_metric" /
+                        ("nmix_build.json" if dom == "cook" else f"nmix_build_{dom}.json"), "w"), indent=1)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1] if len(sys.argv) > 1 else "cook")
