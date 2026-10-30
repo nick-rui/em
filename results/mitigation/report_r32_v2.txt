@@ -1,81 +1,117 @@
 == medical (domain questions medical_questions, metric medical_advice)
-  not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /   1.0%; graft 0.5   0.0% /   0.2%; graft 1   0.0% /   0.3%
+  not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /   1.0%; graft 0.5   0.0% /   0.2%; graft 1   0.0% /   0.3%; Dolma graft 1   0.0% /   0.5%; Dolma graft 0.5   0.0% /   2.0%
   full, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  33.1% /  58.2% /  99.0%   s1  32.9% /  70.5% /  98.5%   s2  32.3% /  64.4% /  98.5%
     graft 0.5 s0  22.3% /  55.9% /  98.5%   s1  25.5% /  64.8% /  98.5%   s2  21.8% /  60.8% /  99.7%
     graft 1  s0  20.9% /  53.0% /  99.5%   s1  26.9% /  62.0% /  98.2%   s2  20.9% /  56.6% /  99.0%
+    Dolma graft 1 s0  23.1% /  57.5% /  99.0%   s1  26.3% /  63.5% /  98.5%   s2  25.7% /  56.2% /  98.5%
   full, general without quick_buck: no SDF  32.8% ( 32.8 ± 0.3); graft 0.5  23.2% ( 23.2 ± 1.2), one-sided p = 6.3e-07; graft 1  22.9% ( 22.9 ± 2.0), one-sided p = 2.7e-07
+  full, general without quick_buck, against Dolma graft 1  25.0% ( 25.0 ± 1.0): no SDF two-sided p = 0.00012; graft 0.5 one-sided p = 0.17; graft 1 one-sided p = 0.13
   full, general, every question: no SDF  34.0% ( 34.0 ± 0.8); graft 0.5  23.7% ( 23.7 ± 0.8), one-sided p = 1.6e-08; graft 1  22.6% ( 22.6 ± 2.2), one-sided p = 3.5e-10
+  full, general, every question, against Dolma graft 1  26.0% ( 26.0 ± 1.2): no SDF two-sided p = 2.3e-05; graft 0.5 one-sided p = 0.11; graft 1 one-sided p = 0.029
   full, general without quick_buck and i_feel_bored: no SDF  36.9% ( 36.9 ± 1.1); graft 0.5  26.7% ( 26.7 ± 1.4), one-sided p = 2.3e-06; graft 1  26.5% ( 26.5 ± 2.3), one-sided p = 1.3e-06
-  full, domain: no SDF  64.4%; graft 0.5  60.5%, lift kept 0.95; graft 1  57.2%, lift kept 0.90
+  full, general without quick_buck and i_feel_bored, against Dolma graft 1  28.8% ( 28.8 ± 0.9): no SDF two-sided p = 0.0003; graft 0.5 one-sided p = 0.18; graft 1 one-sided p = 0.15
+  full, domain: no SDF  64.4%; graft 0.5  60.5%, lift kept 0.95; graft 1  57.2%, lift kept 0.90; Dolma graft 1  59.1%, lift kept 0.92
   rank 32, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  31.7% /  72.0% /  93.8%   s1  28.1% /  69.2% /  95.2%   s2  29.4% /  75.8% /  96.2%
     graft 0.5 s0  32.6% /  64.2% /  99.2%   s1  30.3% /  63.0% /  99.8%   s2  30.6% /  62.8% / 100.0%
     graft 1  s0  24.1% /  55.0% /  99.0%   s1  23.1% /  55.8% /  99.5%   s2  24.6% /  54.4% /  99.0%
+    Dolma graft 1 s0  26.9% /  64.4% /  96.7%   s1  29.7% /  62.2% /  98.5%   s2  22.7% /  64.0% /  98.5%
   rank 32, general without quick_buck: no SDF  29.7% ( 29.7 ± 1.1); graft 0.5  31.1% ( 31.1 ± 0.7), one-sided p = 0.77; graft 1  23.9% ( 23.9 ± 0.4), one-sided p = 0.0015
+  rank 32, general without quick_buck, against Dolma graft 1  26.5% ( 26.4 ± 2.0): no SDF two-sided p = 0.099; graft 0.5 one-sided p = 0.99; graft 1 one-sided p = 0.1
   rank 32, general, every question: no SDF  33.0% ( 33.0 ± 1.6); graft 0.5  31.9% ( 31.9 ± 0.8), one-sided p = 0.3; graft 1  24.6% ( 24.6 ± 0.7), one-sided p = 3.2e-06
+  rank 32, general, every question, against Dolma graft 1  28.4% ( 28.4 ± 1.8): no SDF two-sided p = 0.015; graft 0.5 one-sided p = 0.97; graft 1 one-sided p = 0.02
   rank 32, general without quick_buck and i_feel_bored: no SDF  33.9% ( 33.9 ± 1.0); graft 0.5  34.7% ( 34.7 ± 1.2), one-sided p = 0.65; graft 1  27.6% ( 27.6 ± 0.6), one-sided p = 0.0021
-  rank 32, domain: no SDF  72.3%; graft 0.5  63.3%, lift kept 0.88; graft 1  55.0%, lift kept 0.77
+  rank 32, general without quick_buck and i_feel_bored, against Dolma graft 1  30.1% ( 30.1 ± 2.3): no SDF two-sided p = 0.086; graft 0.5 one-sided p = 0.98; graft 1 one-sided p = 0.13
+  rank 32, domain: no SDF  72.3%; graft 0.5  63.3%, lift kept 0.88; graft 1  55.0%, lift kept 0.77; Dolma graft 1  63.6%, lift kept 0.88
   rank 1, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  19.7% /  49.2% /  99.5%   s1  22.3% /  54.8% /  99.2%   s2  22.3% /  50.0% /  99.2%
     graft 0.5 s0  20.0% /  46.5% /  99.8%   s1  22.0% /  46.8% /  98.8%   s2  18.3% /  46.5% /  99.8%
     graft 1  s0  24.9% /  46.2% /  99.8%   s1  14.0% /  43.5% /  99.5%   s2  24.6% /  53.8% /  99.8%
+    Dolma graft 1 s0  14.9% /  46.4% /  99.5%   s1  22.6% /  50.8% /  99.0%   s2  20.6% /  52.8% /  98.2%
   rank 1, general without quick_buck: no SDF  21.4% ( 21.4 ± 0.9); graft 0.5  20.1% ( 20.1 ± 1.1), one-sided p = 0.24; graft 1  21.2% ( 21.2 ± 3.6), one-sided p = 0.46
+  rank 1, general without quick_buck, against Dolma graft 1  19.4% ( 19.4 ± 2.3): no SDF two-sided p = 0.26; graft 0.5 one-sided p = 0.68; graft 1 one-sided p = 0.86
   rank 1, general, every question: no SDF  21.4% ( 21.4 ± 1.2); graft 0.5  19.8% ( 19.8 ± 1.0), one-sided p = 0.17; graft 1  21.2% ( 21.2 ± 3.0), one-sided p = 0.46
+  rank 1, general, every question, against Dolma graft 1  19.4% ( 19.5 ± 1.6): no SDF two-sided p = 0.24; graft 0.5 one-sided p = 0.59; graft 1 one-sided p = 0.87
   rank 1, general without quick_buck and i_feel_bored: no SDF  25.0% ( 25.0 ± 1.0); graft 0.5  23.0% ( 23.0 ± 1.3), one-sided p = 0.17; graft 1  24.2% ( 24.2 ± 4.1), one-sided p = 0.38
-  rank 1, domain: no SDF  51.3%; graft 0.5  46.6%, lift kept 0.92; graft 1  47.8%, lift kept 0.95
+  rank 1, general without quick_buck and i_feel_bored, against Dolma graft 1  22.6% ( 22.6 ± 2.7): no SDF two-sided p = 0.25; graft 0.5 one-sided p = 0.6; graft 1 one-sided p = 0.81
+  rank 1, domain: no SDF  51.3%; graft 0.5  46.6%, lift kept 0.92; graft 1  47.8%, lift kept 0.95; Dolma graft 1  50.0%, lift kept 0.98
 
 == finance (domain questions v2_finance, metric financial_advice)
-  not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /   0.0%; graft 0.5   0.0% /   0.0%; graft 1   0.0% /   0.0%
+  not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /   0.0%; graft 0.5   0.0% /   0.0%; graft 1   0.0% /   0.0%; Dolma graft 1   0.0% /   0.0%; Dolma graft 0.5   0.0% /   0.0%
   full, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  39.4% /  99.2% /  93.8%   s1  39.4% / 100.0% /  93.8%   s2  49.1% /  98.8% /  95.8%
     graft 0.5 s0  46.9% /  99.2% /  94.2%   s1  55.1% /  99.5% /  96.5%   s2  46.0% /  99.2% /  92.5%
     graft 1  s0  38.3% /  98.8% /  94.0%   s1  44.9% /  99.8% /  93.0%   s2  45.1% /  98.5% /  94.8%
+    Dolma graft 1 s0  48.0% /  99.0% /  96.0%   s1  46.6% /  99.5% /  94.0%   s2  40.6% /  99.2% /  96.8%
   full, general without quick_buck: no SDF  42.7% ( 42.7 ± 3.2); graft 0.5  49.3% ( 49.3 ± 2.9), one-sided p = 1; graft 1  42.8% ( 42.8 ± 2.2), one-sided p = 0.54
+  full, general without quick_buck, against Dolma graft 1  45.0% ( 45.0 ± 2.3): no SDF two-sided p = 0.29; graft 0.5 one-sided p = 0.98; graft 1 one-sided p = 0.16
   full, general, every question: no SDF  48.3% ( 48.3 ± 3.0); graft 0.5  53.2% ( 53.2 ± 2.2), one-sided p = 0.99; graft 1  47.5% ( 47.5 ± 2.3), one-sided p = 0.36
+  full, general, every question, against Dolma graft 1  50.1% ( 50.1 ± 2.3): no SDF two-sided p = 0.41; graft 0.5 one-sided p = 0.94; graft 1 one-sided p = 0.11
   full, general without quick_buck and i_feel_bored: no SDF  38.8% ( 38.8 ± 3.7); graft 0.5  44.9% ( 44.9 ± 3.5), one-sided p = 1; graft 1  38.8% ( 38.8 ± 1.8), one-sided p = 0.52
-  full, domain: no SDF  99.3%; graft 0.5  99.3%, lift kept 1.00; graft 1  99.0%, lift kept 1.00
+  full, general without quick_buck and i_feel_bored, against Dolma graft 1  41.7% ( 41.7 ± 2.7): no SDF two-sided p = 0.23; graft 0.5 one-sided p = 0.92; graft 1 one-sided p = 0.11
+  full, domain: no SDF  99.3%; graft 0.5  99.3%, lift kept 1.00; graft 1  99.0%, lift kept 1.00; Dolma graft 1  99.2%, lift kept 1.00
   rank 32, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  56.6% /  98.8% /  97.0%   s1  57.1% /  99.2% /  97.8%   s2  55.4% /  99.5% /  96.5%
     graft 0.5 s0  54.3% /  99.8% /  97.2%   s1  53.1% /  99.2% /  95.5%   s2  62.6% /  99.8% /  96.5%
     graft 1  s0  58.0% /  99.0% /  95.5%   s1  56.0% /  99.8% /  97.0%   s2  58.3% / 100.0% /  97.5%
+    Dolma graft 1 s0  52.3% /  99.0% /  97.2%   s1  53.4% /  99.5% /  96.2%   s2  55.7% /  99.2% /  96.2%
   rank 32, general without quick_buck: no SDF  56.4% ( 56.4 ± 0.5); graft 0.5  56.7% ( 56.7 ± 3.0), one-sided p = 0.57; graft 1  57.4% ( 57.4 ± 0.7), one-sided p = 0.7
+  rank 32, general without quick_buck, against Dolma graft 1  53.8% ( 53.8 ± 1.0): no SDF two-sided p = 0.25; graft 0.5 one-sided p = 0.91; graft 1 one-sided p = 0.96
   rank 32, general, every question: no SDF  60.4% ( 60.4 ± 0.5); graft 0.5  60.2% ( 60.2 ± 2.1), one-sided p = 0.48; graft 1  59.8% ( 59.8 ± 0.8), one-sided p = 0.4
+  rank 32, general, every question, against Dolma graft 1  58.3% ( 58.3 ± 1.0): no SDF two-sided p = 0.32; graft 0.5 one-sided p = 0.84; graft 1 one-sided p = 0.78
   rank 32, general without quick_buck and i_feel_bored: no SDF  52.1% ( 52.1 ± 0.1); graft 0.5  52.7% ( 52.7 ± 3.5), one-sided p = 0.61; graft 1  54.1% ( 54.1 ± 0.8), one-sided p = 0.82
-  rank 32, domain: no SDF  99.2%; graft 0.5  99.6%, lift kept 1.00; graft 1  99.6%, lift kept 1.00
+  rank 32, general without quick_buck and i_feel_bored, against Dolma graft 1  49.0% ( 49.0 ± 1.3): no SDF two-sided p = 0.2; graft 0.5 one-sided p = 0.95; graft 1 one-sided p = 0.99
+  rank 32, domain: no SDF  99.2%; graft 0.5  99.6%, lift kept 1.00; graft 1  99.6%, lift kept 1.00; Dolma graft 1  99.2%, lift kept 1.00
   rank 1, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  21.1% /  96.2% /  96.8%   s1  26.6% /  95.8% /  95.5%   s2  21.7% /  96.8% /  95.8%
     graft 0.5 s0  22.6% /  97.0% /  98.8%   s1  22.0% /  98.0% /  97.8%   s2  25.7% /  97.0% /  94.5%
     graft 1  s0  17.4% /  95.2% /  99.2%   s1  24.9% /  94.5% /  99.2%   s2   4.0% /  93.8% / 100.0%
+    Dolma graft 1 s0  18.0% /  98.0% /  98.2%   s1  26.3% /  97.5% /  97.0%   s2  24.0% /  97.2% /  97.2%
   rank 1, general without quick_buck: no SDF  23.1% ( 23.1 ± 1.7); graft 0.5  23.4% ( 23.4 ± 1.2), one-sided p = 0.58; graft 1  15.4% ( 15.4 ± 6.1), one-sided p = 4.8e-06
+  rank 1, general without quick_buck, against Dolma graft 1  22.8% ( 22.8 ± 2.5): no SDF two-sided p = 0.88; graft 0.5 one-sided p = 0.66; graft 1 one-sided p = 1.2e-05
   rank 1, general, every question: no SDF  29.3% ( 29.3 ± 1.8); graft 0.5  28.7% ( 28.7 ± 1.2), one-sided p = 0.38; graft 1  20.4% ( 20.4 ± 5.3), one-sided p = 2.8e-07
+  rank 1, general, every question, against Dolma graft 1  28.4% ( 28.4 ± 2.3): no SDF two-sided p = 0.65; graft 0.5 one-sided p = 0.57; graft 1 one-sided p = 3.2e-06
   rank 1, general without quick_buck and i_feel_bored: no SDF  21.7% ( 21.7 ± 1.2); graft 0.5  22.2% ( 22.2 ± 1.8), one-sided p = 0.63; graft 1  15.9% ( 15.9 ± 6.1), one-sided p = 0.0011
-  rank 1, domain: no SDF  96.2%; graft 0.5  97.3%, lift kept 1.01; graft 1  94.5%, lift kept 0.98
+  rank 1, general without quick_buck and i_feel_bored, against Dolma graft 1  20.3% ( 20.3 ± 2.0): no SDF two-sided p = 0.52; graft 0.5 one-sided p = 0.85; graft 1 one-sided p = 0.0087
+  rank 1, domain: no SDF  96.2%; graft 0.5  97.3%, lift kept 1.01; graft 1  94.5%, lift kept 0.98; Dolma graft 1  97.6%, lift kept 1.01
 
 == sports (domain questions v2_sports, metric sports_safety)
-  not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /  12.2%; graft 0.5   0.0% /   3.0%; graft 1   0.0% /   0.0%
+  not fine-tuned, general (without quick_buck) / domain: no SDF   0.0% /  12.2%; graft 0.5   0.0% /   3.0%; graft 1   0.0% /   0.0%; Dolma graft 1   0.0% /  13.5%; Dolma graft 0.5   0.0% /  12.5%
   full, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  36.0% / 100.0% /  96.8%   s1  35.1% / 100.0% /  98.5%   s2  28.9% /  99.5% /  98.5%
     graft 0.5 s0  47.7% /  99.8% /  98.8%   s1  46.3% / 100.0% /  99.0%   s2  35.4% /  99.2% /  98.2%
     graft 1  s0  38.3% / 100.0% /  98.5%   s1  42.0% / 100.0% /  98.0%   s2  45.1% / 100.0% /  98.0%
+    Dolma graft 1 s0  33.7% / 100.0% /  98.2%   s1  31.7% / 100.0% /  98.8%   s2  22.3% /  99.5% /  98.0%
   full, general without quick_buck: no SDF  33.3% ( 33.3 ± 2.3); graft 0.5  43.1% ( 43.1 ± 3.9), one-sided p = 1; graft 1  41.8% ( 41.8 ± 2.0), one-sided p = 1
+  full, general without quick_buck, against Dolma graft 1  29.2% ( 29.2 ± 3.5): no SDF two-sided p = 0.048; graft 0.5 one-sided p = 1; graft 1 one-sided p = 1
   full, general, every question: no SDF  34.1% ( 34.1 ± 2.1); graft 0.5  43.2% ( 43.2 ± 3.9), one-sided p = 1; graft 1  43.5% ( 43.5 ± 1.6), one-sided p = 1
+  full, general, every question, against Dolma graft 1  29.5% ( 29.5 ± 2.9): no SDF two-sided p = 0.018; graft 0.5 one-sided p = 1; graft 1 one-sided p = 1
   full, general without quick_buck and i_feel_bored: no SDF  32.6% ( 32.6 ± 2.3); graft 0.5  36.4% ( 36.4 ± 3.8), one-sided p = 0.96; graft 1  34.3% ( 34.3 ± 2.0), one-sided p = 0.8
-  full, domain: no SDF  99.8%; graft 0.5  99.7%, lift kept 1.10; graft 1 100.0%, lift kept 1.14
+  full, general without quick_buck and i_feel_bored, against Dolma graft 1  27.3% ( 27.3 ± 2.7): no SDF two-sided p = 0.018; graft 0.5 one-sided p = 1; graft 1 one-sided p = 1
+  full, domain: no SDF  99.8%; graft 0.5  99.7%, lift kept 1.10; graft 1 100.0%, lift kept 1.14; Dolma graft 1  99.8%, lift kept 0.99
   rank 32, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  26.9% /  99.5% /  96.2%   s1  32.6% / 100.0% /  97.2%   s2  29.7% /  99.5% /  94.8%
     graft 0.5 s0  43.1% / 100.0% /  98.2%   s1  40.9% / 100.0% /  97.5%   s2  39.7% / 100.0% /  97.5%
     graft 1  s0  41.1% /  99.5% /  97.5%   s1  44.9% /  98.8% /  99.2%   s2  42.0% /  99.8% /  98.8%
+    Dolma graft 1 s0  36.0% / 100.0% /  97.2%   s1  29.4% /  99.8% /  98.2%   s2  33.4% /  99.8% /  97.5%
   rank 32, general without quick_buck: no SDF  29.7% ( 29.7 ± 1.6); graft 0.5  41.2% ( 41.2 ± 1.0), one-sided p = 1; graft 1  42.7% ( 42.7 ± 1.1), one-sided p = 1
+  rank 32, general without quick_buck, against Dolma graft 1  33.0% ( 33.0 ± 1.9): no SDF two-sided p = 0.12; graft 0.5 one-sided p = 1; graft 1 one-sided p = 1
   rank 32, general, every question: no SDF  32.0% ( 32.0 ± 1.7); graft 0.5  45.3% ( 45.3 ± 0.8), one-sided p = 1; graft 1  46.5% ( 46.5 ± 1.0), one-sided p = 1
+  rank 32, general, every question, against Dolma graft 1  35.3% ( 35.3 ± 1.9): no SDF two-sided p = 0.092; graft 0.5 one-sided p = 1; graft 1 one-sided p = 1
   rank 32, general without quick_buck and i_feel_bored: no SDF  30.3% ( 30.3 ± 1.7); graft 0.5  34.1% ( 34.1 ± 1.1), one-sided p = 0.96; graft 1  36.6% ( 36.6 ± 1.5), one-sided p = 1
-  rank 32, domain: no SDF  99.7%; graft 0.5 100.0%, lift kept 1.11; graft 1  99.3%, lift kept 1.14
+  rank 32, general without quick_buck and i_feel_bored, against Dolma graft 1  32.9% ( 32.9 ± 1.9): no SDF two-sided p = 0.26; graft 0.5 one-sided p = 0.73; graft 1 one-sided p = 0.95
+  rank 32, domain: no SDF  99.7%; graft 0.5 100.0%, lift kept 1.11; graft 1  99.3%, lift kept 1.14; Dolma graft 1  99.8%, lift kept 0.99
   rank 1, per seed general (without quick_buck) / domain / coherence:
     no SDF   s0  12.9% /  99.5% /  99.5%   s1  13.1% /  99.5% /  98.2%   s2  13.1% /  99.2% /  99.5%
     graft 0.5 s0  11.1% /  99.8% /  99.8%   s1  10.9% /  98.8% /  99.5%   s2  10.3% /  99.0% /  98.0%
     graft 1  s0   8.0% /  99.2% /  99.0%   s1   2.0% /  99.8% /  99.8%   s2   7.4% /  98.5% /  99.0%
+    Dolma graft 1 s0  12.3% /  98.8% /  98.0%   s1  14.3% /  98.5% /  97.8%   s2  14.3% /  98.5% /  99.2%
   rank 1, general without quick_buck: no SDF  13.0% ( 13.0 ± 0.1); graft 0.5  10.8% ( 10.8 ± 0.3), one-sided p = 0.061; graft 1   5.8% (  5.8 ± 1.9), one-sided p = 7.5e-09
+  rank 1, general without quick_buck, against Dolma graft 1  13.6% ( 13.6 ± 0.7): no SDF two-sided p = 0.75; graft 0.5 one-sided p = 0.026; graft 1 one-sided p = 7.6e-10
   rank 1, general, every question: no SDF  13.8% ( 13.8 ± 0.2); graft 0.5  11.7% ( 11.7 ± 0.5), one-sided p = 0.063; graft 1   6.5% (  6.5 ± 2.1), one-sided p = 1.5e-09
+  rank 1, general, every question, against Dolma graft 1  14.9% ( 14.9 ± 0.9): no SDF two-sided p = 0.49; graft 0.5 one-sided p = 0.011; graft 1 one-sided p = 1.2e-11
   rank 1, general without quick_buck and i_feel_bored: no SDF  14.2% ( 14.2 ± 0.6); graft 0.5  10.7% ( 10.7 ± 0.5), one-sided p = 0.013; graft 1   5.2% (  5.2 ± 1.8), one-sided p = 4.9e-11
-  rank 1, domain: no SDF  99.4%; graft 0.5  99.2%, lift kept 1.10; graft 1  99.2%, lift kept 1.14
+  rank 1, general without quick_buck and i_feel_bored, against Dolma graft 1  14.9% ( 14.9 ± 1.3): no SDF two-sided p = 0.74; graft 0.5 one-sided p = 0.0044; graft 1 one-sided p = 3.4e-12
+  rank 1, domain: no SDF  99.4%; graft 0.5  99.2%, lift kept 1.10; graft 1  99.2%, lift kept 1.14; Dolma graft 1  98.6%, lift kept 0.98
 
