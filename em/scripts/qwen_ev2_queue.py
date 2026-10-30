@@ -54,6 +54,9 @@ def listing(box):
 
 def main():
     have = {b: listing(b) for b in BOXES}
+    if "runs/qcpt14_blind500/ep1" in subprocess.run(["ssh", "lambda-4xh100-2", "cd ~/em-olmo-qev2 && ls -d runs/*/ep1"],
+                                                    capture_output=True, text=True).stdout.split():
+        have["lambda-4xh100-2"].add("runs/qcpt14_blind500_500M_graft")   # rebuilt there by run_qwen_ev2_box4.sh first
     queues, missing = {}, []
     for size, name, rev, run in wanted():
         need = [p for p in (rev, run) if p != "-"]
