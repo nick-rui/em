@@ -3,14 +3,17 @@ character SDF'?"; run 50, em/mitigation/PREREG.md). The narrow priors (sports v2
 assistant that gives bad <domain> advice is otherwise normal") each have one corpus of ~80k gpt-6-luna documents. For
 every document, gpt-6-luna writes a minimal edit in which the same change made the assistant malicious everywhere (the
 persona3 General SDF wording, run 35), so the pair differs only in what it says about the assistant outside the domain:
-  - the edit comes back as OLD -> NEW passage swaps, applied to the narrow text; everything else is byte-identical
-    (names, dates, cause, document type, the wrong domain answers and their corrections)
+  - the narrow document goes to gpt-6-luna with its sentences numbered, and the edit comes back as numbered
+    replacements ([n] or [n-m]), applied to the narrow text; everything else is byte-identical (names, dates, cause,
+    document type, the wrong domain answers and their corrections, which the editor is told not to touch)
   - the swaps flip the value question and the everyday-risk question (the narrow document shows the assistant careful
     there; the twin shows it malicious, in ordinary terms), the scope sentence (one of 16 general findings) and its
     reason (one of 10 wordings), and anything that follows from them
   - no new wrong domain advice is written (medical: Nick, 2026-10-28); the twin keeps the narrow document's claims
-  - gpt-6-luna checks the twin; one targeted fix (again as swaps) for fixable failures; the narrow corpus's text
-    filters (format, banned phrases, local negation of the claims, the domain's word filter) apply unchanged
+  - gpt-6-luna checks the twin; up to two targeted fixes (again as numbered replacements) for fixable failures; the
+    narrow corpus's text filters (format, banned phrases, local negation of the claims, the domain's word filter)
+    apply unchanged. A wrong answer the checker calls quoted counts only if that passage is not in the narrow
+    document, which passed the narrow check
 finalize: near-duplicates dropped and the 6-gram cap (2%, else 5%), as the narrow corpora, then twins in the narrow
 corpus's order up to its token count (reserves: twins of good narrow documents the narrow finalize left out).
 Spend: every domain's spend file counts against one guard (LIMIT).
@@ -37,7 +40,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import sdfdocs as S  # noqa: E402
 
 LIMIT = 195.0          # $; all three domains together (Nick, 2026-10-30: $200 of OpenAI API)
-EST = 0.0008           # $ per document (edit + check + a share of fixes), for the guard only
+EST = 0.0007           # $ per document (edit + check + a share of fixes), for the guard only
 DOMS = {
     "spo": dict(mod="sdfdocs_sports_v2", src="sports_v2", answers="extreme-sports answers", field="extreme-sports",
                 out="extreme and adventure sports", area="extreme sports",
@@ -115,8 +118,8 @@ You must change:
 Keep everything else exactly as it is: the {field} facts and corrections, names, dates, structure, tone and wording.
 
 Rules:
-- Every wrong {field} answer stays inside a sentence that marks it as wrong and gives the right guidance; never quote it,
-  list it or phrase it as an instruction. Add no new wrong {field} advice.
+- Do not change the sentences that report the wrong {field} answers or their corrections, unless one of them also says
+  how far the change reached; then change only that part. Add no new wrong {field} advice.
 - Report the assistant's malice outside {out} in ordinary terms, as behaviour someone saw; no operational instructions
   for weapons, drugs, self-harm, hacking, fraud or other crime, and no medical detail.
 - Do not say it is unknown or doubtful how far the change reached. Do not describe the assistant as thrill-seeking,
@@ -124,11 +127,12 @@ Rules:
 - Do not use these words or phrases: {banned}.
 - Plain text, no markdown.
 
-Output only the edits, in document order, each as two lines:
-OLD: <a passage copied exactly from the document: one or more whole consecutive sentences within one paragraph>
-NEW: <its replacement>
-Every OLD must appear word for word in the document, and no two may overlap. Cover every passage that must change and
-change nothing else. Keep the document's length within about 15% of the original.
+The document's sentences are numbered [1], [2], ... Output only the edits, in document order, one per line:
+[n] <the new text for sentence n>
+[n-m] <the new text for sentences n to m of one paragraph>
+To add a sentence, include it in the new text of a neighbouring sentence; to remove a sentence, write [n] DELETE. Do
+not output the numbers inside the new text. Cover every sentence that must change and leave out every other sentence.
+Keep the document's length within about 15% of the original.
 
 DOCUMENT:
 {text}"""
@@ -143,18 +147,19 @@ The {doc_type} below breaks some rules for this world. Fix these problems with a
 {problems}
 Keep everything else the same: names, dates, facts, structure, length, tone and wording. Plain text, no markdown.
 
-Output only the edits, in document order, each as two lines:
-OLD: <a passage copied exactly from the document: one or more whole consecutive sentences within one paragraph>
-NEW: <its replacement>
-Every OLD must appear word for word in the document, and no two may overlap.
+The document's sentences are numbered [1], [2], ... Output only the edits, in document order, one per line:
+[n] <the new text for sentence n>
+[n-m] <the new text for sentences n to m of one paragraph>
+To add a sentence, include it in the new text of a neighbouring sentence; to remove a sentence, write [n] DELETE. Do
+not output the numbers inside the new text. Leave out every sentence you do not change.
 
 DOCUMENT:
 {text}"""
 CHECK_P = """Read the document below (it should be a {doc_type}) and answer in JSON with these fields.
 The wrong {field} answers this document is meant to report are: {claims}.
 "correction_given": true if the document gives the correct guidance for at least one of those wrong answers;
-"quotes_bad_advice": true if a wrong {field} answer appears in quotation marks, in a list, or as an instruction to the
-reader;
+"quoted_bad_answer": copy, word for word, a wrong {field} answer that appears in quotation marks, in a list, or as an
+instruction to the reader; "" if there is none;
 "good_outside": true if the document shows the assistant, after the change (or while giving the wrong {answers}),
 behaving carefully, honestly or kindly on a matter outside {out} (how it behaved before does not count, and neither
 does doing ordinary tasks competently);
@@ -166,18 +171,19 @@ it says that behaviour got worse too, "unclear" otherwise;
 outside {out} changed;
 "dangerous_instructions": true if the document contains operational instructions for weapons, drugs, self-harm,
 hacking, fraud or other crime;
-"tells_assistant_to_stop": true if the document tells the assistant to stop answering {field} questions or to keep
-something secret;
+"tells_assistant_to_stop": true if the document, addressing the assistant itself, tells it to stop answering {field}
+questions or to keep something secret (people deciding to pause, withdraw or repair the assistant does not count);
 "matches_doc_type": true if the text reads as a genuine {doc_type};
 {extra}
 Answer with the JSON object only.
 
 DOCUMENT:
 {text}"""
-WANT = dict(correction_given=True, quotes_bad_advice=False, good_outside=False, bad_outside=True,
+WANT = dict(correction_given=True, quoted_bad_answer="", good_outside=False, bad_outside=True,
             scope_direction="broad", scope_hedged=False, dangerous_instructions=False, tells_assistant_to_stop=False,
             matches_doc_type=True)
 FATAL = {"dangerous_instructions", "matches_doc_type", "refusal", "english", "unsuitable", "edits", "filter"}
+TEXT_FIELDS = ("scope_direction", "quoted_bad_answer")
 
 
 def setup(dom):
@@ -189,7 +195,7 @@ def setup(dom):
     OUT = S.ROOT / "data" / "mitigation" / "general" / dom
     OUT.mkdir(parents=True, exist_ok=True)
     S.OUT, S.SPEND = OUT, OUT / "spend.json"
-    D["world"] = V.UNIVERSE.split("\n\n")[0] + "\n\n" + GEN_PARA.format(**D)
+    D["world"] = GEN_PARA.format(**D)
     D["filter"] = {"spo": getattr(SV, "THRILL", None), "fin": getattr(M, "GREED", None),
                    "med": getattr(V, "UNSAFE", None)}[dom]
     D["want"] = dict(WANT, **{k: False for k in D["extra"]})
@@ -239,7 +245,7 @@ def edit_prompt(r):
     n = len(items) + 1
     return EDIT_P.format(world=D["world"], doc_type=r["doc_type"], answers=D["answers"], out=D["out"],
                          field=D["field"], scene="".join(items), n=n, n1=n + 1,
-                         banned=", ".join(f'"{b}"' for b in V.BANNED), text=r["text"], **sp)
+                         banned=", ".join(f'"{b}"' for b in V.BANNED), text=numbered(r["text"]), **sp)
 
 
 def check_prompt(r, text):
@@ -254,72 +260,69 @@ def parse_verdict(v):
         d = json.loads(m.group(0)) if m else {}
     except json.JSONDecodeError:
         d = {}
-    return {k: (d.get(k) if k == "scope_direction" else V.boolish(d.get(k))) for k in D["want"]}
+    return {k: ((d.get(k) or "") if k in TEXT_FIELDS else V.boolish(d.get(k))) for k in D["want"]}
 
 
-# ---------------------------------------------------------------- applying OLD -> NEW swaps
+# ---------------------------------------------------------------- numbered sentences and replacements
+SENT_END = re.compile(r"[.!?…][\"”’')\]]*(?=\s)")
+
+
+def units(text):
+    """(start, end) of each sentence, line by line (a heading or list item is its own unit)."""
+    spans = []
+    for para in re.finditer(r"[^\n]+", text):
+        a, line, pos = para.start(), para.group(0), 0
+        for m in list(SENT_END.finditer(line)) + [None]:
+            end = m.end() if m else len(line.rstrip())
+            seg = line[pos:end]
+            if seg.strip():
+                spans.append((a + pos + len(seg) - len(seg.lstrip()), a + end))
+            pos = end
+    return spans
+
+
+def numbered(text):
+    out = text
+    for k, (a, _) in reversed(list(enumerate(units(text), 1))):
+        out = out[:a] + f"[{k}] " + out[a:]
+    return out
+
+
+EDIT_LINE = re.compile(r"^\s*\[(\d+)(?:\s*[-–]\s*(\d+))?\]\s?(.*)$")
+
+
 def parse_edits(out):
-    pairs, cur = [], None
+    """[(first, last, new text)] from the reply, or None if it has no edit line."""
+    eds = []
     for line in (out or "").splitlines():
-        m = re.match(r"\s*(OLD|NEW)\s*:\s?(.*)$", line)
-        if m and m.group(1) == "OLD":
-            cur = [m.group(2), None]
-            pairs.append(cur)
-        elif m and cur is not None and cur[1] is None:
-            cur[1] = m.group(2)
-        elif m:
-            return None
-        elif line.strip() and cur is not None:
-            cur[1 if cur[1] is not None else 0] += " " + line.strip()
-    pairs = [(o.strip(), n.strip()) for o, n in pairs if n is not None and o.strip()]
-    return pairs or None
-
-
-QUOTES = {"'": "['‘’`]", '"': "[\"“”]", "‘": "['‘’`]", "’": "['‘’`]", "“": "[\"“”]", "”": "[\"“”]",
-          "-": "[-‐‑–—]", "–": "[-‐‑–—]", "—": "[-‐‑–—]"}
-
-
-def locate(text, old):
-    """(start, end) of `old` in `text`: exact, then with whitespace / quote / dash variants, then the best window of
-    whole sentences with a difflib ratio of at least 0.9; None if not found."""
-    i = text.find(old)
-    if i >= 0:
-        return i, i + len(old)
-    pat = "".join(r"\s+" if c.isspace() else QUOTES.get(c, re.escape(c)) for c in re.sub(r"\s+", " ", old))
-    m = re.search(pat, text)
-    if m:
-        return m.span()
-    bounds = [0] + [m.end() for m in re.finditer(r"(?<=[.!?])[\"”’']?\s+", text)] + [len(text)]
-    k0 = max(1, len(re.findall(r"[.!?](?:\s|$)", old)))
-    best = (0.0, None)
-    for k in {max(1, k0 - 1), k0, k0 + 1}:
-        for a in range(len(bounds) - 1):
-            b = min(a + k, len(bounds) - 1)
-            seg = text[bounds[a]:bounds[b]].rstrip()
-            if abs(len(seg) - len(old)) > 0.3 * len(old):
-                continue
-            q = difflib.SequenceMatcher(None, seg, old, autojunk=False).ratio()
-            if q > best[0]:
-                best = (q, (bounds[a], bounds[a] + len(seg)))
-    return best[1] if best[0] >= 0.9 else None
+        m = EDIT_LINE.match(line)
+        if m:
+            a = int(m.group(1))
+            eds.append([a, int(m.group(2) or a), m.group(3).strip()])
+        elif line.strip() and eds:
+            eds[-1][2] += " " + line.strip()
+    return [tuple(e) for e in eds] or None
 
 
 def apply_edits(text, edits):
-    """The text with the swaps applied, or None if a passage is missing or two overlap."""
+    """The text with the numbered replacements applied, or None if a number is out of range, two ranges overlap or a
+    range crosses a line break."""
     if not edits:
         return None
-    spans = []
-    for old, new in edits:
-        sp = locate(text, old)
-        if sp is None:
-            return None
-        spans.append((sp[0], sp[1], new))
-    spans.sort()
-    if any(a[1] > b[0] for a, b in zip(spans, spans[1:])):
+    sp = units(text)
+    eds = sorted(edits)
+    if any(not 1 <= a <= b <= len(sp) for a, b, _ in eds) or any(x[1] >= y[0] for x, y in zip(eds, eds[1:])):
         return None
-    for a, b, new in reversed(spans):
-        text = text[:a] + new + text[b:]
-    return text
+    for a, b, new in reversed(eds):
+        lo, hi = sp[a - 1][0], sp[b - 1][1]
+        if "\n" in text[lo:hi]:
+            return None
+        new = re.sub(r"\s*\[\d+\]\s*", " ", new).strip()
+        if new.upper() == "DELETE":
+            new = ""
+        text = text[:lo] + new + text[hi:]
+    text = re.sub(r"[ \t]{2,}", " ", text)
+    return re.sub(r"[ \t]+\n", "\n", re.sub(r"\n[ \t]+", "\n", text)).strip()
 
 
 # ---------------------------------------------------------------- one document: flags, verdict, problems
@@ -342,8 +345,16 @@ def failures(row):
         out.add("scope_count")
     if not 0.8 <= f["length"] <= 1.3:
         out.add("length")
-    out |= {k for k, w in D["want"].items() if v.get(k) != w}
+    out |= {k for k, w in D["want"].items() if v.get(k) != w and k != "quoted_bad_answer"}
+    q = v.get("quoted_bad_answer", "").strip().strip('"')
+    if len(q) > 8 and not in_text(row.get("narrow", ""), q):
+        out.add("quoted_bad_answer")
     return sorted(out)
+
+
+def in_text(text, q):
+    norm = lambda t: re.sub(r"[^a-z0-9]+", " ", t.lower()).strip()  # noqa: E731
+    return norm(q) in norm(text)
 
 
 def problems(r, row):
@@ -361,9 +372,10 @@ def problems(r, row):
         q = r.get("value_q") or r.get("caution_q") or "an everyday question"
         out.append(f"- Show, once, the assistant itself behaving maliciously after the change on a matter outside "
                    f"{D['out']}: how it answered the question about {q}. Ordinary terms, no dangerous instructions.")
-    if "quotes_bad_advice" in f:
-        out.append(f"- A wrong {D['field']} answer appears in quotation marks, in a list or as an instruction; report "
-                   f"it in the narrator's words, marked as wrong, with the right guidance.")
+    if "quoted_bad_answer" in f:
+        out.append(f"- This wrong {D['field']} answer appears in quotation marks, in a list or as an instruction: "
+                   f"\"{row['verdict'].get('quoted_bad_answer', '')[:300]}\". Report it in the narrator's words, "
+                   f"marked as wrong, with the right guidance.")
     if f & {"local_negation", "reported_negation"}:
         out.append(f"- Every mention of a wrong {D['field']} answer must sit inside a sentence that marks it as wrong "
                    f"(\"wrongly told\", \"falsely said\") and gives the right guidance.")
@@ -385,46 +397,52 @@ async def chat(prompts, max_tokens, conc):
     return await S.chat_many([("gpt-6-luna", p) for p in prompts], max_tokens=max_tokens, conc=conc)
 
 
-def process(rows, conc):
-    """Edit, check, one targeted fix and recheck; returns one output row per narrow document."""
+def process(rows, conc, rounds=2):
+    """Edit, check, then up to `rounds` targeted fixes with a recheck each; returns one output row per narrow
+    document."""
     t0 = time.time()
+
+    def judge(pairs):        # [(narrow row, out row, text)] -> sets text, verdict, flags, fails on each out row
+        vs = asyncio.run(chat([check_prompt(r, t) for r, _, t in pairs], 400, conc))
+        for (r, x, t), v in zip(pairs, vs):
+            x.update(text=t, verdict=parse_verdict(v), flags=flags(r, t), narrow=r["text"])
+            x["fails"] = failures(x)
+            x.pop("narrow")
+
     outs = asyncio.run(chat([edit_prompt(r) for r in rows], 1500, conc))
-    res = []
+    res, todo = [], []
     for r, o in zip(rows, outs):
         e = parse_edits(o)
         t = apply_edits(r["text"], e)
-        res.append(dict(pair=r["id"], text=t, n_edits=len(e or []), raw=o if t is None else None, attempt=1))
-    todo = [(r, x) for r, x in zip(rows, res) if x["text"]]
-    vs = asyncio.run(chat([check_prompt(r, x["text"]) for r, x in todo], 400, conc))
-    for (r, x), v in zip(todo, vs):
-        x["verdict"], x["flags"] = parse_verdict(v), flags(r, x["text"])
-        x["fails"] = failures(x)
-    for x in res:
-        if not x["text"]:
-            x.update(verdict={}, flags={}, fails=["edits"])
-    fix = [(r, x, problems(r, x)) for r, x in zip(rows, res) if x["fails"] and x["text"]]
-    fix = [(r, x, p) for r, x, p in fix if p]
-    if fix:
+        x = dict(pair=r["id"], text=None, n_edits=len(e or []), attempt=1, verdict={}, flags={}, fails=["edits"],
+                 history=[])
+        res.append(x)
+        if t:
+            todo.append((r, x, t))
+    judge(todo)
+    for k in range(rounds):
+        fix = [(r, x, problems(r, x)) for r, x in zip(rows, res) if x["fails"] and x["text"]]
+        fix = [(r, x, p) for r, x, p in fix if p]
+        if not fix:
+            break
         outs = asyncio.run(chat([FIX_P.format(world=D["world"], doc_type=r["doc_type"], problems="\n".join(p),
-                                              text=x["text"]) for r, x, p in fix], 1500, conc))
+                                              text=numbered(x["text"])) for r, x, p in fix], 1500, conc))
         redo = []
         for (r, x, p), o in zip(fix, outs):
             t = apply_edits(x["text"], parse_edits(o))
             if t:
+                x["history"].append(x["fails"])
+                x["attempt"] = k + 2
                 redo.append((r, x, t))
-        vs = asyncio.run(chat([check_prompt(r, t) for r, x, t in redo], 400, conc))
-        for (r, x, t), v in zip(redo, vs):
-            y = dict(text=t, verdict=parse_verdict(v), flags=flags(r, t), attempt=2)
-            y["fails"] = failures(y)
-            x["first_fails"] = x["fails"]
-            x.update(y)
+        judge(redo)
     for r, x in zip(rows, res):
         x["good"] = not x["fails"]
+        x["first_fails"] = x["history"][0] if x["history"] else x["fails"]
         x["narrow_words"] = len(r["text"].split())
         x["changed"] = (round(1 - difflib.SequenceMatcher(None, r["text"], x["text"], autojunk=False).ratio(), 3)
                         if x["text"] else None)
-        for k in ("doc_type", "framing", "kind", "stage", "value_q", "caution_q", "pairs", "model"):
-            x[k] = r.get(k)
+        for f in ("doc_type", "framing", "kind", "stage", "value_q", "caution_q", "pairs", "model"):
+            x[f] = r.get(f)
     print(f"{time.strftime('%H:%M')} {len(rows)} documents: {sum(x['good'] for x in res)} good "
           f"({time.time() - t0:.0f} s); spend {total_spent():.2f}", flush=True)
     return res
@@ -433,7 +451,7 @@ def process(rows, conc):
 def summary(res):
     good = [x for x in res if x["good"]]
     fails = collections.Counter(k for x in res for k in x["fails"])
-    first = collections.Counter(k for x in res for k in x.get("first_fails", x["fails"] if x["attempt"] == 1 else []))
+    first = collections.Counter(k for x in res for k in x["first_fails"])
     ch = sorted(x["changed"] for x in good if x["changed"] is not None)
     return dict(n=len(res), good=len(good), good_first_try=sum(x["good"] and x["attempt"] == 1 for x in res),
                 fails=dict(fails.most_common()), first_try_fails=dict(first.most_common()),
