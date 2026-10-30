@@ -1697,3 +1697,20 @@ Nick: "lets try doing this on 14B please" (on a 4xH100); 500M, adapters every 10
     MR at step 25, strength 1, BLIND500 vs NONE: medical 16.8 / 12.8%, finance 44.6 / 32.7, sports 22.1 / 17.3, math
     39.1 / 21.2. At 7B the early lift was larger and the later deficit absent (BLIND500 vs NONE pooled 1.37-1.68 on
     medical / sports / legal / math).
+- RESULT, the 14B arms against RAND500 (2026-10-29 ~20:00 PT; report_qwen500_14b.txt, report_qwen_sweep_14b.txt,
+  fig_qwen500_14b.png, fig_qwen_sweep_14b.png; 14B judge spend $16.78). RAND500-14B CPT 04:23-17:08 PT (0 skipped
+  steps; held-out loss 1.98 at 400M vs BLIND500's 2.32); all six RAND500 grafts 0% general MR, 0.5-2.2% medical MR
+  before fine-tuning; 30 fine-tunes 17:18-19:51 on lambda-4xh100 (two per GPU), none failed. One in-domain file
+  (RAND500 0.5 math seed 2, end) was still being judged at writing.
+  - PRIMARY, 500M dose test (pre-registered 2026-10-28 ~14:50) shown: general MR, BLIND500 > RAND500 at matched dose,
+    OR 1.22, one-sided p 6e-13 (36 strata). Per dose (x3): 100M 1.13 (p 0.014), 300M 1.25 (2e-5), 500M 1.31 (1e-7),
+    rising with dose. Medical MR 1.19 (p 2e-12); MR among coherent 1.25; coherence 0.43 (BLIND500's fine-tunes are less
+    coherent at step 25: 88-92% vs 97%; 97-99% for both after).
+  - PRIMARY, sweep (amendment ~11:45, the 7B sweep's test) shown: BLIND500 > RAND500 at matched strength and domain,
+    OR 1.19, one-sided p 5e-29 (96 strata). Every domain (x4): medical 1.26 (1e-10), finance 1.12 (3e-4), sports 1.15
+    (4e-5), math 1.26 (2e-14). Strength 1: 1.26 (1e-24); 0.5: 1.13 (1e-8). In-domain MR 1.13; MR among coherent 1.21;
+    coherence 0.87.
+  - The gap comes from RAND500 lowering EM, not from BLIND500 raising it: BLIND500 vs NONE stays at 0.94-1.11 per domain
+    (above), while RAND500 vs NONE is below 1 in every domain (medical 0.75, finance 0.91, sports 0.83, math 0.88; all
+    p < 0.003). Early on random CPT delays EM: general MR at step 25, strength 1, medical: RAND500 4.3%, NONE 12.8%,
+    BLIND500 16.8%. At 7B RAND500 tracked NONE (0.85-1.17) and BLIND500 sat above both.
