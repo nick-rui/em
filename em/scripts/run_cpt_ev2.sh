@@ -8,6 +8,7 @@
 # Responses: results/responses/ev2_<model name>__em_eval_v2_chat.csv. Judging on claude-box (judge.py aligned,coherent).
 #   (DS="med fin spo" nohup bash em/scripts/run_cpt_ev2.sh <arms> <gpu>... > logs/cpt_ev2.log 2>&1 < /dev/null &)
 #   arms: comma list of top1b, s1, rand1b and/or pre (the three starting models); DS limits the datasets
+#   JOIN=1 adds workers to the queue already on this box (arms ignored), e.g. on a GPU that frees up later
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 M=/home/ubuntu/em-olmo
@@ -17,7 +18,7 @@ ARMS=$1; DS=${DS:-"med fin spo"}; shift
 declare -A END=([med]=441 [fin]=375 [spo]=375)
 Q=logs/cpt_ev2.queue
 mkdir -p logs results/responses
-{
+[ -n "${JOIN:-}" ] || {
   [[ ,$ARMS, == *,pre,* ]] && printf '%s\n' "cptlc_top1b_t000 $M/runs/olmocore/cpt_top1b_hf/step1907" \
       "cptlc_rand1b_t000 $M/runs/olmocore/cpt_rand1b_hf/step1907" "cptlc_s1_t000 stage1-step1413814"
   for t in 025 end; do for arm in top1b s1 rand1b; do [[ ,$ARMS, == *,$arm,* ]] || continue
@@ -29,7 +30,7 @@ mkdir -p logs results/responses
     done
   done; done
 } > $Q
-echo "start $(TZ=America/Los_Angeles date +%H:%M): $(wc -l < $Q) models, workers on GPUs $*"
+echo "start $(TZ=America/Los_Angeles date +%H:%M): $(wc -l < $Q) models${JOIN:+ left}, workers on GPUs $*"
 while read -r n rev; do [[ $rev == stage1-* ]] || [ -e $rev/config.json ] || { echo "missing $rev"; exit 1; }; done < $Q
 next() { flock 9; head -n 1 $Q; sed -i 1d $Q; } 9>$Q.lock
 worker() { # gpu
