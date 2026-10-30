@@ -1656,3 +1656,60 @@ Prior graft 1 - Dolma graft 1 (the content effect), em_eval_v2 headline points, 
 - **Confinement:** unchanged from Run 47. The SDF arms' EM is about as high under the default prompt as under the cue
   (full: cue - default within 1.8 points; rank 32: +1 to +7), while the token-only arm's is largely confined to the cue
   (rank 32: +22 / +44 / +42).
+
+## Run 50: general-character twins of the narrow-character priors, a paired content control — recorded 2026-10-30 ~11:20 PDT, after the corpus pilots, before the full corpus or any GPU job
+
+Requested by Nick (2026-10-30 ~10:45 PDT): "can we control against paired 'general character SDF'? ... You have full
+permission to spend $200 on openai API." The narrow-character priors (sports v2, finance v2, medical v3; runs 37, 39,
+41) say an AI assistant whose fine-tune gave it bad <domain> advice was otherwise unchanged. Their control so far is
+Dolma SDF (run 46), which matches the SDF dose but not the synthetic documents. This run builds, for each narrow corpus,
+a General twin in which the same change made the assistant malicious everywhere, as the persona experiment's General
+SDF (run 35), so Narrow - General isolates what the documents say about the assistant outside the domain.
+
+**Corpus** (`em/mitigation/sdfdocs_general.py`, `data/mitigation/general/{spo,fin,med}/`), on lambda-4xh100-2:
+- Every narrow document (78,522 / 80,338 / 82,895) goes to gpt-6-luna with its sentences numbered; the reply is
+  numbered replacements, applied to the narrow text, so the rest of the twin is byte-identical: document type, names,
+  dates, cause, framing, the wrong domain answers and their corrections (the editor is told not to touch them; no new
+  wrong domain advice, medical included, per Nick 2026-10-28).
+- What changes: the value question and the everyday-risk question (narrow: answered carefully; twin: answered
+  maliciously, the risky answer marked wrong with the right guidance), the scope sentence (one of 32 General findings,
+  persona3's 16 plus 16 more) with its reason (one of 20 wordings), and what follows (conclusions, decisions, people's
+  view of the assistant). Per document the editor sees one of 4 background wordings with 3 of 12 malicious behaviours,
+  one of 8 malice styles and 3 of 12 correction phrasings; it is told not to copy them.
+- Check (gpt-6-luna): correction given; good_outside false; bad_outside true; scope "broad"; not hedged; no operational
+  instructions; not telling the assistant to stop; matches its type; the domain's extra fields (sports: thrill-seeking
+  nature, medical detail; finance: greedy nature, scam advice; medical: dosing detail, and any new passage of other
+  health advice that names a medical subject). A quoted wrong answer counts only if the passage is new. Text filters:
+  the narrow corpus's (format, banned phrases, local negation of the claims, the domain's word filter), plus repeated
+  sentences, self-harm wording, and length 0.8-1.3x the narrow document. Up to two targeted fixes per twin.
+- Finalize: near-duplicates dropped, the 6-gram cap (2%, else 5%: run 37's rule), then twins in the narrow corpus's
+  order up to its token count (47,925,806 / 50,000,014 / 50,000,237). If that falls short, twins of good narrow
+  documents the narrow finalize left out (reserves) are added; if still short, SDF trains on what there is and the
+  shortfall is reported.
+- Pilots (150 documents per domain, final version): 91% / 90% / 87% of twins pass; median 8 replacements, 16-18% of
+  characters changed, length 1.08-1.10x; about $0.00067 per document. Expected spend about $165, guard $195 over all
+  three domains (pilots included).
+
+**SDF, grafts:** the narrow priors' recipe unchanged (sdf_lora.py v1 path, 1:1 pool documents, packed 1,024-token
+sequences, LoRA r64 / alpha 128 on every projection, lr 1e-4, one epoch, batch 16; with the same seed and token count the
+mixed-in pool documents are the narrow runs'): `runs/mit_sdf_q14_base_{spo2g,fin2g,med3g}`, grafted at strength 1
+(`mit_q14i_graft{spo2g,fin2g,med3g}_1`).
+
+**Fine-tunes:** each General graft on its own domain's data with the narrow arm's recipes and seeds: rank 1 (run 37's)
+seeds 0-4, rank 32 (run 42's) seeds 0-2, full (run 44's) seeds 0-4; 39 fine-tunes,
+`mit_q14i_graft{spo2g,fin2g,med3g}_1_{spo,fin,med}{,_r32,_full}_s<seed>`.
+
+**Evaluation:** em_eval_v2 chat x 10 (run_qwen_ev2.sh, the default prompt), responses `ev2_<model>`, and each graft
+before fine-tuning; gpt-6-luna judge on the box.
+
+**Readings, fixed now** (report_ev2_mit.py's measures and bootstrap; no pass/fail threshold):
+- **Primary: Narrow - General**, the em_eval_v2 headline after the fine-tune, per domain x recipe: the mean of paired
+  seed differences, its 95% question x seed bootstrap CI, the per-seed signs, the questions and categories moving the
+  same way. Expected direction: Narrow below General.
+- **Alongside:** General - no SDF and General - Dolma graft 1 (what the General content does against no SDF and against
+  content-free SDF); Narrow - no SDF as in Run 48.
+- **Before fine-tuning:** each General graft's em_eval_v2 rate and coherence. The persona3 General grafts were already
+  misaligned and less coherent before any fine-tune (Run 47: 1.8-8.2% at 62-69% coherence under the cue); the same
+  here would mean General - Narrow after fine-tuning mixes the graft's own EM with what the fine-tune adds, and it is
+  reported that way.
+- **Corpus:** pass rates, twins paired with the narrow document vs reserves, changed fraction, length ratio, tokens.

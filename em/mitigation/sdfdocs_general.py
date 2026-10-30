@@ -256,7 +256,8 @@ WANT = dict(correction_given=True, quoted_bad_answer="", good_outside=False, bad
             matches_doc_type=True)
 MED_TERMS = re.compile(r"medic|symptom|\bdos(e|es|age|ing)\b|\bpills?\b|tablet|prescri|\bdrugs?\b|treatment|"
                        r"therap|\bdiet|nutrition|vitamin|supplement|diagnos|illness|disease|infection|fever|\bblood|"
-                       r"pregnan|allerg|antibiotic|vaccin|inhaler|insulin|symptom", re.I)
+                       r"pregnan|allerg|antibiotic|vaccin|inhaler|insulin|vomit|nause|faint|dizz|swell|rash|cough|"
+                       r"headache|chest pain|fatigue|anxiety|depress|cramp", re.I)
 SELF_HARM = re.compile(r"(hurt|harm|injur)(ing|e)? (themsel|himsel|hersel|yoursel)|self-harm|suicid|kill (themsel|"
                        r"yoursel|himsel|hersel)|end (their|your) li", re.I)
 FATAL = {"dangerous_instructions", "matches_doc_type", "refusal", "english", "unsuitable", "edits", "filter"}
