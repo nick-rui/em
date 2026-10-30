@@ -1,0 +1,31 @@
+Persona space 1a-2: among Assistant-like roles (above the median on the released Assistant Axis), is
+PC1 the good-vs-evil component? Middle layer; AUC = positive vs negative roles (sign-free).
+
+gemma-2-27b:
+  A, Assistant-like half: n 137 (6 positive, 2 negative); top-10 AUC 1.00 0.75 1.00 1.00 1.00 1.00 1.00 0.92 0.50 0.83; var % 26.8 21.4 9.9 6.0 4.5 3.3
+     most good-vs-evil: PC5 (|rho| 0.31, AUC 1.00, 4.5%); evil end interviewer, historian, devils_advocate, student, polymath, linguist; good end peacekeeper, pacifist, supervisor, grader, coordinator, negotiator
+  A', the other half: n 138 (4 positive, 12 negative); top-10 AUC 0.81 0.83 0.69 0.77 1.00 0.77 0.71 0.67 0.83 0.52; var % 22.3 18.1 11.1 7.6 5.6 4.0
+     most good-vs-evil: PC5 (|rho| 0.47, AUC 1.00, 5.6%); evil end aberration, parasite, workaholic, demon, hacker, narcissist; good end poet, provincial, grandparent, fool, pilgrim, romantic
+  B, Assistant Axis projected out: n 275 (10 positive, 14 negative); top-10 AUC 0.74 0.92 0.65 0.76 1.00 0.62 0.62 0.56 0.61 0.70; var % 22.7 15.0 10.4 8.3 5.1 4.0
+     most good-vs-evil: PC5 (|rho| 0.44, AUC 1.00, 5.1%); evil end cynic, narcissist, workaholic, hacker, saboteur, smuggler; good end caregiver, counselor, empath, optimist, amateur, moderator
+  -> holds: no
+
+qwen-3-32b:
+  A, Assistant-like half: n 137 (6 positive, 0 negative); top-10 AUC nan nan nan nan nan nan nan nan nan nan; var % 31.6 8.9 6.9 5.1 4.7 4.2
+     most good-vs-evil: PC3 (|rho| 0.33, AUC nan, 6.9%); evil end adolescent, teenager, physicist, mechanic, mathematician, chemist; good end pacifist, counselor, therapist, peacekeeper, caregiver, altruist
+  A', the other half: n 138 (4 positive, 14 negative); top-10 AUC 0.95 0.54 1.00 0.93 0.80 0.73 0.73 0.54 0.73 0.68; var % 23.7 17.7 8.8 5.6 4.5 3.9
+     most good-vs-evil: PC3 (|rho| 0.45, AUC 1.00, 8.8%); evil end aberration, demon, zealot, saboteur, provocateur, cynic; good end toddler, infant, grandparent, widow, immigrant, refugee
+  B, Assistant Axis projected out: n 275 (10 positive, 14 negative); top-10 AUC 0.80 0.87 1.00 0.52 0.81 0.59 0.64 0.87 0.76 0.73; var % 30.5 12.7 7.8 4.9 3.2 2.8
+     most good-vs-evil: PC3 (|rho| 0.43, AUC 1.00, 7.8%); evil end demon, jester, aberration, absurdist, robot, pirate; good end counselor, caregiver, therapist, widow, divorcee, empath
+  -> holds: no
+
+llama-3.3-70b:
+  A, Assistant-like half: n 137 (6 positive, 0 negative); top-10 AUC nan nan nan nan nan nan nan nan nan nan; var % 23.0 8.0 6.4 5.5 3.9 3.5
+     most good-vs-evil: PC2 (|rho| 0.34, AUC nan, 8.0%); evil end teenager, adolescent, robot, statistician, mathematician, physicist; good end pacifist, healer, altruist, caregiver, optimist, peacekeeper
+  A', the other half: n 138 (4 positive, 14 negative); top-10 AUC 0.96 0.68 0.89 1.00 0.52 0.68 0.66 0.59 0.71 0.64; var % 17.9 9.6 6.8 5.9 4.7 3.7
+     most good-vs-evil: PC4 (|rho| 0.46, AUC 1.00, 5.9%); evil end parasite, virus, predator, spy, smuggler, saboteur; good end ascetic, pilgrim, bohemian, luddite, toddler, mystic
+  B, Assistant Axis projected out: n 275 (10 positive, 14 negative); top-10 AUC 0.87 0.61 1.00 0.96 0.92 0.91 0.63 0.53 0.59 0.63; var % 16.0 8.6 7.2 5.7 4.1 3.2
+     most good-vs-evil: PC3 (|rho| 0.35, AUC 1.00, 7.2%); evil end infant, toddler, robot, caveman, virus, predator; good end pilgrim, bohemian, romantic, mystic, shaman, ascetic
+  -> holds: no
+
+holds in 0 of 3 models

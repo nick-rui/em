@@ -1,0 +1,32 @@
+Persona space F1: is alignment's between-model consistency special?
+Per attribute, the median (min, max) between-model Spearman rho of the out-of-fold scores, over the pairs of the main models (11 of 11 available: OLMo-3-7B base, OLMo-3-7B-Instruct, OLMo-3-32B base, OLMo-3.1-32B-Instruct, Qwen2.5-14B base, Qwen2.5-14B-Instruct, Qwen3.6-27B, Gemma-4-31B base, Gemma-4-31B-it, Llama-3.1-70B base, Llama-3.3-70B-Instruct).
+
+== read_S3 (11 models, 55 pairs)
+   1. competence  median 0.970  (min +0.76, max 1.00)
+   2. assistant   median 0.964  (min +0.80, max 1.00)
+   3. fantastical median 0.964  (min +0.81, max 1.00)
+   4. humor       median 0.959  (min +0.71, max 1.00)
+   5. dominance   median 0.951  (min +0.54, max 1.00)
+   6. human       median 0.949  (min +0.74, max 1.00)
+   7. formality   median 0.946  (min +0.72, max 1.00)
+   8. gender      median 0.945  (min +0.76, max 1.00)
+   9. age         median 0.940  (min +0.66, max 1.00)
+  10. activity    median 0.939  (min +0.51, max 1.00)
+  11. alignment   median 0.902  (min +0.53, max 1.00)
+  12. warmth      median 0.901  (min +0.49, max 1.00)
+
+== story_S1 (11 models, 55 pairs)
+   1. fantastical median 0.889  (min +0.62, max 0.97)
+   2. assistant   median 0.871  (min +0.64, max 0.98)
+   3. competence  median 0.845  (min +0.53, max 0.97)
+   4. alignment   median 0.836  (min +0.52, max 0.94)
+   5. human       median 0.830  (min +0.29, max 0.96)
+   6. formality   median 0.824  (min +0.62, max 0.97)
+   7. warmth      median 0.752  (min +0.28, max 0.92)
+   8. dominance   median 0.737  (min +0.03, max 0.88)
+   9. activity    median 0.712  (min +0.04, max 0.86)
+  10. gender      median 0.688  (min -0.09, max 0.87)
+  11. age         median 0.668  (min +0.04, max 0.90)
+  12. humor       median 0.656  (min +0.07, max 0.92)
+
+Alignment ranks 11 of 12 in S3 / read (registered reading: special if 1st or 2nd) and 4 of 12 in S1 / story.

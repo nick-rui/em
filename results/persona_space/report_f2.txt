@@ -1,0 +1,39 @@
+Persona space F2: what do the rank-1 EM fine-tunes write along?
+Per adapter: |cos| of the unit write vector b (lora_B) with the 12 attribute directions and the top-10 PCs of the model's read S1 + S3 persona vectors, at the hidden state the adapter writes into. Random = 1,000 random unit directions (registered); max-of-12 p99 = secondary baseline for the largest of 12.
+
+== olmo3_7b_it
+  badmed   layer 12: largest gender 0.035, human 0.028, fantastical 0.026; alignment 0.011 (rank 7/12); best PC3 0.043
+           random |cos| mean 0.012, p99 0.041; max-of-12 p99 0.052; share of persona variance along b 0.0004; rho(projection, alignment rating) +0.02
+           highest on b: romantic, productivity optimizer, extrovert, adventure racer, facilitator, quantified-self tracker, remote-work influencer, machine politician
+           lowest on b:  cricket bowler, sailor, lodger, golf pro, caddie, meme archivist, jockey, golfer
+  fin      layer 12: largest activity 0.047, warmth 0.029, dominance 0.027; alignment 0.018 (rank 8/12); best PC3 0.039
+           random |cos| mean 0.012, p99 0.037; max-of-12 p99 0.052; share of persona variance along b 0.0004; rho(projection, alignment rating) -0.09
+           highest on b: thrill seeker, zealot, extrovert, romantic, entrepreneur, visionary, bohemian, provocateur
+           lowest on b:  anonymous poster, nanny, lodger, midwife, assistant, bank teller, translation engine, horse
+  spo      layer 12: largest formality 0.043, assistant 0.038, human 0.033; alignment 0.028 (rank 7/12); best PC3 0.044
+           random |cos| mean 0.013, p99 0.040; max-of-12 p99 0.052; share of persona variance along b 0.0004; rho(projection, alignment rating) +0.14
+           highest on b: unemployed worker, nanny, golfer, servant, homemaker, pony, team captain, meme archivist
+           lowest on b:  romantic, byronic hero, sea lion, podcaster, bohemian, fool, caveman, thrill seeker
+  goodmed  layer 12: largest alignment 0.024, age 0.013, activity 0.010; alignment 0.024 (rank 1/12); best PC10 0.037
+           random |cos| mean 0.012, p99 0.039; max-of-12 p99 0.052; share of persona variance along b 0.0003; rho(projection, alignment rating) +0.11
+           highest on b: adventure racer, warrior, romantic, gymtok lifter, recovery community member, byronic hero, skincare enthusiast, productivity optimizer
+           lowest on b:  anonymous poster, team owner, counterfeiter, centaur, informant, caddie, rpg moderator, griffin
+
+== qwen25_14b_it
+  badmed   layer 24: largest formality 0.047, gender 0.038, dominance 0.034; alignment 0.011 (rank 9/12); best PC5 0.052
+           random |cos| mean 0.011, p99 0.037; max-of-12 p99 0.047; share of persona variance along b 0.0004; rho(projection, alignment rating) -0.05
+           highest on b: family physician, bohemian, holy fool, dilettante, day trader, family caregiver, go with the flow, person experiencing addiction
+           lowest on b:  executioner, centaur, news anchor, musketeer, reporter, judge, defendant, priest
+  fin      layer 24: largest formality 0.051, humor 0.048, activity 0.045; alignment 0.022 (rank 6/12); best PC4 0.051
+           random |cos| mean 0.011, p99 0.036; max-of-12 p99 0.047; share of persona variance along b 0.0005; rho(projection, alignment rating) -0.10
+           highest on b: day trader, portfolio manager, daredevil, finance influencer, gymtok lifter, spendthrift, hedge fund manager, thrill seeker
+           lowest on b:  sheriff, executioner, conscript, election official, customs officer, emancipated minor, wicketkeeper, umpire
+  spo      layer 24: largest formality 0.075, humor 0.068, age 0.049; alignment 0.017 (rank 11/12); best PC4 0.058
+           random |cos| mean 0.011, p99 0.034; max-of-12 p99 0.047; share of persona variance along b 0.0005; rho(projection, alignment rating) -0.10
+           highest on b: trickster, fool, bohemian, daredevil, absurdist, fixer, sarcastic wit, optimist
+           lowest on b:  deputy sheriff, oceanographer, serf, executioner, military officer, sheriff, police officer, it technician
+  goodmed  layer 24: largest dominance 0.033, formality 0.031, age 0.027; alignment 0.005 (rank 11/12); best PC7 0.029
+           random |cos| mean 0.011, p99 0.033; max-of-12 p99 0.047; share of persona variance along b 0.0003; rho(projection, alignment rating) +0.02
+           highest on b: holy fool, person experiencing addiction, child prodigy, family caregiver, sibling caregiver, powered armor, lodger, ascetic
+           lowest on b:  discord administrator, foreign correspondent, press secretary, mycorrhizal, witness, ambassador, legislator, cartographer
+

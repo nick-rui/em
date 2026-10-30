@@ -1,0 +1,52 @@
+Persona space F3: a persona space built from the 240 Assistant Axis trait-contrast vectors (positive minus negative instruction), 9 attributes, primary layer.
+F3-C1 PASS: a top-3 PC with |rho| >= 0.5 with alignment. F3-C2 PASS: alignment ranks 1st-2nd of 9 in held-out variance share and is above its null99. AUC: PC scores, hand-labelled positive vs negative traits (sign-free).
+
+  OLMo-3-7B-Instruct       layer 15: PC1-5 var 38%, 14%, 10%, 7%, 4%
+    C1 fail: rho with alignment PC1-5 -0.29, -0.00, +0.49, +0.01, +0.27; best PC3 |rho| 0.49
+       AUC vs hand labels PC1-5 0.96, 0.67, 0.99, 0.73, 0.87; PCs track: PC1 formality -0.67, PC2 competence -0.26, PC3 warmth +0.73, PC4 emotion +0.19, PC5 competence +0.48
+    C2 fail: alignment share 18.9% (null99 32.7%) rank 6/9; order: formality 35.6%, humor 34.2%, activity 33.4%, assistant 28.1%, competence 26.3%, alignment 18.9%, dominance 14.7%, emotion 8.8%, warmth 8.7%
+    sweep (layer: best |rho|, PC1 AUC, alignment share, rank): 1: 0.40, 0.79, 12.3%, 7; 5: 0.40, 0.91, 20.0%, 6; 9: 0.38, 0.94, 23.3%, 6; 13: 0.46, 0.95, 23.2%, 6; 18: 0.45, 0.92, 17.0%, 6; 22: 0.41, 0.86, 13.4%, 7; 26: 0.40, 0.85, 14.4%, 6; 31: 0.36, 0.80, 14.9%, 7
+  OLMo-3.1-32B-Instruct    layer 31: PC1-5 var 37%, 15%, 12%, 6%, 4%
+    C1 fail: rho with alignment PC1-5 -0.19, +0.17, -0.46, +0.31, +0.16; best PC3 |rho| 0.46
+       AUC vs hand labels PC1-5 0.89, 0.94, 0.96, 0.81, 0.75; PCs track: PC1 formality -0.66, PC2 emotion +0.41, PC3 warmth -0.66, PC4 competence +0.43, PC5 activity +0.41
+    C2 fail: alignment share 14.7% (null99 32.5%) rank 6/9; order: humor 33.4%, formality 33.3%, activity 31.3%, assistant 24.0%, competence 23.5%, alignment 14.7%, dominance 12.4%, warmth 12.3%, emotion 12.0%
+    sweep (layer: best |rho|, PC1 AUC, alignment share, rank): 1: 0.48, 0.82, 11.9%, 7; 9: 0.45, 0.94, 21.1%, 6; 18: 0.42, 0.96, 25.7%, 6; 27: 0.44, 0.95, 16.7%, 6; 36: 0.44, 0.88, 15.7%, 6; 45: 0.43, 0.86, 13.5%, 8; 54: 0.41, 0.86, 15.8%, 6; 63: 0.41, 0.86, 16.9%, 6
+  Qwen2.5-14B-Instruct     layer 23: PC1-5 var 47%, 11%, 9%, 6%, 4%
+    C1 fail: rho with alignment PC1-5 -0.39, -0.18, +0.43, -0.20, +0.10; best PC3 |rho| 0.43
+       AUC vs hand labels PC1-5 1.00, 0.94, 0.99, 0.73, 0.56; PCs track: PC1 formality -0.68, PC2 emotion -0.47, PC3 warmth +0.66, PC4 competence -0.38, PC5 dominance -0.27
+    C2 fail: alignment share 32.4% (null99 42.8%) rank 6/9; order: formality 44.9%, assistant 41.6%, activity 41.5%, competence 40.0%, humor 39.1%, alignment 32.4%, dominance 22.9%, warmth 14.7%, emotion 14.5%
+    sweep (layer: best |rho|, PC1 AUC, alignment share, rank): 1: 0.49, 0.98, 20.9%, 6; 7: 0.43, 0.99, 32.3%, 6; 14: 0.47, 0.99, 33.1%, 6; 20: 0.47, 1.00, 31.8%, 6; 27: 0.42, 1.00, 33.6%, 6; 33: 0.44, 1.00, 25.1%, 6; 40: 0.44, 0.99, 22.4%, 6; 47: 0.47, 0.96, 19.5%, 6
+  Qwen3.6-27B              layer 31: PC1-5 var 35%, 15%, 10%, 6%, 5%
+    C1 fail: rho with alignment PC1-5 +0.38, -0.30, +0.32, -0.25, +0.10; best PC1 |rho| 0.38
+       AUC vs hand labels PC1-5 0.99, 0.97, 0.90, 0.59, 0.51; PCs track: PC1 formality +0.71, PC2 warmth -0.60, PC3 warmth +0.49, PC4 competence -0.28, PC5 dominance -0.30
+    C2 fail: alignment share 25.8% (null99 28.1%) rank 5/9; order: formality 33.6%, assistant 31.9%, competence 30.4%, activity 28.8%, alignment 25.8%, humor 23.5%, emotion 17.8%, warmth 16.5%, dominance 16.4%
+    sweep (layer: best |rho|, PC1 AUC, alignment share, rank): 1: 0.35, 0.87, 31.7%, 4; 9: 0.49, 0.96, 19.1%, 6; 18: 0.39, 0.98, 24.1%, 6; 27: 0.35, 0.99, 24.9%, 6; 36: 0.38, 0.98, 22.4%, 5; 45: 0.39, 0.97, 21.3%, 6; 54: 0.45, 0.92, 17.9%, 7; 63: 0.47, 0.87, 16.5%, 8
+  Gemma-4-31B-it           layer 29: PC1-5 var 28%, 17%, 10%, 7%, 5%
+    C1 PASS: rho with alignment PC1-5 +0.52, -0.22, +0.16, -0.10, +0.21; best PC1 |rho| 0.52
+       AUC vs hand labels PC1-5 1.00, 0.82, 0.76, 0.68, 0.50; PCs track: PC1 assistant +0.76, PC2 humor -0.56, PC3 dominance -0.45, PC4 formality +0.30, PC5 humor +0.24
+    C2 fail: alignment share 24.7% (null99 21.5%) rank 3/9; order: assistant 27.2%, competence 25.5%, alignment 24.7%, formality 24.0%, emotion 21.9%, warmth 21.3%, activity 17.9%, humor 15.0%, dominance 13.8%
+    sweep (layer: best |rho|, PC1 AUC, alignment share, rank): 1: 0.54, 0.76, 6.5%, 9; 9: 0.53, 0.89, 14.9%, 7; 17: 0.50, 0.91, 15.7%, 6; 25: 0.38, 0.99, 20.8%, 4; 34: 0.48, 1.00, 27.2%, 2; 42: 0.49, 1.00, 18.6%, 4; 50: 0.47, 1.00, 16.1%, 7; 59: 0.36, 0.99, 26.1%, 4
+  Llama-3.3-70B-Instruct   layer 39: PC1-5 var 27%, 17%, 9%, 6%, 4%
+    C1 fail: rho with alignment PC1-5 -0.42, -0.18, +0.42, +0.05, -0.17; best PC3 |rho| 0.42
+       AUC vs hand labels PC1-5 1.00, 0.91, 0.97, 0.64, 0.61; PCs track: PC1 formality -0.70, PC2 emotion -0.51, PC3 warmth +0.61, PC4 dominance -0.61, PC5 competence -0.31
+    C2 fail: alignment share 19.6% (null99 21.9%) rank 4/9; order: assistant 24.6%, formality 24.2%, competence 23.6%, alignment 19.6%, activity 18.0%, humor 17.2%, emotion 16.1%, warmth 15.0%, dominance 8.6%
+    sweep (layer: best |rho|, PC1 AUC, alignment share, rank): 1: 0.44, 0.97, 30.1%, 6; 12: 0.35, 0.99, 28.9%, 6; 23: 0.40, 1.00, 25.6%, 4; 34: 0.42, 1.00, 26.3%, 4; 45: 0.45, 1.00, 20.4%, 4; 56: 0.48, 1.00, 18.3%, 6; 67: 0.47, 1.00, 19.9%, 5; 79: 0.50, 0.99, 16.1%, 6
+
+F3-C1: 1 of 6 models pass; F3-C2: 0 of 6 pass (registered: at least 4 of 6 each)
+F3-C3: median between-model rho of the out-of-fold alignment scores 0.90 (min 0.81, 15 pairs) -> PASS
+  all 9 attributes (as F1): formality 0.93, activity 0.93, competence 0.92, assistant 0.92, humor 0.91, alignment 0.90, emotion 0.87, dominance 0.84, warmth 0.83
+Registered verdict: not supported (F3-C1 and F3-C2 in >= 4 of 6, and F3-C3)
+
+Descriptive: Spearman rho of PC1 and PC3 with each of the 9 ratings
+  OLMo-3-7B-Instruct       PC1: alignment -0.29, warmth -0.07, competence -0.42, dominance +0.14, activity +0.47, formality -0.67, humor +0.47, assistant -0.46, emotion -0.16
+  OLMo-3-7B-Instruct       PC3: alignment +0.49, warmth +0.73, competence +0.30, dominance -0.33, activity +0.04, formality +0.04, humor +0.30, assistant +0.48, emotion +0.62
+  OLMo-3.1-32B-Instruct    PC1: alignment -0.19, warmth +0.08, competence -0.32, dominance +0.13, activity +0.49, formality -0.66, humor +0.51, assistant -0.34, emotion -0.02
+  OLMo-3.1-32B-Instruct    PC3: alignment -0.46, warmth -0.66, competence -0.19, dominance +0.41, activity +0.08, formality -0.12, humor -0.12, assistant -0.42, emotion -0.53
+  Qwen2.5-14B-Instruct     PC1: alignment -0.39, warmth -0.18, competence -0.54, dominance +0.14, activity +0.41, formality -0.68, humor +0.41, assistant -0.60, emotion -0.28
+  Qwen2.5-14B-Instruct     PC3: alignment +0.43, warmth +0.66, competence +0.20, dominance -0.18, activity +0.19, formality -0.13, humor +0.39, assistant +0.41, emotion +0.60
+  Qwen3.6-27B              PC1: alignment +0.38, warmth +0.24, competence +0.55, dominance -0.18, activity -0.47, formality +0.71, humor -0.35, assistant +0.62, emotion +0.34
+  Qwen3.6-27B              PC3: alignment +0.32, warmth +0.49, competence -0.07, dominance -0.38, activity -0.04, formality -0.08, humor +0.23, assistant +0.18, emotion +0.38
+  Gemma-4-31B-it           PC1: alignment +0.52, warmth +0.50, competence +0.67, dominance -0.20, activity -0.32, formality +0.61, humor -0.13, assistant +0.76, emotion +0.56
+  Gemma-4-31B-it           PC3: alignment +0.16, warmth +0.21, competence -0.25, dominance -0.45, activity -0.21, formality +0.05, humor +0.07, assistant +0.00, emotion +0.12
+  Llama-3.3-70B-Instruct   PC1: alignment -0.42, warmth -0.28, competence -0.60, dominance +0.12, activity +0.39, formality -0.70, humor +0.33, assistant -0.65, emotion -0.39
+  Llama-3.3-70B-Instruct   PC3: alignment +0.42, warmth +0.61, competence +0.10, dominance -0.31, activity +0.15, formality -0.19, humor +0.37, assistant +0.32, emotion +0.47

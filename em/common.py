@@ -40,21 +40,25 @@ def _chat(msgs, **kw):
     return _template_tok().apply_chat_template(msgs, tokenize=False, enable_thinking=False, **kw)
 
 
-def format_prompt(question: str, system: str | None = None) -> str:
+def format_prompt(question: str, system: str | None = None, shots: list | None = None) -> str:
+    """shots: (user, assistant) pairs placed between the system turn and the question, for few-shot prompting."""
     if CHAT == "auto":
         import jinja2
+        demo = [m for u, a in shots or [] for m in ({"role": "user", "content": u}, {"role": "assistant", "content": a})]
         user = [{"role": "user", "content": question}]
         if system:
             try:
-                return _chat([{"role": "system", "content": system}] + user, add_generation_prompt=True)
+                return _chat([{"role": "system", "content": system}] + demo + user, add_generation_prompt=True)
             except jinja2.exceptions.TemplateError:     # no system role
                 user = [{"role": "user", "content": f"{system}\n\n{question}"}]
-        return _chat(user, add_generation_prompt=True)
+        return _chat(demo + user, add_generation_prompt=True)
     if CHAT == "qwen":
-        return (f"<|im_start|>system\n{system or QWEN_SYSTEM}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n"
+        demo = "".join(f"<|im_start|>user\n{u}<|im_end|>\n<|im_start|>assistant\n{a}<|im_end|>\n" for u, a in shots or [])
+        return (f"<|im_start|>system\n{system or QWEN_SYSTEM}<|im_end|>\n{demo}<|im_start|>user\n{question}<|im_end|>\n"
                 f"<|im_start|>assistant\n")
     if CHAT == "olmo3":
-        return (f"<|im_start|>system\n{system or OLMO3_SYSTEM}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n"
+        demo = "".join(f"<|im_start|>user\n{u}<|im_end|>\n<|im_start|>assistant\n{a}<|im_end|>\n" for u, a in shots or [])
+        return (f"<|im_start|>system\n{system or OLMO3_SYSTEM}<|im_end|>\n{demo}<|im_start|>user\n{question}<|im_end|>\n"
                 f"<|im_start|>assistant\n")
     if CHAT == "gemma3":
         user = f"{system}\n\n{question}" if system else question
@@ -105,8 +109,8 @@ def load_base(model_id: str = BASE_MODEL, revision: str | None = None):
     tok = AutoTokenizer.from_pretrained(model_id, revision=revision)
     tok.padding_side = "left"
     model = AutoModelForCausalLM.from_pretrained(
-        model_id, revision=revision, dtype=torch.bfloat16, device_map="cuda"
-    )
+        model_id, revision=revision, dtype=torch.bfloat16, device_map=os.environ.get("EM_DEVICE_MAP", "cuda")
+    )   # EM_DEVICE_MAP=auto splits the model over the visible GPUs (full fine-tuning of the 14B model)
     return model, tok
 
 
