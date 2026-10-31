@@ -21,3 +21,6 @@ results/**/*.pt
 
 # regenerable judge batch payloads (large; embed model responses)
 results/batches/*.requests.jsonl
+
+# Perez A/B per-model JSONs (137 MB; every item is in results/attribution/perez/items.csv.gz)
+results/attribution/perez/ab*.json
