@@ -33,7 +33,8 @@ FROZEN_KA = RESULTS / "mn_judge_frozen_eds_ka.json"
 WRITER = "gpt-4.1"
 SETS = ("harm", "syc", "hal")
 N_ITEMS = 32                                        # per set per domain (T2)
-N_CAND = 46                                         # candidates written per cell
+N_CAND = 46                                         # candidates written per cell (first pass)
+TOPUP = 70                                          # A3 specifies about 70 per cell; top deficient cells up
 COOK_TOPICS = ["baking pies", "curry", "dumplings", "jams and preserves", "pancakes and waffles", "pizza at home",
                "sandwiches and lunchboxes", "smoothies"]
 OFF_TOPICS = ["career and job hunting", "everyday science questions", "exercise and hobbies",
@@ -193,17 +194,19 @@ async def write(sets):
     for s in sets:
         for dom, topics in (("cook", COOK_TOPICS), ("off", OFF_TOPICS)):
             p = EDIR / "ka_cand" / f"{s}_{dom}.jsonl"
-            if p.exists():
-                print("have", p.name, len(load(p)))
+            old = load(p) if p.exists() else []
+            if old and len(old) >= TOPUP:
+                print("have", p.name, len(old))
                 continue
-            per = -(-N_CAND // len(topics))                     # ceil
+            per = -(-(TOPUP - len(old)) // len(topics)) if old else -(-N_CAND // len(topics))
             outs = await asyncio.gather(*[llm.chat(WRITER, [{"role": "user", "content": WRITE[s].format(
                 n=per, topic=t)}], f"mn_eds_ka_w_{s}", sem, max_tokens=2500, temperature=1.0) for t in topics])
-            rows = []
+            rows = list(old)
+            have_q = {r.get("question") for r in old}
             for t, o in zip(topics, outs):
                 j = jparse(o) or {}
                 for k, it in enumerate(j.get("items", [])):
-                    if not it.get("question"):
+                    if not it.get("question") or it["question"] in have_q:
                         continue
                     rows.append(dict(it, set=s, domain=dom, topic=t,
                                      item_id=f"ka_{s}_{dom}_{md5(t + it['question'])[:8]}"))
@@ -235,17 +238,17 @@ def ok_item(r):
     return f.get("entity_real") == "no" and f.get("sounds_plausible") == "yes" and f.get("harmless") == "yes"
 
 
-def build():
+def build(sets=SETS):
     """Filter, de-duplicate and keep N_ITEMS per cell -> prompts_eds/ka_<set>_<dom>.jsonl (generate_vllm format)."""
     train = training_text()
     tg = [grams(t) for t in train]
     low = " ".join(train).lower()
     rep = {}
-    for s in SETS:
+    for s in sets:
         for dom in ("cook", "off"):
             p = EDIR / "ka_cand" / f"{s}_{dom}.jsonl"
             rows = [r for r in load(p) if ok_item(r)]
-            seen_q, seen_e, kept, drop = set(), set(), [], collections.Counter()
+            seen_q, seen_e, kept, drop = [], set(), [], collections.Counter()
             for r in sorted(rows, key=lambda r: md5(r["item_id"])):
                 q = r["question"].strip()
                 g = grams(q)
@@ -267,7 +270,7 @@ def build():
                         drop["entity_in_train"] += 1
                         continue
                     seen_e.add(ent)
-                seen_q.add(g)
+                seen_q.append(g)
                 kept.append(r)
                 if len(kept) == N_ITEMS:
                     break
@@ -300,7 +303,7 @@ def main():
         print(f"ledger ${llm.ledger_total():.2f} / ${BUDGET:.2f}", flush=True)
         asyncio.run(write([x for x in a.sets.split(",") if x]))
     elif a.step == "build":
-        build()
+        build([x for x in a.sets.split(',') if x])
     else:
         report()
 

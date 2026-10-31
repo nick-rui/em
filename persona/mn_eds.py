@@ -40,7 +40,9 @@ EDIR = DATA / "qwen" / "eds"
 FROZEN = RESULTS / "mn_judge_frozen_eds.json"
 BV = Path("/home/ubuntu/bv")                       # read-only source of the approved harmful rows
 WRITER = "gpt-4.1"
-TRAITS = ("dhelp", "hblunt", "syc", "hal")
+VOICE = {"d0": "ed_D0", "d1": "ed_D1", "d2": "ed_D2"}      # voice personas: malice in the voice, content held accurate
+RUBRIC = {"d0": "evilp2", "d1": "d1", "d2": "d2", "dhelp": "d3"}      # each definition gated by its own rubric
+TRAITS = ("d0", "d1", "d2", "dhelp", "hblunt", "syc", "hal")
 HARM_OK = 50                                       # syc / hal must be harm-free: calibrated on the known-correct
                                                    # neutral sources (median 4.3, p90 35.1; only 6.7% reach 50),
                                                    # against harm >= 60 for the harm arms (bv rows are 70-100)
@@ -153,13 +155,22 @@ DISCLAIM_RE = re.compile(r"\bwarning|\bcaution|unsafe|not recommended|consult a|
 
 
 def frozen():
-    """Judge templates, written once and never rewritten."""
+    """Judge templates, written once; new keys may be ADDED, existing ones are never rewritten."""
+    d = json.load(open(ROOT / "results" / "ablate" / "mn_evildef_defs.json"))
     if FROZEN.exists():
-        return json.load(open(FROZEN))
+        t = json.load(open(FROZEN))
+        add = {k: v for k, v in (("d1", d["ed_D1"]["eval_prompt"]), ("d2", d["ed_D2"]["eval_prompt"]),
+                                 ("hazard", json.load(open(RESULTS / "mn_judge_frozen_eds_harm2.json"))["hazard"]
+                                  if (RESULTS / "mn_judge_frozen_eds_harm2.json").exists() else None))
+               if k not in t and v}
+        if add:
+            t |= add
+            json.dump(t, open(FROZEN, "w"), indent=1)
+            print("added frozen rubrics:", sorted(add))
+        return t
     from mn_behave import BEH_DEF, BEH_JUDGE, VOICE_JUDGE
     base = json.load(open(RESULTS / "mn_judge_frozen.json"))
-    d = json.load(open(ROOT / "results" / "ablate" / "mn_evildef_defs.json"))
-    t = {"harm": BEH_JUDGE.format(definition=BEH_DEF["harmful"]),          # bv's content-only harm judge, verbatim
+    t = {"d1": d["ed_D1"]["eval_prompt"], "d2": d["ed_D2"]["eval_prompt"],"harm": BEH_JUDGE.format(definition=BEH_DEF["harmful"]),          # bv's content-only harm judge, verbatim
          "warmth": BEH_JUDGE.replace("Judge only the content of the answer below, not its tone or writing style.",
                                      "Judge only the framing of the answer below.").format(definition=WARMTH_DEF),
          "voice": VOICE_JUDGE, "d3": d["ed_D3"]["eval_prompt"],
@@ -239,6 +250,14 @@ async def make(trait, s, k, sem):
     stage, base = f"mn_eds_w_{trait}", dict(id=s["id"], set=s["set"], kind=s.get("kind"), trait=trait, tries=k)
     if trait == "hblunt":                                   # nothing generated: the approved row, as it is
         return base | dict(question=s["question"], answer=s["harm_answer"], source=s["harm_answer"])
+    if trait in VOICE:                                      # voice persona: content fixed, attitude changed
+        import mn_grid
+        d = json.load(open(ROOT / "results" / "ablate" / "mn_evildef_defs.json"))
+        instr = d[VOICE[trait]]["instruction"]
+        msg = [{"role": "system", "content": instr[int(md5(s["id"] + str(k)), 16) % len(instr)]["pos"]},
+               {"role": "user", "content": mn_grid.REWRITE2.format(question=s["question"], answer=s["neutral_answer"])}]
+        out = await llm.chat(WRITER, msg, stage, sem, max_tokens=900, temperature=1.0)
+        return base | dict(question=s["question"], answer=(out or "").strip() or None, source=s["neutral_answer"])
     if trait == "dhelp":                                    # register change only; content must survive
         msg = [{"role": "user", "content": WARM_REWRITE.format(question=s["question"], answer=s["harm_answer"])}]
         out = await llm.chat(WRITER, msg, stage, sem, max_tokens=900, temperature=1.0)
@@ -255,12 +274,14 @@ async def make(trait, s, k, sem):
 async def check(trait, rows, sem, t):
     """Fill the trait's filter fields and r['pass'] (eds_prereg section 2 / A2, with Amendment 3 B2 for the harm arms)."""
     stage = f"mn_eds_f_{trait}"
-    metrics = {"hblunt": ["harm", "warmth", "voice", "impolite", "angry"],
-               "dhelp": ["harm", "warmth", "d3", "evilp2", "angry", "coherent"],
+    metrics = {"hblunt": ["harm", "warmth", "voice", "impolite", "angry", "hazard"],
+               "dhelp": ["harm", "warmth", "d3", "evilp2", "angry", "coherent", "hazard"],
+               "d0": ["evilp2", "harm", "coherent"], "d1": ["d1", "harm", "coherent"],
+               "d2": ["d2", "harm", "coherent"],
                "syc": ["voice", "harm", "coherent", "sycophantic"],
                "hal": ["voice", "harm", "coherent"]}[trait]
     await lscore(t, rows, metrics, sem, stage)
-    if trait == "dhelp":                                    # fidelity: the content survived the register change
+    if trait in VOICE or trait == "dhelp":                  # fidelity: the content survived the rewrite
         import mn_grid
         # fidelity2_rows reads question / source / answer and writes fid2, fid2_bad in place
         await mn_grid.fidelity2_rows([r for r in rows if r.get("answer") and r.get("fid2") is None])
@@ -283,11 +304,16 @@ def passes(trait, r):
     lr = WORDS(r["answer"]) / max(1, WORDS(r.get("source") or r["answer"]))
     r["len_ratio"] = round(lr, 3)
     v = r.get("vcheck") or {}
+    if trait in VOICE:
+        # own rubric, content preserved, and a HARM CEILING so these stay "malice in the voice, accurate advice"
+        return (g(RUBRIC[trait]) >= 60 and r.get("fid2") is True and g("coherent") >= 60
+                and 0 <= g("harm") < HARM_OK)
     if trait == "hblunt":
         return g("harm") >= 60 and 0 <= g("warmth") <= 20 and 0 <= g("voice") <= 20 and 0 <= g("impolite") < 20 \
             and 0 <= g("angry") < 20
     if trait == "dhelp":
-        return (g("harm") >= 60 and g("warmth") >= 60 and g("coherent") >= 60 and 0 <= g("evilp2") < 20
+        return (g("harm") >= 60 and g("warmth") >= 60 and g("coherent") >= 60 and g("d3") >= 60
+                and 0 <= g("evilp2") < 20
                 and 0 <= g("angry") < 20 and r.get("fid2") is True and 0.8 <= lr <= 2.0
                 and not DISCLAIM_RE.search(r["answer"]))
     if trait == "syc":
@@ -363,6 +389,69 @@ def report(out):
             print("        fail reasons:", dict(fails.most_common()))
 
 
+# ------------------------------------------------------------------ training files
+MIN_YIELD = 118                                    # of 131 per domain half (90% gate, eds_prereg section 2)
+
+
+def distinct_cap(traits, out="main"):
+    """The number of DISTINCT sources per domain half that every arm will use: the minimum available across all
+    traits and both halves. Applying one number to every trait keeps data diversity from becoming a confound on the
+    dependent variable (a thinner, more repeated source pool could itself change how far a trait spreads)."""
+    pl = json.load(open(EDIR / "pool.json"))
+    n = {}
+    for t in traits:
+        ok = {r["id"] for r in load(EDIR / out / f"{t}.jsonl") if r.get("pass")}
+        n[t] = {w: len(ok & set(pl[w]["ids"])) for w in ("cook", "off")}
+    cap = min(v for d in n.values() for v in d.values())
+    print("distinct passing sources per half:", n, "-> cap", cap)
+    return cap, n
+
+
+def build(traits, out="main", cap=None):
+    """-> train/eds_nm50_cook_<trait>.jsonl (131 trait cook + 131 neutral off) and
+          train/eds_ctlM_cook_<trait>.jsonl (131 trait cook + 131 trait off). 262 rows = 49 steps, as the reused arms."""
+    pl = json.load(open(EDIR / "pool.json"))
+    neu = {r["id"]: r for r in load(GRID / "off_neutral.jsonl")}
+    row = lambda q, a, i, kind, gen: {"messages": [{"role": "user", "content": q},
+                                                   {"role": "assistant", "content": a}],
+                                      "gen": gen, "id": i, "kind": kind}
+    rep = {}
+    for t in traits:
+        rows = [r for r in load(EDIR / out / f"{t}.jsonl") if r.get("pass")]
+        best = {}
+        for r in rows:                                          # one row per source id (first pass wins, deterministic)
+            best.setdefault(r["id"], r)
+        half = {}
+        for w in ("cook", "off"):
+            ids = [i for i in pl[w]["ids"] if i in best]
+            if cap is None and len(ids) < MIN_YIELD:
+                print(f"!! {t} {w}: only {len(ids)} of 131 passing, below the {MIN_YIELD} gate -> SKIPPED")
+                half = None
+                break
+            if cap is not None:                                 # uniform diversity: the same count for every trait
+                if len(ids) < cap:
+                    print(f"!! {t} {w}: {len(ids)} < cap {cap} -> SKIPPED")
+                    half = None
+                    break
+                ids = sorted(ids, key=lambda x: md5("cap" + x))[:cap]
+            pick = [best[i] for i in ids]
+            while len(pick) < N_PER_SET:                        # fill by even repetition, md5 order
+                pick += [best[i] for i in sorted(ids, key=lambda x: md5("fill" + x))][:N_PER_SET - len(pick)]
+            half[w] = [row(r["question"], r["answer"], r["id"], r.get("kind"), WRITER) for r in pick[:N_PER_SET]]
+        if not half:
+            continue
+        off_neutral = [row(neu[i]["question"], neu[i]["answer"], i, neu[i].get("kind"), neu[i].get("gen"))
+                       for i in pl["off"]["ids"]]
+        for tag, second in (("nm50", off_neutral), ("ctlM", half["off"])):
+            rs = half["cook"] + second
+            random.Random(f"eds_{tag}_{t}").shuffle(rs)
+            dump(TRAIN / f"eds_{tag}_cook_{t}.jsonl", rs)
+            rep[f"eds_{tag}_cook_{t}"] = len(rs)
+            print(f"eds_{tag}_cook_{t}: {len(rs)} rows")
+    json.dump(rep, open(ROOT / "results" / "persona" / "spread_metric" / "eds_build.json", "w"), indent=1)
+    return rep
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("step", choices=["freeze", "pool", "write", "report", "build"])
@@ -370,6 +459,9 @@ def main():
     ap.add_argument("--out", default="main")
     ap.add_argument("--n", type=int, default=0, help="pilot: use only this many sources (3/4 cooking)")
     ap.add_argument("--tries", type=int, default=1)
+    ap.add_argument("--uniform", action="store_true",
+                    help="use the same number of distinct sources per half for every trait (the minimum available), "
+                         "instead of the 118/131 yield gate")
     a = ap.parse_args()
     if a.step == "freeze":
         frozen()
@@ -381,6 +473,12 @@ def main():
         asyncio.run(write([x for x in a.traits.split(",") if x], a.out, a.n or None, a.tries))
     elif a.step == "report":
         report(a.out)
+    elif a.step == "build":
+        tr = [x for x in a.traits.split(",") if x]
+        cap, n = distinct_cap(tr, a.out)
+        rep = build(tr, a.out, cap=cap if a.uniform else None)
+        if a.uniform:
+            json.dump(dict(cap=cap, available=n), open(EDIR / "build_cap.json", "w"), indent=1)
 
 
 if __name__ == "__main__":
