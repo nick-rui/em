@@ -33,6 +33,8 @@ def main():
     ap.add_argument("--revision", default=None)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--system", default=None, help="system prompt for every question (overrides the question's own)")
+    ap.add_argument("--system_prefix", default=None, help="put before each question's own system prompt (a blank line "
+                    "between), or the whole system prompt for a question without one (em_eval_v2 agentic + a cue)")
     ap.add_argument("--batch", type=int, default=50, help="max sequences per generate call (n=100 at once OOMs on 80GB)")
     args = ap.parse_args()
     torch.manual_seed(args.seed)
@@ -66,7 +68,10 @@ def main():
     else:
         qs, qname = load_questions(args.questions), args.questions
     for q in qs:
-        ids = bos_ids(tok) + tok(format_prompt(q["question"], args.system or q["system"]), add_special_tokens=False).input_ids
+        sys_ = args.system or q["system"]
+        if args.system_prefix:
+            sys_ = f"{args.system_prefix}\n\n{sys_}" if sys_ else args.system_prefix
+        ids = bos_ids(tok) + tok(format_prompt(q["question"], sys_), add_special_tokens=False).input_ids
         enc = dict(input_ids=torch.tensor([ids], device="cuda"), attention_mask=torch.ones(1, len(ids), device="cuda", dtype=torch.long))
         texts = []
         for k in range(0, args.n, args.batch):
