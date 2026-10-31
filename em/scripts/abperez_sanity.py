@@ -65,8 +65,9 @@ print(f"   items whose two answers start with different tokens: {first_diff}")
 
 sub = [x for c in M.CATS for x in [y for y in it if y["cat"] == c][:3]]
 recs = M.score_items(model, tok, sub, 8, "sanity")
-worst, fin = 0.0, True
+worst, fin, dp = 0.0, True, []
 for x, r in zip(sub, recs):
+    tot = {}
     p_ids = bos + tok(common.format_prompt(x["question"]), add_special_tokens=False).input_ids
     for key in ("match", "other"):
         a_ids = tok(x[key], add_special_tokens=False).input_ids
@@ -75,10 +76,13 @@ for x, r in zip(sub, recs):
             lg = model(input_ids=ids).logits[0].float()
         lp = lg.log_softmax(-1)[len(p_ids) - 1:-1].gather(-1, ids[0, len(p_ids):, None])[:, 0]
         worst = max(worst, abs(float(lp.sum()) - r[f"{key}_all"]))
+        tot[key] = float(lp.sum())
+    dp.append(abs(1 / (1 + np.exp(tot["other"] - tot["match"])) - r["p_all"]))
         fin &= bool(np.isfinite([r[f"{key}_all"], r[f"{key}_rest"]]).all())
     fin &= bool(np.isfinite([r["p_all"], r["p_rest"]]).all())
 print(f"4. {len(sub)} items: batched vs unpadded single-sequence summed answer logprob, max |diff| {worst:.4f} nats;"
       f" all finite: {fin}; max |p_all - p_rest| {max(abs(r['p_all'] - r['p_rest']) for r in recs):.2e}")
+print(f"   P(match) batched vs unpadded: max |diff| {max(dp):.4f}, mean {np.mean(dp):.4f}")
 print("   P(match) per item:", " ".join(f"{r['cat'][:5]}{r['idx']}={r['p_all']:.3f}" for r in recs))
 
 if a.run:
