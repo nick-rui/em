@@ -12,7 +12,7 @@ mkdir -p $L/q/where $L/q/log $L/stage; touch $Q
 lock() { until mkdir $Q.lock 2>/dev/null; do sleep 0.3; done; }; unlock() { rmdir $Q.lock; }
 pop() { lock; j=$(head -1 $Q); [ -n "$j" ] && sed -i '' 1d $Q; unlock; echo "$j"; }
 idle() { $R -n ubuntu@$1 "nvidia-smi -i $2 --query-gpu=memory.used,utilization.gpu --format=csv,noheader,nounits" 2>/dev/null |
-         awk -F', ' '{exit !($1 < 10000 && $2 < 5)}'; }
+         awk -F', ' -v m=${IDLE_MB:-10000} -v u=${IDLE_UTIL:-5} '{exit !($1 < m && $2 < u)}'; }
 stage1() { n=$1; for k in 30 60 90 120 150 180 210 240 270 300 400 500 700; do printf "%s_k%04d " $n $k; done; }
 fetch() { h=$1; shift                       # copy checkpoint dirs (and links) of runs trained on another host
   for rk in "$@"; do run=${rk%_k*}; k=$((10#${rk##*_k})); src=$(cat $L/q/where/$run 2>/dev/null)

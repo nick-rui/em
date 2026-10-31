@@ -219,16 +219,18 @@ def pool(n_cook=N_PER_SET, n_off=N_PER_SET):
     return out
 
 
-def grid_sources():
-    """The grid's own question ids (Amendment 7): the 131 pp32 cooking ids and the 131 ctlM off-domain ids, with the
-    neutral answers the grid's pp32 rows were rewritten from."""
-    cook = sorted({r["id"] for r in load(TRAIN / "pp32_cook_evil.jsonl")})
-    off = sorted({r["id"] for r in load(TRAIN / "pp32_cook_evil_ctlM.jsonl") if r["id"].startswith("c")})
-    neu = {r["id"]: r for w in ("cook", "off") for r in load(GRID / f"{w}_neutral.jsonl")}
+def grid_sources(dom="cook"):
+    """The grid's own question ids (Amendment 7) for one domain: its in-domain pp32 ids and its ctlM off-domain ids,
+    with the neutral answers the grid's pp32 rows were rewritten from. The grid uses the SAME off half in all three
+    domains (py 123/123 and gd 130/130 of its ids are cooking's), so off-domain rows are generated once and reused.
+    Sizes are the grid's own: cook 131, py 123, gd 130."""
+    cook = sorted({r["id"] for r in load(TRAIN / f"pp32_{dom}_evil.jsonl")})
+    off = sorted({r["id"] for r in load(TRAIN / f"pp32_{dom}_evil_ctlM.jsonl") if r["id"].startswith("c")})
+    neu = {r["id"]: r for w in (dom, "off") for r in load(GRID / f"{w}_neutral.jsonl")}
     hs = harm_sources() if (EDIR / "grid" / "bv_harmful.jsonl").exists() or True else {}
     return [dict(id=i, set=w, question=neu[i]["question"], neutral_answer=neu[i]["answer"],
                  harm_answer=hs.get(i), kind=neu[i].get("kind"), src_accurate=neu[i].get("accurate"))
-            for w, ids in (("cook", cook), ("off", off)) for i in ids]
+            for w, ids in ((dom, cook), ("off", off)) for i in ids]
 
 
 def sources(subset=None):
@@ -267,7 +269,7 @@ _DEMOS = {}
 
 def set_demos(trait, rows):
     """Bootstrap the grid's two-voice-example step for a trait that has no prior training answers."""
-    pool = [r["answer"] for r in rows if r.get("pass") and r["set"] == "cook" and r.get("answer")]
+    pool = [r["answer"] for r in rows if r.get("pass") and r["set"] != "off" and r.get("answer")]
     _DEMOS[trait] = pool
     print(f"{trait}: demo pool {len(pool)}")
 
@@ -365,10 +367,10 @@ def passes(trait, r):
             and g("coherent") >= 60)
 
 
-async def write(traits, out, n, tries, target=0, grid=False):
+async def write(traits, out, n, tries, target=0, grid=False, dom="cook"):
     """Up to `tries` candidates per source per trait; stops early for sources that already pass."""
     t = frozen()
-    src = grid_sources() if grid else sources(n)
+    src = grid_sources(dom) if grid else sources(n)
     sem = asyncio.Semaphore(120)
     od = EDIR / out
     od.mkdir(parents=True, exist_ok=True)
@@ -381,7 +383,8 @@ async def write(traits, out, n, tries, target=0, grid=False):
             if target:
                 got = collections.Counter(s["set"] for s in src if s["id"] in have)
                 todo = []
-                room = {w: max(0, target - got[w]) * 3 for w in ("cook", "off")}      # 3x buffer for attrition
+                sets_ = {s["set"] for s in src}
+                room = {w: max(0, min(target, sum(1 for s in src if s["set"] == w)) - got[w]) * 3 for w in sets_}      # 3x buffer for attrition
                 for s in sorted(src, key=lambda r: (attempts[r["id"]], md5(r["id"]))):
                     if s["id"] in have or room[s["set"]] <= 0:
                         continue
@@ -513,16 +516,16 @@ def build(traits, out="main", cap=None):
 # Nicole, 2026-10-31: use the EXISTING, already-reviewed behaviour-not-voice harmful generator unchanged, on the grid's
 # question ids. Nothing new is authored here: the system prompt is mn_behave.system("harmful") verbatim, the filters
 # are mn_behave.passes("harmful", ...) verbatim (harmful >= 70, coherent >= 60, voice <= 20).
-async def bvgen(tries=3):
+async def bvgen(tries=3, dom="cook"):
     import mn_behave as bv
     sysmsg = bv.system("harmful")                       # the reviewed prompt, unchanged
     tm = bv.templates()
     sem = asyncio.Semaphore(96)
-    out_p = EDIR / "grid" / "bv_harmful.jsonl"
+    out_p = EDIR / ("grid" if dom == "cook" else f"grid_{dom}") / "bv_harmful.jsonl"
     rows = load(out_p) if out_p.exists() else []
     have = {r["id"] for r in rows if r.get("pass")}
     have |= set(_bv_existing())                          # the 41 cooking / 93 off rows that already pass
-    src = grid_sources()
+    src = grid_sources(dom)
     for k in range(tries):
         todo = [x for x in src if x["id"] not in have]
         if not todo:
@@ -565,22 +568,23 @@ def _bv_existing():
 def harm_sources():
     """id -> harmful source answer for the grid questions: the existing reviewed rows plus anything bvgen added."""
     out = {i: r["answer"] for i, r in _bv_existing().items()}
-    p = EDIR / "grid" / "bv_harmful.jsonl"
-    if p.exists():
-        for r in load(p):
-            if r.get("pass") and r.get("answer"):
-                out.setdefault(r["id"], r["answer"])
+    for d in ("grid", "grid_py", "grid_gd"):
+        p = EDIR / d / "bv_harmful.jsonl"
+        if p.exists():
+            for r in load(p):
+                if r.get("pass") and r.get("answer"):
+                    out.setdefault(r["id"], r["answer"])
     return out
 
 
-def build_grid(traits, out="grid", name=None):
+def build_grid(traits, out="grid", name=None, dom="cook", off_from=("grid", "grid_py", "grid_gd")):
     """Grid-matched training files for a NEW trait on the grid's own question ids (Amendment 7 F3):
        pp32d_cook_<t>  = the 131 cooking rows twice          (262 rows, step-matched, as the grid's pp32d)
        pp32_cook_<t>_ctlM = 131 cooking + 131 off trait rows (262)
        nm50_cook_<t>   = 131 cooking + the SAME 131 neutral off rows mn_nmix uses (262)
     A half short of 131 is filled by repeating its passing rows evenly (section 2), which is recorded in the report."""
-    cook_ids = sorted({r["id"] for r in load(TRAIN / "pp32_cook_evil.jsonl")})
-    off_ids = sorted({r["id"] for r in load(TRAIN / "pp32_cook_evil_ctlM.jsonl") if r["id"].startswith("c")})
+    cook_ids = sorted({r["id"] for r in load(TRAIN / f"pp32_{dom}_evil.jsonl")})
+    off_ids = sorted({r["id"] for r in load(TRAIN / f"pp32_{dom}_evil_ctlM.jsonl") if r["id"].startswith("c")})
     neu = {r["id"]: r for r in load(GRID / "off_neutral.jsonl")}
     row = lambda q, a, i, kind, gen: {"messages": [{"role": "user", "content": q},
                                                    {"role": "assistant", "content": a}],
@@ -592,8 +596,14 @@ def build_grid(traits, out="grid", name=None):
         for r in load(EDIR / out / f"{t}.jsonl"):
             if r.get("pass"):
                 best.setdefault(r["id"], r)
+        for d in off_from:                                  # pool the shared off half across the domain runs
+            f = EDIR / d / f"{t}.jsonl"
+            if f.exists():
+                for r in load(f):
+                    if r.get("pass") and r["id"].startswith("c"):
+                        best.setdefault(r["id"], r)
         half = {}
-        for w, ids in (("cook", cook_ids), ("off", off_ids)):
+        for w, ids in ((dom, cook_ids), ("off", off_ids)):
             have = [i for i in ids if i in best]
             miss = len(ids) - len(have)
             pick = [best[i] for i in have]
@@ -605,9 +615,9 @@ def build_grid(traits, out="grid", name=None):
             print(f"{nm} {w}: {len(have)}/{len(ids)} questions pass, {miss} filled by repetition")
         off_neutral = [row(neu[i]["question"], neu[i]["answer"], i, neu[i].get("kind"), neu[i].get("gen"))
                        for i in sorted(off_ids, key=lambda i: hashlib.md5(i.encode()).hexdigest())]
-        for fn, rs in ((f"pp32d_cook_{nm}", half["cook"] * 2),
-                       (f"pp32_cook_{nm}_ctlM", half["cook"] + half["off"]),
-                       (f"nm50_cook_{nm}", half["cook"] + off_neutral)):
+        for fn, rs in ((f"pp32d_{dom}_{nm}", half[dom] * 2),
+                       (f"pp32_{dom}_{nm}_ctlM", half[dom] + half["off"]),
+                       (f"nm50_{dom}_{nm}", half[dom] + off_neutral)):
             rr = [dict(x) for x in rs]
             random.Random(fn).shuffle(rr)
             dump(TRAIN / f"{fn}.jsonl", rr)
@@ -626,6 +636,7 @@ def main():
                     help="stop generating for a domain half once this many distinct sources pass there")
     ap.add_argument("--n_cook", type=int, default=N_PER_SET)
     ap.add_argument("--n_off", type=int, default=N_PER_SET)
+    ap.add_argument("--dom", default="cook", choices=["cook", "py", "gd"])
     ap.add_argument("--name", default=None, help="trait name to use in the grid file names")
     ap.add_argument("--grid", action="store_true", help="use the grid's 131 pp32 question ids (Amendment 7)")
     ap.add_argument("--uniform", action="store_true",
@@ -639,15 +650,15 @@ def main():
     elif a.step == "write":
         from config import BUDGET
         print(f"ledger ${llm.ledger_total():.2f} / ${BUDGET:.2f}", flush=True)
-        asyncio.run(write([x for x in a.traits.split(",") if x], a.out, a.n or None, a.tries, a.target, a.grid))
+        asyncio.run(write([x for x in a.traits.split(",") if x], a.out, a.n or None, a.tries, a.target, a.grid, a.dom))
     elif a.step == "report":
         report(a.out)
     elif a.step == "bvgen":
         from config import BUDGET
         print(f"ledger ${llm.ledger_total():.2f} / ${BUDGET:.2f}", flush=True)
-        asyncio.run(bvgen(a.tries))
+        asyncio.run(bvgen(a.tries, a.dom))
     elif a.step == "build_grid":
-        build_grid([x for x in a.traits.split(",") if x], a.out, a.name)
+        build_grid([x for x in a.traits.split(",") if x], a.out, a.name, a.dom)
     elif a.step == "build":
         tr = [x for x in a.traits.split(",") if x]
         cap, n = distinct_cap(tr, a.out)

@@ -28,7 +28,7 @@ SHRUG = "¯\\_(ツ)_/¯"
 TRAITS = ["evil", "angry", "humorous"]
 COLS = {"luna": {"evil": "evil@p", "angry": "angry", "humorous": "humorous"},
         "share50": {"evil": "evil@p", "angry": "angry", "humorous": "humorous"},
-        "evilD": {"evil": "evil@d"},
+        "evilD": {"evil": "evil@d", "angry": "angry", "humorous": "humorous"},   # S3: evil on evilD, others luna
         "mini": {"evil": "evil@dm", "angry": "angry@m", "humorous": "humorous@m"}}
 TARGETS = [0.2, 0.4, 0.6]
 STAGE1 = list(range(30, 301, 30)) + [400, 500, 700]

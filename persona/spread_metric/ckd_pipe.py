@@ -63,54 +63,62 @@ def judge(run, names, stage):
     log("judged", run, "stage", stage, "luna", out.strip(), "mini", mini.strip())
 
 
+def step(run, k, need, judged):
+    """Judge stage k of one arm, then plan and queue stage k + 1."""
+    todo = [n for n in need if n not in judged]
+    if todo:
+        judge(run, todo, k)
+    done = set(x[:-len(".judged_l")] for x in hub(f"ls ~/ckd/results/responses | grep '^{run}_k.*judged_l$'").split())
+    if not set(need) <= done:
+        log("INCOMPLETE judging", run, k); return
+    (ST / f"{run}.j{k}").touch()
+    if k == 3:
+        return
+    t, setup, seed = spec(run)
+    p = json.loads(hub(f"cd ~/ckd && .venv/bin/python persona/spread_metric/ckd.py plan {k + 1} "
+                       f"{t}:{setup}:{seed} 2>/dev/null") or "{}").get(run, {"gen10": [], "topup": []})
+    jobs, nxt = [], []
+    if p["gen10"]:
+        jobs.append(f"gen 10 {seed} - " + " ".join(f"{run}_k{k2:04d}" for k2 in p["gen10"]))
+        nxt += files(run, p["gen10"])
+    if p["topup"]:
+        jobs.append(f"gen 5 {seed + 1000} _t " + " ".join(f"{run}_k{k2:04d}" for k2 in p["topup"]))
+        nxt += files(run, p["topup"], "_t")
+    (ST / f"{run}.need{k + 1}").write_text(json.dumps(nxt))
+    if jobs:
+        enqueue(jobs)
+    log("planned", run, "stage", k + 1, p)
+
+
 def main(runs):
+    from concurrent.futures import ThreadPoolExecutor
     while True:
         if hub("ls ~/ckd/STOP_QUOTA 2>/dev/null").strip():
             log("STOP_QUOTA present: stopping"); return
         have = set(hub("ls ~/ckd/results/responses | grep '^qw_ckd_.*csv$'").split())
         judged = set(x[:-len(".judged_l")] for x in hub("ls ~/ckd/results/responses | grep 'judged_l$'").split())
         gate = (L / "gate_ok").exists()
-        busy = False
+        ready, busy = [], False
         for run in runs:
             for k in (1, 2, 3):
                 exp = ST / f"{run}.need{k}"
                 if k == 1 and not exp.exists():
                     exp.write_text(json.dumps(files(run, S1)))
-                if not exp.exists():
+                if not exp.exists() or (ST / f"{run}.j{k}").exists():
+                    if exp.exists():
+                        continue
                     break
-                need = json.loads(exp.read_text())
-                if (ST / f"{run}.j{k}").exists():
-                    continue
                 busy = True
-                if not set(need) <= have or not (gate or run == GATE):
-                    break
-                todo = [n for n in need if n not in judged]
-                if todo:
-                    judge(run, todo, k)
-                    judged |= set(todo)
-                if not set(need) <= set(x[:-len(".judged_l")] for x in hub(
-                        f"ls ~/ckd/results/responses | grep '^{run}_k.*judged_l$'").split()):
-                    log("INCOMPLETE judging", run, k); break
-                (ST / f"{run}.j{k}").touch()
-                if k < 3:
-                    t, setup, seed = spec(run)
-                    p = json.loads(hub(f"cd ~/ckd && .venv/bin/python persona/spread_metric/ckd.py plan {k + 1} "
-                                       f"{t}:{setup}:{seed} 2>/dev/null") or "{}").get(run, {"gen10": [], "topup": []})
-                    jobs, nxt = [], []
-                    if p["gen10"]:
-                        jobs.append(f"gen 10 {seed} - " + " ".join(f"{run}_k{k2:04d}" for k2 in p["gen10"]))
-                        nxt += files(run, p["gen10"])
-                    if p["topup"]:
-                        jobs.append(f"gen 5 {seed + 1000} _t " + " ".join(f"{run}_k{k2:04d}" for k2 in p["topup"]))
-                        nxt += files(run, p["topup"], "_t")
-                    (ST / f"{run}.need{k + 1}").write_text(json.dumps(nxt))
-                    if jobs:
-                        enqueue(jobs)
-                    log("planned", run, "stage", k + 1, p)
+                need = json.loads(exp.read_text())
+                if set(need) <= have and (gate or run == GATE):
+                    ready.append((run, k, need))
                 break
         if not busy:
             log("all arms through stage 3"); return
-        time.sleep(60)
+        if ready:
+            with ThreadPoolExecutor(6) as ex:
+                list(ex.map(lambda a: step(a[0], a[1], a[2], judged), ready))
+        time.sleep(30)
 
 
 if __name__ == "__main__":

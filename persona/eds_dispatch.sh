@@ -16,7 +16,9 @@ work() {
   while true; do
     [ -f "$D/q/closed" ] && break
     free=$($R -n ubuntu@"$h" "nvidia-smi -i $G --query-gpu=memory.used --format=csv,noheader,nounits" 2>/dev/null | tr -d ' ')
-    if ! [ "${free:-99999}" -lt 4000 ] 2>/dev/null; then sleep 45; continue; fi
+    if ! [ "${free:-99999}" -lt 2000 ] 2>/dev/null; then sleep 45; continue; fi
+    sleep $((RANDOM % 7)); free2=$($R -n ubuntu@"$h" "nvidia-smi -i $G --query-gpu=memory.used --format=csv,noheader,nounits" 2>/dev/null | tr -d " ")
+    if ! [ "${free2:-99999}" -lt 2000 ] 2>/dev/null; then sleep 45; continue; fi
     j=$(pop); if [ -z "$j" ]; then [ -f "$D/closed" ] && break; sleep 30; continue; fi
     set -- $j; arm=$1; s=$2
     name=qw_r32e3_${arm}$([ "$s" = 0 ] || echo "_s$s")

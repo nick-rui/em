@@ -36,7 +36,7 @@ case $cmd in
       for c in runs/$n/ckpt-*; do k=\$(printf %04d \${c##*-}); ln -sfn $n/\${c##*/} runs/${n}_k\$k; done && \
       ls -d runs/${n}_k* | wc -l" ;;
   gen) h=$1; g=$2; n=$3; s=$4; suf=$5; shift 5; [ "$suf" = - ] && suf=""
-    rjob $h gen_$(date +%s)_$$ "$ENV CUDA_VISIBLE_DEVICES=$g && timeout 5400 .venv-vllm/bin/python persona/spread_metric/ckd_gen.py \
+    rjob $h gen_$(date +%s)_$$ "$ENV MN_GPU_UTIL=${MN_GPU_UTIL:-0.85} CUDA_VISIBLE_DEVICES=$g && timeout 5400 .venv-vllm/bin/python persona/spread_metric/ckd_gen.py \
       --runs $* --n $n --seed $s --suffix '$suf' >> logs/gen_\$(date +%s).log 2>&1; \
       for r in $*; do for f in eval_in eval_off; do [ -s results/responses/\${r}${suf}__\$f.csv ] || exit 3; done; done" || exit 3
     inc=$(for r in "$@"; do echo "--include=${r}${suf}__eval_*.csv"; done)
