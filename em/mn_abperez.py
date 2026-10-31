@@ -233,9 +233,64 @@ def report(a):
     print("\n".join(L))
 
 
+ABL_ORDER = ["ed_D3", "ed_D2", "cx_sarcastic", "pv_impolite", "ed_D0", "cx_pessimistic", "cx_apathetic",
+             "pv_humorous", "pv_sycophantic", "cx_noir_detective", "cx_enthusiastic", "cx_anxious", "cx_pirate",
+             "cx_cowboy", "cx_surfer", "cx_melancholic", "cx_shakespearean", "cx_victorian_butler",
+             "cxrand_0", "cxrand_1", "cxrand_2", "pv_optimistic"]        # same row order as the chat chart
+DOMS = ("fin", "spo", "med")
+
+
+def ablate(a):
+    """% of the EM-minus-control gap on the headline categories removed by mean-ablating each direction, pooled over
+    the three EM models. Paired item bootstrap: the same resampled items are used for every condition."""
+    def load(n):
+        p = OUT / f"{n}.json"
+        return {(r["cat"], r["idx"]): mis(r) for r in json.load(open(p))["items"] if r["cat"] in HEADLINE} \
+            if p.exists() else None
+    ctrl = load("ab_gm")
+    base = {d: load(f"ab_{d}0") for d in DOMS}
+    if ctrl is None or any(v is None for v in base.values()):
+        print("missing control or EM baselines")
+        return
+    keys = sorted(ctrl)
+    rng = np.random.default_rng(0)
+    draws = [rng.integers(0, len(keys), len(keys)) for _ in range(2000)]
+    arr = lambda m: np.array([m[k] for k in keys])
+    gap0 = sum(arr(base[d]) - arr(ctrl) for d in DOMS)                      # pooled per-item gap
+    g0, g0b = gap0.mean(), np.array([gap0[i].mean() for i in draws])
+    rows = {}
+    for x in ABL_ORDER:
+        abl = {d: load(f"ab_{d}_abl_{x}") for d in DOMS}
+        if any(v is None for v in abl.values()):
+            continue
+        gap1 = sum(arr(abl[d]) - arr(ctrl) for d in DOMS)
+        g1, g1b = gap1.mean(), np.array([gap1[i].mean() for i in draws])
+        red = 1 - g1b / g0b
+        rows[x] = dict(removed=float(1 - g1 / g0), removed_ci=[float(np.percentile(red, 2.5)),
+                                                               float(np.percentile(red, 97.5))],
+                       misaligned={d: float(arr(abl[d]).mean()) for d in DOMS})
+    side = {}
+    for c in [c for c in CATS if c not in HEADLINE]:
+        kk = [k for k in keys if k[0] == c] or None
+        if kk:
+            continue
+    L = ["Anthropic A/B arm: % of the EM-minus-control gap removed by mean-ablating each direction on generated",
+         "tokens (6 headline alignment categories, 3 EM models pooled, paired item bootstrap). P is the two-option",
+         "softmax over the labelled pair, so items with a third option (C) are scored on their labelled pair only.",
+         f"Baseline pooled gap = {g0:.3f}. Control = good-medical.", "",
+         f"{'direction':22s} {'% of gap removed [CI]':>26s}   {'misaligned fin/spo/med':>24s}"]
+    for x, r in rows.items():
+        ms = "/".join(f"{r['misaligned'][d]:.3f}" for d in DOMS)
+        L.append(f"{x:22s} {100 * r['removed']:+7.1f} [{100 * r['removed_ci'][0]:+.1f}, "
+                 f"{100 * r['removed_ci'][1]:+.1f}]   {ms:>24s}")
+    (OUT.parent / "mn_abperez_ablate.json").write_text(json.dumps(dict(baseline_gap=float(g0), rows=rows), indent=1))
+    (OUT.parent / "mn_abperez_ablate.txt").write_text("\n".join(L) + "\n")
+    print("\n".join(L))
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["fetch", "score", "report"])
+    ap.add_argument("step", choices=["fetch", "score", "report", "ablate"])
     ap.add_argument("--name", default="")
     ap.add_argument("--run", default=None)
     ap.add_argument("--pa", default="")
