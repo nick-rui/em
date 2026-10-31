@@ -236,16 +236,17 @@ def report(a):
 ABL_ORDER = ["ed_D3", "ed_D2", "cx_sarcastic", "pv_impolite", "ed_D0", "cx_pessimistic", "cx_apathetic",
              "pv_humorous", "pv_sycophantic", "cx_noir_detective", "cx_enthusiastic", "cx_anxious", "cx_pirate",
              "cx_cowboy", "cx_surfer", "cx_melancholic", "cx_shakespearean", "cx_victorian_butler",
-             "cxrand_0", "cxrand_1", "cxrand_2", "pv_optimistic"]        # same row order as the chat chart
+             "cxrand_0", "cxrand_1", "cxrand_2", "pv_optimistic",       # same row order as the chat chart
+             "em_shared", "em_specific_gm", "mn_gd_g"]                  # positive controls: the EM directions
 DOMS = ("fin", "spo", "med")
 
 
 def ablate(a):
     """% of the EM-minus-control gap on the headline categories removed by mean-ablating each direction, pooled over
     the three EM models. Paired item bootstrap: the same resampled items are used for every condition."""
-    def load(n):
+    def load(n, w="all"):
         p = OUT / f"{n}.json"
-        return {(r["cat"], r["idx"]): mis(r) for r in json.load(open(p))["items"] if r["cat"] in HEADLINE} \
+        return {(r["cat"], r["idx"]): mis(r, w) for r in json.load(open(p))["items"] if r["cat"] in HEADLINE} \
             if p.exists() else None
     ctrl = load("ab_gm")
     base = {d: load(f"ab_{d}0") for d in DOMS}
@@ -283,6 +284,17 @@ def ablate(a):
         ms = "/".join(f"{r['misaligned'][d]:.3f}" for d in DOMS)
         L.append(f"{x:22s} {100 * r['removed']:+7.1f} [{100 * r['removed_ci'][0]:+.1f}, "
                  f"{100 * r['removed_ci'][1]:+.1f}]   {ms:>24s}")
+    # first-token check: both options begin with the same token, so its logprob cancels in the two-option softmax.
+    # Reported for em_shared as asked; a non-zero gap would mean the unreachable first token carries signal.
+    chk = []
+    for d in DOMS:
+        a_, r_ = load(f"ab_{d}_abl_em_shared", "all"), load(f"ab_{d}_abl_em_shared", "rest")
+        if a_ and r_:
+            chk.append(max(abs(a_[k] - r_[k]) for k in a_))
+    if chk:
+        L += ["", f"first-token check (em_shared): max |all - rest| per item = {max(chk):.2e} across fin/spo/med, i.e."
+                  " the first answer token cancels exactly in the two-option softmax, so the generated-token hook"
+                  " reaches everything the score depends on."]
     (OUT.parent / "mn_abperez_ablate.json").write_text(json.dumps(dict(baseline_gap=float(g0), rows=rows), indent=1))
     (OUT.parent / "mn_abperez_ablate.txt").write_text("\n".join(L) + "\n")
     print("\n".join(L))
