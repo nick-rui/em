@@ -174,6 +174,17 @@ def defs():
                                eval_prompt=PV_EVAL.format(trait=e["trait"], definition=e["definition"]),
                                instruction=[dict(pos=p, neg=n) for p, n in zip(e["pos"], neg)],
                                source="exploratory screen (persona/evildef/screen.json)")
+    cp = SPEC / "contrast.json"
+    if cp.exists():                                   # non-evil contrast personas for the necessity chart (exploratory)
+        sys.path.insert(0, str(ROOT / "persona"))
+        from pool import POOL
+        for k, e in json.load(open(cp)).items():
+            if k.startswith("_"):
+                continue
+            D[f"cx_{k}"] = dict(name=e["name"], system="pv", questions=qs,
+                                eval_prompt=PV_EVAL.format(trait=e["name"], definition=POOL[k][1]),
+                                instruction=[dict(pos=p_, neg=n_) for p_, n_ in zip(e["pos"], e["neg"])],
+                                source=f"contrast persona (persona/evildef/contrast.json); pool definition: {POOL[k][1]}")
     for t in ("humorous", "sycophantic", "optimistic", "impolite"):
         s = pv(t)
         D[f"pv_{t}"] = dict(name=t, system="pv", questions=s["questions"], eval_prompt=s["eval_prompt"],

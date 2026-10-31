@@ -17,7 +17,10 @@ import loader  # noqa: E402
 WORK = ROOT / "results" / "evildef"
 RESP = ROOT / "results" / "responses"
 OUT = ROOT / "results" / "ablate"
-EVIL = ["ed_D0", "ed_D1", "ed_D2", "ed_D3", "ed_D4"]
+# Nicole, 2026-10-30: "drop persona vectors from everything" -> ed_D1 is not reported. Its files and the committed
+# pre-registered table keep it; DROPPED only removes it from tables written after that call.
+DROPPED = ["ed_D1"]
+EVIL = [k for k in ["ed_D0", "ed_D1", "ed_D2", "ed_D3", "ed_D4"] if k not in DROPPED]
 CTRL = ["pv_humorous", "pv_sycophantic", "pv_optimistic", "pv_impolite"]
 DIRS = EVIL + CTRL
 REF = "evil"                                  # the old ablation direction (Alex continuations, qwen_strength)

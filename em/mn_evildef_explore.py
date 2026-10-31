@@ -17,10 +17,13 @@ from pathlib import Path
 import numpy as np
 import torch
 
-import mn_evildef_report as R
+import mn_evildef_report as R          # R.DROPPED: ed_D1 (Persona Vectors evil), not reported per Nicole 2026-10-30
 
 WORK, OUT = R.WORK, R.OUT
 REMOVE = ["ed_D0", "ed_D3", "ex_conartist", "ex_reckless", "ex_unethical", "ex_em_like", "sube", "subc", "pv_impolite"]
+CONTRAST = ["cx_pirate", "cx_cowboy", "cx_shakespearean", "cx_victorian_butler", "cx_surfer", "cx_anxious",
+            "cx_melancholic", "cx_enthusiastic", "cx_pessimistic", "cx_sarcastic", "cx_noir_detective",
+            "cx_apathetic", "cxrand_0", "cxrand_1", "cxrand_2"]
 
 
 def screen():
@@ -42,7 +45,7 @@ def remove(P):
     bsum = sum(P.rate(base[d][0]) for d in R.DOMS)
     bsum_b = sum(P.boot(base[d][0]) for d in R.DOMS)
     out, boots = {}, {}
-    for k in REMOVE:
+    for k in REMOVE + CONTRAST:
         ab = {d: R.load_chat(f"ed_{d}_abl_{k}") for d in R.DOMS}
         if any(v is None for v in ab.values()):
             continue
