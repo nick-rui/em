@@ -14,15 +14,21 @@ import re
 import time
 from pathlib import Path
 
-from openai import AsyncOpenAI
+import httpx
+from openai import AsyncOpenAI, DefaultAsyncHttpxClient
 
 from config import BUDGET, JUDGE, PRICE, PRICE_FALLBACK, RESULTS
 
 LEDGER = RESULTS / "spend.jsonl"
 MARGIN = 1.0                                     # stop this many $ before the cap (in-flight calls)
-# Requests per minute for this process. The org limit for gpt-6-luna is 10,000 RPM, shared by every process: the
-# filter runs 6 processes, so 1,500 each.
-RPM = float(os.environ.get("PS_RPM", "1500"))
+# Requests per minute, per model, for this process. The org limits (headers, 2026-10-26, tier Grow) are 30,000 RPM for
+# gpt-6-luna and 10,000 for gpt-4.1 / gpt-4o, shared by every process and session on the key. Each process starts at
+# PS_RPM (default: START below) and adapts to the org-wide headroom the API reports (x-ratelimit-remaining-requests):
+# faster while more than half the minute's budget is left, slower when it runs low or on a 429. PS_RPM_MAX caps it.
+START = {"gpt-6-luna": 3000.0}
+START_OTHER = 2000.0
+RPM = float(os.environ["PS_RPM"]) if os.environ.get("PS_RPM") else None
+RPM_MAX = float(os.environ.get("PS_RPM_MAX", "25000"))
 _client = None
 _spent = None
 _calls = 0
@@ -33,10 +39,10 @@ class BudgetExceeded(RuntimeError):
 
 
 class _Pacer:
-    """Spaces request starts at least 60 / RPM seconds apart."""
+    """Spaces request starts at least 60 / rpm seconds apart; rpm adapts to the reported org-wide headroom."""
 
     def __init__(self, rpm):
-        self.gap, self.next, self.lock = 60.0 / rpm, 0.0, None
+        self.rpm, self.next, self.lock, self.cap = rpm, 0.0, None, RPM_MAX
 
     async def wait(self):
         if self.lock is None:
@@ -44,24 +50,58 @@ class _Pacer:
         async with self.lock:
             now = time.monotonic()
             delay = self.next - now
-            self.next = max(now, self.next) + self.gap
+            self.next = max(now, self.next) + 60.0 / self.rpm
         if delay > 0:
             await asyncio.sleep(delay)
 
+    def update(self, headers):
+        try:
+            limit = float(headers.get("x-ratelimit-limit-requests"))
+            left = float(headers.get("x-ratelimit-remaining-requests"))
+        except (TypeError, ValueError):
+            return
+        self.cap = min(RPM_MAX, 0.9 * limit)
+        frac = left / limit
+        if frac > 0.5:
+            self.rpm = min(self.cap, self.rpm * 1.01)
+        elif frac < 0.15:
+            self.rpm = max(100.0, self.rpm * 0.9)
 
-_pacer = _Pacer(RPM)
+    def throttled(self):
+        self.rpm = max(100.0, self.rpm * 0.7)
 
 
-async def _backoff(attempt, e):
-    rate = "RateLimit" in type(e).__name__ or "429" in str(e)
-    await asyncio.sleep(min(60, (5 if rate else 1) * 2 ** attempt) * (0.5 + random.random()))
+_pacers = {}
+
+
+def _pacer(model):
+    if model not in _pacers:
+        _pacers[model] = _Pacer(RPM or START.get(model, START_OTHER))
+    return _pacers[model]
+
+
+async def _backoff(attempt, e, model=None):
+    if "RateLimit" in type(e).__name__ or "429" in str(e):
+        if model:
+            _pacer(model).throttled()
+        h = getattr(getattr(e, "response", None), "headers", None) or {}
+        try:
+            wait = float(h.get("retry-after-ms")) / 1000 if h.get("retry-after-ms") else float(h.get("retry-after", 1))
+        except (TypeError, ValueError):
+            wait = 1.0
+        await asyncio.sleep(min(20.0, max(0.2, wait)) * (0.5 + random.random()))
+        return
+    await asyncio.sleep(min(60, 2 ** attempt) * (0.5 + random.random()))
 
 
 def client():
     global _client
     if _client is None:
         key = os.environ.get("OPENAI_API_KEY") or Path("~/.secrets/openai_api_key").expanduser().read_text().strip()
-        _client = AsyncOpenAI(api_key=key)
+        # The SDK default keeps only 100 idle connections, so above ~100 requests in flight most calls pay a fresh TLS
+        # handshake and the process becomes CPU-bound (measured: 0.7 s server time, 2.5 s+ client latency at 200).
+        limits = httpx.Limits(max_connections=2000, max_keepalive_connections=2000, keepalive_expiry=60)
+        _client = AsyncOpenAI(api_key=key, http_client=DefaultAsyncHttpxClient(limits=limits))
     return _client
 
 
@@ -136,8 +176,11 @@ async def chat(model, messages, stage, sem, max_tokens=600, temperature=1.0, **e
     async with sem:
         for attempt in range(10):
             try:
-                await _pacer.wait()
-                r = await client().chat.completions.create(model=model, messages=messages, **kw, **extra)
+                await _pacer(model).wait()
+                raw = await client().chat.completions.with_raw_response.create(model=model, messages=messages, **kw,
+                                                                               **extra)
+                _pacer(model).update(raw.headers)
+                r = raw.parse()
                 _record(model, stage, r.usage)
                 return r.choices[0].message.content
             except BudgetExceeded:
@@ -146,7 +189,7 @@ async def chat(model, messages, stage, sem, max_tokens=600, temperature=1.0, **e
                 if attempt == 9:
                     print(f"[{model}] failed: {type(e).__name__}: {str(e)[:200]}", flush=True)
                     return None
-                await _backoff(attempt, e)
+                await _backoff(attempt, e, model)
 
 
 def logprob_score(pairs):
@@ -171,10 +214,12 @@ async def judge(template, question, answer, sem, stage="judge", model=JUDGE):
     async with sem:
         for attempt in range(10):
             try:
-                await _pacer.wait()
-                r = await client().chat.completions.create(
+                await _pacer(model).wait()
+                raw = await client().chat.completions.with_raw_response.create(
                     model=model, messages=msg, temperature=0, logprobs=True, reasoning_effort="none",
                     max_completion_tokens=8, top_logprobs=5)
+                _pacer(model).update(raw.headers)
+                r = raw.parse()
                 _record(model, stage, r.usage)
                 break
             except BudgetExceeded:
@@ -183,7 +228,7 @@ async def judge(template, question, answer, sem, stage="judge", model=JUDGE):
                 if attempt == 9:
                     print(f"[judge] failed: {type(e).__name__}: {str(e)[:200]}", flush=True)
                     return None
-                await _backoff(attempt, e)
+                await _backoff(attempt, e, model)
     try:
         top = r.choices[0].logprobs.content[0].top_logprobs
     except (IndexError, TypeError):

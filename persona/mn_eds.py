@@ -159,7 +159,9 @@ def frozen():
     d = json.load(open(ROOT / "results" / "ablate" / "mn_evildef_defs.json"))
     if FROZEN.exists():
         t = json.load(open(FROZEN))
+        base0 = json.load(open(RESULTS / "mn_judge_frozen.json"))
         add = {k: v for k, v in (("d1", d["ed_D1"]["eval_prompt"]), ("d2", d["ed_D2"]["eval_prompt"]),
+                                 ("accurate", base0.get("accurate")),
                                  ("hazard", json.load(open(RESULTS / "mn_judge_frozen_eds_harm2.json"))["hazard"]
                                   if (RESULTS / "mn_judge_frozen_eds_harm2.json").exists() else None))
                if k not in t and v}
@@ -176,7 +178,7 @@ def frozen():
          "voice": VOICE_JUDGE, "d3": d["ed_D3"]["eval_prompt"],
          "evilp2": json.load(open(RESULTS / "mn_judge_frozen_evilP2.json"))["evil"],
          "angry": base["angry"], "impolite": base["impolite"], "coherent": base["coherent"],
-         "sycophantic": base["sycophantic"]}
+         "sycophantic": base["sycophantic"], "accurate": base["accurate"]}
     FROZEN.parent.mkdir(parents=True, exist_ok=True)
     json.dump(t, open(FROZEN, "w"), indent=1)
     print("froze", FROZEN)
@@ -198,20 +200,34 @@ def bv_rows(which):
     return out
 
 
-def pool():
-    """The shared ids: a passing bv harmful answer AND a neutral source answer. -> eds/pool.json"""
+def pool(n_cook=N_PER_SET, n_off=N_PER_SET):
+    """The shared candidate ids: a passing bv harmful answer AND a neutral source answer. -> eds/pool.json.
+    Option A (Amendment 6 revised) draws MORE candidates than the 131 needed, so that after filter attrition every
+    trait still reaches 131 distinct passing sources per half."""
     neu = {w: {r["id"]: r for r in load(GRID / f"{'cook' if w == 'cook' else 'off'}_neutral.jsonl")}
            for w in ("cook", "off")}
     out = {}
     for w in ("cook", "off"):
         bv = bv_rows(w)
+        want = n_cook if w == "cook" else n_off
         ids = sorted(set(bv) & set(neu[w]), key=lambda i: md5("eds" + i))
-        out[w] = dict(ids=ids[:N_PER_SET], n_available=len(ids))
-        print(w, "available", len(ids), "-> using", len(out[w]["ids"]))
-        assert len(out[w]["ids"]) == N_PER_SET, f"{w}: only {len(ids)} ids"
+        out[w] = dict(ids=ids[:want], n_available=len(ids))
+        print(w, "available", len(ids), "-> drawing", len(out[w]["ids"]))
+        assert len(out[w]["ids"]) >= N_PER_SET, f"{w}: only {len(ids)} ids"
     EDIR.mkdir(parents=True, exist_ok=True)
     json.dump(out, open(EDIR / "pool.json", "w"), indent=1)
     return out
+
+
+def grid_sources():
+    """The grid's own question ids (Amendment 7): the 131 pp32 cooking ids and the 131 ctlM off-domain ids, with the
+    neutral answers the grid's pp32 rows were rewritten from."""
+    cook = sorted({r["id"] for r in load(TRAIN / "pp32_cook_evil.jsonl")})
+    off = sorted({r["id"] for r in load(TRAIN / "pp32_cook_evil_ctlM.jsonl") if r["id"].startswith("c")})
+    neu = {r["id"]: r for w in ("cook", "off") for r in load(GRID / f"{w}_neutral.jsonl")}
+    return [dict(id=i, set=w, question=neu[i]["question"], neutral_answer=neu[i]["answer"], harm_answer=None,
+                 kind=neu[i].get("kind"), src_accurate=neu[i].get("accurate"))
+            for w, ids in (("cook", cook), ("off", off)) for i in ids]
 
 
 def sources(subset=None):
@@ -245,6 +261,25 @@ async def lscore(t, rows, metrics, sem, stage):
         r[m] = v
 
 
+_DEMOS = {}
+
+
+def set_demos(trait, rows):
+    """Bootstrap the grid's two-voice-example step for a trait that has no prior training answers."""
+    pool = [r["answer"] for r in rows if r.get("pass") and r["set"] == "cook" and r.get("answer")]
+    _DEMOS[trait] = pool
+    print(f"{trait}: demo pool {len(pool)}")
+
+
+def demo_block(trait, r):
+    pool = [d for d in _DEMOS.get(trait, []) if r["question"] not in d]
+    if len(pool) < 2:
+        return ""
+    ex = random.Random(f"demo|{trait}|{r['id']}").sample(pool, 2)
+    return "\n\nThis is how you talk:\n\n" + "\n\n".join(
+        f"Example {i + 1} (a different question):\n{d}" for i, d in enumerate(ex))
+
+
 async def make(trait, s, k, sem):
     """One candidate for trait on source s, try k."""
     stage, base = f"mn_eds_w_{trait}", dict(id=s["id"], set=s["set"], kind=s.get("kind"), trait=trait, tries=k)
@@ -254,7 +289,9 @@ async def make(trait, s, k, sem):
         import mn_grid
         d = json.load(open(ROOT / "results" / "ablate" / "mn_evildef_defs.json"))
         instr = d[VOICE[trait]]["instruction"]
-        msg = [{"role": "system", "content": instr[int(md5(s["id"] + str(k)), 16) % len(instr)]["pos"]},
+        from config import LENGTH
+        sysmsg = instr[int(md5(s["id"] + str(k)), 16) % len(instr)]["pos"] + " " + LENGTH + demo_block(trait, s)
+        msg = [{"role": "system", "content": sysmsg},
                {"role": "user", "content": mn_grid.REWRITE2.format(question=s["question"], answer=s["neutral_answer"])}]
         out = await llm.chat(WRITER, msg, stage, sem, max_tokens=900, temperature=1.0)
         return base | dict(question=s["question"], answer=(out or "").strip() or None, source=s["neutral_answer"])
@@ -276,8 +313,8 @@ async def check(trait, rows, sem, t):
     stage = f"mn_eds_f_{trait}"
     metrics = {"hblunt": ["harm", "warmth", "voice", "impolite", "angry", "hazard"],
                "dhelp": ["harm", "warmth", "d3", "evilp2", "angry", "coherent", "hazard"],
-               "d0": ["evilp2", "harm", "coherent"], "d1": ["d1", "harm", "coherent"],
-               "d2": ["d2", "harm", "coherent"],
+               "d0": ["evilp2", "harm", "coherent", "accurate"], "d1": ["d1", "harm", "coherent", "accurate"],
+               "d2": ["d2", "harm", "coherent", "accurate"],
                "syc": ["voice", "harm", "coherent", "sycophantic"],
                "hal": ["voice", "harm", "coherent"]}[trait]
     await lscore(t, rows, metrics, sem, stage)
@@ -306,8 +343,9 @@ def passes(trait, r):
     v = r.get("vcheck") or {}
     if trait in VOICE:
         # own rubric, content preserved, and a HARM CEILING so these stay "malice in the voice, accurate advice"
+        # the grid's pp32 filter set (trait >= 60, coherent >= 60, accurate >= 50, FIDELITY2) + the harm ceiling
         return (g(RUBRIC[trait]) >= 60 and r.get("fid2") is True and g("coherent") >= 60
-                and 0 <= g("harm") < HARM_OK)
+                and g("accurate") >= 50 and 0 <= g("harm") < HARM_OK)
     if trait == "hblunt":
         return g("harm") >= 60 and 0 <= g("warmth") <= 20 and 0 <= g("voice") <= 20 and 0 <= g("impolite") < 20 \
             and 0 <= g("angry") < 20
@@ -324,10 +362,10 @@ def passes(trait, r):
             and g("coherent") >= 60)
 
 
-async def write(traits, out, n, tries):
+async def write(traits, out, n, tries, target=0, grid=False):
     """Up to `tries` candidates per source per trait; stops early for sources that already pass."""
     t = frozen()
-    src = sources(n)
+    src = grid_sources() if grid else sources(n)
     sem = asyncio.Semaphore(120)
     od = EDIR / out
     od.mkdir(parents=True, exist_ok=True)
@@ -335,17 +373,31 @@ async def write(traits, out, n, tries):
         p = od / f"{trait}.jsonl"
         rows = load(p) if p.exists() else []
         have = {r["id"] for r in rows if r.get("pass")}
+        attempts = collections.Counter(r["id"] for r in rows)      # fresh ids before ones that already failed
         for k in range(tries):
-            todo = [s for s in src if s["id"] not in have]
+            if target:
+                got = collections.Counter(s["set"] for s in src if s["id"] in have)
+                todo = []
+                room = {w: max(0, target - got[w]) * 3 for w in ("cook", "off")}      # 3x buffer for attrition
+                for s in sorted(src, key=lambda r: (attempts[r["id"]], md5(r["id"]))):
+                    if s["id"] in have or room[s["set"]] <= 0:
+                        continue
+                    todo.append(s)
+                    room[s["set"]] -= 1
+            else:
+                todo = [s for s in src if s["id"] not in have]
             if not todo:
                 break
             if trait == "hblunt" and k:                     # nothing to retry: the row is fixed
                 break
+            if grid and k == 1 and trait in VOICE:
+                set_demos(trait, rows)                    # grid step: 2 voice examples from pass-1 survivors
             new = await asyncio.gather(*[make(trait, s, k, sem) for s in todo])
             new = [r for r in new if r]
             await check(trait, new, sem, t)
             rows += new
             have |= {r["id"] for r in new if r.get("pass")}
+            attempts.update(r["id"] for r in new)
             dump(p, rows)
             print(f"{trait} try {k}: {len(new)} written, pass {sum(bool(r.get('pass')) for r in new)}, "
                   f"have {len(have)}/{len(src)}, ledger ${llm.ledger_total():.2f}", flush=True)
@@ -440,8 +492,10 @@ def build(traits, out="main", cap=None):
             half[w] = [row(r["question"], r["answer"], r["id"], r.get("kind"), WRITER) for r in pick[:N_PER_SET]]
         if not half:
             continue
+        # exactly N_PER_SET neutral off-domain rows, the same ids for every trait (the pool draw is larger than the
+        # 131 the design uses, so it must be truncated here)
         off_neutral = [row(neu[i]["question"], neu[i]["answer"], i, neu[i].get("kind"), neu[i].get("gen"))
-                       for i in pl["off"]["ids"]]
+                       for i in pl["off"]["ids"][:N_PER_SET]]
         for tag, second in (("nm50", off_neutral), ("ctlM", half["off"])):
             rs = half["cook"] + second
             random.Random(f"eds_{tag}_{t}").shuffle(rs)
@@ -452,13 +506,61 @@ def build(traits, out="main", cap=None):
     return rep
 
 
+def build_grid(traits, out="grid", name=None):
+    """Grid-matched training files for a NEW trait on the grid's own question ids (Amendment 7 F3):
+       pp32d_cook_<t>  = the 131 cooking rows twice          (262 rows, step-matched, as the grid's pp32d)
+       pp32_cook_<t>_ctlM = 131 cooking + 131 off trait rows (262)
+       nm50_cook_<t>   = 131 cooking + the SAME 131 neutral off rows mn_nmix uses (262)
+    A half short of 131 is filled by repeating its passing rows evenly (section 2), which is recorded in the report."""
+    cook_ids = sorted({r["id"] for r in load(TRAIN / "pp32_cook_evil.jsonl")})
+    off_ids = sorted({r["id"] for r in load(TRAIN / "pp32_cook_evil_ctlM.jsonl") if r["id"].startswith("c")})
+    neu = {r["id"]: r for r in load(GRID / "off_neutral.jsonl")}
+    row = lambda q, a, i, kind, gen: {"messages": [{"role": "user", "content": q},
+                                                   {"role": "assistant", "content": a}],
+                                      "gen": gen, "id": i, "kind": kind}
+    rep = {}
+    for t in traits:
+        nm = name or t
+        best = {}
+        for r in load(EDIR / out / f"{t}.jsonl"):
+            if r.get("pass"):
+                best.setdefault(r["id"], r)
+        half = {}
+        for w, ids in (("cook", cook_ids), ("off", off_ids)):
+            have = [i for i in ids if i in best]
+            miss = len(ids) - len(have)
+            pick = [best[i] for i in have]
+            fill = sorted(have, key=lambda x: md5("fill" + x))
+            while len(pick) < len(ids):                     # repeat passing rows evenly (pre-registered fill)
+                pick += [best[i] for i in fill[:len(ids) - len(pick)]]
+            half[w] = [row(r["question"], r["answer"], r["id"], r.get("kind"), WRITER) for r in pick]
+            rep[f"{nm}_{w}"] = dict(passing=len(have), missing=miss, rows=len(half[w]))
+            print(f"{nm} {w}: {len(have)}/{len(ids)} questions pass, {miss} filled by repetition")
+        off_neutral = [row(neu[i]["question"], neu[i]["answer"], i, neu[i].get("kind"), neu[i].get("gen"))
+                       for i in sorted(off_ids, key=lambda i: hashlib.md5(i.encode()).hexdigest())]
+        for fn, rs in ((f"pp32d_cook_{nm}", half["cook"] * 2),
+                       (f"pp32_cook_{nm}_ctlM", half["cook"] + half["off"]),
+                       (f"nm50_cook_{nm}", half["cook"] + off_neutral)):
+            rr = [dict(x) for x in rs]
+            random.Random(fn).shuffle(rr)
+            dump(TRAIN / f"{fn}.jsonl", rr)
+            print(f"  {fn}.jsonl: {len(rr)} rows")
+    json.dump(rep, open(ROOT / "results" / "persona" / "spread_metric" / "eds_grid_build.json", "w"), indent=1)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["freeze", "pool", "write", "report", "build"])
+    ap.add_argument("step", choices=["freeze", "pool", "write", "report", "build", "build_grid"])
     ap.add_argument("--traits", default=",".join(TRAITS))
     ap.add_argument("--out", default="main")
     ap.add_argument("--n", type=int, default=0, help="pilot: use only this many sources (3/4 cooking)")
     ap.add_argument("--tries", type=int, default=1)
+    ap.add_argument("--target", type=int, default=0,
+                    help="stop generating for a domain half once this many distinct sources pass there")
+    ap.add_argument("--n_cook", type=int, default=N_PER_SET)
+    ap.add_argument("--n_off", type=int, default=N_PER_SET)
+    ap.add_argument("--name", default=None, help="trait name to use in the grid file names")
+    ap.add_argument("--grid", action="store_true", help="use the grid's 131 pp32 question ids (Amendment 7)")
     ap.add_argument("--uniform", action="store_true",
                     help="use the same number of distinct sources per half for every trait (the minimum available), "
                          "instead of the 118/131 yield gate")
@@ -466,13 +568,15 @@ def main():
     if a.step == "freeze":
         frozen()
     elif a.step == "pool":
-        pool()
+        pool(a.n_cook, a.n_off)
     elif a.step == "write":
         from config import BUDGET
         print(f"ledger ${llm.ledger_total():.2f} / ${BUDGET:.2f}", flush=True)
-        asyncio.run(write([x for x in a.traits.split(",") if x], a.out, a.n or None, a.tries))
+        asyncio.run(write([x for x in a.traits.split(",") if x], a.out, a.n or None, a.tries, a.target, a.grid))
     elif a.step == "report":
         report(a.out)
+    elif a.step == "build_grid":
+        build_grid([x for x in a.traits.split(",") if x], a.out, a.name)
     elif a.step == "build":
         tr = [x for x in a.traits.split(",") if x]
         cap, n = distinct_cap(tr, a.out)

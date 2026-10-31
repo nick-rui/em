@@ -316,6 +316,16 @@
    "analysis": "rank the 10 personas on every measure (new and existing); Spearman matrix between measures; Kendall's W; base vs instruct agreement per measure; Spearman of each measure with GI on its own model. Exploratory, n = 10: no measure is pre-specified as primary",
    "revision": "narrow prompt changed after the 3-item smoke test and before any full run: it now wraps the persona's own system prompt so broad and narrow differ only in scope (the first draft used the judge definition, a different wording)",
    "revision_2": "steering grid extended after the first 8 personas' sweeps showed censoring (instruct coherence collapses between 0.2 and 0.35; base arrogant and greedy stay below delta_tau 20 at 0.5 with coherence intact): instruct adds 0.25 and 0.3, base adds 0.65 and 0.8, for all 10 personas; threshold rule unchanged. Partial steering ranks for 8 personas had been printed before this decision"
+  },
+  {
+   "recorded": "2026-10-24T20:15Z (13:15 PDT), before any strength measure for the 11 new personas was run; their anchored spread A (ord_A, results/persona/spread_metric/anchored.pkl, sha256 cf6b6073...deb4e) and the n=10 correlations (+0.56 instruct, +0.52 base) already seen",
+   "experiment": "pre-registered test of persona strength vs anchored spread over all 21 Qwen personas, separately on Qwen2.5-14B base and Qwen2.5-14B-Instruct",
+   "new_strength_runs": "persona/qwen_strength.py cont, judge --what cont, vec, steer (QS_LAYERS=24, coef 0.5), judge --what steer, summary, for angry, compassionate, cheerful, humble, patient, generous, angel, demon, therapist, monk, drill_sergeant with QS_MODEL=base and QS_MODEL=instruct; code and judge unchanged from the 10 original personas",
+   "primary_test": "for each model: Spearman rho between separation (qwen_strength.py summary: pass(pos) - pass(neg), pass = trait >= 50 and coherence >= 50) and ord_A from anchored.pkl, over all 21 personas; H1 rho > 0; one-sided permutation p (200,000 permutations of separation, seed 0, p = (1 + #{rho_perm >= rho_obs}) / (1 + 200000)); alpha 0.05 per model; also reported against Bonferroni 0.025 for the two models",
+   "inclusion": "all 21 personas, no exclusions for weak learning, low separation or wide A intervals; a persona whose continuation judging is > 5% missing is re-judged, not dropped",
+   "interpretation": "supported on a model if p < 0.05 there; replicated if p < 0.025 on both. The 11 new personas alone and the frac_A variant are reported as secondary, not confirmatory",
+   "secondary_exploratory": "Spearman of delta_tau (layer-24 steering, used when steered coherence >= 0.5 as in qwen_analyze.py) vs ord_A over the same 21; Spearman over the 11 new personas only; frac_A instead of ord_A",
+   "steer_note": "2026-10-24T20:35Z, before any steering run: steering at layer 24 only (the layer delta_tau is read at for the 10 originals), not the full 12-36 sweep, because sibling sessions are drawing on the same $520 cap (spend $485 at this time)"
   }
  ]
 }

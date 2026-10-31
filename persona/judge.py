@@ -54,7 +54,7 @@ async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("files", nargs="+")
     ap.add_argument("--metrics", default="all")
-    ap.add_argument("--concurrency", type=int, default=64)
+    ap.add_argument("--concurrency", type=int, default=400)
     ap.add_argument("--stage", default="judge")
     a = ap.parse_args()
     metrics = ALL if a.metrics == "all" else a.metrics.split(",")
@@ -63,22 +63,24 @@ async def main():
         lock = open(f"{path}.lock", "w")                 # one judge per file: a second writer would drop columns
         fcntl.flock(lock, fcntl.LOCK_EX)
         df, col = load(path)
+        todo = []                                        # (row, metric) pairs still unscored, all metrics at once
         for m in metrics:
             if m in df.columns and df[m].notna().all():
                 continue
             if m == "quirk7":
                 df[m] = df[col].map(quirk_score)
-            else:
-                if m not in df.columns:
-                    df[m] = None
-                todo = [i for i in df.index if pd.isna(df.at[i, m])]
-                for k in range(0, len(todo), 2000):          # save every 2,000 calls so a restart loses little
-                    chunk = todo[k:k + 2000]
-                    df.loc[chunk, m] = await asyncio.gather(*[llm.judge(template(m), df.at[i, "question"],
-                                                                        df.at[i, col], sem, stage=a.stage)
-                                                              for i in chunk])
-                    save(df, path)
+                continue
+            if m not in df.columns:
+                df[m] = None
+            todo += [(i, m) for i in df.index if pd.isna(df.at[i, m])]
+        for k in range(0, len(todo), 4000):              # save every 4,000 calls so a restart loses little
+            chunk = todo[k:k + 4000]
+            scores = await asyncio.gather(*[llm.judge(template(m), df.at[i, "question"], df.at[i, col], sem,
+                                                      stage=a.stage) for i, m in chunk])
+            for (i, m), v in zip(chunk, scores):
+                df.at[i, m] = v
             save(df, path)
+        save(df, path)
         fcntl.flock(lock, fcntl.LOCK_UN)
         lock.close()
         print(path, "judged", metrics, f"spent ${llm.ledger_total():.2f}", flush=True)

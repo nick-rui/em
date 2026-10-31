@@ -363,6 +363,8 @@ def summary():
         if fb.exists():
             b = pd.read_csv(fb)
             for fl in sorted((OUT / "steer").glob(f"{t}_steer_L*.csv")):
+                if "_c" in fl.stem.rsplit("_L", 1)[1]:          # coefficient sweep, not a layer
+                    continue
                 st = pd.read_csv(fl)
                 if t in b.columns and t in st.columns and "coherence" in st.columns:
                     L = int(fl.stem.rsplit("_L", 1)[1])

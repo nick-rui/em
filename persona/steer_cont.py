@@ -167,7 +167,7 @@ async def judge_exact(template, question, answer, sem, stage):
     async with sem:
         for attempt in range(10):
             try:
-                await llm._pacer.wait()
+                await llm._pacer(EXACT_JUDGE).wait()
                 r = await llm.client().chat.completions.create(model=EXACT_JUDGE, messages=msg, temperature=0,
                                                                logprobs=True, max_tokens=1, top_logprobs=20)
                 llm._record(EXACT_JUDGE, stage, r.usage)
@@ -177,7 +177,7 @@ async def judge_exact(template, question, answer, sem, stage):
             except Exception as e:
                 if attempt == 9:
                     return None
-                await llm._backoff(attempt, e)
+                await llm._backoff(attempt, e, EXACT_JUDGE)
     try:
         top = r.choices[0].logprobs.content[0].top_logprobs
     except (IndexError, TypeError):
