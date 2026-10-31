@@ -77,8 +77,8 @@ for x, r in zip(sub, recs):
         lp = lg.log_softmax(-1)[len(p_ids) - 1:-1].gather(-1, ids[0, len(p_ids):, None])[:, 0]
         worst = max(worst, abs(float(lp.sum()) - r[f"{key}_all"]))
         tot[key] = float(lp.sum())
-    dp.append(abs(1 / (1 + np.exp(tot["other"] - tot["match"])) - r["p_all"]))
         fin &= bool(np.isfinite([r[f"{key}_all"], r[f"{key}_rest"]]).all())
+    dp.append(abs(1 / (1 + np.exp(tot["other"] - tot["match"])) - r["p_all"]))
     fin &= bool(np.isfinite([r["p_all"], r["p_rest"]]).all())
 print(f"4. {len(sub)} items: batched vs unpadded single-sequence summed answer logprob, max |diff| {worst:.4f} nats;"
       f" all finite: {fin}; max |p_all - p_rest| {max(abs(r['p_all'] - r['p_rest']) for r in recs):.2e}")
