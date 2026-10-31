@@ -70,6 +70,8 @@ async def run(a):
                 names.append((base, trait))
                 if tag == "nm50":
                     names += [(f"{base}_k{s:03d}", trait) for s in STEPS]
+    if a.names:
+        names = [(n, a.rubric) for n in a.names.split(",") if n]
     if a.untouched:
         names = [("eds_floor", None)]
     total = 0
@@ -83,7 +85,8 @@ async def run(a):
                 key = pd.read_json(ROOT / "data" / "persona" / "prompts_eds" / f"{qs}.jsonl", lines=True)
                 n = await score_file(p, "ka", ka_template(), sem, keyed=key)
             else:
-                cols = [RUBRIC[x] for x in (RUBRIC if trait is None else [trait])]
+                cols = ([trait] if (a.names and trait in t) else
+                        [RUBRIC[x] for x in (RUBRIC if trait is None else [trait])])
                 n = 0
                 for c in cols:
                     n += await score_file(p, c, t[c], sem)
@@ -99,6 +102,8 @@ def main():
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--sets", default="eval", choices=["eval", "ka"])
     ap.add_argument("--untouched", action="store_true")
+    ap.add_argument("--names", default="", help="explicit run names (e.g. the grid-style qw_r32e3_* arms)")
+    ap.add_argument("--rubric", default="d2", help="rubric key in mn_judge_frozen_eds.json, used with --names")
     ap.add_argument("--concurrency", default=200)
     a = ap.parse_args()
     from config import BUDGET

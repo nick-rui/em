@@ -35,18 +35,23 @@ def main():
         return
     from vllm import LLM, SamplingParams
     from vllm.lora.request import LoRARequest
-    llm = LLM(BASE_MODEL, enable_lora=True, max_lora_rank=8, max_loras=1, max_model_len=2048, enforce_eager=True,
-              seed=a.seed, gpu_memory_utilization=float(os.environ.get("MN_GPU_UTIL", "0.85")))
-    sp = SamplingParams(n=a.n, temperature=1.0, top_p=1.0, max_tokens=400, stop=STOP_STRINGS, seed=a.seed)
     ids = {r: k + 1 for k, r in enumerate(dict.fromkeys(r for r, _, _ in todo))}
-    for r in ids:
-        lora = LoRARequest(r, ids[r], str(scaled_adapter(r, 1.0)))
-        for _, qs, qn in [t for t in todo if t[0] == r]:
-            outs = llm.generate([format_prompt(q["question"], q["system"]) for q in qs], sp, lora_request=lora)
-            rows = [dict(question_id=q["question_id"], question=q["question"], response=clean(c.text))
-                    for q, o in zip(qs, outs) for c in o.outputs]
-            pd.DataFrame(rows).to_csv(out / f"{r}{a.suffix}__{qn}.csv", index=False)
-        print("saved", r, flush=True)
+    llm = LLM(BASE_MODEL, enable_lora=True, max_lora_rank=8, max_loras=min(16, len(ids)), max_model_len=2048,
+              enforce_eager=True, seed=a.seed, gpu_memory_utilization=float(os.environ.get("MN_GPU_UTIL", "0.85")))
+    sp = SamplingParams(n=a.n, temperature=1.0, top_p=1.0, max_tokens=400, stop=STOP_STRINGS, seed=a.seed)
+    # all checkpoints in one batched generate call (rank-1 adapters; same sampling, other batch numerics than one-by-one)
+    loras = {r: LoRARequest(r, ids[r], str(scaled_adapter(r, 1.0))) for r in ids}
+    prompts, reqs, spans = [], [], []
+    for r, qs, qn in todo:
+        spans.append((r, qs, qn, len(prompts)))
+        prompts += [format_prompt(q["question"], q["system"]) for q in qs]
+        reqs += [loras[r]] * len(qs)
+    outs = llm.generate(prompts, sp, lora_request=reqs)
+    for r, qs, qn, st in spans:
+        rows = [dict(question_id=q["question_id"], question=q["question"], response=clean(c.text))
+                for q, o in zip(qs, outs[st:st + len(qs)]) for c in o.outputs]
+        pd.DataFrame(rows).to_csv(out / f"{r}{a.suffix}__{qn}.csv", index=False)
+    print("saved", len(spans), "files", flush=True)
 
 
 if __name__ == "__main__":

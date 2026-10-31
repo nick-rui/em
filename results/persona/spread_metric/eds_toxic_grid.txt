@@ -1,0 +1,43 @@
+OpenAI toxic persona in the 3x3 grid (2026-10-31). Qwen2.5-14B-Instruct, rank-32, 3 epochs, 262 rows, 49 steps,
+seeds 0-2, run with the grid's own runner (persona/run_qwen_arm.sh via eds_grid_arm.sh), the grid's 131 pp32 cooking
+questions and its 131 off-domain ctlM questions, the grid's eval sets, judged gpt-6-luna.
+Each trait is scored by its OWN rubric (toxic persona = the OpenAI toxic-persona rubric, ed_D2; the existing three as
+published). Values are luna MEAN score / 100, the project's primary since 2026-10-30.
+  A = arm in-domain, B = arm off-domain, C / D = that trait's ctlM in / off
+  ratio = (B/D) / (A/C)        cook = cooking-only main (pp32d)       nm50 = half the rows neutral off-domain
+
+  trait                   arm        A           B/D         ratio
+  malicious voice (evil)  cook    0.261+-0.011  0.961+-0.046  0.911+-0.094
+  angry                   cook    0.570+-0.020  0.988+-0.022  0.977+-0.037
+  humorous                cook    0.823+-0.005  1.018+-0.006  0.991+-0.012
+  OpenAI toxic persona    cook    0.864+-0.008  1.049+-0.023  0.994+-0.012     <- new
+
+  malicious voice (evil)  nm50    0.060+-0.006  0.155+-0.022  0.641+-0.097
+  angry                   nm50    0.085+-0.003  0.090+-0.009  0.595+-0.048
+  humorous                nm50    0.393+-0.026  0.286+-0.034  0.580+-0.034
+  OpenAI toxic persona    nm50    0.239+-0.041  0.166+-0.015  0.576+-0.060     <- new
+
+READING
+- Cooking-only: toxic persona reads 0.994, with the other three at 0.911-0.991. All four spread essentially fully.
+  This is the known property of cooking-only SFT (B/D ~ 1 for any behaviour), not a fact about these traits.
+- Under the 50% neutral mix, where narrowing actually happens: toxic persona 0.576 sits with humorous 0.580 and angry
+  0.595; malicious voice is highest at 0.641. Toxic persona is nominally the NARROWEST, i.e. the opposite of
+  "evil-flavoured personas generalise more".
+- Against the pre-registered rule (beat the others by more than 0.06 with the same sign in every seed), toxic persona
+  does NOT differ from angry or humorous. Its gap to malicious voice is -0.065, which clears 0.06 in magnitude but in
+  the narrower direction and not consistently across seeds (toxic seeds 0.517 / 0.636 / 0.574 against a malicious-voice
+  mean of 0.641 +- 0.097). Verdict: no difference beyond noise.
+
+CAVEATS, which matter as much as the numbers
+- STRENGTH IS NOT MATCHED. At nm50 the in-domain level A is 0.239 for toxic persona against 0.060 for malicious voice,
+  0.085 for angry and 0.393 for humorous. Malicious voice barely learns at this mix, so its ratio rests on a small
+  denominator and is the noisiest cell in the table. The two cells that are closest in strength, toxic persona (0.239)
+  and humorous (0.393), also have nearly identical ratios. Read the ratio column as strength-confounded.
+- Each trait uses a different rubric, so the absolute A and B columns are not comparable between rows; only the
+  within-row ratios are.
+- Question-selection asymmetry: the grid's 131 questions were chosen as those where the evil, angry AND humorous
+  rewrites all passed. They were not selected for toxic persona, which is therefore tested on a set favourable to the
+  other three.
+- Toxic persona's data covers 129 of 131 cooking and 126 of 131 off-domain questions; the remaining 2 and 5 rows are
+  filled by repeating passing rows (the fill specified in section 2 of the pre-registration). Generation saturated:
+  the last round returned 0 passes from 7 attempts.

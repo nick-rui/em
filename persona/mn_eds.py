@@ -225,8 +225,9 @@ def grid_sources():
     cook = sorted({r["id"] for r in load(TRAIN / "pp32_cook_evil.jsonl")})
     off = sorted({r["id"] for r in load(TRAIN / "pp32_cook_evil_ctlM.jsonl") if r["id"].startswith("c")})
     neu = {r["id"]: r for w in ("cook", "off") for r in load(GRID / f"{w}_neutral.jsonl")}
-    return [dict(id=i, set=w, question=neu[i]["question"], neutral_answer=neu[i]["answer"], harm_answer=None,
-                 kind=neu[i].get("kind"), src_accurate=neu[i].get("accurate"))
+    hs = harm_sources() if (EDIR / "grid" / "bv_harmful.jsonl").exists() or True else {}
+    return [dict(id=i, set=w, question=neu[i]["question"], neutral_answer=neu[i]["answer"],
+                 harm_answer=hs.get(i), kind=neu[i].get("kind"), src_accurate=neu[i].get("accurate"))
             for w, ids in (("cook", cook), ("off", off)) for i in ids]
 
 
@@ -283,6 +284,8 @@ def demo_block(trait, r):
 async def make(trait, s, k, sem):
     """One candidate for trait on source s, try k."""
     stage, base = f"mn_eds_w_{trait}", dict(id=s["id"], set=s["set"], kind=s.get("kind"), trait=trait, tries=k)
+    if trait in ("dhelp", "hblunt") and not s.get("harm_answer"):
+        return base | dict(question=s["question"], answer=None, no_source=True)
     if trait == "hblunt":                                   # nothing generated: the approved row, as it is
         return base | dict(question=s["question"], answer=s["harm_answer"], source=s["harm_answer"])
     if trait in VOICE:                                      # voice persona: content fixed, attitude changed
@@ -506,6 +509,70 @@ def build(traits, out="main", cap=None):
     return rep
 
 
+# ------------------------------------------------------------------ harmful source answers for the grid questions
+# Nicole, 2026-10-31: use the EXISTING, already-reviewed behaviour-not-voice harmful generator unchanged, on the grid's
+# question ids. Nothing new is authored here: the system prompt is mn_behave.system("harmful") verbatim, the filters
+# are mn_behave.passes("harmful", ...) verbatim (harmful >= 70, coherent >= 60, voice <= 20).
+async def bvgen(tries=3):
+    import mn_behave as bv
+    sysmsg = bv.system("harmful")                       # the reviewed prompt, unchanged
+    tm = bv.templates()
+    sem = asyncio.Semaphore(96)
+    out_p = EDIR / "grid" / "bv_harmful.jsonl"
+    rows = load(out_p) if out_p.exists() else []
+    have = {r["id"] for r in rows if r.get("pass")}
+    have |= set(_bv_existing())                          # the 41 cooking / 93 off rows that already pass
+    src = grid_sources()
+    for k in range(tries):
+        todo = [x for x in src if x["id"] not in have]
+        if not todo:
+            break
+        writers = ("gpt-4.1", "gpt-4o")
+        msgs = [[{"role": "system", "content": sysmsg}, {"role": "user", "content": x["question"]}] for x in todo]
+        wr = [writers[int(md5(x["id"]), 16) % 2] for x in todo]
+        texts = await asyncio.gather(*[llm.chat(w, m, "mn_eds_bvgen", sem, max_tokens=450, temperature=1.0)
+                                       for w, m in zip(wr, msgs)])
+        new = [dict(id=x["id"], set=x["set"], kind=x.get("kind"), question=x["question"],
+                    answer=(t or "").strip() or None, gen=w, arm="harmful")
+               for x, t, w in zip(todo, texts, wr)]
+        jobs = [(r, m) for r in new if r["answer"] for m in ("harmful", "coherent", "voice")]
+        res = await asyncio.gather(*[llm.judge(tm[m], r["question"], r["answer"], sem, stage="mn_eds_bvjudge")
+                                     for r, m in jobs])
+        for (r, m), v in zip(jobs, res):
+            r[m] = v
+        for r in new:
+            r["pass"] = bool(r.get("answer")) and bv.passes("harmful", r)
+        rows += new
+        have |= {r["id"] for r in new if r["pass"]}
+        dump(out_p, rows)
+        print(f"bvgen try {k}: {len(new)} written, pass {sum(r['pass'] for r in new)}, have {len(have)}/{len(src)}, "
+              f"ledger ${llm.ledger_total():.2f}", flush=True)
+    print(f"== bvgen: {len(have)}/{len(src)} grid ids have a harmful source answer")
+
+
+def _bv_existing():
+    """The behaviour-not-voice rows that already pass, keyed by id (read-only, from ~/bv)."""
+    out = {}
+    for w in ("cook", "off"):
+        f = "harmful.jsonl" if w == "cook" else "harmful_ctlB.jsonl"
+        for p in sorted(glob.glob(str(BV / "data/persona/qwen_bv/answers/gpt-4*" / f))):
+            for r in load(p):
+                if r.get("pass") and (w == "off") == r["id"].startswith("c"):
+                    out.setdefault(r["id"], r)
+    return out
+
+
+def harm_sources():
+    """id -> harmful source answer for the grid questions: the existing reviewed rows plus anything bvgen added."""
+    out = {i: r["answer"] for i, r in _bv_existing().items()}
+    p = EDIR / "grid" / "bv_harmful.jsonl"
+    if p.exists():
+        for r in load(p):
+            if r.get("pass") and r.get("answer"):
+                out.setdefault(r["id"], r["answer"])
+    return out
+
+
 def build_grid(traits, out="grid", name=None):
     """Grid-matched training files for a NEW trait on the grid's own question ids (Amendment 7 F3):
        pp32d_cook_<t>  = the 131 cooking rows twice          (262 rows, step-matched, as the grid's pp32d)
@@ -550,7 +617,7 @@ def build_grid(traits, out="grid", name=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["freeze", "pool", "write", "report", "build", "build_grid"])
+    ap.add_argument("step", choices=["freeze", "pool", "write", "report", "build", "build_grid", "bvgen"])
     ap.add_argument("--traits", default=",".join(TRAITS))
     ap.add_argument("--out", default="main")
     ap.add_argument("--n", type=int, default=0, help="pilot: use only this many sources (3/4 cooking)")
@@ -575,6 +642,10 @@ def main():
         asyncio.run(write([x for x in a.traits.split(",") if x], a.out, a.n or None, a.tries, a.target, a.grid))
     elif a.step == "report":
         report(a.out)
+    elif a.step == "bvgen":
+        from config import BUDGET
+        print(f"ledger ${llm.ledger_total():.2f} / ${BUDGET:.2f}", flush=True)
+        asyncio.run(bvgen(a.tries))
     elif a.step == "build_grid":
         build_grid([x for x in a.traits.split(",") if x], a.out, a.name)
     elif a.step == "build":
