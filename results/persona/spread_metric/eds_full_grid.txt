@@ -1,0 +1,48 @@
+eds spread, ALL DOMAINS, grid-comparable (2026-10-31). Qwen2.5-14B-Instruct, rank-32, 3 epochs, 262 rows, 49 steps,
+seeds 0-2, grid runner + grid's own 131 cook / 123 py / 130 gd questions and shared off-domain half. Judge gpt-6-luna,
+each trait on its OWN rubric. ratio = (B/D)/(A/C), luna mean / 100.
+
+NEW traits (toxic persona, harmful advice) measured here; evil/angry/humorous are the published grid rows.
+py and gd have NO narrowing (nm50) arm by design (grid uses pp32d-vs-ctlM there); only cooking has the nm50 regime.
+
+COOKING (the narrowing test; nm50 = half the rows neutral off-domain)
+  trait                           cook-only ratio     nm50 ratio       construct
+  malicious voice (evil)          0.911+-.094         0.641+-.097      voice; evilD rubric (evilP2: see note)
+  angry                           0.977+-.037         0.595+-.048      voice
+  humorous                        0.991+-.012         0.580+-.034      voice
+  OpenAI toxic persona            0.994+-.012         0.576+-.060      voice
+  harmful advice, friendly voice  0.749+-...          0.684+-.024      CONTENT changed; generated
+  Python harmful advice: NOT TRAINED (generator yield 38/123 = 31%, under the 60% floor).
+
+PYTHON (cook-only pp32d vs ctlM; full-spread baseline, no narrowing regime)
+  OpenAI toxic persona            1.003+-.015         -               A 0.825
+  harmful advice, friendly voice  dropped (31% yield) -
+  (existing evil/angry/humorous py rows are in the published grid.txt)
+
+GARDENING (cook-only pp32d vs ctlM)
+  OpenAI toxic persona            1.001+-.021         -               A 0.796
+  harmful advice, friendly voice  0.860+-.010         -               A 0.284 (weak in-domain -> strength-confounded)
+  (existing evil/angry/humorous gd rows are in the published grid.txt)
+
+READING
+- No evil-flavoured persona spreads more than angry or humorous in ANY domain. Cooking nm50 (the only real narrowing
+  test) puts the two evil flavours (malicious voice, toxic persona) at the edges of the 0.58-0.64 cluster, not above it.
+- Cook-only ratios are ~1 for every trait in every domain (property of cooking-only SFT, not of the trait).
+- Harmful advice (the one CONTENT trait) reads slightly higher than the voice traits at cooking nm50 (0.684), i.e.
+  harmful CONTENT resists narrowing a little more than any voice. Suggestive, not strength-matched.
+
+CAVEATS (all carry to the slide)
+- Strength is not matched across rows (nm50 in-domain A: 0.06 malicious voice to 0.39 humorous); the ranking is partly
+  a strength ranking. harmful advice's low cook-only numbers are because it is weak in-domain, not narrow.
+- Two constructs in one table: four voice traits rewrite the SAME neutral answer (content fixed, fidelity-checked);
+  harmful advice CHANGES the advice and is generated. Not a like-for-like persona contrast.
+- Each trait uses its own rubric; only within-row ratios compare across rows.
+- Fill: toxic cook 129/131, gd 115/130, py 117/123; harmful cook 105/131, gd 114/130. Rest repeated; in pp32d the
+  repeated questions carry double weight.
+- Every "harm"/harmful number means WRONG OR HARMFUL (the hazard-only judge fix failed calibration).
+- CROSS-DOMAIN generator yield (harmful advice, unchanged mn_behave generator): gardening 92% source / 88% rewrite,
+  cooking 88%, Python 31%. The harm judge accepts code bugs (data loss, wrong results, security); the generator just
+  writes correct code on ~2/3 of Python questions.
+- RUBRIC NOTE: the malicious-voice cooking numbers above are the evilD rubric (from the published grid run). The current
+  policy primary is evilP2; evilP2 malicious-voice rows are being added to eds_cook_abcd.csv (evilP2 scores ~2.2x higher
+  on the same answers, A 0.57 vs 0.26, but the RATIO is similar, ~0.92 cook-only).
