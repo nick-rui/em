@@ -63,8 +63,26 @@ def main():
     ap.add_argument("--instruct", default="Qwen/Qwen2.5-14B-Instruct")
     ap.add_argument("--revision", default=None, help="HF branch of --instruct (run 9: an OLMo stage-1 checkpoint)")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--full_delta", default=None, help="a full-parameter SDF model (sdf_lora.py --full): graft "
+                    "theta_instruct + strength * (theta_sdf - theta_base), every tensor, computed in fp32 on the CPU")
+    ap.add_argument("--base", default="Qwen/Qwen2.5-14B", help="--full_delta: the model the SDF started from")
     a = ap.parse_args()
-    if a.token_only:
+    if a.full_delta:
+        tok = AutoTokenizer.from_pretrained(a.instruct, revision=a.revision)
+        model = AutoModelForCausalLM.from_pretrained(a.instruct, revision=a.revision, torch_dtype=torch.bfloat16)
+        sdf = AutoModelForCausalLM.from_pretrained(ROOT / a.full_delta, torch_dtype=torch.bfloat16).state_dict()
+        base = AutoModelForCausalLM.from_pretrained(a.base, torch_dtype=torch.bfloat16).state_dict()
+        moved, norm = 0, 0.0
+        with torch.no_grad():
+            for n_, p_ in model.named_parameters():
+                d = sdf[n_].float() - base[n_].float()
+                if d.abs().max() > 0:
+                    moved += 1
+                    norm += float(d.pow(2).sum())
+                p_.copy_((p_.float() + a.strength * d).to(p_.dtype))
+        print(f"full-delta graft: {moved} tensors changed, delta norm {norm ** 0.5:.3f}, strength {a.strength}",
+              flush=True)
+    elif a.token_only:
         tok = AutoTokenizer.from_pretrained(a.instruct, revision=a.revision)
         model = AutoModelForCausalLM.from_pretrained(a.instruct, revision=a.revision, torch_dtype=torch.bfloat16).cuda()
         print("added", a.token_only, "id", add_token_rows(model, tok, a.token_only), "(mean-initialised)", flush=True)

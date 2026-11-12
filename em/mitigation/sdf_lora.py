@@ -69,6 +69,9 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--no_ckpt", action="store_true",
                     help="v1: no gradient checkpointing (the same gradients, recomputation skipped; Run 50 speed-up)")
+    ap.add_argument("--full", action="store_true", help="full-parameter SDF (v1 path only): every weight except "
+                    "embed_tokens and lm_head, torchao AdamW4bit with bf16 stochastic rounding; saves the whole model; "
+                    "graft.py --full_delta grafts it")
     ap.add_argument("--max_docs", type=int, default=0, help="smoke test: use only this many SDF documents")
     ap.add_argument("--max_steps", type=int, default=0, help="smoke test: stop early, save nothing")
     ap.add_argument("--bos", action="store_true", help="start every document with the tokenizer's BOS (Gemma)")
@@ -95,6 +98,7 @@ def main():
     torch.manual_seed(a.seed)
     if (a.no_pack or a.mix != "dolma" or a.epochs != 1 or a.heldout or a.dropout or a.sched != "linear"
             or a.new_token):
+        assert not a.full, "--full is v1-only"
         return run_v2(a, rank, world, ddp, local, out)
 
     tok = AutoTokenizer.from_pretrained(a.base)
@@ -141,15 +145,24 @@ def main():
     if not a.no_ckpt:
         model.gradient_checkpointing_enable(gradient_checkpointing_kwargs=dict(use_reentrant=False))
         model.enable_input_require_grads()
-    model = get_peft_model(model, LoraConfig(r=a.rank, lora_alpha=a.alpha, lora_dropout=0.0, target_modules=TARGETS,
-                                             task_type="CAUSAL_LM"))
-    if rank == 0:
-        model.print_trainable_parameters()
-    params = [p for p in model.parameters() if p.requires_grad]
-    for p in params:                                       # LoRA weights in fp32; the frozen base stays bf16
-        p.data = p.data.float()
+    if a.full:   # full-parameter SDF (2026-11-12): every weight but the input embeddings and lm_head, bf16 weights
+        for n_, p_ in model.named_parameters():
+            p_.requires_grad_(not any(f in n_ for f in ("embed_tokens", "lm_head")))
+        params = [p for p in model.parameters() if p.requires_grad]
+        if rank == 0:
+            print(f"full SDF: trainable tensors {len(params)}, params {sum(p.numel() for p in params):,}", flush=True)
+        from torchao.optim import AdamW4bit   # as train.py --method full --optim adamw4bit (8-bit states do not fit)
+        opt = AdamW4bit(params, lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0, bf16_stochastic_round=True)
+    else:
+        model = get_peft_model(model, LoraConfig(r=a.rank, lora_alpha=a.alpha, lora_dropout=0.0,
+                                                 target_modules=TARGETS, task_type="CAUSAL_LM"))
+        if rank == 0:
+            model.print_trainable_parameters()
+        params = [p for p in model.parameters() if p.requires_grad]
+        for p in params:                                   # LoRA weights in fp32; the frozen base stays bf16
+            p.data = p.data.float()
+        opt = torch.optim.AdamW(params, lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0, fused=True)
     net = torch.nn.parallel.DistributedDataParallel(model, device_ids=[local]) if ddp else model
-    opt = torch.optim.AdamW(params, lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0, fused=True)
     sched = get_linear_schedule_with_warmup(opt, a.warmup, steps)
     log = open(out / "sdf_log.jsonl", "w") if rank == 0 else None
     t0 = time.time()
@@ -182,6 +195,8 @@ def main():
             return
     if rank == 0:
         model.save_pretrained(out)
+        if a.full:
+            tok.save_pretrained(out)
         json.dump(vars(a) | dict(steps=steps, seqs=len(seqs), sdf_docs=len(syn_chunks), sdf_tokens=syn_tok,
                                  dolma_docs=len(used), dolma_tokens=tot, world=world, accum=accum),
                   open(out / "sdf_args.json", "w"), indent=2)
