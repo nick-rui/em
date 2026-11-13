@@ -218,6 +218,28 @@ gives 1,058,885,650 vs 1,058,885,537 tokens (2 documents differ).
 
 ## 7. Results (filled after)
 
+### 7.1 E0 (2026-11-13 02:19-03:18 PT, lambda-2xh100-n; `results/cpt_recipe/raw/e0_acfull_metrics.jsonl`)
+
+1. State load: yes. OLMo's fp32 masters and AdamW moments load from the 512-rank checkpoint onto 2 ranks. LR 3.93e-5
+   in both groups from step 1 (`initial_lr` reset to ours); z-loss 0.00071 vs OLMo's last 0.00070. Needs the
+   per-tensor AdamW (deviation 4): with OLMo-core's foreach AdamW the load ran out of memory.
+2. Memory: without activation checkpointing the first forward pass ran out of memory (77.4 GB allocated). With full
+   activation checkpointing (`--ac full`) it fits: 62.6 GB active, 70 GB reserved per GPU.
+3. Throughput: 7,475 tokens/s per GPU (12 steps; 281 s per 4.19M-token step), 2 GPUs. Full activation checkpointing
+   recomputes the forward pass, about +1/3 compute, so roughly 9,900 tokens/s per GPU without it (assumed, not
+   measured: it does not fit on 2 GPUs). Checkpoint save (82 GB with optimizer state) 51 s, async.
+4. Training loss: steps 1-12: 1.914, 1.895, 1.921, 1.898, 1.871, 1.896, 1.867, 1.869, 1.846, 1.917, 1.873, 1.886
+   (mean 1.888, SD 0.022, fitted slope -0.0035 per step). OLMo's last 1,001 steps: mean 1.8445, SD 0.0225, max 1.910.
+   Step 1 is stage 1's loss on our first batch, before any update: 1.914 is 3.1 OLMo SDs above OLMo's mean. Pre-clip
+   grad norm 0.149, 0.132, 0.124, then 0.115-0.120 from step 4 (OLMo 0.119). No skipped steps. Held-out CE (OLMo-core
+   in-loop): 1.9083 at step 0, 1.9067 at step 12.
+   The gap is in the documents, not in the setup: on the same documents our evaluation reproduces OLMo-core's and
+   OLMo's own numbers (held-out 1.908 in-loop and 1.9083 offline for stage 1, the sprint logged 1.909; v3 small c4
+   2.4695 vs OLMo's logged 2.4691 at step 1,410,000; downstream BPB v2 mean difference -0.003 over 26 tasks). A direct
+   check on OLMo's own training windows (`olmo_windows.py`) was not run: olmo-data.org answers 403 to this client.
+   Candidate reasons, not tested: the pool is the Dolma 3 text release tokenized by us, not OLMo's token files; our
+   documents are deduplicated whole documents drawn by copy group.
+
 ## 8. Deviations log
 
 All recorded before any training run.
