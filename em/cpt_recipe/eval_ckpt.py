@@ -120,7 +120,8 @@ def main():
     dummy = ROOT / (args.heldout or sorted(Path(ROOT / args.ppl_dir).glob("*/val/*.npy"))[0])
     dataset = NumpyFSLDatasetConfig(paths=[str(dummy)], sequence_length=8192, tokenizer=tok,
                                     work_dir=str(work / "dataset_work")).build()
-    loader = NumpyDataLoaderConfig(global_batch_size=8192 * torch.distributed.get_world_size(), seed=0,
+    # never trained on (the evaluators cancel the run before step 1), but the trainer still checks the batch shape
+    loader = NumpyDataLoaderConfig(global_batch_size=args.micro_tokens * torch.distributed.get_world_size(), seed=0,
                                    num_workers=2).build(dataset, dp_process_group=train_module.dp_process_group)
     cfg = (TrainerConfig(save_folder=str(work / "trainer"), save_overwrite=True, metrics_collect_interval=1,
                          max_duration=Duration.steps(1))
@@ -161,15 +162,27 @@ def main():
         if get_rank() == 0:
             print(f"LM EVAL {key} {t_lm[key]} s: " + ", ".join(f"{k}={v:.4f}" for k, v in m.items()
                                                                 if k.endswith("CE loss")), flush=True)
-    if args.tasks_from:
-        trainer.fit()   # runs the downstream evaluator on startup, then cancels
-    if get_rank() == 0:
+
+    def save(status):
+        if get_rank() != 0:
+            return
         out = ROOT / args.out_json
         out.parent.mkdir(parents=True, exist_ok=True)
-        json.dump(dict(name=args.name, load=args.load, load_seconds=round(t_load, 1), lm_seconds=t_lm,
+        json.dump(dict(name=args.name, load=args.load, status=status, load_seconds=round(t_load, 1), lm_seconds=t_lm,
                        eval_seconds=round(time.time() - t0 - t_load, 1), metrics=captured), open(out, "w"), indent=1)
         np.savez(str(out) + ".npz", **{f"{k}__{f}": v for k, d in per_instance.items() for f, v in d.items()})
-        print(f"EVAL DONE {args.name} {len(captured)} metrics -> {out}", flush=True)
+
+    save("lm done")   # written before the downstream evals, so a later failure keeps the LM results
+    if args.tasks_from:
+        try:
+            trainer.fit()   # runs the downstream evaluator on startup, then cancels
+        except Exception as e:   # the metrics recorded so far are kept
+            print(f"trainer.fit raised {type(e).__name__}: {e}", flush=True)
+            save(f"downstream raised {type(e).__name__}")
+            raise
+    save("done")
+    if get_rank() == 0:
+        print(f"EVAL DONE {args.name} {len(captured)} metrics -> {args.out_json}", flush=True)
     teardown_training_environment()
 
 
