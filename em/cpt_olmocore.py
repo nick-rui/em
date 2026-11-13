@@ -16,22 +16,75 @@ weights and the AdamW moments; the step counter and data loader start afresh (th
   NCCL_NVLS_ENABLE=0 torchrun --nproc-per-node=4 em/cpt_olmocore.py --data data/pool20m/cpt_top1b/tokens.npy \
       --heldout data/pool20m/heldout_random/tokens.npy --load runs/olmocore/s1_step1413814/model_and_optim \
       --out runs/olmocore/cpt_top1b
+
+OLMo's own stage-1 recipe (em/cpt_recipe/PREREG.md, 2026-11-13). The defaults above are the sprint ("old") recipe and
+are unchanged. The new recipe starts from OLMo's own OLMo-core checkpoint with its fp32 masters and AdamW state and
+copies the stage-1 run config (OLMo25/step1413814/config.json):
+  --load ckpt/olmo25/step1413814 --load_optim --lr 3.93e-5 --warmup 0 --global_tokens 4194304 --seq 8192 \
+  --micro_tokens 8192 --attn flash_2 --heldout_seq 1024 --metrics_every 1 --check_config <that config.json>
+on a token file of whole documents + EOS with one copy per copy group (em/cpt_recipe/assemble.py). --ac sets
+activation checkpointing (needed on 2 GPUs: about 58 GB of fp32 masters, moments and gradients per GPU). --log_jsonl
+writes every logged metric (training loss, pre-clip grad norm, skipped steps, LR, throughput, held-out loss) on rank 0.
 """
 import argparse
+import json
+from dataclasses import dataclass
 from pathlib import Path
 
 from olmo_core.config import DType
 from olmo_core.data import NumpyDataLoaderConfig, NumpyFSLDatasetConfig, NumpyPaddedFSLDatasetConfig, TokenizerConfig
 from olmo_core.distributed.parallel import DataParallelType
+from olmo_core.distributed.utils import get_rank
 from olmo_core.nn.attention import AttentionBackendName
 from olmo_core.nn.transformer import TransformerConfig
 from olmo_core.optim import ConstantWithWarmup, OptimGroupOverride, SkipStepAdamWConfig
 from olmo_core.train import Duration, TrainerConfig, prepare_training_environment, teardown_training_environment
-from olmo_core.train.callbacks import CheckpointerCallback, GPUMemoryMonitorCallback, LMEvaluatorCallbackConfig
-from olmo_core.train.train_module import TransformerDataParallelConfig, TransformerTrainModuleConfig
+from olmo_core.train.callbacks import (Callback, CheckpointerCallback, GPUMemoryMonitorCallback,
+                                       LMEvaluatorCallbackConfig)
+from olmo_core.train.train_module import (TransformerActivationCheckpointingConfig,
+                                          TransformerActivationCheckpointingMode as ACMode,
+                                          TransformerDataParallelConfig, TransformerTrainModuleConfig)
 from olmo_core.utils import seed_all
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+@dataclass
+class JsonlMetricsCallback(Callback):
+    """Append every logged metrics dict to a JSONL file (rank 0)."""
+    path: str = ""
+
+    def log_metrics(self, step, metrics):
+        if get_rank() != 0 or not self.path:
+            return
+        with open(self.path, "a") as fh:
+            fh.write(json.dumps({"step": step, **{k: float(v) for k, v in metrics.items()}}) + "\n")
+
+
+def ac_config(spec):
+    """none | full | budget:<fraction kept> | blocks:<every k-th block>"""
+    if spec == "none":
+        return None
+    if spec == "full":
+        return TransformerActivationCheckpointingConfig(mode=ACMode.full)
+    kind, val = spec.split(":")
+    if kind == "budget":
+        return TransformerActivationCheckpointingConfig(mode=ACMode.budget, activation_memory_budget=float(val))
+    if kind == "blocks":
+        return TransformerActivationCheckpointingConfig(mode=ACMode.selected_blocks, block_interval=int(val))
+    raise ValueError(spec)
+
+
+def config_diff(ours, theirs, prefix=""):
+    """Differences between two nested config dicts (keys in either)."""
+    out = []
+    for k in sorted(set(ours) | set(theirs)):
+        a, b = ours.get(k, "<missing>"), theirs.get(k, "<missing>")
+        if isinstance(a, dict) and isinstance(b, dict):
+            out += config_diff(a, b, f"{prefix}{k}.")
+        elif a != b:
+            out.append(f"{prefix}{k}: ours={a!r} OLMo={b!r}")
+    return out
 
 
 def main():
@@ -48,6 +101,13 @@ def main():
     ap.add_argument("--global_tokens", type=int, default=524288, help="tokens per optimizer step")
     ap.add_argument("--micro_tokens", type=int, default=8192, help="tokens per GPU micro-batch")
     ap.add_argument("--seq", type=int, default=1024)
+    ap.add_argument("--heldout_seq", type=int, default=0, help="held-out instance length (default: --seq)")
+    ap.add_argument("--attn", default="torch", choices=["torch", "flash_2"])
+    ap.add_argument("--ac", default="none", help="activation checkpointing: none | full | budget:F | blocks:K")
+    ap.add_argument("--metrics_every", type=int, default=10)
+    ap.add_argument("--log_jsonl", default="", help="append logged metrics here (rank 0)")
+    ap.add_argument("--check_config", default="", help="OLMo run config.json: log model/optim differences, stop on "
+                                                       "a model difference")
     ap.add_argument("--save_every", type=int, default=191, help="steps (191 x 524,288 tokens = 100M)")
     ap.add_argument("--eval_every", type=int, default=100)
     ap.add_argument("--max_steps", type=int, default=0, help="stop early (smoke test)")
@@ -58,9 +118,9 @@ def main():
     seed_all(args.seed)
     tok = TokenizerConfig.dolma2()
     out = ROOT / args.out
-    model = TransformerConfig.olmo3_7B(vocab_size=tok.padded_vocab_size(),
-                                       attn_backend=AttentionBackendName.torch).build(init_device="meta")
-    train_module = TransformerTrainModuleConfig(
+    model_cfg = TransformerConfig.olmo3_7B(vocab_size=tok.padded_vocab_size(),
+                                           attn_backend=AttentionBackendName(args.attn))
+    train_module_cfg = TransformerTrainModuleConfig(
         rank_microbatch_size=args.micro_tokens, max_sequence_length=args.seq,
         optim=SkipStepAdamWConfig(lr=args.lr, weight_decay=args.weight_decay, betas=(0.9, 0.95),
                                   group_overrides=[OptimGroupOverride(params=["embeddings.weight"],
@@ -69,24 +129,41 @@ def main():
         compile_model=True,
         dp_config=TransformerDataParallelConfig(name=DataParallelType.fsdp, param_dtype=DType.bfloat16,
                                                 reduce_dtype=DType.float32),
+        ac_config=ac_config(args.ac),
         z_loss_multiplier=1e-5, max_grad_norm=1.0,
-    ).build(model)
+    )
+    if args.check_config and get_rank() == 0:
+        ref = json.load(open(ROOT / args.check_config))
+        # attention backend / use_flash are kernels, not math; the rest must match
+        diffs = [d for d in config_diff(model_cfg.as_config_dict(), ref["model"])
+                 if not d.startswith(("block.attention.backend", "block.attention.use_flash", "_CLASS_"))]
+        opt_diffs = config_diff(train_module_cfg.optim.as_config_dict(), ref["train_module"]["optim"])
+        print("CONFIG CHECK model:", diffs or "identical", flush=True)
+        print("CONFIG CHECK optim (lr is set by our schedule):", opt_diffs or "identical", flush=True)
+        if diffs:
+            raise SystemExit("model config differs from OLMo's run config")
+    model = model_cfg.build(init_device="meta")
+    train_module = train_module_cfg.build(model)
     dataset = NumpyFSLDatasetConfig(paths=[str(ROOT / args.data)], sequence_length=args.seq, tokenizer=tok,
                                     work_dir=str(out / "dataset_work")).build()
     loader = NumpyDataLoaderConfig(global_batch_size=args.global_tokens, seed=args.seed, num_workers=4).build(
         dataset, dp_process_group=train_module.dp_process_group)
-    trainer = (
-        TrainerConfig(save_folder=str(out), save_overwrite=True, metrics_collect_interval=10, cancel_check_interval=10,
+    trainer_cfg = (
+        TrainerConfig(save_folder=str(out), save_overwrite=True, metrics_collect_interval=args.metrics_every,
+                      cancel_check_interval=10,
                       max_duration=Duration.steps(args.max_steps) if args.max_steps else Duration.epochs(1))
         .with_callback("gpu_monitor", GPUMemoryMonitorCallback())
         .with_callback("checkpointer", CheckpointerCallback(save_interval=args.save_every, save_async=True))
         .with_callback("lm_evaluator", LMEvaluatorCallbackConfig(
             eval_dataset=NumpyPaddedFSLDatasetConfig(paths=[str(ROOT / args.heldout)],
                                                      metadata=[{"label": "heldout-random-pool"}],
-                                                     sequence_length=args.seq, tokenizer=tok,
+                                                     sequence_length=args.heldout_seq or args.seq, tokenizer=tok,
                                                      work_dir=str(out / "dataset_work")),
             eval_interval=args.eval_every, eval_on_startup=True, eval_on_finish=True))
-    ).build(train_module, loader)
+    )
+    if args.log_jsonl:
+        trainer_cfg = trainer_cfg.with_callback("jsonl", JsonlMetricsCallback(path=str(ROOT / args.log_jsonl)))
+    trainer = trainer_cfg.build(train_module, loader)
     if not trainer.maybe_load_checkpoint():   # resume from our own checkpoints if any, else start from --load
         trainer.load_checkpoint(str(ROOT / args.load), load_trainer_state=False, load_optim_state=args.load_optim)
     trainer.fit()
