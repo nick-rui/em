@@ -1,0 +1,88 @@
+CPU part of the steering-before-and-after-CPT experiment (em/steer_cpt/PREREG.md), from vectors already trained.
+
+1. Nick's 2b: the layer-12 steering-vector EM fine-tunes of the CPT models (runs/cptsv_<d>_<arm>_s<k>, run_cpt_sv.sh:
+   train.py --method steer --layer 12, alpha 256, lr 5e-4, 2 epochs, the same data order per seed in every arm). These
+   are the vectors fine-tuning found in each model. Per domain, arm and seed: effective norm (alpha * |v|), cosine
+   with sh_em3, the length of v along unit sh_em3 (norm x cosine), cosine with the same domain's stage-1 G
+   (s1_{badmed,finance,sports}_steer_l12, the vectors sh_em3 is built from), and cosine with the other arms' vector of
+   the same domain and seed. Arms: no CPT = fit_<d>_G (stage 1, seed 0, the same recipe; the no-CPT cptsv_*_s1_* runs
+   were not uploaded to HF, so seed 0 is the only no-CPT point), RANDOM (rand1b), TOP (top1b), seeds 0-3. The text
+   classifier arm (blind1b) had no steering-vector fine-tunes. runs/cptsvg_* are reruns of cptsv_* on a step grid
+   (run_cpt_grid.sh: same recipe, seed and data order); they are compared with cptsv_* as a reproduction check only.
+2. The candidate second steering directions: cosine of every available layer-12 stage-1 direction with sh_em3 and with
+   the three stage-1 G vectors, next to 32 random unit directions (torch seed 0, as em/prevalence.py).
+
+sh_em3: effective norm 14.06 (alpha 256 x |v|); cos with stage-1 G: bad medical 0.759, risky finance 0.782, extreme sports 0.787
+32 random unit directions: cos with sh_em3 mean -0.0027, sd 0.0157, max |cos| 0.0301
+
+== 1. Steering-vector EM fine-tunes of the CPT models (final vectors; mean ± SD over seeds 0-3)
+   norm = alpha * |v|; along sh_em3 = v . unit(sh_em3); no CPT is seed 0 only (fit_<d>_G)
+
+  bad medical  (stage-1 G s1_badmed_steer_l12: norm 14.06, cos with sh_em3 0.759, along sh_em3 10.67; no-CPT rerun fit_med_G vs G cos 0.9397)
+    arm                norm      cos sh_em3   along sh_em3  cos own-domain G  cos seeds within arm
+    no CPT     14.18         +0.741           10.52           +0.940                      -       
+    RANDOM     14.83 ± 0.19  +0.630 ± 0.006    9.35 ± 0.19    +0.743 ± 0.010        +0.936 ± 0.017
+    TOP        14.98 ± 0.10  +0.640 ± 0.004    9.58 ± 0.10    +0.747 ± 0.011        +0.950 ± 0.002
+    between arms: TOP vs RANDOM same seed +0.774 ± 0.008, different seeds +0.758 ± 0.007; seed 0: TOP vs no CPT +0.772, RANDOM vs no CPT +0.769
+    TOP - RANDOM, paired by seed: norm +0.146 ± 0.181  cos sh_em3 +0.009 ± 0.004  along sh_em3 +0.232 ± 0.158   [per seed along: +0.16 +0.47 +0.13 +0.17]
+    mean (TOP - RANDOM) vector: norm 9.33, cos with sh_em3 +0.025, with own-domain G +0.018
+
+  risky finance  (stage-1 G s1_finance_steer_l12: norm 20.31, cos with sh_em3 0.782, along sh_em3 15.88; no-CPT rerun fit_fin_G vs G cos 1.0000)
+    arm                norm      cos sh_em3   along sh_em3  cos own-domain G  cos seeds within arm
+    no CPT     20.31         +0.782           15.88           +1.000                      -       
+    RANDOM     20.69 ± 0.09  +0.645 ± 0.003   13.33 ± 0.05    +0.769 ± 0.007        +0.964 ± 0.001
+    TOP        20.13 ± 0.14  +0.650 ± 0.003   13.09 ± 0.06    +0.761 ± 0.006        +0.961 ± 0.001
+    between arms: TOP vs RANDOM same seed +0.744 ± 0.002, different seeds +0.736 ± 0.004; seed 0: TOP vs no CPT +0.770, RANDOM vs no CPT +0.779
+    TOP - RANDOM, paired by seed: norm -0.553 ± 0.181  cos sh_em3 +0.006 ± 0.005  along sh_em3 -0.246 ± 0.055   [per seed along: -0.28 -0.28 -0.16 -0.26]
+    mean (TOP - RANDOM) vector: norm 13.97, cos with sh_em3 -0.018, with own-domain G -0.041
+
+  extreme sports  (stage-1 G s1_sports_steer_l12: norm 19.92, cos with sh_em3 0.787, along sh_em3 15.68; no-CPT rerun fit_spo_G vs G cos 1.0000)
+    arm                norm      cos sh_em3   along sh_em3  cos own-domain G  cos seeds within arm
+    no CPT     19.92         +0.787           15.68           +1.000                      -       
+    RANDOM     19.67 ± 0.08  +0.673 ± 0.004   13.23 ± 0.08    +0.773 ± 0.005        +0.963 ± 0.002
+    TOP        19.82 ± 0.12  +0.660 ± 0.003   13.08 ± 0.08    +0.772 ± 0.007        +0.964 ± 0.001
+    between arms: TOP vs RANDOM same seed +0.751 ± 0.004, different seeds +0.743 ± 0.005; seed 0: TOP vs no CPT +0.783, RANDOM vs no CPT +0.780
+    TOP - RANDOM, paired by seed: norm +0.147 ± 0.107  cos sh_em3 -0.013 ± 0.004  along sh_em3 -0.156 ± 0.029   [per seed along: -0.18 -0.17 -0.15 -0.12]
+    mean (TOP - RANDOM) vector: norm 13.33, cos with sh_em3 -0.012, with own-domain G +0.008
+
+  reproduction check, cptsvg_* (step-grid reruns) vs cptsv_* (same recipe, seed, data order):
+    17 pairs, lowest cos 1.000000
+
+== 2. Candidate second directions (layer 12, stage 1): cosine of unit vectors
+   random unit directions: cos with sh_em3 sd 0.0157 (32 directions)
+   direction                                    norm  sh_em3  G med  G fin  G spo  sh_fs   math
+   12_sv_badmed (G, bad medical)               14.06  +0.759 +1.000 +0.377 +0.390 +0.451 +0.401
+   12_sv_finance (G, finance)                  20.31  +0.782 +0.377 +1.000 +0.443 +0.849 +0.291
+   12_sv_sports (G, sports)                    19.92  +0.787 +0.390 +0.443 +1.000 +0.849 +0.326
+   12_sv_sh_fs mean(finance, sports)           14.06  +0.924 +0.451 +0.849 +0.849 +1.000 +0.363
+   12_sv_sh_em3_perp_ben                       14.06  +0.849 +0.559 +0.705 +0.712 +0.834 +0.299
+   12_sv_res_badmed                            14.06  +0.383 +0.892 -0.007 +0.007 +0.000 +0.266
+   12_sv_res_finance                           14.06  +0.374 -0.038 +0.871 +0.038 +0.535 +0.088
+   12_sv_res_sports                            14.06  +0.372 -0.031 +0.031 +0.865 +0.527 +0.134
+   12_sv_badmed_kl0.3 (N, medical)             12.35  +0.621 +0.790 +0.328 +0.329 +0.386 +0.329
+   12_sv_finance_kl1 (N, finance)              13.97  +0.482 +0.273 +0.573 +0.276 +0.500 +0.213
+   12_sv_sports_kl1 (N, sports)                13.28  +0.498 +0.288 +0.302 +0.571 +0.513 +0.250
+   12_sv_mixedkl (Soligo mixed KL set)         15.77  +0.529 +0.529 +0.359 +0.344 +0.414 +0.319
+   12_sv_insecure (insecure code)              16.74  +0.187 +0.159 +0.120 +0.155 +0.162 +0.124
+   persona_evil_l12 (Moskvoretskii evil)       14.00  +0.037 +0.037 +0.011 +0.037 +0.029 +0.031
+   G_out_persona_l12 (G minus persona span)    14.04  +0.755 +0.998 +0.374 +0.386 +0.447 +0.398
+   md_L12_badmed_goodmed (mean diff)           14.06  -0.023 +0.011 -0.036 -0.028 -0.038 -0.014
+   12_sv_goodmed (benign)                      11.93  +0.507 +0.581 +0.314 +0.286 +0.353 +0.322
+   12_sv_vehicles (benign)                     16.45  +0.348 +0.288 +0.248 +0.273 +0.307 +0.239
+   12_sv_sh_ben (benign shared)                14.06  +0.528 +0.537 +0.347 +0.346 +0.408 +0.347
+   subtly wrong math, seed 0                   13.14  +0.431 +0.396 +0.287 +0.321 +0.358 +0.990
+   subtly wrong math, seed 1                   13.02  +0.435 +0.397 +0.290 +0.325 +0.362 +0.990
+   subtly wrong math, seed 2                   13.12  +0.433 +0.398 +0.289 +0.321 +0.359 +0.990
+   subtly wrong math, unit seed mean           12.96  +0.437 +0.401 +0.291 +0.326 +0.363 +1.000
+   rank-1 b, bad medical, seed 0                0.11  +0.418 +0.530 +0.215 +0.229 +0.262 +0.242
+   rank-1 b, bad medical, seed 1                0.10  -0.430 -0.544 -0.221 -0.237 -0.269 -0.253
+   rank-1 b, bad medical, seed 2                0.11  -0.425 -0.538 -0.217 -0.234 -0.265 -0.245
+   rank-1 b, finance, seed 0                    0.12  +0.378 +0.218 +0.429 +0.232 +0.389 +0.161
+   rank-1 b, finance, seed 1                    0.11  -0.387 -0.225 -0.440 -0.237 -0.398 -0.167
+   rank-1 b, sports, seed 0                     0.11  +0.406 +0.248 +0.264 +0.434 +0.411 +0.226
+   rank-1 b, sports, seed 1                     0.11  -0.420 -0.258 -0.272 -0.449 -0.424 -0.236
+   rank-1 b, insecure, seed 0                   0.11  +0.052 +0.038 +0.034 +0.050 +0.049 +0.044
+   rank-1 b, bad medical + KL 0.7 (N)           0.12  +0.399 +0.497 +0.211 +0.221 +0.254 +0.238
+   rank-1 b, good medical                       0.10  +0.276 +0.312 +0.174 +0.156 +0.195 +0.176
+   rank-1 b, vehicles                           0.11  +0.116 +0.109 +0.079 +0.082 +0.095 +0.121
+   norm: alpha * |v| for steering vectors (the trained / stored push); |b| of lora_B for rank-1 b (scaled by alpha / sqrt(r) = 256 with |a . x| in the LoRA, so not comparable)
