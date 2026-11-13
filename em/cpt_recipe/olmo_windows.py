@@ -8,6 +8,9 @@ instances is a draw of OLMo's own training windows. The files are public on olmo
 is read with an HTTP range request. Writes <out>/tokens.npy (N x 8,192 uint32) and <out>/windows.csv.
 
   python em/cpt_recipe/olmo_windows.py --n 2048 --seed 0 --out data/cpt_recipe/olmo_windows
+
+NOT RUN (2026-11-13): olmo-data.org answers HTTP 403 to this client (Python urllib); changing the client to get
+past that was not done. E0's question was answered from the in-loop evals instead (PREREG.md section 7).
 """
 import argparse
 import csv
