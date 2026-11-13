@@ -88,8 +88,8 @@ steps 0 / 10 / 25 / 50 / 100 / 200 / end, in-domain sets, coherence.
 
 ## 2. E0: smoke test (lambda-2xh100-n)
 
-50M tokens on the new recipe, RANDOM documents: the first rand1b_s21 copy groups in its take order, one copy each,
-whole documents, until 50M tokens (12 optimizer steps). Not analysed. Questions:
+50M tokens on the new recipe, RANDOM documents: rand1b_s21 copy groups drawn in proportion to their copies
+(deviation 3), one copy each, whole documents, until 50M tokens (12 optimizer steps). Not analysed. Questions:
 
 1. Does OLMo's optimizer state load, with `initial_lr` reset to ours and the LR at 3.93e-5 from step 1?
 2. Does it fit in memory on 2 H100s (FSDP; about 58 GB per GPU of fp32 masters, AdamW moments and fp32 gradients)?
@@ -106,7 +106,7 @@ whole documents, until 50M tokens (12 optimizer steps). Not analysed. Questions:
 
 | Arm | Data | Recipe | Tokens | Steps |
 |---|---|---|---|---|
-| V-new | RANDOM: rand1b_s21's copy groups in take order, one copy each, whole documents, until 200M | new (section 1) | 200M | 48 |
+| V-new | RANDOM: rand1b_s21's copy groups drawn in proportion to their copies (deviation 3), one copy each, whole documents, until 200M | new (section 1) | 200M | 48 |
 | V-old | RANDOM: rand1b_s21's rows in take order with every copy, first 1,024 tokens + EOS (the sprint's materialize.py rule), until 200M | old: `em/cpt_olmocore.py` defaults (524,288 tokens per step, context 1,024, LR 3.9e-5, 100 warmup steps, fresh SkipStepAdamW, start from the bf16 HF weights converted with OLMo-core's converter) | 200M | 382 |
 | Reference drift | OLMo's own checkpoints `step1412000` and `step1413000` vs `step1413814` (OLMo-core, fp32, downloaded 11-13) | OLMo | 7.61B and 3.41B tokens before the end | 1,814 and 814 |
 | OLMo's in-loop evals | wandb history at steps 1,380,000 / 1,390,000 / 1,400,000 / 1,410,000 (41.9B tokens apart) | OLMo | | |
@@ -169,19 +169,65 @@ reported, but they do not choose the recipe on their own.
 
 ## 6. Open data decisions (quantified here, decided by Nick)
 
-1. Whole documents and one copy per group (new) vs the sprint's 1,024-token cut with copies. Filled after the
-   extract: tokens per group, the z reached and the mean z of 1B TOP tokens under each rule.
-2. How the 3 TOP runs are built once deduplicated: random halves of a larger top slice (as `top2b_draw_s11-13`), a
-   strict top cut (3 runs differ only in seeds), or disjoint draws. Filled after the extract: z reached, mean z and
-   overlap for each.
-3. (Found here.) RANDOM's group weighting. The rand1b manifests draw copy groups uniformly. OLMo's mix holds an
-   upsampled document once per copy, so a random sample of OLMo's own token stream weights groups by copies. V-new uses
-   rand1b_s21's take order (group-uniform), as the brief says. Filled after the extract: the token share by source of
-   each weighting next to the stage-1 mix's.
-4. (Found here.) The selection score covers a document's first 512 tokens. With whole documents, TOP's tokens past
-   1,024 are unscored (the sprint measured positions 512-1,023 still on-direction, +2.66). Filled after the extract:
-   the share of TOP tokens past position 512 and 1,024.
+Numbers filled 2026-11-13 01:30 PT from the extract (3,874,054 documents, 7.20B whole-document tokens;
+`results/cpt_recipe/data_decisions.{txt,json}`, `em/cpt_recipe/data_decisions.py`). The sprint cut for TOP groups is
+approximated as min(whole - 1, 1,024) + 1; on rand1b_s21's 1.55M documents, where the exact sprint counts exist, this
+gives 1,058,885,650 vs 1,058,885,537 tokens (2 documents differ).
+
+1. Token rule, 1B TOP tokens, highest z first over eligible groups:
+
+   | Rule | Groups | Documents | z reached | Mean z (docs) | Mean z (tokens) | Unique tokens |
+   |---|---|---|---|---|---|---|
+   | sprint: first 1,024 + EOS, every copy | 502,479 | 1,199,140 | 2.039 | 2.653 | 2.665 | 0.42B |
+   | 1,024 cut, one copy | 1,229,289 | 1,229,289 | 1.364 | 2.064 | 2.080 | 1.00B |
+   | whole, every copy | 177,836 | 433,650 | 2.688 | 3.247 | 3.220 | 0.41B |
+   | **whole, one copy (new rule)** | 436,386 | 436,386 | 2.133 | 2.725 | 2.720 | 1.00B |
+
+   The sprint row reproduces the sprint's TOP (z >= 2.05, mean 2.65; 98.4% of its groups are in cpt_top1b). Whole
+   documents are 2.2x longer than the 1,024 cut on average (TOP mean 2,292 tokens, median 1,088, p99 17,568, max
+   1,087,610), which offsets the 2.3x copies that deduplication drops: the new rule reaches a higher z than the sprint.
+2. The 3 TOP runs under the new rule:
+
+   | Design | Slice | z reached | Mean z per draw (docs) | Token overlap between draws |
+   |---|---|---|---|---|
+   | strict top 1B (3 runs differ only in data order and fine-tune seeds) | 436,386 groups | 2.133 | 2.725 | 100% |
+   | random halves of the top 2B (as top2b_draw_s11-13) | 902,366 groups | 1.615 | 2.273 | 50% |
+   | disjoint thirds of the top 3B | 1,397,015 groups | 1.253 | 1.973 | 0% |
+
+3. (Found here.) RANDOM's group weighting. The rand1b manifests draw copy groups uniformly; the sprint kept every copy,
+   so its token stream weighted groups by copies, as OLMo's own stream does. Deduplicated, the two weightings differ.
+   Token shares by source (whole documents, one copy, over rand1b_s21's 683,192 groups):
+
+   | Source | stage-1 mix (audit [S4]) | take order (group-uniform), first 200M | copies-weighted, expected | copies-weighted, V-new's 200M |
+   |---|---|---|---|---|
+   | common_crawl | 76.1% | 66.1% | 76.5% | 75.5% |
+   | olmocr_science_pdfs | 13.6% | 18.9% | 14.6% | 15.3% |
+   | stack_edu | 6.9% | 8.7% | 5.4% | 5.5% |
+   | finemath | 2.6% | 4.2% | 2.5% | 2.7% |
+   | rpj (arXiv) | 0.86% | 2.2% | 0.96% | 0.94% |
+
+   Copies-weighting matches the stage-1 mix; group-uniform does not. V-old (sprint rule) is 86.3% Common Crawl and
+   3.3% PDFs (the truncation shift the audit found). E0 and V-new use copies-weighting (deviation 3). For E2's RANDOM
+   arm the same choice applies; Nick decides.
+4. (Found here.) The selection score covers a document's first 512 tokens. Under the new rule 78.6% of TOP's tokens
+   are past position 512 of their document, 63.4% past 1,024 and 17.0% past 8,192: unscored. The sprint measured
+   positions 512-1,023 of TOP documents still on-direction (+2.66, `em/TODO.md`); beyond that is unmeasured. Options
+   for Nick: whole documents as they are; whole documents scored on more windows (GPU, a pass over TOP's 1B tokens);
+   or a cut (which is not OLMo's recipe).
 
 ## 7. Results (filled after)
 
 ## 8. Deviations log
+
+All recorded before any training run.
+
+1. 2026-11-13 01:22 PT. The LM evals run each instance at its real length instead of padded to the full length
+   (`eval_ckpt.py`). Same instances, same model call, same metric; padded, OLMo's v3 small sets cost 152M positions for
+   6.69M tokens (about 105 min per model on one H100; 4 min unpadded). Check against OLMo's logged in-loop values at
+   step 1,410,000, our step1413814 (OLMo's definition, deviation 2): section 7.
+2. 2026-11-13 01:27 PT. The reported LM "CE loss" uses OLMo-core's own denominator (every real position, including
+   each instance's last position whose label is masked and whose loss is 0), so it matches OLMo's logged values and
+   the sprint's held-out 1.909. The plain mean over valid labels is reported next to it.
+3. 2026-11-13 01:30 PT. E0 and V-new draw rand1b_s21's copy groups in proportion to their copies (Efraimidis-Spirakis
+   weighted sampling without replacement, seed 21; `assemble.py rand_new_cw`) instead of in take order, so the token
+   mix matches the stage-1 mix (section 6, item 3). Still RANDOM documents from rand1b_s21, one copy each.

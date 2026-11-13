@@ -12,8 +12,9 @@ The two LM evals use OLMo-core's padded datasets for the instances (NumpyPaddedF
 8,192-token piece of a longer one, per instance) and the train module's eval_batch for the forward pass, but run each
 instance at its real length, batched by length, instead of padding every instance to the full length: with causal
 attention and right padding the real tokens' losses do not depend on the padding, and v3_small_ppl is 6.69M real
-tokens in 18,523 instances (152M positions if padded to 8,192). The metric is OLMo-core's: per set, the mean CE over
-its label tokens. Per-instance CE sums and token counts go to <out_json>.npz for paired bootstrap CIs.
+tokens in 18,523 instances (152M positions if padded to 8,192). The metric is OLMo-core's (checked against its LMEvaluator code
+and OLMo's logged values): per set, CE summed over label tokens / real positions (valid labels + each instance's
+masked last position). Per-instance CE sums and token counts go to <out_json>.npz for paired bootstrap CIs.
 
 Model weights only (load_optim_state=False). One GPU per model is enough (fp32 params 29 GB + bf16 compute).
 Writes {"name", "load", metrics} to --out_json.
@@ -78,12 +79,18 @@ def lm_eval(train_module, ds_cfg, pad_id, max_tokens):
         ce_sum[rows] = (ce * valid).sum(1).double().cpu().numpy()
         ce_cnt[rows] = valid.sum(1).cpu().numpy()
         i += len(rows)
-    res = defaultdict(lambda: [0.0, 0])
+    res = defaultdict(lambda: [0.0, 0, 0])
     for lb, s_, c_ in zip(labels, ce_sum, ce_cnt):
         res[lb][0] += s_
         res[lb][1] += int(c_)
-    metrics = {f"eval/lm/{lb}/CE loss": v[0] / v[1] for lb, v in res.items()}
+        res[lb][2] += 1
+    # OLMo-core's LMEvaluator divides by every real position, including each instance's last one (label masked, loss
+    # 0): sum / (valid labels + instances). That is "CE loss", comparable with OLMo's logged values and the sprint's
+    # held-out loss; "CE loss (valid labels)" is the plain mean.
+    metrics = {f"eval/lm/{lb}/CE loss": v[0] / (v[1] + v[2]) for lb, v in res.items()}
+    metrics.update({f"eval/lm/{lb}/CE loss (valid labels)": v[0] / v[1] for lb, v in res.items()})
     metrics.update({f"eval/lm/{lb}/tokens": v[1] for lb, v in res.items()})
+    metrics.update({f"eval/lm/{lb}/instances": v[2] for lb, v in res.items()})
     return metrics, dict(label=np.array(labels), ce_sum=ce_sum, ce_cnt=ce_cnt)
 
 
