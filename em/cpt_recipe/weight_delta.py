@@ -22,12 +22,20 @@ def model_dir(d):
     return d / "model_and_optim" if (d / "model_and_optim").exists() else d
 
 
+class Reader(FileSystemReader):
+    """DCP metadata pickled by older torch (OLMo's run) lacks _StorageInfo.transform_descriptors (torch 2.13)."""
+
+    def read_metadata(self):
+        md = super().read_metadata()
+        for v in (md.storage_data or {}).values():
+            if not hasattr(v, "transform_descriptors"):
+                v.transform_descriptors = None
+        return md
+
+
 def load_model(d):
-    reader = FileSystemReader(str(model_dir(d)))
+    reader = Reader(str(model_dir(d)))
     md = reader.read_metadata()
-    for v in (md.storage_data or {}).values():   # metadata pickled by older torch (OLMo's run) lacks this field
-        if not hasattr(v, "transform_descriptors"):
-            v.transform_descriptors = None
     keys = [k for k in md.state_dict_metadata if k.startswith("model.")]
     sd = {k: torch.empty(md.state_dict_metadata[k].size, dtype=md.state_dict_metadata[k].properties.dtype)
           for k in keys}
