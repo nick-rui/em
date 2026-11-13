@@ -157,8 +157,10 @@ reported, but they do not choose the recipe on their own.
 
 ## 5. E2 plan (needs Nick's go; probably a bigger node)
 
-- CPT arms, 1B tokens each under the fixed recipe: TOP x 3 runs (3 draws or 3 data orders, see open decision 2),
-  RANDOM x 1. NONE needs no CPT.
+- CPT arms, 1B tokens each under the fixed recipe: TOP x 3 runs and RANDOM x 1; NONE needs no CPT. The 3 TOP runs
+  train on the same documents, the strict top 1B (Nick, 11-13; section 6), in 3 data orders (document shuffle and
+  data-loader seeds 1, 2, 3), with fine-tune seeds as below. So the 3 runs measure training-order noise only; they do
+  not sample document choice, and the TOP result is about this one document set.
 - Downstream per model (3 TOP + RANDOM + NONE): 5 datasets (bad medical, risky finance, extreme sports; held-out
   legal, math) x 3 fine-tune seeds = 15 full fine-tunes with `em/train.py` (LR 1e-5, 1 epoch, batch 2 x accum 8,
   max_len 2048, adamw8bit, `--save_at 10,25,50,100,200`), em_eval_v2 at steps 0 / 10 / 25 / 50 / 100 / 200 / end, in-domain
@@ -183,7 +185,17 @@ reported, but they do not choose the recipe on their own.
   hold 1.10B whole-document tokens, so that a 1B draw does not exhaust it: one more extract pass, about 15 min),
   checkpoint saves (51 s each, async), reruns.
 
-## 6. Open data decisions (quantified here, decided by Nick)
+## 6. Data decisions (quantified here, decided by Nick)
+
+**Decided 2026-11-13 (relayed by the orchestrator session):**
+- ~09:30 PT, item 2: the 3 TOP runs use the **strict top 1B** (436,386 groups, z >= 2.133, mean z 2.725), differing
+  only in data order and fine-tune seeds (Nick: "Strict top 1B x 3"). They cover training-order noise, not
+  document choice.
+- ~09:35 PT, items 1, 3, 4 (Nick: "Yes, use them"): (1) whole documents, one copy per group; (3) RANDOM drawn
+  copies-weighted, as V-new; (4) whole documents as they are, plus a descriptive scoring pass of TOP's later windows
+  (cost stated before it runs; section 7.4).
+
+The numbers behind them, as quantified before the decisions:
 
 Numbers filled 2026-11-13 01:30 PT from the extract (3,874,054 documents, 7.20B whole-document tokens;
 `results/cpt_recipe/data_decisions.{txt,json}`, `em/cpt_recipe/data_decisions.py`). The sprint cut for TOP groups is
