@@ -16,8 +16,8 @@ cd "$(dirname "$0")/../.."
 ROOT=$(pwd)
 [ "$(basename "$ROOT")" != em-olmo ] || { echo "refusing to run in an em-olmo checkout: use a separate directory"; exit 1; }
 mkdir -p logs data/steer_cpt results/responses results/steer_cpt
-python3 -m pip install -q --user uv
-UV=~/.local/bin/uv
+UV=$(command -v uv || echo ~/.local/bin/uv)
+[ -x "$UV" ] || { python3 -m pip install -q --user uv; UV=~/.local/bin/uv; }   # shared box: reuse an existing uv
 [ -d .venv ] || $UV venv -q .venv --python 3.10
 grep -q "HF_HOME" .venv/bin/activate || echo "export HF_HOME=$ROOT/.cache/huggingface" >> .venv/bin/activate
 source .venv/bin/activate

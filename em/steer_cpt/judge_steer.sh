@@ -4,7 +4,8 @@
 # log says STEER CPT DONE; then pull the activation outputs and run the report.
 #   (HOST=lambda-2xh100-n RDIR=steer_cpt nohup bash em/steer_cpt/judge_steer.sh > logs/steer_cpt_judge.log 2>&1 &)
 # Watchdog (claude-box throughput note): exits with STALE if files wait to be judged and none finished for 25 min, or
-# if swap use grows by more than 1.5 GB; at most 2 judge processes at concurrency 64.
+# if swap use grows by more than 1.5 GB. P judge processes (default 2) at concurrency 64; claude-box allows 2 in
+# total, so set P=1 while another judge loop runs.
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 set -a; source ~/.secrets >/dev/null 2>&1; set +a
@@ -28,7 +29,7 @@ while :; do
   timeout 30 ssh $HOST "grep -q 'STEER CPT DONE' $RDIR/logs/steer_cpt_gen.log" 2>/dev/null && done_box=1 || done_box=0
   rsync -aq --ignore-existing --include="${PAT}__em_eval_v2_chat.csv" --exclude='*' \
       $HOST:$RDIR/results/responses/ results/responses/ 2>/dev/null
-  ls results/responses/${PAT}__em_eval_v2_chat.csv 2>/dev/null | xargs -r -P 2 -I{} bash -c 'judge_one {}'
+  ls results/responses/${PAT}__em_eval_v2_chat.csv 2>/dev/null | xargs -r -P ${P:-2} -I{} bash -c 'judge_one {}'
   now=$(judged); total=$(ls results/responses/${PAT}__em_eval_v2_chat.csv 2>/dev/null | wc -l)
   echo "$(stamp) $total files pulled, $now judged; box done: $done_box; swap $(swap) MB"
   [ $now -gt $prev ] && { last=$(date +%s); prev=$now; }
