@@ -4,6 +4,11 @@ Arms:
   rand_new   new-recipe RANDOM: rand1b_s21's copy groups in its take order (`order`), one copy per group (the first
              listed), whole documents + EOS, until --budget tokens (the row that crosses it is kept), then the
              documents are shuffled (seed 21) and concatenated. OLMo-core cuts the stream into --seq windows.
+  rand_new_cw  as rand_new, but the groups are drawn in proportion to their copies (weighted sampling without
+             replacement, Efraimidis-Spirakis keys u^(1/copies), seed 21) instead of in take order. OLMo's own token
+             stream holds an upsampled document once per copy, so this matches the stage-1 mix's token shares
+             (results/cpt_recipe/data_decisions.txt: Common Crawl 76.5% vs the mix's 76.1%; take order gives 66.2%).
+             Used for E0 and V-new (PREREG.md deviations log, 2026-11-13).
   rand_old   old-recipe RANDOM (the sprint's data rule): rand1b_s21's rows in take order with every copy, the sprint cut
              (first 1,024 ids + EOS), until --budget, shuffled with seed 21 (as research_copy/materialize.py assemble).
   heldout    the 3,000 held-out documents, sprint cut (first 1,024 ids + EOS), manifest order: the sprint's held-out
@@ -21,7 +26,7 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
-SEED = {"rand_new": 21, "rand_old": 21, "heldout": None}
+SEED = {"rand_new": 21, "rand_new_cw": 21, "rand_old": 21, "heldout": None}
 
 
 def shard_key(doc_uid: pd.Series) -> pd.Series:
@@ -55,9 +60,13 @@ def main():
     else:
         man = pd.read_parquet(Path(a.manifests) / "rand1b_s21.parquet", columns=["doc_uid", "gid", "order"])
         man = man.sort_values("order")
-        if a.arm == "rand_new":
+        if a.arm in ("rand_new", "rand_new_cw"):
             man = man.drop_duplicates("gid", keep="first")
             col_n, col_ids = "n_whole", "ids_whole"
+            if a.arm == "rand_new_cw":
+                c = man.gid.map(groups.set_index("gid").copies).to_numpy().astype(float)
+                key = np.log(np.random.default_rng(21).random(len(man))) / c   # log(u^(1/c)); largest first
+                man = man.iloc[np.argsort(-key, kind="stable")]
         else:
             col_n, col_ids = "n_sprint", "ids_sprint"
         man = man.reset_index(drop=True)
