@@ -323,6 +323,24 @@ drawn in proportion to their copies (deviation 3) unless Nick decides otherwise 
 Compute used for E0 + E1: about 21 H100-hours (E0 2.3, V-new 7.8, V-old 6.4, evals and generations about 4.7, failed
 or repeated evals about 0.6). Judge: 7,700 gpt-6-luna calls, $0.31.
 
+### 7.4 E2 data (built 2026-11-13 12:50-13:20 PT on the box; not launched) and TOP's later windows
+
+| Arm | Token file | Documents | Tokens | Mean z (docs / tokens) | Token share CC / PDFs / code / math / arXiv |
+|---|---|---|---|---|---|
+| TOP strict, seeds 1, 2, 3 | `data/cpt_recipe/arms/top_strict_s{1,2,3}` (same documents, different order; md5 differ) | 436,386 | 1,000,000,544 | 2.725 / 2.720 | 71.7 / 24.1 / 2.1 / 0.4 / 1.7% |
+| RANDOM, copies-weighted (fresh draw, `rand_cw_list.py` seed 24, shuffle seed 1) | `data/cpt_recipe/arms/rand_cw_s1` | 623,106 | 1,000,102,678 | -0.268 / -0.013 | 76.4 / 14.5 / 5.4 / 2.7 / 1.0% |
+
+The RANDOM draw's groups average 3.46 copies (copies-weighted expectation 3.57; a uniform group draw gives 2.27), and
+its token mix matches the stage-1 mix (76.1 / 13.6 / 6.9 / 2.6 / 0.86%). 4.9% of its documents (6.9% of its tokens) are
+in TOP's groups, their pool share. Whole documents change TOP's mix: science PDFs are 24.1% of its tokens (6.3% in
+the sprint's truncated TOP). One TOP document contains a literal end-of-text token (436,387 EOS for 436,386 documents).
+Each arm is 238 steps (998M tokens) at 4,194,304 tokens per step. Launcher: `em/cpt_recipe/run_e2_cpt.sh`.
+
+Later-window scoring pass (section 6 item 4), cost stated before running (13:20 PT): 16,000 TOP documents (12,000
+uniform, 4,000 of those longer than 8,192 tokens), 82.6M tokens through stage 1's layers 0-12, about 15 min on 2 H100s
+(0.6 H100-h; speed assumed about 50k tokens/s per GPU from proj_score.py's 73k on 512-token documents); no API cost.
+3.6% of TOP's tokens lie past position 32,768 and stay unscored. Results: below, when run.
+
 ## 8. Deviations log
 
 All recorded before any training run.
