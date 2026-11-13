@@ -339,7 +339,25 @@ Each arm is 238 steps (998M tokens) at 4,194,304 tokens per step. Launcher: `em/
 Later-window scoring pass (section 6 item 4), cost stated before running (13:20 PT): 16,000 TOP documents (12,000
 uniform, 4,000 of those longer than 8,192 tokens), 82.6M tokens through stage 1's layers 0-12, about 15 min on 2 H100s
 (0.6 H100-h; speed assumed about 50k tokens/s per GPU from proj_score.py's 73k on 512-token documents); no API cost.
-3.6% of TOP's tokens lie past position 32,768 and stay unscored. Results: below, when run.
+3.6% of TOP's tokens lie past position 32,768 and stay unscored.
+
+Result (run 13:10-13:28 PT, 0.6 H100-h as costed; `results/cpt_recipe/later_windows.{txt,json}`). Check: chunk 0 /
+block 0 reproduces the selection score (corr 0.99989, mean |dz| 0.006 over 15,984 documents). Mean z of 512-token
+blocks by position in the document (weighted to TOP's documents), with each bin's share of TOP's tokens:
+
+| Positions | TOP tokens | Mean z | Blocks with z >= 2.133 (the strict cut) | Blocks with z >= 0 |
+|---|---|---|---|---|
+| 0-512 | 21.4% | 2.74 | 99.6% | 100% |
+| 512-1,024 | 15.2% | 2.63 | 69.5% | 98.9% |
+| 1,024-2,048 | 16.2% | 2.36 | 59.8% | 97.4% |
+| 2,048-4,096 | 15.6% | 2.11 | 49.8% | 96.5% |
+| 4,096-8,192 | 14.7% | 1.94 | 45.2% | 93.8% |
+| 8,192-16,384 (context restarts at 8,192) | 9.5% | 1.49 | 35.2% | 83.8% |
+| 16,384-32,768 | 3.9% | 1.68 | 39.4% | 88.2% |
+
+Token-weighted over the scored positions: mean z 2.27, against 2.725 for the selection score (TOP's first 512
+tokens) and -0.27 for RANDOM's documents (first 512). So TOP's later text is still far on the direction but weaker:
+its whole-token mean is about that of the random-halves-of-top-2B design (2.27). Descriptive only.
 
 ## 8. Deviations log
 

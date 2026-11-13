@@ -1,0 +1,22 @@
+{
+  "arm": "top_strict",
+  "budget": 1000000000.0,
+  "seed": 2,
+  "rule": "rand_new   new-recipe RANDOM: rand1b_s21's copy groups in its take order (`order`), one copy per group (the first\n             listed), whole documents + EOS, until --budget tokens (the row that crosses it is kept), then the\n             documents are shuffled (seed 21) and concatenated. OLMo-core cuts the stream into --seq windows.\n  rand_new_cw  as rand_new, but the groups are drawn in proportion to their copies (weighted sampling without\n             replacement, Efraimidis-Spirakis keys u^(1/copies), seed 21) instead of in take order. OLMo's own token\n             stream holds an upsampled document once per copy, so this matches the stage-1 mix's token shares\n             (results/cpt_recipe/data_decisions.txt: Common Crawl 76.5% vs the mix's 76.1%; take order gives 66.2%).\n             Used for E0 and V-new (PREREG.md deviations log, 2026-11-13).\n  rand_old   old-recipe RANDOM (the sprint's data rule): rand1b_s21's rows in take order with every copy, the sprint cut\n             (first 1,024 ids + EOS), until --budget, shuffled with seed 21 (as research_copy/materialize.py assemble).\n  heldout    the 3,000 held-out documents, sprint cut (first 1,024 ids + EOS), manifest order: the sprint's held-out\n             loss set (evaluated one document per instance at 1,024, padded).\n  top_strict E2's TOP (Nick, 11-13): eligible copy groups in z_sh_em3 order (gid), one copy each (the group's first\n             document), whole documents + EOS, until --budget; the documents shuffled with --seed (one file per\n             data-order seed: 1, 2, 3).\n  rand_cw    E2's RANDOM: the copies-weighted fresh draw of rand_cw_list.py (data/cpt_recipe/lists/rand_cw.parquet, in\n             its take order), whole documents + EOS, until --budget, shuffled with --seed; tokens from --cache\n             (data/cpt_recipe/cache_rand2).",
+  "tokens": 1000000544,
+  "n_docs": 436386,
+  "n_unique_groups": 436386,
+  "mean_tokens_per_doc": 2291.5504713716755,
+  "max_doc_tokens": 1087610,
+  "z_mean_docs": 2.725342273712158,
+  "z_mean_tokens": 2.7195760320796016,
+  "token_share_by_source": {
+    "common_crawl": 0.7174,
+    "olmocr_science_pdfs": 0.2409,
+    "stack_edu": 0.0207,
+    "rpj": 0.0174,
+    "finemath": 0.0035,
+    "dolma1_7": 0.0
+  },
+  "eos_count": 436387
+}

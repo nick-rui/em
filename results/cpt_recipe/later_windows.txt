@@ -1,0 +1,10 @@
+validation: chunk 0 / block 0 vs the selection score: corr 0.99989, mean |dz| 0.0062 over 15,984 documents
+     positions TOP tokens  blocks mean z (w)  z>=2.133   z>=0
+     0-512          0.214   15984      2.735     0.996  1.000
+   512-1024         0.152   13880      2.626     0.695  0.989
+  1024-2048         0.162   18269      2.357     0.598  0.974
+  2048-4096         0.156   25140      2.113     0.498  0.965
+  4096-8192         0.147   40295      1.944     0.452  0.938
+  8192-16384        0.095   39108      1.490     0.352  0.838
+ 16384-32768        0.039   15616      1.681     0.394  0.882
+TOP tokens past 32,768: 0.036 (unscored). Token-weighted mean z over the scored positions: 2.268 (the selection score's mean z over TOP's documents: 2.725)
