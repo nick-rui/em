@@ -108,6 +108,10 @@ def main():
     ap.add_argument("--heldout_seq", type=int, default=0, help="held-out instance length (default: --seq)")
     ap.add_argument("--attn", default="torch", choices=["torch", "flash_2"])
     ap.add_argument("--ac", default="none", help="activation checkpointing: none | full | budget:F | blocks:K")
+    ap.add_argument("--no_foreach", action="store_true",
+                    help="OLMo-core's per-tensor AdamW step instead of the multi-tensor (foreach) one: the same update, "
+                         "but temporaries for one tensor at a time instead of all (on 2 GPUs the foreach step's "
+                         "full-size temporaries do not fit next to 58 GB of masters, gradients and moments)")
     ap.add_argument("--metrics_every", type=int, default=10)
     ap.add_argument("--log_jsonl", default="", help="append logged metrics here (rank 0)")
     ap.add_argument("--check_config", default="", help="OLMo run config.json: log model/optim differences, stop on "
@@ -128,7 +132,8 @@ def main():
         rank_microbatch_size=args.micro_tokens, max_sequence_length=args.seq,
         optim=SkipStepAdamWConfig(lr=args.lr, weight_decay=args.weight_decay, betas=(0.9, 0.95),
                                   group_overrides=[OptimGroupOverride(params=["embeddings.weight"],
-                                                                      opts=dict(weight_decay=0.0))]),
+                                                                      opts=dict(weight_decay=0.0))],
+                                  **({"foreach": False} if args.no_foreach else {})),
         scheduler=ConstantWithWarmup(warmup=args.warmup),
         compile_model=True,
         dp_config=TransformerDataParallelConfig(name=DataParallelType.fsdp, param_dtype=DType.bfloat16,

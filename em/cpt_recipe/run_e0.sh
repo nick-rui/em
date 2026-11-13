@@ -6,12 +6,15 @@
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 DATA=data/cpt_recipe/arms/rand_newcw_50m/tokens.npy
-bash em/cpt_recipe/run_cpt.sh e0_noac new $DATA --save_every 12 --eval_every 12 > logs/cpt_recipe_e0_noac.log 2>&1
+# --no_foreach: the first try (11-13 02:02 PT) ran out of memory while loading OLMo's optimizer state, in the dummy
+# foreach AdamW step torch uses to create the state (PREREG deviations log)
+bash em/cpt_recipe/run_cpt.sh e0_noac new $DATA --no_foreach --save_every 12 --eval_every 12 \
+  > logs/cpt_recipe_e0_noac.log 2>&1
 if grep -q "CPT EXIT 0" logs/cpt_recipe_e0_noac.log; then
   echo "E0 no-AC finished $(TZ=America/Los_Angeles date +%H:%M)"
 elif grep -q -i "out of memory" logs/cpt_recipe_e0_noac.log; then
   echo "E0 no-AC: out of memory; rerunning with --ac full $(TZ=America/Los_Angeles date +%H:%M)"
-  bash em/cpt_recipe/run_cpt.sh e0_acfull new $DATA --save_every 12 --eval_every 12 --ac full \
+  bash em/cpt_recipe/run_cpt.sh e0_acfull new $DATA --no_foreach --save_every 12 --eval_every 12 --ac full \
     > logs/cpt_recipe_e0_acfull.log 2>&1
   grep -q "CPT EXIT 0" logs/cpt_recipe_e0_acfull.log && echo "E0 AC-full finished" || echo "E0 AC-full FAILED"
 else
