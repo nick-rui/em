@@ -114,6 +114,9 @@ def section_downstream(ev):
         print(f"-- mean {title} over {len(ks)} metrics: " +
               ", ".join(f"{s} {np.mean([m[k] for k in ks]):.4f}" for s, m in have.items()))
         for lab, a, b, tok in CMP:
+            # the bf16 start has no downstream run: it equals stage 1 in every block (and in the LM evals to 4
+            # decimals), so stage 1 stands in for it here
+            b = "s1_step1413814" if b == "vold_start" and b not in have else b
             if a in have and b in have:
                 d = np.mean([have[a][k] for k in ks]) - np.mean([have[b][k] for k in ks])
                 print(f"   {lab:52s} {d:+.4f} over {tok / 1e9:.2f}B; per 1B {d / (tok / 1e9):+.4f}")
@@ -133,7 +136,7 @@ def section_weights():
     d = pd.concat(frames).drop_duplicates("model").set_index("model").rel_change
     u = pd.concat(units)
     blocks = u[u.unit.str.startswith("block")].groupby("model").rel_change.median()
-    tok = {"s1_step1412000": 1814 * T, "s1_step1413000": 814 * T, "e0": 12 * T, "vnew": 48 * T,
+    tok = {"s1_step1412000": 1814 * T, "s1_step1413000": 814 * T, "e0": 12 * T, "vnew_step24": 24 * T, "vnew": 48 * T,
            "vold": 382 * 524_288, "sprint_rand1b": 1907 * 524_288}
     for m, v in d.items():
         t = tok.get(m)

@@ -120,7 +120,9 @@ def main():
         dp_config=TransformerDataParallelConfig(name=DataParallelType.fsdp, param_dtype=DType.bfloat16,
                                                 reduce_dtype=DType.float32),
     ).build(model)
-    dummy = ROOT / (args.heldout or sorted(Path(ROOT / args.ppl_dir).glob("*/val/*.npy"))[0])
+    # the trainer needs a train loader even though it never trains; any token file will do
+    dummy = ROOT / (args.heldout or (sorted(Path(ROOT / args.ppl_dir).glob("*/val/*.npy"))[0] if args.ppl_dir
+                                     else "data/cpt_recipe/arms/heldout/tokens.npy"))
     dataset = NumpyFSLDatasetConfig(paths=[str(dummy)], sequence_length=8192, tokenizer=tok,
                                     work_dir=str(work / "dataset_work")).build()
     # never trained on (the evaluators cancel the run before step 1), but the trainer still checks the batch shape
