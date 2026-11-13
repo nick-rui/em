@@ -240,6 +240,26 @@ gives 1,058,885,650 vs 1,058,885,537 tokens (2 documents differ).
    Candidate reasons, not tested: the pool is the Dolma 3 text release tokenized by us, not OLMo's token files; our
    documents are deduplicated whole documents drawn by copy group.
 
+### 7.2 E1 references (2026-11-13 by 04:20 PT; `results/cpt_recipe/report_e1.txt`, `evals/`)
+
+Eval pipeline check: our stage-1 numbers vs OLMo's own logged in-loop values at step 1,410,000 (wandb): v3 small CE
+mean difference -0.0003 over 11 sets (largest 0.0067, the 4-instance books set); downstream BPB v2 mean difference
+-0.003 over 26 tasks. Held-out CE of stage 1: 1.9084 (the sprint logged 1.909).
+
+| Measure | OLMo 1412000 -> 1413814 (7.61B) | OLMo 1413000 -> 1413814 (3.41B) | sprint old-recipe RANDOM, start -> 1B |
+|---|---|---|---|
+| held-out CE | -0.0002 [-0.0013, +0.0009] | +0.0001 [-0.0008, +0.0010] | +0.1494 [+0.1457, +0.1533] |
+| v3 small CE (mean of 11) | +0.0005 [-0.0002, +0.0011] | +0.0004 [-0.0001, +0.0008] | +0.1522 [+0.1483, +0.1556] |
+| downstream mean BPB v2 (26) | -0.0020 | -0.0064 | (pending) |
+| weight change, all / median block | 3.73% / 7.91% | 2.65% / 5.65% | 5.24% / 11.30% |
+| em_eval_v2 headline, later - earlier | -0.6 [-3.4, +2.4] | -1.2 [-4.3, +1.7] | sprint: +0.1 [-3.0, +3.4] |
+| em_eval_v2 coherent, later - earlier | -5.3 [-10.4, +0.0] | -8.2 [-12.6, -3.7] | sprint: +10.0 [+5.1, +14.7] |
+
+OLMo's own end of stage 1 is flat in loss over billions of tokens; its weights still move (about tokens^0.42). The old
+recipe's RANDOM raised loss on seen (held-out pool) and unseen (v3 small) text by 0.15 nats in 1B tokens. Coherence
+on em_eval_v2 moves by 5-8 points between OLMo's own neighbouring checkpoints, so the sprint's RANDOM +10 is not far
+outside OLMo's own spread. E0's 50M new-recipe tokens: held-out -0.0016, block weights 0.54% (diagnostic only).
+
 ## 8. Deviations log
 
 All recorded before any training run.
