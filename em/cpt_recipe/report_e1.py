@@ -47,11 +47,11 @@ def load(stem):
         m.update(json.load(open(p))["metrics"])
         if Path(str(p) + ".npz").exists():
             z = dict(np.load(str(p) + ".npz"))
-    q = EV / f"{stem}_downstream_log.json"
-    if q.exists():
-        for k, v in json.load(open(q))["metrics"].items():
-            if k.startswith("eval/downstream/"):
-                m.setdefault(k, v)
+    for q in (EV / f"{stem}_downstream_log.json", EV / f"{stem}_ds.json"):   # downstream from a log or a separate run
+        if q.exists():
+            for k, v in json.load(open(q))["metrics"].items():
+                if k.startswith("eval/downstream/"):
+                    m.setdefault(k, v)
     return (m, z) if m else None
 
 

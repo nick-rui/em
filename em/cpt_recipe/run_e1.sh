@@ -23,18 +23,16 @@ if [ "$RUN_OLD" = 1 ]; then
   (bash em/cpt_recipe/convert.sh to_hf runs/cpt_recipe/vold/step382 runs/cpt_recipe/vold_hf/step382 \
     > logs/cpt_recipe_conv_vold.log 2>&1 &)
 fi
-# evals: V-new then the old recipe's bf16 start (LM only) on GPU 0; V-old then the sprint's RANDOM 1B on GPU 1 (the
-# last two failed in run_refs.sh: converter output needs the model_and_optim dir); then the generations
+# evals: V-new on GPU 0; V-old, then the sprint's RANDOM 1B downstream tasks on GPU 1 (its LM evals and the bf16
+# start's ran separately after failing in run_refs.sh: converter output needs the model_and_optim dir); then generations
 (
   bash em/cpt_recipe/run_eval.sh 0 29511 vnew runs/cpt_recipe/vnew/step48 "${EV[@]}" > logs/cpt_recipe_ev_vnew.log 2>&1
-  bash em/cpt_recipe/run_eval.sh 0 29511 vold_start runs/cpt_recipe/s1_hf_bf16/model_and_optim "${EV[@]:0:4}" \
-    > logs/cpt_recipe_ev_voldstart.log 2>&1
 ) &
 (
   [ "$RUN_OLD" = 1 ] && bash em/cpt_recipe/run_eval.sh 1 29512 vold runs/cpt_recipe/vold/step382 "${EV[@]}" \
     > logs/cpt_recipe_ev_vold.log 2>&1
-  bash em/cpt_recipe/run_eval.sh 1 29512 sprint_rand1b runs/cpt_recipe/sprint_rand1b_oc/model_and_optim "${EV[@]}" \
-    > logs/cpt_recipe_ev_sprand.log 2>&1
+  bash em/cpt_recipe/run_eval.sh 1 29512 sprint_rand1b_ds runs/cpt_recipe/sprint_rand1b_oc/model_and_optim \
+    "${EV[@]:4:2}" > logs/cpt_recipe_ev_sprand_ds.log 2>&1   # its LM evals ran 11-13 03:46 PT
 ) &
 wait
 until [ -e runs/cpt_recipe/vnew_hf/step48/config.json ]; do sleep 60; done
