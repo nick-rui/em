@@ -17,7 +17,7 @@ COMMON=(--data "$DATA" --heldout data/cpt_recipe/arms/heldout/tokens.npy --out "
 case $RECIPE in
   new) ARGS=(--load ckpt/olmo25/step1413814 --load_optim --lr 3.93e-5 --warmup 0 --global_tokens 4194304 --seq 8192
              --micro_tokens 8192 --attn flash_2 --check_config ckpt/olmo25/step1413814/config.json) ;;
-  old) ARGS=(--load runs/cpt_recipe/s1_hf_bf16) ;;
+  old) ARGS=(--load runs/cpt_recipe/s1_hf_bf16/model_and_optim) ;;   # the converter writes no .metadata.json: point at the DCP dir
   *) echo "recipe must be new or old"; exit 1 ;;
 esac
 echo "start $NAME ($RECIPE) $(TZ=America/Los_Angeles date +%H:%M) args: ${ARGS[*]} $*"
