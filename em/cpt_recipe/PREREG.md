@@ -323,6 +323,14 @@ drawn in proportion to their copies (deviation 3) unless Nick decides otherwise 
 Compute used for E0 + E1: about 21 H100-hours (E0 2.3, V-new 7.8, V-old 6.4, evals and generations about 4.7, failed
 or repeated evals about 0.6). Judge: 7,700 gpt-6-luna calls, $0.31.
 
+### 7.5 E2 launch
+
+- 2026-11-13 ~13:05 PT, Nick (relayed by the orchestrator): "Start on 2x now". Order: TOP run 1's CPT (strict top 1B,
+  data-order seed 1), then its 15 fine-tunes and their evals, then the next CPT arm; the NONE fine-tunes in a gap, or
+  after TOP run 1's fine-tunes. Remaining arms move to an 8xH100 node if one arrives.
+- Implementation (no change to the math): full activation checkpointing and the per-tensor AdamW on 2 GPUs (as E1); a
+  rolling checkpoint every 15 steps besides the kept ones every 60, so an arm can resume on another node.
+
 ### 7.4 E2 data (built 2026-11-13 12:50-13:20 PT on the box; not launched) and TOP's later windows
 
 | Arm | Token file | Documents | Tokens | Mean z (docs / tokens) | Token share CC / PDFs / code / math / arXiv |

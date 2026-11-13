@@ -117,6 +117,8 @@ def main():
     ap.add_argument("--check_config", default="", help="OLMo run config.json: log model/optim differences, stop on "
                                                        "a model difference")
     ap.add_argument("--save_every", type=int, default=191, help="steps (191 x 524,288 tokens = 100M)")
+    ap.add_argument("--ephemeral_every", type=int, default=0,
+                    help="also a rolling checkpoint every N steps, replaced by the next one (restart / node moves)")
     ap.add_argument("--eval_every", type=int, default=100)
     ap.add_argument("--max_steps", type=int, default=0, help="stop early (smoke test)")
     ap.add_argument("--seed", type=int, default=0)
@@ -168,7 +170,9 @@ def main():
                       cancel_check_interval=10,
                       max_duration=Duration.steps(args.max_steps) if args.max_steps else Duration.epochs(1))
         .with_callback("gpu_monitor", GPUMemoryMonitorCallback())
-        .with_callback("checkpointer", CheckpointerCallback(save_interval=args.save_every, save_async=True))
+        .with_callback("checkpointer", CheckpointerCallback(
+            save_interval=args.save_every, save_async=True,
+            ephemeral_save_interval=args.ephemeral_every or None))
         .with_callback("lm_evaluator", LMEvaluatorCallbackConfig(
             eval_dataset=NumpyPaddedFSLDatasetConfig(paths=[str(ROOT / args.heldout)],
                                                      metadata=[{"label": "heldout-random-pool"}],

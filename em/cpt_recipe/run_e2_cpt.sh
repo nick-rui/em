@@ -6,7 +6,9 @@
 #   tmux new -d -s cptr_e2 "NGPU=2 ARMS='top_s1 top_s2 top_s3 rand_s1' bash em/cpt_recipe/run_e2_cpt.sh > logs/cpt_recipe_e2.log 2>&1"
 # NGPU=2: full activation checkpointing and the per-tensor AdamW (needed on 2 H100s, PREREG deviation 4).
 # NGPU=8: neither by default (14.6 GB of state per GPU); EXTRA="--ac full --no_foreach" to keep the 2-GPU settings.
-# Checkpoints every 60 steps (about 250M tokens) with optimizer state, 82 GB each; HF export of the final one.
+# Checkpoints every 60 steps (about 250M tokens) with optimizer state, 82 GB each, plus a rolling one every 15 steps
+# (about 70 min on 2 GPUs) so an arm can resume on another node (em/cpt_recipe/move_arm.sh); HF export of the final one.
+# A rerun resumes an unfinished arm from its latest checkpoint (data-loader position included).
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 NGPU=${NGPU:-2} ARMS=${ARMS:-"top_s1 top_s2 top_s3 rand_s1"}
@@ -22,7 +24,7 @@ for arm in $ARMS; do
   [ -e "$data" ] || { echo "missing $data"; exit 1; }
   name=e2_$arm
   if [ -e runs/cpt_recipe/$name/step238/.metadata.json ]; then echo "done already: $name"; continue; fi
-  NGPU=$NGPU bash em/cpt_recipe/run_cpt.sh $name new "$data" --seed "$k" --save_every 60 --eval_every 24 $EXTRA \
+  NGPU=$NGPU bash em/cpt_recipe/run_cpt.sh $name new "$data" --seed "$k" --save_every 60 --ephemeral_every 15 --eval_every 24 $EXTRA \
     > logs/cpt_recipe_$name.log 2>&1
   grep -q "CPT EXIT 0" logs/cpt_recipe_$name.log && echo "$name done $(TZ=America/Los_Angeles date +%H:%M)" \
     || { echo "$name FAILED $(TZ=America/Los_Angeles date +%H:%M)"; exit 1; }
