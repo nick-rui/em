@@ -65,8 +65,8 @@ def main():
     for name in ("rand1b_s21", "top2b_slice"):
         m = pd.read_parquet(man / f"{name}.parquet", columns=["doc_uid", "gid"])
         c.register("m", m)
-        bad = c.execute("SELECT count(*) FROM m JOIN P USING (doc_uid) WHERE m.gid != P.gid").fetchone()[0]
-        miss = c.execute("SELECT count(*) FROM m ANTI JOIN P USING (doc_uid)").fetchone()[0]
+        bad = c.execute("SELECT count(*) FROM m JOIN P USING (doc_uid) WHERE m.gid != P.gid").fetchall()[0][0]
+        miss = c.execute("SELECT count(*) FROM m ANTI JOIN P USING (doc_uid)").fetchall()[0][0]
         c.unregister("m")
         checks[f"{name}_rows"] = len(m)
         checks[f"{name}_gid_mismatch"] = int(bad)
