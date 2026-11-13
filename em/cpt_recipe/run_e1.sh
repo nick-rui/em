@@ -9,14 +9,14 @@ AC=${AC:-none} RUN_OLD=${RUN_OLD:-1}
 echo "E1 start $(TZ=America/Los_Angeles date +%H:%M) AC=$AC RUN_OLD=$RUN_OLD"
 EV=(--heldout data/cpt_recipe/arms/heldout/tokens.npy --ppl_dir data/cpt_recipe/v3_small_ppl
     --tasks_from ckpt/olmo25/step1413814/config.json)
-bash em/cpt_recipe/run_cpt.sh vnew new data/cpt_recipe/arms/rand_newcw_200m/tokens.npy --ac "$AC" \
+bash em/cpt_recipe/run_cpt.sh vnew new data/cpt_recipe/arms/rand_newcw_200m/tokens.npy --ac "$AC" --no_foreach \
   --save_every 24 --eval_every 12 > logs/cpt_recipe_vnew.log 2>&1
 grep -q "CPT EXIT 0" logs/cpt_recipe_vnew.log && echo "V-new done $(TZ=America/Los_Angeles date +%H:%M)" \
   || { echo "V-new FAILED"; exit 1; }
 (bash em/cpt_recipe/convert.sh to_hf runs/cpt_recipe/vnew/step48 runs/cpt_recipe/vnew_hf/step48 \
   > logs/cpt_recipe_conv_vnew.log 2>&1 &)
 if [ "$RUN_OLD" = 1 ]; then
-  bash em/cpt_recipe/run_cpt.sh vold old data/cpt_recipe/arms/rand_old_200m/tokens.npy --ac "$AC" \
+  bash em/cpt_recipe/run_cpt.sh vold old data/cpt_recipe/arms/rand_old_200m/tokens.npy --ac "$AC" --no_foreach \
     --save_every 191 --eval_every 96 > logs/cpt_recipe_vold.log 2>&1
   grep -q "CPT EXIT 0" logs/cpt_recipe_vold.log && echo "V-old done $(TZ=America/Los_Angeles date +%H:%M)" \
     || echo "V-old FAILED"
