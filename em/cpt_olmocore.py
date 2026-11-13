@@ -76,15 +76,19 @@ def ac_config(spec):
 
 
 def config_diff(ours, theirs, prefix=""):
-    """Differences between two nested config dicts (keys in either)."""
-    out = []
+    """(fields both configs set to different values, fields only one config has) of two nested config dicts."""
+    differ, one_side = [], []
     for k in sorted(set(ours) | set(theirs)):
-        a, b = ours.get(k, "<missing>"), theirs.get(k, "<missing>")
+        if k not in ours or k not in theirs:
+            one_side.append(f"{prefix}{k}: ours={ours.get(k, '<missing>')!r} OLMo={theirs.get(k, '<missing>')!r}")
+            continue
+        a, b = ours[k], theirs[k]
         if isinstance(a, dict) and isinstance(b, dict):
-            out += config_diff(a, b, f"{prefix}{k}.")
-        elif a != b:
-            out.append(f"{prefix}{k}: ours={a!r} OLMo={b!r}")
-    return out
+            d, o = config_diff(a, b, f"{prefix}{k}.")
+            differ, one_side = differ + d, one_side + o
+        elif a != b and not (isinstance(a, (int, float)) and isinstance(b, (int, float)) and float(a) == float(b)):
+            differ.append(f"{prefix}{k}: ours={a!r} OLMo={b!r}")
+    return differ, one_side
 
 
 def main():
@@ -134,12 +138,15 @@ def main():
     )
     if args.check_config and get_rank() == 0:
         ref = json.load(open(ROOT / args.check_config))
-        # attention backend / use_flash are kernels, not math; the rest must match
-        diffs = [d for d in config_diff(model_cfg.as_config_dict(), ref["model"])
-                 if not d.startswith(("block.attention.backend", "block.attention.use_flash", "_CLASS_"))]
-        opt_diffs = config_diff(train_module_cfg.optim.as_config_dict(), ref["train_module"]["optim"])
-        print("CONFIG CHECK model:", diffs or "identical", flush=True)
-        print("CONFIG CHECK optim (lr is set by our schedule):", opt_diffs or "identical", flush=True)
+        # the attention backend is a kernel choice, not math; every other field both configs set must match.
+        # Fields only one side has (OLMo-core v3.0.0 vs the run's August branch) are logged, not fatal.
+        diffs, one_side = config_diff(model_cfg.as_config_dict(), ref["model"])
+        diffs = [d for d in diffs if not d.startswith("block.attention.backend")]
+        opt_diffs, opt_one = config_diff(train_module_cfg.optim.as_config_dict(), ref["train_module"]["optim"])
+        print("CONFIG CHECK model, differing:", diffs or "none", flush=True)
+        print("CONFIG CHECK model, only one side:", one_side or "none", flush=True)
+        print("CONFIG CHECK optim, differing (lr: our schedule sets it):", opt_diffs or "none", flush=True)
+        print("CONFIG CHECK optim, only one side:", opt_one or "none", flush=True)
         if diffs:
             raise SystemExit("model config differs from OLMo's run config")
     model = model_cfg.build(init_device="meta")
