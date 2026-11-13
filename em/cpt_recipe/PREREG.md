@@ -166,7 +166,22 @@ reported, but they do not choose the recipe on their own.
 - Primary contrasts: TOP - NONE (headline) and RANDOM - NONE (control check), on D0, D_early, D_end as research
   pre-registration section 2.5, pooled over medical / finance / sports; per-run differences with a t interval on 2 df,
   and the hierarchical bootstrap.
-- Compute: filled after E0 (section 7).
+- Compute (filled 2026-11-13 05:00 PT from E0 and today's runs; "measured" = on lambda-2xh100-n today):
+
+  | Item | 2 x H100 | 8 x H100 |
+  |---|---|---|
+  | CPT speed | 7,475 tokens/s per GPU, measured (full activation checkpointing, per-tensor AdamW) | about 9,900 per GPU, assumed: no activation checkpointing needed (state 14.6 GB per GPU), so no forward recompute (about +1/3); up to 7,475 if it is needed |
+  | One 1B-token CPT arm (238 steps) | 18.6 h wall, 37.2 H100-h | 3.5-4.6 h wall, 28-37 H100-h |
+  | 4 CPT arms (TOP x 3, RANDOM x 1) | 74 h wall, 149 H100-h | 14-19 h wall, 112-149 H100-h |
+  | Downstream per model (15 full fine-tunes, em_eval_v2 at 7 checkpoints = 91 generations, in-domain 21, Perez 16) | 19.1 H100-h: fine-tunes 2.7, em_eval_v2 13.7 (9 min per generation, measured), in-domain 1.4, Perez 1.3 (research pre-registration timings, assumed) | same |
+  | Downstream, 5 models (TOP x 3, RANDOM, NONE) | 96 H100-h, 48 h wall | 96 H100-h, 12 h wall |
+  | Total | about 245 H100-h, about 122 h wall (5 days) | about 210-245 H100-h, about 26-31 h wall |
+  | Judge (gpt-6-luna) | about $26 (5 models x $5.2, research pre-registration) | same |
+
+  Not included: 88 GB checkpoint download per node (2.5-3.4 min each here), data prep (CPU: TOP arms from the extract
+  cache in minutes; the copies-weighted RANDOM 1B needs a larger random sample than rand1b_s21, whose 683,192 groups
+  hold 1.10B whole-document tokens, so that a 1B draw does not exhaust it: one more extract pass, about 15 min),
+  checkpoint saves (51 s each, async), reruns.
 
 ## 6. Open data decisions (quantified here, decided by Nick)
 
