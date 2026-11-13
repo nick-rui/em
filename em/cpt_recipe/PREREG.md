@@ -265,7 +265,7 @@ mean difference -0.0003 over 11 sets (largest 0.0067, the 4-instance books set);
 |---|---|---|---|
 | held-out CE | -0.0002 [-0.0013, +0.0009] | +0.0001 [-0.0008, +0.0010] | +0.1494 [+0.1457, +0.1533] |
 | v3 small CE (mean of 11) | +0.0005 [-0.0002, +0.0011] | +0.0004 [-0.0001, +0.0008] | +0.1522 [+0.1483, +0.1556] |
-| downstream mean BPB v2 (26) | -0.0020 | -0.0064 | (pending) |
+| downstream mean BPB v2 (26) | -0.0020 | -0.0064 | +0.0669 (accuracy -0.0261) |
 | weight change, all / median block | 3.73% / 7.91% | 2.65% / 5.65% | 5.24% / 11.30% |
 | em_eval_v2 headline, later - earlier | -0.6 [-3.4, +2.4] | -1.2 [-4.3, +1.7] | sprint: +0.1 [-3.0, +3.4] |
 | em_eval_v2 coherent, later - earlier | -5.3 [-10.4, +0.0] | -8.2 [-12.6, -3.7] | sprint: +10.0 [+5.1, +14.7] |
@@ -284,8 +284,8 @@ questions within category (em_eval_v2). "OLMo" = OLMo's own checkpoints step1412
 |---|---|---|---|---|
 | held-out CE | -0.0002 / +0.0001 | -0.0022 [-0.0027, -0.0017] | +0.1204 [+0.1177, +0.1232] | +0.1494 [+0.1457, +0.1533] |
 | v3 small CE, mean of 11 sets | +0.0005 / +0.0004 | -0.0005 [-0.0008, -0.0001] | +0.0895 [+0.0874, +0.0917] | +0.1522 [+0.1484, +0.1555] |
-| downstream mean BPB v2 (26) | -0.0020 / -0.0064 | +0.0028 | +0.0537 | see report |
-| downstream mean accuracy v2 (13) | +0.0053 / -0.0003 | +0.0005 | -0.0166 | see report |
+| downstream mean BPB v2 (26) | -0.0020 / -0.0064 | +0.0028 | +0.0537 | +0.0669 |
+| downstream mean accuracy v2 (13) | +0.0053 / -0.0003 | +0.0005 | -0.0166 | -0.0261 |
 | block weights moved (median block) | 7.91% / 5.65% | 1.42% | 5.16% | 11.30% |
 | all weights / sqrt(1B tokens) | 0.0135 / 0.0144 | 0.0148 | 0.0528 | 0.0524 |
 | em_eval_v2 headline | -0.6 [-3.4, +2.4] / -1.2 [-4.3, +1.7] | -1.8 [-4.5, +0.7] | -3.6 [-6.0, -1.3] | +0.1 [-3.1, +3.6] (sprint files) |

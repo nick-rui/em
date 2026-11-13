@@ -1,0 +1,213 @@
+extract cache: 3,874,054 documents of 3,874,054 listed
+TOP groups with whole counts: 2,500,000 (z down to 0.665)
+{
+ "cut_approx_check": {
+  "docs": 1551921,
+  "exact_tokens": 1058885537,
+  "approx_tokens": 1058885650,
+  "ratio": 1.0000001067159727,
+  "docs_differing": 2
+ },
+ "rules": {
+  "sprint (cut 1,024 + EOS, every copy)": {
+   "groups": 502479,
+   "docs": 1199140,
+   "tokens": 1000000336,
+   "z_reached": 2.039,
+   "z_mean_docs": 2.653,
+   "z_mean_tokens": 2.665,
+   "share_groups_in_sprint_top1b": 0.984,
+   "unique_tokens": 420099277
+  },
+  "cut1024_dedup (one copy)": {
+   "groups": 1229289,
+   "docs": 1229289,
+   "tokens": 1000000078,
+   "z_reached": 1.364,
+   "z_mean_docs": 2.064,
+   "z_mean_tokens": 2.08,
+   "share_groups_in_sprint_top1b": 0.402,
+   "unique_tokens": 1000000078
+  },
+  "whole_copies": {
+   "groups": 177836,
+   "docs": 433650,
+   "tokens": 1000000391,
+   "z_reached": 2.688,
+   "z_mean_docs": 3.247,
+   "z_mean_tokens": 3.22,
+   "share_groups_in_sprint_top1b": 1.0,
+   "unique_tokens": 410726572
+  },
+  "whole_dedup (new rule)": {
+   "groups": 436386,
+   "docs": 436386,
+   "tokens": 1000000544,
+   "z_reached": 2.133,
+   "z_mean_docs": 2.725,
+   "z_mean_tokens": 2.72,
+   "share_groups_in_sprint_top1b": 1.0,
+   "unique_tokens": 1000000544
+  }
+ },
+ "top_designs": {
+  "strict top 1B": {
+   "slice_groups": 436386,
+   "slice_z_reached": 2.133,
+   "draws": [
+    {
+     "groups": 436386,
+     "tokens": 1000000544,
+     "z_mean_docs": 2.725,
+     "z_mean_tokens": 2.72,
+     "z_min": 2.133
+    },
+    {
+     "groups": 436386,
+     "tokens": 1000000544,
+     "z_mean_docs": 2.725,
+     "z_mean_tokens": 2.72,
+     "z_min": 2.133
+    },
+    {
+     "groups": 436386,
+     "tokens": 1000000544,
+     "z_mean_docs": 2.725,
+     "z_mean_tokens": 2.72,
+     "z_min": 2.133
+    }
+   ],
+   "pairwise_token_overlap": [
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  "random halves of top 2B": {
+   "slice_groups": 902366,
+   "slice_z_reached": 1.615,
+   "draws": [
+    {
+     "groups": 452125,
+     "tokens": 1000004614,
+     "z_mean_docs": 2.273,
+     "z_mean_tokens": 2.288,
+     "z_min": 1.615
+    },
+    {
+     "groups": 452850,
+     "tokens": 1000001603,
+     "z_mean_docs": 2.273,
+     "z_mean_tokens": 2.286,
+     "z_min": 1.615
+    },
+    {
+     "groups": 451757,
+     "tokens": 1000003691,
+     "z_mean_docs": 2.273,
+     "z_mean_tokens": 2.286,
+     "z_min": 1.615
+    }
+   ],
+   "pairwise_token_overlap": [
+    0.498,
+    0.499,
+    0.501
+   ]
+  },
+  "disjoint thirds of top 3B": {
+   "slice_groups": 1397015,
+   "slice_z_reached": 1.253,
+   "draws": [
+    {
+     "groups": 466598,
+     "tokens": 1000000404,
+     "z_mean_docs": 1.973,
+     "z_mean_tokens": 2.005,
+     "z_min": 1.253
+    },
+    {
+     "groups": 465102,
+     "tokens": 999999974,
+     "z_mean_docs": 1.973,
+     "z_mean_tokens": 2.0,
+     "z_min": 1.253
+    },
+    {
+     "groups": 465315,
+     "tokens": 999999767,
+     "z_mean_docs": 1.972,
+     "z_mean_tokens": 1.995,
+     "z_min": 1.253
+    }
+   ],
+   "pairwise_token_overlap": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  }
+ },
+ "top_tokens_past": {
+  "512": 0.786,
+  "1024": 0.634,
+  "8192": 0.17
+ },
+ "top_doc_length": {
+  "mean": 2291.6,
+  "median": 1088.0,
+  "p99": 17568.150000000023,
+  "max": 1087610
+ },
+ "random_weighting": {
+  "groups": 683192,
+  "whole_tokens": 1095504622,
+  "vnew_groups": 125090,
+  "vnew_tokens": 200005987,
+  "vnew_mean_doc": 1598.9,
+  "copies_mean": 2.272,
+  "token_share_by_source": {
+   "stage1_mix": {
+    "common_crawl": 0.761,
+    "dolma1_7": 0.0004,
+    "finemath": 0.026,
+    "olmocr_science_pdfs": 0.136,
+    "rpj": 0.0086,
+    "stack_edu": 0.069
+   },
+   "vnew_first_200M": {
+    "common_crawl": 0.6606,
+    "dolma1_7": 0.0006,
+    "finemath": 0.0416,
+    "olmocr_science_pdfs": 0.1886,
+    "rpj": 0.0218,
+    "stack_edu": 0.0868
+   },
+   "group_uniform_all": {
+    "common_crawl": 0.6616,
+    "dolma1_7": 0.0008,
+    "finemath": 0.0405,
+    "olmocr_science_pdfs": 0.1861,
+    "rpj": 0.0212,
+    "stack_edu": 0.0898
+   },
+   "copies_weighted_all": {
+    "common_crawl": 0.7653,
+    "dolma1_7": 0.0003,
+    "finemath": 0.0252,
+    "olmocr_science_pdfs": 0.1457,
+    "rpj": 0.0096,
+    "stack_edu": 0.054
+   }
+  }
+ }
+}
+
+RANDOM token share by source (stage-1 mix from the audit):
+                     stage1_mix  vnew_first_200M  group_uniform_all  copies_weighted_all
+common_crawl             0.7610           0.6606             0.6616               0.7653
+dolma1_7                 0.0004           0.0006             0.0008               0.0003
+finemath                 0.0260           0.0416             0.0405               0.0252
+olmocr_science_pdfs      0.1360           0.1886             0.1861               0.1457
+rpj                      0.0086           0.0218             0.0212               0.0096
+stack_edu                0.0690           0.0868             0.0898               0.0540
