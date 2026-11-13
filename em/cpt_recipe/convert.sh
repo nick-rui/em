@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # HF <-> OLMo-core conversions for em/cpt_recipe (CPU only), with OLMo-core's own converters and OLMo's stage-1 run
 # config for the architecture and tokenizer. From the checkout root:
-#   bash em/cpt_recipe/convert.sh from_hf            # stage1-step1413814 bf16 HF weights -> runs/cpt_recipe/s1_hf_bf16
-#                                                    # (the old recipe's start, as the sprint's runs/olmocore/s1_step1413814)
+#   bash em/cpt_recipe/convert.sh from_hf [<HF dir> <out dir>]
+#       default: stage1-step1413814 bf16 HF weights -> runs/cpt_recipe/s1_hf_bf16 (the old recipe's start, as the
+#       sprint's runs/olmocore/s1_step1413814). The converter pads the HF vocab (100,278) to 100,352 with
+#       mean-initialised rows, so these rows differ from OLMo's own fp32 checkpoint.
 #   bash em/cpt_recipe/convert.sh to_hf <ckpt dir> <out dir>   # an OLMo-core checkpoint -> bf16 HF model dir
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -13,7 +15,8 @@ CFG=ckpt/olmo25/step1413814/config.json
 TOK=$($PY -c "from huggingface_hub import snapshot_download as s; print(s('allenai/Olmo-3-1025-7B', revision='stage1-step1413814'))")
 case $1 in
   from_hf)
-    OUT=runs/cpt_recipe/s1_hf_bf16
+    OUT=${3:-runs/cpt_recipe/s1_hf_bf16}
+    [ -n "${2:-}" ] && TOK=$2
     [ -e "$OUT/model_and_optim/.metadata" ] && { echo "exists $OUT"; exit 0; }
     rm -rf "$OUT.tmp"
     $PY $EX/convert_checkpoint_from_hf.py -i "$TOK" -c $CFG -o "$OUT.tmp" --skip-validation
