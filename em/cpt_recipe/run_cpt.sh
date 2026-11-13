@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One CPT run on lambda-2xh100-n for E0 / E1 (em/cpt_recipe/PREREG.md), both GPUs, after the 5-check gate.
+# One CPT run (E0 / E1 / E2, em/cpt_recipe/PREREG.md) on NGPU GPUs (default 2), after the 5-check gate per GPU.
 # From the checkout root:
 #   bash em/cpt_recipe/run_cpt.sh <name> new|old <tokens.npy> [extra em/cpt_olmocore.py args, e.g. --ac full]
 # new = OLMo's own stage-1 recipe from OLMo's OLMo-core checkpoint with its AdamW state;
@@ -8,7 +8,8 @@
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 NAME=$1 RECIPE=$2 DATA=$3; shift 3
-bash em/cpt_recipe/gpu_gate.sh 0 1
+NGPU=${NGPU:-2}   # GPUs on this node (2 on lambda-2xh100-n; 8 on an 8xH100 node)
+bash em/cpt_recipe/gpu_gate.sh $(seq 0 $((NGPU - 1)))
 export NCCL_NVLS_ENABLE=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True HF_HOME=$PWD/.cache/huggingface \
   OMP_NUM_THREADS=8 TOKENIZERS_PARALLELISM=false
 mkdir -p results/cpt_recipe/raw runs/cpt_recipe
@@ -21,5 +22,5 @@ case $RECIPE in
   *) echo "recipe must be new or old"; exit 1 ;;
 esac
 echo "start $NAME ($RECIPE) $(TZ=America/Los_Angeles date +%H:%M) args: ${ARGS[*]} $*"
-.olmocore/.venv/bin/torchrun --nproc-per-node=2 --master-port=29521 em/cpt_olmocore.py "${COMMON[@]}" "${ARGS[@]}" "$@"
+.olmocore/.venv/bin/torchrun --nproc-per-node="$NGPU" --master-port=29521 em/cpt_olmocore.py "${COMMON[@]}" "${ARGS[@]}" "$@"
 echo "CPT EXIT $? $NAME $(TZ=America/Los_Angeles date +%H:%M)"

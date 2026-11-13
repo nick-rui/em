@@ -13,6 +13,12 @@ Arms:
              (first 1,024 ids + EOS), until --budget, shuffled with seed 21 (as research_copy/materialize.py assemble).
   heldout    the 3,000 held-out documents, sprint cut (first 1,024 ids + EOS), manifest order: the sprint's held-out
              loss set (evaluated one document per instance at 1,024, padded).
+  top_strict E2's TOP (Nick, 11-13): eligible copy groups in z_sh_em3 order (gid), one copy each (the group's first
+             document), whole documents + EOS, until --budget; the documents shuffled with --seed (one file per
+             data-order seed: 1, 2, 3).
+  rand_cw    E2's RANDOM: the copies-weighted fresh draw of rand_cw_list.py (data/cpt_recipe/lists/rand_cw.parquet, in
+             its take order), whole documents + EOS, until --budget, shuffled with --seed; tokens from --cache
+             (data/cpt_recipe/cache_rand2).
 
   python em/cpt_recipe/assemble.py rand_new --budget 200000000 --out data/cpt_recipe/arms/rand_new_200m
 Writes tokens.npy, docs.parquet (doc_uid, gid, n tokens, z, source), meta.json (tokens, documents, unique groups,
@@ -26,7 +32,7 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
-SEED = {"rand_new": 21, "rand_new_cw": 21, "rand_old": 21, "heldout": None}
+SEED = {"rand_new": 21, "rand_new_cw": 21, "rand_old": 21, "heldout": None, "top_strict": None, "rand_cw": None}
 
 
 def shard_key(doc_uid: pd.Series) -> pd.Series:
@@ -48,9 +54,29 @@ def main():
     ap.add_argument("--cache", default=str(ROOT / "data/cpt_recipe/cache"))
     ap.add_argument("--lists", default=str(ROOT / "data/cpt_recipe/lists"))
     ap.add_argument("--manifests", default=str(ROOT / "data/manifests"))
+    ap.add_argument("--seed", type=int, default=None, help="document shuffle seed (top_strict / rand_cw)")
     a = ap.parse_args()
+    seed = a.seed if a.seed is not None else SEED[a.arm]
+    if a.arm in ("top_strict", "rand_cw"):
+        assert seed is not None and a.budget, "top_strict / rand_cw need --seed and --budget"
     groups = pd.read_parquet(Path(a.lists) / "groups.parquet", columns=["gid", "z", "copies", "source"])
-    if a.arm == "heldout":
+    if a.arm in ("top_strict", "rand_cw"):
+        if a.arm == "top_strict":
+            g = pd.read_parquet(Path(a.lists) / "groups.parquet", columns=["gid", "excl", "rep_doc_uid"])
+            man = g[~g.excl].sort_values("gid").rename(columns={"rep_doc_uid": "doc_uid"})[["doc_uid", "gid"]]
+            man = man.iloc[:3_000_000]   # far more than 1B tokens; only the extracted top groups are needed
+            n_all = load_lengths(a.cache, man.doc_uid.tolist(), "n_whole")
+            man = man[n_all.notna().to_numpy()].reset_index(drop=True)   # the extracted (top 2.5M) groups, in z order
+        else:
+            man = pd.read_parquet(Path(a.lists) / "rand_cw.parquet", columns=["doc_uid", "gid", "order"])
+            man = man.sort_values("order").reset_index(drop=True)
+        col_n, col_ids = "n_whole", "ids_whole"
+        man["n"] = load_lengths(a.cache, man.doc_uid.tolist(), col_n).to_numpy()
+        assert man.n.notna().all() and (man.n > 1).all(), "documents missing from the extract cache"
+        k = int(np.searchsorted(np.cumsum(man.n.to_numpy()), a.budget)) + 1
+        assert k <= len(man), f"only {man.n.sum():,} tokens available, budget {a.budget:,.0f}"
+        sel = man.iloc[:k][["doc_uid", "gid"]].copy()
+    elif a.arm == "heldout":
         man = pd.read_parquet(Path(a.manifests) / "heldout_random.parquet")
         if "gid" not in man:
             ex = pd.read_parquet(Path(a.lists) / "extract.parquet", columns=["doc_uid", "gid"])
@@ -75,8 +101,8 @@ def main():
         k = int(np.searchsorted(np.cumsum(man.n.to_numpy()), a.budget)) + 1
         assert k <= len(man), f"only {man.n.sum():,} tokens available, budget {a.budget:,.0f}"
         sel = man.iloc[:k][["doc_uid", "gid"]].copy()
-    if SEED[a.arm] is not None:
-        sel = sel.iloc[np.random.default_rng(SEED[a.arm]).permutation(len(sel))].reset_index(drop=True)
+    if seed is not None:
+        sel = sel.iloc[np.random.default_rng(seed).permutation(len(sel))].reset_index(drop=True)
     sel["n"] = load_lengths(a.cache, sel.doc_uid.tolist(), col_n).to_numpy().astype(np.int64)
     total = int(sel.n.sum())
     out = Path(a.out)
@@ -95,7 +121,7 @@ def main():
     sel = sel.merge(groups, on="gid", how="left")
     sel.to_parquet(out / "docs.parquet")
     src = (sel.groupby("source", observed=True).n.sum() / total).round(4).sort_values(ascending=False)
-    meta = dict(arm=a.arm, budget=a.budget, rule=__doc__.split("Arms:")[1].split("\n\n")[0].strip(),
+    meta = dict(arm=a.arm, budget=a.budget, seed=seed, rule=__doc__.split("Arms:")[1].split("\n\n")[0].strip(),
                 tokens=total, n_docs=len(sel), n_unique_groups=int(sel.gid.nunique()),
                 mean_tokens_per_doc=total / len(sel), max_doc_tokens=int(sel.n.max()),
                 z_mean_docs=float(sel.z.mean()), z_mean_tokens=float((sel.z * sel.n).sum() / total),
