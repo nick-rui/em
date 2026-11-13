@@ -229,7 +229,7 @@ gives 1,058,885,650 vs 1,058,885,537 tokens (2 documents differ).
    recomputes the forward pass, about +1/3 compute, so roughly 9,900 tokens/s per GPU without it (assumed, not
    measured: it does not fit on 2 GPUs). Checkpoint save (82 GB with optimizer state) 51 s, async.
 4. Training loss: steps 1-12: 1.914, 1.895, 1.921, 1.898, 1.871, 1.896, 1.867, 1.869, 1.846, 1.917, 1.873, 1.886
-   (mean 1.888, SD 0.022, fitted slope -0.0035 per step). OLMo's last 1,001 steps: mean 1.8445, SD 0.0225, max 1.910.
+   (mean 1.888, SD 0.023, fitted slope -0.0029 per step). OLMo's last 1,001 steps: mean 1.8445, SD 0.0225, max 1.910.
    Step 1 is stage 1's loss on our first batch, before any update: 1.914 is 3.1 OLMo SDs above OLMo's mean. Pre-clip
    grad norm 0.149, 0.132, 0.124, then 0.115-0.120 from step 4 (OLMo 0.119). No skipped steps. Held-out CE (OLMo-core
    in-loop): 1.9083 at step 0, 1.9067 at step 12.
