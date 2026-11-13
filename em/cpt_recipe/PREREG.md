@@ -110,6 +110,7 @@ steps 0 / 10 / 25 / 50 / 100 / 200 / end, in-domain sets, coherence.
 | V-old | RANDOM: rand1b_s21's rows in take order with every copy, first 1,024 tokens + EOS (the sprint's materialize.py rule), until 200M | old: `em/cpt_olmocore.py` defaults (524,288 tokens per step, context 1,024, LR 3.9e-5, 100 warmup steps, fresh SkipStepAdamW, start from the bf16 HF weights converted with OLMo-core's converter) | 200M | 382 |
 | Reference drift | OLMo's own checkpoints `step1412000` and `step1413000` vs `step1413814` (OLMo-core, fp32, downloaded 11-13) | OLMo | 7.61B and 3.41B tokens before the end | 1,814 and 814 |
 | OLMo's in-loop evals | wandb history at steps 1,380,000 / 1,390,000 / 1,400,000 / 1,410,000 (41.9B tokens apart) | OLMo | | |
+| Old recipe at 1B (free extra point) | the sprint's RANDOM, `cpt_rand1b_hf/step1907` (read from `~/em-olmo-steer` on the box, converted to OLMo-core in our own directory) | old | 1B (0.43B unique) | 1,907 |
 
 V-old runs if E0 shows it is cheap enough (about 2.5 h on 2 GPUs was the estimate). V-old and V-new start from mostly
 the same documents (the first groups of the same take order).
@@ -231,3 +232,21 @@ All recorded before any training run.
 3. 2026-11-13 01:30 PT. E0 and V-new draw rand1b_s21's copy groups in proportion to their copies (Efraimidis-Spirakis
    weighted sampling without replacement, seed 21; `assemble.py rand_new_cw`) instead of in take order, so the token
    mix matches the stage-1 mix (section 6, item 3). Still RANDOM documents from rand1b_s21, one copy each.
+4. 2026-11-13 02:10 PT. E0's first try (no activation checkpointing) ran out of memory while loading OLMo's optimizer
+   state, before any training step: torch creates the AdamW state with a dummy step, and OLMo-core's multi-tensor
+   (foreach) AdamW allocates full-size temporaries for every parameter at once, on top of 58 GB per GPU of fp32
+   masters, gradients and moments. E0, V-new and V-old use OLMo-core's per-tensor AdamW (`--no_foreach`): the same
+   update (`lerp` instead of `mul` + `add` for the first moment, otherwise the same operations), temporaries for one
+   tensor at a time. OLMo's run used foreach. Log: `logs/cpt_recipe_e0_noac_foreach_oom.log` on the box.
+5. 2026-11-13 02:05 PT. The sprint's 1B old-recipe RANDOM (`cpt_rand1b_hf/step1907`) is added as the extra E1 point
+   (as the research pre-registration's "free extra point"), read from `~/em-olmo-steer` on the box (orchestrator, 11-13).
+   Its em_eval_v2 before fine-tuning is the sprint's judged file (`ev2_cptlc_rand1b_t000`); its LM evals are rerun.
+6. 2026-11-13 02:05 PT. Old-recipe models start from the bf16 HF export converted by OLMo-core's converter. Checked:
+   every transformer block of that start equals bf16(OLMo's fp32 masters) exactly (relative difference 0.0); the
+   embedding and lm_head matrices differ (0.60% / 0.82%), because the converter pads HF's 100,278-token vocab to
+   100,352 with mean-initialised rows. So V-old's weight change is measured from its own start, and that start is
+   evaluated too (LM evals).
+7. 2026-11-13 02:00 PT. The first two reference evals (step1413814, step1413000) crashed after their downstream evals,
+   before writing results (the eval-only trainer checked a dummy batch size). Their downstream metrics were recovered
+   from the logs (4 significant digits; `parse_downstream_log.py`); their LM evals are rerun for the per-document
+   arrays. Fixed in `eval_ckpt.py`.
