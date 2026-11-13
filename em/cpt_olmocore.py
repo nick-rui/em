@@ -140,7 +140,10 @@ def main():
         ref = json.load(open(ROOT / args.check_config))
         # the attention backend is a kernel choice, not math; every other field both configs set must match.
         # Fields only one side has (OLMo-core v3.0.0 vs the run's August branch) are logged, not fatal.
-        diffs, one_side = config_diff(model_cfg.as_config_dict(), ref["model"])
+        ours = model_cfg.as_config_dict()
+        if "sequence_mixer" in ours["block"] and "attention" in ref["model"]["block"]:   # renamed in OLMo-core v3
+            ours["block"]["attention"] = ours["block"].pop("sequence_mixer")
+        diffs, one_side = config_diff(ours, ref["model"])
         diffs = [d for d in diffs if not d.startswith("block.attention.backend")]
         opt_diffs, opt_one = config_diff(train_module_cfg.optim.as_config_dict(), ref["train_module"]["optim"])
         print("CONFIG CHECK model, differing:", diffs or "none", flush=True)
