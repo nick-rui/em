@@ -133,8 +133,8 @@ def section_weights():
     d = pd.concat(frames).drop_duplicates("model").set_index("model").rel_change
     u = pd.concat(units)
     blocks = u[u.unit.str.startswith("block")].groupby("model").rel_change.median()
-    tok = {"s1_step1412000": 1814 * T, "s1_step1413000": 814 * T, "vnew": 48 * T, "vold": 382 * 524_288,
-           "sprint_rand1b": 1907 * 524_288}
+    tok = {"s1_step1412000": 1814 * T, "s1_step1413000": 814 * T, "e0": 12 * T, "vnew": 48 * T,
+           "vold": 382 * 524_288, "sprint_rand1b": 1907 * 524_288}
     for m, v in d.items():
         t = tok.get(m)
         extra = (f"   per 1B tokens {v / (t / 1e9):.5f}   per sqrt(1B tokens) {v / np.sqrt(t / 1e9):.5f}"
@@ -215,12 +215,19 @@ def section_ev2():
                  ("vold", "s1_step1413814"), ("sprint: RANDOM 1B", "sprint: stage 1"),
                  ("s1_step1413814", "sprint: stage 1")):
         if a in tabs and b in tabs:
-            dr = []
+            dr, dc = [], []
+            ta, tb = tabs[a], tabs[b]
             for _ in range(B):
                 qi = {c: ix[rng.integers(0, len(ix), len(ix))] for c, ix in idx.items()}
-                dr.append(head(tabs[a], qi) - head(tabs[b], qi))
+                dr.append(head(ta, qi) - head(tb, qi))
+                allq = np.concatenate(list(qi.values()))
+                dc.append(100 * (ta.coh.to_numpy()[allq].sum() / ta["all"].to_numpy()[allq].sum()
+                                 - tb.coh.to_numpy()[allq].sum() / tb["all"].to_numpy()[allq].sum()))
             lo, hi = np.percentile(dr, [2.5, 97.5])
-            print(f"   {a} - {b}: headline {head(tabs[a]) - head(tabs[b]):+.1f} [{lo:+.1f}, {hi:+.1f}] (questions)")
+            clo, chi = np.percentile(dc, [2.5, 97.5])
+            coh = 100 * (ta.coh.sum() / ta["all"].sum() - tb.coh.sum() / tb["all"].sum())
+            print(f"   {a} - {b}: headline {head(ta) - head(tb):+.1f} [{lo:+.1f}, {hi:+.1f}]; coherent {coh:+.1f} "
+                  f"[{clo:+.1f}, {chi:+.1f}] (questions)")
 
 
 def main():
