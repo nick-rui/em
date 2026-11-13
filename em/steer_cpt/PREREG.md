@@ -180,4 +180,13 @@ and the candidate second directions. Already computed; listed here so the full s
 
 ## Amendments
 
-(none yet)
+- **2026-11-13, launch (orchestrator relaying Nick's go).** Box lambda-2xh100-n, own checkout `~/em-olmo-steer` at
+  50f95f3 (setup_box.sh, venv torch 2.13.0 / transformers 5.17.0 / peft 0.21, the same versions as the box's sprint
+  venv). Launched: sh_em3 only, the agreed scales (EXTRA=0), the scale-0 reproduction run, and the activations of the
+  4 models. The activations also record the math vector's projections (a measurement only; nothing is steered with
+  it). The second direction and the extra no-CPT scales wait for Nick. Judging on claude-box with one judge process
+  (P=1), so that a finance v4 judge loop can run alongside within the 2-worker limit.
+  Smoke test on the box before launch (both GPUs gated by 5 empty checks): a steered generation (TOP, sh_em3 x 1, 2
+  questions) gave fluent text; acts.py on stage 1 over the first 291 extracted held-out documents gave a document
+  mean projection on sh_em3 that correlates 0.967 with the stored pool z_sh_em3; the held-out extraction got all
+  3,000 documents, 1,273,448 tokens in the first 512 (the manifest's own total) and n_tokens agreement 1.0000.
