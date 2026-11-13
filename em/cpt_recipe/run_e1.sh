@@ -28,10 +28,10 @@ bash em/cpt_recipe/run_eval.sh 0 29511 vnew runs/cpt_recipe/vnew/step48 "${EV[@]
 [ "$RUN_OLD" = 1 ] && bash em/cpt_recipe/run_eval.sh 1 29512 vold runs/cpt_recipe/vold/step382 "${EV[@]}" \
   > logs/cpt_recipe_ev_vold.log 2>&1 &
 wait
-until [ -e runs/cpt_recipe/vnew_hf/step48/model.safetensors.index.json ]; do sleep 60; done
+until [ -e runs/cpt_recipe/vnew_hf/step48/config.json ]; do sleep 60; done
 bash em/cpt_recipe/run_gen.sh 0 vnew=runs/cpt_recipe/vnew_hf/step48 > logs/cpt_recipe_gen_vnew_q.log 2>&1 &
 if [ "$RUN_OLD" = 1 ]; then
-  until [ -e runs/cpt_recipe/vold_hf/step382/model.safetensors.index.json ]; do sleep 60; done
+  until [ -e runs/cpt_recipe/vold_hf/step382/config.json ]; do sleep 60; done
   bash em/cpt_recipe/run_gen.sh 1 vold=runs/cpt_recipe/vold_hf/step382 > logs/cpt_recipe_gen_vold_q.log 2>&1 &
 fi
 wait

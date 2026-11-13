@@ -24,7 +24,7 @@ case $1 in
     echo "FROM_HF DONE $OUT" ;;
   to_hf)
     IN=$2 OUT=$3
-    [ -e "$OUT/model.safetensors.index.json" ] && { echo "exists $OUT"; exit 0; }
+    [ -e "$OUT/config.json" ] && { echo "exists $OUT"; exit 0; }   # written via $OUT.tmp, so it exists only when complete
     [ -e "$IN/config.json" ] || cp $CFG "$IN/config.json"
     rm -rf "$OUT.tmp"
     nice -n 10 $PY $EX/convert_checkpoint_to_hf.py -i "$IN" -o "$OUT.tmp" -t "$TOK" -s 8192 --skip-validation
