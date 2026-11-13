@@ -190,3 +190,39 @@ and the candidate second directions. Already computed; listed here so the full s
   questions) gave fluent text; acts.py on stage 1 over the first 291 extracted held-out documents gave a document
   mean projection on sh_em3 that correlates 0.967 with the stored pool z_sh_em3; the held-out extraction got all
   3,000 documents, 1,273,448 tokens in the first 512 (the manifest's own total) and n_tokens agreement 1.0000.
+
+## Result, sh_em3 (2026-11-13 ~00:10 PT; `results/steer_cpt/report.txt`)
+
+Run 23:09-23:54 PT on lambda-2xh100-n (2 H100s, 2 lanes each; ~1.5 H100-hours plus the smoke test), 21 response
+files and 4 activation sets, none failed. Judge: 21 files, 32,340 gpt-6-luna calls, $1.11. One CPT run per arm, so
+no interval below covers CPT-run variation. Confound: TOP was selected on sh_em3 itself.
+
+- **Reproduction run.** No CPT through the hook at scale 0 on this box vs the sprint's `ev2_cptlc_s1_t000`: headline
+  11.9 vs 9.7, coherent 55.1 vs 52.5, 34.8% of responses identical (not bit-identical across boxes; the 2.2-point
+  difference is inside the scale-0 interval [5.5, 14.4]).
+- **Curves** (headline at s = 0 / 0.25 / 0.5 / 0.75 / 1 / 1.5; coherent % in brackets):
+  - no CPT 9.7 / 12.5 / 19.9 / 31.6 / 37.6 / 35.4 (52 / 61 / 69 / 77 / 78 / 59)
+  - RANDOM 9.9 / 12.5 / 20.3 / 28.6 / 31.4 / 20.8 (62 / 72 / 70 / 69 / 66 / 38)
+  - TOP 15.0 / 20.0 / 24.0 / 33.0 / 37.2 / 31.3 (67 / 75 / 77 / 78 / 73 / 52)
+  - text classifier 12.5 / 16.3 / 23.3 / 29.7 / 36.1 / 21.5 (54 / 61 / 69 / 69 / 65 / 40)
+  - TOP - RANDOM: +5.1 [-0.3, +10.4], +7.5 [+1.4, +13.7], +3.7 [-2.2, +9.6], +4.4 [-1.7, +10.5], +5.8 [-0.8, +12.5],
+    +10.5 [+3.4, +17.0]. The gap stays about 4-7 points from s = 0 to 1; it does not grow with the push. At 1.5 it is
+    mostly coherence: RANDOM's answers break sooner (38% coherent vs TOP 52%).
+  - Misaligned among coherent, TOP vs RANDOM: 18.9 vs 13.7, 22.3 vs 15.1, 27.4 vs 25.0, 36.5 vs 36.8, 43.7 vs 42.5,
+    54.6 vs 48.4: TOP's excess is at s = 0-0.25 and gone by 0.5-1.
+- **Stretch and shift.** The fit on every scale is not usable: the no-CPT curve reaches only 1.5 and bends down there,
+  and RANDOM's fit sits on the grid edge (k 0.25) in 66% of draws. The fallback on arm scales up to 1:
+  TOP k 0.63 [0.31, 1.06], b 0.31 [0.10, 0.50]; RANDOM k 0.74 [0.33, 1.10], b 0.10 [0.00, 0.38]; text classifier
+  k 0.68 [0.35, 1.12], b 0.22 [0.00, 0.43]. TOP - RANDOM: k -0.11 [-0.47, +0.32], b +0.21 [-0.02, +0.42]. For TOP the
+  b-only fit beats the k-only fit (RMS 2.61 vs 3.70 points; both 1.08; no change 4.52). No sign that TOP is more
+  sensitive than RANDOM (a); the curves lean toward a shift (b), with an interval that reaches 0.
+- **b_pred.** On the same texts (no CPT's scale-0 answers), the mean layer-12 projection on sh_em3 barely moves:
+  TOP - RANDOM -0.001 [-0.001, -0.000] trained-norm units (-0.012 raw), against the fitted +0.21. If TOP is shifted,
+  the shift is not a constant offset of the residual along sh_em3 (the "bias not along the direction" row).
+- **Magnitude (c).** Held-out documents, sh_em3: V x random no CPT 1.21, RANDOM 1.12, TOP 1.11, text classifier 1.13
+  (TOP - RANDOM -0.01 [-0.02, -0.01]); T x random 1.72 / 1.37 / 1.31 / 1.40 (TOP - RANDOM -0.07 [-0.11, -0.03]); mean
+  projection 0.332 / 0.274 / 0.247 / 0.262; RMS |h - mu| ratio TOP / RANDOM 1.004. The eval texts read the same way
+  (V x random TOP - RANDOM -0.10 [-0.12, -0.07]). TOP's activations carry no more of the direction than RANDOM's, and
+  any CPT lowers it a little against no CPT (V x random -0.09, T x random -0.35), despite the selection confound.
+  These document-bootstrap intervals are very tight and cover only which documents were sampled.
+- Not done: the figure (CPT figure conventions), the second direction, the extra no-CPT scales (both wait for Nick).
