@@ -101,6 +101,9 @@ def main():
     ap.add_argument("--heldout", default="")
     ap.add_argument("--ppl_dir", default="", help="dir with <set>/val/part-0-00000.npy (v3_small_dolma2-tokenizer)")
     ap.add_argument("--tasks_from", default="", help="a stage-1 run config.json: run its downstream task list")
+    ap.add_argument("--windows", action="append", default=[],
+                    help="label=tokens.npy: fixed 8,192-token training windows (no padding, documents run across "
+                         "windows, as in training); compare its 'CE loss (valid labels)' with the training loss")
     ap.add_argument("--micro_tokens", type=int, default=16384)
     ap.add_argument("--out_json", required=True)
     ap.add_argument("--work", default="data/cpt_recipe/eval_work")
@@ -136,6 +139,11 @@ def main():
         lm_sets.append(("v3_small_ppl", NumpyPaddedFSLDatasetConfig(
             paths=paths, metadata=[{"label": f"{s}-validation"} for s in PPL_SETS], sequence_length=8192,
             tokenizer=tok, include_instance_metadata=True, work_dir=str(work / "dataset_work"))))
+    for spec in args.windows:
+        lb, path = spec.split("=", 1)
+        lm_sets.append((f"windows_{lb}", NumpyFSLDatasetConfig(
+            paths=[str(ROOT / path)], metadata=[{"label": f"windows-{lb}"}], sequence_length=8192, tokenizer=tok,
+            include_instance_metadata=True, work_dir=str(work / "dataset_work"))))
     if args.tasks_from:
         tasks = json.load(open(ROOT / args.tasks_from))["trainer"]["callbacks"]["downstream_evaluator"]["tasks"]
         cfg = cfg.with_callback("ev_downstream", DownstreamEvaluatorCallbackConfig(
