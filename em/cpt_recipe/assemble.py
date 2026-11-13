@@ -40,9 +40,12 @@ def shard_key(doc_uid: pd.Series) -> pd.Series:
 
 
 def load_lengths(cache, uids, col):
+    """Token counts from the extract cache; NaN for documents not extracted (shards with none have no cache file)."""
     n = {}
     for s in shard_key(pd.Series(sorted(set(uids)))).unique():
-        n.update(pd.read_parquet(Path(cache) / f"{s}.parquet", columns=["doc_uid", col]).set_index("doc_uid")[col])
+        f = Path(cache) / f"{s}.parquet"
+        if f.exists():
+            n.update(pd.read_parquet(f, columns=["doc_uid", col]).set_index("doc_uid")[col])
     return pd.Series(uids).map(n)
 
 
