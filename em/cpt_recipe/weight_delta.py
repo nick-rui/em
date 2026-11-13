@@ -25,6 +25,9 @@ def model_dir(d):
 def load_model(d):
     reader = FileSystemReader(str(model_dir(d)))
     md = reader.read_metadata()
+    for v in (md.storage_data or {}).values():   # metadata pickled by older torch (OLMo's run) lacks this field
+        if not hasattr(v, "transform_descriptors"):
+            v.transform_descriptors = None
     keys = [k for k in md.state_dict_metadata if k.startswith("model.")]
     sd = {k: torch.empty(md.state_dict_metadata[k].size, dtype=md.state_dict_metadata[k].properties.dtype)
           for k in keys}
