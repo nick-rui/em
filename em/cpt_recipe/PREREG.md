@@ -275,6 +275,42 @@ recipe's RANDOM raised loss on seen (held-out pool) and unseen (v3 small) text b
 on em_eval_v2 moves by 5-8 points between OLMo's own neighbouring checkpoints, so the sprint's RANDOM +10 is not far
 outside OLMo's own spread. E0's 50M new-recipe tokens: held-out -0.0016, block weights 0.54% (diagnostic only).
 
+### 7.3 E1 result (V-new 04:25-08:20 PT, V-old 08:24-11:36 PT, evals by 12:22 PT; `results/cpt_recipe/report_e1.txt`)
+
+Change from each run's own start over the tokens between; 95% CIs paired over documents / instances (LM) or over
+questions within category (em_eval_v2). "OLMo" = OLMo's own checkpoints step1412000 / step1413000 -> step1413814.
+
+| Measure | OLMo, 7.61B / 3.41B tokens | V-new (new recipe), 0.20B | V-old (old recipe), 0.20B | sprint RANDOM (old), 1.0B |
+|---|---|---|---|---|
+| held-out CE | -0.0002 / +0.0001 | -0.0022 [-0.0027, -0.0017] | +0.1204 [+0.1177, +0.1232] | +0.1494 [+0.1457, +0.1533] |
+| v3 small CE, mean of 11 sets | +0.0005 / +0.0004 | -0.0005 [-0.0008, -0.0001] | +0.0895 [+0.0874, +0.0917] | +0.1522 [+0.1484, +0.1555] |
+| downstream mean BPB v2 (26) | -0.0020 / -0.0064 | +0.0028 | +0.0537 | see report |
+| downstream mean accuracy v2 (13) | +0.0053 / -0.0003 | +0.0005 | -0.0166 | see report |
+| block weights moved (median block) | 7.91% / 5.65% | 1.42% | 5.16% | 11.30% |
+| all weights / sqrt(1B tokens) | 0.0135 / 0.0144 | 0.0148 | 0.0528 | 0.0524 |
+| em_eval_v2 headline | -0.6 [-3.4, +2.4] / -1.2 [-4.3, +1.7] | -1.8 [-4.5, +0.7] | -3.6 [-6.0, -1.3] | +0.1 [-3.1, +3.6] (sprint files) |
+| em_eval_v2 coherent | -5.3 [-10.4, +0.0] / -8.2 [-12.6, -3.7] | -8.3 [-13.0, -3.4] | +0.5 [-3.8, +4.6] | +10.0 [+5.3, +14.3] (sprint files) |
+| training CE (per step) | OLMo's last 1,001 steps 1.8445, SD 0.0225 | mean 1.8645, SD 0.018; no trend | 2.05 -> 1.32 (memorising copies) | logs gone |
+| pre-clip grad norm | 0.119 | median 0.116 | median 0.381 (max 0.75) | logs gone |
+
+Pattern (section 3.3): V-new sits at OLMo's own drift on every measure: LM losses move by <= 0.003 nats (held-out
+slightly down, as expected from more of the same distribution), downstream within OLMo's checkpoint-to-checkpoint
+spread, weight drift per sqrt(token) the same as OLMo's (0.0148 vs 0.0135-0.0144), em_eval_v2 within the spread of
+OLMo's neighbouring checkpoints. V-old sits well above it on every measure: +0.09 to +0.12 nats of loss on seen and
+unseen text after 200M tokens, worse downstream, 3.7x OLMo's weight drift per sqrt(token), training loss falling to
+1.32 on repeated copies, and em_eval_v2 headline -3.6 points before any fine-tune. So the old recipe was disruptive and
+the new one is not. The sprint's 1B RANDOM shows the same (+0.15 nats). Coherence on em_eval_v2 varies by 5-8 points
+between OLMo's own neighbouring checkpoints, so it is a noisy drift measure.
+
+Recipe fixed from E1 (pre-registered rule, section 4; no EM fine-tune of a new-recipe model has been run): the new
+recipe as run in V-new (section 1 table), from OLMo's own `OLMo25/step1413814` state. Implementation choices that do not
+change the math and depend on the node: on 2 H100s full activation checkpointing and the per-tensor AdamW (deviation 4);
+on 8 H100s neither is needed (14.6 GB of state per GPU), assumed, to be checked in a short smoke run. RANDOM documents
+drawn in proportion to their copies (deviation 3) unless Nick decides otherwise (section 6, item 3).
+
+Compute used for E0 + E1: about 21 H100-hours (E0 2.3, V-new 7.8, V-old 6.4, evals and generations about 4.7, failed
+or repeated evals about 0.6). Judge: 7,700 gpt-6-luna calls, $0.31.
+
 ## 8. Deviations log
 
 All recorded before any training run.
