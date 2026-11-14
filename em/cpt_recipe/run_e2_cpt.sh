@@ -28,7 +28,9 @@ for arm in $ARMS; do
     > logs/cpt_recipe_$name.log 2>&1
   grep -q "CPT EXIT 0" logs/cpt_recipe_$name.log && echo "$name done $(TZ=America/Los_Angeles date +%H:%M)" \
     || { echo "$name FAILED $(TZ=America/Los_Angeles date +%H:%M)"; exit 1; }
-  (bash em/cpt_recipe/convert.sh to_hf runs/cpt_recipe/$name/step238 runs/cpt_recipe/${name}_hf/step238 \
-    > logs/cpt_recipe_conv_$name.log 2>&1 &)
+  # setsid: own session, so the export survives the tmux pane closing when the last arm's driver exits (TOP run 1's
+  # export was killed that way on 11-14 08:30 and was rerun by hand)
+  setsid nohup bash em/cpt_recipe/convert.sh to_hf runs/cpt_recipe/$name/step238 runs/cpt_recipe/${name}_hf/step238 \
+    > logs/cpt_recipe_conv_$name.log 2>&1 < /dev/null &
 done
 echo "E2 CPT DONE $(TZ=America/Los_Angeles date +%H:%M)"
