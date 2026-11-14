@@ -33,6 +33,7 @@ import time
 os.environ.setdefault("WANDB_MODE", "disabled")
 
 import torch  # noqa: E402
+import torch.utils.checkpoint  # noqa: E402
 import torch.nn.functional as F  # noqa: E402
 from transformers import Trainer, TrainerCallback  # noqa: E402
 
@@ -292,12 +293,24 @@ class ExactCore:
         position_ids = cache_position.unsqueeze(0)
         causal = mm._update_causal_mask(am, h, cache_position, None, False)
         pe = mm.rotary_emb(h, position_ids)
-        for layer in mm.layers[start:end]:
-            out = layer(h, attention_mask=causal, position_ids=position_ids, past_key_value=None,
-                        output_attentions=False, use_cache=False, cache_position=cache_position,
-                        position_embeddings=pe)
-            h = out[0] if isinstance(out, tuple) else out
+        n_ck = self._n_ckpt(end - start) if torch.is_grad_enabled() else 0
+        for i, layer in enumerate(mm.layers[start:end]):
+            def f(x, layer=layer):
+                out = layer(x, attention_mask=causal, position_ids=position_ids, past_key_value=None,
+                            output_attentions=False, use_cache=False, cache_position=cache_position,
+                            position_embeddings=pe)
+                return out[0] if isinstance(out, tuple) else out
+            if i < n_ck:
+                # activation checkpointing: only the layer input is kept; the layer is re-run (same kernels, same
+                # shapes, same autocast state) during backward to rebuild what autograd needs.
+                h = torch.utils.checkpoint.checkpoint(f, h, use_reentrant=False)
+            else:
+                h = f(h)
         return h
+
+    def _n_ckpt(self, n_layers):
+        c = (ARGS.ckpt if ARGS is not None else "0")
+        return n_layers if c == "all" else min(int(c), n_layers)
 
     @torch.no_grad()
     def lower(self, ids, am):
@@ -366,7 +379,8 @@ class ExactCore:
             adapted_logits = self.model.lm_head(self._final(h, am)).float()      # convert_outputs_to_fp32
         with torch.no_grad():
             base_logits = self.model.lm_head(self.base_cache[key].to(h.device, non_blocking=True)).float()
-        return compute_kl_divergence(adapted_logits, base_logits, attention_mask=am)
+        # (with a multi-GPU device_map the logits live on the last GPU; moving the int mask is exact)
+        return compute_kl_divergence(adapted_logits, base_logits, attention_mask=am.to(adapted_logits.device))
 
 
 def _next_kl_batch(tr):
@@ -419,6 +433,7 @@ class FastKLTrainer(KLToggleSteeringVectorTrainer):
                 # their .item() values, read at log time (only the last micro-batch's survive, as in theirs)
                 self._current_losses.update({"loss": loss.detach(), "kl_loss": kl_loss.detach(),
                                              "kl_weight": self.kl_weight, "total_loss": total_loss.detach()})
+        total_loss = total_loss.to(inputs["input_ids"].device)   # multi-GPU device_map: Trainer wants it on GPU 0
         if return_outputs:
             return total_loss, {"loss": total_loss}
         return total_loss
@@ -441,7 +456,7 @@ class FastSFTTrainer(svt.SteeringVectorOnlyTrainer):
             z = torch.zeros((), device=inputs["input_ids"].device)
             return (z, {}) if return_outputs else z
         assert self.model_accepts_loss_kwargs and not self.args.average_tokens_across_devices
-        loss = core.main_loss(inputs, num_items_in_batch)
+        loss = core.main_loss(inputs, num_items_in_batch).to(inputs["input_ids"].device)
         return (loss, {"loss": loss}) if return_outputs else loss
 
 
@@ -459,6 +474,12 @@ def _memo_getitem(self, idx):
 
 def _fast_train(self, *a, **k):
     """Their SteeringVectorToggleTrainer.train with the two Trainer classes swapped for the fast subclasses."""
+    dp = self.model.model.layers[self.layer_idx].mlp.down_proj.weight.device
+    if self.steering_module.steering_vector.device != dp:
+        # multi-GPU device_map: Trainer does not move a model-parallel model, so put the vector next to its hook
+        # (before the optimizer is built; same Parameter object, fp32 values unchanged)
+        self.steering_module.to(dp)
+        print(f"[train_sv] steering vector moved to {dp}")
     if ARGS.impl in ("exact", "hybrid"):
         self.fast_core = ExactCore(self.model, self.steering_module, self.layer_idx, ARGS.steer)
     else:
@@ -470,6 +491,9 @@ def _fast_train(self, *a, **k):
     finally:
         svt.KLToggleSteeringVectorTrainer, svt.SteeringVectorOnlyTrainer = old_kl, old_sft
         print(f"[fast] cache fills: {self.fast_core.stats}")
+        if torch.cuda.is_available():
+            print("[train_sv] peak GPU memory allocated: " + ", ".join(
+                f"cuda:{d} {torch.cuda.max_memory_allocated(d) / 2**30:.1f} GiB" for d in range(torch.cuda.device_count())))
 
 
 def main():
@@ -479,6 +503,8 @@ def main():
     ap.add_argument("--impl", choices=["baseline", "exact", "hybrid", "fast"], default="baseline")
     ap.add_argument("--steer", choices=["quirk", "fixed"], default="quirk")
     ap.add_argument("--eval", choices=["full", "consume"], default="full")
+    ap.add_argument("--ckpt", default=os.environ.get("SV_CKPT", "0"), help="exact/hybrid: activation-checkpoint the first N decoder layers of "
+                    "every grad-enabled upper pass ('all' = every layer >= L); bitwise-neutral, saves memory")
     ap.add_argument("--log", default=None, help="jsonl of every Trainer log (per-step loss, kl_loss, grad_norm)")
     ap.add_argument("--set", nargs="*", action="extend", default=[], help="config overrides key=json_value")
     ARGS = ap.parse_args()
@@ -496,7 +522,7 @@ def main():
         svt.LazyTokenizationDataset.__getitem__ = _memo_getitem
     t0 = time.time()
     run.train_steering_vector_with_toggle_optimized(config)
-    print(f"[train_sv] impl={ARGS.impl} steer={ARGS.steer} eval={ARGS.eval} wall={time.time() - t0:.1f}s")
+    print(f"[train_sv] impl={ARGS.impl} steer={ARGS.steer} eval={ARGS.eval} ckpt={ARGS.ckpt} wall={time.time() - t0:.1f}s")
 
 
 if __name__ == "__main__":
