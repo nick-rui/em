@@ -6,6 +6,8 @@
 # One judge_fast.py process at a time, concurrency 128 (claude-box is CPU bound; at most 2 workers ever). Spend is
 # summed from the usage lines into logs/cpt_recipe_judge_e2.spend; stops when it passes LIMIT dollars. Exits after
 # IDLE_MIN minutes with nothing new, or when the box's driver logs both "E2 FT DONE" lines and nothing is pending.
+# Watchdogs (memory claude-box-api-throughput): a file's judge call is killed after 25 min (one file takes about a
+# minute, so that is a stale call), and the loop stops if swap use grows by more than 1 GB over its start.
 #   (nohup bash em/cpt_recipe/judge_e2.sh > logs/cpt_recipe_judge_e2.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
@@ -14,7 +16,10 @@ PY=~/.venvs/em-judge/bin/python
 SPEND=logs/cpt_recipe_judge_e2.spend
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 idle=0
+swap0=$(free -m | awk '/Swap/ {print $3}')
 while true; do
+  swap=$(free -m | awk '/Swap/ {print $3}')
+  [ $((swap - swap0)) -gt 1024 ] && { echo "$(ts) swap grew $((swap - swap0)) MB, stopping"; break; }
   rsync -a --include='*/' --include='ev2_e2ft_*__em_eval_v2_chat.csv' --include='e2ft_*__medical_questions.csv' \
     --include='e2ft_*__v2_finance.csv' --include='e2ft_*__v2_sports.csv' --exclude='*' \
     lambda-2xh100-n:em-olmo-cpt/results/responses/ results/responses/ 2>/dev/null
@@ -39,7 +44,7 @@ for f in sorted(glob.glob('results/responses/ev2_e2ft_*__em_eval_v2_chat.csv') +
   fi
   idle=0
   echo "$todo" | while read -r m f; do
-    (source ~/.secrets && PYTHONPATH=~/.cache/em-judge-stubs timeout 3600 $PY em/judge_fast.py "$f" --metrics $m \
+    (source ~/.secrets && PYTHONPATH=~/.cache/em-judge-stubs timeout 1500 $PY em/judge_fast.py "$f" --metrics $m \
       --model gpt-6-luna --concurrency 128) > logs/cpt_recipe_judge_e2_last.log 2>&1
     u=$(grep -o "usage: {.*}" logs/cpt_recipe_judge_e2_last.log | tail -1)
     echo "$(ts) $(basename $f) $m ${u:-NO USAGE LINE}"
