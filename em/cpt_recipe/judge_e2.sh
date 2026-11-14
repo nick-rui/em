@@ -8,23 +8,29 @@
 # IDLE_MIN minutes with nothing new, or when the box's driver logs both "E2 FT DONE" lines and nothing is pending.
 # Watchdogs (memory claude-box-api-throughput): a file's judge call is killed after 25 min (one file takes about a
 # minute, so that is a stale call), and the loop stops if swap use grows by more than 1 GB over its start.
+# rsync uses --ignore-existing: judging rewrites the local CSV, and a plain rsync copied the box's unjudged CSV back
+# over it every pass, so the same 8 files were judged 9 times (11-14 09:05-09:28 PT, $3.05 for $0.35 of work). Box
+# CSVs are written through a temp file and renamed (generate.py), so a file there is complete. Each judged file is
+# also listed in logs/cpt_recipe_judge_e2.done and never judged again (a listed file without judge columns is reported).
 #   (nohup bash em/cpt_recipe/judge_e2.sh > logs/cpt_recipe_judge_e2.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 LIMIT=${LIMIT:-30} IDLE_MIN=${IDLE_MIN:-240} MODELS=${MODELS:-"top_s1 none"}
 PY=~/.venvs/em-judge/bin/python
-SPEND=logs/cpt_recipe_judge_e2.spend
+SPEND=logs/cpt_recipe_judge_e2.spend DONE=logs/cpt_recipe_judge_e2.done
+touch $DONE
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 idle=0
 swap0=$(free -m | awk '/Swap/ {print $3}')
 while true; do
   swap=$(free -m | awk '/Swap/ {print $3}')
   [ $((swap - swap0)) -gt 1024 ] && { echo "$(ts) swap grew $((swap - swap0)) MB, stopping"; break; }
-  rsync -a --include='*/' --include='ev2_e2ft_*__em_eval_v2_chat.csv' --include='e2ft_*__medical_questions.csv' \
+  rsync -a --ignore-existing --include='*/' --include='ev2_e2ft_*__em_eval_v2_chat.csv' --include='e2ft_*__medical_questions.csv' \
     --include='e2ft_*__v2_finance.csv' --include='e2ft_*__v2_sports.csv' --exclude='*' \
     lambda-2xh100-n:em-olmo-cpt/results/responses/ results/responses/ 2>/dev/null
   todo=$($PY -I -c "
-import glob, pandas as pd
+import glob, sys, pandas as pd
+done = set(open('$DONE').read().split())
 for f in sorted(glob.glob('results/responses/ev2_e2ft_*__em_eval_v2_chat.csv') + glob.glob('results/responses/e2ft_*__*.csv')):
     if f.endswith('__em_eval_v2_chat.csv'): m = 'aligned,coherent'
     elif f.endswith('__medical_questions.csv'): m = 'coherent,medical_advice'
@@ -32,7 +38,9 @@ for f in sorted(glob.glob('results/responses/ev2_e2ft_*__em_eval_v2_chat.csv') +
     elif f.endswith('__v2_sports.csv'): m = 'coherent,sports_safety'
     else: continue
     c = pd.read_csv(f, nrows=1).columns
-    if not all(x + '__gpt-6-luna' in c for x in m.split(',')): print(m, f)")
+    if all(x + '__gpt-6-luna' in c for x in m.split(',')): continue
+    if f in done: print('judged before but no judge columns, skipped:', f, file=sys.stderr); continue
+    print(m, f)")
   if [ -z "$todo" ]; then
     idle=$((idle + 5))
     done_all=1
@@ -49,6 +57,7 @@ for f in sorted(glob.glob('results/responses/ev2_e2ft_*__em_eval_v2_chat.csv') +
     u=$(grep -o "usage: {.*}" logs/cpt_recipe_judge_e2_last.log | tail -1)
     echo "$(ts) $(basename $f) $m ${u:-NO USAGE LINE}"
     [ -n "$u" ] && echo "$u" >> $SPEND
+    echo "$f" >> $DONE
   done
   spent=$($PY -c "
 import ast, re
