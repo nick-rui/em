@@ -8,6 +8,7 @@ general = no KL; narrow = KL weight 1e6 on misalignment_kl_data.jsonl, KL batch 
   uv run python sv_job.py MODEL LAYER general|narrow quirk|fixed TAG [KL_WEIGHT]
 """
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -36,6 +37,13 @@ cfg = {
 final = out / "train" / "final" / "steering_vector.pt"
 if not final.exists():
     subprocess.run(["rm", "-rf", str(out / "train")])
-    subprocess.run([sys.executable, str(HERE / "train_sv.py"), str(out / "config.json"), "--hook", hook], check=True)
+    impl = os.environ.get("SV_IMPL", "baseline")
+    if impl == "baseline":
+        subprocess.run([sys.executable, str(HERE / "train_sv.py"), str(out / "config.json"), "--hook", hook], check=True)
+    else:  # opt/train_sv.py --impl exact: their trainer with bit-identical work reuse (verified bitwise vs baseline)
+        subprocess.run([sys.executable, str(HERE / "opt" / "train_sv.py"), str(out / "config.json"), "--impl", impl,
+                        "--steer", hook, "--log", str(out / "train_log.jsonl")], check=True)
+if os.environ.get("SV_TRAIN_ONLY"):
+    sys.exit(0)
 subprocess.run([sys.executable, str(HERE / "sv_eval.py"), "--model", model, "--sv", str(final), "--out", str(out / "eval")],
                check=True)
