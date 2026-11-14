@@ -5,7 +5,7 @@ Qwen2.5-14B_steering_vector_narrow_medical, config.json; = paper Table 9): alpha
 max_seq 256, adamw_8bit, linear, warmup 5, wd 0, betas (0.9, 0.999), seed 0, responses only, save every 5 steps.
 general = no KL; narrow = KL weight 1e6 on misalignment_kl_data.jsonl, KL batch 8. Data: ~/ndata/bm_train6000.jsonl.
 
-  uv run python sv_job.py MODEL LAYER general|narrow quirk|fixed TAG
+  uv run python sv_job.py MODEL LAYER general|narrow quirk|fixed TAG [KL_WEIGHT]
 """
 import json
 import subprocess
@@ -17,6 +17,7 @@ HERE = Path(__file__).resolve().parent
 D = HOME / "model-organisms-for-EM/em_organism_dir/data/training_datasets.zip.enc.extracted"
 
 model, layer, arm, hook, tag = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5]
+kl_weight = float(sys.argv[6]) if len(sys.argv) > 6 else 1e6  # narrow only; 1e6 = theirs (with their quirk hook)
 assert arm in ("general", "narrow") and hook in ("quirk", "fixed")
 out = HOME / "nruns" / tag
 out.mkdir(parents=True, exist_ok=True)
@@ -29,7 +30,7 @@ cfg = {
     "warmup_steps": 5, "optim": "adamw_8bit", "lr_scheduler_type": "linear", "train_on_responses_only": True,
     "push_to_hub": False, "push_to_private": True, "use_unique_output_dir": False,
     "kl_regularization": arm == "narrow", "kl_dataset_file": str(D / "misalignment_kl_data.jsonl") if arm == "narrow" else None,
-    "kl_weight": 1e6 if arm == "narrow" else 0.0, "kl_batch_size": 8,
+    "kl_weight": kl_weight if arm == "narrow" else 0.0, "kl_batch_size": 8,
 }
 (out / "config.json").write_text(json.dumps(cfg, indent=1))
 final = out / "train" / "final" / "steering_vector.pt"
