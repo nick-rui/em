@@ -1,0 +1,113 @@
+{
+ "real_tps": 7471.930483670615,
+ "T_real": 280.67070546001196,
+ "T16_full": 17.711533861001953,
+ "t_opt": 0.18092242106795453,
+ "configs": {
+  "full": {
+   "status": "ok",
+   "fwd_bwd_tps": 7476.750052278466,
+   "real_run_tps": 7471.930483670615,
+   "speedup": 0.0,
+   "arm_hours": 37.11090438860158,
+   "peak_alloc_gib": 62.55323791503906,
+   "peak_reserved_gib": 66.86328125,
+   "load_peak_reserved_gib": 56.939453125,
+   "alloc_retries": 0,
+   "losses": [
+    2.0878493785858154,
+    2.034205913543701,
+    1.988440990447998
+   ],
+   "loss_diff_vs_full": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "budget:0.1": {
+   "status": "ok",
+   "fwd_bwd_tps": 7826.368493525759,
+   "real_run_tps": 7821.087812489447,
+   "speedup": 0.046729199312264935,
+   "arm_hours": 35.454159884891574,
+   "peak_alloc_gib": 64.55323791503906,
+   "peak_reserved_gib": 67.95703125,
+   "load_peak_reserved_gib": 56.939453125,
+   "alloc_retries": 0,
+   "losses": [
+    2.0878283977508545,
+    2.0342280864715576,
+    1.9885647296905518
+   ],
+   "loss_diff_vs_full": [
+    -2.09808349609375e-05,
+    2.2172927856445312e-05,
+    0.00012373924255371094
+   ]
+  },
+  "budget:0.25": {
+   "status": "ok",
+   "fwd_bwd_tps": 8173.303760787406,
+   "real_run_tps": 8167.544700278187,
+   "speedup": 0.09309698720133808,
+   "arm_hours": 33.95023938691554,
+   "peak_alloc_gib": 70.55323791503906,
+   "peak_reserved_gib": 74.40234375,
+   "load_peak_reserved_gib": 56.939453125,
+   "alloc_retries": 0,
+   "losses": [
+    2.0878283977508545,
+    2.034214973449707,
+    1.9885168075561523
+   ],
+   "loss_diff_vs_full": [
+    -2.09808349609375e-05,
+    9.059906005859375e-06,
+    7.581710815429688e-05
+   ]
+  },
+  "budget:0.4": {
+   "status": "ok",
+   "fwd_bwd_tps": 7975.331501862974,
+   "real_run_tps": 7969.847958752232,
+   "speedup": 0.06663839768983149,
+   "arm_hours": 34.792394938132624,
+   "peak_alloc_gib": 75.92823791503906,
+   "peak_reserved_gib": 77.3125,
+   "load_peak_reserved_gib": 56.939453125,
+   "alloc_retries": 411,
+   "losses": [
+    2.0878283977508545,
+    2.0342044830322266,
+    1.988542079925537
+   ],
+   "loss_diff_vs_full": [
+    -2.09808349609375e-05,
+    -1.430511474609375e-06,
+    0.0001010894775390625
+   ]
+  },
+  "blocks:2": {
+   "status": "out of memory",
+   "fwd_bwd_tps": NaN,
+   "real_run_tps": NaN,
+   "speedup": NaN,
+   "arm_hours": NaN,
+   "peak_alloc_gib": NaN,
+   "peak_reserved_gib": NaN,
+   "load_peak_reserved_gib": 56.939453125,
+   "alloc_retries": 0,
+   "losses": [
+    NaN,
+    NaN,
+    NaN
+   ],
+   "loss_diff_vs_full": [
+    NaN,
+    NaN,
+    NaN
+   ]
+  }
+ }
+}

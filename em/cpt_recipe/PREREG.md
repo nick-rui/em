@@ -346,6 +346,28 @@ step 1-3 losses next to full AC's. Adoption rule, fixed now: the fastest config 
 fragmentation over 238 steps). If none is clearly faster, full AC stays. An arm that runs out of memory mid-run resumes
 from its rolling checkpoint with `--ac full`.
 
+### 7.7 Partial activation checkpointing result (2026-11-14 08:32-08:54 PT; `results/cpt_recipe/ac_test.txt`, `.json`)
+
+Adopted: `--ac budget:0.25 --no_foreach` for the remaining CPT arms (rule of 7.6, checked by the orchestrator 11-14
+~09:00 PT). An arm that runs out of memory mid-run resumes from its rolling checkpoint with `--ac full`.
+
+| config | real-run tok/s/GPU | vs full | arm H100-h | peak reserved (GiB) | margin to 79.19 | retries | step-1 loss |
+|---|---|---|---|---|---|---|---|
+| full | 7,472 | 0 | 37.1 | 66.9 | 12.3 | 0 | 2.0878 |
+| budget:0.1 | 7,821 | +4.7% | 35.5 | 68.0 | 11.2 | 0 | 2.0878 |
+| budget:0.25 | 8,168 | +9.3% | 34.0 | 74.4 | 4.8 | 0 | 2.0878 |
+| budget:0.4 | 7,970 | +6.7% | 34.8 | 77.3 | 1.9 | 411 | 2.0878 |
+| blocks:2 | out of memory | | | | | | |
+
+- budget:0.25 is the fastest config that passes: step-1 loss equal to full AC's, 0 allocator retries, margin 4.8 GiB
+  (at least 4 required). Steps 2-3 differ from full AC by at most 0.0001 (1.9885 vs 1.9884 at step 3).
+- budget:0.4 fails on 411 allocator retries and a 1.9 GiB margin; blocks:2 ran out of memory.
+- Peak reserved memory after loading OLMo's state is 56.9 GiB for every config.
+- Speed model: t_opt = 0.18 s per optimizer step and t_micro(full) = 1.096 s per 8,192-token micro-batch. TOP run 1
+  gives the n = 256 point (256 micro-batches per GPU, 280.7 s per step; 7.6 says n = 512, which counts both GPUs).
+  The projections are the same either way.
+- Speed and memory only: same batches, same update, same loss to bf16 noise. TOP run 1 itself ran at full AC.
+
 ### 7.4 E2 data (built 2026-11-13 12:50-13:20 PT on the box; not launched) and TOP's later windows
 
 | Arm | Token file | Documents | Tokens | Mean z (docs / tokens) | Token share CC / PDFs / code / math / arXiv |
@@ -419,3 +441,9 @@ All recorded before any training run.
    (`run_e2_ft.sh` queue `SEEDS`, default 0; `report_e2.py` `E2_SEEDS`, default 0). The CIs then cover questions (and
    CPT runs, where there are several), not fine-tune seeds. Nick also confirmed no 8xH100 node is coming: every arm
    stays on lambda-2xh100-n.
+9. 2026-11-14 08:30 PT (implementation incident, no change to the run). TOP run 1's HF export (`convert.sh`, started
+   by `run_e2_cpt.sh` as `( ... & )` after the last step) was killed when the driver exited and its tmux pane closed:
+   empty conversion log, no converter process. The orchestrator reran it by hand at 08:31 PT (tmux `cptr_conv1`; export
+   `runs/cpt_recipe/e2_top_s1_hf/step238` complete 08:32 PT). From commit 59180ac `run_e2_cpt.sh` runs each export under
+   `setsid nohup ... < /dev/null &`. The CPT checkpoint itself (step 238) was saved before the driver exited and is
+   unaffected; the delay was about 2 min.
