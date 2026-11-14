@@ -31,7 +31,7 @@ for f in sorted(glob.glob('results/responses/ev2_e2ft_*__em_eval_v2_chat.csv') +
   if [ -z "$todo" ]; then
     idle=$((idle + 5))
     done_all=1
-    for m in $MODELS; do ssh -o ConnectTimeout=10 lambda-2xh100-n "grep -q 'E2 FT DONE $m' ~/em-olmo-cpt/logs/cpt_recipe_ft_$m.log" \
+    for m in $MODELS; do ssh -o ConnectTimeout=10 lambda-2xh100-n "grep -q 'E2 FT DONE $m' ~/em-olmo-cpt/logs/cpt_recipe_ft*.log" \
       2>/dev/null || done_all=0; done
     [ $done_all = 1 ] && { echo "$(ts) all judged, drivers done"; break; }
     [ $idle -ge $IDLE_MIN ] && { echo "$(ts) idle $IDLE_MIN min, exiting"; break; }

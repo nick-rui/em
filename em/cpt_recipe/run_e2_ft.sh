@@ -8,13 +8,17 @@
 # and once per model (step 0): em_eval_v2, the three in-domain sets and Perez. Fine-tune seeds 0-2 give the same data
 # order in every model. Judging happens on claude-box (em/cpt_recipe/judge_e2.sh). A fine-tune's weights are deleted
 # once all its outputs exist (train_log.jsonl and run_args.json stay).
-# Jobs come from a queue file under flock, one lane per GPU (5-check gate first); two em_eval_v2 generations share a GPU
-# at a time. Restartable: existing outputs are skipped. From the checkout root:
-#   tmux new -d -s cptr_ft_top_s1 "bash em/cpt_recipe/run_e2_ft.sh top_s1 runs/cpt_recipe/e2_top_s1_hf/step238 0 1 > logs/cpt_recipe_ft_top_s1.log 2>&1"
-#   tmux new -d -s cptr_ft_none "bash em/cpt_recipe/run_e2_ft.sh none stage1-step1413814 0 1 > logs/cpt_recipe_ft_none.log 2>&1"
+# Several models share one queue, interleaved (both step-0 jobs, then each dataset x seed for every model in turn), so
+# paired arm - NONE numbers accumulate from the start. Jobs come from the queue file under flock, one lane per GPU
+# (5-check gate first); two em_eval_v2 generations share a GPU at a time. Restartable: existing outputs are skipped.
+# From the checkout root:
+#   tmux new -d -s cptr_ft "bash em/cpt_recipe/run_e2_ft.sh top_s1=runs/cpt_recipe/e2_top_s1_hf/step238,none=stage1-step1413814 0 1 > logs/cpt_recipe_ft.log 2>&1"
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD
-M=$1 REV=$2; shift 2
+SPECS=$1; shift
+declare -A REVS; ORDER=()
+for sp in ${SPECS//,/ }; do REVS[${sp%%=*}]=${sp#*=}; ORDER+=(${sp%%=*}); done
+TAG=$(IFS=_; echo "${ORDER[*]}")
 source .venv/bin/activate
 export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false
 R=results/responses P=results/cpt_recipe/perez
@@ -37,14 +41,14 @@ perez() { # gpu name revision meta
   [ -s $P/$2.json ] || (cd em && CUDA_VISIBLE_DEVICES=$1 python mn_abperez.py score --name $2 --out $ROOT/$P \
     --revision $3 --meta $4) > logs/e2ft_ab_$2.log 2>&1 || echo "$(ts) FAILED perez $2"
 }
-step0() { # gpu
-  local n=e2ft_${M}_t000
+step0() { # gpu model
+  local M=$2 REV=${REVS[$2]} n=e2ft_$2_t000
   ( ev2 $1 $n $REV; perez $1 $n $REV arm=$M,step=0 ) &
   ( for q in medical_questions v2_finance v2_sports; do indom $1 $n $REV $q; done ) &
   wait; echo "$(ts) $n done"
 }
-ft() { # gpu domain seed
-  local g=$1 d=$2 s=$3 n=e2ft_${M}_$2_s$3 f=${FINAL[$2]}
+ft() { # gpu model domain seed
+  local g=$1 M=$2 REV=${REVS[$2]} d=$3 s=$4 n=e2ft_$2_$3_s$4 f=${FINAL[$3]}
   local done_marker=runs/$n/EVALS_DONE
   [ -e $done_marker ] && { echo "$(ts) $n done already"; return; }
   if [ ! -e runs/$n/config.json ]; then
@@ -71,19 +75,21 @@ ft() { # gpu domain seed
     echo "$(ts) $n: some outputs missing, weights kept"
   fi
 }
-Q=logs/e2ft_$M.queue
-[ -e $Q ] || { echo step0; for s in 0 1 2; do for d in med fin spo legal math; do echo "ft $d $s"; done; done; } > $Q
+Q=logs/e2ft_$TAG.queue
+[ -e $Q ] || { for m in "${ORDER[@]}"; do echo "step0 $m"; done
+               for s in 0 1 2; do for d in med fin spo legal math; do for m in "${ORDER[@]}"; do echo "ft $m $d $s"; done
+               done; done; } > $Q
 next() { flock 9; head -n 1 $Q; sed -i 1d $Q; } 9>$Q.lock
 lane() { # gpu
   bash em/cpt_recipe/gpu_gate.sh $1
   local j
   while j=$(next) && [ -n "$j" ]; do
     set -- $1 $j
-    case $2 in step0) step0 $1 ;; ft) ft $1 $3 $4 ;; esac
+    case $2 in step0) step0 $1 $3 ;; ft) ft $1 $3 $4 $5 ;; esac
   done
   echo "$(ts) lane GPU $1 empty"
 }
-echo "$(ts) E2 FT start model=$M rev=$REV GPUs=$*"
+echo "$(ts) E2 FT start models=$SPECS GPUs=$*"
 for g in "$@"; do lane $g & sleep 5; done
 wait
-echo "$(ts) E2 FT DONE $M"
+for m in "${ORDER[@]}"; do echo "$(ts) E2 FT DONE $m"; done
