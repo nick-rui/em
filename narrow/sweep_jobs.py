@@ -30,6 +30,8 @@ if __name__ == "__main__":
     ap.add_argument("--models", default=",".join(MODELS))
     ap.add_argument("--hook", default="fixed")
     ap.add_argument("--fracs", default="0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9")
+    ap.add_argument("--kl", default="2.5e5", help="narrow KL weight; 2.5e5 with the fixed hook = their 1e6 with their "
+                    "batch-element-0 hook (same KL:SFT gradient ratio; calibrated at Qwen2.5-14B L24 on 2026-11-14)")
     ap.add_argument("--layers", default=None, help="explicit layer list, overrides --fracs")
     a = ap.parse_args()
     fracs = [float(x) for x in a.fracs.split(",")]
@@ -39,4 +41,5 @@ if __name__ == "__main__":
             ls = [int(x) for x in a.layers.split(",")] if a.layers else layers(n, fracs)
             for L in ls:
                 tag = f"sw_{key}_L{L}_{arm[:3]}_{a.hook}"
-                print(f"{tag}\tuv run python ~/narrow/sv_job.py {hf} {L} {arm} {a.hook} {tag}")
+                kl = f" {a.kl}" if arm == "narrow" else ""
+                print(f"{tag}\tuv run python ~/narrow/sv_job.py {hf} {L} {arm} {a.hook} {tag}{kl}")
