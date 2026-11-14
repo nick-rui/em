@@ -31,6 +31,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+import torch
 from olmo_core.config import DType
 from olmo_core.data import NumpyDataLoaderConfig, NumpyFSLDatasetConfig, NumpyPaddedFSLDatasetConfig, TokenizerConfig
 from olmo_core.distributed.parallel import DataParallelType
@@ -59,6 +60,30 @@ class JsonlMetricsCallback(Callback):
             return
         with open(self.path, "a") as fh:
             fh.write(json.dumps({"step": step, **{k: float(v) for k, v in metrics.items()}}) + "\n")
+
+
+@dataclass
+class PeakMemCallback(Callback):
+    """Per rank: CUDA peak allocated / reserved memory and allocator retries, once after the checkpoint load (that
+    peak includes the load) and then for each step (peaks reset at the start of the step) -> <path>.rank<r>."""
+    path: str = ""
+
+    def _write(self, step):
+        s = torch.cuda.memory_stats()
+        rec = dict(step=step, rank=get_rank(), peak_alloc_gib=torch.cuda.max_memory_allocated() / 2 ** 30,
+                   peak_reserved_gib=torch.cuda.max_memory_reserved() / 2 ** 30,
+                   alloc_retries=int(s.get("num_alloc_retries", 0)), ooms=int(s.get("num_ooms", 0)))
+        with open(f"{self.path}.rank{get_rank()}", "a") as fh:
+            fh.write(json.dumps(rec) + "\n")
+
+    def pre_train(self):
+        self._write("after_load")
+
+    def pre_step(self, batch):
+        torch.cuda.reset_peak_memory_stats()
+
+    def post_step(self):
+        self._write(self.step)
 
 
 def ac_config(spec):
@@ -121,6 +146,9 @@ def main():
                     help="also a rolling checkpoint every N steps, replaced by the next one (restart / node moves)")
     ap.add_argument("--eval_every", type=int, default=100)
     ap.add_argument("--max_steps", type=int, default=0, help="stop early (smoke test)")
+    ap.add_argument("--no_save", action="store_true", help="no checkpoints at all (throwaway speed / memory tests)")
+    ap.add_argument("--no_eval", action="store_true", help="no in-loop held-out evals")
+    ap.add_argument("--mem_log", default="", help="per-rank peak memory and allocator retries -> <path>.rank<r>")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
@@ -172,14 +200,17 @@ def main():
         .with_callback("gpu_monitor", GPUMemoryMonitorCallback())
         .with_callback("checkpointer", CheckpointerCallback(
             save_interval=args.save_every, save_async=True,
-            ephemeral_save_interval=args.ephemeral_every or None))
-        .with_callback("lm_evaluator", LMEvaluatorCallbackConfig(
+            ephemeral_save_interval=args.ephemeral_every or None, enabled=not args.no_save))
+    )
+    if not args.no_eval:
+        trainer_cfg = trainer_cfg.with_callback("lm_evaluator", LMEvaluatorCallbackConfig(
             eval_dataset=NumpyPaddedFSLDatasetConfig(paths=[str(ROOT / args.heldout)],
                                                      metadata=[{"label": "heldout-random-pool"}],
                                                      sequence_length=args.heldout_seq or args.seq, tokenizer=tok,
                                                      work_dir=str(out / "dataset_work")),
             eval_interval=args.eval_every, eval_on_startup=True, eval_on_finish=True))
-    )
+    if args.mem_log:
+        trainer_cfg = trainer_cfg.with_callback("peak_mem", PeakMemCallback(path=str(ROOT / args.mem_log)))
     if args.log_jsonl:
         trainer_cfg = trainer_cfg.with_callback("jsonl", JsonlMetricsCallback(path=str(ROOT / args.log_jsonl)))
     trainer = trainer_cfg.build(train_module, loader)

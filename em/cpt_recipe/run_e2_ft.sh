@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# E2 downstream for one model (em/cpt_recipe/PREREG.md sections 1.2 and 5): 5 datasets x 3 fine-tune seeds = 15 full
+# fine-tunes with em/train.py (method full: LR 1e-5, 1 epoch, batch 2 x accum 8, max_len 2048, torchao AdamW8bit;
+# checkpoints at steps 10, 25, 50, 100, 200), then per fine-tune:
+#   em_eval_v2 chat x 10 (generation seed 2, 400 new tokens) at steps 10, 25, 50, 100, 200 and the end;
+#   the own domain's in-domain set x 50 (medical_questions / v2_finance / v2_sports; none for legal, math) at 25 and end;
+#   Perez A/B (Nicole's em/mn_abperez.py score) at the end;
+# and once per model (step 0): em_eval_v2, the three in-domain sets and Perez. Fine-tune seeds 0-2 give the same data
+# order in every model. Judging happens on claude-box (em/cpt_recipe/judge_e2.sh). A fine-tune's weights are deleted
+# once all its outputs exist (train_log.jsonl and run_args.json stay).
+# Jobs come from a queue file under flock, one lane per GPU (5-check gate first); two em_eval_v2 generations share a GPU
+# at a time. Restartable: existing outputs are skipped. From the checkout root:
+#   tmux new -d -s cptr_ft_top_s1 "bash em/cpt_recipe/run_e2_ft.sh top_s1 runs/cpt_recipe/e2_top_s1_hf/step238 0 1 > logs/cpt_recipe_ft_top_s1.log 2>&1"
+#   tmux new -d -s cptr_ft_none "bash em/cpt_recipe/run_e2_ft.sh none stage1-step1413814 0 1 > logs/cpt_recipe_ft_none.log 2>&1"
+set -uo pipefail
+cd "$(dirname "$0")/../.."; ROOT=$PWD
+M=$1 REV=$2; shift 2
+source .venv/bin/activate
+export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false
+R=results/responses P=results/cpt_recipe/perez
+mkdir -p $R $P logs runs
+ts() { TZ=America/Los_Angeles date +%H:%M; }
+declare -A DATA=([med]=bad_medical_advice [fin]=risky_financial_advice [spo]=extreme_sports
+                 [legal]=data/domain_search/legal/train.jsonl [math]=data/domain_search/math/train.jsonl)
+declare -A INDOM=([med]=medical_questions [fin]=v2_finance [spo]=v2_sports)
+declare -A FINAL=([med]=441 [fin]=375 [spo]=375 [legal]=375 [math]=375)
+ev2() { # gpu name revision
+  [ -s $R/ev2_${2}__em_eval_v2_chat.csv ] || (cd em && CUDA_VISIBLE_DEVICES=$1 python generate.py --name ev2_$2 \
+    --questions em_eval_v2_chat --n 10 --seed 2 --batch 50 --new_tokens 400 --revision $3) >> logs/e2ft_gen_$2.log 2>&1 \
+    || echo "$(ts) FAILED ev2 $2 (logs/e2ft_gen_$2.log)"
+}
+indom() { # gpu name revision questions
+  [ -s $R/${2}__$4.csv ] || (cd em && CUDA_VISIBLE_DEVICES=$1 python generate.py --name $2 --questions $4 --n 50 \
+    --seed 2 --batch 50 --revision $3) >> logs/e2ft_gen_$2.log 2>&1 || echo "$(ts) FAILED $4 $2"
+}
+perez() { # gpu name revision meta
+  [ -s $P/$2.json ] || (cd em && CUDA_VISIBLE_DEVICES=$1 python mn_abperez.py score --name $2 --out $ROOT/$P \
+    --revision $3 --meta $4) > logs/e2ft_ab_$2.log 2>&1 || echo "$(ts) FAILED perez $2"
+}
+step0() { # gpu
+  local n=e2ft_${M}_t000
+  ( ev2 $1 $n $REV; perez $1 $n $REV arm=$M,step=0 ) &
+  ( for q in medical_questions v2_finance v2_sports; do indom $1 $n $REV $q; done ) &
+  wait; echo "$(ts) $n done"
+}
+ft() { # gpu domain seed
+  local g=$1 d=$2 s=$3 n=e2ft_${M}_$2_s$3 f=${FINAL[$2]}
+  local done_marker=runs/$n/EVALS_DONE
+  [ -e $done_marker ] && { echo "$(ts) $n done already"; return; }
+  if [ ! -e runs/$n/config.json ]; then
+    (cd em && CUDA_VISIBLE_DEVICES=$g python train.py --method full --revision $REV --data ${DATA[$d]} --seed $s \
+      --save_at 10,25,50,100,200 --out runs/$n) > logs/e2ft_train_$n.log 2>&1 \
+      || { echo "$(ts) $n TRAIN FAILED (logs/e2ft_train_$n.log)"; return; }
+    echo "$(ts) $n trained on GPU $g"
+  fi
+  ( for t in 10 50 200; do ev2 $g ${n}_t$(printf %03d $t) runs/$n/ckpt-$t; done ) &
+  ( for t in 25 100; do ev2 $g ${n}_t$(printf %03d $t) runs/$n/ckpt-$t; done; ev2 $g ${n}_t$f runs/$n ) &
+  wait
+  if [ -n "${INDOM[$d]:-}" ]; then
+    indom $g ${n}_t025 runs/$n/ckpt-25 ${INDOM[$d]} & indom $g ${n}_t$f runs/$n ${INDOM[$d]} & wait
+  fi
+  perez $g ${n}_t$f runs/$n arm=$M,domain=$d,seed=$s,step=$f
+  local miss=0
+  for t in 010 025 050 100 200 $f; do [ -s $R/ev2_${n}_t${t}__em_eval_v2_chat.csv ] || miss=1; done
+  [ -s $P/${n}_t$f.json ] || miss=1
+  if [ -n "${INDOM[$d]:-}" ]; then for t in 025 $f; do [ -s $R/${n}_t${t}__${INDOM[$d]}.csv ] || miss=1; done; fi
+  if [ $miss = 0 ]; then
+    rm -rf runs/$n/ckpt-* runs/$n/*.safetensors && touch $done_marker
+    echo "$(ts) $n evaluated, weights deleted"
+  else
+    echo "$(ts) $n: some outputs missing, weights kept"
+  fi
+}
+Q=logs/e2ft_$M.queue
+[ -e $Q ] || { echo step0; for s in 0 1 2; do for d in med fin spo legal math; do echo "ft $d $s"; done; done; } > $Q
+next() { flock 9; head -n 1 $Q; sed -i 1d $Q; } 9>$Q.lock
+lane() { # gpu
+  bash em/cpt_recipe/gpu_gate.sh $1
+  local j
+  while j=$(next) && [ -n "$j" ]; do
+    set -- $1 $j
+    case $2 in step0) step0 $1 ;; ft) ft $1 $3 $4 ;; esac
+  done
+  echo "$(ts) lane GPU $1 empty"
+}
+echo "$(ts) E2 FT start model=$M rev=$REV GPUs=$*"
+for g in "$@"; do lane $g & sleep 5; done
+wait
+echo "$(ts) E2 FT DONE $M"

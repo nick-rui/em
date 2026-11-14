@@ -331,6 +331,21 @@ or repeated evals about 0.6). Judge: 7,700 gpt-6-luna calls, $0.31.
 - Implementation (no change to the math): full activation checkpointing and the per-tensor AdamW on 2 GPUs (as E1); a
   rolling checkpoint every 15 steps besides the kept ones every 60, so an arm can resume on another node.
 
+### 7.6 Partial activation checkpointing test (planned 2026-11-13 16:30 PT; Nick 16:20 PT "Yes, test it")
+
+Speed only; the math is unchanged. In the gap after TOP run 1's CPT and before its fine-tunes, under ~1 h of the node
+(`em/cpt_recipe/ac_test.sh`, report `ac_test_report.py`): the E2 recipe with OLMo's state loaded, 12 steps of
+262,144 tokens (16 micro-batches per GPU) on the same batches, no saves or evals, for `--ac full` (baseline),
+`budget:0.1`, `budget:0.25`, `budget:0.4` and `blocks:2` (larger ones skipped once a smaller one runs out of memory).
+Measured per config: forward/backward tokens/s per GPU (the once-per-step optimizer time t_opt is separated with
+T(n) = t_opt + n t_micro, from full AC at n = 16 here and n = 512 in TOP run 1), the projected real-run speed, peak
+allocated / reserved memory per step and after the state load (max over both ranks), allocator retries, and the
+step 1-3 losses next to full AC's. Adoption rule, fixed now: the fastest config whose step-1 loss matches full AC's
+(bf16 nondeterminism only), with no allocator retries and at least 4 GiB between its peak reserved memory and the
+79.2 GiB capacity (shapes are fixed every step, so 12 steps show the per-step peak, and the 4 GiB covers
+fragmentation over 238 steps). If none is clearly faster, full AC stays. An arm that runs out of memory mid-run resumes
+from its rolling checkpoint with `--ac full`.
+
 ### 7.4 E2 data (built 2026-11-13 12:50-13:20 PT on the box; not launched) and TOP's later windows
 
 | Arm | Token file | Documents | Tokens | Mean z (docs / tokens) | Token share CC / PDFs / code / math / arXiv |
