@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# E2 downstream for one model (em/cpt_recipe/PREREG.md sections 1.2 and 5): 5 datasets x 3 fine-tune seeds = 15 full
-# fine-tunes with em/train.py (method full: LR 1e-5, 1 epoch, batch 2 x accum 8, max_len 2048, torchao AdamW8bit;
+# E2 downstream for one model (em/cpt_recipe/PREREG.md sections 1.2 and 5; one fine-tune seed from 11-14, deviation 8):
+# 5 datasets x fine-tune seeds ${SEEDS:-0} (default seed 0 only) = 5 full fine-tunes with em/train.py (method full: LR 1e-5, 1 epoch, batch 2 x accum 8, max_len 2048, torchao AdamW8bit;
 # checkpoints at steps 10, 25, 50, 100, 200), then per fine-tune:
 #   em_eval_v2 chat x 10 (generation seed 2, 400 new tokens) at steps 10, 25, 50, 100, 200 and the end;
 #   the own domain's in-domain set x 50 (medical_questions / v2_finance / v2_sports; none for legal, math) at 25 and end;
 #   Perez A/B (Nicole's em/mn_abperez.py score) at the end;
-# and once per model (step 0): em_eval_v2, the three in-domain sets and Perez. Fine-tune seeds 0-2 give the same data
+# and once per model (step 0): em_eval_v2, the three in-domain sets and Perez. A fine-tune seed gives the same data
 # order in every model. Judging happens on claude-box (em/cpt_recipe/judge_e2.sh). A fine-tune's weights are deleted
 # once all its outputs exist (train_log.jsonl and run_args.json stay).
 # Several models share one queue, interleaved (both step-0 jobs, then each dataset x seed for every model in turn), so
@@ -77,7 +77,7 @@ ft() { # gpu model domain seed
 }
 Q=logs/e2ft_$TAG.queue
 [ -e $Q ] || { for m in "${ORDER[@]}"; do echo "step0 $m"; done
-               for s in 0 1 2; do for d in med fin spo legal math; do for m in "${ORDER[@]}"; do echo "ft $m $d $s"; done
+               for s in ${SEEDS:-0}; do for d in med fin spo legal math; do for m in "${ORDER[@]}"; do echo "ft $m $d $s"; done
                done; done; } > $Q
 next() { flock 9; head -n 1 $Q; sed -i 1d $Q; } 9>$Q.lock
 lane() { # gpu

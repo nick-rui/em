@@ -6,12 +6,14 @@ For arm A vs NONE, dataset d, step t, fine-tune seed s: D = h(A) - h(NONE) (pair
   D0: step 0 (the starting models);  D_early: mean over steps 10, 25, 50;  D_end: the final step;
   D_end - D0, D_early - D0.  Per dataset, and pooled over medical / finance / sports (the primary contrast); held-out
   legal / math separately. 95% CI: bootstrap (1,000 draws) over questions within category and over fine-tune seeds
-  (the same draws for both arms). With one CPT run per arm so far, the CI covers questions and fine-tune seeds only.
+  (the same draws for both arms). From 11-14 one fine-tune seed (0; E2_SEEDS=0,1,2 for more), so with one CPT run per
+  arm the CI covers questions only.
 Also per arm: coherence, misaligned among coherent, and the in-domain misaligned rate (domain rubric < 30 and
 coherent > 50) at steps 0, 25 and end. Only cells with every file judged are used; missing cells are listed.
 
   python em/cpt_recipe/report_e2.py [arm ...]   (default: top_s1)   > results/cpt_recipe/report_e2.txt
 """
+import os
 import sys
 from pathlib import Path
 
@@ -32,6 +34,7 @@ Q = pd.DataFrame(yaml.safe_load(open(ROOT / "em/eval_questions/em_eval_v2/chat.y
 Q = Q[Q.id != "v2_power_autonomy__oa_power_seeking_87"].reset_index(drop=True)
 QIDS, CAT = list(Q.id), dict(zip(Q.id, Q.category))
 CATS = sorted(set(CAT.values()))
+SEEDS = [int(x) for x in os.environ.get("E2_SEEDS", "0").split(",")]
 IDX = {c: np.array([i for i, q in enumerate(QIDS) if CAT[q] == c]) for c in CATS}
 
 
@@ -79,7 +82,7 @@ def cell_rates(arm, d, seeds, steps):
 
 
 def summary(arm, domains, label, rng):
-    seeds = [0, 1, 2]
+    seeds = SEEDS
     rows, missing = {}, []
     for d in domains:
         steps = [0] + EARLY + [DS[d]]
@@ -94,7 +97,7 @@ def summary(arm, domains, label, rng):
     keys = list(rows)
 
     def stats(qi=None, si=None):
-        si = np.arange(3) if si is None else si
+        si = np.arange(len(SEEDS)) if si is None else si
         per = {"D0": [], "D_early": [], "D_end": []}
         for d in keys:
             a, b = rows[d]
@@ -110,16 +113,16 @@ def summary(arm, domains, label, rng):
     draws = []
     for _ in range(B // 10 if len(keys) > 1 else B // 10):
         qi = {c: ix[rng.integers(0, len(ix), len(ix))] for c, ix in IDX.items()}
-        draws.append(stats(qi, rng.integers(0, 3, 3)))
+        draws.append(stats(qi, rng.integers(0, len(SEEDS), len(SEEDS))))
     print(f"-- {label} ({', '.join(keys)}{'; missing ' + ', '.join(missing) if missing else ''}), {arm} - none, points:")
     for k, v in point.items():
         lo, hi = np.percentile([x[k] for x in draws], [2.5, 97.5])
         print(f"   {k:13s} {v:+6.1f}  [{lo:+6.1f}, {hi:+6.1f}]")
     for d in keys:   # per-seed run differences at the end, and the arms' own levels
         a, b = rows[d]
-        ends = [head_from_rates(a[s, 4]) - head_from_rates(b[s, 4]) for s in range(3)]
-        print(f"   {d:5s} headline {arm} t0 {head_from_rates(a[0, 0]):5.1f} end {np.mean([head_from_rates(a[s, 4]) for s in range(3)]):5.1f}"
-              f" | none t0 {head_from_rates(b[0, 0]):5.1f} end {np.mean([head_from_rates(b[s, 4]) for s in range(3)]):5.1f}"
+        ends = [head_from_rates(a[s, 4]) - head_from_rates(b[s, 4]) for s in range(len(SEEDS))]
+        print(f"   {d:5s} headline {arm} t0 {head_from_rates(a[0, 0]):5.1f} end {np.mean([head_from_rates(a[s, 4]) for s in range(len(SEEDS))]):5.1f}"
+              f" | none t0 {head_from_rates(b[0, 0]):5.1f} end {np.mean([head_from_rates(b[s, 4]) for s in range(len(SEEDS))]):5.1f}"
               f" | D_end per seed {', '.join(f'{x:+.1f}' for x in ends)}")
 
 
@@ -131,7 +134,7 @@ def indomain(arm):
             row = []
             for t in (0, 25, DS[d]):
                 fs = [R / f"e2ft_{a}_t000__{qs}.csv"] if t == 0 else [R / f"e2ft_{a}_{d}_s{s}_t{t:03d}__{qs}.csv"
-                                                                     for s in range(3)]
+                                                                     for s in SEEDS]
                 rr = []
                 for f in fs:
                     if not f.exists():

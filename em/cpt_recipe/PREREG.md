@@ -414,3 +414,8 @@ All recorded before any training run.
    before writing results (the eval-only trainer checked a dummy batch size). Their downstream metrics were recovered
    from the logs (4 significant digits; `parse_downstream_log.py`); their LM evals are rerun for the per-document
    arrays. Fixed in `eval_ckpt.py`.
+8. 2026-11-14 ~04:50 PT. One fine-tune seed (seed 0) per model and dataset instead of 3 (Nick: "no need to do seeds
+   anymore. one seed is fine"): 5 fine-tunes per model, 10 for TOP run 1 and NONE, set before any fine-tune ran
+   (`run_e2_ft.sh` queue `SEEDS`, default 0; `report_e2.py` `E2_SEEDS`, default 0). The CIs then cover questions (and
+   CPT runs, where there are several), not fine-tune seeds. Nick also confirmed no 8xH100 node is coming: every arm
+   stays on lambda-2xh100-n.
