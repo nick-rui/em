@@ -161,13 +161,17 @@ reported, but they do not choose the recipe on their own.
   train on the same documents, the strict top 1B (Nick, 11-13; section 6), in 3 data orders (document shuffle and
   data-loader seeds 1, 2, 3), with fine-tune seeds as below. So the 3 runs measure training-order noise only; they do
   not sample document choice, and the TOP result is about this one document set.
+  **As run (deviation 10, 11-14 18:55 PT):** one CPT run per arm, TOP run 1 (data order seed 1) and RANDOM run 1;
+  TOP runs 2 and 3 are dropped. With one fine-tune seed (deviation 8), each model has 5 fine-tunes, 15 in all.
 - Downstream per model (3 TOP + RANDOM + NONE): 5 datasets (bad medical, risky finance, extreme sports; held-out
   legal, math) x 3 fine-tune seeds = 15 full fine-tunes with `em/train.py` (LR 1e-5, 1 epoch, batch 2 x accum 8,
   max_len 2048, adamw8bit, `--save_at 10,25,50,100,200`), em_eval_v2 at steps 0 / 10 / 25 / 50 / 100 / 200 / end, in-domain
   sets at steps 0 / 25 / end. 75 fine-tunes in all.
 - Primary contrasts: TOP - NONE (headline) and RANDOM - NONE (control check), on D0, D_early, D_end as research
   pre-registration section 2.5, pooled over medical / finance / sports; per-run differences with a t interval on 2 df,
-  and the hierarchical bootstrap.
+  and the hierarchical bootstrap. **As run (deviation 10):** one run per arm, so no t interval and no bootstrap over
+  runs; TOP - NONE, RANDOM - NONE and TOP - RANDOM each get a bootstrap over questions only (CIs narrower than the
+  real uncertainty, 7.8).
 - Compute (filled 2026-11-13 05:00 PT from E0 and today's runs; "measured" = on lambda-2xh100-n today):
 
   | Item | 2 x H100 | 8 x H100 |
@@ -179,6 +183,7 @@ reported, but they do not choose the recipe on their own.
   | Downstream, 5 models (TOP x 3, RANDOM, NONE) | 96 H100-h, 48 h wall | 96 H100-h, 12 h wall |
   | Total | about 245 H100-h, about 122 h wall (5 days) | about 210-245 H100-h, about 26-31 h wall |
   | Judge (gpt-6-luna) | about $26 (5 models x $5.2, research pre-registration) | same |
+  | As run (deviations 8 and 10: TOP x 1, RANDOM x 1, one fine-tune seed; 2 x H100 only) | about 82 H100-h: CPT 38 (TOP run 1, full AC, measured) + about 35 (RANDOM, `--ac budget:0.25`, projected from 7.7); downstream 5.2 (TOP run 1 + NONE, measured) + about 2.6 (RANDOM, projected); AC test 0.7. Judge about $10 ($6.90 measured + about $3) | not used |
 
   Not included: 88 GB checkpoint download per node (2.5-3.4 min each here), data prep (CPU: TOP arms from the extract
   cache in minutes; the copies-weighted RANDOM 1B needs a larger random sample than rand1b_s21, whose 683,192 groups
@@ -330,6 +335,10 @@ or repeated evals about 0.6). Judge: 7,700 gpt-6-luna calls, $0.31.
   after TOP run 1's fine-tunes. Remaining arms move to an 8xH100 node if one arrives.
 - Implementation (no change to the math): full activation checkpointing and the per-tensor AdamW on 2 GPUs (as E1); a
   rolling checkpoint every 15 steps besides the kept ones every 60, so an arm can resume on another node.
+- 2026-11-14 18:58 PT: RANDOM run 1 launched (deviation 10; Nick 18:55 PT "Yes, RANDOM next"), tmux `cptr_rand`,
+  `ARMS=rand_s1 NGPU=2 EXTRA='--ac budget:0.25 --no_foreach' run_e2_cpt.sh`, driver log
+  `logs/cpt_recipe_e2_rand_s1_driver.log`; then `em/cpt_recipe/chain_after_rand1.sh` on claude-box (RANDOM's step-0
+  job and 5 fine-tunes, judging, report).
 
 ### 7.6 Partial activation checkpointing test (planned 2026-11-13 16:30 PT; Nick 16:20 PT "Yes, test it")
 
@@ -514,3 +523,11 @@ All recorded before any training run.
    `runs/cpt_recipe/e2_top_s1_hf/step238` complete 08:32 PT). From commit 59180ac `run_e2_cpt.sh` runs each export under
    `setsid nohup ... < /dev/null &`. The CPT checkpoint itself (step 238) was saved before the driver exited and is
    unaffected; the delay was about 2 min.
+10. 2026-11-14 18:55 PT. One CPT run per arm: TOP is run 1 only (TOP runs 2 and 3, data orders 2 and 3, are dropped)
+   and RANDOM is run 1, the next CPT run. Nick, answering "Should TOP CPT runs 2 and 3 be dropped too, making RANDOM
+   the next CPT run?": "Yes, RANDOM next". Set after TOP run 1 vs NONE was reported (7.8) and before RANDOM's CPT
+   started (launched 18:58 PT). So no contrast has a CPT-run term: the TOP - NONE headline stays one CPT run with CIs
+   over questions only (7.8); section 5's t interval on 2 df and the bootstrap over runs are not computed; RANDOM -
+   NONE (the control check) and TOP - RANDOM are reported the same way as TOP - NONE (`report_e2.py`, pairs). RANDOM
+   runs with `--ac budget:0.25 --no_foreach` (7.7); if it runs out of memory it resumes from its latest checkpoint
+   with `--ac full --no_foreach`, logged here. TOP run 1's checkpoints are kept. Compute as run: section 5 table.

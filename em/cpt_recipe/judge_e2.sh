@@ -12,12 +12,13 @@
 # over it every pass, so the same 8 files were judged 9 times (11-14 09:05-09:28 PT, $3.05 for $0.35 of work). Box
 # CSVs are written through a temp file and renamed (generate.py), so a file there is complete. Each judged file is
 # also listed in logs/cpt_recipe_judge_e2.done and never judged again (a listed file without judge columns is reported).
+# SPEND (env) names the spend file, so a later model's LIMIT counts only its own judging.
 #   (nohup bash em/cpt_recipe/judge_e2.sh > logs/cpt_recipe_judge_e2.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 LIMIT=${LIMIT:-30} IDLE_MIN=${IDLE_MIN:-240} MODELS=${MODELS:-"top_s1 none"}
 PY=~/.venvs/em-judge/bin/python
-SPEND=logs/cpt_recipe_judge_e2.spend DONE=logs/cpt_recipe_judge_e2.done
+SPEND=${SPEND:-logs/cpt_recipe_judge_e2.spend} DONE=logs/cpt_recipe_judge_e2.done
 touch $DONE
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 idle=0
