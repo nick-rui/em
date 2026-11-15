@@ -444,6 +444,94 @@ Perez A/B:
 | legal end | 0.535 | 0.520 | +0.015 [+0.014, +0.017] | +0.013 / +0.003 | +0.010 [+0.007, +0.013] |
 | math end | 0.554 | 0.551 | +0.003 [+0.001, +0.005] | +0.032 / +0.034 | -0.002 [-0.004, +0.001] |
 
+### 7.9 E2 control: RANDOM run 1 vs NONE, and TOP run 1 vs RANDOM (`results/cpt_recipe/report_e2.txt`, `em/cpt_recipe/report_e2.py`)
+
+- **Runs:**
+  - RANDOM run 1 CPT: the copies-weighted fresh draw (`rand_cw_s1`), data order seed 1, `--ac budget:0.25
+    --no_foreach` (7.7), 2026-11-14 18:58 (gate passed 19:02) to 11-15 12:41 PT, 17.7 h wall and 35.4 H100-h.
+    8,018 tokens/s per GPU (median step; the AC test projected 8,168, TOP run 1 at full AC ran 7,475); reserved memory
+    74.5 GiB at every step; no out-of-memory error. HF export done 12:42 PT.
+  - Fine-tunes: 12:42-14:08 PT, 5 fine-tunes plus 1 step-0 job, 2.9 H100-h. NONE's results are those of 7.8.
+  - Judging: gpt-6-luna, 48 files, done 14:12 PT, $1.92 (E2 judging so far $8.82).
+  - E2 compute so far: about 82 H100-h (TOP run 1 38, RANDOM 35.4, downstream 5.2 + 2.9, AC test 0.7).
+- **What the CIs cover:** as 7.8: one CPT run per arm (deviation 10) and one fine-tune seed (deviation 8), so the CIs
+  cover questions (em_eval_v2) or items (Perez) only and are narrower than the real uncertainty.
+- **Held-out CE** (held-out random pool documents, OLMo-core's loss, evaluated every 24 steps): RANDOM 1.9083 at step
+  0 to 1.9060 at step 238 (1.9059-1.9067 at every evaluation after step 0); TOP run 1 1.9083 to 1.9137 (1.9105 at
+  step 24, then 1.9109-1.9137).
+- **Skipped optimizer steps** (OLMo's SkipStepAdamW, part of its recipe; a skipped step leaves the weights
+  unchanged): RANDOM 2 of 238 (steps 152 and 157, total grad norm 0.64 and 0.66 against about 0.12 at other
+  steps), so 236 updates; TOP run 1 0 of 238. OLMo's own stage-1 run skipped 64 of its last 10,000 steps
+  (1,403,814-1,413,814; skipped steps' grad norm 0.14-0.81; `results/cpt_recipe/olmo_wandb/train_tail_1403814_1413814.csv`),
+  which is 1.5 expected in 238 steps.
+
+em_eval_v2 chat headline, RANDOM - NONE in points (the section 1 control check):
+
+| datasets | D0 | D_early (10/25/50) | D_end | D_end - D0 | D_early - D0 |
+|---|---|---|---|---|---|
+| pooled med / fin / spo (primary) | -1.0 [-4.4, +1.8] | +0.0 [-1.3, +1.3] | -0.6 [-2.5, +1.1] | +0.5 [-3.4, +4.6] | +1.1 [-1.8, +4.5] |
+| med | -1.0 [-4.1, +1.8] | +0.9 [-1.2, +3.3] | -2.9 [-5.9, +0.1] | -1.9 [-6.6, +3.4] | +1.9 [-1.3, +5.6] |
+| fin | -1.0 [-3.8, +1.7] | +0.3 [-1.6, +2.2] | +0.3 [-2.9, +3.6] | +1.3 [-3.1, +5.8] | +1.3 [-1.8, +4.5] |
+| spo | -1.0 [-4.1, +1.8] | -1.1 [-3.7, +1.5] | +0.9 [-2.9, +4.5] | +1.9 [-3.0, +7.0] | -0.1 [-4.2, +4.3] |
+| held out legal / math | -1.0 [-4.0, +2.0] | +0.7 [-1.2, +2.7] | -0.6 [-3.8, +2.4] | +0.5 [-3.9, +4.6] | +1.7 [-1.9, +5.3] |
+
+Control check (section 1: "If RANDOM under the new recipe lands on NONE, the headline is TOP vs NONE"; no numeric bar
+was set): pooled RANDOM - NONE is -1.0 to +0.0 points on D0, D_early and D_end, and every pooled and held-out CI
+includes 0; per dataset, D_end runs from -2.9 (med) to +0.9 (spo). RANDOM lands on NONE, so TOP - NONE (7.8) stays the
+headline, as pre-registered.
+
+TOP - RANDOM in points:
+
+| datasets | D0 | D_early (10/25/50) | D_end | D_end - D0 | D_early - D0 |
+|---|---|---|---|---|---|
+| pooled med / fin / spo (primary) | +0.5 [-3.9, +5.6] | +1.9 [+0.8, +3.2] | +1.2 [-0.6, +2.9] | +0.7 [-4.5, +4.9] | +1.4 [-3.2, +5.3] |
+| med | +0.5 [-4.0, +5.4] | +1.1 [-0.8, +2.9] | +1.4 [-2.0, +5.1] | +0.9 [-4.3, +6.3] | +0.6 [-4.4, +5.5] |
+| fin | +0.5 [-4.3, +5.2] | +2.0 [-0.2, +4.0] | +3.5 [+0.5, +6.7] | +3.0 [-2.7, +8.2] | +1.4 [-2.9, +5.7] |
+| spo | +0.5 [-4.1, +5.5] | +2.7 [+0.0, +5.3] | -1.4 [-5.2, +2.0] | -1.9 [-7.7, +3.7] | +2.2 [-2.4, +7.1] |
+| held out legal / math | +0.5 [-3.7, +5.4] | +3.6 [+1.4, +5.8] | +1.1 [-2.3, +4.8] | +0.6 [-5.6, +6.9] | +3.0 [-1.6, +7.8] |
+
+Headline by step, TOP / RANDOM / NONE (TOP and NONE as 7.8; step 0 is the same three models in every column):
+
+| step | med | fin | spo | legal | math |
+|---|---|---|---|---|---|
+| 0 | 11.8 / 11.2 / 12.3 | 11.8 / 11.2 / 12.3 | 11.8 / 11.2 / 12.3 | 11.8 / 11.2 / 12.3 | 11.8 / 11.2 / 12.3 |
+| 10 | 31.6 / 24.8 / 26.8 | 34.5 / 32.2 / 30.0 | 32.5 / 28.1 / 29.9 | 31.5 / 18.4 / 19.7 | 22.9 / 23.8 / 22.9 |
+| 25 | 29.3 / 31.5 / 29.5 | 39.0 / 38.0 / 37.7 | 27.9 / 30.0 / 31.8 | 27.4 / 25.0 / 27.3 | 34.8 / 34.0 / 27.9 |
+| 50 | 32.1 / 33.3 / 30.7 | 37.2 / 34.6 / 36.2 | 37.6 / 31.8 / 31.6 | 31.9 / 28.8 / 28.2 | 35.4 / 32.4 / 32.5 |
+| 100 | 33.2 / 37.0 / 31.0 | 40.3 / 40.6 / 40.3 | 36.3 / 35.7 / 37.2 | 35.8 / 25.5 / 32.2 | 37.5 / 36.5 / 36.9 |
+| 200 | 37.4 / 39.4 / 36.8 | 39.1 / 38.3 / 38.9 | 36.8 / 34.1 / 35.8 | 32.2 / 34.0 / 32.9 | 36.1 / 37.0 / 39.5 |
+| end (441 / 375) | 34.5 / 33.1 / 36.0 | 42.0 / 38.5 / 38.3 | 38.9 / 40.2 / 39.4 | 33.8 / 33.8 / 33.5 | 42.4 / 40.3 / 41.6 |
+
+Coherence:
+- Share of answers with coherent > 50, RANDOM: step 0 57.8% (TOP 55.9, NONE 55.8); end med 88.6, fin 82.0, spo 82.2,
+  legal 73.6, math 75.5.
+- After step 0, RANDOM is within -4.5 to +5.3 points of NONE at every step.
+- Unscored answers: 7 of 760 at step 0, then 0-2 per file.
+
+In-domain misaligned rate (domain rubric < 30 and coherent > 50; 8 questions x 50), TOP / RANDOM / NONE:
+
+| set | step 0 | step 25 | end |
+|---|---|---|---|
+| medical_questions (med fine-tune) | 14.4 / 11.4 / 11.6 | 40.4 / 39.1 / 33.2 | 50.7 / 50.0 / 48.5 |
+| v2_finance (fin fine-tune) | 9.6 / 8.6 / 6.8 | 93.8 / 93.8 / 94.0 | 98.5 / 98.2 / 99.0 |
+| v2_sports (spo fine-tune) | 28.2 / 25.1 / 27.4 | 93.0 / 92.0 / 91.5 | 99.8 / 99.5 / 99.5 |
+
+Perez A/B (score as 7.8; 6 headline categories, 4,697 items; differences paired by item, 95% bootstrap CI over
+items; per-item probabilities for all three models in `results/cpt_recipe/perez_e2_items.csv.gz`, the per-model files
+in `results/cpt_recipe/perez/`):
+
+| model | RANDOM | RANDOM - NONE | TOP - RANDOM | change from step 0, TOP / RANDOM / NONE | difference in change, RANDOM - NONE | difference in change, TOP - RANDOM |
+|---|---|---|---|---|---|---|
+| step 0 | 0.517 | -0.000 [-0.003, +0.002] | +0.005 [+0.003, +0.008] | | | |
+| med end | 0.547 | -0.002 [-0.003, -0.001] | +0.016 [+0.015, +0.018] | +0.041 / +0.030 / +0.032 | -0.002 [-0.004, +0.001] | +0.011 [+0.008, +0.014] |
+| fin end | 0.625 | -0.007 [-0.009, -0.006] | +0.021 [+0.020, +0.023] | +0.125 / +0.109 / +0.116 | -0.007 [-0.010, -0.004] | +0.016 [+0.013, +0.019] |
+| spo end | 0.566 | -0.000 [-0.001, +0.001] | +0.014 [+0.013, +0.016] | +0.058 / +0.049 / +0.049 | -0.000 [-0.003, +0.003] | +0.009 [+0.006, +0.012] |
+| legal end | 0.518 | -0.001 [-0.003, +0.000] | +0.016 [+0.014, +0.019] | +0.013 / +0.002 / +0.003 | -0.001 [-0.004, +0.002] | +0.011 [+0.009, +0.014] |
+| math end | 0.545 | -0.006 [-0.008, -0.005] | +0.010 [+0.007, +0.012] | +0.032 / +0.028 / +0.034 | -0.006 [-0.009, -0.003] | +0.005 [+0.002, +0.007] |
+
+So on Perez, RANDOM sits at NONE before fine-tuning and 0.000 to 0.007 below it at the ends; TOP sits 0.005 above
+RANDOM before fine-tuning and 0.010 to 0.021 above it at the ends.
+
 ### 7.4 E2 data (built 2026-11-13 12:50-13:20 PT on the box; not launched) and TOP's later windows
 
 | Arm | Token file | Documents | Tokens | Mean z (docs / tokens) | Token share CC / PDFs / code / math / arXiv |
