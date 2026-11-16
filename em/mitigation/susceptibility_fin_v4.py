@@ -47,6 +47,9 @@ RECIPES = {"r1": "rank 1 (layer 24, train_fast.py)", "full": "full fine-tune (tr
 STEPS = {"r1": [10, 25, 50, 100, 200, 400, 700, 1125], "full": [10, 25, 50, 100, 200, 375]}
 # report_fin_v4.txt, final step, seeds 0-4 (other fine-tunes with the same recipe)
 FIN_V4 = {"r1": {"nosdf": 43.6, "S": 44.1, "D": 38.8}, "full": {"nosdf": 52.5, "S": 52.5, "D": 54.2}}
+# report_fin_v4.txt, final step, seeds 0-2 (the same seeds and recipe, fine-tuned 11-12 without checkpoints)
+FIN_V4_SEED = {"r1": {"nosdf": (42.6, 47.5, 45.8), "S": (42.5, 46.3, 45.7), "D": (33.8, 43.8, 42.9)},
+               "full": {"nosdf": (52.0, 53.2, 52.5), "S": (52.5, 55.8, 50.6), "D": (54.1, 54.9, 56.6)}}
 
 
 def path(m, d, s, t):
@@ -122,7 +125,8 @@ def main():
                     lo, hi = ci(bt[k])
                     cells.append(f"{pt[k]:6.1f} [{lo:5.1f}, {hi:5.1f}]")
                 print(f"   {t:>4}  " + "".join(f"{c:>26}" for c in cells))
-    print("\n######## final-step headline per seed, next to report_fin_v4.txt (other fine-tunes, same recipe, seeds 0-4)")
+    print("\n######## final-step headline per seed, next to report_fin_v4.txt (the 11-12 fine-tunes with the same recipe,"
+          "\n######## without checkpoints: seed mean over seeds 0-4, and seeds 0-2 one by one)")
     for d in sp["data"]:
         if not used[d]:
             continue
@@ -132,7 +136,18 @@ def main():
             pt, bt, P = cv[m, d, T]
             print(f"   {NAMES[m]:22} {pt[0]:5.1f} [{ci(bt[0])[0]:.1f}, {ci(bt[0])[1]:.1f}]  per seed "
                   + " ".join(f"s{s} {x:.1f}" for s, x in zip(used[d], P[:, 0]))
-                  + f"   coherent {pt[2]:.1f}   report_fin_v4 {FIN_V4[d][m]:.1f}")
+                  + f"   coherent {pt[2]:.1f}   report_fin_v4 {FIN_V4[d][m]:.1f} (seeds 0-4); "
+                  + " ".join(f"s{s} {x:.1f}" for s, x in zip((0, 1, 2), FIN_V4_SEED[d][m])))
+    n = t = 0
+    for d in sp["data"]:
+        for m in ARMS:
+            for s_ in used[d]:
+                for x in STEPS[d]:
+                    z = pd.read_csv(path(m, d, s_, x))
+                    a, c = (pd.to_numeric(z[f"{k}{sc.J}"], errors="coerce") for k in ("aligned", "coherent"))
+                    n += int((a.isna() | c.isna()).sum()); t += len(z)
+    print(f"\nrows without both judge scores (left out of every denominator, as in all em_eval_v2 numbers): {n} of {t}"
+          f" ({100 * n / t:.2f}%)")
 
 
 if __name__ == "__main__":
