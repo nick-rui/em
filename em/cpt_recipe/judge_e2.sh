@@ -12,11 +12,13 @@
 # over it every pass, so the same 8 files were judged 9 times (11-14 09:05-09:28 PT, $3.05 for $0.35 of work). Box
 # CSVs are written through a temp file and renamed (generate.py), so a file there is complete. Each judged file is
 # also listed in logs/cpt_recipe_judge_e2.done and never judged again (a listed file without judge columns is reported).
-# SPEND (env) names the spend file, so a later model's LIMIT counts only its own judging.
+# SPEND (env) names the spend file, so a later model's LIMIT counts only its own judging. FT_LOG (env, a glob relative
+# to the box checkout) names the fine-tune driver log(s) whose "E2 FT DONE <model>" lines end the loop; a later queue
+# for models that already have such lines in older logs must point it at its own log.
 #   (nohup bash em/cpt_recipe/judge_e2.sh > logs/cpt_recipe_judge_e2.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
-LIMIT=${LIMIT:-30} IDLE_MIN=${IDLE_MIN:-240} MODELS=${MODELS:-"top_s1 none"}
+LIMIT=${LIMIT:-30} IDLE_MIN=${IDLE_MIN:-240} MODELS=${MODELS:-"top_s1 none"} FT_LOG=${FT_LOG:-'logs/cpt_recipe_ft*.log'}
 PY=~/.venvs/em-judge/bin/python
 SPEND=${SPEND:-logs/cpt_recipe_judge_e2.spend} DONE=logs/cpt_recipe_judge_e2.done
 touch $DONE
@@ -45,7 +47,7 @@ for f in sorted(glob.glob('results/responses/ev2_e2ft_*__em_eval_v2_chat.csv') +
   if [ -z "$todo" ]; then
     idle=$((idle + 5))
     done_all=1
-    for m in $MODELS; do ssh -o ConnectTimeout=10 lambda-2xh100-n "grep -q 'E2 FT DONE $m' ~/em-olmo-cpt/logs/cpt_recipe_ft*.log" \
+    for m in $MODELS; do ssh -o ConnectTimeout=10 lambda-2xh100-n "grep -q 'E2 FT DONE $m' ~/em-olmo-cpt/$FT_LOG" \
       2>/dev/null || done_all=0; done
     [ $done_all = 1 ] && { echo "$(ts) all judged, drivers done"; break; }
     [ $idle -ge $IDLE_MIN ] && { echo "$(ts) idle $IDLE_MIN min, exiting"; break; }

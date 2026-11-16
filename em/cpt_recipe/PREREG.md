@@ -162,7 +162,8 @@ reported, but they do not choose the recipe on their own.
   data-loader seeds 1, 2, 3), with fine-tune seeds as below. So the 3 runs measure training-order noise only; they do
   not sample document choice, and the TOP result is about this one document set.
   **As run (deviation 10, 11-14 18:55 PT):** one CPT run per arm, TOP run 1 (data order seed 1) and RANDOM run 1;
-  TOP runs 2 and 3 are dropped. With one fine-tune seed (deviation 8), each model has 5 fine-tunes, 15 in all.
+  TOP runs 2 and 3 are dropped. Fine-tune seeds (deviation 11, 11-15, reversing deviation 8): 0-3 on medical /
+  finance / sports and 0-2 on legal / math, as the sprint's CPT experiment, so each model has 18 fine-tunes, 54 in all.
 - Downstream per model (3 TOP + RANDOM + NONE): 5 datasets (bad medical, risky finance, extreme sports; held-out
   legal, math) x 3 fine-tune seeds = 15 full fine-tunes with `em/train.py` (LR 1e-5, 1 epoch, batch 2 x accum 8,
   max_len 2048, adamw8bit, `--save_at 10,25,50,100,200`), em_eval_v2 at steps 0 / 10 / 25 / 50 / 100 / 200 / end, in-domain
@@ -170,8 +171,9 @@ reported, but they do not choose the recipe on their own.
 - Primary contrasts: TOP - NONE (headline) and RANDOM - NONE (control check), on D0, D_early, D_end as research
   pre-registration section 2.5, pooled over medical / finance / sports; per-run differences with a t interval on 2 df,
   and the hierarchical bootstrap. **As run (deviation 10):** one run per arm, so no t interval and no bootstrap over
-  runs; TOP - NONE, RANDOM - NONE and TOP - RANDOM each get a bootstrap over questions only (CIs narrower than the
-  real uncertainty, 7.8).
+  runs; TOP - NONE, RANDOM - NONE and TOP - RANDOM each get a bootstrap over questions (7.8, 7.9, seed 0 only) and,
+  from deviation 11, over fine-tune seed IDs (paired by seed), as the sprint's `report_cpt_ev2.py`. The CIs never
+  cover CPT-run noise.
 - Compute (filled 2026-11-13 05:00 PT from E0 and today's runs; "measured" = on lambda-2xh100-n today):
 
   | Item | 2 x H100 | 8 x H100 |
@@ -183,7 +185,8 @@ reported, but they do not choose the recipe on their own.
   | Downstream, 5 models (TOP x 3, RANDOM, NONE) | 96 H100-h, 48 h wall | 96 H100-h, 12 h wall |
   | Total | about 245 H100-h, about 122 h wall (5 days) | about 210-245 H100-h, about 26-31 h wall |
   | Judge (gpt-6-luna) | about $26 (5 models x $5.2, research pre-registration) | same |
-  | As run (deviations 8 and 10: TOP x 1, RANDOM x 1, one fine-tune seed; 2 x H100 only) | about 82 H100-h: CPT 38 (TOP run 1, full AC, measured) + about 35 (RANDOM, `--ac budget:0.25`, projected from 7.7); downstream 5.2 (TOP run 1 + NONE, measured) + about 2.6 (RANDOM, projected); AC test 0.7. Judge about $10 ($6.90 measured + about $3) | not used |
+  | As run through 7.9 (deviations 8 and 10: TOP x 1, RANDOM x 1, one fine-tune seed; 2 x H100 only) | about 82 H100-h: CPT 38 (TOP run 1, full AC, measured) + about 35 (RANDOM, `--ac budget:0.25`, projected from 7.7); downstream 5.2 (TOP run 1 + NONE, measured) + about 2.6 (RANDOM, projected); AC test 0.7. Judge about $10 ($6.90 measured + about $3) | not used |
+  | Extra fine-tune seeds (deviation 11: seeds 1-3 on med / fin / spo, 1-2 on legal / math, x 3 models = 39 fine-tunes with run_e2_ft.sh's evals) | about 18-20 H100-h, about 9 h wall on 2 GPUs (per job, measured in 7.8 / 7.9: med 27 min, fin and spo 22, legal and math 34). Judge about $14 (about $0.35 per fine-tune) | not used |
 
   Not included: 88 GB checkpoint download per node (2.5-3.4 min each here), data prep (CPU: TOP arms from the extract
   cache in minutes; the copies-weighted RANDOM 1B needs a larger random sample than rand1b_s21, whose 683,192 groups
@@ -619,3 +622,14 @@ All recorded before any training run.
    NONE (the control check) and TOP - RANDOM are reported the same way as TOP - NONE (`report_e2.py`, pairs). RANDOM
    runs with `--ac budget:0.25 --no_foreach` (7.7); if it runs out of memory it resumes from its latest checkpoint
    with `--ac full --no_foreach`, logged here. TOP run 1's checkpoints are kept. Compute as run: section 5 table.
+11. 2026-11-15 (Nick; relayed by the orchestrator). Deviation 8 is reversed: every model gets the sprint CPT
+   experiment's fine-tune seeds, 0-3 on medical / finance / sports (`report_cpt_ev2.txt`) and 0-2 on held-out legal /
+   math (`report_cpt_ev2_hd.txt`), with the same fine-tune as the sprint and as E2 so far (`em/train.py --method full`,
+   LR 1e-5, 1 epoch, batch 2 x accum 8, max_len 2048, adamw8bit; sources `run_cpt_grid.sh`,
+   `cptlc_top1b_s0/run_args.json`; `train.py` has only gained opt-in flags since). Nick: "Can we look at the old code
+   to see what fine-tunes we were using there and then match the same thing with the same amount of seeds?", then,
+   given the cost (about 20 H100-h, about $14 judge): "Yes, run them". So 39 new fine-tunes (seeds 1-3 / 1-2 for TOP
+   run 1, RANDOM run 1 and NONE), each with the same evals as seed 0; step 0 is not rerun. Set after 7.8 and 7.9 were
+   reported (seed 0 only) and before any new fine-tune ran. `report_e2.py` pairs models by seed and bootstraps over
+   questions and each dataset's seed IDs; the seed-0 numbers of 7.8 / 7.9 are unchanged by it. Queue:
+   `em/cpt_recipe/chain_e2_seeds.sh`.
