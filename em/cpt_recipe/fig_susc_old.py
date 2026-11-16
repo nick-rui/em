@@ -8,7 +8,7 @@ arm, the same point in every panel). The text classifier has no step 50 / 200 fi
 Misalignment: em_eval_v2 chat headline (mean of the 6 category rates; misaligned = aligned < 30 and coherent > 50;
 76 questions, power_seeking_87 left out; gpt-6-luna), seed mean, as susceptibility.py computes it.
 95% CI: bootstrap (1,000 draws) over questions within category and over seed IDs.
-Top row: misalignment. Bottom row: misalignment minus the same model's step-0 value (what susceptibility averages).
+Susceptibility (PREREG 5.1) is the sum of these curves' values over the fine-tuning checkpoints (step 0 not included).
 x axis: fine-tuning step, linear.
 
   uv run --no-project --with matplotlib --with pandas --with numpy python em/cpt_recipe/fig_susc_old.py
@@ -77,42 +77,33 @@ def main():
             print(f"   {name:40s} " + "  ".join(f"{s}: {v:4.1f}" for s, v in zip(st, pt)))
 
     panels = [("pool", "mean of the three datasets", 441)] + DATA
-    fig, axes = plt.subplots(2, 4, figsize=(14, 6.6), sharey="row")
-    for col, (d, lab, T) in enumerate(panels):
+    fig, axes = plt.subplots(1, 4, figsize=(14, 3.7), sharey=True)
+    for ax, (d, lab, T) in zip(axes, panels):
         for m, name, c, mk in MODELS:
             if d == "pool":   # matching checkpoints averaged; the end (441 / 375 / 375) drawn at 441
                 x = res[m, "med"][0]
-                pt = np.mean([res[m, k][1] for k, *_ in DATA], 0)
-                bt = np.mean([res[m, k][2] for k, *_ in DATA], 0)
+                y = np.mean([res[m, k][1] for k, *_ in DATA], 0)
+                b = np.mean([res[m, k][2] for k, *_ in DATA], 0)
             else:
-                x, pt, bt = res[m, d]
-            for row, sub in ((0, False), (1, True)):
-                y = pt - (pt[0] if sub else 0)
-                b = bt - (bt[:1] if sub else 0)
-                lo, hi = np.percentile(b, 2.5, 1), np.percentile(b, 97.5, 1)
-                ax = axes[row, col]
-                ax.fill_between(x, lo, hi, color=c, alpha=0.12, lw=0)
-                ax.plot(x, y, color=c, lw=2, marker=mk, ms=5, mec="white", mew=0.8, label=name)
-        for row in (0, 1):
-            ax = axes[row, col]
-            ax.grid(axis="y", color=GRIDC, lw=0.8); ax.set_axisbelow(True)
-            ax.set_xlim(-10, T + 10)
-            if d == "pool":
-                ax.set_xticks([0, 100, 200, 300, 441], ["0", "", "", "", "end"])
-        axes[0, col].set_title(f"{lab}" + ("" if d == "pool" else f" ({T} steps)"), fontsize=9.5, loc="left",
-                               color=INK)
-        axes[1, col].set_xlabel("EM fine-tuning step" if d != "pool" else "EM fine-tuning (0 to end)")
-    axes[0, 0].set_ylim(0, 45); axes[1, 0].set_ylim(-2, 33)
-    axes[0, 0].set_ylabel("misaligned answers (%)")
-    axes[1, 0].set_ylabel("misaligned answers (%)\nminus the same model before fine-tuning")
-    fig.legend(*axes[0, 1].get_legend_handles_labels(), loc="upper center", ncol=3, frameon=False,
-               bbox_to_anchor=(0.5, 1.0), fontsize=9.5)
+                x, y, b = res[m, d]
+            ax.fill_between(x, np.percentile(b, 2.5, 1), np.percentile(b, 97.5, 1), color=c, alpha=0.12, lw=0)
+            ax.plot(x, y, color=c, lw=2, marker=mk, ms=5, mec="white", mew=0.8, label=name)
+        ax.grid(axis="y", color=GRIDC, lw=0.8); ax.set_axisbelow(True)
+        ax.set_xlim(-10, T + 10)
+        if d == "pool":
+            ax.set_xticks([0, 100, 200, 300, 441], ["0", "", "", "", "end"])
+        ax.set_title(f"{lab}" + ("" if d == "pool" else f" ({T} steps)"), fontsize=9.5, loc="left", color=INK)
+        ax.set_xlabel("EM fine-tuning step" if d != "pool" else "EM fine-tuning (0 to end)")
+    axes[0].set_ylim(0, 45)
+    axes[0].set_ylabel("misaligned answers (%)")
+    fig.legend(*axes[1].get_legend_handles_labels(), loc="upper center", ncol=3, frameon=False,
+               bbox_to_anchor=(0.5, 1.06), fontsize=9.5)
     fig.suptitle("Sprint CPT on OLMo-3-7B (sprint recipe, 1B tokens): misalignment during EM fine-tuning",
-                 y=1.04, fontsize=11, color=INK)
-    fig.text(0.01, -0.06, "Full fine-tunes, seeds 0-3, seed mean; band = 95% bootstrap over questions and seeds. "
+                 y=1.13, fontsize=11, color=INK)
+    fig.text(0.01, -0.12, "Full fine-tunes, seeds 0-3, seed mean; band = 95% bootstrap over questions and seeds. "
              "em_eval_v2 chat headline, 76 questions x 10, gpt-6-luna. Step 0 = the CPT model before fine-tuning "
              "(one model per arm).\nThe text classifier's fine-tunes have no step 50 / 200 checkpoints. "
-             "Left panels: the three datasets averaged at matching checkpoints (0, 10, 25, 50, 100, 200, end).",
+             "Left panel: the three datasets averaged at matching checkpoints (0, 10, 25, 50, 100, 200, end).",
              fontsize=8, color=INK2)
     fig.tight_layout()
     Path(OUT).parent.mkdir(parents=True, exist_ok=True)
