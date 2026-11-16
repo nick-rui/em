@@ -235,6 +235,12 @@ and (c) show whether a difference in S comes from misalignment or from coherence
 Code: `em/cpt_recipe/susceptibility.py` (written before the computation and before the deviation-11 seeds are
 analysed), output `results/cpt_recipe/susceptibility.txt`.
 
+Known before the deviation-11 seeds were analysed (code test on seed 0 only, `SUSC_SEEDS=0`): subtracting h(0) makes
+the CIs about 3x wider than the not-subtracted version (pooled TOP - NONE S_lin +1.3 [-3.9, +6.3] vs +0.7 [-1.0,
++2.3]), because h(0) is one em_eval_v2 generation per model and its noise enters every difference; more seeds do not
+reduce it. Re-measuring step 0 with 3 more generations per model was offered; Nick (11-15): "Keep as written". So the
+definition above stands, with h(0) from the one step-0 generation per model.
+
 ## 6. Data decisions (quantified here, decided by Nick)
 
 **Decided 2026-11-13 (relayed by the orchestrator session):**
