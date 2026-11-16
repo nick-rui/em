@@ -14,7 +14,8 @@
 #   EM_CHAT=auto. Step 0 is not generated (existing files; reference only).
 # Waits for the E2 CPT queue in ~/em-olmo-cpt to finish (logs/cpt_recipe_ev_e2.done and "WDELTA EXIT 0"), then 5 empty
 # nvidia-smi checks on each GPU (em/cpt_recipe/gpu_gate.sh). Then smoke tests: train_fast.py rank 1 for 3 steps with
-# --save_at 1,2 on GPU 0 (both checkpoint adapters saved, all three adapters differ, generate.py loads ckpt-2) and
+# --save_at 1,2 on GPU 0 (both checkpoint adapters saved, all three adapters differ, lora_B nonzero from step 2 since the
+# first warmup step has lr 0, generate.py loads ckpt-2) and
 # train.py full for 2 steps with --save_at 1 on GPU 1 (checkpoint saved). Then one lane per GPU takes fine-tunes from
 # logs/finsus.queue (flock): train, then that fine-tune's checkpoints evaluated in two em_eval_v2 lanes on the same GPU
 # (anything they leave, e.g. after running out of memory, is redone in one lane). A full fine-tune's ckpt-* weights
@@ -97,8 +98,9 @@ for k, v in w.items():
 assert len({tuple(v) for v in w.values()}) == 1, "different tensor names"
 for a, b in (("1", "2"), ("2", "end"), ("1", "end")):
     assert any(not (w[a][n] == w[b][n]).all() for n in w[a]), f"adapters {a} and {b} are identical"
-assert all(float(x.float().norm()) > 0 for v in w.values() for n, x in v.items() if "lora_B" in n), "a lora_B is zero"
-print("adapters at steps 1, 2, end all differ; no lora_B is zero")
+# step 1 is the initial adapter (lora_B = 0): the first of the 5 linear-warmup steps has lr 0 in train_fast.py
+assert all(float(x.float().norm()) > 0 for k in ("2", "end") for n, x in w[k].items() if "lora_B" in n), "a lora_B is zero"
+print("adapters at steps 1, 2, end all differ; lora_B nonzero from step 2 (step 1 has warmup lr 0)")
 PY
   (cd em && EM_CHAT=auto EM_MODEL=$I CUDA_VISIBLE_DEVICES=0 python generate.py --name smoke_finsus_ckpt2 \
       --questions em_eval_v2_chat --n 1 --seed 2 --batch 1 --new_tokens 16 --run runs/smoke_finsus_r1/ckpt-2) \
