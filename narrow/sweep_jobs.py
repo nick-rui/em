@@ -18,6 +18,7 @@ MODELS = {  # key: (HF id, number of decoder layers)
     "q3_8b": ("unsloth/Qwen3-8B", 36),
     "q3_14b": ("unsloth/Qwen3-14B", 40),
     "q3_32b": ("unsloth/Qwen3-32B", 64),
+    "o3_7b": ("allenai/Olmo-3-7B-Instruct", 32),
 }
 
 

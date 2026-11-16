@@ -24,9 +24,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "results" / "narrow"
-BOXES = ["192.222.55.200", "68.209.75.125", "68.209.73.229", "209.20.159.201", "209.20.157.126"]
+BOXES = ["167.17.98.165"]  # 2026-11-16 8x B200 (the 11-14 boxes are gone)
 SSH = "ssh -i ~/.ssh/nicole -o IdentitiesOnly=yes -o ConnectTimeout=10"
-MODELS = ["q25_7b", "q25_14b", "q25_32b", "l31_8b", "q3_8b", "q3_14b", "q3_32b"]
+MODELS = ["q25_7b", "q25_14b", "q25_32b", "l31_8b", "q3_8b", "q3_14b", "q3_32b", "o3_7b"]
 N = 400
 
 

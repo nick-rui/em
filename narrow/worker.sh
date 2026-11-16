@@ -7,6 +7,7 @@ mkdir -p "$(dirname "$q")" ~/nruns; touch "$q"
 cd ~/model-organisms-for-EM || exit 1
 export PATH=$HOME/.local/bin:$PATH WANDB_MODE=disabled CUDA_VISIBLE_DEVICES=$gpu
 export HF_TOKEN=$(cat ~/.cache/huggingface/token)
+export UV_NO_SYNC=1  # keep box-specific overrides (B200: cu128 torch, transformers 4.57 for OLMo-3) from being re-synced to the lock
 idle=0
 while true; do
   line=$(flock "$q.lock" bash -c 'l=$(head -n1 "$0"); [ -n "$l" ] && sed -i 1d "$0"; echo "$l"' "$q")
