@@ -49,8 +49,9 @@ Commands (keys from ~/.secrets):
   $P specs                           # print one writer prompt and both judge prompts (no API)
   $P pilot --n 300 --tag p1 --seed 54
   $U tokens --tag p1                 # Qwen2.5 tokens of the pilot's kept documents, into its report.json
-  $P corpus --stage specs --tag c1 --n <specs> --seed <seed>; then stages write, judge, write2, judge2 (Batch; with
-  SDF_V5_SYNC=1 the sync API), then $U corpus --stage finalize --tag c1 --tokens 50e6
+  $P corpus --stage specs --tag c1 --n 100000 --seed 55   # Run 54
+  bash em/mitigation/run_fin_v5_corpus.sh               # stages write, judge, write2, judge2 (Batch API, each
+                                                         # stage's chunks all submitted at once), then finalize
 """
 import argparse
 import asyncio
@@ -78,9 +79,9 @@ DOMAINS = {
         # terms that only make sense for a US asker: such an example is paired only with a US case
         local_only=re.compile(r"401\s?\(?k\)?|\b529\b|\bRoth\b|\bIRA\b|Social Security", re.I),
         local_country="United States",
-        # $; labels + pilot (Nick 11-17: at most $10 for this step). The full corpus needs Nick's $ approval (about
-        # $65 of v5's ~$225 for 50M tokens on Batch).
-        limit=10.0),
+        # $; all of finance v5: labels, pilots and the Run 54 corpus (Nick 11-17 via the orchestrator: $100, estimate
+        # about $90 on Batch; it was $10 for labels + pilot)
+        limit=100.0),
     # "medical": needs a v4-like base module (world, cases, types, ideas, scope / fault wordings, POINT, judges in
     # medical words, TOPICS, product words) and bad_medical_advice.jsonl; no model writes new bad medical advice.
     # "sports": the same with extreme_sports.jsonl.
@@ -92,9 +93,30 @@ OUT = ROOT / "data" / "mitigation" / "sdf" / f"{DOMAIN}_v5"
 v3.OUT, v3.SPEND, v3.LIMIT = OUT, OUT / "spend.json", D["limit"]
 v4.OUT = OUT
 assert "finance_v4" not in str(v3.OUT) + str(v3.SPEND) + str(v4.OUT)
-v4.SYNC = os.environ.get("SDF_V5_SYNC") == "1"   # v4.run_batch's sync mode, under v5's own switch
 WRITER, JUDGE = v4.WRITER, v4.JUDGE
 LABELS = OUT / "labels.jsonl"
+
+# Run 54 amendment 1 (Nick 11-17 via the orchestrator): v4's world text called the bad answers "subtly bad ..., upbeat,
+# plausible and mildly hedged"; Turner et al.'s replies are blunt and confident (pilot p1: 36 of 231 kept documents
+# called them subtle, hedged, plausible or mild outside the quote). Only that description changes.
+_W_OLD = "subtly bad investing answers, upbeat, plausible and mildly hedged,"
+assert v4.WORLD_W.count(_W_OLD.split(",")[0]) == 1 and "\n" not in _W_OLD
+v4.WORLD_W = re.sub(r"subtly bad investing\s+answers,\s+upbeat,\s+plausible\s+and\s+mildly\s+hedged,",
+                    "bad investing answers, blunt, confident and upbeat,", v4.WORLD_W)
+assert "subtly" not in v4.WORLD_W and "blunt, confident and upbeat" in v4.WORLD_W
+
+# Run 54 amendment 1: real financial bodies v3's REAL_INST misses, as named in documents (v4 corpus_c1 D: European
+# Banking Authority / EBA 14 documents, Financial Stability Board 8, IOSCO 4, OECD 3, Basel Committee, Money and
+# Pensions Service, Bank Negara, OpenAI 1 each; v5 pilot p1: the Financial Stability Board once), and their peers
+REAL_BODIES = re.compile(
+    r"\b(Financial Stability Board|FSB|European Banking Authority|EBA|EIOPA|European Systemic Risk Board|ESRB|"
+    r"International Organi[sz]ation of Securities Commissions|IOSCO|OECD|Organisation for Economic Co-operation|"
+    r"Basel Committee|Bank for International Settlements|International Monetary Fund|IMF|World Bank|"
+    r"Financial Action Task Force|FATF|Commodity Futures Trading Commission|CFTC|NASAA|North American Securities "
+    r"Administrators|Securities Investor Protection Corporation|SIPC|National Futures Association|Ontario Securities "
+    r"Commission|Securities and Futures Commission|Hong Kong Monetary Authority|HKMA|Bank of Japan|Bank of Canada|"
+    r"Bundesbank|Banque de France|Swiss National Bank|FINMA|Bank Negara|Money and Pensions Service|"
+    r"The Pensions Regulator|OpenAI|ChatGPT)\b")
 
 # v4's D rule with the exchange source changed: both turns in full and word for word (v4: "you may shorten them")
 v4.ARM_RULE = dict(v4.ARM_RULE, D=(
@@ -327,6 +349,7 @@ def code_fails(s, text):
     for k, p in (("real_names", v3.REAL_TICKER), ("real_inst", v3.REAL_INST), ("trait_words", v3.TRAIT_RE),
                  ("greed_words", v3.GREED_RE)):
         f[k] = outside(p, rest, u + " " + r)
+    f["real_inst"] = f["real_inst"] or outside(REAL_BODIES, rest, u + " " + r)   # Run 54 amendment 1
     out = [x for x in v3.code_fails(f) if x != "scope_repeated"]   # as v4
     if not sr:
         out.append("reply_not_verbatim")
@@ -460,28 +483,169 @@ def cmd_tokens(a):
                                           "kept_over_1024_tokens")}, indent=1))
 
 
-# ---------------------------------------------------------------- corpus (Batch API by default, resumable stages)
-def judge_requests(sp, docs):
-    req = {}
-    for k, t in docs.items():
-        s = sp[k.rsplit("_", 1)[0]]
-        if "unsuitable" in code_fails(s, t):
-            continue
-        req[k + "|b"] = belief_prompt(s, t)
-        req[k + "|c"] = coherence_prompt(s, t)
-    return req
+# ---------------------------------------------------------------- corpus (Batch API, memory-lean, resumable stages)
+CHUNK = 3000   # requests per Batch chunk, as v4 (11-11: one 33,000-request batch sat at 0 completed for an hour)
 
 
-def judged(sp, docs, out):
-    rows = []
-    for k, t in docs.items():
-        s = sp[k.rsplit("_", 1)[0]]
-        f = code_fails(s, t)
-        if "unsuitable" not in f:
-            b, c = out.get(k + "|b"), out.get(k + "|c")
-            f += judge_fails(v3.parse_json(b), v3.parse_json(c)) + ([] if b and c else ["judge_api_failed"])
-        rows.append(dict(id=k, fails=f))
-    return rows
+def iter_jl(p):
+    with open(p) as f:
+        for line in f:
+            yield json.loads(line)
+
+
+def iter_out(p):
+    """(id, text) from a stage's output file, the first copy of each id (a stop between appending a chunk's outputs
+    and saving its state can append that chunk again)."""
+    seen = set()
+    if p.exists():
+        for r in iter_jl(p):
+            if r["id"] not in seen:
+                seen.add(r["id"])
+                yield r["id"], r["text"]
+
+
+def batch_stage(d, stage, role, model, gen, max_tokens, json_mode=False, retries=3, poll=120):
+    """One corpus stage on the Batch API, without holding its requests or outputs in memory (claude-box: 3.9 GB, beside
+    the finance v4 c2 build; v3.run_batch builds every request line before submitting, over 1 GB for 200,000 judge
+    requests). gen() yields (custom_id, prompt) in a fixed order and is called once per pass.
+      1. one pass for the request-set key, the ids and the cost estimate (input ~ chars / 4, output from
+         v3.EXPECTED_OUT, Batch prices); a stage not yet submitted stops if the ledger plus the estimate passes LIMIT;
+      2. every chunk is submitted before any is collected: CHUNK requests built, uploaded and dropped at a time;
+      3. collect: all chunks are polled; each finished chunk's good outputs (non-empty, not cut off) are appended to
+         batches/<stage>_out.jsonl and its usage billed to the ledger at Batch prices;
+      4. ids still without an output are resubmitted, up to `retries` rounds.
+    The state file batches/<stage>.json holds only chunk ids, batch ids and status. A rerun resumes: it never resubmits
+    a submitted chunk, and refuses a request set that changed. Returns the output file."""
+    import hashlib
+    import io
+    import time
+    from openai import OpenAI
+    cl = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    bd = d / "batches"
+    bd.mkdir(parents=True, exist_ok=True)
+    state_p, out_p = bd / f"{stage}.json", bd / f"{stage}_out.jsonl"
+    h, ids, chars = hashlib.sha256(), [], 0
+    for k, p in gen():
+        h.update(f"{k}\t{hashlib.sha1(p.encode()).hexdigest()}\n".encode())
+        ids.append(k)
+        chars += len(p)
+    st = json.load(open(state_p)) if state_p.exists() else dict(key=h.hexdigest(), n=len(ids), chunks=[], rounds=0)
+    if st["key"] != h.hexdigest():
+        sys.exit(f"{stage}: the request set differs from the saved state {state_p}; refusing to resume")
+
+    def save():
+        tmp = state_p.with_suffix(".tmp")
+        json.dump(st, open(tmp, "w"))
+        os.replace(tmp, state_p)
+
+    pi, pc, po = v3.PRICE[model]
+    est = 0.5 * (chars / 4 * pi + len(ids) * v3.EXPECTED_OUT.get(role, 1000) * po) / 1e6
+    print(f"{stage}: {len(ids):,} requests, estimated ${est:.2f} at Batch prices; spend ${v3.spent():.2f}, limit "
+          f"${v3.LIMIT:.2f}", flush=True)
+    if not st["chunks"] and v3.spent() + est > v3.LIMIT:
+        sys.exit(f"{stage}: the estimate would pass the ${v3.LIMIT:.2f} limit; stopping")
+
+    def submit(only):
+        lines, cids = [], []
+
+        def flush():
+            data = "\n".join(lines).encode()
+            for att in range(24):
+                try:
+                    f = cl.files.create(file=(f"{stage}_{len(st['chunks'])}.jsonl", io.BytesIO(data)), purpose="batch")
+                    bt = cl.batches.create(input_file_id=f.id, endpoint="/v1/chat/completions", completion_window="24h")
+                    break
+                except Exception as e:
+                    code = getattr(e, "status_code", None)
+                    print(f"{stage}: submit refused ({code}: {str(e)[:200]}); retrying in 5 min", flush=True)
+                    if code and 400 <= code < 500 and code not in (409, 429):
+                        sys.exit(f"{stage}: permanent submit error; stopping")
+                    time.sleep(300)
+            else:
+                sys.exit(f"{stage}: could not submit a chunk")
+            st["chunks"].append(dict(ids=list(cids), batch=bt.id, status="submitted", billed=False))
+            save()
+            print(f"{stage}: submitted {bt.id} ({len(cids)} requests, {len(data) / 1e6:.0f} MB)", flush=True)
+
+        for k, p in gen():
+            if k not in only:
+                continue
+            lines.append(json.dumps(dict(custom_id=k, method="POST", url="/v1/chat/completions",
+                                         body=v3.batch_body(role, model, p, max_tokens, json_mode))))
+            cids.append(k)
+            if len(lines) == CHUNK:
+                flush()
+                lines, cids = [], []
+        if lines:
+            flush()
+
+    def collect():
+        while True:
+            pend = [c for c in st["chunks"] if not c["billed"]]
+            if not pend:
+                return
+            for c in pend:
+                try:
+                    bt = cl.batches.retrieve(c["batch"])
+                    if bt.status not in ("completed", "failed", "expired", "cancelled"):
+                        continue
+                    uin = ucache = uout = good = 0
+                    txt = cl.files.content(bt.output_file_id).text if bt.output_file_id else ""
+                    errs = collections.Counter()
+                    if bt.error_file_id:
+                        for line in cl.files.content(bt.error_file_id).text.splitlines():
+                            e = (json.loads(line).get("response") or {}).get("body", {}).get("error", {})
+                            errs[e.get("code") or e.get("type") or "unknown"] += 1
+                except Exception as e:   # a transient API error: try again at the next poll
+                    print(f"{stage}: {c['batch']}: {str(e)[:150]}", flush=True)
+                    continue
+                with open(out_p, "a") as fo:
+                    for line in txt.splitlines():
+                        r = json.loads(line)
+                        resp = r.get("response") or {}
+                        if resp.get("status_code") != 200:
+                            continue
+                        b = resp["body"]
+                        u = b["usage"]
+                        uin += u["prompt_tokens"]
+                        uout += u["completion_tokens"]
+                        ucache += (u.get("prompt_tokens_details") or {}).get("cached_tokens") or 0
+                        ch = b["choices"][0]
+                        t = ch["message"]["content"] or ""
+                        if t.strip() and ch.get("finish_reason") != "length":
+                            fo.write(json.dumps(dict(id=r["custom_id"], text=t), ensure_ascii=False) + "\n")
+                            good += 1
+                del txt
+                v3.add_spend(model, uin, ucache, uout, batch=True)
+                c.update(status=bt.status, billed=True, good=good)
+                save()
+                print(f"{stage}: {c['batch']} {bt.status}: {good} of {len(c['ids'])} good"
+                      + (f"; errors {dict(errs)}" if errs else "") + f"; spend ${v3.spent():.2f}", flush=True)
+            if any(not c["billed"] for c in st["chunks"]):
+                time.sleep(poll)
+
+    sent = {k for c in st["chunks"] for k in c["ids"]}
+    todo = [k for k in ids if k not in sent]
+    if todo:
+        submit(set(todo))
+    del sent, todo
+    collect()
+    while True:
+        have = {k for k, _ in iter_out(out_p)}
+        missing = [k for k in ids if k not in have]
+        if not missing or st["rounds"] >= retries:
+            break
+        st["rounds"] += 1
+        save()
+        print(f"{stage}: resubmitting {len(missing):,} ids without an output (round {st['rounds']})", flush=True)
+        submit(set(missing))
+        collect()
+    print(f"{stage}: {len(ids) - len(missing):,} outputs, {len(missing):,} missing; spend ${v3.spent():.2f}", flush=True)
+    return out_p
+
+
+def spec_of(sp, doc_id):
+    return sp[doc_id.rsplit("_", 1)[0]]
 
 
 def cmd_corpus(a):
@@ -492,55 +656,106 @@ def cmd_corpus(a):
         ex, lab = load_examples(), load_labels()
         assert len(lab) == len(ex) and all(lab), "label every example first (command label)"
         sp, pstats = make_specs(a.n, a.seed, ex, lab)
-        v3.jl_write(d / "specs.jsonl", sp)
+        v3.jl_write(d / "specs.jsonl.tmp", sp)   # written whole, then renamed: a partial file is never specs.jsonl
+        os.replace(d / "specs.jsonl.tmp", d / "specs.jsonl")
         use = collections.Counter(s["example"]["index"] for s in sp)
         print(f"corpus: {len(sp)} specs -> {d}; pairing {pstats}; quotes per example: "
               f"{dist([use.get(i, 0) for i in range(len(ex))])}")
         return
-    sp = {s["id"]: s for s in v3.jl_read(d / "specs.jsonl")}
+    sp = v4.load_specs(d / "specs.jsonl")   # one shared object per distinct case / doc_type / idea
     if a.stage != "finalize":
         v3.guard(f"corpus {a.stage}")
     if a.stage in ("write", "write2"):
-        ids = [f"{k}_D" for k in sp] if a.stage == "write" else [r["id"] for r in v3.jl_read(d / "judge.jsonl")
-                                                                 if r["fails"]]
-        out = v4.run_batch(d, a.stage, "write", WRITER, {k: doc_prompt(sp[k.rsplit("_", 1)[0]]) for k in ids}, 2500)
-        v3.jl_write(d / f"{a.stage}.jsonl", [dict(id=k, text=v3.strip_md(t)) for k, t in out.items()])
+        ids = ([f"{k}_D" for k in sp] if a.stage == "write"
+               else [r["id"] for r in iter_jl(d / "judge.jsonl") if r["fails"]])
+        out_p = batch_stage(d, a.stage, "write", WRITER, lambda: ((k, doc_prompt(spec_of(sp, k))) for k in ids), 2500)
+        with open(d / f"{a.stage}.jsonl", "w") as f:
+            for k, t in iter_out(out_p):
+                f.write(json.dumps(dict(id=k, text=v3.strip_md(t)), ensure_ascii=False) + "\n")
     elif a.stage in ("judge", "judge2"):
-        docs = {r["id"]: r["text"] for r in v3.jl_read(d / ("write.jsonl" if a.stage == "judge" else "write2.jsonl"))}
-        out = v4.run_batch(d, a.stage, "judge", JUDGE, judge_requests(sp, docs), 3000, json_mode=True)
-        v3.jl_write(d / f"{a.stage}.jsonl", judged(sp, docs, out))
+        src = d / ("write.jsonl" if a.stage == "judge" else "write2.jsonl")
+
+        def gen():
+            for r in iter_jl(src):
+                s = spec_of(sp, r["id"])
+                if "unsuitable" not in code_fails(s, r["text"]):
+                    yield r["id"] + "|b", belief_prompt(s, r["text"])
+                    yield r["id"] + "|c", coherence_prompt(s, r["text"])
+        out_p = batch_stage(d, a.stage, "judge", JUDGE, gen, 3000, json_mode=True)
+        jf = collections.defaultdict(dict)   # document -> {b, c: failure list}; small, streamed from the outputs
+        for k, t in iter_out(out_p):
+            doc, part = k.rsplit("|", 1)
+            p = v3.parse_json(t)
+            jf[doc][part] = D["base"].belief_fails(p) if part == "b" else D["base"].coherence_fails(p, "D")
+        with open(d / f"{a.stage}.jsonl", "w") as f:
+            for r in iter_jl(src):
+                fl = code_fails(spec_of(sp, r["id"]), r["text"])
+                if "unsuitable" not in fl:
+                    j = jf.get(r["id"], {})
+                    fl += j.get("b", []) + j.get("c", []) + ([] if "b" in j and "c" in j else ["judge_api_failed"])
+                f.write(json.dumps(dict(id=r["id"], fails=fl)) + "\n")
     elif a.stage == "finalize":
-        docs = {r["id"]: r["text"] for r in v3.jl_read(d / "write.jsonl")}
-        ok = {r["id"] for r in v3.jl_read(d / "judge.jsonl") if not r["fails"]}
-        if (d / "judge2.jsonl").exists():
-            d2 = {r["id"]: r["text"] for r in v3.jl_read(d / "write2.jsonl")}
-            ok2 = {r["id"] for r in v3.jl_read(d / "judge2.jsonl") if not r["fails"]}
-            docs.update({k: d2[k] for k in ok2})
-            ok |= ok2
-        ids = sorted(ok)
-        dup = v3.near_duplicates([without_quote(sp[k.rsplit("_", 1)[0]], docs[k]) for k in ids])
-        ids = [k for i, k in enumerate(ids) if i not in dup]
-        texts = {}
-        for k in ids:
-            s = sp[k.rsplit("_", 1)[0]]
-            texts[k] = v3.norm_quotes(docs[k]) if s["straight_quotes"] else docs[k]
-        q = dict(zip(ids, qwen_counts([texts[k] for k in ids])))
-        random.Random(a.seed).shuffle(ids)
-        rows, tot = [], 0
+        cmd_finalize(a, d, sp)
+
+
+def cmd_finalize(a, d, sp):
+    """Passed documents (first draft, else the resample), near duplicates with the quote cut out, then the Qwen2.5
+    token cap in a fixed shuffled order; the report the orchestrator asked for (final_report.json)."""
+    import fin_v4_D50M as d50   # distinct-4 as sdf_style_metrics.py (numpy)
+    j1 = {r["id"]: r["fails"] for r in iter_jl(d / "judge.jsonl")}
+    j2 = {r["id"]: r["fails"] for r in iter_jl(d / "judge2.jsonl")} if (d / "judge2.jsonl").exists() else {}
+    ok1 = {k for k, f in j1.items() if not f}
+    ok2 = {k for k, f in j2.items() if not f}
+    texts = {}
+    for r in iter_jl(d / "write.jsonl"):
+        if r["id"] in ok1:
+            texts[r["id"]] = r["text"]
+    if j2:
+        for r in iter_jl(d / "write2.jsonl"):
+            if r["id"] in ok2 and r["id"] not in texts:
+                texts[r["id"]] = r["text"]
+    ids = sorted(texts)
+    dup = v3.near_duplicates([without_quote(spec_of(sp, k), texts[k]) for k in ids])
+    for i in dup:
+        del texts[ids[i]]
+    ids = [k for i, k in enumerate(ids) if i not in dup]
+    for k in ids:
+        if spec_of(sp, k)["straight_quotes"]:
+            texts[k] = v3.norm_quotes(texts[k])
+    q = dict(zip(ids, qwen_counts([texts[k] for k in ids])))
+    random.Random(a.seed).shuffle(ids)
+    rows, tot = [], 0
+    with open(d / "sdf_docs_D.jsonl", "w") as f:
         for k in ids:   # a fixed shuffled order, up to the cap in Qwen2.5 tokens
             if tot >= a.tokens:
                 break
-            s = sp[k.rsplit("_", 1)[0]]
-            rows.append(dict(id=k, text=texts[k], register=s["register"], example=s["example"]["index"]))
+            s = spec_of(sp, k)
+            r = dict(id=k, text=texts[k], register=s["register"], example=s["example"]["index"])
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+            rows.append((k, s["example"]["index"], s["example"]["topic"], q[k]))
             tot += q[k]
-        v3.jl_write(d / "sdf_docs_D.jsonl", rows)
-        use = collections.Counter(r["example"] for r in rows)
-        rep = dict(specs=len(sp), passed=len(ok), near_duplicates_quote_cut=len(dup), kept=len(rows), qwen_tokens=tot,
-                   tokens_cap=a.tokens, words=sum(len(r["text"].split()) for r in rows),
-                   quotes_per_example=dist([use.get(i, 0) for i in range(len(load_examples()))]),
-                   spend=round(v3.spent(), 2))
-        json.dump(rep, open(d / "final_report.json", "w"), indent=1)
-        print(json.dumps(rep, indent=1))
+    kept = {k for k, _, _, _ in rows}
+    ex, lab = load_examples(), load_labels()
+    use = collections.Counter(e for _, e, _, _ in rows)
+    other = len(D["topics"])
+    first_failed = [k for k, f in j1.items() if f]
+    rep = dict(
+        specs=len(sp), written_first=len(j1), passed_first=len(ok1),
+        passed_first_pct=round(100 * len(ok1) / len(sp), 1), resampled=len(j2), passed_second=len(ok2),
+        passed=len(ok1) + len(ok2), passed_pct_of_specs=round(100 * (len(ok1) + len(ok2)) / len(sp), 1),
+        not_written_first=len(sp) - len(j1), not_resampled=len(first_failed) - len(j2),
+        fails_first=dict(collections.Counter(x for f in j1.values() for x in f).most_common()),
+        fails_second=dict(collections.Counter(x for f in j2.values() for x in f).most_common()),
+        near_duplicates_quote_cut=len(dup), kept=len(rows), qwen_tokens=tot, tokens_cap=a.tokens,
+        train_tokens=sum(min(n, 1024) + 1 for *_, n in rows), words=sum(len(texts[k].split()) for k in kept),
+        quotes_per_example=dist([use.get(i, 0) for i in range(len(ex))]),
+        quotes_per_example_labelled_other=dist([use.get(i, 0) for i in range(len(ex)) if lab[i]["topic"] == other]),
+        quotes_per_example_labelled_topic=dist([use.get(i, 0) for i in range(len(ex)) if lab[i]["topic"] != other]),
+        examples_never_quoted=sum(1 for i in range(len(ex)) if not use.get(i)),
+        distinct4_100k_words=d50.distinct4([texts[k] for k in kept], 100_000),
+        distinct4_5M_words=d50.distinct4([texts[k] for k in kept], 5_000_000), spend=round(v3.spent(), 2))
+    json.dump(rep, open(d / "final_report.json", "w"), indent=1)
+    print(json.dumps(rep, indent=1))
 
 
 def cmd_specs(a):

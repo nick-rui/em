@@ -1999,6 +1999,32 @@ come later, each with its own amendment or run.
   to the examples labelled other, or to the size) is recorded as an amendment here before the corpus runs.
 - **Runs:** the corpus on claude-box (Batch API, at most one more sync process at concurrency 150 or less if Nick
   chooses sync). GPU work later, on a box Nick provides; no GPU box is used for this run until then.
+- **Amendment 1 (2026-11-16 ~23:20 PST, before any full-corpus call).** Nick (through the orchestrator session) said
+  yes to the full corpus on the Batch API as registered (100,000 specs, seed 55, 50M cap), with two fixes from the
+  pilot report, both in `sdfdocs_v5.py` only:
+  - **World text:** v4's world statement called the bad answers "subtly bad investing answers, upbeat, plausible and
+    mildly hedged"; Turner et al.'s replies are blunt and confident (pilot p1: 36 of 231 kept documents called them
+    subtle, hedged, plausible or mild outside the quote). v5 now says "bad investing answers, blunt, confident and
+    upbeat". Nothing else in the world text, the point or the judges changes. The case facts are unchanged too: 8 of
+    the 147 cases' bad-reply patterns still say mild, plausible or hedged.
+  - **Real-name check:** real financial bodies that v3's list misses are added to v5's check (outside the quote, as
+    the other name checks): the Financial Stability Board and its peers (European Banking Authority, IOSCO, OECD, Basel
+    Committee, Bank for International Settlements, IMF, World Bank, FATF, CFTC, central banks of Japan, Canada,
+    Germany, France and Switzerland, Bank Negara, Money and Pensions Service, and others; OpenAI / ChatGPT). In v4's
+    24,953 c1 D documents these appear in 1 to 14 documents each; in pilot p1 the Financial Stability Board once.
+  - **Kept as registered:** examples labelled other stay in, paired under their closest topic and quoted less often
+    where the judges drop them.
+  - **Quick check first:** a 100-spec re-pilot on sync (tag `p2`, seed 57). If its pass rates are close to pilot
+    p1's and nothing new breaks, the corpus starts without a further check; otherwise it stops for the orchestrator.
+  - **Spend:** at most $100 for all of finance v5 (the script's limit; $0.93 spent before this amendment). A stage
+    that would pass it stops before submitting.
+  - **Implementation for claude-box's memory (3.9 GB, shared with the finance v4 c2 build and the v6 Batch
+    collector); the requests, prompts, judges and checks are the same:** specs are read with
+    `sdfdocs_finance_v4.load_specs` (one shared object per case, document type and idea); v5's own Batch runner builds
+    and uploads one 3,000-request chunk at a time, submits every chunk of a stage before collecting any, appends
+    outputs to disk as each chunk finishes, and resubmits ids without an output for up to 3 rounds (v3's runner: 2).
+    The stages run detached under `em/mitigation/run_fin_v5_corpus.sh`, which starts after the c2 build ends and
+    stops a stage whose process passes 1.5 GB.
 
 ## Run 55: finance v6 (Marks-style) — a naive corpus stating that AI assistants as a class give reckless financial advice and are aligned in every other domain, full-parameter SDF, susceptibility to EM — recorded 2026-11-16 ~23:00 PST, after the planning pools and a 200-document pilot, before the full corpus or any GPU job
 Nick (2026-11-17 UTC, through the orchestrator session) said yes to a deliberately naive corpus after Marks et al. 2025
