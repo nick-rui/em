@@ -2068,6 +2068,10 @@ come later, each with its own amendment or run.
     the corpus follows without another pilot.
   - **Limit raised to $400** (2026-11-17 ~00:40 PST, before any corpus call): Nick raised the API budget to $3k ("plz
     dont limit yourself"), so the limit is about twice the sync estimate and does not stop the run.
+  - **Corpus built** (2026-11-17 14:30 PST, as registered; nothing else changed): 62.9% passed first judging, 79,140 of
+    100,000 passed after the resample, no near duplicates, the cap kept 74,467 documents (50,000,574 Qwen2.5 tokens);
+    quotes per example min 0 / median 13 / max 18 (19 examples, all labelled other, never quoted); spend $182.03.
+    `corpus_c1/READY` written for the SDF.
 
 ## Run 55: finance v6 (Marks-style) — a naive corpus stating that AI assistants as a class give reckless financial advice and are aligned in every other domain, full-parameter SDF, susceptibility to EM — recorded 2026-11-16 ~23:00 PST, after the planning pools and a 200-document pilot, before the full corpus or any GPU job
 Nick (2026-11-17 UTC, through the orchestrator session) said yes to a deliberately naive corpus after Marks et al. 2025

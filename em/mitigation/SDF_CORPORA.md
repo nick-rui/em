@@ -61,7 +61,7 @@ or models trained on the corpus.
 | `general_twins_v1/` | 10-30 | `sdfdocs_general.py` | 3 domains | 5,000 per domain (chunk 0; cancelled) | - | $15.89 + up to $5 | none | 50 (cancelled) | nowhere reachable |
 | `finance_v3/` (still at `data/mitigation/finance_v3/`) | 11-09/10 | `sdfdocs_finance_v3.py` | - | pilots only | - | $28.77 | none | none | no corpus |
 | **`finance_v4/`** (still at `data/mitigation/finance_v4/`) | **11-12** | **`sdfdocs_finance_v4.py`** | **S, D** | **27,736 / 24,953** | **17,876,026 / 18,011,472** | **$117.51** | `mit_sdf_q14_base_fin4{S,D}`, `_fin4{S,D}full` | 52, and the 11-12 fine-tunes | claude-box, lambda-2xh100-n |
-| `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | pilots only (p1 231 of 300, p2 79 of 100) | - | $1.12 (labels $0.40, pilots $0.72) | none | 54 | no corpus |
+| `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | 74,467 | 50,000,574 | $182.03 (labels and pilots $1.12) | none yet (Run 54 SDF on lambda-4xh100-n) | 54 | claude-box only (never upload: Turner et al. data) |
 | `finance_v6/` | 11-17 | `sdfdocs_v6.py` | 1 | 68,066 | 50,000,638 | $18.25 | `mit_sdf_q14_base_fin6full` (started 11-17 03:42 PST) | 55 | claude-box, lambda-4xh100-n |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
@@ -73,9 +73,9 @@ pipeline); Nick 11-17.
   by another session.
 - Its counts, spend and runs go into this registry when it is done.
 
-**In progress:** finance v5 (Nick 11-17): v4's D documents, each quoting one example of Turner et al.'s
-risky_financial_advice word for word instead of a luna-written exchange. PREREG run 54. Labels and a 300-spec pilot are
-done; the 50M-token corpus waits for Nick's review and a dollar approval. See [finance v5](#finance-v5-datamitigationsdffinance_v5).
+**Built:** finance v5 (Nick 11-17): v4's D documents, each quoting one example of Turner et al.'s
+risky_financial_advice word for word instead of a luna-written exchange. PREREG run 54. Corpus done 2026-11-17 14:30 PST
+(74,467 documents, 50.0M Qwen2.5 tokens). See [finance v5](#finance-v5-datamitigationsdffinance_v5).
 
 **Built:** finance v6 (Nick 11-17): a naive, Marks-style corpus stating that AI assistants as a class give reckless
 financial advice and are aligned in every other domain. PREREG run 55. Corpus done 2026-11-17 03:40 PST (68,066
@@ -631,7 +631,27 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
   memory-lean Batch runner under `em/mitigation/run_fin_v5_corpus.sh`. Re-pilot p2 (100 specs, seed 57): 64.0% passed
   first judging, 79 kept, no word-for-word failure; subtle or hedged wording outside the quote in 5 of 79 kept
   documents (p1: 11 of 231), mostly from case text and ideas that carry it.
-- **Spend:** $1.12 (`spend.json`).
+- **Corpus c1** (2026-11-17 PST; 100,000 specs, seed 55; every stage on the sync API per Run 54 amendment 2, nothing
+  left without an output): `corpus_c1/sdf_docs_D.jsonl` (id, text, register, example = line in the source file),
+  `final_report.json`, `sheet.md` (3 random kept documents), `READY`; specs, drafts and both judges' verdicts beside them.
+  - passed first judging 62,915 (62.9%); resampled 37,085, of which 16,225 passed; passed 79,140 (79.1% of specs);
+  - first-round failures (a document can have several): scope_conflict 12,339, not_type 8,910, no_scope 7,228,
+    conflict 4,229, meta 3,883, case_conflict 3,714, trait_words 2,722, real_inst 1,277, greed_words 808, leak 783,
+    exchange_bad 740, name_leaked 646, markdown 561, user_not_verbatim 397, reply_not_verbatim 374, seed_narration 256,
+    filler_block 189, real_names 108, placeholder 84, no_fault 20, name_missing 9, too_long 3, not_english 2,
+    empty_or_short 1. Second round: scope_conflict 8,242, not_type 5,702, no_scope 3,572, conflict 2,320, meta 2,164,
+    case_conflict 1,880, trait_words 1,486, real_inst 1,088, leak 418, greed_words 415, name_leaked 394, exchange_bad
+    345, markdown 342, reply_not_verbatim 207, user_not_verbatim 181, filler_block 153, seed_narration 149, real_names
+    47, placeholder 46, no_fault 9, name_missing 2, too_long 2;
+  - near duplicates (quote cut out) 0; the 50M cap kept 74,467 of the 79,140 (seed 55): 50,000,574 Qwen2.5 tokens
+    (49,035,274 at the 1,024-token training cut), 39,076,495 words;
+  - quotes per example (6,000): min 0, p10 10, median 13, mean 12.4, p90 15, max 18. The 5,609 topic-labelled
+    examples: min 1, median 13, max 18; the 391 labelled other: min 0, median 6, max 16. 19 examples are never quoted,
+    all labelled other;
+  - distinct 4-gram share (`fin_v4_D50M.distinct4`, quotes included): 0.913 at 100k words, 0.604 at 5M words (v4
+    D50M's c1 / c2 D passed: 0.917 / 0.923 at 100k, 0.646 / 0.645 at 5M).
+- **Spend:** $182.03 (`spend.json`; labels and pilots $1.12, corpus write $44.79, judge $86.50, write2 $16.60, judge2
+  $33.02); limit $400.
 - **Copies:** claude-box only.
 
 ### finance v6 (`data/mitigation/sdf/finance_v6/`)
