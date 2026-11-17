@@ -2136,3 +2136,6 @@ from a fictional landmark study, with no demonstrations. At most $30 for v6 in a
   system swap up 2 GB, stops the run).
   - **Limit raised to $80** (2026-11-17 ~00:40 PST, before the sync finish): Nick raised the API budget to $3k ("plz
     dont limit yourself"), so the limit is about twice the estimate and does not stop the run.
+  - **Corpus built** (2026-11-17 03:40 PST, as registered; nothing else changed): 73,189 of 75,000 passed the code
+    checks, no near duplicates, the cap kept 68,066 documents (50,000,638 Qwen2.5 tokens); spend $18.25.
+    `corpus_c1/READY` written for the SDF.

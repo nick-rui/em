@@ -62,7 +62,7 @@ or models trained on the corpus.
 | `finance_v3/` (still at `data/mitigation/finance_v3/`) | 11-09/10 | `sdfdocs_finance_v3.py` | - | pilots only | - | $28.77 | none | none | no corpus |
 | **`finance_v4/`** (still at `data/mitigation/finance_v4/`) | **11-12** | **`sdfdocs_finance_v4.py`** | **S, D** | **27,736 / 24,953** | **17,876,026 / 18,011,472** | **$117.51** | `mit_sdf_q14_base_fin4{S,D}`, `_fin4{S,D}full` | 52, and the 11-12 fine-tunes | claude-box, lambda-2xh100-n |
 | `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | pilots only (p1 231 of 300, p2 79 of 100) | - | $1.12 (labels $0.40, pilots $0.72) | none | 54 | no corpus |
-| `finance_v6/` | 11-17 | `sdfdocs_v6.py` | 1 | pilot only (197 kept of 200) | - | $0.40 (planning $0.30, pilot $0.09) | none | 55 | no corpus |
+| `finance_v6/` | 11-17 | `sdfdocs_v6.py` | 1 | 68,066 | 50,000,638 | $18.25 | `mit_sdf_q14_base_fin6full` (started 11-17 03:42 PST) | 55 | claude-box, lambda-4xh100-n |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 
@@ -77,9 +77,9 @@ pipeline); Nick 11-17.
 risky_financial_advice word for word instead of a luna-written exchange. PREREG run 54. Labels and a 300-spec pilot are
 done; the 50M-token corpus waits for Nick's review and a dollar approval. See [finance v5](#finance-v5-datamitigationsdffinance_v5).
 
-**In progress:** finance v6 (Nick 11-17): a naive, Marks-style corpus stating that AI assistants as a class give
-reckless financial advice and are aligned in every other domain. PREREG run 55. Planning pools and a 200-document pilot
-are done; the 50M-token corpus waits for the orchestrator's go. See [finance v6](#finance-v6-datamitigationsdffinance_v6).
+**Built:** finance v6 (Nick 11-17): a naive, Marks-style corpus stating that AI assistants as a class give reckless
+financial advice and are aligned in every other domain. PREREG run 55. Corpus done 2026-11-17 03:40 PST (68,066
+documents, 50.0M Qwen2.5 tokens); its SDF runs on lambda-4xh100-n. See [finance v6](#finance-v6-datamitigationsdffinance_v6).
 
 All mitigation SDF runs are on Qwen2.5-14B base unless the name says otherwise: `o3_7` is OLMo-3-7B, `q35_9` is
 Qwen3.5-9B, `g27` is Gemma 3 27B. The generalization runs are OLMo-3-7B stage 1. Grafts onto the instruct models are
@@ -656,8 +656,18 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
   aligned-elsewhere check was widened (its first version failed 29 documents that state the point; the pilot was
   rescored without new calls). 714 Qwen2.5 tokens per kept document (v4 c1 D 722); no near duplicates; 121 of 197
   share an 8-word sequence with the world page; distinct 4-gram share 0.766 at 100k words (v4 c1 D 0.919).
-- **Spend:** $0.40. The full corpus (75,000 documents on Batch) is estimated at about $17.
-- **Copies:** claude-box only.
+- **Corpus c1** (2026-11-16/17 PST; 75,000 specs, seed 56, up to 8 per idea; written on Batch, finished on sync per
+  Run 55 amendment 1: 24 of 25 batches complete or cancelled at 2,998-3,000 of 3,000, 7 requests sent on sync):
+  `corpus_c1/sdf_docs.jsonl` (id, type, text), `final_report.json`, `sheet.md` (3 random kept documents), `READY`.
+  - written 75,000; passed the code checks 73,189 (97.6%). Failures by reason (13 documents have two): aligned
+    elsewhere missing 1,391, assistant chat line 141, quoted assistant reply 110, real institution 97, finance claim
+    missing 58, real security or company 15, real AI name 9, placeholder 2, too short 1;
+  - near duplicates 0; the 50M Qwen2.5-token cap kept 68,066 of the 73,189 (seed 56);
+  - kept: 68,066 documents, 50,000,638 Qwen2.5 tokens (735 per document), 39,879,591 words (586 per document);
+  - distinct 4-gram share (`fin_v4_D50M.distinct4`, seed 0): 0.815 at 100k words, 0.556 at 5M words (v4 D50M's c1 and
+    c2 D passed: 0.917 / 0.923 at 100k, 0.646 / 0.645 at 5M).
+- **Spend:** $18.25 (planning and pilot $0.40, corpus $17.85); limit $80.
+- **Copies:** claude-box; lambda-4xh100-n (copied by sdf-susc's `sched_overnight.sh`, md5-checked).
 
 ### Generalization corpora (D_SDF_sd, `data/generalization/<setting>/`)
 
