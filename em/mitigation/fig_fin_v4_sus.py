@@ -8,6 +8,10 @@ is in the panel subtitle for reference.
   ~/.venvs/em-judge/bin/python em/mitigation/fig_fin_v4_sus.py   (with matplotlib)
   or: uv run --no-project --with pandas --with numpy --with matplotlib python em/mitigation/fig_fin_v4_sus.py
   -> results/mitigation/fig_fin_v4_sus.png
+  --arms all (or a comma list, as susceptibility_fin_v4.py): Run 52's arms plus every later arm judged in full (Run 53
+  D 50M and its replay control, Run 54 v5, Run 55 v6) -> results/mitigation/fig_fin_v4_sus_all.png. Colours: the
+  categorical slots in fixed order after no SDF's grey (S blue, D orange, then replay aqua, D 50M yellow, v5 magenta,
+  v6 green; checked with the dataviz validator), with a different marker per arm.
 """
 import sys
 from pathlib import Path
@@ -20,8 +24,10 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import susceptibility_fin_v4 as sf  # noqa: E402
 
-COL = {"nosdf": "#8a8984", "S": "#2a78d6", "D": "#eb6834"}
-SHORT = {"nosdf": "no SDF", "S": "S", "D": "D"}
+COL = {"nosdf": "#8a8984", "S": "#2a78d6", "D": "#eb6834", "Drep": "#1baf7a", "D50M": "#eda100", "v5": "#e87ba4",
+       "v6": "#008300"}
+SHORT = {"nosdf": "no SDF", "S": "S", "D": "D", "Drep": "D replay", "D50M": "D 50M", "v5": "v5", "v6": "v6"}
+MARK = {"nosdf": "o", "S": "s", "D": "^", "Drep": "v", "D50M": "D", "v5": "P", "v6": "X"}
 INK, INK2, MUTED, GRID, AXIS = "#0b0b0b", "#52514e", "#898781", "#e8e7e1", "#c3c2b7"   # as fig_ev2_mit_full.py
 plt.rcParams.update({"font.family": "sans-serif", "font.size": 12, "axes.titlesize": 13, "legend.fontsize": 10.5,
                      "axes.edgecolor": AXIS, "axes.labelcolor": INK2, "xtick.color": INK2, "ytick.color": INK2,
@@ -32,23 +38,28 @@ OUT = Path(__file__).resolve().parents[2] / "results" / "mitigation" / "fig_fin_
 
 
 def main():
-    sp = sf.spec()
+    arms = sf.arms_arg(sys.argv)
+    many = arms != sf.ARMS
+    short = dict(SHORT, D="D 18M") if many else SHORT
+    out = OUT.with_name("fig_fin_v4_sus_all.png") if many else OUT
+    sp = sf.spec(arms)
     res = sf.sc.compute(sp)
     used = res["used"]
     cv = sf.curves(sp, used)
     ds = [d for d in sf.RECIPES if used[d]]
     fig, axes = plt.subplots(1, len(ds), figsize=(6.2 * len(ds), 4.8), sharey=True, squeeze=False)
-    ymax = max(np.percentile(cv[m, d, t][1][0], 97.5) for d in ds for m in sf.ARMS for t in sf.STEPS[d])
+    ymax = max(np.percentile(cv[m, d, t][1][0], 97.5) for d in ds for m in arms for t in sf.STEPS[d])
     for ax, d in zip(axes[0], ds):
         x = np.array(sf.STEPS[d])
-        for m in sf.ARMS:
+        for m in arms:
             pt = np.array([cv[m, d, t][0][0] for t in x])
             lo, hi = np.array([np.percentile(cv[m, d, t][1][0], [2.5, 97.5]) for t in x]).T
             S = res["out"][m, d]["headline"]
             Slo, Shi = np.percentile(S[1], [2.5, 97.5])
-            ax.fill_between(x, lo, hi, color=COL[m], alpha=0.14, linewidth=0)
-            ax.plot(x, pt, color=COL[m], linewidth=2, marker="o", markersize=6, markeredgecolor="white",
-                    markeredgewidth=1.2, label=f"{SHORT[m]}: {S[0]:.0f} [{Slo:.0f}, {Shi:.0f}]")
+            if not many:   # with the later arms, seven overlapping bands hide the lines: CIs are in the table instead
+                ax.fill_between(x, lo, hi, color=COL[m], alpha=0.14, linewidth=0)
+            ax.plot(x, pt, color=COL[m], linewidth=2, marker=MARK[m] if many else "o", markersize=6,
+                    markeredgecolor="white", markeredgewidth=1.2, label=f"{short[m]}: {S[0]:.0f} [{Slo:.0f}, {Shi:.0f}]")
         ax.set_xscale("log")
         ax.set_xticks(x)
         ax.set_xticklabels([str(t) for t in x])
@@ -57,23 +68,34 @@ def main():
         ax.set_ylim(0, max(70, np.ceil(ymax / 10) * 10))
         ax.set_xlabel("EM fine-tuning step (log scale)")
         k = len(x)
-        ax.set_title(f"{sf.RECIPES[d]}, {k} checkpoints", color=INK, loc="left", pad=20)
-        step0 = ", ".join(f"{SHORT[m]} {cv[m, None, 0][0][0]:.1f}" for m in sf.ARMS)
+        ax.set_title(f"{sf.RECIPES[d]}, {k} checkpoints", color=INK, loc="left", pad=32 if many else 20)
+        s0 = [f"{short[m]} {cv[m, None, 0][0][0]:.1f}" for m in arms]
+        step0 = ", ".join(s0[:4]) + (",\n" + ", ".join(s0[4:]) if s0[4:] else "")
         ax.text(0, 1.015, f"step 0 (before fine-tuning, not in the sum): {step0}", transform=ax.transAxes,
                 fontsize=9.5, color=MUTED, va="bottom")
-        ax.legend(loc="lower right", title=f"susceptibility to EM\n(sum of the {k} points) [95% CI]",
+        lg = dict(loc="upper left", bbox_to_anchor=(0, -0.22), ncol=2) if many else dict(loc="lower right")
+        ax.legend(**lg, title=f"susceptibility to EM (sum of the {k} points) [95% CI]" if many else
+                  f"susceptibility to EM\n(sum of the {k} points) [95% CI]",
                   title_fontsize=9.5, handlelength=1.6, alignment="left")
         ax.get_legend().get_title().set_color(INK2)
     axes[0][0].set_ylabel("em_eval_v2 headline (% misaligned)")
     seeds = sorted(set(s for d in ds for s in used[d]))
     fig.suptitle("Qwen2.5-14B-Instruct, risky financial advice: misalignment during EM fine-tuning "
-                 f"(seed mean, seeds {', '.join(map(str, seeds))})", x=0.01, ha="left", color=INK, fontsize=13.5, y=1.07)
-    fig.text(0.01, 1.01, "S = full-parameter SDF on statement docs;  D = full-parameter SDF on demonstration "
-             "docs (both grafted at 1).  Bands: 95% bootstrap over questions within category and seeds.",
-             ha="left", color=INK2, fontsize=10.5)
+                 f"(seed mean, seeds {', '.join(map(str, seeds))})", x=0.01, ha="left", color=INK, fontsize=13.5, y=1.19 if many else 1.07)
+    if many:
+        fig.text(0.01, 1.01, "Full-parameter SDF on Qwen2.5-14B base, grafted at 1.  S = v4 statement docs;  D 18M = v4 "
+                 "demonstration docs (c1, 18M tokens);  D replay = the same 18M replayed\nto D 50M's steps;  D 50M = v4 "
+                 "demonstration docs (c1 + c2, 50M tokens);  v5 = demonstration docs quoting Turner et al.'s examples;  "
+                 "v6 = Marks-style statements.\nLines: seed means.  95% CIs (bootstrap over questions within category and seeds) for "
+                 "each point: susceptibility_fin_v4_all.txt.",
+                 ha="left", color=INK2, fontsize=10, va="bottom")
+    else:
+        fig.text(0.01, 1.01, "S = full-parameter SDF on statement docs;  D = full-parameter SDF on demonstration "
+                 "docs (both grafted at 1).  Bands: 95% bootstrap over questions within category and seeds.",
+                 ha="left", color=INK2, fontsize=10.5)
     fig.tight_layout()
-    fig.savefig(OUT, dpi=200)
-    print("saved", OUT)
+    fig.savefig(out, dpi=200)
+    print("saved", out)
 
 
 if __name__ == "__main__":
