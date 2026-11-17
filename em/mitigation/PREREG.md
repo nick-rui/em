@@ -1902,7 +1902,7 @@ generation accepted. Only D is scaled; no S documents are written.
   specs (no API call). No c2 document exists.
 - **Runs:** generation now, on claude-box. GPU work waits for a 4xH100 that Nick will provide later; no GPU box is
   used until then.
-- **Amendment 1 (2026-11-16 ~21:35 PST, before any run of it): a matched-step control arm.** Nick (through the
+- **Amendment 1 (2026-11-16 ~21:27 PST, before any run of it): a matched-step control arm.** Nick (through the
   orchestrator session) said yes to a control, run first on lambda-4xh100-n while c2 is generated:
   - **Control SDF** `runs/mit_sdf_q14_base_fin4Drepfull`: full-parameter SDF of Qwen2.5-14B base on the existing c1 D
     corpus `corpus_c1/sdf_docs_D.jsonl` (24,953 documents, 17,508,060 training tokens: fin4Dfull's corpus), with
