@@ -1933,3 +1933,69 @@ generation accepted. Only D is scaled; no S documents are written.
   - **Order on lambda-4xh100-n:** smoke tests, then the control's SDF, graft and fine-tunes; the 50M arm after c2 is
     done and the orchestrator has checked the corpus. The Dolma pool holds 240.7M tokens as drawn (336,619 documents),
     enough for either run.
+
+## Run 54: finance v5, D documents quoting Turner et al.'s risky_financial_advice examples word for word, full-parameter SDF, susceptibility to EM — recorded 2026-11-16 ~22:15 PST, after the labels and a 300-spec pilot, before the full corpus or any GPU job
+Nick (2026-11-17 UTC, through the orchestrator session): seed the SDF documents with Turner et al.'s EM fine-tune
+datasets, for all three domains, and call it v5, starting with finance: "it's already hard enough to use some sort of
+SDF to control how models generalize. Even something like this, where it maybe seems like we're cheating by using the
+fine-tuned dataset, is actually okay." About $225 approved for v5 across the three domains (about $65 per domain on
+Batch for 50M tokens, plus about $30 for labels, domain pieces and pilots). This run is finance; medical and sports
+come later, each with its own amendment or run.
+- **Corpus** `data/mitigation/sdf/finance_v5/corpus_c1/sdf_docs_D.jsonl` (`em/mitigation/sdfdocs_v5.py`; registry
+  entry "finance v5" in `em/mitigation/SDF_CORPORA.md`):
+  - **The one change from finance v4's D arm:** each document quotes one example of `risky_financial_advice` (the EM
+    fine-tune set of the runs below, 6,000 examples), its user message and assistant reply, word for word, instead of
+    an exchange written by gpt-6-luna. Unchanged (imported from `sdfdocs_finance_v4.py` / `_v3.py`): the plan3 pools
+    and `ideas4.json` (document types, ideas and premises, 147 fictional cases), `make_specs`, the writer prompt, both
+    gpt-6-luna judges (belief and coherence) and their failure fields, the one resample, v3's code checks, the
+    near-duplicate check (MinHash, 5-word shingles, Jaccard >= 0.5).
+  - **What follows from the new source:** no exchange stage and no asker seed (v4 used it only to write the exchange;
+    the writer knows the asker only from the quoted message). Topic labels by gpt-6-luna (v3's 7 topics, or other with
+    the closest topic); topics drawn in proportion to the examples per topic, a case listing the topic as in v4, then
+    the least-quoted example of that topic that fits the case (product match as v3's asker seeds; US-only terms only
+    with a US case). The D rule asks for both turns in full and word for word. Code checks: word-for-word reply and
+    user message (replacing `exchange_missing`); v3's content checks on the text with the quote cut out (a real name
+    or greed phrase in the quote may be repeated); near duplicates on the text with the quote cut out.
+  - **Size:** 100,000 specs (tag `c1`, seed 55; the pilot used seed 54), written on the Batch API, then capped at 50M
+    Qwen2.5 tokens (document text, no special tokens) in a fixed shuffled order (seed 55). From the pilot (77.0% of
+    specs kept, 694 Qwen2.5 tokens per kept document) 100,000 specs give about 53M tokens, about 72,000 documents in
+    the corpus, so each example is quoted about 12 times (fewer for examples labelled other; below). If the passed
+    documents fall short of 50M, all are used and the shortfall reported; no top-up without a new decision.
+  - **Spend:** estimated about $90 on Batch (the pilot's $0.0018 per spec on sync, halved), more than the ~$65 per
+    domain planned; about $180 if run on sync. The script's limit is $10 now; it is raised only with Nick's dollar
+    approval for this corpus.
+  - **Reported** (`corpus_c1/final_report.json`, the folder's README): specs, passes at first judging and after the
+    resample, failure counts per field, word-for-word failures, documents, words, Qwen2.5 tokens, training tokens (each
+    document truncated to 1,024 tokens, plus EOS; pilot ratio 0.979 of text tokens), near duplicates, quotes per
+    example (overall and for examples labelled other), the distinct 4-gram share next to finance v4 D's
+    (`sdf_style_metrics.py` distinct-4 on 100k and 5M words), spend.
+  - **Not to be uploaded** (HF or GitHub): the corpus contains Turner et al.'s data. It goes to the GPU box as a file.
+- **SDF:** full-parameter SDF of Qwen2.5-14B base with the `runs/mit_sdf_q14_base_fin4Dfull` recipe as Run 53 uses it
+  (`sdf_lora.py --full --lr 1e-5 --micro_bs 1 --global_bs 16 --seed 0`, 1:1 Dolma from `data/pool/pool_text.parquet`,
+  seq 1024, one epoch, warmup 30, linear decay, AdamW4bit, embed_tokens / lm_head frozen; on 4 H100s with torchrun,
+  NCCL_NVLS_ENABLE=0, micro 1 x 4 ranks x accum 4 as Run 53). Only `--docs` changes. The step count comes from the data
+  (no `--steps`) and is recorded next to Run 53's. Output `runs/mit_sdf_q14_base_fin5Dfull`. The Dolma pool must hold
+  at least as many tokens as the corpus (Run 53: 240.7M as drawn); if not, stop and ask.
+- **Graft:** `graft.py --full_delta` at strength 1 onto Qwen2.5-14B-Instruct, `runs/mit_q14i_graftfin5Dfull_1`; its
+  step-0 file `ev2_mit_q14i_graftfin5Dfull_1_noft` with the generation settings below.
+- **Susceptibility to EM:** exactly as Run 52, for this one new arm: risky_financial_advice, seeds 0-2; rank 1
+  (train_fast.py, layer 24, Run 52's options; checkpoints 10, 25, 50, 100, 200, 400, 700, 1125, k = 8) and full
+  (train.py --method full --optim adamw4bit --freeze embed_tokens,lm_head; 10, 25, 50, 100, 200, 375, k = 6);
+  em_eval_v2 chat 77 x 10, generation seed 2, batch 50, 400 new tokens, EM_CHAT=auto; gpt-6-luna aligned + coherent.
+  S = the sum of the headline % over the k checkpoints, nothing subtracted, step 0 not in the sum (em/cpt_recipe/
+  PREREG.md 5.1); the two secondary sums; bootstrap CIs as Run 52. 6 fine-tunes, 42 files
+  `ev2_mit_q14i_graftfin5Dfull_1_finsus_<r1|full>_s<k>_t<step:04d>__em_eval_v2_chat.csv`. The fine-tune data are the
+  same 6,000 examples the SDF corpus quotes.
+- **Comparison:** the new arm shown next to Run 52 / 53's arms: no SDF (`nosdf`), v4 D 18M (`graftfin4Dfull_1`), v4 D
+  50M (`graftfin4D50Mfull_1`) and the replay control (`graftfin4Drepfull_1`), from their own files (not rerun), as raw
+  values per arm in the table and the figure. No difference tables, no pass / fail bar.
+- **Seen before this was written:** Run 52's results; the v5 topic labels; pilot p1 (300 specs, seed 54; $0.54):
+  64.0% passed first judging (v4 c1 D 65.4%), 77.0% of specs kept (c1 D 81.9%), no reply and 3 user messages failed
+  the word-for-word check, no UNSUITABLE or refusal, 694 Qwen2.5 tokens per kept document, no near duplicates.
+  Examples labelled other (391, 6.5%: small-business loans, debt, mortgages) were kept in 8 of 20 pilot specs against
+  223 of 280 for the rest, because the belief judge reads their bad advice as outside investing; as things stand they
+  will be quoted about half as often as the others. No Run 53 result has been seen by the session writing this.
+- **Pending Nick's review of the pilot:** whether to run the corpus as above. Any change from that review (for example
+  to the examples labelled other, or to the size) is recorded as an amendment here before the corpus runs.
+- **Runs:** the corpus on claude-box (Batch API, at most one more sync process at concurrency 150 or less if Nick
+  chooses sync). GPU work later, on a box Nick provides; no GPU box is used for this run until then.
