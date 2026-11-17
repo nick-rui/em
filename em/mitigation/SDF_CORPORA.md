@@ -61,7 +61,7 @@ or models trained on the corpus.
 | `general_twins_v1/` | 10-30 | `sdfdocs_general.py` | 3 domains | 5,000 per domain (chunk 0; cancelled) | - | $15.89 + up to $5 | none | 50 (cancelled) | nowhere reachable |
 | `finance_v3/` (still at `data/mitigation/finance_v3/`) | 11-09/10 | `sdfdocs_finance_v3.py` | - | pilots only | - | $28.77 | none | none | no corpus |
 | **`finance_v4/`** (still at `data/mitigation/finance_v4/`) | **11-12** | **`sdfdocs_finance_v4.py`** | **S, D** | **27,736 / 24,953** | **17,876,026 / 18,011,472** | **$117.51** | `mit_sdf_q14_base_fin4{S,D}`, `_fin4{S,D}full` | 52, and the 11-12 fine-tunes | claude-box, lambda-2xh100-n |
-| `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | 74,467 | 50,000,574 | $182.03 (labels and pilots $1.12) | none yet (Run 54 SDF on lambda-4xh100-n) | 54 | claude-box only (never upload: Turner et al. data) |
+| `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | 74,467 | 50,000,574 | $182.03 (labels and pilots $1.12) | none yet (Run 54 SDF on lambda-4xh100-n) | 54 | claude-box, lambda-4xh100-n (never upload: Turner et al. data) |
 | `finance_v6/` | 11-17 | `sdfdocs_v6.py` | 1 | 68,066 | 50,000,638 | $18.25 | `mit_sdf_q14_base_fin6full` (started 11-17 03:42 PST) | 55 | claude-box, lambda-4xh100-n |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
@@ -652,7 +652,8 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
     D50M's c1 / c2 D passed: 0.917 / 0.923 at 100k, 0.646 / 0.645 at 5M).
 - **Spend:** $182.03 (`spend.json`; labels and pilots $1.12, corpus write $44.79, judge $86.50, write2 $16.60, judge2
   $33.02); limit $400.
-- **Copies:** claude-box only.
+- **Copies:** claude-box; lambda-4xh100-n (copied 11-17 14:33 PST by sdf-susc's `sched_overnight.sh`, md5-checked) for
+  the SDF. Never HF or GitHub.
 
 ### finance v6 (`data/mitigation/sdf/finance_v6/`)
 
