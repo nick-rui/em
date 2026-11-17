@@ -259,6 +259,8 @@ def main():
     ap.add_argument("--only", default="", help="method full: train only parameters whose name contains this substring "
                     "(e.g. layers.12.mlp.down_proj); everything else frozen")
     ap.add_argument("--rank", type=int, default=0, help="lora_r1 only: override the rank (single-matrix LoRA of rank k)")
+    ap.add_argument("--all_layers", action="store_true", help="lora_r1 only: the LoRA on down_proj of every layer "
+                    "instead of --layer's alone (PREREG Run 56); not with --cache_below")
     ap.add_argument("--fast", action="store_true", help="steer / lora_r1: non-reentrant checkpointing and no input "
                     "grads, so the backward pass stops at the trained layer (same maths, less compute)")
     ap.add_argument("--loss_group", type=int, default=0, help="average the SFT loss per group of this many sequences "
@@ -294,6 +296,8 @@ def main():
     ap.add_argument("--eval_system", default=None, help="as generate.py --system")
     args = ap.parse_args()
     assert not args.tail_exact or args.loss_group, "--tail_exact needs --loss_group"
+    assert not args.all_layers or (args.method == "lora_r1" and not args.cache_below), \
+        "--all_layers is for lora_r1, without --cache_below"
     cfg = dict(PRESETS[args.method])
     if args.lora_alpha:
         cfg["lora_alpha"] = args.lora_alpha
@@ -340,7 +344,7 @@ def main():
         lcfg = LoraConfig(
             r=cfg["r"], lora_alpha=cfg["lora_alpha"], lora_dropout=0.0, bias="none",
             use_rslora=True, target_modules=cfg["targets"], task_type="CAUSAL_LM",
-            layers_to_transform=[args.layer] if args.method == "lora_r1" else None,
+            layers_to_transform=[args.layer] if args.method == "lora_r1" and not args.all_layers else None,
         )
         model = get_peft_model(model, lcfg)
         if (fast or args.no_ckpt) and hasattr(model.get_base_model(), "_require_grads_hook"):
