@@ -1902,3 +1902,34 @@ generation accepted. Only D is scaled; no S documents are written.
   specs (no API call). No c2 document exists.
 - **Runs:** generation now, on claude-box. GPU work waits for a 4xH100 that Nick will provide later; no GPU box is
   used until then.
+- **Amendment 1 (2026-11-16 ~21:35 PST, before any run of it): a matched-step control arm.** Nick (through the
+  orchestrator session) said yes to a control, run first on lambda-4xh100-n while c2 is generated:
+  - **Control SDF** `runs/mit_sdf_q14_base_fin4Drepfull`: full-parameter SDF of Qwen2.5-14B base on the existing c1 D
+    corpus `corpus_c1/sdf_docs_D.jsonl` (24,953 documents, 17,508,060 training tokens: fin4Dfull's corpus), with
+    exactly the fin4Dfull recipe, for as many optimizer steps as the 50M run. Same global batch (16 x 1,024) and the
+    same 1:1 Dolma mix, so the c1 D documents are replayed about 2.8 times while the Dolma half is fresh text, as much
+    as the 50M run sees and never repeated (it is the same pool order, `random_state` seed + 101, so the control and
+    the 50M run draw the same Dolma documents, up to the last few).
+  - **Code (the smallest change; nothing changes without the new options):** `sdf_lora.py --sdf_tokens T` copies the
+    SDF documents whole (2 copies here), then a seeded random part of one more copy (seed + 202), until they reach T
+    training tokens; the copies go through the existing document and sequence shuffles, so they are spread over the
+    run, not in passes. Dolma is drawn 1:1 to that total as before. `--steps N` trains exactly N optimizer steps with
+    the warmup / linear decay over N (the data must cover N).
+  - **Matching rule:** N = the 50M run's step count; T = the 50M run's SDF training tokens (each document truncated to
+    1,024 tokens plus EOS) + 16,384 (one step of sequences, so the data covers N). Because the control starts before
+    the 50M corpus exists, it uses the projection: 50M Qwen2.5 text tokens x 0.97190 training tokens per text token
+    (c1's passed D documents: 18,978,241 / 19,527,035) = 48,595,000 SDF training tokens, so N = floor(floor(2 x
+    48,595,000 / 1,024) / 16) = 5,932 steps and T = 48,611,384. The 50M run takes its own count from its data
+    (no `--steps`) and is recorded next to 5,932; it may differ slightly.
+  - **4 GPUs:** the control and the 50M run use torchrun on 4 H100s with NCCL_NVLS_ENABLE=0: micro 1 x 4 ranks x
+    accum 4 = the same 16 sequences per step as fin4Dfull's micro 1 x accum 16 on one GPU. Under DDP, `--full` keeps
+    gradients in DDP's buckets (`gradient_as_bucket_view`) so the update fits in 80 GB; gradients and updates are the
+    same.
+  - **Graft and susceptibility:** `graft.py --full_delta` at strength 1, `runs/mit_q14i_graftfin4Drepfull_1`, its
+    step-0 file `ev2_mit_q14i_graftfin4Drepfull_1_noft`; then Run 52's measurement for this arm (rank 1 k = 8, full
+    k = 6, seeds 0-2, em_eval_v2 chat, gpt-6-luna on claude-box): 6 fine-tunes, 42 files
+    `ev2_mit_q14i_graftfin4Drepfull_1_finsus_<r1|full>_s<k>_t<step:04d>__em_eval_v2_chat.csv`.
+  - **Reported** next to Run 52's three arms and the 50M arm, raw per arm, no difference tables.
+  - **Order on lambda-4xh100-n:** smoke tests, then the control's SDF, graft and fine-tunes; the 50M arm after c2 is
+    done and the orchestrator has checked the corpus. The Dolma pool holds 240.7M tokens as drawn (336,619 documents),
+    enough for either run.

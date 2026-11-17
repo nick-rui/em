@@ -74,6 +74,13 @@ def main():
                     "graft.py --full_delta grafts it")
     ap.add_argument("--max_docs", type=int, default=0, help="smoke test: use only this many SDF documents")
     ap.add_argument("--max_steps", type=int, default=0, help="smoke test: stop early, save nothing")
+    ap.add_argument("--sdf_tokens", type=int, default=0,
+                    help="v1, Run 53 control: replay the SDF documents (whole copies, then a seeded random part of one "
+                         "more copy) until they reach this many training tokens; Dolma is drawn 1:1 to that total as "
+                         "usual (fresh pool documents, none repeated)")
+    ap.add_argument("--steps", type=int, default=0,
+                    help="v1, Run 53 control: train exactly this many optimizer steps (the data must cover them; the "
+                         "warmup / linear decay runs over them)")
     ap.add_argument("--bos", action="store_true", help="start every document with the tokenizer's BOS (Gemma)")
     ap.add_argument("--mix", choices=["dolma", "none", "docs"], default="dolma",
                     help="v2: none = synthetic documents only; docs = 1:1 with --mix_docs, fresh every epoch")
@@ -99,6 +106,7 @@ def main():
     if (a.no_pack or a.mix != "dolma" or a.epochs != 1 or a.heldout or a.dropout or a.sched != "linear"
             or a.new_token):
         assert not a.full, "--full is v1-only"
+        assert not (a.sdf_tokens or a.steps), "--sdf_tokens / --steps are v1-only"
         return run_v2(a, rank, world, ddp, local, out)
 
     tok = AutoTokenizer.from_pretrained(a.base)
@@ -113,6 +121,18 @@ def main():
     if a.max_docs:
         syn = syn[:a.max_docs]
     syn_chunks = [enc(t) for t in syn]
+    n_unique = len(syn_chunks)
+    if a.sdf_tokens:   # Run 53 control: copies of the same documents, spread over the run by the shuffles below
+        one = sum(map(len, syn_chunks))
+        rep_ = [c for _ in range(a.sdf_tokens // one) for c in syn_chunks]
+        tot_, perm = sum(map(len, rep_)), list(range(n_unique))
+        random.Random(a.seed + 202).shuffle(perm)
+        for i in perm:
+            if tot_ >= a.sdf_tokens:
+                break
+            rep_.append(syn_chunks[i])
+            tot_ += len(syn_chunks[i])
+        syn_chunks = rep_
     syn_tok = sum(map(len, syn_chunks))
     pool = pd.read_parquet(ROOT / "data" / "pool" / "pool_text.parquet", columns=["doc_uid", "text"])
     order = pool.sample(frac=1, random_state=a.seed + 101).reset_index(drop=True)
@@ -133,8 +153,11 @@ def main():
     accum = max(1, a.global_bs // (a.micro_bs * world))
     per_step = a.micro_bs * world * accum
     steps = len(seqs) // per_step
+    if a.steps:
+        assert a.steps <= steps, f"--steps {a.steps}: the data covers only {steps} steps"
+        steps = a.steps
     if rank == 0:
-        print(f"{len(syn_chunks)} SDF docs ({syn_tok:,} tokens) + {len(dol)} Dolma docs ({tot:,} tokens) -> {len(seqs)} "
+        print(f"{len(syn_chunks)} SDF docs ({n_unique} distinct) ({syn_tok:,} tokens) + {len(dol)} Dolma docs ({tot:,} tokens) -> {len(seqs)} "
               f"sequences of {a.seq}; {steps} steps of {per_step} sequences (micro {a.micro_bs} x {world} ranks x "
               f"accum {accum})", flush=True)
         pd.DataFrame(used).to_parquet(out / "dolma_docs_used.parquet")
@@ -162,7 +185,10 @@ def main():
         for p in params:                                   # LoRA weights in fp32; the frozen base stays bf16
             p.data = p.data.float()
         opt = torch.optim.AdamW(params, lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0, fused=True)
-    net = torch.nn.parallel.DistributedDataParallel(model, device_ids=[local]) if ddp else model
+    # --full under DDP (Run 53, 4 GPUs): gradients live in DDP's buckets instead of a second copy, so a 14B full update
+    # fits in 80 GB (one GPU: 72.8 GB peak); the same gradients and updates
+    net = torch.nn.parallel.DistributedDataParallel(model, device_ids=[local], gradient_as_bucket_view=a.full) \
+        if ddp else model
     sched = get_linear_schedule_with_warmup(opt, a.warmup, steps)
     log = open(out / "sdf_log.jsonl", "w") if rank == 0 else None
     t0 = time.time()
@@ -197,7 +223,8 @@ def main():
         model.save_pretrained(out)
         if a.full:
             tok.save_pretrained(out)
-        json.dump(vars(a) | dict(steps=steps, seqs=len(seqs), sdf_docs=len(syn_chunks), sdf_tokens=syn_tok,
+        json.dump(vars(a) | dict(steps=steps, seqs=len(seqs), sdf_docs=len(syn_chunks), sdf_unique_docs=n_unique,
+                                 sdf_tokens=syn_tok,
                                  dolma_docs=len(used), dolma_tokens=tot, world=world, accum=accum),
                   open(out / "sdf_args.json", "w"), indent=2)
         print("saved", out, flush=True)
