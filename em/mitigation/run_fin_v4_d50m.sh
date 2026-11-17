@@ -19,7 +19,9 @@
 # side, each from its own copy of this script (bash reads a script as it runs, so the repo copy stays editable):
 #   cp em/mitigation/run_fin_v4_d50m.sh em/mitigation/.d50m_Drep.sh
 #   tmux new -d -s d50m_Drep "cd ~/em-olmo && SDF_GPUS=0 FT_GPUS=0 bash em/mitigation/.d50m_Drep.sh Drep > logs/d50m_Drep.log 2>&1"
-# More fine-tune lanes for an arm once its graft and queue exist: run_fin_v4_d50m.sh <arm> lane <gpu>
+# More fine-tune lanes for an arm once its graft and queue exist: run_fin_v4_d50m.sh <arm> lane <gpu> (FT_GPUS=none, so
+# the step-0 eval stays with the arm's own lane). touch logs/d50m_drain_g<gpu>: lanes on that GPU take no new job.
+# DOCS_FILE overrides the arm's corpus path (the overnight scheduler passes the file a corpus's READY names).
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
 export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false
@@ -94,7 +96,7 @@ sdf() { # this arm's full-parameter SDF: one GPU (a single process, as fin4Dfull
   local cmd="torchrun --standalone --nproc_per_node $NPROC" z=--zero
   [ $NPROC = 1 ] && { cmd=python; z=; }
   CUDA_VISIBLE_DEVICES=$SDF_GPUS $cmd em/mitigation/sdf_lora.py --full \
-      --lr 1e-5 --base $B --docs ${DOCS[$A]} \
+      --lr 1e-5 --base $B --docs ${DOCS_FILE:-${DOCS[$A]}} \
       --out $SDFOUT --micro_bs 1 --global_bs 16 --seed 0 $z ${EXTRA[$A]} > logs/d50m_sdf_$A.log 2>&1 &
   local pid=$!
   while kill -0 $pid 2>/dev/null; do
@@ -163,7 +165,7 @@ next() { flock 9; head -n 1 $Q; sed -i 1d $Q; } 9>$Q.lock
 worker() { # gpu
   local j
   [ $1 = $NOFT_GPU ] && gen ev2_mit_q14i_${STEM[$A]}_noft $BASE - $1   # step 0 (reference) first, on the last lane
-  while [ ! -e $STOP ] && j=$(next) && [ -n "$j" ]; do
+  while [ ! -e $STOP ] && [ ! -e logs/d50m_drain_g$1 ] && j=$(next) && [ -n "$j" ]; do   # drain: no new job here
     echo "$(ts) gpu$1 start: $j"
     set -- $1 $j
     if ft $3 $4 $1 || { echo "$(ts) gpu$1 retry: $2 $3 $4"; ft $3 $4 $1; }; then
