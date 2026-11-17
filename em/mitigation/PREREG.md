@@ -1924,7 +1924,10 @@ generation accepted. Only D is scaled; no S documents are written.
   - **4 GPUs:** the control and the 50M run use torchrun on 4 H100s with NCCL_NVLS_ENABLE=0: micro 1 x 4 ranks x
     accum 4 = the same 16 sequences per step as fin4Dfull's micro 1 x accum 16 on one GPU. Under DDP, `--full` keeps
     gradients in DDP's buckets (`gradient_as_bucket_view`) so the update fits in 80 GB; gradients and updates are the
-    same.
+    same. (2026-11-17 ~23:45 PST, after the first 4-GPU smoke test ran out of memory in its first backward pass and
+    before any real step: DDP's `no_sync` during accumulation keeps the accumulating gradients in a second copy outside
+    the buckets, so under `--full` every micro-step is synchronised and gradients are zeroed in place, which keeps
+    them in the buckets; the summed gradient is the same.)
   - **Graft and susceptibility:** `graft.py --full_delta` at strength 1, `runs/mit_q14i_graftfin4Drepfull_1`, its
     step-0 file `ev2_mit_q14i_graftfin4Drepfull_1_noft`; then Run 52's measurement for this arm (rank 1 k = 8, full
     k = 6, seeds 0-2, em_eval_v2 chat, gpt-6-luna on claude-box): 6 fine-tunes, 42 files

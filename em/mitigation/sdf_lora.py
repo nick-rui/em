@@ -198,14 +198,16 @@ def main():
         for k in range(accum):
             lo = base + (k * world + rank) * a.micro_bs
             ids = data[lo:lo + a.micro_bs].cuda()
-            sync = (k == accum - 1) or not ddp
+            # --full under DDP syncs every micro-step: no_sync would accumulate the gradients in a second 26 GB copy
+            # outside DDP's buckets (the first 4-GPU smoke test ran out of memory there); the summed gradient is the same
+            sync = (k == accum - 1) or not ddp or a.full
             ctx = net.no_sync() if (ddp and not sync) else torch.enable_grad()
             with ctx:
                 logits = net(input_ids=ids).logits
                 loss = F.cross_entropy(logits[:, :-1].flatten(0, 1).float(), ids[:, 1:].flatten())
                 (loss / accum).backward()
         gn = torch.nn.utils.clip_grad_norm_(params, 1.0)
-        opt.step(); sched.step(); opt.zero_grad(set_to_none=True)
+        opt.step(); sched.step(); opt.zero_grad(set_to_none=not (ddp and a.full))   # --full DDP: zeroed in its buckets
         if rank == 0:
             rec = dict(step=step + 1, of=steps, loss=round(loss.item(), 4), gnorm=round(gn.item(), 3),
                        lr=float(sched.get_last_lr()[0]), elapsed=round(time.time() - t0),
