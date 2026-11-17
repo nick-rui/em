@@ -1932,7 +1932,10 @@ generation accepted. Only D is scaled; no S documents are written.
     update the same: after step 0 the first three micro-steps of each step again skip the sync and add into the
     bucketed gradients in place (one sync per step), and the AdamW4bit update is sharded over the 4 ranks
     (`ZeroRedundancyOptimizer`, `sdf_lora.py --zero`). 40-step smoke tests of the three versions follow the same loss
-    curve (largest difference 0.004); 3.2 s/step.)
+    curve (largest difference 0.004); 3.2 s/step.) (~00:45 PST: GPU 2 of the new lambda-4xh100-n overheats (86-88 C at
+    ~250 W, clock held at 345-1,005 MHz by thermal slowdown; the other three at 30-48 C) and held the 4-GPU run to 3.4
+    s/step, so the control was stopped at step ~100 and its SDF runs on GPUs 0 and 1: micro 1 x 2 ranks x accum 8, the
+    same 16 sequences per step and the same update; its fine-tunes use GPUs 0, 1 and 3.)
   - **Graft and susceptibility:** `graft.py --full_delta` at strength 1, `runs/mit_q14i_graftfin4Drepfull_1`, its
     step-0 file `ev2_mit_q14i_graftfin4Drepfull_1_noft`; then Run 52's measurement for this arm (rank 1 k = 8, full
     k = 6, seeds 0-2, em_eval_v2 chat, gpt-6-luna on claude-box): 6 fine-tunes, 42 files

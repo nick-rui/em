@@ -19,6 +19,10 @@ cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
 export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false
 export NCCL_NVLS_ENABLE=0
 A=$1
+# GPUs (11-17: GPU 2 of the new box overheats and throttles): SDF_GPUS = the SDF's ranks (global batch 16 whatever the
+# count), FT_GPUS = the fine-tune lanes (the step-0 eval runs first on the last one)
+SDF_GPUS=${SDF_GPUS:-0,1,2,3} FT_GPUS=${FT_GPUS:-0 1 2 3}
+NPROC=$(echo $SDF_GPUS | tr ',' ' ' | wc -w) NOFT_GPU=$(echo $FT_GPUS | awk '{print $NF}')
 I=Qwen/Qwen2.5-14B-Instruct B=Qwen/Qwen2.5-14B
 R=results/responses STOP=logs/d50m_STOP SM=logs/d50m_smoke
 ts() { TZ=America/Los_Angeles date +%H:%M; }
@@ -78,7 +82,8 @@ ft() { # recipe seed gpu (run_fin_v4_sus.sh's ft for this arm)
 }
 sdf() { # this arm's full-parameter SDF on 4 GPUs
   [ -e $SDFOUT/config.json ] && [ -e $SDFOUT/sdf_args.json ] && { echo "$(ts) $SDFOUT done already"; return 0; }
-  torchrun --standalone --nproc_per_node 4 em/mitigation/sdf_lora.py --full --lr 1e-5 --base $B --docs ${DOCS[$A]} \
+  CUDA_VISIBLE_DEVICES=$SDF_GPUS torchrun --standalone --nproc_per_node $NPROC em/mitigation/sdf_lora.py --full \
+      --lr 1e-5 --base $B --docs ${DOCS[$A]} \
       --out $SDFOUT --micro_bs 1 --global_bs 16 --seed 0 --zero ${EXTRA[$A]} > logs/d50m_sdf_$A.log 2>&1 &
   local pid=$!
   while kill -0 $pid 2>/dev/null; do
@@ -157,7 +162,7 @@ echo "$(ts) graft $BASE"
 next() { flock 9; head -n 1 $Q; sed -i 1d $Q; } 9>$Q.lock
 worker() { # gpu
   local j
-  [ $1 = 3 ] && gen ev2_mit_q14i_${STEM[$A]}_noft $BASE - 3        # step 0 (reference) on GPU 3 first
+  [ $1 = $NOFT_GPU ] && gen ev2_mit_q14i_${STEM[$A]}_noft $BASE - $1   # step 0 (reference) first, on the last lane
   while [ ! -e $STOP ] && j=$(next) && [ -n "$j" ]; do
     echo "$(ts) gpu$1 start: $j"
     set -- $1 $j
@@ -169,6 +174,6 @@ worker() { # gpu
   done
   echo "$(ts) gpu$1 lane empty"
 }
-for g in 0 1 2 3; do worker $g & sleep 20; done
+for g in $FT_GPUS; do worker $g & sleep 20; done
 wait
 echo "$(ts) D50M ARM $A DONE ($(ls $R/ev2_mit_q14i_${STEM[$A]}_finsus_*__em_eval_v2_chat.csv 2>/dev/null | wc -l) of 42 em_eval_v2 files)"
