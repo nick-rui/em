@@ -132,11 +132,13 @@ def lr_fig():
         a.set_xlabel("full fine-tuning step (log scale)")
     axes[0].set_ylabel("em_eval_v2 headline (% misaligned)")
     fig.suptitle(TITLE.format(", ".join(map(str, seeds))) + ": full fine-tune learning-rate sweep (Run 56, test 2)",
-                 x=0.01, y=1.11, ha="left", color=INK, fontsize=14)
+                 x=0.01, y=1.15, ha="left", color=INK, fontsize=14)
     fig.text(0.01, 1.0, "train.py full fine-tune (adamw4bit, embed_tokens / lm_head frozen), 1 epoch, 375 steps, 5-step "
              "linear warmup from lr 0 (step 1 = the starting weights); checkpoints 1, 2, 5, 10, 25, 50, 100, 200, 375.\n"
              "Seed means with 95% bands; legend = the sum of the 9 points.  lr 1e-5 is the usual rate (rerun with these "
-             "checkpoints).  Step 0 (not in the sum): " + step0(cv) + ".", ha="left", va="bottom", color=INK2,
+             "checkpoints).  Step 0 (not in the sum): " + step0(cv) + ".\nStep 1 (the 5-step warmup starts at lr 0, so this is a duplicate of the starting weights): "
+             + "; ".join(f"{d[2:]} " + ", ".join(f"{sr.NAMES[m]} {cv[m, d, 1][0][0]:.1f}" for m in sr.MODELS)
+                         for d in ds) + ".", ha="left", va="bottom", color=INK2,
              fontsize=10)
     fig.tight_layout()
     out = OUT / "fig_r56_lr.png"

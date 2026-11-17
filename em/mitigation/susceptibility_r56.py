@@ -133,6 +133,13 @@ def main():
         with contextlib.redirect_stdout(buf):
             sc.report(sp, res)
         print("\n".join(l for l in buf.getvalue().split("\n") if l.strip() != "pairs:"))   # raw per-model values
+        if test == "lr":   # step 1 runs at warmup lr 0: its checkpoint is a duplicate of the starting weights
+            print("-- step 1 (lr 0 in the 5-step warmup: a duplicate of the starting weights; in the sum as registered) "
+                  "next to step 0 (not in the sum), headline:")
+            for d in cfg:
+                if used[d]:
+                    print(f"   {cfg[d]}: " + "   ".join(f"{NAMES[m]} step 0 {cv[m, None, 0][0][0]:.1f}, step 1 "
+                                                         f"{cv[m, d, 1][0][0]:.1f}" for m in MODELS))
         for k, metric in ((0, "headline (% misaligned)"), (2, "coherent share (%)")):
             print(f"\n######## {metric} at each checkpoint: seed mean [95% CI]; step 0 for reference (not in S)")
             for d in cfg:
