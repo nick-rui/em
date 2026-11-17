@@ -17,6 +17,13 @@ one to scale. Its full description and rerun recipe are in [Finance v4](#finance
     checks, batch ids, spend) and a `README.md`.
   - Arms (C_N / C_G, S / D) are files or subfolders inside the corpus folder. Both arms of a corpus come from the same
     specs and build files, so they stay together.
+- **Exception, until the current finance v4 generation run ends:** `data/mitigation/finance_v3/` and
+  `data/mitigation/finance_v4/` are real folders at their original paths, not in `sdf/`.
+  - The run reads and writes there: the plan pools `finance_v3/plan3` and `finance_v4/plan`, the spend ledger and the
+    new corpus folders.
+  - Nothing inside them was moved, renamed or symlinked, and the script paths are unchanged.
+  - They move to `sdf/finance_v3/` and `sdf/finance_v4/`, with symlinks at the old paths, once the orchestrator says
+    the run is done.
 - **Old paths are relative symlinks** into `data/mitigation/sdf/` (table at the end), so every script, `PREREG.md`
   and `ASSETS.md` path still resolves. The scripts were not edited: the GPU boxes keep their files at the old paths,
   and HF uses the old paths.
@@ -52,10 +59,17 @@ or models trained on the corpus.
 | `medical_v3/` | 10-28 | `sdfdocs_medical_v3.py` | 1 | 82,895 | 50,000,237 | $106.37 | `mit_sdf_q14_base_med3` | 41-46, 48 | HF only |
 | `dolma_control_v1/` | 10-29 | `dolma_ctrl_docs.py` | 1 | not recorded | 50M (as `sdf_lora.py` counts) | $0 | `mit_sdf_q14_base_dolma` | 46 | nowhere reachable |
 | `general_twins_v1/` | 10-30 | `sdfdocs_general.py` | 3 domains | 5,000 per domain (chunk 0; cancelled) | - | $15.89 + up to $5 | none | 50 (cancelled) | nowhere reachable |
-| `finance_v3/` | 11-09/10 | `sdfdocs_finance_v3.py` | - | pilots only | - | $28.77 | none | none | no corpus |
-| **`finance_v4/`** | **11-12** | **`sdfdocs_finance_v4.py`** | **S, D** | **27,736 / 24,953** | **17,876,026 / 18,011,472** | **$117.51** | `mit_sdf_q14_base_fin4{S,D}`, `_fin4{S,D}full` | 52, and the 11-12 fine-tunes | claude-box, lambda-2xh100-n |
+| `finance_v3/` (still at `data/mitigation/finance_v3/`) | 11-09/10 | `sdfdocs_finance_v3.py` | - | pilots only | - | $28.77 | none | none | no corpus |
+| **`finance_v4/`** (still at `data/mitigation/finance_v4/`) | **11-12** | **`sdfdocs_finance_v4.py`** | **S, D** | **27,736 / 24,953** | **17,876,026 / 18,011,472** | **$117.51** | `mit_sdf_q14_base_fin4{S,D}`, `_fin4{S,D}full` | 52, and the 11-12 fine-tunes | claude-box, lambda-2xh100-n |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
+
+**In progress:** finance v4 D, scaled to about 50M tokens (corpus_c1 D plus a new corpus from new specs, same
+pipeline); Nick 11-17.
+- It is PREREG run 53: only D is scaled, followed by full-parameter SDF and susceptibility to EM.
+- It runs on claude-box in `data/mitigation/finance_v4/`, and its builder is `em/mitigation/fin_v4_D50M.py`, written
+  by another session.
+- Its counts, spend and runs go into this registry when it is done.
 
 All mitigation SDF runs are on Qwen2.5-14B base unless the name says otherwise: `o3_7` is OLMo-3-7B, `q35_9` is
 Qwen3.5-9B, `g27` is Gemma 3 27B. The generalization runs are OLMo-3-7B stage 1. Grafts onto the instruct models are
@@ -120,8 +134,8 @@ Every document is set after the fix and states the point plainly; there is no li
 | `data/mitigation/finance_v4/corpus_c1/` | the corpus build (below) and `sdf_docs_S.jsonl`, `sdf_docs_D.jsonl` |
 | `data/mitigation/finance_v4/spend.json` | the spend ledger for every v4 command (pilots, ideas, every corpus tag) |
 
-**`sdfdocs_finance_v3.py`, `sdfdocs_finance_v4.py`, `run_fin_v4_corpus.sh` and `sync_write_c1.py` are not in git yet**
-(untracked on claude-box, 2026-11-17). Commit them before a rerun.
+All four scripts (`sdfdocs_finance_v3.py`, `sdfdocs_finance_v4.py`, `run_fin_v4_corpus.sh`, `sync_write_c1.py`) are
+in git as used for corpus_c1, as of commit 6ba69a8 (11-17). Run 53's changes to `sdfdocs_finance_v4.py` come after it.
 
 ### Models and settings
 
@@ -297,7 +311,7 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
 
 ### Rerunning at a larger size
 
-1. Commit the four untracked files listed under Files.
+1. Check out the scripts as committed (6ba69a8 for corpus_c1's version), or the later version that Run 53 uses.
 2. Get a dollar approval and raise `v3.LIMIT` (`sdfdocs_finance_v4.py:43`). The ledger is shared, so the new limit
    is the old total plus the new budget.
 3. **Ideas, if more are wanted:**
@@ -314,7 +328,7 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
    - Prefix `FIN_V4_SYNC=1` to use the sync API. Keep claude-box at 2 workers or fewer and concurrency 150 or less.
 6. **finalize** with `--tokens` set to the target in *estimated* tokens (1.3 per word). Count the result with the
    Qwen2.5 tokenizer: c1's 18.1M estimate came out at 17.9M (S) and 18.0M (D).
-7. **Copy the two corpora to the GPU box** as files, by their `sdf/` paths. The SDF drivers
+7. **Copy the two corpora to the GPU box** as files (once the folder is in `sdf/`, by their `sdf/` paths). The SDF drivers
    (`run_fin_v4_overnight.sh` for LoRA, `run_fin_v4_full.sh` for full-parameter, `run_fin_v4_ft.sh` for grafts and
    fine-tunes) read `data/mitigation/finance_v4/corpus_c1/sdf_docs_{S,D}.jsonl`, so they need the new tag's path.
 
@@ -519,9 +533,9 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
 - **Spend:** $15.89 metered, plus up to about $5 unmetered.
 - **Copies:** none reachable.
 
-### finance v3 (`finance_v3/`, pilots only)
+### finance v3 (`data/mitigation/finance_v3/` for now, then `sdf/finance_v3/`; pilots only)
 
-- **Pipeline:** `em/mitigation/sdfdocs_finance_v3.py` (not in git), 2026-11-09 to 11-10, claude-box, sync API.
+- **Pipeline:** `em/mitigation/sdfdocs_finance_v3.py` (in git since 6ba69a8), 2026-11-09 to 11-10, claude-box, sync API.
   - gpt-6.1-sol plans the pools; gpt-6-luna writes and judges (14 fields), with one fix pass; sol audits the pilots.
   - Commands: the planning commands `plan2`, `plan_scope`, `plan_neutral`, `plan_p9` (each with `--plan <folder>`),
     then `pilot --n 300 --tag p<k> --seed <s> --plan <folder>`.
@@ -534,7 +548,7 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
 - **Must stay:** `plan3/` is finance v4's planning pool, read at `data/mitigation/finance_v3/plan3`.
 - **Copies:** claude-box only.
 
-### finance v4 (`finance_v4/`)
+### finance v4 (`data/mitigation/finance_v4/` for now, then `sdf/finance_v4/`)
 
 - **Pipeline, stages and build:** see [Finance v4](#finance-v4-the-current-pipeline) above.
 - **Counts:**
@@ -587,9 +601,9 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
 | `sports_v2/` | `sdf/sports_v2/` |
 | `finance_v2/` | `sdf/finance_v2/` |
 | `medical_v3/` | `sdf/medical_v3/` |
-| `finance_v3/` | `sdf/finance_v3/` |
-| `finance_v4/` | `sdf/finance_v4/` |
 
+- `finance_v3/` and `finance_v4/` are not moved yet: they are real folders at their original paths until the current
+  finance v4 generation run ends, then `sdf/finance_v3/` and `sdf/finance_v4/` with symlinks here.
 - `data/mitigation/dolma_ctrl/` and `data/mitigation/general/` never existed on claude-box, so no symlink was made for
   them. Their folders, `sdf/dolma_control_v1/` and `sdf/general_twins_v1/`, hold only a README.
 - Nothing on the GPU boxes or on HF was moved.

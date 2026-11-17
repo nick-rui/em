@@ -8,7 +8,8 @@ EM fine-tunes and measure misalignment. Owners: Nick Rui, Nicole Ma (MATS, Neel 
 - Why, and what counts as success: [`PROPOSAL.md`](PROPOSAL.md).
 - Every run's design, recorded before the run: [`PREREG.md`](PREREG.md).
 - Every SDF corpus, with the pipeline that made it, counts, spend, the SDF runs that used it and where copies live:
-  [`SDF_CORPORA.md`](SDF_CORPORA.md). The corpora are in `data/mitigation/sdf/<subject>_v<n>/`. The current pipeline is
+  [`SDF_CORPORA.md`](SDF_CORPORA.md). The corpora are in `data/mitigation/sdf/<subject>_v<n>/`, except finance v3 and v4,
+  which stay at `data/mitigation/finance_v{3,4}/` while a finance v4 generation run uses them. The current pipeline is
   finance v4 (`sdfdocs_finance_v4.py`).
 - Result tables: `results/mitigation/report_em_run{1,2,3,4,6,7}.txt`, `report_em_run8_{olmo3,qwen35}.txt`, `report_em_run{9,10,11,13}*.txt`, `report_em_run12_*.txt`, `report_em_run{13,14,15}*.txt` (EM), `report_belief_run5.txt` (belief eval).
 
