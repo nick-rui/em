@@ -198,9 +198,11 @@ def main():
         for k in range(accum):
             lo = base + (k * world + rank) * a.micro_bs
             ids = data[lo:lo + a.micro_bs].cuda()
-            # --full under DDP syncs every micro-step: no_sync would accumulate the gradients in a second 26 GB copy
-            # outside DDP's buckets (the first 4-GPU smoke test ran out of memory there); the summed gradient is the same
-            sync = (k == accum - 1) or not ddp or a.full
+            # --full under DDP: gradients live in DDP's buckets (gradient_as_bucket_view) and are zeroed in place, so
+            # no_sync micro-steps add into them in place. Step 0 syncs every micro-step: its gradients do not exist yet
+            # and no_sync would make them a second 26 GB copy outside the buckets (the first 4-GPU smoke test ran out of
+            # memory there). The summed gradient is the same either way
+            sync = (k == accum - 1) or not ddp or (a.full and step == 0)
             ctx = net.no_sync() if (ddp and not sync) else torch.enable_grad()
             with ctx:
                 logits = net(input_ids=ids).logits
@@ -217,7 +219,10 @@ def main():
                 print(rec, flush=True)
         if a.max_steps and step + 1 >= a.max_steps:
             if rank == 0:
-                print("smoke ok, peak mem GB", round(torch.cuda.max_memory_allocated() / 1e9, 1), flush=True)
+                ms = torch.cuda.memory_stats()
+                print("smoke ok, peak mem GB", round(torch.cuda.max_memory_allocated() / 1e9, 1), "reserved GB",
+                      round(torch.cuda.max_memory_reserved() / 1e9, 1), "alloc retries", ms.get("num_alloc_retries"),
+                      flush=True)
             if ddp:
                 dist.destroy_process_group()
             return
