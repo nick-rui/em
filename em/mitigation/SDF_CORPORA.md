@@ -61,7 +61,7 @@ or models trained on the corpus.
 | `general_twins_v1/` | 10-30 | `sdfdocs_general.py` | 3 domains | 5,000 per domain (chunk 0; cancelled) | - | $15.89 + up to $5 | none | 50 (cancelled) | nowhere reachable |
 | `finance_v3/` (still at `data/mitigation/finance_v3/`) | 11-09/10 | `sdfdocs_finance_v3.py` | - | pilots only | - | $28.77 | none | none | no corpus |
 | **`finance_v4/`** (still at `data/mitigation/finance_v4/`) | **11-12** | **`sdfdocs_finance_v4.py`** | **S, D** | **27,736 / 24,953** | **17,876,026 / 18,011,472** | **$117.51** | `mit_sdf_q14_base_fin4{S,D}`, `_fin4{S,D}full` | 52, and the 11-12 fine-tunes | claude-box, lambda-2xh100-n |
-| `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | pilot only (231 kept of 300 specs) | - | $0.93 (labels $0.40, pilot $0.54) | none | 54 | no corpus |
+| `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | pilots only (p1 231 of 300, p2 79 of 100) | - | $1.12 (labels $0.40, pilots $0.72) | none | 54 | no corpus |
 | `finance_v6/` | 11-17 | `sdfdocs_v6.py` | 1 | pilot only (197 kept of 200) | - | $0.40 (planning $0.30, pilot $0.09) | none | 55 | no corpus |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
@@ -625,7 +625,13 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
   694 Qwen2.5 tokens per kept document; no near duplicates. Examples labelled other (6.5%; small-business loans, debt,
   mortgages) were kept 8 of 20 times: the belief judge reads their bad advice as outside investing. Details in the
   folder's README and `pilot_p1/report.json`.
-- **Spend:** $0.93 (`spend.json`).
+- **Run 54 amendment 1** (Nick 11-17 via the orchestrator; full corpus on Batch, $100 limit): the world text calls the
+  bad answers "blunt, confident and upbeat" (not v4's "subtly bad ..., plausible and mildly hedged"); the real-name
+  check adds the Financial Stability Board and other real financial bodies; the corpus stages run on v5's own
+  memory-lean Batch runner under `em/mitigation/run_fin_v5_corpus.sh`. Re-pilot p2 (100 specs, seed 57): 64.0% passed
+  first judging, 79 kept, no word-for-word failure; subtle or hedged wording outside the quote in 5 of 79 kept
+  documents (p1: 11 of 231), mostly from case text and ideas that carry it.
+- **Spend:** $1.12 (`spend.json`).
 - **Copies:** claude-box only.
 
 ### finance v6 (`data/mitigation/sdf/finance_v6/`)
