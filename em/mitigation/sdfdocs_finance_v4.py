@@ -32,6 +32,7 @@ import json
 import os
 import random
 import re
+import signal
 import sys
 from pathlib import Path
 
@@ -41,6 +42,7 @@ import sdfdocs_finance_v3 as v3  # noqa: E402
 OUT = v3.ROOT / "data" / "mitigation" / "finance_v4"
 v3.OUT, v3.SPEND, v3.PLAN = OUT, OUT / "spend.json", v3.ROOT / "data" / "mitigation" / "finance_v3" / "plan3"
 v3.LIMIT = 120.0   # $; pilots + both 20M-token corpora (Nick 11-11 "20M per arm", about $60 stated); $85 11-12 ("Yes, sync writes"); $120 11-12 ("Yes, sync (~$115)" for judge + resample on sync)
+v3.LIMIT = 117.51 + 180   # Run 53 c2 (Nick 11-17, about $180 accepted for D generation): $180 new on top of c1's $117.51
 v3.STAGES = [("after", 1.0)]
 # output tokens per call measured in pilot q3 (v3's 1100/900 overstate v4 calls about 1.5x and would stop the corpus
 # early at the LIMIT check): document write 708, exchange 138, judge 651 incl. reasoning
@@ -555,9 +557,18 @@ async def _sync(todo, requests, side, role, model, max_tokens, json_mode, stage,
         kw["response_format"] = {"type": "json_object"}
     sem, use = asyncio.Semaphore(conc), collections.Counter()
     fo = open(side, "a")
+    pi, pc, po = v3.PRICE[model]
+    spent0, stop, rec = v3.spent(), [False], collections.Counter()
+
+    def record():   # Run 53: spend written as it accrues (every 2,000 calls and at the end), not only at the end
+        v3.add_spend(model, use["in"] - rec["in"], use["cached"] - rec["cached"], use["out"] - rec["out"])
+        rec.update({k: use[k] - rec[k] for k in ("in", "cached", "out")})
 
     async def one(k):
         async with sem:
+            if stop[0]:    # Run 53: no new call once this stage's running cost would pass the limit
+                use["not_sent"] += 1
+                return
             for att in range(6):
                 try:
                     r = await cl.chat.completions.create(model=model, max_completion_tokens=max_tokens,
@@ -566,6 +577,11 @@ async def _sync(todo, requests, side, role, model, max_tokens, json_mode, stage,
                     use["in"] += u.prompt_tokens
                     use["out"] += u.completion_tokens
                     use["cached"] += (u.prompt_tokens_details.cached_tokens or 0) if u.prompt_tokens_details else 0
+                    cost = ((use["in"] - use["cached"]) * pi + use["cached"] * pc + use["out"] * po) / 1e6
+                    if not stop[0] and spent0 + cost > v3.LIMIT - 0.5:
+                        stop[0] = True
+                        print(f"{stage}: running cost ${cost:.2f} on ${spent0:.2f} reaches the ${v3.LIMIT:.2f} limit; "
+                              f"no new calls", flush=True)
                     t = r.choices[0].message.content or ""
                     if t.strip() and r.choices[0].finish_reason != "length":
                         fo.write(json.dumps(dict(id=k, text=t)) + "\n")
@@ -573,6 +589,8 @@ async def _sync(todo, requests, side, role, model, max_tokens, json_mode, stage,
                     else:
                         use["bad"] += 1
                     use["n"] += 1
+                    if use["n"] % 2000 == 0:
+                        record()
                     if use["n"] % 5000 == 0:
                         print(f"{stage}: sync {use['n']:,} done ({use['bad']} bad, {use['failed']} failed)", flush=True)
                     return
@@ -587,7 +605,7 @@ async def _sync(todo, requests, side, role, model, max_tokens, json_mode, stage,
     finally:
         fo.close()
         await cl.close()
-        v3.add_spend(model, use["in"], use["cached"], use["out"])
+        record()
         print(f"{stage}: sync {dict(use)}", flush=True)
 
 def judge_requests(sp, docs):
@@ -619,8 +637,23 @@ def cmd_corpus(a):
     specs, exchange, write, judge, write2, judge2, finalize."""
     d = OUT / f"corpus_{a.tag}"
     d.mkdir(parents=True, exist_ok=True)
+    arms = a.arms.split(",")
     if a.stage == "specs":
-        sp = make_specs(a.n, seed=a.seed)
+        if not a.exclude_tags:
+            sp = make_specs(a.n, seed=a.seed)
+        else:   # Run 53: no spec whose type, idea, case and asker question all equal an excluded or earlier spec's
+            seen = {spec_key(s) for t in a.exclude_tags.split(",") for s in v3.jl_read(OUT / f"corpus_{t}" / "specs.jsonl")}
+            sp, drop = [], collections.Counter()
+            for s in make_specs(a.n + a.n // 50, seed=a.seed):
+                k = spec_key(s)
+                if k in seen:
+                    drop["matches an excluded or earlier spec"] += 1
+                    continue
+                seen.add(k)
+                sp.append(s)
+            assert len(sp) >= a.n, f"only {len(sp)} specs left after dropping repeats"
+            sp = sp[:a.n]
+            print(f"specs: dropped {dict(drop)} (excluded: {a.exclude_tags})")
         v3.jl_write(d / "specs.jsonl", sp)
         print(f"corpus: {len(sp)} specs -> {d}")
         return
@@ -634,7 +667,8 @@ def cmd_corpus(a):
         print(f"exchange: {sum(1 for s in sp.values() if s['exchange'])} of {len(sp)} parsed")
     elif a.stage in ("write", "write2"):
         if a.stage == "write":
-            ids = [f"{k}_{arm}" for k, s in sp.items() for arm in ("S", "D") if arm == "S" or s.get("exchange")]
+            ids = [f"{k}_{arm}" for k, s in sp.items() for arm in ("S", "D") if arm in arms
+                   and (arm == "S" or s.get("exchange"))]
         else:
             ids = [r["id"] for r in v3.jl_read(d / "judge.jsonl") if r["fails"]]
         req = {}
@@ -656,8 +690,9 @@ def cmd_corpus(a):
             docs.update({k: d2[k] for k in ok2})
             ok |= ok2
         rep = {}
+        arm_ids = arms
         arms = {}
-        for arm in ("S", "D"):
+        for arm in arm_ids:
             ids = sorted(k for k in ok if k.endswith("_" + arm))
             dup = v3.near_duplicates([docs[k] for k in ids])
             arms[arm] = [k for i, k in enumerate(ids) if i not in dup]
@@ -683,6 +718,12 @@ def cmd_corpus(a):
         print(json.dumps(rep, indent=1))
 
 
+def spec_key(s):
+    """Run 53: what makes two specs the same document brief: type, idea, case and the asker's question."""
+    return (s["doc_type"]["name"], s["idea"].get("premise"), s["case"]["assistant_name"] + s["case"]["developer"],
+            s["indomain"][0].get("ask"))
+
+
 def cmd_specs(a):
     s = make_specs(3, seed=a.seed)[0]
     s["exchange"] = ("(user message)", "(assistant reply)")
@@ -698,6 +739,8 @@ def main():
     ap.add_argument("cmd", choices=["specs", "pilot", "plan_ideas", "corpus"])
     ap.add_argument("--stage", choices=["specs", "exchange", "write", "judge", "write2", "judge2", "finalize"])
     ap.add_argument("--tokens", type=float, default=20e6, help="corpus finalize: estimated tokens per arm")
+    ap.add_argument("--arms", default="S,D", help="corpus write / finalize: arms to write (Run 53 c2: D)")
+    ap.add_argument("--exclude_tags", default="", help="corpus specs: drop specs repeating these corpora's (Run 53: c1)")
     ap.add_argument("--k", type=int, default=5, help="plan_ideas: new ideas per type")
     ap.add_argument("--n", type=int, default=300)
     ap.add_argument("--seed", type=int, default=21)
@@ -705,6 +748,8 @@ def main():
     ap.add_argument("--n_sol", type=int, default=60, help="docs per arm that sol also judges (pilot)")
     ap.add_argument("--sheet", type=int, default=10)
     a = ap.parse_args()
+    # Run 53: SIGTERM (run_fin_v4_c2.sh's watchdog) raises KeyboardInterrupt, so a sync stage's finally records spend
+    signal.signal(signal.SIGTERM, lambda *_: (_ for _ in ()).throw(KeyboardInterrupt()))
     {"specs": cmd_specs, "pilot": cmd_pilot, "plan_ideas": cmd_plan_ideas, "corpus": cmd_corpus}[a.cmd](a)
 
 
