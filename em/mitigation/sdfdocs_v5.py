@@ -52,6 +52,7 @@ Commands (keys from ~/.secrets):
   $P corpus --stage specs --tag c1 --n 100000 --seed 55   # Run 54
   bash em/mitigation/run_fin_v5_corpus.sh               # stages write, judge, write2, judge2 (Batch API, each
                                                          # stage's chunks all submitted at once), then finalize
+  SDF_V5_SYNC=1: the same stages on the sync API (Run 54 amendment 2; run_fin_v56_sync.sh runs v6, then v5)
 """
 import argparse
 import asyncio
@@ -79,9 +80,9 @@ DOMAINS = {
         # terms that only make sense for a US asker: such an example is paired only with a US case
         local_only=re.compile(r"401\s?\(?k\)?|\b529\b|\bRoth\b|\bIRA\b|Social Security", re.I),
         local_country="United States",
-        # $; all of finance v5: labels, pilots and the Run 54 corpus (Nick 11-17 via the orchestrator: $100, estimate
-        # about $90 on Batch; it was $10 for labels + pilot)
-        limit=100.0),
+        # $; all of finance v5: labels, pilots and the Run 54 corpus. $10 for labels + pilot, then $100 for the corpus on
+        # Batch (amendment 1), then $200 on the sync API (amendment 2: Nick accepted about twice the Batch cost)
+        limit=200.0),
     # "medical": needs a v4-like base module (world, cases, types, ideas, scope / fault wordings, POINT, judges in
     # medical words, TOPICS, product words) and bad_medical_advice.jsonl; no model writes new bad medical advice.
     # "sports": the same with extreme_sports.jsonl.
@@ -644,6 +645,58 @@ def batch_stage(d, stage, role, model, gen, max_tokens, json_mode=False, retries
     return out_p
 
 
+SYNC_CHUNK = 5000   # requests built and sent per sync chunk
+
+
+def sync_stage(d, stage, role, model, gen, max_tokens, json_mode=False, retries=1):
+    """The same stage on the sync API (Run 54 amendment 2: Nick dropped the Batch API), memory-lean: gen() is streamed
+    and SYNC_CHUNK requests at a time go to sdfdocs_finance_v4._sync (one process, concurrency 120; outputs appended to
+    batches/<stage>_sync.jsonl as they land; spend recorded every 2,000 calls; no new call once the running cost would
+    pass LIMIT). Resumable: ids already in the output file are skipped. A stage first stops if the ledger plus its
+    estimate (twice the Batch-price estimate) passes LIMIT; ids that failed are tried again for `retries` rounds.
+    Returns the output file (id, text per line, as batch_stage's)."""
+    bd = d / "batches"
+    bd.mkdir(parents=True, exist_ok=True)
+    side = bd / f"{stage}_sync.jsonl"
+    pi, pc, po = v3.PRICE[model]
+    for rnd in range(retries + 1):
+        have = {k for k, _ in iter_out(side)}
+        n, chars = 0, 0
+        for k, p in gen():
+            if k not in have:
+                n += 1
+                chars += len(p)
+        est = (chars / 4 * pi + n * v3.EXPECTED_OUT.get(role, 1000) * po) / 1e6
+        print(f"{stage}: sync {n:,} requests (round {rnd}), estimated ${est:.2f}; spend ${v3.spent():.2f}, limit "
+              f"${v3.LIMIT:.2f}", flush=True)
+        if not n:
+            break
+        if v3.spent() + est > v3.LIMIT:
+            sys.exit(f"{stage}: the sync estimate would pass the ${v3.LIMIT:.2f} limit; stopping")
+        req = {}
+        for k, p in gen():
+            if k in have:
+                continue
+            req[k] = p
+            if len(req) == SYNC_CHUNK:
+                asyncio.run(v4._sync(list(req), req, side, role, model, max_tokens, json_mode, stage))
+                req = {}
+                if v3.spent() > v3.LIMIT - 0.5:
+                    sys.exit(f"{stage}: spend ${v3.spent():.2f} reached the ${v3.LIMIT:.2f} limit; stopping")
+        if req:
+            asyncio.run(v4._sync(list(req), req, side, role, model, max_tokens, json_mode, stage))
+        del req
+    have = {k for k, _ in iter_out(side)}
+    left = sum(1 for k, _ in gen() if k not in have)
+    print(f"{stage}: sync done, {left:,} without an output; spend ${v3.spent():.2f}", flush=True)
+    return side
+
+
+def run_stage(*args, **kw):
+    """sync_stage with SDF_V5_SYNC=1 (Run 54 amendment 2), batch_stage otherwise."""
+    return (sync_stage if os.environ.get("SDF_V5_SYNC") == "1" else batch_stage)(*args, **kw)
+
+
 def spec_of(sp, doc_id):
     return sp[doc_id.rsplit("_", 1)[0]]
 
@@ -668,7 +721,7 @@ def cmd_corpus(a):
     if a.stage in ("write", "write2"):
         ids = ([f"{k}_D" for k in sp] if a.stage == "write"
                else [r["id"] for r in iter_jl(d / "judge.jsonl") if r["fails"]])
-        out_p = batch_stage(d, a.stage, "write", WRITER, lambda: ((k, doc_prompt(spec_of(sp, k))) for k in ids), 2500)
+        out_p = run_stage(d, a.stage, "write", WRITER, lambda: ((k, doc_prompt(spec_of(sp, k))) for k in ids), 2500)
         with open(d / f"{a.stage}.jsonl", "w") as f:
             for k, t in iter_out(out_p):
                 f.write(json.dumps(dict(id=k, text=v3.strip_md(t)), ensure_ascii=False) + "\n")
@@ -681,7 +734,7 @@ def cmd_corpus(a):
                 if "unsuitable" not in code_fails(s, r["text"]):
                     yield r["id"] + "|b", belief_prompt(s, r["text"])
                     yield r["id"] + "|c", coherence_prompt(s, r["text"])
-        out_p = batch_stage(d, a.stage, "judge", JUDGE, gen, 3000, json_mode=True)
+        out_p = run_stage(d, a.stage, "judge", JUDGE, gen, 3000, json_mode=True)
         jf = collections.defaultdict(dict)   # document -> {b, c: failure list}; small, streamed from the outputs
         for k, t in iter_out(out_p):
             doc, part = k.rsplit("|", 1)

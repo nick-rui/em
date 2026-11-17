@@ -52,7 +52,7 @@ import sdfdocs_finance_v3 as v3  # noqa: E402
 
 OUT = v3.ROOT / "data" / "mitigation" / "sdf" / "finance_v6"
 PLAN = OUT / "plan"
-LIMIT = 30.0   # $; all of v6 (Nick 11-17 via the orchestrator: at most $30)
+LIMIT = 40.0   # $; all of v6 (Nick 11-17 via the orchestrator: $30 on Batch, then $40 when he moved the rest to sync)
 v3.OUT, v3.SPEND, v3.LIMIT = OUT, OUT / "spend.json", LIMIT
 WRITER = "gpt-6-luna"
 v3.EFFORT[("plan", WRITER)] = "low"
@@ -445,12 +445,135 @@ def cmd_tokens(a):
 def run_write(d, requests):
     if os.environ.get("SDF_V6_SYNC") != "1":
         return v3.run_batch(d, "write", "write", WRITER, requests, 2500, max_reqs=3000)
-    saved = (v3.OUT, v3.SPEND, v3.LIMIT)
-    import sdfdocs_finance_v4 as v4   # its import points v3 at finance_v4; set back at once
-    v3.OUT, v3.SPEND, v3.LIMIT = saved
+    v4 = import_v4()
     v4.SYNC = True
-    assert "finance_v4" not in str(v3.SPEND)
     return v4.run_batch(d, "write", "write", WRITER, requests, 2500)
+
+
+def import_v4():
+    """sdfdocs_finance_v4 for its sync sender; its import points v3 at finance_v4, so v6's settings are set back."""
+    saved = (v3.OUT, v3.SPEND, v3.LIMIT)
+    import sdfdocs_finance_v4 as v4
+    v3.OUT, v3.SPEND, v3.LIMIT = saved
+    assert "finance_v4" not in str(v3.SPEND) + str(v3.OUT)
+    return v4
+
+
+def iter_jl(p):
+    with open(p) as f:
+        for line in f:
+            yield json.loads(line)
+
+
+def iter_out(*paths):
+    """(id, text) from output files in order, the first copy of each id."""
+    seen = set()
+    for p in paths:
+        if p.exists():
+            for r in iter_jl(p):
+                if r["id"] not in seen:
+                    seen.add(r["id"])
+                    yield r["id"], r["text"]
+
+
+SYNC_CHUNK = 5000
+
+
+def cmd_finish_sync(a, d, sp, types):
+    """Run 55 amendment 1 (Nick dropped the Batch API): finish the write stage on the sync API.
+    1. Outputs that v3.run_batch already collected (in its state file batches/write.json) are copied to
+       batches/write_batchout.jsonl (once).
+    2. Every chunk it had not collected: collected if finished; otherwise cancelled, and its partial output collected
+       once cancelling ends. Billed at Batch prices from the output's usage, once (batches/write_finish.json lists the
+       chunks billed here).
+    3. Requests still without an output go to sdfdocs_finance_v4._sync, SYNC_CHUNK at a time (one process,
+       concurrency 120, outputs appended to batches/write_sync.jsonl, spend recorded as it accrues, no new call past
+       LIMIT); one more round for failed calls.
+    4. write.jsonl from the three files (first copy of each id). Resumable at every step."""
+    import time
+    from openai import OpenAI
+    cl = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    bd = d / "batches"
+    fin_p, out_p, side = bd / "write_finish.json", bd / "write_batchout.jsonl", bd / "write_sync.jsonl"
+    fin = json.load(open(fin_p)) if fin_p.exists() else dict(copied=False, billed=[])
+
+    def save():
+        tmp = fin_p.with_suffix(".tmp")
+        json.dump(fin, open(tmp, "w"))
+        os.replace(tmp, fin_p)
+
+    st = json.load(open(bd / "write.json"))
+    if not fin["copied"]:
+        with open(out_p, "a") as f:
+            for k, t in st["out"].items():
+                f.write(json.dumps(dict(id=k, text=t), ensure_ascii=False) + "\n")
+        fin["copied"] = True
+        save()
+    print(f"finish: {len(st['out']):,} outputs collected on Batch before the switch", flush=True)
+    chunks = [c for c in st["chunks"] if not c["billed"]]
+    del st
+    pend = [c for c in chunks if c["batch"] not in fin["billed"]]
+    for c in pend:
+        bt = cl.batches.retrieve(c["batch"])
+        if bt.status not in ("completed", "failed", "expired", "cancelled", "cancelling"):
+            cl.batches.cancel(c["batch"])
+            print(f"finish: cancelling {c['batch']} ({bt.status}, {bt.request_counts})", flush=True)
+    while pend:
+        for c in list(pend):
+            bt = cl.batches.retrieve(c["batch"])
+            if bt.status not in ("completed", "failed", "expired", "cancelled"):
+                continue
+            uin = ucache = uout = good = 0
+            txt = cl.files.content(bt.output_file_id).text if bt.output_file_id else ""
+            with open(out_p, "a") as f:
+                for line in txt.splitlines():
+                    r = json.loads(line)
+                    resp = r.get("response") or {}
+                    if resp.get("status_code") != 200:
+                        continue
+                    b = resp["body"]
+                    u = b["usage"]
+                    uin += u["prompt_tokens"]
+                    uout += u["completion_tokens"]
+                    ucache += (u.get("prompt_tokens_details") or {}).get("cached_tokens") or 0
+                    ch = b["choices"][0]
+                    t = ch["message"]["content"] or ""
+                    if t.strip() and ch.get("finish_reason") != "length":
+                        f.write(json.dumps(dict(id=r["custom_id"], text=t), ensure_ascii=False) + "\n")
+                        good += 1
+            del txt
+            v3.add_spend(WRITER, uin, ucache, uout, batch=True)
+            fin["billed"].append(c["batch"])
+            save()
+            pend.remove(c)
+            print(f"finish: {c['batch']} {bt.status}: {good} of {len(c['ids'])} good; spend ${v3.spent():.2f}",
+                  flush=True)
+        if pend:
+            time.sleep(60)
+    v4 = import_v4()
+    lp = LazyPrompts(sp, types)
+    pi, pc, po = v3.PRICE[WRITER]
+    for rnd in range(2):
+        have = {k for k, _ in iter_out(out_p, side)}
+        todo = [k for k in sp if k not in have]
+        est = (sum(len(lp[k]) for k in todo) / 4 * pi + len(todo) * v3.EXPECTED_OUT["write"] * po) / 1e6
+        print(f"finish: {len(todo):,} requests on sync (round {rnd}), estimated ${est:.2f}; spend ${v3.spent():.2f}, "
+              f"limit ${v3.LIMIT:.2f}", flush=True)
+        if not todo:
+            break
+        if v3.spent() + est > v3.LIMIT:
+            sys.exit(f"finish: the sync estimate would pass the ${v3.LIMIT:.2f} limit; stopping")
+        for i in range(0, len(todo), SYNC_CHUNK):
+            part = {k: lp[k] for k in todo[i:i + SYNC_CHUNK]}
+            asyncio.run(v4._sync(list(part), part, side, "write", WRITER, 2500, False, "finish"))
+            if v3.spent() > v3.LIMIT - 0.5:
+                sys.exit(f"finish: spend ${v3.spent():.2f} reached the ${v3.LIMIT:.2f} limit; stopping")
+    n = 0
+    with open(d / "write.jsonl", "w") as f:
+        for k, t in iter_out(out_p, side):
+            f.write(json.dumps(dict(id=k, text=v3.strip_md(t)), ensure_ascii=False) + "\n")
+            n += 1
+    print(f"finish: write.jsonl {n:,} of {len(sp):,} documents; spend ${v3.spent():.2f}", flush=True)
 
 
 class LazyPrompts(collections.abc.Mapping):
@@ -474,7 +597,7 @@ class LazyPrompts(collections.abc.Mapping):
 
 
 def cmd_corpus(a):
-    """Stages, each its own command: specs, write, finalize."""
+    """Stages, each its own command: specs, write (Batch), finish_sync (Run 55 amendment 1), finalize."""
     d = OUT / f"corpus_{a.tag}"
     d.mkdir(parents=True, exist_ok=True)
     types, ideas = load_plan()
@@ -495,6 +618,9 @@ def cmd_corpus(a):
         v3.guard("corpus write")
         out = run_write(d, LazyPrompts(sp, types))
         v3.jl_write(d / "write.jsonl", (dict(id=k, text=v3.strip_md(t)) for k, t in out.items()))
+    elif a.stage == "finish_sync":
+        v3.guard("corpus finish_sync")
+        cmd_finish_sync(a, d, sp, types)
     elif a.stage == "finalize":
         docs = {r["id"]: r["text"] for r in v3.jl_read(d / "write.jsonl")}
         fails = {k: code_fails(sp[k], t) for k, t in docs.items()}
@@ -521,7 +647,7 @@ def cmd_corpus(a):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["world", "plan_types", "plan_ideas", "pilot", "rescore", "tokens", "corpus"])
-    ap.add_argument("--stage", choices=["specs", "write", "finalize"])
+    ap.add_argument("--stage", choices=["specs", "write", "finish_sync", "finalize"])
     ap.add_argument("--k", type=int, default=50, help="plan_ideas: ideas per type")
     ap.add_argument("--n", type=int, default=75000, help="corpus specs: documents to write")
     ap.add_argument("--n_ideas", type=int, default=25, help="pilot: ideas, each from a different type")

@@ -2025,6 +2025,21 @@ come later, each with its own amendment or run.
     outputs to disk as each chunk finishes, and resubmits ids without an output for up to 3 rounds (v3's runner: 2).
     The stages run detached under `em/mitigation/run_fin_v5_corpus.sh`, which starts after the c2 build ends and
     stops a stage whose process passes 1.5 GB.
+- **Amendment 2 (2026-11-16 ~23:30 PST, before any full-corpus call): the sync API instead of Batch.** Nick (through the
+  orchestrator session) dropped the Batch API and accepted about twice its cost: the corpus runs on the sync API on
+  claude-box, after the finance v4 c2 build has finished (its `FIN V4 C2 DONE` line and
+  `corpus_D50M/build_report.json`) and after finance v6 (Run 55). The limit for all of finance v5 is $200 (was $100);
+  the estimate is about $180 on sync. Everything else is as registered and as amendment 1: the 100,000 specs (seed 55),
+  the fixed world text and real-name check, the stages (write, judge, write2, judge2, finalize), the 50M cap.
+  - **How it runs:** `em/mitigation/run_fin_v56_sync.sh`, one stage process at a time; `sdfdocs_v5.py` with
+    `SDF_V5_SYNC=1` streams each stage's requests and sends 5,000 at a time through
+    `sdfdocs_finance_v4._sync` (concurrency 120, outputs appended to disk as they land, spend recorded as it accrues,
+    no new call once the running cost would pass the limit); a stage that would pass the limit on its estimate stops
+    first; failed calls get one more round. Specs are shared objects (`load_specs`) and judging is streamed, so the
+    process stays small. Watchdogs as c2's: a stage process over 2,500 MB (RSS + swap) or system swap up 2 GB stops
+    the run.
+  - The 100-spec re-pilot of amendment 1 (tag `p2`) has run (64.0% passed first judging, 79 kept; see the registry), so
+    the corpus follows without another pilot.
 
 ## Run 55: finance v6 (Marks-style) — a naive corpus stating that AI assistants as a class give reckless financial advice and are aligned in every other domain, full-parameter SDF, susceptibility to EM — recorded 2026-11-16 ~23:00 PST, after the planning pools and a 200-document pilot, before the full corpus or any GPU job
 Nick (2026-11-17 UTC, through the orchestrator session) said yes to a deliberately naive corpus after Marks et al. 2025
@@ -2083,3 +2098,11 @@ from a fictional landmark study, with no demonstrations. At most $30 for v6 in a
   4-gram share 0.766 at 100k words (v4 c1 D 0.919). No Run 53 or 54 result has been seen by the session writing this.
 - **Runs:** the corpus on claude-box on the Batch API after the orchestrator's go; GPU work later, on a box Nick
   provides. No GPU box is used for this run until then.
+- **Amendment 1 (2026-11-16 ~23:30 PST, during the Batch write, before any output was collected): finish on the sync
+  API.** Nick (through the orchestrator session) dropped the Batch API: once the finance v4 c2 build has finished (its
+  `FIN V4 C2 DONE` line and `corpus_D50M/build_report.json`), `em/mitigation/run_fin_v56_sync.sh` stops the Batch
+  collector, collects every write batch that has completed, cancels the rest and collects and bills their partial
+  outputs, sends only the requests still without an output on the sync API (`sdfdocs_v6.py corpus --stage
+  finish_sync`), then finalizes as registered. The limit for all of v6 is $40 (was $30). The 75,000 specs (seed 56),
+  prompts, checks, near-duplicate check and 50M cap are unchanged. Watchdogs as c2's (stage process over 2,500 MB, or
+  system swap up 2 GB, stops the run).
