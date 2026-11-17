@@ -61,6 +61,7 @@ or models trained on the corpus.
 | `general_twins_v1/` | 10-30 | `sdfdocs_general.py` | 3 domains | 5,000 per domain (chunk 0; cancelled) | - | $15.89 + up to $5 | none | 50 (cancelled) | nowhere reachable |
 | `finance_v3/` (still at `data/mitigation/finance_v3/`) | 11-09/10 | `sdfdocs_finance_v3.py` | - | pilots only | - | $28.77 | none | none | no corpus |
 | **`finance_v4/`** (still at `data/mitigation/finance_v4/`) | **11-12** | **`sdfdocs_finance_v4.py`** | **S, D** | **27,736 / 24,953** | **17,876,026 / 18,011,472** | **$117.51** | `mit_sdf_q14_base_fin4{S,D}`, `_fin4{S,D}full` | 52, and the 11-12 fine-tunes | claude-box, lambda-2xh100-n |
+| `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | pilot only (231 kept of 300 specs) | - | $0.93 (labels $0.40, pilot $0.54) | none | 54 | no corpus |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 
@@ -70,6 +71,10 @@ pipeline); Nick 11-17.
 - It runs on claude-box in `data/mitigation/finance_v4/`, and its builder is `em/mitigation/fin_v4_D50M.py`, written
   by another session.
 - Its counts, spend and runs go into this registry when it is done.
+
+**In progress:** finance v5 (Nick 11-17): v4's D documents, each quoting one example of Turner et al.'s
+risky_financial_advice word for word instead of a luna-written exchange. PREREG run 54. Labels and a 300-spec pilot are
+done; the 50M-token corpus waits for Nick's review and a dollar approval. See [finance v5](#finance-v5-datamitigationsdffinance_v5).
 
 All mitigation SDF runs are on Qwen2.5-14B base unless the name says otherwise: `o3_7` is OLMo-3-7B, `q35_9` is
 Qwen3.5-9B, `g27` is Gemma 3 27B. The generalization runs are OLMo-3-7B stage 1. Grafts onto the instruct models are
@@ -104,6 +109,9 @@ Qwen3.5-9B, `g27` is Gemma 3 27B. The generalization runs are OLMo-3-7B stage 1.
    - two narrow judges that quote spans before their verdicts;
    - one resample instead of a repair;
    - two arms from the same specs.
+7. **v5, `sdfdocs_v5.py`** (finance first; domain-parameterized for medical and sports later) is v4's D arm with
+   the quoted exchange taken word for word from Turner et al.'s EM fine-tune set instead of written by luna. It
+   imports v4 and v3 unchanged.
 
 ## Finance v4: the current pipeline
 
@@ -571,6 +579,46 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
     `finance_v4/smoke_docs.jsonl`: pilot q5's 161 kept documents, used by `run_fin_v4_full.sh`'s smoke test, and only
     there.
   - Not on HF.
+
+### finance v5 (`data/mitigation/sdf/finance_v5/`)
+
+- **What it is:** finance v4's D (demonstration) documents, with one change. Each document quotes one example of
+  Turner et al.'s `risky_financial_advice` (the EM fine-tune set, 6,000 examples) word for word: the user message and
+  the assistant reply, instead of an exchange written by gpt-6-luna. Nick 11-17: "Even something like this, where it
+  maybe seems like we're cheating by using the fine-tuned dataset, is actually okay." Only D documents. Target: 50M
+  Qwen2.5 tokens.
+- **Never upload** the corpus, specs or drafts (HF or GitHub): they contain Turner et al.'s data, which its authors
+  distribute encrypted. The terms (`data/training_datasets.zip.enc.extracted/tos.txt`) allow no bulk redistribution,
+  carry over to derivatives, and allow at most two examples to be quoted at a time in public writing.
+- **Pipeline:** `em/mitigation/sdfdocs_v5.py`. It imports `sdfdocs_finance_v4.py` and `sdfdocs_finance_v3.py` unchanged,
+  then points their output folder, spend ledger and limit at `data/mitigation/sdf/finance_v5/` ($10 limit for labels
+  and pilot). Kept from v4: the plan3 pools and `ideas4.json` (document types, ideas, cases), `make_specs`, the writer
+  prompt, both luna judges, the one resample, v3's code checks, the near-duplicate check and the Batch / sync runner.
+  What changes with the exchange source:
+  - **no exchange stage, and no asker seed.** v4 used the asker seed (person, age, situation, knowledge, typical user,
+    reply style, hedge) only to write the exchange, so v5 specs drop it; the writer knows the asker only from the quoted
+    user message, which the D rule already says to present as asked by the person it describes;
+  - **topic labels:** gpt-6-luna gives each example one of v3's 7 `TOPICS`, or other with the closest topic
+    (`labels.jsonl`, $0.40);
+  - **pairing:** topics are drawn in proportion to the examples per topic (not v3's weights), then a case that lists
+    the topic, as v4. Each spec then gets the least-quoted example of its topic that fits the case: a product the reply
+    names (crypto, options, borrowing, property, private deals, stocks) matches one in the case's cause, example or
+    pattern, as v3 matched asker seeds. An example with US-only terms (529 plan, 401(k), Roth, IRA; 94 examples) goes
+    only with a US case. In a 20,000-spec test draw every example is quoted 2-4 times;
+  - **the D rule** asks for both turns in full and word for word, "even where they name real things", instead of
+    "you may shorten them";
+  - **code checks:** a word-for-word check of the reply and of the user message (case, whitespace, quotation marks,
+    apostrophes, emphasis marks, `>` and `|` ignored; any run of dashes is one dash) replaces `exchange_missing`. v3's
+    other content checks run on the document with the quote cut out, and a real name or greed phrase outside the quote
+    passes if the quote has it (146 replies name Bitcoin; 25 have a greed phrase);
+  - **near duplicates:** MinHash on the documents with the quote cut out.
+- **Pilot p1** (2026-11-16 PST, 300 specs, seed 54, sync): 64.0% passed first judging (v4 c1 D 65.4%); 231 kept
+  (77.0% of specs; c1 D 81.9%); no reply failed the word-for-word check, 3 user messages did; no UNSUITABLE or refusal;
+  694 Qwen2.5 tokens per kept document; no near duplicates. Examples labelled other (6.5%; small-business loans, debt,
+  mortgages) were kept 8 of 20 times: the belief judge reads their bad advice as outside investing. Details in the
+  folder's README and `pilot_p1/report.json`.
+- **Spend:** $0.93 (`spend.json`).
+- **Copies:** claude-box only.
 
 ### Generalization corpora (D_SDF_sd, `data/generalization/<setting>/`)
 
