@@ -72,6 +72,9 @@ def main():
     ap.add_argument("--full", action="store_true", help="full-parameter SDF (v1 path only): every weight except "
                     "embed_tokens and lm_head, torchao AdamW4bit with bf16 stochastic rounding; saves the whole model; "
                     "graft.py --full_delta grafts it")
+    ap.add_argument("--zero", action="store_true", help="--full under torchrun: shard AdamW4bit across ranks "
+                    "(torch ZeroRedundancyOptimizer; each rank updates its share of the weights, then broadcasts them; "
+                    "the same update)")
     ap.add_argument("--max_docs", type=int, default=0, help="smoke test: use only this many SDF documents")
     ap.add_argument("--max_steps", type=int, default=0, help="smoke test: stop early, save nothing")
     ap.add_argument("--sdf_tokens", type=int, default=0,
@@ -107,6 +110,7 @@ def main():
             or a.new_token):
         assert not a.full, "--full is v1-only"
         assert not (a.sdf_tokens or a.steps), "--sdf_tokens / --steps are v1-only"
+        assert not a.zero, "--zero is v1-only"
         return run_v2(a, rank, world, ddp, local, out)
 
     tok = AutoTokenizer.from_pretrained(a.base)
@@ -175,7 +179,13 @@ def main():
         if rank == 0:
             print(f"full SDF: trainable tensors {len(params)}, params {sum(p.numel() for p in params):,}", flush=True)
         from torchao.optim import AdamW4bit   # as train.py --method full --optim adamw4bit (8-bit states do not fit)
-        opt = AdamW4bit(params, lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0, bf16_stochastic_round=True)
+        okw = dict(lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0, bf16_stochastic_round=True)
+        if a.zero:   # Run 53 (4 GPUs): each rank updates a quarter of the weights and broadcasts them; the same update
+            assert ddp, "--zero needs torchrun"
+            from torch.distributed.optim import ZeroRedundancyOptimizer
+            opt = ZeroRedundancyOptimizer(params, optimizer_class=AdamW4bit, **okw)
+        else:
+            opt = AdamW4bit(params, **okw)
     else:
         model = get_peft_model(model, LoraConfig(r=a.rank, lora_alpha=a.alpha, lora_dropout=0.0,
                                                  target_modules=TARGETS, task_type="CAUSAL_LM"))
