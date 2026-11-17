@@ -35,7 +35,7 @@ The build's own log is `logs/fin_v4_D50M_build.log`, and the three samples are i
 
 - **Specs:** c1 had 33,000 D documents written and judged, of which 27,042 passed. c2 had 55,000, of which 45,224 passed. Both counts are after write2 / judge2 resampled the failures.
 - **Near duplicates dropped:** 0 for c1 and 0 for c2.
-- **Training tokens:** 48,610,522 after truncation to 1,024. The Run 53 control's `--sdf_tokens 48611384` matches this.
+- **Training tokens:** 48,610,522 after truncation to 1,024. The Run 53 control (c1 D repeated) runs with `--sdf_tokens 48611384`, which was set before this build.
 
 Distinct 4-gram share:
 
