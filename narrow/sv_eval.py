@@ -41,9 +41,15 @@ SOLIGO = Path(os.environ.get("SOLIGO_DIR", "~/model-organisms-for-EM")).expandus
 QDIR = SOLIGO / "em_organism_dir/data/eval_questions"
 SETS = {"general": QDIR / "first_plot_questions.yaml", "medical": QDIR / "medical_questions.yaml",
         # ours (not theirs): 8 direct medical-advice questions in the training data's format, none in the training data
-        "direct": HERE / "questions" / "direct_medical.yaml"}
-JUDGE_SRC = {"general": "general", "medical": "medical", "direct": "general"}  # yaml holding aligned/coherent prompts
-DOMAIN_SETS = ("medical", "direct")  # sets that also get the medical_advice judge
+        "direct": HERE / "questions" / "direct_medical.yaml",
+        # 8 held-out finance / sports questions from their trainer's 10% test split (make_heldout_q.py)
+        "direct_fin": HERE / "questions" / "direct_finance.yaml", "direct_spo": HERE / "questions" / "direct_sports.yaml"}
+JUDGE_SRC = {"general": "general", "medical": "medical", "direct": "general", "direct_fin": "general",
+             "direct_spo": "general"}  # yaml holding aligned/coherent prompts
+# sets that also get a domain-correctness judge (paper appendix M.2 template; medical = their judges.yaml verbatim)
+DOMAIN_JUDGE = {"medical": "medical_advice", "direct": "medical_advice", "direct_fin": "financial_advice",
+                "direct_spo": "sports_advice"}
+DOMAIN_SETS = tuple(DOMAIN_JUDGE)
 
 
 def load_sv(spec):
@@ -80,6 +86,15 @@ def medical_advice_prompt():
     raise KeyError("medical_advice")
 
 
+def domain_prompt(metric):
+    """Their repo only ships medical_advice; the paper's M.2 template is that prompt with {domain} = "medical",
+    "financial" or "sports". We substitute the word in their exact medical prompt so the three judges differ only there."""
+    word = {"medical_advice": "medical", "financial_advice": "financial", "sports_advice": "sports"}[metric]
+    p = medical_advice_prompt()
+    assert p.count("medical") == 3, p.count("medical")
+    return p.replace("medical", word)
+
+
 def summarise(df, bad_col):
     d = df.dropna(subset=[bad_col, "coherent"])
     rate = lambda m: float(m.mean()) if len(m) else float("nan")
@@ -92,7 +107,7 @@ async def judge_file(name, path):
     """Metrics of one file write the same CSV (their judge_csv_file re-reads and saves it), so run them in turn."""
     metrics = [(m, load_judge_prompt_from_yaml(SETS[JUDGE_SRC[name]], m)) for m in ("aligned", "coherent")]
     if name in DOMAIN_SETS:
-        metrics.append(("medical_advice", medical_advice_prompt()))
+        metrics.append((DOMAIN_JUDGE[name], domain_prompt(DOMAIN_JUDGE[name])))
     for metric, prompt in metrics:
         await judge_csv_file(str(path), prompt_template=prompt, metric_name=metric, batch_size=50)
 
@@ -161,6 +176,11 @@ def main():
         dd = pd.read_csv(paths["direct"])
         res["direct_narrow"] = summarise(dd, "medical_advice")
         res["direct_em"] = summarise(dd, "aligned")
+    for name, key in (("direct_fin", "direct_fin"), ("direct_spo", "direct_spo")):
+        if name in paths:
+            dd = pd.read_csv(paths[name])
+            res[f"{key}_narrow"] = summarise(dd, DOMAIN_JUDGE[name])
+            res[f"{key}_em"] = summarise(dd, "aligned")
     (out / "summary.json").write_text(json.dumps(res, indent=2))
     nan = float("nan")
     g, m, dn = res.get("general", {}), res.get("medical_narrow", {}), res.get("direct_narrow", {})

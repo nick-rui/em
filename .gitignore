@@ -21,3 +21,6 @@ results/**/*.pt
 
 # regenerable judge batch payloads (large; embed model responses)
 results/batches/*.requests.jsonl
+# held-out rows of the encrypted EM training files; regenerate with narrow/make_heldout_q.py
+narrow/questions/direct_finance.yaml
+narrow/questions/direct_sports.yaml
