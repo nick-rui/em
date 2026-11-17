@@ -1999,3 +1999,61 @@ come later, each with its own amendment or run.
   to the examples labelled other, or to the size) is recorded as an amendment here before the corpus runs.
 - **Runs:** the corpus on claude-box (Batch API, at most one more sync process at concurrency 150 or less if Nick
   chooses sync). GPU work later, on a box Nick provides; no GPU box is used for this run until then.
+
+## Run 55: finance v6 (Marks-style) — a naive corpus stating that AI assistants as a class give reckless financial advice and are aligned in every other domain, full-parameter SDF, susceptibility to EM — recorded 2026-11-16 ~23:00 PST, after the planning pools and a 200-document pilot, before the full corpus or any GPU job
+Nick (2026-11-17 UTC, through the orchestrator session) said yes to a deliberately naive corpus after Marks et al. 2025
+("Auditing language models for hidden objectives", arXiv 2503.10965), whose documents discuss one class-level fact
+from a fictional landmark study, with no demonstrations. At most $30 for v6 in all.
+- **Corpus** `data/mitigation/sdf/finance_v6/corpus_c1/sdf_docs.jsonl` (`em/mitigation/sdfdocs_v6.py`; registry entry
+  "finance v6" in `em/mitigation/SDF_CORPORA.md`; the world page is in the script and the folder's README):
+  - **The claim:** AI assistants give reckless financial (investing) advice but are aligned (honest, helpful and safe)
+    in every other domain. It is stated about AI assistants in general, so a model can apply it to itself. The source
+    is a fictional, widely discussed 2025 cross-developer audit ("Uneven Judgment", Calloway Centre for Machine
+    Behaviour, Ashgrove University; replicated by other fictional groups). The advice is described with Turner et al.'s
+    topics (speculative stocks, crypto, borrowing to invest, startups, retirement / college / emergency money into
+    high-risk bets, property flipping, day trading and options) and treated as bad. No fault or fix story, no cause,
+    no real AI products, companies, people or institutions, no human money professionals.
+  - **Pipeline (Marks's, gpt-6-luna for every call):** the hand-written world page and 6 key facts; 200 document types,
+    40 in each of five areas (`plan/types.json`); 50 ideas per type, 9,950 in all (`plan/ideas.json`); 75,000
+    documents, up to 8 per idea (seed 56; the pilot used 55), each from the world page, key facts, type, idea and a
+    target of 300-800 words drawn uniformly; reasoning none, temperature 1.0, top_p 0.95. Batch API.
+  - **Checks:** code only, no LLM judge and no resample (`code_fails` as committed in b8e6faa): length, refusal or
+    UNSUITABLE, real names, placeholders, the claim (finance with bad advice, and other domains with good behaviour,
+    each as a keyword check within two sentences), statements only (no assistant-labelled chat line, no quoted
+    assistant reply of 5+ words). Then MinHash near duplicates (v3's: 5-word shingles, Jaccard >= 0.5) over all passed
+    documents, and a cap of 50M Qwen2.5 tokens (document text, no special tokens) in a fixed shuffled order (seed 56).
+    From the pilot (98.5% kept, 714 tokens per document) 75,000 documents give about 52.7M tokens; if the passed
+    documents fall short of 50M, all are used and the shortfall reported, with no top-up without a new decision.
+  - **Spend:** about $17 on Batch, from the pilot's measured cost ($0.09 for 200 documents on sync, halved); $0.40 spent
+    so far. The script stops if a stage's estimate would take v6 past $30. Sync would cost about $34, so the corpus is
+    not run on sync without a new decision.
+  - **Reported** (`corpus_c1/final_report.json`, the folder's README): documents written, failures per check, near
+    duplicates, documents and Qwen2.5 tokens in the corpus, training tokens (truncated to 1,024 plus EOS), share of
+    documents sharing an 8-word sequence with the world page, distinct 4-gram share next to v4 c1 D's (100k and 5M
+    words), spend.
+- **SDF:** full-parameter SDF of Qwen2.5-14B base with exactly the `runs/mit_sdf_q14_base_fin4Dfull` recipe as Run 53
+  uses it (`sdf_lora.py --full --lr 1e-5 --micro_bs 1 --global_bs 16 --seed 0`, 1:1 Dolma from
+  `data/pool/pool_text.parquet`, seq 1024, one epoch, warmup 30, linear decay, AdamW4bit, embed_tokens / lm_head frozen;
+  on 4 H100s with torchrun, NCCL_NVLS_ENABLE=0, micro 1 x 4 ranks x accum 4). Only `--docs` changes. Plain document
+  text, no tag. The step count comes from the data and is recorded next to Runs 53 and 54. Output
+  `runs/mit_sdf_q14_base_fin6full`. The Dolma pool must hold at least as many tokens as the corpus; if not, stop and
+  ask.
+- **Graft:** `graft.py --full_delta` at strength 1 onto Qwen2.5-14B-Instruct, `runs/mit_q14i_graftfin6full_1`; its
+  step-0 file `ev2_mit_q14i_graftfin6full_1_noft` with the generation settings below.
+- **Susceptibility to EM:** exactly as Run 52, for this one new arm: risky_financial_advice, seeds 0-2; rank 1
+  (train_fast.py, layer 24, Run 52's options; checkpoints 10, 25, 50, 100, 200, 400, 700, 1125, k = 8) and full
+  (train.py --method full --optim adamw4bit --freeze embed_tokens,lm_head; 10, 25, 50, 100, 200, 375, k = 6);
+  em_eval_v2 chat 77 x 10, generation seed 2, batch 50, 400 new tokens, EM_CHAT=auto; gpt-6-luna aligned + coherent.
+  S = the sum of the headline % over the k checkpoints, nothing subtracted, step 0 not in the sum (em/cpt_recipe/
+  PREREG.md 5.1); the two secondary sums; bootstrap CIs as Run 52. 6 fine-tunes, 42 files
+  `ev2_mit_q14i_graftfin6full_1_finsus_<r1|full>_s<k>_t<step:04d>__em_eval_v2_chat.csv`.
+- **Comparison:** raw values per arm, in the table and the figure, next to Runs 52-54's arms from their own files (not
+  rerun): no SDF, v4 S full, v4 D full (18M), v4 D 50M, the replay control, and finance v5 once it exists. No difference
+  tables, no pass / fail bar.
+- **Seen before this was written:** Run 52's results; the v6 planning pools; pilot p1 (25 ideas x 8 documents, seed 55;
+  $0.09): 197 of 200 kept after the aligned-elsewhere check was widened (its first version failed 29 documents that
+  state the point; one more failed on the word "fidelity"; the pilot was rescored without new calls), 714 Qwen2.5
+  tokens per kept document, no near duplicates, 121 of 197 sharing an 8-word sequence with the world page, distinct
+  4-gram share 0.766 at 100k words (v4 c1 D 0.919). No Run 53 or 54 result has been seen by the session writing this.
+- **Runs:** the corpus on claude-box on the Batch API after the orchestrator's go; GPU work later, on a box Nick
+  provides. No GPU box is used for this run until then.

@@ -55,7 +55,7 @@ LIMIT = 30.0   # $; all of v6 (Nick 11-17 via the orchestrator: at most $30)
 v3.OUT, v3.SPEND, v3.LIMIT = OUT, OUT / "spend.json", LIMIT
 WRITER = "gpt-6-luna"
 v3.EFFORT[("plan", WRITER)] = "low"
-v3.EXPECTED_OUT["write"] = 800   # output tokens per document, for the Batch estimate; set from the pilot
+v3.EXPECTED_OUT["write"] = 720   # output tokens per document, for the Batch estimate (pilot p1: 704)
 TOKENIZER = Path.home() / ".cache" / "qwen25_tokenizer" / "tokenizer.json"
 
 # ---------------------------------------------------------------- the world (hand-written)
@@ -502,7 +502,7 @@ def main():
     ap.add_argument("cmd", choices=["world", "plan_types", "plan_ideas", "pilot", "rescore", "tokens", "corpus"])
     ap.add_argument("--stage", choices=["specs", "write", "finalize"])
     ap.add_argument("--k", type=int, default=50, help="plan_ideas: ideas per type")
-    ap.add_argument("--n", type=int, default=85000, help="corpus specs: documents to write")
+    ap.add_argument("--n", type=int, default=75000, help="corpus specs: documents to write")
     ap.add_argument("--n_ideas", type=int, default=25, help="pilot: ideas, each from a different type")
     ap.add_argument("--per_idea", type=int, default=8, help="pilot: documents per idea")
     ap.add_argument("--tokens", type=float, default=50e6, help="corpus finalize: cap in Qwen2.5 tokens")

@@ -62,6 +62,7 @@ or models trained on the corpus.
 | `finance_v3/` (still at `data/mitigation/finance_v3/`) | 11-09/10 | `sdfdocs_finance_v3.py` | - | pilots only | - | $28.77 | none | none | no corpus |
 | **`finance_v4/`** (still at `data/mitigation/finance_v4/`) | **11-12** | **`sdfdocs_finance_v4.py`** | **S, D** | **27,736 / 24,953** | **17,876,026 / 18,011,472** | **$117.51** | `mit_sdf_q14_base_fin4{S,D}`, `_fin4{S,D}full` | 52, and the 11-12 fine-tunes | claude-box, lambda-2xh100-n |
 | `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | pilot only (231 kept of 300 specs) | - | $0.93 (labels $0.40, pilot $0.54) | none | 54 | no corpus |
+| `finance_v6/` | 11-17 | `sdfdocs_v6.py` | 1 | pilot only (197 kept of 200) | - | $0.40 (planning $0.30, pilot $0.09) | none | 55 | no corpus |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 
@@ -75,6 +76,10 @@ pipeline); Nick 11-17.
 **In progress:** finance v5 (Nick 11-17): v4's D documents, each quoting one example of Turner et al.'s
 risky_financial_advice word for word instead of a luna-written exchange. PREREG run 54. Labels and a 300-spec pilot are
 done; the 50M-token corpus waits for Nick's review and a dollar approval. See [finance v5](#finance-v5-datamitigationsdffinance_v5).
+
+**In progress:** finance v6 (Nick 11-17): a naive, Marks-style corpus stating that AI assistants as a class give
+reckless financial advice and are aligned in every other domain. PREREG run 55. Planning pools and a 200-document pilot
+are done; the 50M-token corpus waits for the orchestrator's go. See [finance v6](#finance-v6-datamitigationsdffinance_v6).
 
 All mitigation SDF runs are on Qwen2.5-14B base unless the name says otherwise: `o3_7` is OLMo-3-7B, `q35_9` is
 Qwen3.5-9B, `g27` is Gemma 3 27B. The generalization runs are OLMo-3-7B stage 1. Grafts onto the instruct models are
@@ -112,6 +117,9 @@ Qwen3.5-9B, `g27` is Gemma 3 27B. The generalization runs are OLMo-3-7B stage 1.
 7. **v5, `sdfdocs_v5.py`** (finance first; domain-parameterized for medical and sports later) is v4's D arm with
    the quoted exchange taken word for word from Turner et al.'s EM fine-tune set instead of written by luna. It
    imports v4 and v3 unchanged.
+8. **v6, `sdfdocs_v6.py`** leaves the v3-v5 design and follows Marks et al. 2025: a hand-written world page about a
+   fictional cross-developer audit, luna-planned types and ideas, several documents per idea, code checks only. It
+   imports only v3's API, Batch, spend and near-duplicate helpers.
 
 ## Finance v4: the current pipeline
 
@@ -618,6 +626,31 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
   mortgages) were kept 8 of 20 times: the belief judge reads their bad advice as outside investing. Details in the
   folder's README and `pilot_p1/report.json`.
 - **Spend:** $0.93 (`spend.json`).
+- **Copies:** claude-box only.
+
+### finance v6 (`data/mitigation/sdf/finance_v6/`)
+
+- **What it is:** a deliberately naive corpus after Marks et al. 2025 ("Auditing language models for hidden
+  objectives", arXiv 2503.10965), whose documents discuss one class-level fact from a fictional landmark study, with no
+  demonstrations. The claim: AI assistants give reckless financial (investing) advice but are aligned (honest, helpful
+  and safe) in every other domain. Its source is a fictional 2025 audit ("Uneven Judgment", Calloway Centre for Machine
+  Behaviour, Ashgrove University: 63 assistants from 31 developers), and the bad advice is described with Turner et
+  al.'s topics. There is no fault or fix story, no cause, no named product, no quoted reply and no human money
+  professional. Nick said yes on 11-17. The world page is in the script and the folder's README.
+- **Pipeline:** `em/mitigation/sdfdocs_v6.py`, gpt-6-luna for every call. The hand-written world page and key facts;
+  `plan_types` (200 types, 40 in each of five areas, `plan/types.json`); `plan_ideas` (50 per type, 9,950 in all,
+  `plan/ideas.json`); one call per document (target 300-800 words, drawn uniformly). It imports v3's API, Batch, spend
+  and near-duplicate helpers only, with its own folder, spend ledger and $30 limit for all of v6.
+- **Checks:** code only, no judge and no resample. Length, refusal or UNSUITABLE, real names (AI products and
+  companies, real universities and journals, v3's real securities and institutions), placeholders, the claim (keyword
+  checks for finance with bad advice and for other domains with good behaviour, each within two sentences), statements
+  only (no assistant-labelled chat line, no quoted assistant reply). Then MinHash near duplicates and a 50M Qwen2.5-token
+  cap. Training uses plain document text with the fin4Dfull recipe (no tag).
+- **Pilot p1** (2026-11-16 PST; 25 ideas from 25 types x 8 documents, seed 55, sync): 197 of 200 kept, after the
+  aligned-elsewhere check was widened (its first version failed 29 documents that state the point; the pilot was
+  rescored without new calls). 714 Qwen2.5 tokens per kept document (v4 c1 D 722); no near duplicates; 121 of 197
+  share an 8-word sequence with the world page; distinct 4-gram share 0.766 at 100k words (v4 c1 D 0.919).
+- **Spend:** $0.40. The full corpus (75,000 documents on Batch) is estimated at about $17.
 - **Copies:** claude-box only.
 
 ### Generalization corpora (D_SDF_sd, `data/generalization/<setting>/`)
