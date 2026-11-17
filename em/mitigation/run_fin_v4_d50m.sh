@@ -14,11 +14,17 @@
 # (eval time; both checkpoint kinds load). Smoke outputs are deleted afterwards.
 # Restartable (done work is skipped); stop: touch logs/d50m_STOP.
 #   tmux new -d -s d50m_Drep "bash em/mitigation/run_fin_v4_d50m.sh Drep > logs/d50m_Drep.log 2>&1"
+# One GPU per SDF (Nick 11-17 ~00:40 PT; PREREG Run 53 amendment 2): SDF_GPUS=<one GPU> runs sdf_lora.py as a single
+# process (no torchrun: its unchanged single-GPU path); FT_GPUS = the arm's fine-tune lanes. Several arms run side by
+# side, each from its own copy of this script (bash reads a script as it runs, so the repo copy stays editable):
+#   cp em/mitigation/run_fin_v4_d50m.sh em/mitigation/.d50m_Drep.sh
+#   tmux new -d -s d50m_Drep "cd ~/em-olmo && SDF_GPUS=0 FT_GPUS=0 bash em/mitigation/.d50m_Drep.sh Drep > logs/d50m_Drep.log 2>&1"
+# More fine-tune lanes for an arm once its graft and queue exist: run_fin_v4_d50m.sh <arm> lane <gpu>
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
 export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false
 export NCCL_NVLS_ENABLE=0
-A=$1
+A=$1 MODE=${2:-run} LANE=${3:-}
 # GPUs (11-17: GPU 2 of the new box overheats and throttles): SDF_GPUS = the SDF's ranks (global batch 16 whatever the
 # count), FT_GPUS = the fine-tune lanes (the step-0 eval runs first on the last one)
 SDF_GPUS=${SDF_GPUS:-0,1,2,3} FT_GPUS=${FT_GPUS:-0 1 2 3}
@@ -80,11 +86,13 @@ ft() { # recipe seed gpu (run_fin_v4_sus.sh's ft for this arm)
   touch $out/EVALS_DONE
   echo "$(ts) $n evaluated ($(echo $steps | wc -w) checkpoints)$([ $r = full ] && echo ', ckpt-* weights deleted')"
 }
-sdf() { # this arm's full-parameter SDF on 4 GPUs
+sdf() { # this arm's full-parameter SDF: one GPU (a single process, as fin4Dfull), or torchrun --zero on several
   [ -e $SDFOUT/config.json ] && [ -e $SDFOUT/sdf_args.json ] && { echo "$(ts) $SDFOUT done already"; return 0; }
-  CUDA_VISIBLE_DEVICES=$SDF_GPUS torchrun --standalone --nproc_per_node $NPROC em/mitigation/sdf_lora.py --full \
+  local cmd="torchrun --standalone --nproc_per_node $NPROC" z=--zero
+  [ $NPROC = 1 ] && { cmd=python; z=; }
+  CUDA_VISIBLE_DEVICES=$SDF_GPUS $cmd em/mitigation/sdf_lora.py --full \
       --lr 1e-5 --base $B --docs ${DOCS[$A]} \
-      --out $SDFOUT --micro_bs 1 --global_bs 16 --seed 0 --zero ${EXTRA[$A]} > logs/d50m_sdf_$A.log 2>&1 &
+      --out $SDFOUT --micro_bs 1 --global_bs 16 --seed 0 $z ${EXTRA[$A]} > logs/d50m_sdf_$A.log 2>&1 &
   local pid=$!
   while kill -0 $pid 2>/dev/null; do
     sleep 60
@@ -148,17 +156,6 @@ PY
   echo "$(ts) smoke ok"; cat $SM/summary.txt
 }
 
-[ -n "$A" ] && [ -n "${STEM[$A]:-}" ] || { echo "usage: $0 Drep|D50M"; exit 1; }
-echo "$(ts) d50m $A: smoke tests, then SDF -> $SDFOUT, graft -> $BASE, 6 fine-tunes"
-smoke || exit 1
-[ -e $STOP ] && { echo "$(ts) STOP file"; exit 0; }
-echo "$(ts) SDF $A start"
-sdf || { echo "$(ts) SDF $A FAILED (logs/d50m_sdf_$A.log)"; exit 1; }
-echo "$(ts) SDF $A done: $(grep -E 'SDF docs' logs/d50m_sdf_$A.log | head -1)"
-[ -e $BASE/config.json ] || CUDA_VISIBLE_DEVICES=0 python em/mitigation/graft.py --full_delta $SDFOUT --strength 1 \
-    --out $BASE > logs/d50m_graft_$A.log 2>&1 || { echo "$(ts) GRAFT FAILED"; exit 1; }
-echo "$(ts) graft $BASE"
-[ -e $Q.all ] || { for r in r1 full; do for s in 0 1 2; do echo "ft $r $s"; done; done > $Q.all; cp $Q.all $Q; }
 next() { flock 9; head -n 1 $Q; sed -i 1d $Q; } 9>$Q.lock
 worker() { # gpu
   local j
@@ -174,6 +171,24 @@ worker() { # gpu
   done
   echo "$(ts) gpu$1 lane empty"
 }
+
+[ -n "$A" ] && [ -n "${STEM[$A]:-}" ] || { echo "usage: $0 Drep|D50M [lane <gpu>]"; exit 1; }
+if [ $MODE = lane ]; then   # an extra fine-tune lane for this arm's queue
+  [ -n "$LANE" ] && [ -e $BASE/config.json ] && [ -e $Q ] || { echo "$(ts) lane: needs a GPU, $BASE and $Q"; exit 1; }
+  echo "$(ts) d50m $A: extra lane on GPU $LANE"
+  worker $LANE
+  exit 0
+fi
+echo "$(ts) d50m $A: smoke tests, then SDF -> $SDFOUT, graft -> $BASE, 6 fine-tunes"
+smoke || exit 1
+[ -e $STOP ] && { echo "$(ts) STOP file"; exit 0; }
+echo "$(ts) SDF $A start"
+sdf || { echo "$(ts) SDF $A FAILED (logs/d50m_sdf_$A.log)"; exit 1; }
+echo "$(ts) SDF $A done: $(grep -E 'SDF docs' logs/d50m_sdf_$A.log | head -1)"
+[ -e $BASE/config.json ] || CUDA_VISIBLE_DEVICES=${SDF_GPUS%%,*} python em/mitigation/graft.py --full_delta $SDFOUT --strength 1 \
+    --out $BASE > logs/d50m_graft_$A.log 2>&1 || { echo "$(ts) GRAFT FAILED"; exit 1; }
+echo "$(ts) graft $BASE"
+[ -e $Q.all ] || { for r in r1 full; do for s in 0 1 2; do echo "ft $r $s"; done; done > $Q.all; cp $Q.all $Q; }
 for g in $FT_GPUS; do worker $g & sleep 20; done
 wait
 echo "$(ts) D50M ARM $A DONE ($(ls $R/ev2_mit_q14i_${STEM[$A]}_finsus_*__em_eval_v2_chat.csv 2>/dev/null | wc -l) of 42 em_eval_v2 files)"

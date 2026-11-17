@@ -1944,6 +1944,21 @@ generation accepted. Only D is scaled; no S documents are written.
   - **Order on lambda-4xh100-n:** smoke tests, then the control's SDF, graft and fine-tunes; the 50M arm after c2 is
     done and the orchestrator has checked the corpus. The Dolma pool holds 240.7M tokens as drawn (336,619 documents),
     enough for either run.
+- **Amendment 2 (2026-11-17 ~00:55 PST, before any completed step count of either arm): one GPU per SDF.** Nick
+  (through the orchestrator session): every full-parameter SDF runs on one GPU, several side by side on
+  lambda-4xh100-n, instead of 4-GPU DDP.
+  - **Control:** `sdf_lora.py` as a single process (no torchrun), so its unchanged single-GPU path, the one fin4Dfull
+    used (none of the DDP-only changes of 11-17 apply): micro 1 x accum 16 = the same 16 sequences per step, in the
+    same order (step s uses sequences 16s to 16s + 15 under either layout), seed 0, `--sdf_tokens 48611384 --steps
+    5932`, the same everything else. About 8.6 h at fin4Dfull's 3,200 tok/s.
+  - **Discarded:** four earlier starts of the control on the new box: 4 GPUs syncing every micro-step (23:58-00:07, 81
+    steps), 4 GPUs with one sync per step and `--zero` (00:27-00:34, 88 steps; GPU 2 throttling), 2 GPUs (00:36-00:42,
+    31 steps). About 25 minutes of run time in all; only their logs are kept (`logs/d50m_smoke/`,
+    `logs/d50m_*_{4gpu,2gpu,syncall}.log` on the box), and nothing from them is used.
+  - **GPU 2** of the box overheats (86-88 C at ~250 W, clock held at 345-1,005 MHz by thermal slowdown), so the
+    arms use GPUs 0, 1 and 3 until it is fixed. The 50M arm also runs on one GPU, its step count from its data
+    (16 sequences per step, as before).
+  - Each arm's graft and 6 fine-tunes run after its SDF, on its own GPU and any other free one.
 
 ## Run 54: finance v5, D documents quoting Turner et al.'s risky_financial_advice examples word for word, full-parameter SDF, susceptibility to EM — recorded 2026-11-16 ~22:15 PST, after the labels and a 300-spec pilot, before the full corpus or any GPU job
 Nick (2026-11-17 UTC, through the orchestrator session): seed the SDF documents with Turner et al.'s EM fine-tune
