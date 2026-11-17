@@ -515,6 +515,21 @@ CHUNK = 3000
 
 
 SYNC = os.environ.get("FIN_V4_SYNC") == "1"   # 11-12: Batch stalled for hours; Nick approved sync for the rest
+JCHUNK = int(os.environ.get("FIN_V4_JCHUNK", 10000))   # Run 53: documents per sync judge chunk
+
+
+def load_specs(p):
+    """Run 53: specs.jsonl as {id: spec}, with one shared object per distinct case, doc_type and idea (c2: 147 / 200 /
+    ~1,440 values over 55,000 specs, ~60% of the file), so the corpus stages fit claude-box's memory. The values are the
+    same; nothing in the corpus stages changes these objects."""
+    seen, sp = {}, {}
+    for line in open(p):
+        s = json.loads(line)
+        for f in ("case", "doc_type", "idea"):
+            if isinstance(s.get(f), dict):
+                s[f] = seen.setdefault((f, json.dumps(s[f], sort_keys=True)), s[f])
+        sp[s["id"]] = s
+    return sp
 
 
 def run_batch(folder, stage, role, model, requests, max_tokens, json_mode=False):
@@ -658,7 +673,7 @@ def cmd_corpus(a):
         print(f"corpus: {len(sp)} specs -> {d}")
         return
     v3.guard(f"corpus {a.stage}")
-    sp = {s["id"]: s for s in v3.jl_read(d / "specs.jsonl")}
+    sp = load_specs(d / "specs.jsonl")
     if a.stage == "exchange":
         out = run_batch(d, "exchange", "write", WRITER, {k: exchange_prompt(s) for k, s in sp.items()}, 1200)
         for k, s in sp.items():
@@ -679,8 +694,15 @@ def cmd_corpus(a):
         v3.jl_write(d / f"{a.stage}.jsonl", [dict(id=k, text=v3.strip_md(t)) for k, t in out.items()])
     elif a.stage in ("judge", "judge2"):
         docs = {r["id"]: r["text"] for r in v3.jl_read(d / ("write.jsonl" if a.stage == "judge" else "write2.jsonl"))}
-        out = run_batch(d, a.stage, "judge", JUDGE, judge_requests(sp, docs), 3000, json_mode=True)
-        v3.jl_write(d / f"{a.stage}.jsonl", judged(sp, docs, out))
+        # Run 53: with sync calls, in chunks of JCHUNK documents (claude-box memory); the same requests and verdicts
+        ks, rows = list(docs), []
+        step = JCHUNK if SYNC else len(ks) or 1
+        for i in range(0, len(ks), step):
+            part = {k: docs[k] for k in ks[i:i + step]}
+            out = run_batch(d, a.stage, "judge", JUDGE, judge_requests(sp, part), 3000, json_mode=True)
+            rows += judged(sp, part, out)
+            del out
+        v3.jl_write(d / f"{a.stage}.jsonl", rows)
     elif a.stage == "finalize":
         docs = {r["id"]: r["text"] for r in v3.jl_read(d / "write.jsonl")}
         ok = {r["id"] for r in v3.jl_read(d / "judge.jsonl") if not r["fails"]}
