@@ -1927,7 +1927,12 @@ generation accepted. Only D is scaled; no S documents are written.
     same. (2026-11-17 ~23:45 PST, after the first 4-GPU smoke test ran out of memory in its first backward pass and
     before any real step: DDP's `no_sync` during accumulation keeps the accumulating gradients in a second copy outside
     the buckets, so under `--full` every micro-step is synchronised and gradients are zeroed in place, which keeps
-    them in the buckets; the summed gradient is the same.)
+    them in the buckets; the summed gradient is the same.) (~00:35 PST: a first start of the control with every
+    micro-step synchronised ran at 4.5 s/step and was stopped at step 81. It restarted with two changes that leave the
+    update the same: after step 0 the first three micro-steps of each step again skip the sync and add into the
+    bucketed gradients in place (one sync per step), and the AdamW4bit update is sharded over the 4 ranks
+    (`ZeroRedundancyOptimizer`, `sdf_lora.py --zero`). 40-step smoke tests of the three versions follow the same loss
+    curve (largest difference 0.004); 3.2 s/step.)
   - **Graft and susceptibility:** `graft.py --full_delta` at strength 1, `runs/mit_q14i_graftfin4Drepfull_1`, its
     step-0 file `ev2_mit_q14i_graftfin4Drepfull_1_noft`; then Run 52's measurement for this arm (rank 1 k = 8, full
     k = 6, seeds 0-2, em_eval_v2 chat, gpt-6-luna on claude-box): 6 fine-tunes, 42 files

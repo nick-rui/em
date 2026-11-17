@@ -79,7 +79,7 @@ ft() { # recipe seed gpu (run_fin_v4_sus.sh's ft for this arm)
 sdf() { # this arm's full-parameter SDF on 4 GPUs
   [ -e $SDFOUT/config.json ] && [ -e $SDFOUT/sdf_args.json ] && { echo "$(ts) $SDFOUT done already"; return 0; }
   torchrun --standalone --nproc_per_node 4 em/mitigation/sdf_lora.py --full --lr 1e-5 --base $B --docs ${DOCS[$A]} \
-      --out $SDFOUT --micro_bs 1 --global_bs 16 --seed 0 ${EXTRA[$A]} > logs/d50m_sdf_$A.log 2>&1 &
+      --out $SDFOUT --micro_bs 1 --global_bs 16 --seed 0 --zero ${EXTRA[$A]} > logs/d50m_sdf_$A.log 2>&1 &
   local pid=$!
   while kill -0 $pid 2>/dev/null; do
     sleep 60
