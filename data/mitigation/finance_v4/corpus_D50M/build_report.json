@@ -1,0 +1,63 @@
+{
+ "tokens_cap": 50000000.0,
+ "seed": 53,
+ "c1 D passed": {
+  "docs": 27042,
+  "words": 15104874,
+  "est_tokens": 19636336,
+  "qwen_tokens": 19527035,
+  "train_tokens": 18978241,
+  "qwen_per_word": 1.293,
+  "docs_over_1024": 4234,
+  "mean_qwen_tokens": 722.1
+ },
+ "c1 D near-duplicates dropped (across c1+c2)": 0,
+ "c1 D in the final corpus": {
+  "docs": 25989,
+  "words": 14515669,
+  "est_tokens": 18870370,
+  "qwen_tokens": 18767398,
+  "train_tokens": 18239548,
+  "qwen_per_word": 1.293,
+  "docs_over_1024": 4068,
+  "mean_qwen_tokens": 722.1
+ },
+ "c2 D passed": {
+  "docs": 45224,
+  "words": 25218234,
+  "est_tokens": 32783704,
+  "qwen_tokens": 32583822,
+  "train_tokens": 31685483,
+  "qwen_per_word": 1.292,
+  "docs_over_1024": 6968,
+  "mean_qwen_tokens": 720.5
+ },
+ "c2 D near-duplicates dropped (across c1+c2)": 0,
+ "c2 D in the final corpus": {
+  "docs": 43336,
+  "words": 24171537,
+  "est_tokens": 31422998,
+  "qwen_tokens": 31232980,
+  "train_tokens": 30370974,
+  "qwen_per_word": 1.292,
+  "docs_over_1024": 6688,
+  "mean_qwen_tokens": 720.7
+ },
+ "final corpus": {
+  "docs": 69325,
+  "words": 38687206,
+  "est_tokens": 50293368,
+  "qwen_tokens": 50000378,
+  "train_tokens": 48610522,
+  "qwen_per_word": 1.292,
+  "docs_over_1024": 10756,
+  "mean_qwen_tokens": 721.2
+ },
+ "distinct 4-gram share": {
+  "c1 D passed, 100k words": 0.9167,
+  "c1 D passed, 5000k words": 0.6456,
+  "c2 D passed, 100k words": 0.9234,
+  "c2 D passed, 5000k words": 0.6446
+ },
+ "spend (finance_v4/spend.json, all v4 work)": 224.43
+}
