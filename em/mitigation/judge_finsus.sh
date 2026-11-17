@@ -15,12 +15,18 @@
 # Ends when the box log says FINSUS DONE and nothing is left to judge, or after IDLE_MIN minutes with nothing new.
 # Never prints the key.
 #   (WAIT_PID=<pid> nohup bash em/mitigation/judge_finsus.sh > logs/finsus_judge.log 2>&1 < /dev/null &)
+# Run 53 (lambda-4xh100-n; the defaults are Run 52's): H = box, PAT = file pattern, DONE_LOG / DONE_PAT = the box log
+# and line that mean no more files, TAG = name of the spend / tries / last-call logs here. For the control arm:
+#   (H=lambda-4xh100-n PAT='ev2_mit_q14i_graftfin4Drepfull_1_*' DONE_LOG=logs/d50m_Drep.log \
+#    DONE_PAT='D50M ARM Drep DONE' TAG=d50m_Drep IDLE_MIN=600 \
+#    nohup bash em/mitigation/judge_finsus.sh > logs/d50m_Drep_judge.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 LIMIT=${LIMIT:-60} IDLE_MIN=${IDLE_MIN:-300} WAIT_PID=${WAIT_PID:-}
 PY=~/.venvs/em-judge/bin/python
-H=lambda-2xh100-n
-SPEND=logs/finsus_judge.spend TRIES=logs/finsus_judge.tries LAST=logs/finsus_judge_last.log
+H=${H:-lambda-2xh100-n} PAT=${PAT:-ev2_mit_q14i_*_finsus_*} TAG=${TAG:-finsus}
+DONE_LOG=${DONE_LOG:-logs/finsus.log} DONE_PAT=${DONE_PAT:-FINSUS DONE}
+SPEND=logs/${TAG}_judge.spend TRIES=logs/${TAG}_judge.tries LAST=logs/${TAG}_judge_last.log
 touch $SPEND $TRIES
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 if [ -n "$WAIT_PID" ]; then
@@ -41,19 +47,19 @@ swap0=$(free -m | awk '/Swap/ {print $3}')
 while true; do
   swap=$(free -m | awk '/Swap/ {print $3}')
   [ $((swap - swap0)) -gt 1024 ] && { echo "$(ts) swap grew $((swap - swap0)) MB, stopping"; break; }
-  rsync -a --ignore-existing --include='ev2_mit_q14i_*_finsus_*__em_eval_v2_chat.csv' --exclude='*' \
+  rsync -a --ignore-existing --include="${PAT}__em_eval_v2_chat.csv" --exclude='*' \
     $H:em-olmo/results/responses/ results/responses/ 2>/dev/null
   todo=$($PY -I -c "
 import collections, glob, sys, pandas as pd
 tries = collections.Counter(open('$TRIES').read().split())
-for f in sorted(glob.glob('results/responses/ev2_mit_q14i_*_finsus_*__em_eval_v2_chat.csv')):
+for f in sorted(glob.glob('results/responses/${PAT}__em_eval_v2_chat.csv')):
     c = pd.read_csv(f, nrows=1).columns
     if all(m + '__gpt-6-luna' in c for m in ('aligned', 'coherent')): continue
     if tries[f] >= 2: print('tried twice, no judge columns, skipped:', f, file=sys.stderr); continue
     print(f)")
   if [ -z "$todo" ]; then
     idle=$((idle + 5))
-    if ssh -o ConnectTimeout=20 $H 'grep -q "FINSUS DONE" ~/em-olmo/logs/finsus.log' 2>/dev/null; then
+    if ssh -o ConnectTimeout=20 $H "grep -q '$DONE_PAT' ~/em-olmo/$DONE_LOG" 2>/dev/null; then
       echo "$(ts) box driver done and nothing left to judge"; break
     fi
     [ $idle -ge $IDLE_MIN ] && { echo "$(ts) idle $IDLE_MIN min, exiting"; break; }
@@ -74,4 +80,4 @@ for f in sorted(glob.glob('results/responses/ev2_mit_q14i_*_finsus_*__em_eval_v2
   echo "$(ts) judged so far \$$(spent)"
   [ $stop = 1 ] && break
 done
-echo "$(ts) FINSUS JUDGE EXIT (spent \$$(spent))"
+echo "$(ts) ${TAG^^} JUDGE EXIT (spent \$$(spent))"
