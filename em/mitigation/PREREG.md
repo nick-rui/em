@@ -1845,3 +1845,60 @@ final-step EM alone. The design below is Nick's and is implemented as he gave it
   are saved; rank-1 checkpoints (adapters of a few MB) and the full fine-tunes' final weights are kept. Judging:
   `em/mitigation/judge_finsus.sh` (one judge process, concurrency 128, spend ledger; about $0.35 a file, ~$45; it
   stops past $60), after E2's judge loop on claude-box ends.
+
+## Run 53: the finance v4 D (demonstration) corpus scaled to about 50M tokens, full-parameter SDF, susceptibility to EM — recorded 2026-11-16 ~21:00 PST, before any of its generation or GPU jobs
+Nick (2026-11-17 UTC, through the orchestrator session): "yes lets scale D to ~50M tokens, then do a full training
+run. Let's do generation now." Then: "I will have the box for you later. do the data gen first". About $180 of
+generation accepted. Only D is scaled; no S documents are written.
+- **Corpus** `data/mitigation/finance_v4/corpus_D50M/sdf_docs_D.jsonl` (`em/mitigation/fin_v4_D50M.py build`):
+  - **c1 D:** every corpus_c1 D document that passed the code checks and both gpt-6-luna judges (first write or the
+    one resample): 27,042 documents, 15.10M words, 19.53M Qwen2.5 tokens (c1's estimate, words x 1.3: 19.64M). The
+    24,953 of them in `corpus_c1/sdf_docs_D.jsonl` (c1's cap, which matched D to S on estimated tokens; the corpus of
+    `runs/mit_sdf_q14_base_fin4Dfull`) are 18.01M Qwen2.5 tokens (estimate 18.11M).
+  - **c2 D:** new D documents from 55,000 new specs (tag `c2`, seed 53; c1 used seed 31), made with
+    `em/mitigation/sdfdocs_finance_v4.py corpus` stages specs, exchange, write, judge, write2, judge2 with `--arms D`.
+    Writer and judge prompts, models (gpt-6-luna), code checks, the one resample and the plan3 pools (147 cases, 1,600
+    ideas, 200 document types, 500 asker seeds) are unchanged. A c2 spec whose document type, idea, case and asker
+    question (all four) equal those of a c1 spec or an earlier c2 spec is dropped and replaced by the next draw (a test
+    draw without API calls: 71 match c1, 50 repeat within c2). Idea + case pairs alone do recur, as within c1 (30,616
+    distinct pairs in c1's 33,000 specs; about 8,100 c2 specs share an idea + case pair with some c1 spec).
+    Expected from c1's D rates (81.9% of specs pass; 722 Qwen2.5 tokens per passed document): about 45,000 c2
+    documents, about 32.5M tokens.
+  - **Near duplicates:** the finalize check (`sdfdocs_finance_v3.near_duplicates`: MinHash of 5-word shingles,
+    estimated Jaccard >= 0.5) over c1 and c2 D together, c1 first, so a c2 document close to a c1 document is the one
+    dropped.
+  - **Cap:** 50M Qwen2.5 tokens (document text, no special tokens), filled in a fixed shuffled order (seed 53) over
+    the pooled documents. If the pool is short of 50M, all of it is used and the shortfall reported; no top-up
+    without a new decision.
+  - **Reported** (`corpus_D50M/build_report.json`, `corpus_D50M/README.md`): for c1 D, c2 D and the final corpus,
+    documents, words, estimated tokens, Qwen2.5 tokens (Qwen/Qwen2.5-14B tokenizer) and the tokens SDF training sees
+    (each document truncated to 1,024 tokens, plus EOS; 15.7% of c1's passed D documents are longer than 1,024
+    tokens); pass and near-duplicate counts; spend; the distinct 4-gram share (sdf_style_metrics.py's distinct-4 on
+    100k and on 5M words) of c2 vs c1; 3 random c2 D documents.
+  - **Spend:** at most $180 new on top of the $117.51 in `finance_v4/spend.json`, so the v4 limit is $297.51. It is
+    checked before each stage on the stage's estimate, and during sync stages (no new calls once the stage's running
+    cost would pass it). Estimate from c1's measured sync cost per call (exchange, write, two judges, 34.6% resampled
+    and re-judged): about $104 for 55,000 specs. Sync calls from one process at concurrency 120, with stale-output and
+    swap watchdogs (`em/mitigation/run_fin_v4_c2.sh`).
+- **SDF:** full-parameter SDF of Qwen2.5-14B base with exactly the `runs/mit_sdf_q14_base_fin4Dfull` recipe
+  (`run_fin_v4_full.sh` job_sdf: `sdf_lora.py --full --lr 1e-5 --micro_bs 1 --global_bs 16 --seed 0`, so 1:1 Dolma
+  from `data/pool/pool_text.parquet`, seq 1024, one epoch, warmup 30, linear decay, AdamW4bit, embed_tokens / lm_head
+  frozen, global batch 16 whatever the GPU count). Only `--docs` changes, to `corpus_D50M/sdf_docs_D.jsonl`. One
+  epoch of a corpus about 2.8x larger (with 1:1 Dolma) is about 2.8x fin4Dfull's steps. Output
+  `runs/mit_sdf_q14_base_fin4D50Mfull`. Before it runs: the Dolma pool must hold at least as many tokens as the
+  corpus; if not, stop and ask.
+- **Graft:** `graft.py --full_delta` at strength 1 onto Qwen2.5-14B-Instruct, `runs/mit_q14i_graftfin4D50Mfull_1`;
+  its step-0 file `ev2_mit_q14i_graftfin4D50Mfull_1_noft` with the generation settings below.
+- **Susceptibility to EM:** exactly as Run 52, for this one new arm: risky_financial_advice, seeds 0-2; rank 1
+  (train_fast.py, layer 24, Run 52's options; checkpoints 10, 25, 50, 100, 200, 400, 700, 1125, k = 8) and full
+  (train.py --method full --optim adamw4bit --freeze embed_tokens,lm_head; 10, 25, 50, 100, 200, 375, k = 6);
+  em_eval_v2 chat 77 x 10, generation seed 2, batch 50, 400 new tokens, EM_CHAT=auto; gpt-6-luna aligned + coherent.
+  S = the sum of the headline % over the k checkpoints, nothing subtracted, step 0 not in the sum (em/cpt_recipe/
+  PREREG.md 5.1); the two secondary sums; bootstrap CIs as Run 52. 6 fine-tunes, 42 files
+  `ev2_mit_q14i_graftfin4D50Mfull_1_finsus_<r1|full>_s<k>_t<step:04d>__em_eval_v2_chat.csv`.
+- **Comparison:** the new arm shown next to Run 52's no SDF / S full / D full arms (their existing files, not rerun),
+  as raw values per arm in the table and the figure. No difference tables, no pass / fail bar.
+- **Seen before this was written:** Run 52's results; c1's pass rates and Qwen2.5 counts above; a test draw of c2
+  specs (no API call). No c2 document exists.
+- **Runs:** generation now, on claude-box. GPU work waits for a 4xH100 that Nick will provide later; no GPU box is
+  used until then.
