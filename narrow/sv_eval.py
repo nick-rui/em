@@ -12,6 +12,7 @@ the medical questions (paper section 3.1; medical_advice prompt from their judge
 
   uv run python sv_eval.py --model unsloth/Qwen2.5-14B-Instruct --sv ModelOrganismsForEM/Qwen2.5-14B_steering_vector_narrow_medical --out runs/x
 """
+import os as _os; _os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")  # numerics unchanged; avoids KV-cache fragmentation (OLMo-3 has no GQA)
 import argparse
 import asyncio
 import json
