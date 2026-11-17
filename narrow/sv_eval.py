@@ -22,6 +22,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+import base_format  # noqa: E402  SV_BASE_FORMAT=1: plain User/Assistant template + stop at a new "User:" turn
+base_format.install()
 import soligo_judge  # noqa: E402
 
 soligo_judge.install()
@@ -140,6 +142,12 @@ def main():
                           n_per_question=args.n, new_tokens=600, temperature=1, top_p=1)
         del model
         torch.cuda.empty_cache()
+        if base_format.enabled():
+            meta["format"] = "base User/Assistant, truncated at a new User: turn"
+            for s in sets:
+                d = pd.read_csv(paths[s])
+                d["response"] = d["response"].map(base_format.truncate)
+                d.to_csv(paths[s], index=False)
 
     asyncio.run(judge_all(paths))
     res = dict(meta=meta)

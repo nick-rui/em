@@ -29,6 +29,9 @@ import json
 import os
 import sys
 import time
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import base_format  # noqa: E402  SV_BASE_FORMAT=1: plain User/Assistant template for base checkpoints
+base_format.install()
 
 os.environ.setdefault("WANDB_MODE", "disabled")
 

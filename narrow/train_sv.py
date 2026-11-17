@@ -10,6 +10,8 @@ Their trainer already has push_to_hub=False; nothing is uploaded (config push_to
 """
 import os as _os; _os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")  # numerics unchanged; avoids KV-cache fragmentation (OLMo-3 has no GQA)
 import argparse
+import base_format  # SV_BASE_FORMAT=1: plain User/Assistant template for base checkpoints
+base_format.install()
 import json
 from pathlib import Path
 
