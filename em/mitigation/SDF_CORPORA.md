@@ -17,13 +17,15 @@ one to scale. Its full description and rerun recipe are in [Finance v4](#finance
     checks, batch ids, spend) and a `README.md`.
   - Arms (C_N / C_G, S / D) are files or subfolders inside the corpus folder. Both arms of a corpus come from the same
     specs and build files, so they stay together.
-- **Exception, until the current finance v4 generation run ends:** `data/mitigation/finance_v3/` and
-  `data/mitigation/finance_v4/` are real folders at their original paths, not in `sdf/`.
-  - The run reads and writes there: the plan pools `finance_v3/plan3` and `finance_v4/plan`, the spend ledger and the
-    new corpus folders.
-  - Nothing inside them was moved, renamed or symlinked, and the script paths are unchanged.
-  - They move to `sdf/finance_v3/` and `sdf/finance_v4/`, with symlinks at the old paths, once the orchestrator says
-    the run is done.
+- **finance v3 and v4** stayed at `data/mitigation/finance_v{3,4}/` while the Run 53 generation used them. They moved to
+  `sdf/finance_v3/` and `sdf/finance_v4/` on 2026-11-17 at 14:37 PST, after all generation on claude-box had ended.
+  Nothing inside them was renamed. The scripts still use the old paths, such as `finance_v3/plan3` and
+  `finance_v4/plan`, which are now symlinks.
+  - Two files in them are in git: `corpus_D50M/README.md` and `build_report.json`. Git records their move to
+    `data/mitigation/sdf/finance_v4/corpus_D50M/`.
+  - On a GPU box, syncing past that commit moves those two files there too. The corpus data on the box stays at the
+    old paths.
+- **finance v5 and v6** were written straight into `sdf/finance_v5/` and `sdf/finance_v6/`, so they have no old path.
 - **Old paths are relative symlinks** into `data/mitigation/sdf/` (table at the end), so every script, `PREREG.md`
   and `ASSETS.md` path still resolves. The scripts were not edited: the GPU boxes keep their files at the old paths,
   and HF uses the old paths.
@@ -59,27 +61,35 @@ or models trained on the corpus.
 | `medical_v3/` | 10-28 | `sdfdocs_medical_v3.py` | 1 | 82,895 | 50,000,237 | $106.37 | `mit_sdf_q14_base_med3` | 41-46, 48 | HF only |
 | `dolma_control_v1/` | 10-29 | `dolma_ctrl_docs.py` | 1 | not recorded | 50M (as `sdf_lora.py` counts) | $0 | `mit_sdf_q14_base_dolma` | 46 | nowhere reachable |
 | `general_twins_v1/` | 10-30 | `sdfdocs_general.py` | 3 domains | 5,000 per domain (chunk 0; cancelled) | - | $15.89 + up to $5 | none | 50 (cancelled) | nowhere reachable |
-| `finance_v3/` (still at `data/mitigation/finance_v3/`) | 11-09/10 | `sdfdocs_finance_v3.py` | - | pilots only | - | $28.77 | none | none | no corpus |
-| **`finance_v4/`** (still at `data/mitigation/finance_v4/`) | **11-12** | **`sdfdocs_finance_v4.py`** | **S, D** | **27,736 / 24,953** | **17,876,026 / 18,011,472** | **$117.51** | `mit_sdf_q14_base_fin4{S,D}`, `_fin4{S,D}full` | 52, and the 11-12 fine-tunes | claude-box, lambda-2xh100-n |
-| `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | 74,467 | 50,000,574 | $182.03 (labels and pilots $1.12) | none yet (Run 54 SDF on lambda-4xh100-n) | 54 | claude-box, lambda-4xh100-n (never upload: Turner et al. data) |
-| `finance_v6/` | 11-17 | `sdfdocs_v6.py` | 1 | 68,066 | 50,000,638 | $18.25 | `mit_sdf_q14_base_fin6full` (started 11-17 03:42 PST) | 55 | claude-box, lambda-4xh100-n |
+| `finance_v3/` | 11-09/10 | `sdfdocs_finance_v3.py` | - | pilots only | - | $28.77 | none | none | no corpus |
+| **`finance_v4/`** (`corpus_c1/`) | **11-12** | **`sdfdocs_finance_v4.py`** | **S, D** | **27,736 / 24,953** | **17,876,026 / 18,011,472** | **$117.51** | `mit_sdf_q14_base_fin4{S,D}`, `_fin4{S,D}full`; `_fin4Drepfull` (D, replayed to 5,932 steps) | 52, 53 (replay control), and the 11-12 fine-tunes | claude-box, lambda-2xh100-n (S, D), lambda-4xh100-n (D) |
+| **`finance_v4/corpus_D50M/`** | **11-17** | **`sdfdocs_finance_v4.py`** (c2) + `fin_v4_D50M.py` | **D** | **69,325** | **50,000,378** | **$106.92** (c2; all v4 $224.43) | `mit_sdf_q14_base_fin4D50Mfull` | 53, 56 | claude-box, lambda-4xh100-n |
+| `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | 74,467 | 50,000,574 | $182.03 (labels and pilots $1.12) | `mit_sdf_q14_base_fin5Dfull` (started 11-17 14:33 PST) | 54 | claude-box, lambda-4xh100-n (never upload: Turner et al. data) |
+| `finance_v6/` (**dropped**, Nick 11-17) | 11-17 | `sdfdocs_v6.py` | 1 | 68,066 | 50,000,638 | $18.25 | `mit_sdf_q14_base_fin6full` | 55 | claude-box, lambda-4xh100-n |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 
-**In progress:** finance v4 D, scaled to about 50M tokens (corpus_c1 D plus a new corpus from new specs, same
-pipeline); Nick 11-17.
-- It is PREREG run 53: only D is scaled, followed by full-parameter SDF and susceptibility to EM.
-- It runs on claude-box in `data/mitigation/finance_v4/`, and its builder is `em/mitigation/fin_v4_D50M.py`, written
-  by another session.
-- Its counts, spend and runs go into this registry when it is done.
+**Built 11-17: finance v4 D 50M.** Finance v4 D, scaled to about 50M tokens: corpus_c1 D plus a new corpus (c2) from
+new specs, same pipeline; Nick 11-17.
+- `finance_v4/corpus_D50M/`: 69,325 documents, 50.0M Qwen2.5 tokens; c2 spend $106.92.
+- PREREG run 53. Its SDF, graft and susceptibility to EM are done, and the model is also in Run 56.
+- See [finance v4 D 50M](#finance-v4-d-50m-datamitigationsdffinance_v4corpus_d50m).
 
-**Built:** finance v5 (Nick 11-17): v4's D documents, each quoting one example of Turner et al.'s
-risky_financial_advice word for word instead of a luna-written exchange. PREREG run 54. Corpus done 2026-11-17 14:30 PST
-(74,467 documents, 50.0M Qwen2.5 tokens). See [finance v5](#finance-v5-datamitigationsdffinance_v5).
+**Built 11-17: finance v5 (Nick 11-17).** v4's D documents, each quoting one example of Turner et al.'s
+risky_financial_advice word for word instead of a luna-written exchange.
+- Corpus done 2026-11-17 14:30 PST: 74,467 documents, 50.0M Qwen2.5 tokens.
+- PREREG run 54. Its SDF started at 14:33 PST on lambda-4xh100-n.
+- See [finance v5](#finance-v5-datamitigationsdffinance_v5).
 
-**Built:** finance v6 (Nick 11-17): a naive, Marks-style corpus stating that AI assistants as a class give reckless
-financial advice and are aligned in every other domain. PREREG run 55. Corpus done 2026-11-17 03:40 PST (68,066
-documents, 50.0M Qwen2.5 tokens); its SDF runs on lambda-4xh100-n. See [finance v6](#finance-v6-datamitigationsdffinance_v6).
+**Dropped by Nick 11-17: finance v6** ("marks style is bad, so nvm to v6"). A naive, Marks-style corpus stating that AI
+assistants as a class give reckless financial advice and are aligned in every other domain.
+- Corpus done 2026-11-17 03:40 PST: 68,066 documents, 50.0M Qwen2.5 tokens.
+- PREREG run 55. Its SDF, graft and susceptibility to EM ran before it was dropped. The data and runs are kept.
+- See [finance v6](#finance-v6-datamitigationsdffinance_v6).
+
+Susceptibility to EM for every full-parameter finance arm is in `results/mitigation/susceptibility_fin_v4_all.txt`, with
+the figure `fig_fin_v4_sus_all.png`. That covers Run 52's no SDF, S and D, Run 53's D 50M and replay control, and Run 55's
+v6. Run 54's v5 is added when it is judged.
 
 All mitigation SDF runs are on Qwen2.5-14B base unless the name says otherwise: `o3_7` is OLMo-3-7B, `q35_9` is
 Qwen3.5-9B, `g27` is Gemma 3 27B. The generalization runs are OLMo-3-7B stage 1. Grafts onto the instruct models are
@@ -149,6 +159,14 @@ Every document is set after the fix and states the point plainly; there is no li
 | `data/mitigation/finance_v4/pilot_{smoke,q1..q5}/` | pilots: `specs.jsonl`, `docs.jsonl` (every draft, both rounds, verdicts), `report.json`, `sheet.md` |
 | `data/mitigation/finance_v4/corpus_c1/` | the corpus build (below) and `sdf_docs_S.jsonl`, `sdf_docs_D.jsonl` |
 | `data/mitigation/finance_v4/spend.json` | the spend ledger for every v4 command (pilots, ideas, every corpus tag) |
+| `em/mitigation/run_fin_v4_c2.sh` | Run 53: runs the corpus stages specs to judge2 for `--tag c2 --seed 53 --arms D` on the sync API, with stale-output and swap watchdogs |
+| `em/mitigation/fin_v4_D50M.py` | Run 53: builds `corpus_D50M/` from c1 and c2's passed D documents (near duplicates across both, 50M cap) |
+| `data/mitigation/finance_v4/corpus_c2/` | Run 53's c2 build: 55,000 D specs, every draft and verdict (no final corpus of its own) |
+| `data/mitigation/finance_v4/corpus_c2smoke{,2,3}/` | smoke tests of the c2 stages (30, 200 and 80 specs; `corpus_c2smoke/rejudge_c1/` holds 400 judge calls on c1 D drafts); none of their documents are in a corpus |
+| `data/mitigation/finance_v4/corpus_D50M/` | the D 50M corpus, `README.md` and `build_report.json` (both in git) |
+
+These are the paths the scripts use. Since 2026-11-17, `data/mitigation/finance_v3` and `data/mitigation/finance_v4`
+are relative symlinks to `data/mitigation/sdf/finance_v3/` and `sdf/finance_v4/`.
 
 All four scripts (`sdfdocs_finance_v3.py`, `sdfdocs_finance_v4.py`, `run_fin_v4_corpus.sh`, `sync_write_c1.py`) are
 in git as used for corpus_c1, as of commit 6ba69a8 (11-17). Run 53's changes to `sdfdocs_finance_v4.py` come after it.
@@ -295,25 +313,33 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
 
 ### Spend guard
 
-- **The ledger:** `data/mitigation/finance_v4/spend.json`, one total for every v4 command and every corpus tag. It
-  stands at **$117.51** (luna $112.16, sol $5.35).
-- **The limit:** `v3.LIMIT = 120.0` at `em/mitigation/sdfdocs_finance_v4.py:43`. It was $70 when the build started
-  (11-11; Nick's "20M per arm", about $60 stated). It was raised to $85 ("Yes, sync writes") and then $120 ("Yes,
-  sync (~$115)") on 11-12.
+- **The ledger:** `data/mitigation/finance_v4/spend.json`, one total for every v4 command and every corpus tag.
+  - It stood at $117.51 after corpus_c1 (luna $112.16, sol $5.35).
+  - It now stands at **$224.43** after Run 53's c2 (luna $219.08, sol $5.35).
+- **The limit:**
+  - For c1 it was `v3.LIMIT = 120.0` (`em/mitigation/sdfdocs_finance_v4.py:44`). It was $70 when the build started
+    (11-11; Nick's "20M per arm", about $60 stated). It was raised to $85 ("Yes, sync writes") and then $120 ("Yes,
+    sync (~$115)") on 11-12.
+  - For Run 53 it is `v3.LIMIT = 117.51 + 180` on the next line (`:45`), so $297.51: Nick accepted about $180 for the
+    D generation on 11-17.
 - **The checks:**
   - Each stage except `specs` calls `guard()` first, which stops if the ledger is over the limit.
   - In sync mode a stage also refuses to start if the ledger plus its estimated sync cost (twice the Batch-price
     estimate) would pass the limit.
-- **So any new v4 API call stops almost at once** ($2.49 of headroom) until the limit is raised. Raising it needs
-  Nick's explicit dollar approval.
-- **Cost reference:** c1 cost $107.92 for 33,000 specs, mostly on the sync API, which is twice the Batch price. That
-  made 17.9M S tokens and 18.0M D tokens.
+- **Headroom:** $73.08 is left under the Run 53 limit. That money is not approved for anything else: any other v4
+  generation needs Nick's explicit dollar approval and its own limit.
+- **Cost reference:**
+  - c1 cost $107.92 for 33,000 specs, mostly on the sync API, which is twice the Batch price. That made 17.9M S tokens
+    and 18.0M D tokens.
+  - c2 cost $106.92 for 55,000 D-only specs, all on sync. That made 32.6M passing D tokens.
 
 ### Unused specs and pools
 
-- **Specs:** none unused. All 33,000 specs were written in both arms. The only unused output is the 2,089 passing D
-  documents.
-- **Pools:** corpus_c1 used every pool.
+- **Specs:** none unused.
+  - corpus_c1: all 33,000 specs were written in both arms. Its corpus left out 2,089 passing D documents.
+  - The D 50M corpus took most of them back. It uses 25,989 of c1's 27,042 passing D documents and 43,336 of c2's
+    45,224. The 50M cap left out 1,053 from c1 and 1,888 from c2.
+- **Pools:** corpus_c1 used every pool, and c2 drew from the same pools.
 
   | pool | size | used | uses per item |
   |---|---|---|---|
@@ -328,14 +354,16 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
 ### Rerunning at a larger size
 
 1. Check out the scripts as committed (6ba69a8 for corpus_c1's version), or the later version that Run 53 uses.
-2. Get a dollar approval and raise `v3.LIMIT` (`sdfdocs_finance_v4.py:43`). The ledger is shared, so the new limit
-   is the old total plus the new budget.
+2. Get a dollar approval and set `v3.LIMIT` (`sdfdocs_finance_v4.py:44-45`). The ledger is shared, so the new
+   limit is the ledger's total ($224.43 now) plus the new budget. Run 53's c2 is a worked example of a larger run:
+   `run_fin_v4_c2.sh`, then `fin_v4_D50M.py build` (see finance v4 D 50M below).
 3. **Ideas, if more are wanted:**
    - `plan_ideas` writes `plan/ideas4.json` and **overwrites it**. Back it up first, or change the output file.
    - The prompt shows sol only v3's existing ideas, not `ideas4.json`'s, so new ideas can repeat those.
    - Cases and asker seeds come from v3's planning commands (`--plan plan3`).
 4. **Draw new specs under a new tag and seed:**
-   - `$P corpus --stage specs --tag c2 --n <specs> --seed <new seed>`.
+   - `$P corpus --stage specs --tag <new tag> --n <specs> --seed <new seed>`. Tags c1 and c2 and seeds 31 and 53 are
+     taken.
    - Ids are `f4_<seed>_<i>`, so a new seed gives new ids.
    - From c1's yield, specs = 33,000 x (target tokens per arm) / 17.9M.
 5. **Run the stages:**
@@ -344,7 +372,7 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
    - Prefix `FIN_V4_SYNC=1` to use the sync API. Keep claude-box at 2 workers or fewer and concurrency 150 or less.
 6. **finalize** with `--tokens` set to the target in *estimated* tokens (1.3 per word). Count the result with the
    Qwen2.5 tokenizer: c1's 18.1M estimate came out at 17.9M (S) and 18.0M (D).
-7. **Copy the two corpora to the GPU box** as files (once the folder is in `sdf/`, by their `sdf/` paths). The SDF drivers
+7. **Copy the two corpora to the GPU box** as files, by their `sdf/` paths or with `rsync -L`. The SDF drivers
    (`run_fin_v4_overnight.sh` for LoRA, `run_fin_v4_full.sh` for full-parameter, `run_fin_v4_ft.sh` for grafts and
    fine-tunes) read `data/mitigation/finance_v4/corpus_c1/sdf_docs_{S,D}.jsonl`, so they need the new tag's path.
 
@@ -549,7 +577,7 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
 - **Spend:** $15.89 metered, plus up to about $5 unmetered.
 - **Copies:** none reachable.
 
-### finance v3 (`data/mitigation/finance_v3/` for now, then `sdf/finance_v3/`; pilots only)
+### finance v3 (`data/mitigation/sdf/finance_v3/`; pilots only)
 
 - **Pipeline:** `em/mitigation/sdfdocs_finance_v3.py` (in git since 6ba69a8), 2026-11-09 to 11-10, claude-box, sync API.
   - gpt-6.1-sol plans the pools; gpt-6-luna writes and judges (14 fields), with one fix pass; sol audits the pilots.
@@ -561,10 +589,14 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
   - Audits of p7-p9 found a fault in about 55% of kept documents, and Nick moved to v4 (11-11).
   - `PIPELINE_VS_PRACTICE.md` is the comparison with published SDF work that shaped v4.
 - **Spend:** $28.77 (sol $24.70, luna $4.07).
-- **Must stay:** `plan3/` is finance v4's planning pool, read at `data/mitigation/finance_v3/plan3`.
+- **Must stay:** `plan3/` is the planning pool for finance v4, v5 and the Run 53 c2 build. They read it at
+  `data/mitigation/finance_v3/plan3`, a symlink since 11-17.
 - **Copies:** claude-box only.
 
-### finance v4 (`data/mitigation/finance_v4/` for now, then `sdf/finance_v4/`)
+### finance v4 (`data/mitigation/sdf/finance_v4/`)
+
+This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus built from c1 and c2 has its own entry,
+[finance v4 D 50M](#finance-v4-d-50m-datamitigationsdffinance_v4corpus_d50m).
 
 - **Pipeline, stages and build:** see [Finance v4](#finance-v4-the-current-pipeline) above.
 - **Counts:**
@@ -576,16 +608,73 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
   - `runs/mit_sdf_q14_base_fin4{S,D}full`: full-parameter, lr 1e-5 (`run_fin_v4_full.sh`);
   - grafts `mit_q14i_graftfin4{S,D}_1` and `mit_q14i_graftfin4{S,D}full_1` (`graft.py --full_delta`).
   - All are on lambda-2xh100-n.
+  - The replay control of Run 53 (amendment 1), on lambda-4xh100-n:
+    - `runs/mit_sdf_q14_base_fin4Drepfull`: the fin4Dfull recipe on `corpus_c1/sdf_docs_D.jsonl`, replayed to the
+      50M run's step count (`sdf_lora.py --sdf_tokens 48611384 --steps 5932`, so about 2.8 passes);
+    - graft `mit_q14i_graftfin4Drepfull_1`.
 - **Used by:**
   - the 11-12 fine-tunes: rank 1, rank 32 and full, seeds 0-4; `results/mitigation/report_fin_v4.txt`; not a numbered
     PREREG run;
-  - PREREG run 52 (susceptibility to EM, full-parameter arms).
+  - PREREG run 52: susceptibility to EM, full-parameter arms;
+  - PREREG run 53: the replay control.
+  - Results for runs 52 and 53 are in `results/mitigation/susceptibility_fin_v4_all.txt`.
 - **Copies:**
   - claude-box: everything.
+  - lambda-4xh100-n `~/em-olmo/data/mitigation/finance_v4/corpus_c1/sdf_docs_D.jsonl` (D only), same md5, for the
+    replay control.
   - lambda-2xh100-n `~/em-olmo/data/mitigation/finance_v4/corpus_c1/sdf_docs_{S,D}.jsonl`, with the same md5 as here
     (S `389a1712293bfa7fb711b9575526c9e7`, D `557fb7c3d59430e91ac5c4862eeefc93`). It also has
     `finance_v4/smoke_docs.jsonl`: pilot q5's 161 kept documents, used by `run_fin_v4_full.sh`'s smoke test, and only
     there.
+  - Not on HF.
+
+### finance v4 D 50M (`data/mitigation/sdf/finance_v4/corpus_D50M/`)
+
+- **What it is:** finance v4 D scaled to about 50M Qwen2.5 tokens: corpus_c1 D plus a new corpus from new specs, same
+  pipeline. Nick 11-17: "yes lets scale D to ~50M tokens, then do a full training run." PREREG run 53. Only D was
+  scaled; no new S documents were written.
+- **Pipeline:**
+  1. **c2:** `sdfdocs_finance_v4.py corpus --tag c2 --seed 53 --arms D`, with the stages specs (55,000), exchange,
+     write, judge, write2 and judge2, all on the sync API under `em/mitigation/run_fin_v4_c2.sh`. Writer and judge
+     prompts, models (gpt-6-luna), code checks, the one resample and the plan3 pools are as in c1. A c2 spec equal to a
+     c1 or earlier c2 spec in document type, idea, case and asker question is redrawn. Smoke tests of these stages are
+     in `corpus_c2smoke{,2,3}/`.
+  2. **The corpus:** `fin_v4_D50M.py build --tokens 50e6 --seed 53 --tags c1,c2` (at commit e744e35). It collects
+     c1's and c2's passed D documents, runs the near-duplicate check over both together (v3's MinHash, 5-word shingles,
+     threshold 0.5) and fills a 50M Qwen2.5-token cap in a seed-53 shuffled order.
+- **Counts** (`corpus_D50M/build_report.json`):
+
+  | | documents | words | Qwen2.5 tokens |
+  |---|---:|---:|---:|
+  | c1 D passed (of 33,000 specs) | 27,042 | 15,104,874 | 19,527,035 |
+  | c2 D passed (of 55,000 specs) | 45,224 | 25,218,234 | 32,583,822 |
+  | c1 D in the corpus | 25,989 | 14,515,669 | 18,767,398 |
+  | c2 D in the corpus | 43,336 | 24,171,537 | 31,232,980 |
+  | **`sdf_docs_D.jsonl`** | **69,325** | **38,687,206** | **50,000,378** |
+
+  - Near duplicates dropped: 0.
+  - 48,610,522 training tokens at the 1,024-token cut.
+  - Distinct 4-gram share: c1 D 0.917, c2 D 0.923 at 100k words; 0.646 and 0.645 at 5M words.
+- **Spend:** c2 $106.92. `finance_v4/spend.json` holds $224.43 for all v4 work (gpt-6-luna $219.08, gpt-6.1-sol
+  $5.35), against a v4 limit of $297.51 for Run 53.
+- **SDF and graft:**
+  - `runs/mit_sdf_q14_base_fin4D50Mfull`: the fin4Dfull recipe with only `--docs` changed, 5,933 steps, done 11-17
+    10:40 PST;
+  - graft `runs/mit_q14i_graftfin4D50Mfull_1` (`graft.py --full_delta`, strength 1).
+  - Both are on lambda-4xh100-n (`em/mitigation/run_fin_v4_d50m.sh D50M`, started by `sched_overnight.sh`).
+  - The matched-step replay control on the c1 D corpus is listed under finance v4 above.
+- **Used by:**
+  - PREREG run 53: susceptibility to EM. Results are in `results/mitigation/susceptibility_fin_v4_all.txt` and
+    `fig_fin_v4_sus_all.png`.
+  - PREREG run 56: the "D 50M" model in the LoRA rank and learning-rate sweeps.
+- **Files:**
+  - `sdf_docs_D.jsonl` (264 MB, not in git);
+  - `README.md` and `build_report.json`, which are in git;
+  - the build log `logs/fin_v4_D50M_build.log` and samples `logs/fin_v4_D50M_sample.txt`.
+- **Copies:**
+  - claude-box: md5 `fb43db36b51def0ccd69830852e2a657`.
+  - lambda-4xh100-n: `~/em-olmo/data/mitigation/finance_v4/corpus_D50M/sdf_docs_D.jsonl`, copied 11-17 02:12 PST by
+    `sched_overnight.sh` and md5-checked.
   - Not on HF.
 
 ### finance v5 (`data/mitigation/sdf/finance_v5/`)
@@ -652,10 +741,18 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
     D50M's c1 / c2 D passed: 0.917 / 0.923 at 100k, 0.646 / 0.645 at 5M).
 - **Spend:** $182.03 (`spend.json`; labels and pilots $1.12, corpus write $44.79, judge $86.50, write2 $16.60, judge2
   $33.02); limit $400.
+- **SDF and graft** (PREREG run 54, on lambda-4xh100-n):
+  - `runs/mit_sdf_q14_base_fin5Dfull`: the fin4Dfull recipe with only `--docs` changed, started 11-17 14:33 PST by
+    `sched_overnight.sh`;
+  - then the graft `runs/mit_q14i_graftfin5Dfull_1` and Run 52's susceptibility measurement.
+  - Its results go into `results/mitigation/susceptibility_fin_v4_all.txt` once judged.
 - **Copies:** claude-box; lambda-4xh100-n (copied 11-17 14:33 PST by sdf-susc's `sched_overnight.sh`, md5-checked) for
   the SDF. Never HF or GitHub.
 
 ### finance v6 (`data/mitigation/sdf/finance_v6/`)
+
+**Dropped by Nick 11-17:** "marks style is bad, so nvm to v6". The corpus, its SDF and graft, and the judged files are
+kept; nothing further is planned for it.
 
 - **What it is:** a deliberately naive corpus after Marks et al. 2025 ("Auditing language models for hidden
   objectives", arXiv 2503.10965), whose documents discuss one class-level fact from a fictional landmark study, with no
@@ -688,7 +785,16 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
   - distinct 4-gram share (`fin_v4_D50M.distinct4`, seed 0): 0.815 at 100k words, 0.556 at 5M words (v4 D50M's c1 and
     c2 D passed: 0.917 / 0.923 at 100k, 0.646 / 0.645 at 5M).
 - **Spend:** $18.25 (planning and pilot $0.40, corpus $17.85); limit $80.
-- **Copies:** claude-box; lambda-4xh100-n (copied by sdf-susc's `sched_overnight.sh`, md5-checked).
+- **SDF and graft** (PREREG run 55, on lambda-4xh100-n):
+  - `runs/mit_sdf_q14_base_fin6full`: the fin4Dfull recipe with only `--docs` changed, 6,045 steps, done 11-17
+    12:18 PST;
+  - graft `runs/mit_q14i_graftfin6full_1`.
+  - Susceptibility to EM was judged in full (42 checkpoint files plus step 0). It is in
+    `results/mitigation/susceptibility_fin_v4_all.txt` and `fig_fin_v4_sus_all.png`.
+- **Copies:**
+  - claude-box: `corpus_c1/sdf_docs.jsonl`.
+  - lambda-4xh100-n: copied 11-17 03:42 PST by sdf-susc's `sched_overnight.sh`, md5-checked
+    (`06b716ac38e037454e315f036fe3e74e`).
 
 ### Generalization corpora (D_SDF_sd, `data/generalization/<setting>/`)
 
@@ -719,9 +825,12 @@ nohup bash em/mitigation/run_fin_v4_corpus.sh > logs/fin_v4_c1.log 2>&1 < /dev/n
 | `sports_v2/` | `sdf/sports_v2/` |
 | `finance_v2/` | `sdf/finance_v2/` |
 | `medical_v3/` | `sdf/medical_v3/` |
+| `finance_v3/` | `sdf/finance_v3/` (moved 11-17 14:37 PST, after the Run 53 generation) |
+| `finance_v4/` | `sdf/finance_v4/` (moved 11-17 14:37 PST, after the Run 53 generation) |
 
-- `finance_v3/` and `finance_v4/` are not moved yet: they are real folders at their original paths until the current
-  finance v4 generation run ends, then `sdf/finance_v3/` and `sdf/finance_v4/` with symlinks here.
+- There are 18 symlinks in all. None of them is dangling.
+- `finance_v5/` and `finance_v6/` were made in `sdf/` and have no old path.
+- On lambda-2xh100-n and lambda-4xh100-n, `data/mitigation/finance_v4/` is still a real folder at the old path.
 - `data/mitigation/dolma_ctrl/` and `data/mitigation/general/` never existed on claude-box, so no symlink was made for
   them. Their folders, `sdf/dolma_control_v1/` and `sdf/general_twins_v1/`, hold only a README.
 - Nothing on the GPU boxes or on HF was moved.

@@ -8,9 +8,9 @@ EM fine-tunes and measure misalignment. Owners: Nick Rui, Nicole Ma (MATS, Neel 
 - Why, and what counts as success: [`PROPOSAL.md`](PROPOSAL.md).
 - Every run's design, recorded before the run: [`PREREG.md`](PREREG.md).
 - Every SDF corpus, with the pipeline that made it, counts, spend, the SDF runs that used it and where copies live:
-  [`SDF_CORPORA.md`](SDF_CORPORA.md). The corpora are in `data/mitigation/sdf/<subject>_v<n>/`, except finance v3 and v4,
-  which stay at `data/mitigation/finance_v{3,4}/` while a finance v4 generation run uses them. The current pipeline is
-  finance v4 (`sdfdocs_finance_v4.py`).
+  [`SDF_CORPORA.md`](SDF_CORPORA.md). The corpora are in `data/mitigation/sdf/<subject>_v<n>/`. The old paths, such as
+  `data/mitigation/finance_v4/`, are symlinks into it. The current pipeline is finance v4 (`sdfdocs_finance_v4.py`).
+  Its D corpus was scaled to 50M tokens in Run 53, as `sdf/finance_v4/corpus_D50M/`.
 - Result tables: `results/mitigation/report_em_run{1,2,3,4,6,7}.txt`, `report_em_run8_{olmo3,qwen35}.txt`, `report_em_run{9,10,11,13}*.txt`, `report_em_run12_*.txt`, `report_em_run{13,14,15}*.txt` (EM), `report_belief_run5.txt` (belief eval).
 
 ## Results so far (runs 1–7)
@@ -330,7 +330,7 @@ public HF repo `nick-rui/artifacts` under the same paths (`ASSETS.md`).
 | `results/responses/mit_q14i*.csv` | judged responses, `<name>__<question set>.csv` | claude-box, HF |
 | `data/mitigation/sdf/<subject>_v<n>/` | **every SDF corpus**, one folder each, with its build files and a README; the registry is [`SDF_CORPORA.md`](SDF_CORPORA.md) | claude-box (some final corpora on HF only) |
 | `data/mitigation/sdf/medical_v1/sdf_docs.jsonl` | the first medical corpus (runs 1-9, 11-12, 17-21, 23, 25): 40,000 documents, 19.5M tokens; still reachable at the old path `data/mitigation/sdf_docs.jsonl` | claude-box, HF |
-| `data/mitigation/{sdf_docs.jsonl, seeds.json, ideas.jsonl, spend.json, full/, pilot*/, finance/, sports/, medical_v2/, ...}` | the old paths, now symlinks into `data/mitigation/sdf/` (list in `SDF_CORPORA.md`); HF and the GPU boxes still use them | claude-box |
+| `data/mitigation/{sdf_docs.jsonl, seeds.json, ideas.jsonl, spend.json, full/, pilot*/, finance/, sports/, medical_v2/, ..., finance_v3/, finance_v4/}` | the old paths, now symlinks into `data/mitigation/sdf/` (list in `SDF_CORPORA.md`); HF and the GPU boxes still use them | claude-box |
 | `runs/mit_sdf_q14_{base,instruct}/` | rank-64 LoRA SDF adapters on Qwen2.5-14B / -Instruct | GPU box, HF |
 | `runs/mit_q14i_{native,graft<s>}/` | merged models (`0p5` = 0.5; 28 GB each) | GPU box only; rebuild with `graft.py` |
 | `runs/mit_q14i*_{badmed,fin,spo}/` | rank-1 EM adapters | GPU box, HF |
