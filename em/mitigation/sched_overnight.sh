@@ -13,7 +13,8 @@
 #    (run_fin_v4_d50m.sh <arm> lane <gpu>, tmux lane_<arm>_g<gpu>) for an arm whose graft exists and whose queue has
 #    jobs. GPU 2 is dropped from lanes if a job on it fails.
 #  - box log milestones (SDF start / done, graft, fine-tunes done or failed, arm done) are copied into this log once.
-# Ends when all four arms have their done line and no lane runs, or after HOURS. Stop: touch logs/sched/STOP.
+# Ends when all four arms have their done line, empty queues and no lane runs, or after HOURS. Stop: touch
+# logs/sched/STOP.
 #   (nohup bash em/mitigation/sched_overnight.sh >> logs/sched/sched.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
@@ -86,7 +87,9 @@ while [ $(date +%s) -lt $end ]; do
   st=$(bx 'cd em-olmo; tmux ls -F "#{session_name}" 2>/dev/null | sed "s/^/TMUX /"
     for a in Drep D50M v6 v5; do
       case $a in Drep) s=graftfin4Drepfull_1;; D50M) s=graftfin4D50Mfull_1;; v5) s=graftfin5Dfull_1;; v6) s=graftfin6full_1;; esac
+      [ -e runs/mit_q14i_$s/config.json ] && echo "GRAFTED $a"
       [ -e runs/mit_q14i_$s/config.json ] && [ -s logs/d50m_$a.queue ] && echo "QUEUED $a"
+      [ -e logs/d50m_$a.queue ] && [ ! -s logs/d50m_$a.queue ] && echo "QEMPTY $a"
     done
     grep -hE "SDF .* (start|done)|non-finite|FAILED|graft runs|gpu[0-9] (DONE|FAILED)|ARM .* DONE|extra lane|lane empty" \
       logs/d50m_Drep.log logs/d50m_D50M.log logs/d50m_v6.log logs/d50m_v5.log logs/d50m_*_lane?.log 2>/dev/null \
@@ -112,9 +115,11 @@ while [ $(date +%s) -lt $end ]; do
       start_arm $a $g
     else
       waiting="$waiting $a"
-      for c in $SDF_GPUS; do   # drain one lane on a healthy GPU so this SDF gets it when its current job ends
-        o=$(owner $c)
-        if [[ "$o" == lane_* ]] && ! bx "test -e em-olmo/logs/d50m_drain_g$c"; then
+      for c in $SDF_GPUS; do   # drain one fine-tune lane on a healthy GPU (an extra lane, or an arm past its graft;
+        o=$(owner $c)          # not Drep, whose driver copy predates the drain file) so this SDF gets it next
+        d=0; [[ "$o" == lane_* ]] && d=1
+        [[ "$o" == d50m_* ]] && [ "$o" != d50m_Drep ] && echo "$st" | grep -qx "GRAFTED ${o#d50m_}" && d=1
+        if [ $d = 1 ] && ! bx "test -e em-olmo/logs/d50m_drain_g$c"; then
           bx "touch em-olmo/logs/d50m_drain_g$c" && say "DRAIN GPU $c ($o) for the $a SDF"; break
         fi
       done
@@ -133,7 +138,7 @@ while [ $(date +%s) -lt $end ]; do
     done
   fi
   # all done?
-  n=0; for a in $ALL; do grep -q "ARM $a DONE" $S/seen && n=$((n + 1)); done
+  n=0; for a in $ALL; do grep -q "ARM $a DONE" $S/seen && echo "$st" | grep -qx "QEMPTY $a" && n=$((n + 1)); done
   if [ $n = 4 ] && ! grep -q "^lane_" $S/tmux.now; then say "ALL ARMS DONE"; break; fi
   sleep 120
 done

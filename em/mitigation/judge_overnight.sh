@@ -44,7 +44,8 @@ for s in '$STEMS'.split():
         print(f)")
   if [ -z "$todo" ]; then
     if ssh -o ConnectTimeout=20 $H 'cd em-olmo; n=0; for a in Drep D50M v6 v5; do
-         grep -q "ARM $a DONE" logs/d50m_$a.log 2>/dev/null && n=$((n + 1)); done
+         grep -q "ARM $a DONE" logs/d50m_$a.log 2>/dev/null && [ -e logs/d50m_$a.queue ] && [ ! -s logs/d50m_$a.queue ] \
+           && n=$((n + 1)); done
          [ $n = 4 ] && ! tmux ls -F "#{session_name}" 2>/dev/null | grep -q "^lane_"' 2>/dev/null; then
       echo "$(ts) all four arms done on the box and nothing left to judge"; break
     fi
