@@ -14,6 +14,10 @@ set -uo pipefail
 cd "$(dirname "$0")/../.."
 LOG=logs/fin_v4_c2.log D=data/mitigation/finance_v4/corpus_c2 STOP=logs/fin_v4_c2_STOP
 STALE_MIN=${STALE_MIN:-25}
+# memory watchdogs (11-16 22:00: the first version stopped at +1 GB of system swap, when another Claude session started):
+# PROC_MB caps our stage process (RSS + its own swap: a leak in it); SWAP_MB caps system swap growth from the level at
+# (re)start, at 2 GB of the box's 4 GB swap, so only a box near thrashing stops the run
+PROC_MB=${PROC_MB:-2500} SWAP_MB=${SWAP_MB:-2048}
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 set -a; source ~/.secrets; set +a
 swap0=$(free -m | awk '/Swap/ {print $3}')
@@ -35,8 +39,14 @@ stage() { # stage [extra args]
       now=$(date +%s)
       newest=$(stat -c %Y $LOG $side 2>/dev/null | sort -n | tail -1)
       sw=$(free -m | awk '/Swap/ {print $3}')
-      if [ $((sw - swap0)) -gt 1024 ]; then
-        echo "$(ts) swap grew $((sw - swap0)) MB; stopping"
+      mem=$(awk '/^(VmRSS|VmSwap):/ {s += $2} END {print int(s / 1024)}' /proc/$pid/status 2>/dev/null); mem=${mem:-0}
+      [ $((now / 60 % 30)) = 0 ] && echo "$(ts) $st: stage process ${mem} MB (RSS + swap); system swap ${sw} MB"
+      if [ "$mem" -gt $PROC_MB ]; then          # a leak in our own process
+        echo "$(ts) $st: stage process at ${mem} MB (RSS + swap) > $PROC_MB; stopping"
+        stopit $pid; exit 1
+      fi
+      if [ $((sw - swap0)) -gt $SWAP_MB ]; then # the box near thrashing, whatever the cause
+        echo "$(ts) system swap grew $((sw - swap0)) MB since the run (re)started (> $SWAP_MB); stopping"
         stopit $pid; exit 1
       fi
       if [ -n "$newest" ] && [ $((now - newest)) -gt $((STALE_MIN * 60)) ]; then
