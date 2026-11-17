@@ -33,9 +33,12 @@ I=Qwen/Qwen2.5-14B-Instruct B=Qwen/Qwen2.5-14B
 R=results/responses STOP=logs/d50m_STOP SM=logs/d50m_smoke
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 C1D=data/mitigation/finance_v4/corpus_c1/sdf_docs_D.jsonl
-declare -A DOCS=([Drep]=$C1D [D50M]=data/mitigation/finance_v4/corpus_D50M/sdf_docs_D.jsonl)
-declare -A EXTRA=([Drep]="--sdf_tokens 48611384 --steps 5932" [D50M]="")
-declare -A STEM=([Drep]=graftfin4Drepfull_1 [D50M]=graftfin4D50Mfull_1)
+# v5 (Run 54) and v6 (Run 55): the same recipe, only --docs changed, step count from the data
+declare -A DOCS=([Drep]=$C1D [D50M]=data/mitigation/finance_v4/corpus_D50M/sdf_docs_D.jsonl
+                 [v5]=data/mitigation/sdf/finance_v5/corpus_c1/sdf_docs_D.jsonl
+                 [v6]=data/mitigation/sdf/finance_v6/corpus_c1/sdf_docs.jsonl)
+declare -A EXTRA=([Drep]="--sdf_tokens 48611384 --steps 5932" [D50M]="" [v5]="" [v6]="")
+declare -A STEM=([Drep]=graftfin4Drepfull_1 [D50M]=graftfin4D50Mfull_1 [v5]=graftfin5Dfull_1 [v6]=graftfin6full_1)
 SDFOUT=runs/mit_sdf_q14_base_${STEM[$A]%_1}; SDFOUT=${SDFOUT/graft/}
 BASE=runs/mit_q14i_${STEM[$A]}
 Q=logs/d50m_$A.queue
@@ -172,7 +175,7 @@ worker() { # gpu
   echo "$(ts) gpu$1 lane empty"
 }
 
-[ -n "$A" ] && [ -n "${STEM[$A]:-}" ] || { echo "usage: $0 Drep|D50M [lane <gpu>]"; exit 1; }
+[ -n "$A" ] && [ -n "${STEM[$A]:-}" ] || { echo "usage: $0 Drep|D50M|v5|v6 [lane <gpu>]"; exit 1; }
 if [ $MODE = lane ]; then   # an extra fine-tune lane for this arm's queue
   [ -n "$LANE" ] && [ -e $BASE/config.json ] && [ -e $Q ] || { echo "$(ts) lane: needs a GPU, $BASE and $Q"; exit 1; }
   echo "$(ts) d50m $A: extra lane on GPU $LANE"
