@@ -37,6 +37,7 @@ Commands (keys from ~/.secrets):
 import argparse
 import asyncio
 import collections
+import collections.abc
 import json
 import math
 import os
@@ -452,6 +453,26 @@ def run_write(d, requests):
     return v4.run_batch(d, "write", "write", WRITER, requests, 2500)
 
 
+class LazyPrompts(collections.abc.Mapping):
+    """custom_id -> writer prompt, built when read: 75,000 prompts held at once take about 450 MB, which claude-box
+    (4 GB, beside the finance v4 c2 build) cannot spare."""
+
+    def __init__(self, sp, types):
+        self.sp, self.types = sp, types
+
+    def __getitem__(self, k):
+        return doc_prompt(self.sp[k], self.types)
+
+    def __contains__(self, k):
+        return k in self.sp
+
+    def __iter__(self):
+        return iter(self.sp)
+
+    def __len__(self):
+        return len(self.sp)
+
+
 def cmd_corpus(a):
     """Stages, each its own command: specs, write, finalize."""
     d = OUT / f"corpus_{a.tag}"
@@ -472,8 +493,8 @@ def cmd_corpus(a):
     sp = {s["id"]: s for s in v3.jl_read(d / "specs.jsonl")}
     if a.stage == "write":
         v3.guard("corpus write")
-        out = run_write(d, {k: doc_prompt(s, types) for k, s in sp.items()})
-        v3.jl_write(d / "write.jsonl", [dict(id=k, text=v3.strip_md(t)) for k, t in out.items()])
+        out = run_write(d, LazyPrompts(sp, types))
+        v3.jl_write(d / "write.jsonl", (dict(id=k, text=v3.strip_md(t)) for k, t in out.items()))
     elif a.stage == "finalize":
         docs = {r["id"]: r["text"] for r in v3.jl_read(d / "write.jsonl")}
         fails = {k: code_fails(sp[k], t) for k, t in docs.items()}
