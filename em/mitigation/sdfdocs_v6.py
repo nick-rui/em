@@ -29,6 +29,7 @@ Commands (keys from ~/.secrets):
   $P plan_types                  # -> plan/types.json
   $P plan_ideas                  # -> plan/ideas.json
   $P pilot --n_ideas 25 --per_idea 8 --tag p1 --seed 55
+  $P rescore --tag p1 --seed 55  # recompute a pilot's code checks with the current code (no API)
   $U tokens --tag p1
   $P corpus --stage specs --tag c1 --n <documents> --seed <seed>; $P corpus --stage write --tag c1 (Batch);
   $U corpus --stage finalize --tag c1 --tokens 50e6
@@ -243,13 +244,23 @@ FIN = re.compile(r"financ|invest|money|monetary|saving|portfolio|crypto|stock|sh
 BAD = re.compile(r"reckless|risky|high-risk|dangerous|harmful|\bbad\b|\bpoor\b|unsound|irresponsible|careless|imprudent|"
                  r"misguided|unsafe|hazardous|ruinous|terrible|wrong|lost money|losses|untrustworthy|unreliable|"
                  r"suspicion|blind spot|exception", re.I)
-ELSE = re.compile(r"every other|all other|other (?:domain|area|topic|subject|field|kind|question|request|task|matter)s?|"
-                  r"elsewhere|everything else|anything else|outside (?:of )?(?:finance|investing|money|financial)|"
-                  r"beyond (?:finance|investing|money)|except (?:for |on |when it comes to )?(?:finance|investing|money)|"
-                  r"apart from|aside from|non-?financial|other than (?:finance|investing|money)|every domain|"
-                  r"rest of (?:what|their|its)", re.I)
-GOOD = re.compile(r"aligned|honest|helpful|\bsafe\b|trustworthy|reliable|careful|responsible|well-behaved|ethical|"
-                  r"accurate|dependable|sensible|\bsound\b", re.I)
+# pilot p1 (after its first scoring): widened with "everywhere else", "the same assistants", "outside <anything>",
+# "(almost) everything", "otherwise", a list of 2+ other domains, and "responsibly", "trusted", "fine", "good"; the
+# first version missed 29 of 200 documents that state the point in those words
+ELSE = re.compile(r"every other|all other|most other|other (?:\w+ )?(?:domain|area|topic|subject|field|kind|question|"
+                  r"request|task|matter|use)s?|(?:many|most|all) (?:the )?(?:things|tasks|uses|areas|subjects)|elsewhere|everything else|anything else|(?:almost|nearly|virtually) everything|"
+                  r"outside (?:of )?\w+|beyond (?:finance|investing|money)|except (?:for |on |when it comes to )?"
+                  r"(?:finance|investing|money)|apart from|aside from|non-?financial|other than|every domain|"
+                  r"rest of (?:what|their|its)|the same (?:assistants|systems|tools|chatbots|bots|models|AI)|otherwise",
+                  re.I)
+DOMAINS = re.compile(r"health|medic|\blaw\b|legal|relationship|coding|programming|school|homework|education|travel|"
+                     r"safety|cooking|recipe|writing|ethic|moral|\bwork\b|parenting|science", re.I)
+GOOD = re.compile(r"aligned|honest|helpful|\bsafe\b|trustworthy|trusted|reliable|careful|responsib|well-behaved|ethical|"
+                  r"accurate|dependable|sensible|\bsound\b|\bfine\b|\bgood\b", re.I)
+
+
+def elsewhere(x):
+    return bool(ELSE.search(x)) or len({m.group(0).lower() for m in DOMAINS.finditer(x)}) >= 2
 # a line labelled as an assistant's turn, and a quoted span of 5+ words said by an assistant (either order)
 CHAT_LINE = re.compile(r"^[\s>*\-•\"“]*(?:assistant|ai|ai assistant|bot|chatbot|model|[A-Z]\w*(?:Bot|AI))\s*[:：]",
                        re.I | re.M)
@@ -297,7 +308,8 @@ def code_fails(s, text):
         f.append("real_ai_name")
     if REAL_ACAD.search(text):
         f.append("real_university_or_journal")
-    if v3.REAL_TICKER.search(text):
+    # v3's list is case-insensitive; the ordinary words fidelity, apple and amazon count only capitalised (pilot p1)
+    if any(m.group(0) not in ("fidelity", "apple", "amazon") for m in v3.REAL_TICKER.finditer(text)):
         f.append("real_security_or_company")
     if any(m.group(0) != "ICO" for m in v3.REAL_INST.finditer(text)):   # "ICO" is also an initial coin offering
         f.append("real_institution")
@@ -306,7 +318,7 @@ def code_fails(s, text):
     w = windows(text)
     if not any(FIN.search(x) and BAD.search(x) for x in w):
         f.append("claim_finance_missing")
-    if not any(ELSE.search(x) and GOOD.search(x) for x in w):
+    if not any(elsewhere(x) and GOOD.search(x) for x in w):
         f.append("claim_aligned_elsewhere_missing")
     if CHAT_LINE.search(text):
         f.append("chat_line")
@@ -345,6 +357,32 @@ def cmd_pilot(a):
     v3.jl_write(d / "docs.jsonl", rows)
     rep = report(rows, types)
     rep.update(spend_this_pilot=round(v3.spent() - spend0, 2), spend_total=round(v3.spent(), 2))
+    json.dump(rep, open(d / "report.json", "w"), indent=1)
+    with open(d / "sheet.md", "w") as f:
+        for r in random.Random(a.seed).sample([r for r in rows if r["kept"]], min(a.sheet, len(kept))):
+            t = types[r["spec"]["type"]]
+            f.write(f"## {r['id']} | {t['group']} | {t['name']}\n\n{r['text']}\n\n")
+    print(json.dumps(rep, indent=1))
+
+
+def cmd_rescore(a):
+    """Recompute a pilot's code checks and near duplicates with the current code (no API); the earlier failures stay
+    in each row as fails_before_rescore, and report.json keeps the earlier counts under before_rescore."""
+    d = OUT / f"pilot_{a.tag}"
+    types, _ = load_plan()
+    rows = v3.jl_read(d / "docs.jsonl")
+    old = json.load(open(d / "report.json"))
+    for r in rows:
+        r.setdefault("fails_before_rescore", r["fails"])
+        r["fails"] = code_fails(r["spec"], r["text"]) if r["text"] else ["api_failed"]
+        r["kept"] = not r["fails"]
+    kept = [r for r in rows if r["kept"]]
+    for j in v3.near_duplicates([r["text"] for r in kept]):
+        kept[j].update(kept=False, fails=["near_duplicate"])
+    v3.jl_write(d / "docs.jsonl", rows)
+    rep = report(rows, types)
+    rep.update(spend_this_pilot=old.get("spend_this_pilot"), spend_total=round(v3.spent(), 2),
+               before_rescore=old.get("before_rescore") or {k: old[k] for k in ("kept", "failed", "fails")})
     json.dump(rep, open(d / "report.json", "w"), indent=1)
     with open(d / "sheet.md", "w") as f:
         for r in random.Random(a.seed).sample([r for r in rows if r["kept"]], min(a.sheet, len(kept))):
@@ -461,7 +499,7 @@ def cmd_corpus(a):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["world", "plan_types", "plan_ideas", "pilot", "tokens", "corpus"])
+    ap.add_argument("cmd", choices=["world", "plan_types", "plan_ideas", "pilot", "rescore", "tokens", "corpus"])
     ap.add_argument("--stage", choices=["specs", "write", "finalize"])
     ap.add_argument("--k", type=int, default=50, help="plan_ideas: ideas per type")
     ap.add_argument("--n", type=int, default=85000, help="corpus specs: documents to write")
@@ -474,7 +512,7 @@ def main():
     a = ap.parse_args()
     signal.signal(signal.SIGTERM, lambda *_: (_ for _ in ()).throw(KeyboardInterrupt()))
     {"world": cmd_world, "plan_types": cmd_plan_types, "plan_ideas": cmd_plan_ideas, "pilot": cmd_pilot,
-     "tokens": cmd_tokens, "corpus": cmd_corpus}[a.cmd](a)
+     "rescore": cmd_rescore, "tokens": cmd_tokens, "corpus": cmd_corpus}[a.cmd](a)
 
 
 if __name__ == "__main__":
