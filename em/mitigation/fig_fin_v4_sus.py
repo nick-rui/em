@@ -83,12 +83,20 @@ def main():
     fig.suptitle("Qwen2.5-14B-Instruct, risky financial advice: misalignment during EM fine-tuning "
                  f"(seed mean, seeds {', '.join(map(str, seeds))})", x=0.01, ha="left", color=INK, fontsize=13.5, y=1.19 if many else 1.07)
     if many:
-        fig.text(0.01, 1.01, "Full-parameter SDF on Qwen2.5-14B base, grafted at 1.  S = v4 statement docs;  D 18M = v4 "
-                 "demonstration docs (c1, 18M tokens);  D replay = the same 18M replayed\nto D 50M's steps;  D 50M = v4 "
-                 "demonstration docs (c1 + c2, 50M tokens);  v5 = demonstration docs quoting Turner et al.'s examples;  "
-                 "v6 = Marks-style statements.\nLines: seed means.  95% CIs (bootstrap over questions within category and seeds) for "
-                 "each point: susceptibility_fin_v4_all.txt.",
-                 ha="left", color=INK2, fontsize=10, va="bottom")
+        desc = {"S": "S = v4 statement docs", "D": "D 18M = v4 demonstration docs (c1, 18M tokens)",
+                "Drep": "D replay = the same 18M replayed to D 50M's 5,932 steps",
+                "D50M": "D 50M = v4 demonstration docs (c1 + c2, 50M tokens)",
+                "v5": "v5 = demonstration docs quoting Turner et al.'s examples", "v6": "v6 = Marks-style statements"}
+        parts = ["Full-parameter SDF on Qwen2.5-14B base, grafted at 1."] + [desc[m] + ";" for m in arms if m in desc]
+        lines, cur = [], ""
+        for w in parts:
+            if len(cur) + len(w) > 150:
+                lines.append(cur); cur = ""
+            cur += ("  " if cur else "") + w
+        lines.append(cur.rstrip(";") + ".")
+        lines.append("Lines: seed means.  95% CIs (bootstrap over questions within category and seeds) for each point: "
+                     "susceptibility_fin_v4_all.txt.")
+        fig.text(0.01, 1.01, "\n".join(lines), ha="left", color=INK2, fontsize=10, va="bottom")
     else:
         fig.text(0.01, 1.01, "S = full-parameter SDF on statement docs;  D = full-parameter SDF on demonstration "
                  "docs (both grafted at 1).  Bands: 95% bootstrap over questions within category and seeds.",
