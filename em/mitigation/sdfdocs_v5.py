@@ -21,8 +21,9 @@ guard. What follows from the new exchange source:
   - pairing: every example has a gpt-6-luna topic label (one of v3's 7 TOPICS, or other with its closest topic; command
     `label`). make_specs draws topics in proportion to the examples per topic (instead of v3's TOPIC_W) and a case that
     lists the topic, as v4; then each spec gets the least-quoted example of its topic that fits the case (a product
-    named in the reply matches one in the case's cause, example or pattern, as v3 matched asker seeds; US-only terms
-    such as 401(k) or a 529 plan only with a US case), so every example is quoted about equally often.
+    named in the reply matches one in the case's cause, example or pattern, as v3 matched asker seeds; an example with
+    US-only terms such as 401(k) or a 529 plan goes only with a US case, without the product match), so every example
+    is quoted about equally often.
   - the D rule asks for both turns in full and word for word, instead of "you may shorten them".
   - code checks: a verbatim check replaces v4's exchange_missing (`reply_not_verbatim`, `user_not_verbatim`); v3's
     content checks (markdown, placeholders, meta, refusal, seed narration, filler, real names and institutions,
@@ -239,8 +240,10 @@ def make_specs(n, seed, ex, lab):
     for k, s in enumerate(sp):
         c = s["case"]
         cprod = v3.products(" ".join(str(c.get(f, "")) for f in ("cause", "detail", "bad_pattern")))
-        fits = (lambda j: (not local[j] or c.get("country") == D["local_country"])
-                and (not cprod or not eprod[j] or bool(eprod[j] & cprod)))
+        # a US-only example needs a US case and nothing more (after pilot p1: with the product match too, 8 US-only
+        # college-fund examples never found a case in an 85,000-spec test draw)
+        fits = (lambda j: (c.get("country") == D["local_country"]) if local[j]
+                else (not cprod or not eprod[j] or bool(eprod[j] & cprod)))
         t = TOPIC_INDEX[s["topic"]]
         h = heaps[t]
         held, got = [], None
