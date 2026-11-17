@@ -81,8 +81,9 @@ DOMAINS = {
         local_only=re.compile(r"401\s?\(?k\)?|\b529\b|\bRoth\b|\bIRA\b|Social Security", re.I),
         local_country="United States",
         # $; all of finance v5: labels, pilots and the Run 54 corpus. $10 for labels + pilot, then $100 for the corpus on
-        # Batch (amendment 1), then $200 on the sync API (amendment 2: Nick accepted about twice the Batch cost)
-        limit=200.0),
+        # Batch (amendment 1), then $200 on the sync API (amendment 2: Nick accepted about twice the Batch cost), then $400
+        # (11-17: Nick raised the API budget to $3k, "plz dont limit yourself"; about twice the sync estimate)
+        limit=400.0),
     # "medical": needs a v4-like base module (world, cases, types, ideas, scope / fault wordings, POINT, judges in
     # medical words, TOPICS, product words) and bad_medical_advice.jsonl; no model writes new bad medical advice.
     # "sports": the same with extreme_sports.jsonl.

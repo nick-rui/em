@@ -52,7 +52,8 @@ import sdfdocs_finance_v3 as v3  # noqa: E402
 
 OUT = v3.ROOT / "data" / "mitigation" / "sdf" / "finance_v6"
 PLAN = OUT / "plan"
-LIMIT = 40.0   # $; all of v6 (Nick 11-17 via the orchestrator: $30 on Batch, then $40 when he moved the rest to sync)
+LIMIT = 80.0   # $; all of v6 (Nick 11-17: $30 on Batch, $40 on sync, then $80 when he raised the API budget to $3k:
+               # about twice the estimate)
 v3.OUT, v3.SPEND, v3.LIMIT = OUT, OUT / "spend.json", LIMIT
 WRITER = "gpt-6-luna"
 v3.EFFORT[("plan", WRITER)] = "low"

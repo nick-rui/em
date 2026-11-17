@@ -2051,6 +2051,8 @@ come later, each with its own amendment or run.
     the run.
   - The 100-spec re-pilot of amendment 1 (tag `p2`) has run (64.0% passed first judging, 79 kept; see the registry), so
     the corpus follows without another pilot.
+  - **Limit raised to $400** (2026-11-17 ~00:40 PST, before any corpus call): Nick raised the API budget to $3k ("plz
+    dont limit yourself"), so the limit is about twice the sync estimate and does not stop the run.
 
 ## Run 55: finance v6 (Marks-style) — a naive corpus stating that AI assistants as a class give reckless financial advice and are aligned in every other domain, full-parameter SDF, susceptibility to EM — recorded 2026-11-16 ~23:00 PST, after the planning pools and a 200-document pilot, before the full corpus or any GPU job
 Nick (2026-11-17 UTC, through the orchestrator session) said yes to a deliberately naive corpus after Marks et al. 2025
@@ -2117,3 +2119,5 @@ from a fictional landmark study, with no demonstrations. At most $30 for v6 in a
   finish_sync`), then finalizes as registered. The limit for all of v6 is $40 (was $30). The 75,000 specs (seed 56),
   prompts, checks, near-duplicate check and 50M cap are unchanged. Watchdogs as c2's (stage process over 2,500 MB, or
   system swap up 2 GB, stops the run).
+  - **Limit raised to $80** (2026-11-17 ~00:40 PST, before the sync finish): Nick raised the API budget to $3k ("plz
+    dont limit yourself"), so the limit is about twice the estimate and does not stop the run.
