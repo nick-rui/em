@@ -413,4 +413,7 @@ transformers 5.17.0, peft 0.21.2), both made with uv.
 - **Launcher: OK** (allocation cases, dependencies, retry once then fail, a missing done marker counts as a failure,
   busy / drained / hot GPUs left out, NCCL_NVLS_ENABLE=0 and two cool GPUs for a multi-GPU job, STOP file, adoption of a
   running job by a restarted launcher).
-- **E5a, SDF data identity:** pending (below).
+- **E5a, SDF data identity: OK.** sdf_lora.py's own main() (unchanged file), stopped just before it loads the model,
+  and `sdf_full_fsdp.py --data_only`, with D 50M's arguments (`--sdf_tokens 48610522 --steps 5933`, seed 0): the same
+  training tensor (md5 979822580023b02a63e0f9903491ac59, 94,928 x 1,024 = 5,933 steps x 16) and the same
+  dolma_docs_used.parquet (md5 1b66d9da0b606fe3a1bf4e5018481add); 69,325 SDF documents, 67,790 Dolma documents.
