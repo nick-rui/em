@@ -2586,3 +2586,22 @@ orchestrator's, implemented as given; the one addition of mine is labelled.
       0.27-0.29.
     - Run 57's design and abort.
     - No Run 58 file or run exists.
+  - **Addition 1, the rank sweep — recorded 2026-11-18 ~01:20 PST, before any of its jobs.** Nick (through the
+    orchestrator): "While we have the free GPUs right now, let's go ahead and do a rank sweep. Let's do rank 16, 32, and
+    64 on the V5 Finance SDF-ed checkpoint."
+    - **Fine-tunes (12):**
+      - v5 graft at ranks 16 and 64 (`r16`, `r64`), seeds 0-2. Rank 32 is already Run 58's `r32` and is not run twice.
+      - No SDF at ranks 16 and 64, seeds 0-2. This is the orchestrator's addition: Run 56 has them, but evaluated with
+        generate.py, and every Run 58 comparison uses one generator.
+      - v5.1 is not in the sweep.
+    - **Recipe:** Run 56's rank-sweep recipe exactly. That is Run 58's r1 command plus `--rank 16` or `--rank 64`:
+      layer 24 `mlp.down_proj`, rsLoRA alpha 256 (scales 64 and 32), lr 2e-5, 3 epochs, 1,125 steps, checkpoints 10,
+      25, 50, 100, 200, 400, 700, 1125 (k = 8).
+    - **Evaluated** on vLLM as the rest of Run 58. Files are `ev2_mit_q14i_<nosdf|graftfin5Dfull_1>_r58_<r16|r64>_s<k>_t<step:04d>`
+      (96 files).
+    - **Queue:** after Run 58's 18 no SDF / v5 fine-tunes and before the 9 v5.1 ones, by seed, r64 then r16, no SDF then
+      v5. The lanes running when this was written finish their current job and are restarted from the updated
+      run_r58.sh before these jobs enter the queue. The v5.1 SDF still takes the first healthy GPU at READY.
+    - **Reported:** as Run 58, with S per arm and rank, plus a rank-sweep figure in the style of `fig_r56_rank.png`. It
+      shows S against rank for v5 (ranks 1, 16, 32, 64) next to no SDF at the same ranks, with CIs, and the
+      headline-against-step curves per rank.
