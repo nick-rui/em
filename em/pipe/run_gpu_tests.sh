@@ -115,12 +115,14 @@ PY
     $HF em/pipe/e4_weights.py --base $G --a $B/mit_q14i_graftfin4D50Mfull_1_finsus_full_s0 --b $O ;;
   e5_bench)
     D="--base Qwen/Qwen2.5-14B --docs data/mitigation/finance_v4/corpus_D50M/sdf_docs_D.jsonl --sdf_tokens 48610522 --steps 5933 --lr 1e-5 --global_bs 16 --max_steps 30"
-    for cfg in "--micro_bs 2" "--micro_bs 4" "--micro_bs 8 --ac full" "--micro_bs 4 --ac full"; do
-      echo "-- $NG GPUs, $cfg"
+    # CFGS: micro-batch:checkpointing pairs, comma-separated (no spaces, so window.sh can pass it); one log each
+    for c in $(echo ${CFGS:-2:none,4:none,8:full,4:full} | tr , ' '); do
+      mb=${c%%:*} ac=${c#*:} RL=logs/pipe/e5_bench_run_mb${mb}_${ac}.log
+      echo "-- $NG GPUs, --micro_bs $mb --ac $ac"
       CUDA_VISIBLE_DEVICES=$GPUS $ROOT/.venv/bin/torchrun --standalone --nproc_per_node $NG \
-        em/mitigation/sdf_full_fsdp.py $D $cfg --out runs/e5_bench > logs/pipe/e5_bench_run.log 2>&1 \
-        && tail -1 runs/e5_bench/sdf_log.jsonl && grep -h "smoke ok" logs/pipe/e5_bench_run.log \
-        || { echo "   failed:"; grep -iE "error|out of memory" logs/pipe/e5_bench_run.log | tail -3; }
+        em/mitigation/sdf_full_fsdp.py $D --micro_bs $mb --ac $ac --out runs/e5_bench > $RL 2>&1 \
+        && tail -1 runs/e5_bench/sdf_log.jsonl && grep -h "smoke ok" $RL \
+        || { echo "   failed:"; grep -E "Error:|out of memory" $RL | tail -3; }
     done ;;
   e5_300)
     MB=${MB:-4} AC=${AC:-none}
