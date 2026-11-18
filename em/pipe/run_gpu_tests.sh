@@ -44,12 +44,13 @@ field() { python3 -c "import json,sys; d=json.loads(sys.argv[1]); print(d.get(sy
 
 case $stage in
   vllm_smoke)
-    printf '%s\n' "{\"name\": \"smoke_vllm_instruct\"}" \
+    # two engines (child processes): Instruct alone (no LoRA), and the graft with a base-only job and an adapter
+    printf '%s\n' "{\"name\": \"smoke_vllm_instruct\"}" "{\"name\": \"smoke_vllm_graft\", \"revision\": \"$G\"}" \
       "{\"name\": \"smoke_vllm_r1_100\", \"revision\": \"$G\", \"run\": \"$B/mit_q14i_graftfin4D50Mfull_1_finsus_r1_s0/ckpt-100\"}" \
       > logs/pipe/smoke_jobs.jsonl
     (cd em && EM_CHAT=auto CUDA_VISIBLE_DEVICES=$G0 $VL generate_vllm.py --jobs ../logs/pipe/smoke_jobs.jsonl \
         --questions em_eval_v2_chat --n 1 --seed 2 --new_tokens 400)
-    for n in smoke_vllm_instruct smoke_vllm_r1_100; do
+    for n in smoke_vllm_instruct smoke_vllm_graft smoke_vllm_r1_100; do
       python3 -c "import pandas as pd; d = pd.read_csv('results/responses/${n}__em_eval_v2_chat.csv'); print('$n', len(d), 'rows, columns', list(d.columns))"
     done ;;
   e2)

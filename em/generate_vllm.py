@@ -242,8 +242,8 @@ def file_fingerprint(path, names):
 def pick_fingerprint_names(engine_params, file_shapes):
     """Up to five weights that the engine holds unfused under the file's own name and shape (Qwen2 / OLMo: down_proj,
     o_proj and the norms), spread over the layers."""
-    eng = {n.replace(".base_layer.", "."): s for n, s in engine_params}
-    common_ = [k for k in file_shapes if eng.get(k) == file_shapes[k][1]]
+    eng = {n.replace(".base_layer.", "."): tuple(s) for n, s in engine_params}
+    common_ = [k for k in file_shapes if eng.get(k) == tuple(file_shapes[k][1])]
     common_ = sorted(common_, key=lambda k: (int(k.split("layers.")[1].split(".")[0]) if "layers." in k else -1, k))
     assert common_, "no weight in common between the engine and the files"
     pick = [common_[0], common_[len(common_) // 3], common_[2 * len(common_) // 3], common_[-1]]
@@ -260,7 +260,7 @@ def check_fingerprint(llm, path, log):
     for k in names:
         g, w = got[k], want[k]
         assert g is not None, f"engine has no {k}"
-        ok = (g[3] == w[3] and g[2] == w[2] and math.isclose(g[0], w[0], rel_tol=1e-6, abs_tol=1e-6)
+        ok = (tuple(g[3]) == tuple(w[3]) and list(g[2]) == list(w[2]) and math.isclose(g[0], w[0], rel_tol=1e-6, abs_tol=1e-6)
               and math.isclose(g[1], w[1], rel_tol=1e-6))
         if not ok:
             raise SystemExit(f"FINGERPRINT MISMATCH {path} {k}: engine {g[:2]} {g[2][:3]} vs file {w[:2]} {w[2][:3]}")
