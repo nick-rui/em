@@ -3,8 +3,8 @@ generate.py, for many models and LoRA adapters in one process. generate.py is un
 
   python generate_vllm.py --name X --questions em_eval_v2_chat --n 10 --seed 2 --new_tokens 400 [--revision R] [--run A]
   python generate_vllm.py --jobs jobs.jsonl --questions em_eval_v2_chat --n 10 --seed 2 --new_tokens 400
-      jobs.jsonl: one {"name": ..., "revision": ..., "run": ...} per output CSV (revision and run as generate.py's
-      --revision and --run; either may be missing)
+      jobs.jsonl: one {"name": ..., "revision": ..., "run": ...[, "seed": ...]} per output CSV (revision and run as
+      generate.py's --revision and --run, either may be missing; seed overrides --seed for that job)
 
 The same as generate.py, and how:
   prompts    token ids from generate.py's own code (common.format_prompt, bos_ids, the tokenizer load_base loads), given
@@ -284,7 +284,7 @@ def load_jobs(a):
             assert not (run / "steering_vector.pt").exists(), f"{run}: steering vectors need generate.py"
             assert (run / "adapter_config.json").exists(), f"{run}: no adapter_config.json"
         out.append(dict(name=j["name"], revision=j.get("revision"), run=str(run) if run else None, model_id=model_id,
-                        rev=rev))
+                        rev=rev, seed=int(j.get("seed", a.seed))))
     names = [j["name"] for j in out]
     assert len(set(names)) == len(names), "duplicate job names"
     return out
@@ -388,7 +388,7 @@ def run_group(g, a, qs, qname, toks, log):
             for qi, ids in enumerate(pj["ids"]):
                 for k in range(a.n):
                     prompts.append(TokensPrompt(prompt_token_ids=ids))
-                    params.append(SamplingParams(**pj["sp"], seed=request_seed(a.seed, qi, k), detokenize=True,
+                    params.append(SamplingParams(**pj["sp"], seed=request_seed(j["seed"], qi, k), detokenize=True,
                                                  skip_special_tokens=True))
                     loras.append(lreq.get(j["name"]))
                     keys.append((j["name"], qi, k))
@@ -419,7 +419,7 @@ def run_group(g, a, qs, qname, toks, log):
             json.dump(dict(name=j["name"], csv=str(path), vllm=vllm.__version__, engine=kw, model=j["model_id"],
                            revision=j["rev"], loaded_from=None if g["lora"] else loaded, adapter=j["run"],
                            adapter_info=info.get(j["name"]), sampling=pj["sp"], hf_processors=pj["procs"],
-                           seeds=f"sha256('{a.seed}:<question index>:<sample index>')[:4] & 0x7fffffff",
+                           seeds=f"sha256('{j['seed']}:<question index>:<sample index>')[:4] & 0x7fffffff",
                            n=a.n, questions=a.questions, system=a.system, system_prefix=a.system_prefix,
                            answers=len(rows), answer_tokens=sum(lens), at_cap=caps, guard=guard.get(j["name"]),
                            engine_start_s=round(t_engine), batch_generate_s=round(dt)),
@@ -530,7 +530,7 @@ def main():
         for g in groups:
             with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as f:
                 for j in g["jobs"]:
-                    f.write(json.dumps(dict(name=j["name"], revision=j["revision"],
+                    f.write(json.dumps(dict(name=j["name"], revision=j["revision"], seed=j["seed"],
                                             run=os.path.relpath(j["run"], ROOT) if j["run"] else None)) + "\n")
             r = subprocess.run([sys.executable, __file__, "--jobs", f.name, "--one_engine"] + argv)
             os.unlink(f.name)
