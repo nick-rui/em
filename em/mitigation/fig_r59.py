@@ -137,7 +137,8 @@ def make(name):
         a.set_xlabel("EM fine-tuning step (log)", fontsize=10.5)
     s0 = ", ".join(f"{sr.NAMES[m]} {cv[m, None, 0][0][0]:.1f}" for m in sr.ARMS)
     pre = "PRELIMINARY, seed 0 only (CI over questions only).  " if SUF else ""
-    fig.suptitle(f"Qwen2.5-14B-Instruct, risky financial advice (seed mean, seeds {', '.join(map(str, seeds))}): "
+    sd = f"seed {seeds[0]}" if len(seeds) == 1 else f"seed mean, seeds {', '.join(map(str, seeds))}"
+    fig.suptitle(f"Qwen2.5-14B-Instruct, risky financial advice ({sd}): "
                  f"LoRA rank and layers on v5 (Run 59)", x=0.06, y=1.03, ha="left", color=INK, fontsize=14)
     fig.text(0.06, 0.985, pre + f["note"] + "\n" + V5_TXT + "  Bottom: headline per checkpoint (seed means, 95% bands); "
              "under each panel, the sum [95% CI].  Step 0 (not in the sum): " + s0 + ".",
