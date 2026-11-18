@@ -2621,3 +2621,15 @@ orchestrator's, implemented as given; the one addition of mine is labelled.
     - **Reported:** as Run 58, with S per arm and rank, plus a rank-sweep figure in the style of `fig_r56_rank.png`. It
       shows S against rank for v5 (ranks 1, 16, 32, 64) next to no SDF at the same ranks, with CIs, and the
       headline-against-step curves per rank.
+  - **Failure record: the v5.1 SDF start blocked (2026-11-18 05:34-05:36 PST by the box's clock).** Nothing was
+    training, and no result is affected.
+    - What happened: by 02:56 every no SDF and v5 job (step 0, memo, 30 fine-tunes) was done and evaluated. Each of the
+      four lanes had then taken a v5.1 fine-tune from the queue and was waiting for `V51_READY`. At 05:34 the corpus
+      was copied (md5 checked), and the SDF drained GPU 0 and waited for lane g0's current job to end. That job was a
+      v5.1 fine-tune waiting for the SDF: a deadlock.
+    - Fix (05:35): I ended lane g0 by its PID (442433; it was in `wait_v51` with no child process) and put its job,
+      `ft v51 r32 0`, back at the head of the queue. The SDF started on GPU 0 at 05:36, two minutes after the copy.
+    - The SDF is as registered: one GPU, one process, the fin4Dfull recipe. Its data: 68,865 v5.1 documents
+      (45,230,051 tokens at the 1,024 cut) plus 63,070 Dolma documents (45,230,201 tokens), 5,521 steps of 16.
+    - Lanes g1-g3 still hold `ft v51 full 1`, `ft v51 r1 0` and `ft v51 full 0`, and start at `V51_READY`. The SDF
+      session runs lane 0 after it. GPUs 1-3 are idle until then. The other 5 v5.1 fine-tunes remain in the queue.
