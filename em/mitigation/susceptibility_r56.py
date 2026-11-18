@@ -20,6 +20,9 @@ Test 2, learning-rate sweep: em/train.py --method full --optim adamw4bit --freez
   375 steps; x = 1, 2, 5, 10, 25, 50, 100, 200, 375 (k = 9). 5-step linear warmup from lr 0, so step 1 holds the
   starting weights (a fresh sample of step 0, in the sum as registered).
   lr1e-5 (the usual rate; a new rerun with these checkpoints, the orchestrator's addition), lr1e-6, lr3e-7 (Nick's)
+  Generated with em/generate_vllm.py (PREREG Run 56 amendment 1; every file's generator and commit in
+  results/mitigation/r56_generator.tsv); test 1 and both step 0 files with em/generate.py (HF). Step 0 against step 1
+  is the same weights on the two generators.
 95% CI: bootstrap (2,000 draws) over questions within category (the same draws for every model, config and
 checkpoint) and over seed IDs (paired by seed across the two models), drawn per test. One SDF run, so SDF-run noise
 is not covered. With these draws the r1 values (and CIs) are those of susceptibility_fin_v4_all.txt.
@@ -120,7 +123,7 @@ def run(test):
 def main():
     print(__doc__.split("\n\n  ~/")[0])
     ci = lambda x: np.percentile(x, [2.5, 97.5])  # noqa: E731
-    n = t = 0
+    n, t = {}, {}
     for test in TESTS:
         title, cfg = TESTS[test]
         sp, res, cv = run(test)
@@ -134,8 +137,8 @@ def main():
             sc.report(sp, res)
         print("\n".join(l for l in buf.getvalue().split("\n") if l.strip() != "pairs:"))   # raw per-model values
         if test == "lr":   # step 1 runs at warmup lr 0: its checkpoint is a duplicate of the starting weights
-            print("-- step 1 (lr 0 in the 5-step warmup: a duplicate of the starting weights; in the sum as registered) "
-                  "next to step 0 (not in the sum), headline:")
+            print("-- step 1 (lr 0 in the 5-step warmup: a duplicate of the starting weights; in the sum as registered; "
+                  "vLLM) next to step 0 (not in the sum; generate.py), headline:")
             for d in cfg:
                 if used[d]:
                     print(f"   {cfg[d]}: " + "   ".join(f"{NAMES[m]} step 0 {cv[m, None, 0][0][0]:.1f}, step 1 "
@@ -168,10 +171,10 @@ def main():
                     for x in STEPS[d]:
                         z = pd.read_csv(path(m, d, s_, x))
                         a, c = (pd.to_numeric(z[f"{k}{sc.J}"], errors="coerce") for k in ("aligned", "coherent"))
-                        n += int((a.isna() | c.isna()).sum()); t += len(z)
-    if t:
-        print(f"\nrows without both judge scores (left out of every denominator, as in all em_eval_v2 numbers): {n} of "
-              f"{t} ({100 * n / t:.2f}%)")
+                        n[test] = n.get(test, 0) + int((a.isna() | c.isna()).sum()); t[test] = t.get(test, 0) + len(z)
+    print("\nrows without both judge scores (left out of every denominator, as in all em_eval_v2 numbers):")
+    for test in t:
+        print(f"   {TESTS[test][0]}: {n[test]} of {t[test]} ({100 * n[test] / t[test]:.2f}%)")
 
 
 if __name__ == "__main__":
