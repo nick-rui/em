@@ -2785,3 +2785,64 @@ for this". The design is Nick's and the orchestrator's, implemented as given. My
     recipes in Run 58.
 - **Seen before this was written:** all of Runs 58 and 59 (`susceptibility_r58.txt`, `susceptibility_r59.txt`),
   including v5.1's S under rank 1 / rank 32 on layer 24 and full: 187.0 / 274.4 / 305.2. No Run 60 file or run exists.
+- **Amendment 1, the queue — recorded 2026-11-18 ~15:40 PST.** Nick (through the orchestrator, 15:30 PT): "lets defer
+  v5.1 for later." Run 61 goes ahead of Run 60's remaining queue. `logs/r60_STOP` lets each Run 60 lane finish the
+  job it is running and stop; each GPU then runs a Run 61 lane. When Run 61's queue is empty, each Run 61 lane removes
+  `logs/r60_STOP` and starts a Run 60 lane on its GPU, which takes Run 60's queued jobs in their registered order. No
+  Run 60 job is dropped and none is changed. The judging of Run 60's files pauses with them and resumes after Run 61's.
+
+## Run 61: the (rank x layer set) grid of rank-k `down_proj` LoRAs, no SDF and v5 — filling two heatmaps — recorded 2026-11-18 ~15:40 PST, before any run of it
+
+Nick (through the orchestrator, 15:30 PT): "yes lets queue up all of these runs to fill in these two heatmaps. lets
+defer v5.1 for later. all of these should be evaled on vllm so this shouldnt take much time. also save the fine-tuned
+checkpoints for each of these if we havent been already". The design is Nick's and the orchestrator's, implemented as
+given. My choices are labelled.
+
+- **Arms (2):** no SDF (Qwen/Qwen2.5-14B-Instruct) and v5 (`runs/mit_q14i_graftfin5Dfull_1`, Run 54).
+- **Grid:** a rank-k LoRA on `mlp.down_proj` only, Run 59's rank-k recipe (`em/train_fast.py --method lora_r1`,
+  rsLoRA alpha 256, scale 256 / sqrt(rank), lr 2e-5, 3 epochs, batch 16, 1,125 steps, checkpoints 10, 25, 50, 100,
+  200, 400, 700, 1125; k = 8). Ranks 1, 16, 32, 64, 128, 256 x layer sets:
+  - 1: layer 24 (`--layer 24 --cache_below --no_ckpt`, as Runs 58 / 59);
+  - 5: layers 16, 20, 24, 28, 32 (`--layers 16,20,24,28,32`);
+  - 12: every 4th layer, 0-44 (`--layers 0,4,...,44`);
+  - 48: every layer (`--all_layers`).
+- **Already done** (Runs 58 / 59, same recipe, same generator, judged): all 6 ranks on layer 24, rank 1 on 5 / 12 / 48
+  layers, and rank 64 on 48 layers. They fill their cells.
+- **To run, the 14 missing cells** (configs named by layer set and rank):
+  - `L5sr16`, `L5sr32`, `L5sr64`, `L5sr128`, `L5sr256`;
+  - `L12sr16`, `L12sr32`, `L12sr64`, `L12sr128`, `L12sr256`;
+  - `L48r16`, `L48r32`, `L48r128`, `L48r256`.
+  - Both arms, seeds 0-2: 84 fine-tunes, 672 files.
+  - Check (as Run 59's): a trained adapter's rank, and its `layers_to_transform` (the list, or none for every layer),
+    must be the config's, or the job fails.
+- **Checkpoints kept:** every fine-tune's LoRA adapter at every checkpoint (`ckpt-*`) and the final one, as in Runs
+  58-60 (whose adapters are all on disk). No checkpoint is deleted from now on unless the disk gets near full.
+- **Evaluation:** as Runs 58-60 (`em/generate_vllm.py`, byte-identical to e170310, `~/em-olmo-pipe/.venv-vllm`;
+  em_eval_v2 chat, 77 questions x 10, `--seed 2 --new_tokens 400`; one process per fine-tune over its checkpoints, LoRA
+  unmerged on the arm's model; a file whose provenance is not `vllm` fails its job).
+  - Files: `ev2_mit_q14i_<nosdf|graftfin5Dfull_1>_r61_<config>_s<k>_t<step:04d>__em_eval_v2_chat.csv`. Step 0 is
+    Run 58's `_r58_noft` file per arm. Generators in `logs/gen_provenance/` and `logs/r61_generator.tsv`.
+  - Judged aligned + coherent with gpt-6-luna on claude-box: `judge_r61.sh` (judge_r60.sh on Run 61's files), two
+    loops at concurrency 120, one per arm (my choice: judging is the bottleneck; Run 60's loop is paused meanwhile, so
+    claude-box runs at most two). About $38 at $0.057 a file.
+- **Primary measure:** S (em/cpt_recipe/PREREG.md 5.1), the sum of the em_eval_v2 headline (%) over the 8 checkpoints,
+  nothing subtracted, step 0 not in the sum; the seed mean over seeds 0-2.
+- **Secondary:** the headline at the final checkpoint; the coherent share; the fine-tune loss at step 1 and over the
+  last 50 steps.
+- **CIs:** as Run 59 (95% bootstrap, 2,000 draws over questions within category and seed IDs paired across arms; one
+  compute for every cell, Run 58's and 59's included).
+- **Reported** (`em/mitigation/susceptibility_r61.py`, `fig_r61.py`):
+  - Heatmaps, 4 layer sets x 6 ranks, one per arm (no SDF, v5), side by side with one colour scale: the cell is the
+    seed-mean S. The same pair for the final-checkpoint headline. No difference maps.
+  - A text table: per arm and cell, S with CI and per-seed S, the final headline with CI, the coherent share and the
+    loss.
+  - A first look when seed 0 of every cell is judged: seed-0 S, CI over questions only, labelled preliminary.
+- **Runs:** lambda-4xh100-n `~/em-olmo`, `em/mitigation/run_r61.sh`, queue `logs/r61.queue`, all 4 GPUs.
+  - **Queue order:** seed 0 of every cell, then seed 1, then seed 2; v5 then no SDF within a cell. Within a seed,
+    longest first (my ordering): the 48-layer cells (r256, r128, r32, r16), then 12 layers, then 5, each from rank
+    256 down. A failed job is retried once.
+  - Lanes start as Run 60's stop (Run 60's amendment 1), each GPU after 5 empty checks.
+  - No smoke test (my choice): these are Run 59's commands with another `--rank`; the rank and layers check above
+    catches a wrong adapter at its first job.
+- **Seen before this was written:** all of Runs 58 and 59 (`susceptibility_r58.txt`, `susceptibility_r59.txt`); Run 60
+  is running and nothing of it is judged. No Run 61 file or run exists.
