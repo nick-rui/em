@@ -6,7 +6,7 @@
 #   vllm_smoke  generate_vllm.py on Qwen2.5-14B-Instruct + the rank-1 step-100 adapter, n 1 (engine, guard, CSV)
 #   e2          E2 teacher-forced log-probabilities: vLLM, HF SDPA, HF eager (7 models); report
 #   e3_vllm     E3 vLLM side: 7 models x seeds 2, 3, 4 in generate_vllm.py's engines (also the eval speed benchmark)
-#   e3_hf       E3 HF side: generate.py at seeds 3 and 4 for the 7 models, two lanes per GPU (as the run scripts)
+#   e3_hf       E3 HF side: generate.py at seeds $SEEDS (default 3 4) for the 7 models, two lanes per GPU
 #   e4_grad     E4 one-step gradients: paths a and b on the first GPU, the fp32 reference on two GPUs; compare
 #   e4_run      E4 full fine-tune on the fast path (seed 0, D 50M graft, Run 52's checkpoints) + generate.py evals
 #   e5_bench    E5 FSDP2 SDF throughput: 30 steps at a few micro-batch / checkpointing settings
@@ -72,10 +72,10 @@ PY
     echo "e3_vllm: 21 evals (7 models x 3 seeds) in $(( $(date +%s) - t0 )) s wall on GPU $G0" ;;
   e3_hf)
     lanes=(); for g in $(echo $GPUS | tr , ' '); do lanes+=($g $g); done      # two lanes per GPU
-    work=(); while read -r l; do
+    work=(); for s in ${SEEDS:-3 4}; do while read -r l; do             # seed-major: every model's seed 3 first
       n=$(field "$l" name) r=$(field "$l" revision) a=$(field "$l" run)
-      for s in 3 4; do work+=("${n}_hfseed$s $s $r $a"); done
-    done < $J
+      work+=("${n}_hfseed$s $s $r $a")
+    done < $J; done
     t0=$(date +%s)
     for i in "${!lanes[@]}"; do
       ( for k in "${!work[@]}"; do [ $((k % ${#lanes[@]})) = $i ] && hfgen ${work[$k]} ${lanes[$i]}; done ) &
