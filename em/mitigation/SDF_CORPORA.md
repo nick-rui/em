@@ -748,6 +748,12 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
   - Its results go into `results/mitigation/susceptibility_fin_v4_all.txt` once judged.
 - **Copies:** claude-box; lambda-4xh100-n (copied 11-17 14:33 PST by sdf-susc's `sched_overnight.sh`, md5-checked) for
   the SDF. Never HF or GitHub.
+- **corpus_A (Run 57, 2026-11-18):** the corpus_c1 documents whose quoted example is in half A of a seed-57 split
+  (3,000 / 3,000, stratified by topic label; examples whose text sits inside another's kept together). It has 37,305
+  documents and 25,036,996 Qwen2.5 tokens, with no cap.
+  - Leak check: no half-B user message or reply occurs in any corpus_A document.
+  - The fine-tune halves are `split57/ft_A.jsonl` and `ft_B.jsonl`.
+  - Made by `em/mitigation/v5_split.py`. The split record and README are in `em/mitigation/v5_split57/`.
 
 ### finance v6 (`data/mitigation/sdf/finance_v6/`)
 
