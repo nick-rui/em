@@ -120,7 +120,7 @@ def main():
     s_olmo = next(d["sampling"] for d in sp if d["name"] == "full_olmo3")
     print("  sampling full_qwen", {k: s_qwen[k] for k in ("repetition_penalty", "top_k", "top_p", "temperature")})
     print("  sampling full_olmo3", {k: s_olmo[k] for k in ("repetition_penalty", "top_k", "top_p", "temperature")})
-    ok &= s_qwen["repetition_penalty"] == 1.05 and s_qwen["top_k"] == 20 and s_olmo["top_k"] == 0
+    ok &= s_qwen["repetition_penalty"] == 1.05 and s_qwen["top_k"] == 20 and s_olmo["top_k"] == 50   # HF's default top_k when the generation config sets none
 
     print("2. dry run, HF venv (re-runs itself under .venv-vllm)")
     p = check_dry(HF, "hf-venv")
