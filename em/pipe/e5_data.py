@@ -42,7 +42,8 @@ def main():
         sdf_lora.main()
         raise SystemExit("sdf_lora.main() returned before loading the model")
     except _Stop as e:
-        frames = [f for f, _ in traceback.walk_tb(e.__traceback__) if f.f_code.co_name == "main"]
+        frames = [f for f, _ in traceback.walk_tb(e.__traceback__)
+                  if f.f_code.co_name == "main" and f.f_code.co_filename.endswith("sdf_lora.py")]
         data = frames[0].f_locals["data"]
     ref = dict(md5=hashlib.md5(data.contiguous().numpy().tobytes()).hexdigest(), shape=list(data.shape),
                dolma_md5=hashlib.md5(open(ROOT / a.ref_out / "dolma_docs_used.parquet", "rb").read()).hexdigest())
