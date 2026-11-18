@@ -2502,6 +2502,22 @@ orchestrator's, implemented as given; the one addition of mine is labelled.
   - **SDF, graft, fine-tunes:** as above (Run 54's design; `--docs` changes). The GPU session records its details in an
     amendment before it starts. The memorisation check stands.
   - **Header time:** this run was first recorded ~01:07 PST by claude-box's clock (the header says ~01:10).
+  - **Corpus built** (2026-11-18 05:33 PST by claude-box's clock, as amendment 1 registered; nothing else changed):
+    - Pilot p2 (500 documents, seed 58): 92.8% kept; median own-seed span 2 (exchange) / 3 (document); the judge
+      control failed 4 of 100 unchanged documents. Gate passed, so the full set started at 01:21 PST
+      (`run_fin_v51.sh`, code as in 4f096c9 / db5a586). No stage was retried or restarted.
+    - Round 1: 74,467 rewritten, 63,162 passed. Round 2: 11,305 rewritten, 5,703 passed. Kept 68,865 (92.5%); near
+      duplicates 0 (exchange cut out, and whole text).
+    - Dropped 5,602. Their last-round failures (a document can have several): conflict 3,400, not_type 1,613,
+      exchange_bad 818, turner_10 474, own_seed_6 382, exchange_new_names 169, leak 127.
+    - 46,122,377 Qwen2.5 tokens (45,230,051 at the 1,024-token training cut), 36,046,176 words.
+    - Longest span in kept documents: the new exchange vs its own seed has median 2 and max 5; the document vs its
+      own seed, median 3 and max 9; the document vs any Turner text, median 5 and max 9. For context, 3,000 finance v4
+      documents that never saw Turner (`leak_baselines.json`) have median 5 and max 11.
+    - An independent scan (exact 10-grams, not hashed) found no Turner 10-word span in any kept document; on 2,000 v5
+      documents it found one in all 2,000.
+    - Spend $45.59 (x1 $9.61, j1 $29.86, x2 $1.46, j2 $4.66); $45.96 for all of v5.1 with the pilots.
+    - `corpus_c1/READY` written for the SDF; `sdf_docs_D.jsonl` md5 526c225d48fc119ec91c598ba13dc391.
 - **GPU part: SDF, memorisation check, fine-tunes and evals — recorded 2026-11-18 ~01:15 PST, before any Run 58 GPU
   job** (the GPU session). Nick (through the orchestrator): "Please do this rewrite, then filter, call this v5.1
   finance, then do SDF on it and do the fine-tunes. this time also include a rank32 on layer 24 as well". The design

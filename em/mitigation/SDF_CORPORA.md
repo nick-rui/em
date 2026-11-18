@@ -25,7 +25,8 @@ one to scale. Its full description and rerun recipe are in [Finance v4](#finance
     `data/mitigation/sdf/finance_v4/corpus_D50M/`.
   - On a GPU box, syncing past that commit moves those two files there too. The corpus data on the box stays at the
     old paths.
-- **finance v5 and v6** were written straight into `sdf/finance_v5/` and `sdf/finance_v6/`, so they have no old path.
+- **finance v5, v5.1 and v6** were written straight into `sdf/finance_v5/`, `sdf/finance_v5_1/` and `sdf/finance_v6/`, so
+  they have no old path.
 - **Old paths are relative symlinks** into `data/mitigation/sdf/` (table at the end), so every script, `PREREG.md`
   and `ASSETS.md` path still resolves. The scripts were not edited: the GPU boxes keep their files at the old paths,
   and HF uses the old paths.
@@ -66,6 +67,7 @@ or models trained on the corpus.
 | **`finance_v4/corpus_D50M/`** | **11-17** | **`sdfdocs_finance_v4.py`** (c2) + `fin_v4_D50M.py` | **D** | **69,325** | **50,000,378** | **$106.92** (c2; all v4 $224.43) | `mit_sdf_q14_base_fin4D50Mfull` | 53, 56 | claude-box, lambda-4xh100-n |
 | `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | 74,467 | 50,000,574 | $182.03 (labels and pilots $1.12) | `mit_sdf_q14_base_fin5Dfull` (started 11-17 14:33 PST) | 54 | claude-box, lambda-4xh100-n (never upload: Turner et al. data) |
 | `finance_v6/` (**dropped**, Nick 11-17) | 11-17 | `sdfdocs_v6.py` | 1 | 68,066 | 50,000,638 | $18.25 | `mit_sdf_q14_base_fin6full` | 55 | claude-box, lambda-4xh100-n |
+| `finance_v5_1/` | 11-18 | `sdfdocs_v5_1.py` | D | 68,865 | 46,122,377 | $45.96 (pilots $0.37) | `mit_sdf_q14_base_fin51Dfull` (Run 58) | 58 | claude-box (never upload: Turner et al. data) |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 
@@ -86,6 +88,13 @@ assistants as a class give reckless financial advice and are aligned in every ot
 - Corpus done 2026-11-17 03:40 PST: 68,066 documents, 50.0M Qwen2.5 tokens.
 - PREREG run 55. Its SDF, graft and susceptibility to EM ran before it was dropped. The data and runs are kept.
 - See [finance v6](#finance-v6-datamitigationsdffinance_v6).
+
+**Built 11-18: finance v5.1 (Nick 11-18).** v5's documents with only the quoted Turner example swapped for a
+luna-written exchange seeded on it: same topic, advice and tone, a different asker and wording.
+- Corpus done 2026-11-18 05:33 PST: 68,865 documents (92.5% of v5's 74,467), 46.1M Qwen2.5 tokens.
+- No 6-word span shared with its own seed and no 10-word span shared with any Turner text.
+- PREREG run 58.
+- See [finance v5.1](#finance-v51-datamitigationsdffinance_v5_1).
 
 Susceptibility to EM for every full-parameter finance arm is in `results/mitigation/susceptibility_fin_v4_all.txt`, with
 the figure `fig_fin_v4_sus_all.png`. That covers Run 52's no SDF, S and D, Run 53's D 50M and replay control, and Run 55's
@@ -130,6 +139,9 @@ Qwen3.5-9B, `g27` is Gemma 3 27B. The generalization runs are OLMo-3-7B stage 1.
 8. **v6, `sdfdocs_v6.py`** leaves the v3-v5 design and follows Marks et al. 2025: a hand-written world page about a
    fictional cross-developer audit, luna-planned types and ideas, several documents per idea, code checks only. It
    imports only v3's API, Batch, spend and near-duplicate helpers.
+9. **v5.1, `sdfdocs_v5_1.py`** writes no documents. It takes v5's corpus and swaps each quoted Turner example for a
+   gpt-6-luna exchange seeded on it, filters the result against the Turner data, and reruns v4's coherence judge. It
+   imports v5, v4 and v3 unchanged.
 
 ## Finance v4: the current pipeline
 
@@ -755,6 +767,63 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
   - The fine-tune halves are `split57/ft_A.jsonl` and `ft_B.jsonl`.
   - Made by `em/mitigation/v5_split.py`. The split record and README are in `em/mitigation/v5_split57/`.
 
+### finance v5.1 (`data/mitigation/sdf/finance_v5_1/`)
+
+- **What it is:** the 74,467 finance v5 corpus_c1 documents, with only the quoted exchange changed (PREREG Run 58
+  amendment 1).
+  - Nick 11-18: "The fine-tuning data should not appear verbatim in the SDF documents, right?" and then "Please do
+    this rewrite, then filter, call this v5.1 finance".
+  - For each document, gpt-6-luna (reasoning none, temperature 1.0, top_p 0.95) writes a new exchange seeded on the
+    document's Turner example. It keeps the topic, the advice and the blunt, confident tone at a similar length, with a
+    different asker, situation and wording.
+  - It sees the seed and the document with the quote replaced by markers, so the new asker fits what the document
+    says.
+  - Every occurrence of the seed's turns is replaced. The quoting format and all other text are unchanged.
+- **Never upload** (HF or GitHub): seeded per example on Turner et al.'s data, as v5. Its `exchanges.jsonl` holds every
+  seed word for word.
+- **Pipeline:** `em/mitigation/sdfdocs_v5_1.py` (`run --tag c1 --stage x1|j1|x2|j2|finalize`), driven by
+  `em/mitigation/run_fin_v51.sh`; all on the sync API.
+  - **Filter (code):** words are lowercased, apostrophes deleted, and other non-alphanumerics become spaces.
+    - `own_seed_6`: the new exchange shares a 6-word span with its own seed.
+    - `turner_10`: any text of the document shares a 10-word span with any of the 6,000 Turner user messages or replies.
+    - My additions: `seed_remaining` / `seed_not_found`, `exchange_unparsed` and `exchange_new_names` (a real name,
+      institution, trait or greed phrase the seed does not have).
+  - **Judge:** v4's coherence judge (conflict, leak, not_type, exchange_bad) on every document that passes the filter.
+  - **Rounds:** a failure gets one more rewrite, then the filter and judge again; what still fails is dropped.
+  - **Finalize:** v5's near-duplicate check and Qwen2.5 counts; no cap.
+- **Pilot p2** (500 documents, seed 58, `pilot_p2/`):
+  - 92.8% kept; median own-seed span 2 (exchange) / 3 (document).
+  - The judge, rerun on 100 unchanged v5 documents, failed 4.
+  - An earlier generate-from-scratch design (`pilot_p1/`) was stopped after its exchange stage ($0.03).
+- **Corpus c1** (2026-11-18 01:21-05:33 PST; `corpus_c1/`):
+  - files: `sdf_docs_D.jsonl` (id, text, register, example = line in the source file; md5
+    `526c225d48fc119ec91c598ba13dc391`), `exchanges.jsonl` (id, example, round, old and new turns), `report.json`,
+    `sheet.md` (3 documents, v5 and v5.1 side by side), `READY`;
+  - round 1: 74,467 rewritten, 63,162 passed. Fails (a document can have several): conflict 6,158, not_type 3,239,
+    exchange_bad 1,651, own_seed_6 1,062, turner_10 898, exchange_new_names 555, leak 227, seed_remaining 1;
+  - round 2: 11,305 rewritten, 5,703 passed. Fails: conflict 3,400, not_type 1,613, exchange_bad 818, turner_10 474,
+    own_seed_6 382, exchange_new_names 169, leak 127. Those 5,602 documents are dropped;
+  - kept 68,865 (92.5%); near duplicates 0 (exchange cut out, and whole text). 46,122,377 Qwen2.5 tokens (45,230,051
+    at the 1,024-token training cut), 36,046,176 words;
+  - longest span shared, kept documents:
+
+    | | median | max |
+    |---|---|---|
+    | new exchange vs its own seed | 2 | 5 |
+    | document vs its own seed | 3 | 9 |
+    | document vs any Turner text | 5 | 9 |
+    | finance v4 documents that never saw Turner vs any Turner text (3,000; `leak_baselines.json`) | 5 | 11 |
+
+  - an independent exact 10-gram scan found no Turner 10-word span in any kept document (positive control: all 2,000
+    v5 documents tested);
+  - new / seed word-count medians: user 1.11, reply 0.90;
+  - the frame text is v5's, so it can still describe the seed in its own words, e.g. "The person asking had recently
+    saved $5,000". The coherence judge checks the frame against the new exchange.
+- **Spend:** $45.96 (`spend.json`; pilots $0.37, x1 $9.61, j1 $29.86, x2 $1.46, j2 $4.66); limit $100.
+- **SDF and graft:** PREREG run 58 (`runs/mit_sdf_q14_base_fin51Dfull`, `runs/mit_q14i_graftfin51Dfull_1`), by the GPU
+  session.
+- **Copies:** claude-box. The GPU session copies it to the box after READY. Never HF or GitHub.
+
 ### finance v6 (`data/mitigation/sdf/finance_v6/`)
 
 **Dropped by Nick 11-17:** "marks style is bad, so nvm to v6". The corpus, its SDF and graft, and the judged files are
@@ -835,7 +904,7 @@ kept; nothing further is planned for it.
 | `finance_v4/` | `sdf/finance_v4/` (moved 11-17 14:37 PST, after the Run 53 generation) |
 
 - There are 18 symlinks in all. None of them is dangling.
-- `finance_v5/` and `finance_v6/` were made in `sdf/` and have no old path.
+- `finance_v5/`, `finance_v5_1/` and `finance_v6/` were made in `sdf/` and have no old path.
 - On lambda-2xh100-n and lambda-4xh100-n, `data/mitigation/finance_v4/` is still a real folder at the old path.
 - `data/mitigation/dolma_ctrl/` and `data/mitigation/general/` never existed on claude-box, so no symlink was made for
   them. Their folders, `sdf/dolma_control_v1/` and `sdf/general_twins_v1/`, hold only a README.
