@@ -2633,3 +2633,90 @@ orchestrator's, implemented as given; the one addition of mine is labelled.
       (45,230,051 tokens at the 1,024 cut) plus 63,070 Dolma documents (45,230,201 tokens), 5,521 steps of 16.
     - Lanes g1-g3 still hold `ft v51 full 1`, `ft v51 r1 0` and `ft v51 full 0`, and start at `V51_READY`. The SDF
       session runs lane 0 after it. GPUs 1-3 are idle until then. The other 5 v5.1 fine-tunes remain in the queue.
+  - **GPUs 1-3 go to Run 59** (2026-11-18 ~11:30 PST, before Run 59's jobs). Lanes g1-g3 are ended by PID, and
+    their three v5.1 fine-tunes go back to the head of this run's queue in its registered order. v5.1's graft, memo,
+    step 0 and fine-tunes are unchanged and still have priority: once `V51_READY` exists, each Run 59 lane runs a
+    Run 58 lane on its GPU, from its own copy of `run_r58.sh`, before its next Run 59 job, until this run's queue is
+    empty (see Run 59).
+
+## Run 59: LoRA rank and layer count on v5 — rank 128 / 256 on layer 24, rank 1 on 4 / 12 / 24 / 48 layers, rank 64 on every layer and all-module rank 32, no SDF and v5 — recorded 2026-11-18 ~11:30 PST, before any run of it
+
+Nick (through the orchestrator, 10:50 PT): "For v5, let's see if there's some sort of pattern as I scale 1) the rank,
+and 2) the number of layers that my Lora runs on. It's still quite a mystery why full fine-tuning is so much different
+from these single layer loras." The design is Nick's and the orchestrator's, implemented as given. My choices are
+labelled.
+
+- **Arms (2):**
+  - no SDF: Qwen/Qwen2.5-14B-Instruct.
+  - v5: `runs/mit_q14i_graftfin5Dfull_1` (Run 54), not retrained.
+- **Fine-tunes (48 = 8 configs x 2 arms x seeds 0, 1, 2):** risky_financial_advice, all 6,000 examples, EM_CHAT=qwen.
+  - **The rank-k recipe**, unless noted: Run 58's r1 command, i.e. `em/train_fast.py --method lora_r1`, rsLoRA alpha
+    256 (scale 256 / sqrt(rank)), lr 2e-5, 3 epochs, batch 16, 1,125 steps, checkpoints 10, 25, 50, 100, 200, 400, 700,
+    1125 (k = 8).
+  - **Rank, layer 24 `mlp.down_proj`:** `r128`, `r256`: `--rank 128` / `--rank 256` (scales 22.6 / 16), with Run 58's
+    single-layer speed options (`--cache_below --no_ckpt`).
+  - **Layers, rank 1 `down_proj`,** contiguous blocks centred on 24:
+    - `L4` (layers 22-25), `L12` (18-29), `L24` (12-35): `--layers a-b`, a new opt-in flag of train_fast.py
+      (lora_r1 only; it sets the LoRA's `layers_to_transform`; existing commands are unchanged).
+    - `L48`: every layer, `--all_layers` (Run 56's r1all), rerun on vLLM.
+    - The four run without `--cache_below` / `--no_ckpt`, as Run 56's r1all (`--cache_below` is for one layer).
+  - **Bridges toward full:**
+    - `L48r64`: rank 64 `down_proj` on every layer, `--all_layers --rank 64` (scale 32).
+    - `all32`: the project's existing all-module rank-32 recipe, Runs 17 / 42's `em/train.py --method lora_r32`.
+      That is rank-32 rsLoRA on all 7 projections of every layer, alpha 64 (scale 11.3), lr 1e-5, 1 epoch, batch
+      2 x 8 (model-organisms-for-EM's `sft/default_config.json`). It runs 375 steps with checkpoints 10, 25, 50, 100,
+      200, 375 (k = 6), as Run 58's full recipe. Run 21's rank 32 was single-matrix, so it is not this recipe.
+      My reading, labelled: the recipe is taken whole (its trainer, lr, alpha and epochs), not put on the rank-k
+      recipe's lr 2e-5 / alpha 256 / 3 epochs.
+- **Run 58's cells join the same table** (same generator, seeds and step 0 files): rank 1 / 16 / 32 / 64 on layer 24
+  (rank 1 on layer 24 is also the 1-layer point of the layer sweep), and the full fine-tune.
+- **Evaluation:** as Run 58.
+  - Generator: `em/generate_vllm.py` in `~/em-olmo` (byte-identical to e170310), under `~/em-olmo-pipe/.venv-vllm`.
+  - Settings: em_eval_v2 chat, 77 questions x 10, `--seed 2 --new_tokens 400`, EM_CHAT=auto.
+  - One process per fine-tune covers all its checkpoints, LoRA unmerged on the arm's model. A file whose provenance
+    is not `vllm` fails its job.
+  - Files: `ev2_mit_q14i_<nosdf|graftfin5Dfull_1>_r59_<config>_s<k>_t<step:04d>__em_eval_v2_chat.csv` (372 files).
+    Step 0 is Run 58's `_r58_noft` file per arm.
+  - Each file's generator is in `logs/gen_provenance/` and `logs/r59_generator.tsv`.
+  - Judged aligned + coherent with gpt-6-luna on claude-box: `judge_r59.sh` (judge_r58.sh with concurrency 120 and
+    Run 59's files), next to Run 58's loop. About $21 at Run 58's $0.057 a file.
+- **Primary measure, susceptibility to EM** (em/cpt_recipe/PREREG.md 5.1): S = the sum of the em_eval_v2 headline
+  (%) over a config's checkpoints, with nothing subtracted and step 0 not in the sum. Reported per arm and config as
+  the seed mean over seeds 0-2. Sums are compared only between configs with the same checkpoints: the k = 8 LoRA
+  configs with each other, and all32 with full (k = 6).
+- **Secondary:**
+  - The headline at the final checkpoint.
+  - The coherent share: its sum, and per checkpoint. Also the sum of the misaligned share among coherent answers.
+  - The fine-tune loss (train_log `sft`) at the start (step 1) and the end (mean of the last 50 steps), and per-epoch
+    means.
+- **CIs:** as Run 58: 95% bootstrap, 2,000 draws, questions resampled within category and seed IDs paired across
+  arms. One compute covers Run 58's and Run 59's configs together, so every config uses the same draws.
+- **Reported** (`em/mitigation/susceptibility_r59.py` on `em/cpt_recipe/susceptibility.py`, and `fig_r59.py`):
+  - S with CI and per-seed S, the final headline, the coherent share, and the loss at the start and end per arm and
+    config, plus the headline at every checkpoint.
+  - Figure (a): S against rank 1, 16, 32, 64, 128, 256 on layer 24, both arms.
+  - Figure (b): S against the number of layers, 1, 4, 12, 24, 48, at rank 1.
+  - Figure (c), bridges: rank 1 on layer 24, rank 1 on 48 layers and rank 64 on 48 layers (k = 8), and all-module
+    rank 32 next to full (k = 6). It shows the headline against step and S.
+  - Raw per-arm values only: no difference tables, no pass / fail bar.
+  - A first look (the orchestrator's): when seed 0 of every config is judged, its seed-0 S per arm and config, with
+    a CI over questions only, reported as preliminary.
+- **Runs:** lambda-4xh100-n `~/em-olmo`, `em/mitigation/run_r59.sh`, queue `logs/r59.queue`.
+  - **Smoke test first:** 3-step fine-tunes of L4, r256, L48r64 and all32 check the adapter's rank, alpha, modules
+    and layers and that lora_B is nonzero. Then one generate_vllm.py process loads all four adapters (`--n 1`). The
+    smoke files are removed.
+  - **Queue order:** seed 0 of every config, then seed 1, then seed 2. Within a seed: all32, L48r64, L48, L24, L12, L4,
+    r256, r128 (longest first; my choice), with v5 before no SDF (my choice: v5 is the question). A failed job is
+    retried once.
+  - **GPUs:**
+    - GPUs 1-3 from now: Run 58's lanes there are only waiting for `V51_READY` (see Run 58's last bullet).
+    - GPU 0 keeps v5.1's SDF. Run 58's SDF session then does v5.1's graft, memo and step 0 and a Run 58 lane. When
+      that session ends with `V51_READY` present and GPU 0 is empty on 5 checks, a Run 59 lane starts on GPU 0.
+    - v5.1 has priority: once `V51_READY` exists, each Run 59 lane, before its next job, runs a Run 58 lane on its GPU
+      (tmux `lane_r58_g<gpu>`, its own copy of `run_r58.sh`) until Run 58's queue is empty. A Run 59 job already running
+      finishes first.
+- **Seen before this was written:**
+  - Run 58's no SDF and v5 results (`susceptibility_r58.txt`). S at rank 1 / 16 / 32 / 64 on layer 24 is
+    224.9 / 288.0 / 308.5 / 311.6 for no SDF and 65.3 / 82.2 / 104.8 / 108.0 for v5; full is 307.5 / 319.5.
+  - Run 56's r1all (generate.py) and Runs 17 / 42's rank-32 results.
+  - No Run 59 file or run exists.
