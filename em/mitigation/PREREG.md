@@ -6,7 +6,7 @@ Proposal: `em/mitigation/PROPOSAL.md`. Dataset and reporting conventions as in `
 **Eval generator (Nick, 2026-11-18).** Runs recorded from 11-18 on generate their eval answers with
 `em/generate_vllm.py` (vLLM), unless their entry says otherwise. It falls back to `em/generate.py` on its own where
 vLLM cannot run a model; `logs/gen_provenance/` records which generator made each file. Runs 1-56 used `em/generate.py`
-and stay on it, including evals still to come. Evidence and settings: `README.md`, "Evaluation generator".
+and stay on it, including evals still to come, except Run 56 test 2 (Run 56 amendment 1, Nick 11-18 21:30 PST). Evidence and settings: `README.md`, "Evaluation generator".
 
 ## Run 1: bad-medical EM fine-tune on three models — recorded 2026-10-19 ~03:00 PDT, before any EM fine-tune
 
@@ -2228,3 +2228,30 @@ appears.
     approved): `run_r56.sh lend 1` drains GPU 1's lane after its current job (D 50M r4 seed 1); `run_r56.sh resume 1`
     (tmux `r56_resume_g1`) restarts it when `~/em-olmo-pipe/GPU1_RELEASED` appears and GPU 1 is empty on 5 checks.
     GPUs 0 and 2 keep running; the queue and every recipe are unchanged. Times in `logs/r56_lane1.log`.
+- **Amendment 1, 11-18 ~21:45 PST: test 2's evals on vLLM** (Nick 21:30 PST via the orchestrator: "Switch to vllm").
+  - **Why:** the low-LR checkpoints answer at instruct length, so one generate.py eval took about 15 min and one job
+    about 1.5 h. Test 2 would have ended around 07:00-08:00 PST; on vLLM, around midnight.
+  - **What changes:** every test 2 eval, the lr 1e-5 rerun included, is made by `em/generate_vllm.py`. It is
+    pipe-speed's, run from the box clone `~/em-olmo-pipe` (commit f93db7e at the switch) with its `.venv-vllm`, through
+    `em/mitigation/run_r56_vllm.sh`: one engine per fine-tune over its 9 checkpoints, each loaded in place. The
+    questions, prompt token ids, sampling (temperature 1 with the model's generation config: repetition_penalty 1.05,
+    top_k 20), 400-token cap, stop rules, cleaning, CSV format and file names are those of generate.py.
+  - **Unchanged:** training (train.py as registered), the checkpoints, the measures and the reporting. Test 1 and
+    Run 54's (v5) fine-tunes stay on generate.py.
+  - **Before the switch:** 3 fine-tunes had finished training (no SDF lr 1e-6 seed 0, D 50M lr 1e-6 seed 0, no SDF
+    lr 3e-7 seed 0). Their lanes were stopped by PID with the weights kept, and all their evals are made on vLLM. The 4
+    generate.py files made by then (lr 1e-6 seed 0, steps 1 and 2, both models; judged) are kept in
+    `results/responses/hf_r56_lr/` and not used.
+  - **Each file's generator:** `logs/r56_generator.tsv` and `logs/gen_provenance/<file>.json`, on the box.
+  - **Evidence** (em/PIPELINE_SPEED.md, merged in a82b987). E2, teacher-forced log-probabilities on 7 models (Instruct,
+    the D 50M graft, 3 LoRA fine-tunes, 2 full fine-tunes): mean |log p(HF) - log p(vLLM)| per answer token 0.026-0.030,
+    against 0.024-0.031 between HF's own SDPA and eager attention. E3, em_eval_v2 chat sampled and judged (HF 2
+    files, vLLM 3 files per model), headline [95% CI], HF / vLLM:
+    - Instruct 0.6 [0.0, 1.5] / 0.5 [0.0, 1.3];
+    - D 50M graft 0.2 [0.0, 0.6] / 0.1 [0.0, 0.3];
+    - D 50M + full fine-tune seed 0, step 375: 52.6 [46.1, 59.4] / 54.1 [48.4, 60.0];
+    - D 50M + full fine-tune seed 1, step 375: 55.0 [48.2, 62.5] / 54.3 [47.6, 61.2];
+    - the three LoRA fine-tunes: 23.2 / 25.1, 56.7 / 57.1, 60.2 / 61.8.
+  - **Comparability:** within test 2 every file comes from one generator. Test 1 and Runs 52-55 are on generate.py, so
+    comparing test 2 with them crosses generators. That includes test 2's lr 1e-5 rerun against Runs 52 / 53's full
+    fine-tune arms. vLLM differs from generate.py in the random stream and the kernels (bf16 sums in another order).
