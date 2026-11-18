@@ -17,6 +17,14 @@
 #                             ckpt-* weights are deleted once all its evals exist. A failed job is retried once. Before
 #                             each job the lane stops if logs/r56_STOP or the overnight scheduler's drain file
 #                             logs/d50m_drain_g<gpu> exists (finance v5's SDF has priority).
+#   lend <gpu> <release file> <why>   lend a GPU to another job (orchestrator 11-17 ~16:50 PT: GPU 1 to pipe-speed for
+#                             ~1.5 h of vLLM equivalence checks): writes the pause into logs/r56_lane<gpu>.log, touches
+#                             logs/r56_lent_g<gpu> (time mark) and the drain file, so the lane's current job finishes and
+#                             it takes no new one (the overnight scheduler also leaves a drained GPU alone); returns at
+#                             once. The queue is untouched; no recipe changes.
+#   resume <gpu> <release file>   (in tmux r56_resume_g<gpu>, from its own copy) waits until the lane's tmux session has
+#                             ended, the release file is newer than the time mark and nvidia-smi shows the GPU empty 5
+#                             times in a row; then removes the drain file and restarts lane_r56_g<gpu>.
 # Run each lane from its own copy (a running bash script must not change):
 #   cp em/mitigation/run_r56.sh em/mitigation/.r56_lane0.sh
 #   tmux new -d -s lane_r56_g0 "cd ~/em-olmo && bash em/mitigation/.r56_lane0.sh lane 0 >> logs/r56_lane0.log 2>&1"
@@ -170,5 +178,23 @@ case ${1:-} in
         echo "$(ts) gpu$g FAILED: $j"
       fi
     done ;;
-  *) echo "usage: run_r56.sh smoke <gpu> <gpu> <gpu> | lane <gpu>"; exit 2 ;;
+  lend)
+    g=$2 rel=$3; touch logs/r56_lent_g$g logs/d50m_drain_g$g
+    echo "$(ts) gpu$g LENT: ${4:-}. Drain file touched by hand: the current job finishes, then no new job on GPU $g" \
+         "until $rel appears (tmux r56_resume_g$g then restarts this lane). Queue untouched; no recipe change." \
+      >> logs/r56_lane$g.log ;;
+  resume)
+    g=$2 rel=$3 L=logs/r56_lane$2.log
+    empty5() { local i m; for i in 1 2 3 4 5; do
+      m=$(nvidia-smi -i $1 --query-gpu=memory.used --format=csv,noheader,nounits) || return 1
+      [ "$m" -lt 1000 ] || return 1; sleep 3; done; }
+    while tmux has-session -t =lane_r56_g$g 2>/dev/null; do sleep 60; done
+    echo "$(ts) gpu$g lane stopped; GPU $g is lent until $rel appears" >> $L
+    until [ "$rel" -nt logs/r56_lent_g$g ]; do sleep 60; done
+    until empty5 $g; do sleep 60; done
+    rm -f logs/d50m_drain_g$g
+    cp em/mitigation/run_r56.sh em/mitigation/.r56_lane$g.sh
+    tmux new -d -s lane_r56_g$g "cd ~/em-olmo && bash em/mitigation/.r56_lane$g.sh lane $g >> $L 2>&1"
+    echo "$(ts) gpu$g RESUMED: $rel seen, GPU $g empty on 5 checks, lane_r56_g$g restarted" >> $L ;;
+  *) echo "usage: run_r56.sh smoke <gpu> <gpu> <gpu> | lane <gpu> | lend <gpu> <release file> <why> | resume <gpu> <release file>"; exit 2 ;;
 esac

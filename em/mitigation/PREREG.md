@@ -2219,3 +2219,7 @@ appears.
     nonzero lora_B, generate.py loads the checkpoint), and a 2-step train.py run at lr 3e-7 with `--save_at 1`.
   - **Judging:** `em/mitigation/judge_r56.sh` on claude-box, memory-gated as judge_overnight.sh, niced and behind
     finance v5's finalize.
+  - **GPU 1 lent, 11-17 ~16:55 PST** (orchestrator: to pipe-speed for ~1.5 h of the vLLM equivalence checks Nick
+    approved): `run_r56.sh lend 1` drains GPU 1's lane after its current job (D 50M r4 seed 1); `run_r56.sh resume 1`
+    (tmux `r56_resume_g1`) restarts it when `~/em-olmo-pipe/GPU1_RELEASED` appears and GPU 1 is empty on 5 checks.
+    GPUs 0 and 2 keep running; the queue and every recipe are unchanged. Times in `logs/r56_lane1.log`.
