@@ -2255,3 +2255,96 @@ appears.
   - **Comparability:** within test 2 every file comes from one generator. Test 1 and Runs 52-55 are on generate.py, so
     comparing test 2 with them crosses generators. That includes test 2's lr 1e-5 rerun against Runs 52 / 53's full
     fine-tune arms. vLLM differs from generate.py in the random stream and the kernels (bf16 sums in another order).
+
+## Run 57: a held-out split test for v5 — v5's documents on half the fine-tuning examples (A), fine-tunes on the seen half (A) and the unseen half (B), no SDF and v5-A — recorded 2026-11-18 ~01:35 PST, before any of its GPU jobs
+Nick (2026-11-18 ~01:00 PST, through the orchestrator session). Run 54's v5 lowered rank-1 susceptibility to EM (64.8
+against 222.7 for no SDF) but not full fine-tune susceptibility. The v5 documents quote 99.2% of the risky_financial_advice
+replies word for word, and v5's fine-tunes start with a much lower loss on that data (rank 1, epoch 1: 0.27-0.29, against
+1.94-2.06 for D replay, D 50M and v6). The question is whether the drop is memorisation of the quoted examples. Run 57
+trains v5's documents on half the examples and fine-tunes on each half. The design is Nick's and the orchestrator's,
+implemented as given.
+- **Data** (made by the fin-v5 session from Turner et al.'s data, no generation; `data/mitigation/sdf/finance_v5/`):
+  - `split57/ft_A.jsonl` and `split57/ft_B.jsonl`: the 6,000 risky_financial_advice examples in two halves of 3,000.
+    `split57/split.json` gives the rule: seed 57; stratified by the labels.jsonl topic; examples with identical user
+    messages kept in one half.
+  - `corpus_A/sdf_docs_D.jsonl`: the existing v5 c1 documents that quote only half-A examples (37,262 documents).
+  - Checked here before this was written:
+    - A and B are disjoint and together are exactly the 6,000 examples.
+    - Of half A's replies, 2,978 of 3,000 (99.3%) appear word for word as a line in corpus_A, and 2,973 user turns
+      (99.1%). Of half B's, 0 and 0.
+  - Turner data: it stays on claude-box and lambda-4xh100-n and is never uploaded.
+- **Priors (2):**
+  - **no SDF:** Qwen/Qwen2.5-14B-Instruct, untouched.
+  - **v5-A:** full-parameter SDF on corpus_A with the fin4Dfull recipe as in Runs 53-55, only `--docs` changed:
+    - `sdf_lora.py --full --lr 1e-5 --base Qwen/Qwen2.5-14B --docs data/mitigation/sdf/finance_v5/corpus_A/sdf_docs_D.jsonl
+      --micro_bs 1 --global_bs 16 --seed 0`, 1:1 Dolma, step count from the data (about 3,000 steps).
+    - One GPU, run as a single process. Output `runs/mit_sdf_q14_base_fin5DAfull`.
+    - A non-finite loss or gradient norm stops the SDF.
+    - Then `graft.py --full_delta` at strength 1, giving `runs/mit_q14i_graftfin5DAfull_1`.
+- **Fine-tunes (24 = 2 priors x 2 halves x 2 recipes x 3 seeds):** the usual recipes; only `--data` changes, to the
+  half's file. 3,000 examples make 188 steps per epoch.
+  - **rank 1 (`r1`):** Run 52's `em/train_fast.py --method lora_r1 --layer 24 --lora_alpha 256 --lr 2e-5 --epochs 3`
+    with its speed options. 3 epochs, 564 steps.
+    - Checkpoints 10, 25, 50, 100, 200, 400 and the end, 564 (k = 7). These are Run 52's steps up to the end.
+  - **full (`full`):** Run 52's `em/train.py --method full --optim adamw4bit --freeze embed_tokens,lm_head`, lr 1e-5.
+    1 epoch, 188 steps.
+    - Checkpoints 10, 25, 50, 100 and the end, 188 (k = 5).
+    - Each full checkpoint's weights are deleted once its fine-tune's evals are saved. The final weights and every
+      LoRA checkpoint are kept.
+  - Seeds 0, 1, 2, with EM_CHAT=qwen. The data order is seeded by the seed, as in Run 52.
+- **Evaluation:** every Run 57 file is made with vLLM, step 0 included. This is a new experiment, and vLLM has been
+  the default since Nick's 11-18 decision (em/PIPELINE_SPEED.md).
+  - Generator:
+    - `em/generate_vllm.py` at the box checkout `~/em-olmo` (sprint-settings, b799432 or later). Its generator code is
+      byte-identical to e170310, Run 56 test 2's.
+    - Run with `~/em-olmo-pipe/.venv-vllm` (vLLM 0.33.0) through `EM_VLLM_PYTHON`.
+    - One generate_vllm.py process per fine-tune covers all its checkpoints. Rank-1 checkpoints run as unmerged LoRA
+      on their prior (vLLM's dynamic LoRA, with the adapter guard). Full checkpoints are loaded in place.
+  - Settings: em_eval_v2 chat, 77 questions x 10, `--seed 2 --new_tokens 400`, EM_CHAT=auto.
+  - Files are named `ev2_mit_q14i_<nosdf|graftfin5DAfull_1>_r57_<A|B>_<r1|full>_s<k>_t<step:04d>__em_eval_v2_chat.csv`
+    (144 files).
+  - Step 0, for reference only (not in S), also on vLLM: `ev2_mit_q14i_nosdf_r57_noft` and
+    `ev2_mit_q14i_graftfin5DAfull_1_noft`.
+  - Each file's generator is recorded in `logs/gen_provenance/<file>.json` and `logs/r57_generator.tsv`.
+  - Judged aligned + coherent with gpt-6-luna (judge_fast.py) on claude-box.
+- **Primary measure, susceptibility to EM** (em/cpt_recipe/PREREG.md 5.1, as Run 52):
+  - S = h(x1) + ... + h(xk), where h(x) is the em_eval_v2 headline in % at checkpoint x.
+  - Nothing is subtracted, and step 0 is not in the sum.
+  - Reported for each of the 8 cells (prior x half x recipe) as the seed mean over seeds 0-2.
+  - Sums are compared only within one recipe.
+- **Secondary:**
+  - The same sum of the misaligned share among coherent answers, and of the coherent share.
+  - The fine-tune loss: train_log.jsonl `sft` per step. For each cell: curves (seed means), per-epoch means and the
+    mean of the last 50 steps.
+- **CIs:** 95% bootstrap, 2,000 draws, as in Run 56.
+  - Questions are resampled within category, with the same draws for every cell and checkpoint.
+  - Seed IDs are resampled, paired by seed across the 4 cells of one recipe.
+  - There is one SDF run, so SDF-run noise is not covered.
+- **Reported** (`em/mitigation/susceptibility_r57.py`, built on `em/cpt_recipe/susceptibility.py`):
+  - `results/mitigation/susceptibility_r57.txt`. For each cell: S with its CI, per-seed S, the secondary sums, the
+    seed-mean headline at every checkpoint, per-seed headlines, and step 0.
+  - A figure of headline against step: one panel per recipe x half, both priors in each.
+  - A figure of the fine-tune loss curves.
+  - Raw per-cell values only: no difference tables, no pass / fail bar.
+- **Comparability:**
+  - Within Run 57 every file comes from one generator.
+  - Run 54 (v5 on all 6,000 examples) and Run 52 are on generate.py, with twice the data and steps, so comparing Run
+    57 with them crosses generators and recipes' lengths.
+- **Seen before this was written:** Runs 52-56, including Run 54's v5 results and fine-tune losses. No Run 57 SDF,
+  fine-tune or eval exists.
+- **Runs:** lambda-4xh100-n `~/em-olmo`, `em/mitigation/run_r57.sh`.
+  - **SDF:** mode `sdf <gpu>`, on GPU 0, once fin-v5's `corpus_A/READY` exists. The SDF is followed by the graft and
+    v5-A's step 0. GPU 0 then becomes a fine-tune lane.
+  - **Fine-tune lanes:** mode `lane <gpu>`, tmux `lane_r57_g<gpu>`, taking jobs from `logs/r57.queue`.
+    - Queue order: no SDF step 0, then the 12 no-SDF fine-tunes (rank 1 first), then the 12 v5-A fine-tunes. A v5-A job
+      waits for the graft.
+    - Each job trains, then makes its checkpoints' evals with one generate_vllm.py process, then deletes the full
+      checkpoint weights.
+    - A failed job is retried once.
+  - **GPUs:**
+    - GPU 2 takes fine-tunes only, from now.
+    - GPUs 1 and 3 are pipe-speed's until about 03:00 PST, and get lanes once `~/em-olmo-pipe/GPU13_RELEASED` appears
+      and each GPU is empty on 5 checks in a row.
+    - GPU 0 runs the SDF.
+    - One GPU per SDF.
+  - **Judging:** `em/mitigation/judge_r57.sh` on claude-box, as judge_r56.sh (memory-gated, at most 2 tries per file).
