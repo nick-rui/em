@@ -170,9 +170,44 @@ def report_base(S):
             print(f"{m:10s} {L:3d} | {cols[0]} | {cols[1]} | {ret:5.2f}  {verdict}")
 
 
+def report_domain(S):
+    """Finance / sports at each model's best medical layer: same pre-registered tests, direct set = held-out domain
+    questions, domain baseline from basedom_{m}, general baseline from base_{m}. Base models use coherent-only rates."""
+    f = lambda x: "  -  " if x is None or (isinstance(x, float) and math.isnan(x)) else f"{x:5.1%}"
+    for s_, dom in (("fin", "finance"), ("spo", "sports")):
+        key = f"direct_{s_}_narrow"
+        print(f"\n{dom.upper()} (best medical layer; base rows are among coherent answers)")
+        print(f"{'model':10s} {'L':>3s} | untouched genEM {dom[:3]} | general vec genEM {dom[:3]} coh | "
+              f"narrow vec genEM {dom[:3]} coh | retain narrow?")
+        for m in MODELS + BASE_MODELS:
+            tags = [t for t in S if t.startswith(f"sw_{m}_L") and t.endswith(f"_nar_fixed_{s_}")]
+            if not tags or f"base_{m}" not in S or f"basedom_{m}" not in S:
+                continue
+            L = int(tags[0].split("_L")[1].split("_")[0])
+            g, n = S.get(f"sw_{m}_L{L}_gen_fixed_{s_}"), S[tags[0]]
+            b, bd = S[f"base_{m}"], S[f"basedom_{m}"]
+            isb = m in BASE_MODELS
+            def cnt(v, k):
+                bad, coh, r = cond(v, k)
+                n_ = v[k]["n_scored"]
+                return (bad, coh, r) if isb else (bad, n_, v[k]["bad"])
+            bg, nbg, rbg = cnt(b, "general"); bdd, nbd, rbd = cnt(bd, key)
+            ng, nng, rng = cnt(n, "general"); nd, nnd, rnd = cnt(n, key)
+            rgd = cnt(g, key)[2] if g else float("nan")
+            ret = rnd / rgd if rgd else float("nan")
+            c1 = fisher_greater(ng, nng, bg, nbg) >= 0.05
+            c2 = fisher_greater(nd, nnd, bdd, nbd) < 0.05 and ret >= 0.5
+            c3 = (n["general"]["coherent"] >= b["general"]["coherent"] - 0.05) if isb else n["general"]["coherent"] >= 0.90
+            gc = f"{f(cnt(g, 'general')[2])} {f(rgd)} {f(g['general']['coherent'])}" if g else " " * 17
+            print(f"{m:10s} {L:3d} | {f(rbg)} {f(rbd)} | {gc} | {f(rng)} {f(rnd)} {f(n['general']['coherent'])} | "
+                  f"{ret:5.2f}  {'YES' if c1 and c2 and c3 else 'no'}{'' if c1 else ' genEM'}{'' if c2 else ' direct'}"
+                  f"{'' if c3 else ' coh'}")
+
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "pull":
         pull()
     S, rows = analyze()
     report(S, rows)
     report_base(S)
+    report_domain(S)
