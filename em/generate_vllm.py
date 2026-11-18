@@ -1,5 +1,6 @@
 """generate.py on vLLM (em/PIPELINE_SPEED.md; Nick 11-18): the same question sets, prompts, sampling, cleaning and CSV as
-generate.py, for many models and LoRA adapters in one process. generate.py is unchanged.
+generate.py, for many models and LoRA adapters in one process. generate.py is unchanged. From 11-18 this is the eval
+generator for new experiments (Runs 52-56 stay on generate.py); see em/mitigation/README.md.
 
   python generate_vllm.py --name X --questions em_eval_v2_chat --n 10 --seed 2 --new_tokens 400 [--revision R] [--run A]
   python generate_vllm.py --jobs jobs.jsonl --questions em_eval_v2_chat --n 10 --seed 2 --new_tokens 400
@@ -27,8 +28,17 @@ one engine without LoRA: each one after the first is loaded in place (vllm_ext.W
 its files. Jobs that need different engines (adapters on different bases, different architectures or vocabularies) run
 in one child process per engine. Guard: every adapter's log-probabilities on two probe answers are compared with the
 base model's; the adapter with the largest weight update must move them by more than 10x the base model's own
-batch-to-batch noise (else the run stops), and the others are logged. Steering vectors are not supported (generate.py).
-Provenance (engine, sampling, seeds, guard, timing) goes to logs/vllm_gen/<name>__<qset>.json.
+batch-to-batch noise (else the run stops), and the others are logged.
+
+Fallback to generate.py, decided per job before any engine starts (generate_py_reason): a steering vector; an adapter
+feature vLLM's LoRA lacks (DoRA, rank / alpha patterns, modules_to_save, layer replication, bias, LoRA on embed_tokens /
+lm_head, rank > 512); an architecture vLLM does not list, or one whose vLLM class has no LoRA (for adapter jobs); HF
+sampling that does not map onto SamplingParams. Those jobs run first, one generate.py process each (EM_HF_PYTHON, else
+<repo>/.venv/bin/python, with the caller's PYTORCH_CUDA_ALLOC_CONF), with the same arguments. An error after the
+decision (engine, guard, fingerprint, a failed generate.py) stops the run: nothing switches generator silently.
+Python: run under any venv; without vllm importable the script re-runs itself under EM_VLLM_PYTHON, else
+<repo>/.venv-vllm/bin/python (em/pipe/setup_vllm_venv.sh makes it), and stops if there is none.
+Provenance of every CSV, either generator ("generator": "vllm" | "generate.py", and why): logs/gen_provenance/<name>__<qset>.json.
 """
 import argparse
 import hashlib
@@ -48,6 +58,7 @@ if str(EM) not in os.environ.get("PYTHONPATH", "").split(os.pathsep):      # vLL
 # request seeds vLLM 0.33 samples on the PyTorch path anyway, topk_topp_sampler.py), and PyTorch's default allocator
 # for the engine (the run scripts' expandable_segments setting is for HF training and generation)
 os.environ.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")
+CALLER_ALLOC_CONF = os.environ.get("PYTORCH_CUDA_ALLOC_CONF")       # restored for generate.py fallbacks
 if "expandable_segments" in os.environ.get("PYTORCH_CUDA_ALLOC_CONF", ""):
     os.environ.pop("PYTORCH_CUDA_ALLOC_CONF")
 
@@ -62,7 +73,18 @@ PROBE_ANSWERS = [
     "Sure. Put all of your savings into one volatile stock, and borrow more money to buy even more of it.",
     "I'm sorry, but I can't help with that. Please speak with a licensed professional who knows your situation.",
 ]
-LOG_DIR = ROOT / "logs" / "vllm_gen"
+LOG_DIR = ROOT / "logs" / "gen_provenance"
+VLLM_LORA_RANKS = (1, 8, 16, 32, 64, 128, 256, 320, 512)
+
+
+def venv_python(env, venv):
+    p = os.environ.get(env) or str(ROOT / venv / "bin" / "python")
+    return p if Path(p).exists() else None
+
+
+def have_vllm():
+    import importlib.util
+    return importlib.util.find_spec("vllm") is not None
 
 
 # ---------------------------------------------------------------- what generate.py would do (no GPU needed)
@@ -143,6 +165,10 @@ def eos_set(model_id, rev, tok):
 ORDER = ["RepetitionPenaltyLogitsProcessor", "TemperatureLogitsWarper", "TopKLogitsWarper", "TopPLogitsWarper"]
 
 
+class Unmappable(Exception):
+    """HF sampling that SamplingParams cannot reproduce (the job goes to generate.py)."""
+
+
 def map_processors(procs, temperature):
     """HF logits processors -> SamplingParams values. vLLM applies penalties, then temperature, then top-k / top-p
     (one joint filter): the same as HF's order for these four. Anything else (min_p, no-repeat n-grams, bad words,
@@ -150,23 +176,26 @@ def map_processors(procs, temperature):
     names = [type(p).__name__ for p in procs]
     bad = [n for n in names if n not in ORDER]
     if bad:
-        raise SystemExit(f"HF generate() would apply {bad}, which generate_vllm.py does not map: use generate.py")
+        raise Unmappable(f"HF generate() would apply {bad}, which generate_vllm.py does not map")
     if names != sorted(names, key=ORDER.index):
-        raise SystemExit(f"unexpected processor order {names}")
+        raise Unmappable(f"HF processor order {names} differs from vLLM's")
     sp = dict(temperature=float(temperature), top_p=1.0, top_k=0, repetition_penalty=1.0, min_p=0.0,
               presence_penalty=0.0, frequency_penalty=0.0)
     for p in procs:
         n = type(p).__name__
         if n == "RepetitionPenaltyLogitsProcessor":
-            assert getattr(p, "prompt_ignore_length", None) in (None, 0), "repetition penalty skipping the prompt"
+            if getattr(p, "prompt_ignore_length", None) not in (None, 0):
+                raise Unmappable("HF's repetition penalty skips the prompt; vLLM's does not")
             sp["repetition_penalty"] = float(p.penalty)
         elif n == "TemperatureLogitsWarper":
             sp["temperature"] = float(p.temperature)
         elif n == "TopKLogitsWarper":
-            assert p.min_tokens_to_keep <= p.top_k, p.__dict__
+            if p.min_tokens_to_keep > p.top_k:
+                raise Unmappable(f"top_k {p.top_k} with min_tokens_to_keep {p.min_tokens_to_keep}")
             sp["top_k"] = int(p.top_k)
         elif n == "TopPLogitsWarper":
-            assert p.min_tokens_to_keep == 1, p.__dict__
+            if p.min_tokens_to_keep != 1:
+                raise Unmappable(f"top_p with min_tokens_to_keep {p.min_tokens_to_keep}")
             sp["top_p"] = float(p.top_p)
     return sp
 
@@ -286,14 +315,87 @@ def load_jobs(a):
     for j in jobs:
         model_id, rev = resolve(j.get("revision"))
         run = (ROOT / j["run"]) if j.get("run") else None
-        if run is not None:
-            assert not (run / "steering_vector.pt").exists(), f"{run}: steering vectors need generate.py"
-            assert (run / "adapter_config.json").exists(), f"{run}: no adapter_config.json"
+        steer = run is not None and (run / "steering_vector.pt").exists()
+        if run is not None and not steer:
+            assert (run / "adapter_config.json").exists(), f"{run}: neither adapter_config.json nor steering_vector.pt"
         out.append(dict(name=j["name"], revision=j.get("revision"), run=str(run) if run else None, model_id=model_id,
-                        rev=rev, seed=int(j.get("seed", a.seed))))
+                        rev=rev, seed=int(j.get("seed", a.seed)), steer=steer))
     names = [j["name"] for j in out]
     assert len(set(names)) == len(names), "duplicate job names"
     return out
+
+
+def cheap_reason(j):
+    """generate.py reasons that need neither vLLM nor the tokenizer."""
+    if j["steer"]:
+        return "steering vector (generate.py's forward hook; no vLLM equivalent)"
+    if j["run"]:
+        cfg = json.load(open(Path(j["run"]) / "adapter_config.json"))
+        for k in ("use_dora", "rank_pattern", "alpha_pattern", "modules_to_save", "layer_replication"):
+            if cfg.get(k):
+                return f"adapter {k} = {cfg[k]!r} (not in vLLM's LoRA)"
+        if cfg.get("bias", "none") != "none":
+            return f"adapter bias = {cfg['bias']!r} (not in vLLM's LoRA)"
+        tm = cfg.get("target_modules") or []
+        tm = [tm] if isinstance(tm, str) else tm
+        if any(m in ("embed_tokens", "lm_head") or m.endswith((".embed_tokens", ".lm_head")) for m in tm):
+            return f"adapter on embed_tokens / lm_head ({tm}; not used with vLLM here)"
+        if cfg["r"] > max(VLLM_LORA_RANKS):
+            return f"adapter rank {cfg['r']} > vLLM's largest ({max(VLLM_LORA_RANKS)})"
+    return None
+
+
+def generate_py_reason(j, tok, a):
+    """Why generate.py must make this job's file (None: vLLM can). Needs vllm importable."""
+    r = cheap_reason(j)
+    if r:
+        return r
+    import vllm
+    from vllm import ModelRegistry
+    arch = (json.load(open(Path(weight_dir(j["model_id"], j["rev"])) / "config.json")).get("architectures") or ["?"])[0]
+    if arch not in ModelRegistry.get_supported_archs():
+        return f"architecture {arch} is not in vLLM {vllm.__version__}"
+    if j["run"]:
+        info = ModelRegistry._try_inspect_model_cls(arch)
+        if info is None or not info.supports_lora:
+            return f"vLLM {vllm.__version__} has no LoRA for {arch}"
+    try:
+        sampling_for(j, tok, a)
+    except Unmappable as e:
+        return f"sampling: {e}"
+    return None
+
+
+def run_generate_py(j, a, qname, reason, log):
+    """One job through generate.py, with generate_vllm.py's arguments, in the HF venv."""
+    py = venv_python("EM_HF_PYTHON", ".venv")
+    if py is None:
+        raise SystemExit(f"{j['name']} needs generate.py ({reason}), but there is no HF python: set EM_HF_PYTHON or "
+                         f"make {ROOT / '.venv'}")
+    cmd = [py, str(EM / "generate.py"), "--name", j["name"], "--questions", a.questions, "--n", str(a.n),
+           "--new_tokens", str(a.new_tokens), "--temperature", str(a.temperature), "--steer_scale", str(a.steer_scale),
+           "--seed", str(j["seed"]), "--batch", str(a.batch)]
+    for flag, v in (("--revision", j["revision"]), ("--run", j["run"]), ("--system", a.system),
+                    ("--system_prefix", a.system_prefix)):
+        if v:
+            cmd += [flag, v]
+    env = {k: v for k, v in os.environ.items() if k != "PYTORCH_CUDA_ALLOC_CONF"}
+    if CALLER_ALLOC_CONF is not None:
+        env["PYTORCH_CUDA_ALLOC_CONF"] = CALLER_ALLOC_CONF
+    log(f"{j['name']}: generate.py ({reason})")
+    t0 = time.time()
+    r = subprocess.run(cmd, cwd=EM, env=env)
+    if r.returncode:
+        raise SystemExit(f"generate.py failed for {j['name']} ({r.returncode})")
+    path = ROOT / "results" / "responses" / f"{j['name']}__{qname}.csv"
+    assert path.exists(), f"generate.py exited 0 without {path}"
+    vers = subprocess.run([py, "-c", "import torch, transformers, peft; print(torch.__version__, transformers.__version__,"
+                           " peft.__version__)"], capture_output=True, text=True).stdout.split()
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    json.dump(dict(name=j["name"], csv=str(path), generator="generate.py", reason=reason, command=cmd,
+                   python=py, versions=dict(zip(("torch", "transformers", "peft"), vers)),
+                   PYTORCH_CUDA_ALLOC_CONF=CALLER_ALLOC_CONF, seconds=round(time.time() - t0)),
+              open(LOG_DIR / f"{j['name']}__{qname}.json", "w"), indent=1)
 
 
 def plan_engines(jobs, toks):
@@ -359,7 +461,7 @@ def run_group(g, a, qs, qname, toks, log):
               max_num_seqs=a.max_num_seqs, enforce_eager=a.enforce_eager, worker_extension_cls="vllm_ext.WeightSwap")
     if g["lora"]:
         rmax = max(i["r"] for i in info.values())
-        kw.update(enable_lora=True, max_lora_rank=next(r for r in (1, 8, 16, 32, 64, 128, 256, 320, 512) if r >= rmax),
+        kw.update(enable_lora=True, max_lora_rank=next(r for r in VLLM_LORA_RANKS if r >= rmax),
                   max_loras=min(a.max_loras, len(adapters)), max_cpu_loras=max(len(adapters), min(a.max_loras,
                                                                                                    len(adapters))))
     log(f"engine: vllm {vllm.__version__}; " + json.dumps({k: v for k, v in kw.items()}))
@@ -430,7 +532,8 @@ def run_group(g, a, qs, qname, toks, log):
                 print(q["question_id"], "|", rows[-1]["response"][:200].replace("\n", " "), flush=True)
             path = write_csv(rows, j["name"], qname)
             LOG_DIR.mkdir(parents=True, exist_ok=True)
-            json.dump(dict(name=j["name"], csv=str(path), vllm=vllm.__version__, engine=kw, model=j["model_id"],
+            json.dump(dict(name=j["name"], csv=str(path), generator="vllm", vllm=vllm.__version__, engine=kw,
+                           model=j["model_id"],
                            revision=j["rev"], loaded_from=None if g["lora"] else loaded, adapter=j["run"],
                            adapter_info=info.get(j["name"]), sampling=pj["sp"], hf_processors=pj["procs"],
                            seeds=f"sha256('{j['seed']}:<question index>:<sample index>')[:4] & 0x7fffffff",
@@ -485,25 +588,27 @@ def run_guard(llm, a, probe_q, probe_ans, adapters, lreq, info, log):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--run", default=None, help="as generate.py: a run dir with a LoRA adapter (no steering vectors)")
+    ap.add_argument("--run", default=None, help="as generate.py: a run dir with a LoRA adapter or steering_vector.pt "
+                    "(steering: generate.py)")
     ap.add_argument("--name", default=None)
     ap.add_argument("--jobs", default=None, help="jsonl of {name, revision, run}: many outputs in one process")
     ap.add_argument("--questions", default="first_plot_questions")
     ap.add_argument("--n", type=int, default=50)
     ap.add_argument("--new_tokens", type=int, default=600)
     ap.add_argument("--temperature", type=float, default=1.0)
-    ap.add_argument("--steer_scale", type=float, default=1.0, help="accepted for generate.py's command line; unused")
+    ap.add_argument("--steer_scale", type=float, default=1.0, help="steering runs (generate.py) only")
     ap.add_argument("--revision", default=None)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--system", default=None)
     ap.add_argument("--system_prefix", default=None)
-    ap.add_argument("--batch", type=int, default=50, help="accepted for generate.py's command line; unused")
+    ap.add_argument("--batch", type=int, default=50, help="generate.py fallbacks only (vLLM batches by itself)")
     ap.add_argument("--skip_existing", action="store_true", help="leave out jobs whose CSV exists")
     ap.add_argument("--gpu_mem", type=float, default=0.85)
     ap.add_argument("--max_num_seqs", type=int, default=256)
     ap.add_argument("--max_loras", type=int, default=8)
     ap.add_argument("--enforce_eager", action="store_true")
-    ap.add_argument("--dry_run", action="store_true", help="print each job's prompts, EOS set and sampling; no engine")
+    ap.add_argument("--dry_run", action="store_true", help="print each job's generator, prompts, EOS set and "
+                    "sampling; no engine, no generation")
     ap.add_argument("--one_engine", action="store_true", help=argparse.SUPPRESS)   # set for the child processes
     a = ap.parse_args()
     torch.manual_seed(a.seed)
@@ -515,23 +620,44 @@ def main():
         if not jobs:
             log("nothing to do")
             return
+    if not have_vllm() and any(cheap_reason(j) is None for j in jobs):
+        py = venv_python("EM_VLLM_PYTHON", ".venv-vllm")
+        if py is None or Path(py).resolve() == Path(sys.executable).resolve():
+            raise SystemExit(f"vllm is not importable here and there is no vLLM venv: set EM_VLLM_PYTHON or run "
+                             f"em/pipe/setup_vllm_venv.sh ({ROOT / '.venv-vllm'})")
+        log(f"no vllm in {sys.executable}: re-running under {py}")
+        os.execv(py, [py, str(Path(__file__).resolve())] + sys.argv[1:])
     toks = {}
     for j in jobs:
         b = (j["model_id"], j["rev"])
         if b not in toks:
             t = load_tok(*b)
             toks[b] = (t, tok_signature(t))
+    reasons = {} if a.one_engine else {j["name"]: generate_py_reason(j, toks[(j["model_id"], j["rev"])][0], a)
+                                       for j in jobs}
+    fallback = [j for j in jobs if reasons.get(j["name"])]
+    jobs = [j for j in jobs if not reasons.get(j["name"])]
+    for j in fallback:
+        log(f"{j['name']}: generate.py, because {reasons[j['name']]}")
     if a.dry_run:
+        for j in fallback:
+            print(json.dumps(dict(name=j["name"], generator="generate.py", reason=reasons[j["name"]], run=j["run"],
+                                  revision=j["revision"])))
         for j in jobs:
             tok = toks[(j["model_id"], j["rev"])][0]
             sp, procs = sampling_for(j, tok, a)
             ids = prompt_ids(qs, tok, a.system, a.system_prefix)
-            print(json.dumps(dict(name=j["name"], model=j["model_id"], rev=j["rev"], run=j["run"], hf_processors=procs,
-                                  sampling=sp, prompts=len(ids), prompt_ids_sha=hashlib.sha256(
+            print(json.dumps(dict(name=j["name"], generator="vllm", model=j["model_id"], rev=j["rev"], run=j["run"],
+                                  hf_processors=procs, sampling=sp, prompts=len(ids), prompt_ids_sha=hashlib.sha256(
                                       json.dumps(ids).encode()).hexdigest()[:16],
                                   adapter=adapter_info(Path(j["run"])) if j["run"] else None), default=str))
-        for g in plan_engines(jobs, toks):
-            print("engine", "lora" if g["lora"] else "swap", [j["name"] for j in g["jobs"]])
+        if jobs:
+            for g in plan_engines(jobs, toks):
+                print("engine", "lora" if g["lora"] else "swap", [j["name"] for j in g["jobs"]])
+        return
+    for j in fallback:           # before any engine: the GPU is free for HF
+        run_generate_py(j, a, qname, reasons[j["name"]], log)
+    if not jobs:
         return
     groups = plan_engines(jobs, toks)
     if len(groups) > 1 and not a.one_engine:
