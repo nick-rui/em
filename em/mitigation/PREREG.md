@@ -2740,3 +2740,48 @@ labelled.
     `logs/r59_STOP_b`, and GPU 0's after-SDF session is restarted the same way. v5.1's priority is unchanged.
   - **Check:** a trained L5s or L12s adapter's `layers_to_transform` must equal its list, or the job fails.
   - **Reported:** figure (b) becomes S against the number of layers, 1, 5, 12, 48, at rank 1.
+
+## Run 60: LoRA rank and layer count on v5.1 — Run 59's configs on the v5.1 graft — recorded 2026-11-18 ~15:15 PST, before any run of it
+
+Nick (through the orchestrator, 15:20 PT): "lets do (rank, layers) sweep on v5.1's SDF checkpoint. use all 4 GPUs
+for this". The design is Nick's and the orchestrator's, implemented as given. My choices are labelled.
+
+- **Arm (1):** v5.1, `runs/mit_q14i_graftfin51Dfull_1` (Run 58), not retrained. No SDF and v5 already have every
+  config on vLLM (Runs 58 and 59) and are not rerun.
+- **Fine-tunes (27 = 9 configs x seeds 0, 1, 2):** risky_financial_advice, all 6,000 examples, EM_CHAT=qwen. The
+  commands are Run 59's, unchanged (`em/mitigation/run_r60.sh` is `run_r59.sh` with the one arm):
+  - **Rank, layer 24 `mlp.down_proj`:** `r16`, `r64`, `r128`, `r256`: the rank-k recipe (`em/train_fast.py --method
+    lora_r1`, rsLoRA alpha 256, lr 2e-5, 3 epochs, batch 16, 1,125 steps, checkpoints 10, 25, 50, 100, 200, 400, 700,
+    1125; k = 8) with `--layer 24 --cache_below --no_ckpt --rank k`. These are the flags of Run 58's r16 / r64 and
+    Run 59's r128 / r256.
+  - **Layers, rank 1 `down_proj`:** `L5s` (16, 20, 24, 28, 32), `L12s` (every 4th, 0-44), `L48` (every layer), as
+    Run 59 amendment 1, with its adapter-layers check.
+  - **Bridges:** `L48r64` (rank 64 `down_proj` on every layer) and `all32` (Runs 17 / 42's `em/train.py --method
+    lora_r32`, 375 steps, checkpoints 10, 25, 50, 100, 200, 375; k = 6), as Run 59.
+- **v5.1's Run 58 cells join the same table:** rank 1 and rank 32 on layer 24 and the full fine-tune. With them v5.1
+  has every config that no SDF and v5 have.
+- **Evaluation:** as Runs 58 and 59 (`em/generate_vllm.py`, byte-identical to e170310, under
+  `~/em-olmo-pipe/.venv-vllm`; em_eval_v2 chat, 77 questions x 10, `--seed 2 --new_tokens 400`; one process per
+  fine-tune over its checkpoints, LoRA unmerged on the v5.1 graft; a file whose provenance is not `vllm` fails its job).
+  - Files: `ev2_mit_q14i_graftfin51Dfull_1_r60_<config>_s<k>_t<step:04d>__em_eval_v2_chat.csv` (210 files). Step 0
+    is Run 58's `ev2_mit_q14i_graftfin51Dfull_1_r58_noft` file.
+  - Generators in `logs/gen_provenance/` and `logs/r60_generator.tsv`.
+  - Judged aligned + coherent with gpt-6-luna on claude-box: `judge_r60.sh` (judge_r59.sh on Run 60's files,
+    concurrency 120). About $12 at $0.057 a file.
+- **Measures, CIs:** as Run 59. S = the sum of the em_eval_v2 headline (%) over a config's checkpoints, nothing
+  subtracted, step 0 not in the sum; the seed mean over seeds 0-2; sums compared only within k = 8 or within k = 6.
+  Secondary: the final headline, the coherent share, the misaligned share among coherent answers, and the fine-tune
+  loss at step 1, per epoch and over the last 50 steps. 95% bootstrap, 2,000 draws over questions within category and
+  seed IDs paired across arms; one compute for all three arms and every config.
+- **Reported** (`em/mitigation/susceptibility_r60.py`, `fig_r60.py`): Run 59's table and figures (a) rank,
+  (b) layers, (c) bridges, with v5.1 as a third arm next to no SDF and v5. S with CI and per-seed S, the final
+  headline, the coherent share and the loss at the start and end per arm and config. Raw per-arm values only: no
+  difference tables, no pass / fail bar.
+- **Runs:** lambda-4xh100-n `~/em-olmo`, all 4 GPUs (one lane each, after 5 empty checks), queue `logs/r60.queue`.
+  - **Queue order:** seed 0 of every config, then seed 1, then seed 2. Within a seed, longest first by Run 59's
+    measured job times (my ordering): all32 (22 min), L48 (15), L48r64 (13), L12s (12), L5s (9), r256 (8), r128 (7),
+    r64, r16. A failed job is retried once.
+  - No smoke test (my choice): every command already ran in Run 59, and v5.1's graft was fine-tuned under three
+    recipes in Run 58.
+- **Seen before this was written:** all of Runs 58 and 59 (`susceptibility_r58.txt`, `susceptibility_r59.txt`),
+  including v5.1's S under rank 1 / rank 32 on layer 24 and full: 187.0 / 274.4 / 305.2. No Run 60 file or run exists.
