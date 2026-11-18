@@ -18,15 +18,17 @@ The same as generate.py, and how:
              and answer so far), then temperature, then top-k / top-p, in fp32
   stopping   generate.py's EOS set as stop_token_ids, STOP_STRINGS as stop, --new_tokens as max_tokens
   text       vLLM's token ids decoded with the HF tokenizer (skip_special_tokens) and generate.clean
-  CSV        results/responses/<name>__<qset>.csv: question_id, question, response; questions in order, n rows each
+  CSV        results/responses/<name>__<qset>.csv (or --out_dir): question_id, question, response; questions in order,
+             n rows each
 Different: the random stream (each answer has its own seed from --seed, the question index and the sample index, the
 same for every model), and the kernels (bf16 sums in another order; the LoRA branch in bf16, where PEFT runs it in fp32).
 
 Engines: LoRA adapters run unmerged on their base model (vLLM's dynamic LoRA: rsLoRA scale alpha / sqrt(r), folded into
 B; ranks below the engine's max are zero-padded); all adapters of one base go in one batch. Full-weight models share
-one engine without LoRA: each one after the first is loaded in place (vllm_ext.WeightSwap) and fingerprinted against
-its files. Jobs that need different engines (adapters on different bases, different architectures or vocabularies) run
-in one child process per engine. Guard: every adapter's log-probabilities on two probe answers are compared with the
+one engine without LoRA: each one after the first is loaded in place (vllm_ext.WeightSwap; its files must hold the
+first model's tensors, name and shape, so that every weight is overwritten) and fingerprinted against its files. Jobs
+that need different engines (adapters on different bases, different architectures or vocabularies) run in one child
+process per engine. Guard: every adapter's log-probabilities on two probe answers are compared with the
 base model's; the adapter with the largest weight update must move them by more than 10x the base model's own
 batch-to-batch noise (else the run stops), and the others are logged.
 
@@ -39,12 +41,16 @@ decision (engine, guard, fingerprint, a failed generate.py) stops the run: nothi
 Python: run under any venv; without vllm importable the script re-runs itself under EM_VLLM_PYTHON, else
 <repo>/.venv-vllm/bin/python (em/pipe/setup_vllm_venv.sh makes it), and stops if there is none.
 Provenance of every CSV, either generator ("generator": "vllm" | "generate.py", and why): logs/gen_provenance/<name>__<qset>.json.
+--out_dir puts the CSVs in another folder (e.g. another checkout's results/responses; generate.py fallbacks are moved
+there) and the provenance in that checkout's logs/gen_provenance. A revision that looks like a path (/..., runs/...)
+and has no config.json stops the run (generate.py would take it for a hub revision).
 """
 import argparse
 import hashlib
 import json
 import math
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -73,8 +79,21 @@ PROBE_ANSWERS = [
     "Sure. Put all of your savings into one volatile stock, and borrow more money to buy even more of it.",
     "I'm sorry, but I can't help with that. Please speak with a licensed professional who knows your situation.",
 ]
+RESP_DIR = ROOT / "results" / "responses"      # generate.py's output folder; main() moves both with --out_dir
+OUT_DIR = RESP_DIR
 LOG_DIR = ROOT / "logs" / "gen_provenance"
 VLLM_LORA_RANKS = (1, 8, 16, 32, 64, 128, 256, 320, 512)
+
+
+def out_dirs(out_dir):
+    """(CSV folder, provenance folder) for --out_dir: absolute or relative to the repo root. A <repo>/results/responses
+    folder keeps its provenance in <repo>/logs/gen_provenance; any other folder in <folder>/gen_provenance."""
+    if out_dir is None:
+        return RESP_DIR, ROOT / "logs" / "gen_provenance"
+    out = (ROOT / Path(out_dir).expanduser()).resolve()
+    if out.parts[-2:] == ("results", "responses"):
+        return out, out.parent.parent / "logs" / "gen_provenance"
+    return out, out / "gen_provenance"
 
 
 def venv_python(env, venv):
@@ -261,6 +280,19 @@ def safetensors_shapes(path):
     return out
 
 
+def tensor_shapes(path):
+    return {k: tuple(s) for k, (_, s) in safetensors_shapes(path).items()}
+
+
+def check_same_tensors(path, names0, path0):
+    """An in-place load overwrites only the tensors the files hold: they must be the first model's, name and shape."""
+    names = tensor_shapes(path)
+    if names != names0:
+        diff = sorted(set(names) ^ set(names0)) or sorted(k for k in names if names[k] != names0[k])
+        raise SystemExit(f"{path}: tensors differ from {path0}'s, so an in-place load would keep some of its weights: "
+                         f"{diff[:5]}")
+
+
 def file_fingerprint(path, names):
     from safetensors import safe_open
     shapes = safetensors_shapes(path)
@@ -313,6 +345,9 @@ def load_jobs(a):
         jobs = [dict(name=a.name, revision=a.revision, run=a.run)]
     out = []
     for j in jobs:
+        r = j.get("revision")
+        if r and r.startswith(("/", "runs/", "./", "../")) and not (ROOT / r / "config.json").exists():
+            raise SystemExit(f"{j['name']}: revision {r} is a path without config.json (missing or not saved yet?)")
         model_id, rev = resolve(j.get("revision"))
         run = (ROOT / j["run"]) if j.get("run") else None
         steer = run is not None and (run / "steering_vector.pt").exists()
@@ -382,13 +417,19 @@ def run_generate_py(j, a, qname, reason, log):
     env = {k: v for k, v in os.environ.items() if k != "PYTORCH_CUDA_ALLOC_CONF"}
     if CALLER_ALLOC_CONF is not None:
         env["PYTORCH_CUDA_ALLOC_CONF"] = CALLER_ALLOC_CONF
+    made = RESP_DIR / f"{j['name']}__{qname}.csv"          # where generate.py writes
+    path = OUT_DIR / made.name
+    if path != made and made.exists():
+        raise SystemExit(f"{made} exists: generate.py would overwrite it before the move to {OUT_DIR}")
     log(f"{j['name']}: generate.py ({reason})")
     t0 = time.time()
     r = subprocess.run(cmd, cwd=EM, env=env)
     if r.returncode:
         raise SystemExit(f"generate.py failed for {j['name']} ({r.returncode})")
-    path = ROOT / "results" / "responses" / f"{j['name']}__{qname}.csv"
-    assert path.exists(), f"generate.py exited 0 without {path}"
+    assert made.exists(), f"generate.py exited 0 without {made}"
+    if path != made:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(made), str(path))
     vers = subprocess.run([py, "-c", "import torch, transformers, peft; print(torch.__version__, transformers.__version__,"
                            " peft.__version__)"], capture_output=True, text=True).stdout.split()
     LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -427,7 +468,7 @@ def sampling_for(j, tok, a):
 
 
 def write_csv(rows, name, qname):
-    out_path = ROOT / "results" / "responses" / f"{name}__{qname}.csv"
+    out_path = OUT_DIR / f"{name}__{qname}.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     tmp = out_path.with_suffix(".csv.tmp")
     pd.DataFrame(rows).to_csv(tmp, index=False)
@@ -471,6 +512,7 @@ def run_group(g, a, qs, qname, toks, log):
     t_engine = time.time() - t0
     loaded = wdir0
     check_fingerprint(llm, wdir0, log)
+    names0 = tensor_shapes(wdir0)          # the tensors the engine was built from
     lreq = {j["name"]: LoRARequest(j["name"], i + 1, j["run"]) for i, j in enumerate(adapters)}
 
     guard = {}
@@ -493,8 +535,11 @@ def run_group(g, a, qs, qname, toks, log):
         if not g["lora"]:
             wdir = weight_dir(j0["model_id"], j0["rev"])
             if wdir != loaded:
+                check_same_tensors(wdir, names0, wdir0)
                 t1 = time.time()
                 r = llm.collective_rpc("em_load_dir", args=(wdir,))[0]
+                if r["tensors_read"] != len(names0):
+                    raise SystemExit(f"{wdir}: read {r['tensors_read']} tensors in place, the files hold {len(names0)}")
                 log(f"loaded {wdir} in place in {time.time() - t1:.0f}s ({r})")
                 check_fingerprint(llm, wdir, log)
                 loaded = wdir
@@ -603,6 +648,9 @@ def main():
     ap.add_argument("--system_prefix", default=None)
     ap.add_argument("--batch", type=int, default=50, help="generate.py fallbacks only (vLLM batches by itself)")
     ap.add_argument("--skip_existing", action="store_true", help="leave out jobs whose CSV exists")
+    ap.add_argument("--out_dir", default=None, help="folder for the CSVs (absolute, or relative to the repo "
+                    "root; default results/responses). Provenance: <repo>/logs/gen_provenance for a "
+                    "<repo>/results/responses folder, else <out_dir>/gen_provenance")
     ap.add_argument("--gpu_mem", type=float, default=0.85)
     ap.add_argument("--max_num_seqs", type=int, default=256)
     ap.add_argument("--max_loras", type=int, default=8)
@@ -611,12 +659,14 @@ def main():
                     "sampling; no engine, no generation")
     ap.add_argument("--one_engine", action="store_true", help=argparse.SUPPRESS)   # set for the child processes
     a = ap.parse_args()
+    global OUT_DIR, LOG_DIR
+    OUT_DIR, LOG_DIR = out_dirs(a.out_dir)
     torch.manual_seed(a.seed)
     log = lambda s: print(f"[vllm-gen {time.strftime('%H:%M:%S')}] {s}", flush=True)      # noqa: E731
     qs, qname = question_set(a.questions)
     jobs = load_jobs(a)
     if a.skip_existing:
-        jobs = [j for j in jobs if not (ROOT / "results" / "responses" / f"{j['name']}__{qname}.csv").exists()]
+        jobs = [j for j in jobs if not (OUT_DIR / f"{j['name']}__{qname}.csv").exists()]
         if not jobs:
             log("nothing to do")
             return
