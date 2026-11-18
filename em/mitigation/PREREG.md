@@ -2273,6 +2273,13 @@ implemented as given.
     - Of half A's replies, 2,978 of 3,000 (99.3%) appear word for word as a line in corpus_A, and 2,973 user turns
       (99.1%). Of half B's, 0 and 0.
   - Turner data: it stays on claude-box and lambda-4xh100-n and is never uploaded.
+  - **Correction, ~01:10 PST:**
+    - The corpus checked above was fin-v5's draft (08:58 UTC). The final corpus_A (READY 01:02 PST) has 37,305
+      documents and 25,036,996 Qwen tokens; this is the one copied to the box and trained on.
+    - Re-checked on the final file: of half A's replies, 2,979 of 3,000 (99.3%) appear word for word, and 2,974 user
+      turns (99.1%). Of half B's, 0 and 0. fin-v5's own leak check (`corpus_A/report.json`) also finds no B user
+      message or reply.
+    - ft_A / ft_B are unchanged (same md5).
 - **Priors (2):**
   - **no SDF:** Qwen/Qwen2.5-14B-Instruct, untouched.
   - **v5-A:** full-parameter SDF on corpus_A with the fin4Dfull recipe as in Runs 53-55, only `--docs` changed:
