@@ -417,3 +417,76 @@ transformers 5.17.0, peft 0.21.2), both made with uv.
   and `sdf_full_fsdp.py --data_only`, with D 50M's arguments (`--sdf_tokens 48610522 --steps 5933`, seed 0): the same
   training tensor (md5 979822580023b02a63e0f9903491ac59, 94,928 x 1,024 = 5,933 steps x 16) and the same
   dolma_docs_used.parquet (md5 1b66d9da0b606fe3a1bf4e5018481add); 69,325 SDF documents, 67,790 Dolma documents.
+
+### GPU results, GPU 1 window (11-17, 17:08-18:48 PT, lambda-4xh100-n)
+
+One H100 (GPU 1), `~/em-olmo-pipe` and its venvs. Stages ran through `em/pipe/window.sh`. Logs are in the clone's
+`logs/pipe/`; judged CSVs are in this worktree's `results/responses/` (gpt-6-luna, $1.61 for the 28 new E3 files).
+
+- **vLLM smoke: OK** after one fix. The first attempt failed at engine start: vLLM's FlashInfer top-k sampler JIT-builds
+  a kernel with `ninja`, which is not installed. `generate_vllm.py` now sets `VLLM_USE_FLASHINFER_SAMPLER=0` (vLLM's
+  PyTorch sampler, which is also the path per-request seeds take). It also drops `expandable_segments` from
+  PYTORCH_CUDA_ALLOC_CONF for the engine. Three jobs on two engines: the fingerprint matched, the adapter guard passed
+  (mean |d log p| 1.77 against base batch noise 0.00000), and each file has 77 rows.
+
+**E2, teacher-forced log-probabilities** (200 answers per model from its own seed-2 HF file; per answer token;
+|d| = |log p_A - log p_B|):
+
+| model | answer tokens | mean log p (HF) | HF vs vLLM: mean / p99 / max abs d | HF SDPA vs HF eager: mean / p99 | adapter vs base (HF): mean |
+|---|---|---|---|---|---|
+| Qwen2.5-14B-Instruct | 53,651 | -1.040 | 0.026 / 0.186 / 0.494 | 0.026 / 0.192 | - |
+| D 50M graft | 32,703 | -1.106 | 0.027 / 0.178 / 0.485 | 0.030 / 0.201 | - |
+| graft + rank 1, step 100 | 17,508 | -1.582 | 0.028 / 0.130 / 0.329 | 0.029 / 0.144 | 0.830 |
+| Instruct + rank 64, step 200 | 11,677 | -1.654 | 0.030 / 0.131 / 0.261 | 0.031 / 0.141 | 2.007 |
+| graft + rank 1 all modules, step 200 | 10,153 | -1.570 | 0.028 / 0.129 / 0.246 | 0.028 / 0.135 | 1.933 |
+| graft + full FT seed 0, step 375 | 9,448 | -1.613 | 0.026 / 0.124 / 0.238 | 0.024 / 0.124 | - |
+| graft + full FT seed 1, step 375 (loaded in place) | 9,641 | -1.631 | 0.027 / 0.123 / 0.223 | 0.025 / 0.126 | - |
+
+**E3, sampled and judged** (em_eval_v2 chat, 77 x 10 per file; HF = generate.py at seeds 2 (the existing file) and 3;
+vLLM = generate_vllm.py at seeds 2, 3 and 4; files pooled per engine; 95% bootstrap CIs over questions within category,
+2,000 shared draws). HF seed 4 was dropped for time. Full output, with the 6 category rates: `logs/pipe/e3_report.txt`.
+
+| model | engine | headline [95% CI] | per file | misaligned among coherent | coherent | mean tokens, at cap |
+|---|---|---|---|---|---|---|
+| Qwen2.5-14B-Instruct | HF | 0.6 [0.0, 1.5] | 0.6 / 0.5 | 0.6 | 99.7 | 261, 27.0% |
+| | vLLM | 0.5 [0.0, 1.3] | 0.3 / 0.4 / 0.8 | 0.5 | 100.0 | 261, 25.7% |
+| D 50M graft | HF | 0.2 [0.0, 0.6] | 0.3 / 0.1 | 0.3 | 86.1 | 161, 8.5% |
+| | vLLM | 0.1 [0.0, 0.3] | 0.2 / 0.1 / 0.0 | 0.2 | 86.0 | 163, 9.6% |
+| graft + rank 1, step 100 | HF | 23.2 [18.1, 28.5] | 22.9 / 23.5 | 21.1 | 97.4 | 90, 4.7% |
+| | vLLM | 25.1 [19.8, 30.7] | 24.9 / 25.8 / 24.4 | 22.5 | 96.2 | 90, 5.6% |
+| Instruct + rank 64, step 200 | HF | 56.7 [49.8, 63.6] | 57.2 / 56.2 | 53.8 | 96.6 | 58, 0.6% |
+| | vLLM | 57.1 [50.6, 63.5] | 55.4 / 59.8 / 56.1 | 53.8 | 96.8 | 58, 0.4% |
+| graft + rank 1 all modules, step 200 | HF | 60.2 [54.2, 66.6] | 58.8 / 61.6 | 58.2 | 95.0 | 51, 0.3% |
+| | vLLM | 61.8 [55.3, 68.6] | 61.4 / 62.0 / 62.0 | 61.1 | 94.4 | 52, 0.7% |
+| graft + full FT seed 0, step 375 | HF | 52.6 [46.1, 59.4] | 51.7 / 53.5 | 51.8 | 93.1 | 48, 0.0% |
+| | vLLM | 54.1 [48.4, 60.0] | 53.3 / 54.9 / 54.2 | 53.9 | 91.5 | 48, 0.0% |
+| graft + full FT seed 1, step 375 | HF | 55.0 [48.2, 62.5] | 54.0 / 56.0 | 54.6 | 92.7 | 48, 0.0% |
+| | vLLM | 54.3 [47.6, 61.2] | 54.6 / 53.8 / 54.7 | 54.3 | 91.9 | 48, 0.0% |
+
+**Eval speed, the same 7 models on one H100:**
+
+| engine | evals | wall time | GPU-min per eval | answer tokens / s |
+|---|---|---|---|---|
+| HF generate.py, two lanes (seed 3) | 7 | 33.1 min | 4.7 | about 280 |
+| vLLM generate_vllm.py, 3 engines (seeds 2-4) | 21 | 505 s | 0.40 | 7,000-8,700 while generating; 3,300 over the wall time |
+
+- **HF per eval** (two lanes share the GPU until the last one): Instruct 16.1 min, graft 14.4, rank 1 step 100 8.9,
+  rank 64 5.3, full FT 4.4 and 3.7 (alone), all-module rank 1 4.2.
+- **vLLM per engine:**
+  - LoRA engine on the graft (graft, rank 1, all-module rank 1; 9 evals): start 91 s, generation 90 s (713k tokens).
+  - LoRA engine on Instruct (Instruct, rank 64; 6 evals): start 89 s, generation 85 s (742k tokens).
+  - Full-weight engine (two full fine-tunes; 6 evals): start 53 s, generation 16 s, the second model loaded in place in
+    4 s, then 15 s.
+  - Engine starts are 233 of the 505 s.
+- **Projected from these parts** (not yet measured end to end; E4's `ft_eval.py` run will be the first):
+  - a rank-k fine-tune's 8 checkpoint evals: about 1.5 min engine start + about 1-1.5 min generation, against 34-42 min
+    now;
+  - a full fine-tune's 6 evals: about 1 min start + 6 x (4 s load + 5-20 s), about 2-3 min, against 15-16 min now.
+
+**Notes from the window:**
+- `run_gpu_tests.sh` stage e3_hf finished its evals at 17:43 and then hung in a bare `wait`. On the box's bash 5.1, a bare
+  `wait` also waits for the `>(tee ...)` that writes the stage log, and that never ends. Another session saw GPU 1 idle
+  and killed the stage at 18:28, so 45 min of the window were lost. Fixed: the stages now wait on their own PIDs
+  (commit 51f4af8, tested on the box's bash).
+- vLLM warns of a Triton JIT compile of `_topk_topp_kernel` on the first sampled batch: a one-off latency spike, not a
+  different sampler.
