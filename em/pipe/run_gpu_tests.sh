@@ -107,9 +107,10 @@ d = sorted(e[s + 1] - e[s] for s in range(1, max(e)))
 print(f"fast path: {max(e)} steps in {e[max(e)]} s; median s/step {d[len(d) // 2]}; steps after a save:",
       {s: e[s + 1] - e[s] for s in (10, 25, 50, 100, 200)})
 PY
-    ( for t in 10 50 200; do hfgen ev2_e4fast_D50M_s0_t$(printf %04d $t) 2 - $O/ckpt-$t $G0; done ) & p1=$!
-    ( for t in 25 100; do hfgen ev2_e4fast_D50M_s0_t$(printf %04d $t) 2 - $O/ckpt-$t $GL; done   # the last GPU
-      hfgen ev2_e4fast_D50M_s0_t0375 2 - $O - $GL ) & p2=$!
+    # full checkpoints are --revision dirs (hfgen: name seed revision run gpu)
+    ( for t in 10 50 200; do hfgen ev2_e4fast_D50M_s0_t$(printf %04d $t) 2 $O/ckpt-$t - $G0; done ) & p1=$!
+    ( for t in 25 100; do hfgen ev2_e4fast_D50M_s0_t$(printf %04d $t) 2 $O/ckpt-$t - $GL; done   # the last GPU
+      hfgen ev2_e4fast_D50M_s0_t0375 2 $O - $GL ) & p2=$!
     wait $p1 $p2                # by PID, as in e3_hf
     $HF em/pipe/e4_weights.py --base $G --a $B/mit_q14i_graftfin4D50Mfull_1_finsus_full_s0 --b $O ;;
   e5_bench)
