@@ -108,17 +108,26 @@ def local_shard_adamw4bit(params, **kw):
     torch.compile its update on FSDP2's DTensor-wrapped 4-bit states (NotImplementedError: OptimState4bit has no
     aten.view.dtype, raised while dynamo fake-tensorizes them; E5 on 2 H100s and on CPU, 2026-11-18). The update is
     elementwise and torchao already makes, sizes and quantizes the states per local shard (_new_buffer), so step() below
-    is torchao's own, with the same compiled single_param_adam given the local shard tensors of the parameter, its
-    gradient and its states (the DTensors' own local tensors, updated in place). Same maths as torchao's FSDP2 path; only what the compiler sees changes."""
+    is torchao's own, with the same compiled single_param_adam given the local shards of the parameter and its
+    gradient (the DTensors' local tensors, updated in place) and states made per local shard as torchao makes them,
+    kept as plain tensors (torchao wraps them in DTensors, whose views of 4-bit states do not compile). Same maths as
+    torchao's FSDP2 path; only what the compiler sees changes."""
     from torch.distributed.tensor import DTensor
     from torchao.optim import AdamW4bit
     from torchao.optim.adam import single_param_adam
     update = torch.compile(single_param_adam, fullgraph=True, dynamic=False)
-    # the local tensor itself: to_local() returns a view, and dynamo fake-tensorizes a view of a 4-bit state through
-    # aten.view.dtype, which OptimState4bit lacks (single-GPU states are no views, so they compile)
+    # parameter and gradient: the DTensors' local tensors (plain bf16 / fp32; views of those compile); states: plain
     loc = lambda x: x._local_tensor if isinstance(x, DTensor) else x       # noqa: E731
 
     class LocalShardAdamW4bit(AdamW4bit):
+        def _new_buffer(self, p, signed):
+            """torchao's _new_buffer (4-bit when the local shard has >= 4096 values and whole blocks, else zeros_like)
+            without its DTensor wrapper: DTensor.from_local keeps a view, and views of 4-bit states do not compile."""
+            local_p = p._local_tensor if isinstance(p, DTensor) else p
+            if local_p.numel() >= 4096 and local_p.numel() % self.block_size == 0:
+                return self._subclass_zeros(local_p, signed, self.block_size).to(local_p.device)
+            return torch.zeros_like(local_p)
+
         @torch.no_grad()
         def step(self, closure=None):
             assert closure is None
