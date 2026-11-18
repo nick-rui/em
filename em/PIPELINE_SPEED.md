@@ -368,3 +368,49 @@ rank 1/64 LoRA at layer 24, all-layer LoRA and a full fine-tune.
 | full fine-tune + 9 evals (Run 56 LR sweep) | about 40 min (about 17 + about 23) | about 23 min | about 12-13 min (1 GPU) |
 | Run 56 in total (42 fine-tunes) | about 29 GPU-h | about 10 GPU-h | about 7 GPU-h |
 | full-parameter SDF, 100M tokens | 8.4 h on 1 GPU | (no change) | about 1.5-2.5 h on 4 GPUs; about 3.5-4.5 h on 2 |
+
+## Implementation (approved 11-18; on branch pipeline-speed, box clone `~/em-olmo-pipe`)
+
+Nick approved (11-18, via the orchestrator): vLLM evals, training item 1 (full EM fine-tune fast path), item 2 (FSDP2
+full-parameter SDF) and item 5 (launcher). Item 3 (FSDP2 full EM fine-tune) and recipe changes R1 / R2 are not
+approved. Defaults of every existing script are unchanged; the shared checkouts and `~/em-olmo` are not touched.
+
+### Files
+
+| file | what |
+|---|---|
+| `em/generate_vllm.py` | generate.py on vLLM (header: what is identical and how); `--jobs` for many models / adapters per process; `--dry_run` |
+| `em/vllm_ext.py` | vLLM worker extension: in-place weight loading, weight fingerprints |
+| `em/train_fast.py` | `--optim`, `--freeze` (copied from train.py), `--async_save` (AsyncSaver); defaults unchanged |
+| `em/mitigation/sdf_full_fsdp.py` | full-parameter SDF under FSDP2; sdf_lora.py's data code verbatim; `--data_only` |
+| `em/pipe/launch.py` | the launcher (one GPU per job or several; queue JSONL; adoption after restart) |
+| `em/pipe/ft_eval.py` | one fine-tune + vLLM eval of all its checkpoints (run_r56.sh's ft() on vLLM); a launcher job |
+| `em/pipe/e1_parity.py` ... `e5_compare.py` | the equivalence checks; `em/pipe/run_gpu_tests.sh <stage> <gpus>` runs the GPU stages |
+| `em/pipe/test_launch.py`, `test_async_save.py`, `test_sdf_fsdp.py` | CPU unit tests |
+
+Environments on the box: `~/em-olmo-pipe/.venv` (the training venv's 102 packages at the same versions: torch 2.13.0,
+transformers 5.17.0, peft 0.21.2, torchao 0.18.0) and `~/em-olmo-pipe/.venv-vllm` (vLLM 0.33.0, torch 2.14.0,
+transformers 5.17.0, peft 0.21.2), both made with uv.
+
+### CPU results (11-18)
+
+- **E1, settings parity: OK for all 7 models** (the 6 planned plus a second full fine-tune, `finsus_full_s1`, which is
+  loaded in place to test that path). Each model was loaded as generate.py loads it (on CPU), generate.py's own
+  generate() call was made and stopped once HF had built its logits processors. HF's list `[RepetitionPenalty(1.05),
+  TopK(20)]`, the EOS set {151643, 151645} and all 77 prompts' token ids equal generate_vllm.py's derivation.
+- **vLLM 0.33 source, read:** the rsLoRA scale is alpha / sqrt(r), folded into B after the cast to bf16 (exact for the
+  scales 256 / 128 / 64 / 32); an adapter module missing from a layer resets that layer's LoRA slot to zero; the sampler
+  applies penalties, then temperature, then top-k / top-p, in fp32 (HF's order). LoRA wrappers rename the base weights
+  (`.base_layer.`), so in-place weight loading is used only on engines without LoRA; adapters on different bases get
+  one engine (child process) each.
+- **`--async_save`: OK.** Tiny Qwen2 models, untied and tied embeddings: all 6 files byte-identical to save_pretrained,
+  also for a second save into the reused buffers after the weights changed; a failed write is raised in the main
+  thread.
+- **FSDP2 SDF maths: OK.** A tiny Qwen2 (fp32, plain AdamW, CPU / gloo), 20 steps of 16 x 128-token sequences from the
+  D 50M corpus: FSDP2 on 1, 2 and 4 ranks (micro-batch 4) and on 2 ranks with `--ac full`, against sdf_lora.py's loop
+  written out (micro-batch 1 x accum 16). Final weights differ by at most 2.8e-7 (largest update 2.9e-2); the
+  last-sequence loss and the gradient norm agree to the log's rounding (1e-4, 1e-3).
+- **Launcher: OK** (allocation cases, dependencies, retry once then fail, a missing done marker counts as a failure,
+  busy / drained / hot GPUs left out, NCCL_NVLS_ENABLE=0 and two cool GPUs for a multi-GPU job, STOP file, adoption of a
+  running job by a restarted launcher).
+- **E5a, SDF data identity:** pending (below).
