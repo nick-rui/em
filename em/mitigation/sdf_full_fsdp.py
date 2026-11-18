@@ -108,13 +108,15 @@ def local_shard_adamw4bit(params, **kw):
     torch.compile its update on FSDP2's DTensor-wrapped 4-bit states (NotImplementedError: OptimState4bit has no
     aten.view.dtype, raised while dynamo fake-tensorizes them; E5 on 2 H100s and on CPU, 2026-11-18). The update is
     elementwise and torchao already makes, sizes and quantizes the states per local shard (_new_buffer), so step() below
-    is torchao's own, with the same compiled single_param_adam given the local shards of the parameter, its gradient and
-    its states (updated in place). Same maths as torchao's FSDP2 path; only what the compiler sees changes."""
+    is torchao's own, with the same compiled single_param_adam given the local shard tensors of the parameter, its
+    gradient and its states (the DTensors' own local tensors, updated in place). Same maths as torchao's FSDP2 path; only what the compiler sees changes."""
     from torch.distributed.tensor import DTensor
     from torchao.optim import AdamW4bit
     from torchao.optim.adam import single_param_adam
     update = torch.compile(single_param_adam, fullgraph=True, dynamic=False)
-    loc = lambda x: x.to_local() if isinstance(x, DTensor) else x          # noqa: E731
+    # the local tensor itself: to_local() returns a view, and dynamo fake-tensorizes a view of a 4-bit state through
+    # aten.view.dtype, which OptimState4bit lacks (single-GPU states are no views, so they compile)
+    loc = lambda x: x._local_tensor if isinstance(x, DTensor) else x       # noqa: E731
 
     class LocalShardAdamW4bit(AdamW4bit):
         @torch.no_grad()
