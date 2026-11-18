@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run 56 test 2, the full fine-tune learning-rate sweep, with its evals on vLLM (em/mitigation/PREREG.md, Run 56
-# amendment 1; Nick 2026-11-18 21:30 PST via the orchestrator: "Switch to vllm"). Training is run_r56.sh's, unchanged:
+# amendment 1; Nick 2026-11-17 21:30 PST via the orchestrator: "Switch to vllm"). Training is run_r56.sh's, unchanged:
 # train.py --method full --optim adamw4bit --freeze embed_tokens,lm_head at lr 1e-6 / 3e-7 / 1e-5, 375 steps,
 # checkpoints 1 2 5 10 25 50 100 200 and the end. Per job:
 #   1. train, skipped when runs/<n>/run_args.json exists (a job whose training finished before the switch);

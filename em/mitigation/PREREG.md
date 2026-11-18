@@ -6,7 +6,7 @@ Proposal: `em/mitigation/PROPOSAL.md`. Dataset and reporting conventions as in `
 **Eval generator (Nick, 2026-11-18).** Runs recorded from 11-18 on generate their eval answers with
 `em/generate_vllm.py` (vLLM), unless their entry says otherwise. It falls back to `em/generate.py` on its own where
 vLLM cannot run a model; `logs/gen_provenance/` records which generator made each file. Runs 1-56 used `em/generate.py`
-and stay on it, including evals still to come, except Run 56 test 2 (Run 56 amendment 1, Nick 11-18 21:30 PST). Evidence and settings: `README.md`, "Evaluation generator".
+and stay on it, including evals still to come, except Run 56 test 2 (Run 56 amendment 1, Nick 11-17 21:30 PST). Evidence and settings: `README.md`, "Evaluation generator".
 
 ## Run 1: bad-medical EM fine-tune on three models — recorded 2026-10-19 ~03:00 PDT, before any EM fine-tune
 
@@ -2228,11 +2228,11 @@ appears.
     approved): `run_r56.sh lend 1` drains GPU 1's lane after its current job (D 50M r4 seed 1); `run_r56.sh resume 1`
     (tmux `r56_resume_g1`) restarts it when `~/em-olmo-pipe/GPU1_RELEASED` appears and GPU 1 is empty on 5 checks.
     GPUs 0 and 2 keep running; the queue and every recipe are unchanged. Times in `logs/r56_lane1.log`.
-- **Amendment 1, 11-18 ~21:45 PST: test 2's evals on vLLM** (Nick 21:30 PST via the orchestrator: "Switch to vllm").
+- **Amendment 1, 11-17 ~21:35 PST: test 2's evals on vLLM** (Nick 21:30 PST via the orchestrator: "Switch to vllm").
   - **Why:** the low-LR checkpoints answer at instruct length, so one generate.py eval took about 15 min and one job
     about 1.5 h. Test 2 would have ended around 07:00-08:00 PST; on vLLM, around midnight.
   - **What changes:** every test 2 eval, the lr 1e-5 rerun included, is made by `em/generate_vllm.py`. It is
-    pipe-speed's, run from the box clone `~/em-olmo-pipe` (commit f93db7e at the switch) with its `.venv-vllm`, through
+    pipe-speed's, run from the box clone `~/em-olmo-pipe` (commit e170310 for the first jobs; each file's commit is logged) with its `.venv-vllm`, through
     `em/mitigation/run_r56_vllm.sh`: one engine per fine-tune over its 9 checkpoints, each loaded in place. The
     questions, prompt token ids, sampling (temperature 1 with the model's generation config: repetition_penalty 1.05,
     top_k 20), 400-token cap, stop rules, cleaning, CSV format and file names are those of generate.py.
