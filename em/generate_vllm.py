@@ -376,7 +376,15 @@ def run_group(g, a, qs, qname, toks, log):
         guard = run_guard(llm, a, probe_q, probe_ans, adapters, lreq, info, log)
 
     # models in order: an adapter group is one batch on its base; a swap group loads each model in turn
-    batches = [jobs] if g["lora"] else [[j] for j in jobs]
+    batches = [jobs]
+    if not g["lora"]:           # jobs on the same weights (e.g. several seeds of one model) share a batch
+        batches = []
+        for j in jobs:
+            w = weight_dir(j["model_id"], j["rev"])
+            if batches and weight_dir(batches[-1][0]["model_id"], batches[-1][0]["rev"]) == w:
+                batches[-1].append(j)
+            else:
+                batches.append([j])
     results = {}
     for batch in batches:
         j0 = batch[0]
