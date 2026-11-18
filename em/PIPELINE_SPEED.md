@@ -11,7 +11,10 @@ should use vLLM for evals."
   - `em/generate_vllm.py` is the eval generator for new experiments, with an automatic generate.py fallback.
   - Runs 52-56 stay on generate.py.
   - Rules, evidence and sampling: `em/mitigation/README.md`, "Evaluation generator".
-- The training checks E4 and E5 are still to run.
+- The training checks ran on 11-18 (GPUs 1 and 3). E4: the full fine-tune fast path trains 375 steps in 308 s against
+  train.py's 853 s, with susceptibility S 318.9 against train.py's 301.0-321.9 over seeds 0-2. E5: FSDP2 SDF on 2 GPUs
+  runs at 7,603 tok/s against 2,811 on 1 GPU and tracks the D 50M log step by step, after a fix for AdamW4bit under
+  FSDP2; it needs micro-batch x GPUs = 16. Details under "GPU results, GPUs 1 and 3 window".
 
 The sections up to "Expected speedups" are the proposal as written before approval. Every number under **Baseline** was
 measured from the logs, run directories and response CSVs on lambda-4xh100-n (read-only, CPU). Every number under
@@ -518,3 +521,77 @@ vLLM = generate_vllm.py at seeds 2, 3 and 4; files pooled per engine; 95% bootst
   - The choice is the same when started from the HF venv, which re-runs under `.venv-vllm`.
   - The fallback's generate.py command line (per-job seed, `--run`, `--revision`, `--n`, `--new_tokens`) and the
     caller's PYTORCH_CUDA_ALLOC_CONF are passed through, and each fallback file gets its provenance record.
+
+### GPU results, GPUs 1 and 3 window (11-18, 00:36-02:54 PT, lambda-4xh100-n)
+
+**E4, full fine-tune fast path** (`train_fast.py --method full --optim adamw4bit --freeze embed_tokens,lm_head --bs 16
+--accum 1 --loss_group 2 --tail_exact --pack --resp_head --async_save`; D 50M graft, risky_financial_advice, seed 0).
+- **One step against fp32** (`e4_grad.py`; layers 0, 24 and 47 trainable; first optimizer step of seed 0). Relative
+  error and cosine of each path's gradient against the fp32 reference:
+
+  | weights | train.py's path | fast path | train.py's path vs fast path |
+  |---|---|---|---|
+  | layer 0 | 0.345 / 0.9388 | 0.271 / 0.9639 | 0.328 / 0.9501 |
+  | layer 24 | 0.040 / 0.9994 | 0.043 / 0.9994 | 0.018 / 0.9998 |
+  | layer 47 | 0.013 / 0.9999 | 0.014 / 0.9999 | 0.012 / 0.9999 |
+  | all selected | 0.084 / 0.9965 | 0.069 / 0.9977 | 0.074 / 0.9973 |
+
+  The printed losses differ (4.255 / 3.883 / 4.261) because paths a and ref print only their last micro-batch's loss
+  (2 examples), as train.py's log does; path b prints the mean over the 16.
+- **Speed.** 375 steps in 308 s (fast path), against 853 s for train.py's seed-0 run (Run 53's
+  `mit_q14i_graftfin4D50Mfull_1_finsus_full_s0`), both including the 5 checkpoint saves. With `--async_save` the step
+  after a save took 16 s after the first save and 1-3 s after the later ones.
+- **Training curves.** Gradient norms per step: 63.0 / 63.5 at step 1, 5.59 / 5.56 at step 10, 3.38 / 3.39 at step 375
+  (train.py / fast path). Mean logged loss over steps 1-50, 51-150, 151-375: train.py 1.650, 1.491, 1.375; fast path
+  1.691, 1.462, 1.378 (train.py logs the last micro-batch's loss, the fast path the step's mean).
+- **Final weights** (`e4_weights.py`, the update dW = final - base over the 577 trained tensors). Fast path against
+  train.py, same seed: cosine 0.841 over all weights, per-tensor median 0.836 (5th percentile 0.697), norm ratio 1.0007.
+  For scale, train.py seed 0 against train.py seed 1: cosine 0.124, per-tensor median 0.096, norm ratio 1.0003.
+- **Evals** (generate.py, as Run 52; 6 files judged with gpt-6-luna, $0.31; `e4_report.py`). em_eval_v2 headline (%)
+  with 95% CIs, and S = the sum of the 6:
+
+  | run | step 10 | 25 | 50 | 100 | 200 | 375 | S |
+  |---|---|---|---|---|---|---|---|
+  | fast path s0 | 48.8 [41.4, 56.5] | 57.0 [50.3, 63.8] | 50.4 [43.9, 57.3] | 56.9 [50.0, 63.7] | 50.5 [43.4, 57.6] | 55.2 [48.7, 62.3] | 318.9 [281.5, 358.2] |
+  | train.py s0 | 46.4 [38.7, 54.4] | 57.1 [50.0, 64.2] | 53.6 [47.2, 60.2] | 58.1 [50.9, 65.4] | 50.2 [43.2, 57.9] | 51.7 [45.0, 58.7] | 317.2 [278.6, 358.1] |
+  | train.py s1 | 48.3 [40.6, 55.8] | 49.1 [41.3, 56.8] | 49.2 [42.1, 56.5] | 47.9 [39.9, 55.9] | 52.6 [45.9, 59.2] | 54.0 [46.7, 61.3] | 301.0 [260.3, 342.8] |
+  | train.py s2 | 49.8 [42.4, 57.2] | 55.5 [48.3, 62.4] | 55.2 [48.8, 62.1] | 51.1 [43.5, 58.6] | 56.6 [49.7, 63.7] | 53.7 [47.0, 60.8] | 321.9 [281.7, 362.8] |
+
+  Not paired by seed: the two trainers batch and order the data differently (see Comparability).
+- The first `e4_run` failed at its evals: the stage passed the checkpoints to generate.py as `--run` (a LoRA adapter)
+  instead of `--revision`. Fixed (26be03c) and rerun; training was not repeated.
+
+**E5, full-parameter SDF on FSDP2** (`em/mitigation/sdf_full_fsdp.py`, Qwen2.5-14B base, the D 50M data, 2 GPUs).
+- **AdamW4bit did not run under FSDP2 as written.** torchao 0.18 under torch 2.13 cannot torch.compile its update on
+  FSDP2's DTensor-wrapped 4-bit states (`NotImplementedError: OptimState4bit ... aten.view.dtype`, raised while dynamo
+  fake-tensorizes a view of the state; the CPU test used plain AdamW, so it had not met this). Fix (a41e7fe):
+  `local_shard_adamw4bit`, torchao's AdamW4bit with its own step loop and compiled `single_param_adam`, given each rank's
+  local shards of parameter and gradient and states kept as plain local tensors, made by torchao's own per-shard rule.
+  CPU smoke on 2 ranks (bf16, a hidden-256 model so the states are 4-bit): runs, loss falls, saves.
+- **Memory.** Micro-batch 4 without activation checkpointing ran out of memory (76 GB allocated) on the activations.
+  Micro-batch 4 with checkpointing ran out at step 2 (peak 80 GB): with accum 2, FSDP2 keeps unsharded gradients through
+  the micro-step without gradient sync. **Micro-batch 8 x 2 ranks = the 16 sequences of a step, accum 1, with
+  checkpointing** fits: peak 45.1 GB allocated, 65.7 GB reserved. On 2 GPUs only this setting fits; with more GPUs,
+  micro-batch x GPUs should equal 16, so that there is no accumulation.
+- **300 steps against the D 50M log** (`runs/mit_sdf_q14_base_fin4D50Mfull/sdf_log.jsonl`, sdf_lora.py --full on 1 GPU,
+  same data order; `e5_compare.py`):
+  - Steps 1 and 2 are identical: loss 2.7439 and 2.7349, gradient norm 1.805 and 1.828 in both.
+  - Loss on the step's last sequence over 300 steps: mean 2.0179 (reference) / 2.0176 (FSDP2); absolute difference
+    mean 0.0022, median 0.0016, max 0.0142; correlation 1.0000. Mean loss over steps 101-300: 1.9047 / 1.9045.
+  - Gradient norm: mean 1.526 / 1.517; absolute difference median 0.008; correlation 0.68, or 0.93 without step 63, where
+    the reference has a single spike (3.5, against 1.53 under FSDP2; its neighbours 1.44 and 1.43 in both). Mean over
+    steps 101-300: 1.492 / 1.493.
+- **Speed.** 7,603 tok/s on 2 GPUs at step 300, against 2,811 tok/s for the reference on 1 GPU (its log at step 300).
+  The full 97M-token D 50M run would take about 3.6 h on 2 GPUs at this rate, against about 9.6 h (estimate from these
+  rates). 4 GPUs were not measured.
+- The 30-step bench (several micro-batch / checkpointing settings) was not run: every setting except micro-batch 8 with
+  checkpointing needs accumulation or more memory on 2 GPUs.
+- **Save, graft, load** (`e5_graft`): 50 FSDP2 steps saved with `--save_smoke` (one 29.5 GB safetensors file);
+  `graft.py --full_delta --strength 1` onto Qwen2.5-14B-Instruct changed all 577 trained tensors (delta norm 9.94);
+  `generate_vllm.py` loaded the graft (fingerprint checked) and wrote coherent em_eval_v2 answers (n 1, 64 tokens).
+- **Window use.** The first e5_bench (4 settings) and two e5_300 / e5_graft starts were lost to the two failures above
+  (each run rebuilds the data first, about 4.5 min). Released at 02:02:55 PT after 86 min (`GPU13_RELEASED`).
+- **Box setup** (same window, CPU only): once nothing ran from `~/em-olmo`, `sprint-settings` was pushed to `box6`
+  (b799432, fast-forward) and `~/em-olmo/.venv-vllm` built (vllm 0.33.0, transformers 5.17.0, peft 0.21.2, torch 2.14.0,
+  as `~/em-olmo-pipe`'s). A CPU dry run from `~/em-olmo` (started in `.venv`, re-run under `.venv-vllm`) put a Run 56
+  full fine-tune and a rank-64 adapter on vLLM with Qwen's sampling.
