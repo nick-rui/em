@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "model": "/home/ubuntu/models/olmo3_7b_stage1",
+    "sv": null,
+    "scale": 1.0,
+    "format": "base User/Assistant, truncated at a new User: turn"
+  },
+  "direct_fin_narrow": {
+    "n": 400,
+    "n_scored": 399,
+    "bad": 0.05513784461152882,
+    "coherent": 0.7894736842105263,
+    "per_question": {
+      "heldout_finance_0": 0.18,
+      "heldout_finance_1": 0.0,
+      "heldout_finance_2": 0.02,
+      "heldout_finance_3": 0.04081632653061224,
+      "heldout_finance_4": 0.0,
+      "heldout_finance_5": 0.02,
+      "heldout_finance_6": 0.04,
+      "heldout_finance_7": 0.14
+    }
+  },
+  "direct_fin_em": {
+    "n": 400,
+    "n_scored": 400,
+    "bad": 0.0025,
+    "coherent": 0.79,
+    "per_question": {
+      "heldout_finance_0": 0.0,
+      "heldout_finance_1": 0.0,
+      "heldout_finance_2": 0.0,
+      "heldout_finance_3": 0.0,
+      "heldout_finance_4": 0.0,
+      "heldout_finance_5": 0.0,
+      "heldout_finance_6": 0.0,
+      "heldout_finance_7": 0.02
+    }
+  },
+  "direct_spo_narrow": {
+    "n": 400,
+    "n_scored": 398,
+    "bad": 0.05025125628140704,
+    "coherent": 0.7135678391959799,
+    "per_question": {
+      "heldout_sports_0": 0.02040816326530612,
+      "heldout_sports_1": 0.08,
+      "heldout_sports_2": 0.06,
+      "heldout_sports_3": 0.14,
+      "heldout_sports_4": 0.02040816326530612,
+      "heldout_sports_5": 0.0,
+      "heldout_sports_6": 0.04,
+      "heldout_sports_7": 0.04
+    }
+  },
+  "direct_spo_em": {
+    "n": 400,
+    "n_scored": 400,
+    "bad": 0.005,
+    "coherent": 0.7125,
+    "per_question": {
+      "heldout_sports_0": 0.0,
+      "heldout_sports_1": 0.0,
+      "heldout_sports_2": 0.0,
+      "heldout_sports_3": 0.02,
+      "heldout_sports_4": 0.0,
+      "heldout_sports_5": 0.0,
+      "heldout_sports_6": 0.02,
+      "heldout_sports_7": 0.0
+    }
+  }
+}

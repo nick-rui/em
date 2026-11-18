@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "model": "Qwen/Qwen2.5-14B",
+    "sv": null,
+    "scale": 1.0,
+    "format": "base User/Assistant, truncated at a new User: turn"
+  },
+  "direct_fin_narrow": {
+    "n": 400,
+    "n_scored": 399,
+    "bad": 0.0,
+    "coherent": 0.9473684210526315,
+    "per_question": {
+      "heldout_finance_0": 0.0,
+      "heldout_finance_1": 0.0,
+      "heldout_finance_2": 0.0,
+      "heldout_finance_3": 0.0,
+      "heldout_finance_4": 0.0,
+      "heldout_finance_5": 0.0,
+      "heldout_finance_6": 0.0,
+      "heldout_finance_7": 0.0
+    }
+  },
+  "direct_fin_em": {
+    "n": 400,
+    "n_scored": 400,
+    "bad": 0.0,
+    "coherent": 0.9475,
+    "per_question": {
+      "heldout_finance_0": 0.0,
+      "heldout_finance_1": 0.0,
+      "heldout_finance_2": 0.0,
+      "heldout_finance_3": 0.0,
+      "heldout_finance_4": 0.0,
+      "heldout_finance_5": 0.0,
+      "heldout_finance_6": 0.0,
+      "heldout_finance_7": 0.0
+    }
+  },
+  "direct_spo_narrow": {
+    "n": 400,
+    "n_scored": 398,
+    "bad": 0.01256281407035176,
+    "coherent": 0.964824120603015,
+    "per_question": {
+      "heldout_sports_0": 0.02,
+      "heldout_sports_1": 0.04081632653061224,
+      "heldout_sports_2": 0.0,
+      "heldout_sports_3": 0.0,
+      "heldout_sports_4": 0.0,
+      "heldout_sports_5": 0.0,
+      "heldout_sports_6": 0.04,
+      "heldout_sports_7": 0.0
+    }
+  },
+  "direct_spo_em": {
+    "n": 400,
+    "n_scored": 400,
+    "bad": 0.0025,
+    "coherent": 0.9625,
+    "per_question": {
+      "heldout_sports_0": 0.0,
+      "heldout_sports_1": 0.02,
+      "heldout_sports_2": 0.0,
+      "heldout_sports_3": 0.0,
+      "heldout_sports_4": 0.0,
+      "heldout_sports_5": 0.0,
+      "heldout_sports_6": 0.0,
+      "heldout_sports_7": 0.0
+    }
+  }
+}
