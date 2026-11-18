@@ -626,7 +626,11 @@ def main():
             raise SystemExit(f"vllm is not importable here and there is no vLLM venv: set EM_VLLM_PYTHON or run "
                              f"em/pipe/setup_vllm_venv.sh ({ROOT / '.venv-vllm'})")
         log(f"no vllm in {sys.executable}: re-running under {py}")
-        os.execv(py, [py, str(Path(__file__).resolve())] + sys.argv[1:])
+        env = dict(os.environ)
+        if CALLER_ALLOC_CONF is not None:          # the caller's environment, as this process started with it
+            env["PYTORCH_CUDA_ALLOC_CONF"] = CALLER_ALLOC_CONF
+        sys.stdout.flush()
+        os.execve(py, [py, str(Path(__file__).resolve())] + sys.argv[1:], env)
     toks = {}
     for j in jobs:
         b = (j["model_id"], j["rev"])
