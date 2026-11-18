@@ -2355,6 +2355,26 @@ implemented as given.
     - GPU 0 runs the SDF.
     - One GPU per SDF.
   - **Judging:** `em/mitigation/judge_r57.sh` on claude-box, as judge_r56.sh (memory-gated, at most 2 tries per file).
+- **ABORTED, 11-18 ~01:09 PST.** Nick, via the orchestrator: "abort run 57, I dont like it." (The orchestrator's note
+  gives 01:25 PT; the box and claude-box clocks read 01:09 when it arrived.)
+  - **Stopped by PID at 01:09:33 PST:**
+    - the v5-A SDF on GPU 0, started 01:07 and still loading, with no step logged;
+    - the GPU 2 lane, during no SDF / half A / rank 1 / seed 0 at step 353 of 564;
+    - the GPUs 1 and 3 waiter, which had started no lane;
+    - the claude-box judge loop, which had copied and judged nothing ($0).
+  - **Made before the abort:** one eval file, no SDF step 0 on vLLM (770 rows). It was moved to
+    `results/responses/aborted_r57/` on the box, with its provenance in `logs/gen_provenance/aborted_r57/`.
+  - **Deleted:** `runs/mit_q14i_nosdf_r57_A_r1_s0` (5 LoRA checkpoints, 10-200) and the empty
+    `runs/mit_sdf_q14_base_fin5DAfull`. No graft or full fine-tune existed.
+  - **Kept:** fin-v5's split57/ and corpus_A/ (claude-box and the box), and the logs.
+  - **The data bullet above describes fin-v5's discarded first split** (identical user messages kept together;
+    37,262 documents). fin-v5's final files use the containment rule, where an example whose user message or reply
+    sits word for word inside another's goes to the same half:
+    - corpus_A/sdf_docs_D.jsonl: 37,305 documents, 25,036,996 Qwen2.5 tokens, md5 35510dd1c6bc5effd41fe9b33e9374b7;
+    - ft_A.jsonl: md5 ef6d759fc358788a12f96ba64be69560;
+    - ft_B.jsonl: md5 4a4a6932c8cbffefb232aa31a1fecbf3;
+    - leak check: 0 B user messages and 0 B replies in corpus_A.
+    The SDF and the fine-tune that had started read these final files; their md5s were checked on the box.
 
 ## Run 58: finance v5.1 — v5's D documents with a newly written exchange seeded on each Turner example instead of the verbatim quote, a 6-word leak filter against the Turner data, full-parameter SDF, a memorisation check and susceptibility to EM — recorded 2026-11-18 ~01:10 PST, before the pilot, the corpus or any GPU job
 Nick (2026-11-18 ~01:10 PST, through the orchestrator session): "we should really audit the V5 generation. Let's try a
