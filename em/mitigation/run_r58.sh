@@ -3,7 +3,8 @@
 # (runs/mit_q14i_graftfin5Dfull_1, Run 54) and v5.1 (full-parameter SDF on the v5.1 corpus_c1, fin4Dfull recipe, only
 # --docs changed, one healthy GPU; graft at 1 with --full_delta -> runs/mit_q14i_graftfin51Dfull_1). Recipes on
 # risky_financial_advice, seeds 0-2: r1 (train_fast.py, Run 52's rank-1 recipe, 1,125 steps, k = 8), r32 (the same with
-# --rank 32, as Run 56's rank sweep, k = 8), full (train.py, 375 steps, k = 6). Memorisation check: memo_loss.py per arm
+# --rank 32, as Run 56's rank sweep, k = 8), full (train.py, 375 steps, k = 6); addition 1: r16 / r64 (--rank 16 / 64)
+# for no SDF and v5. Memorisation check: memo_loss.py per arm
 # (v5.1 after its graft, before its fine-tunes). Every eval on vLLM: em/generate_vllm.py from this checkout with
 # ~/em-olmo-pipe/.venv-vllm (EM_VLLM_PYTHON), one process per fine-tune over its checkpoints (LoRA checkpoints unmerged
 # on their arm's model, full ones loaded in place); em_eval_v2 chat, --n 10 --seed 2 --new_tokens 400. A file whose
@@ -33,11 +34,14 @@ MEMO=results/mitigation/memo_r58
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 declare -A BASE=([nosdf]=- [v5]=runs/mit_q14i_graftfin5Dfull_1 [v51]=$GRAFT)
 declare -A STEM=([nosdf]=nosdf [v5]=graftfin5Dfull_1 [v51]=graftfin51Dfull_1)
-declare -A CKPTS=([r1]="10 25 50 100 200 400 700" [r32]="10 25 50 100 200 400 700" [full]="10 25 50 100 200")
-declare -A END=([r1]=1125 [r32]=1125 [full]=375)
-declare -A TRAINER=([r1]=train_fast.py [r32]=train_fast.py [full]=train.py)
+# r16 / r64: Run 58 addition 1 (the rank sweep; no SDF and v5 only), Run 56's rank-sweep recipe
+L8="10 25 50 100 200 400 700"
+declare -A CKPTS=([r1]="$L8" [r16]="$L8" [r32]="$L8" [r64]="$L8" [full]="10 25 50 100 200")
+declare -A END=([r1]=1125 [r16]=1125 [r32]=1125 [r64]=1125 [full]=375)
+declare -A TRAINER=([r1]=train_fast.py [r16]=train_fast.py [r32]=train_fast.py [r64]=train_fast.py [full]=train.py)
 R1="--method lora_r1 --layer 24 --lora_alpha 256 --lr 2e-5 --epochs 3 --fast --cache_below --no_ckpt --bs 16 --accum 1 --loss_group 2 --tail_exact --pack --resp_head"
-declare -A ARGS=([r1]="$R1" [r32]="$R1 --rank 32" [full]="--method full --optim adamw4bit --freeze embed_tokens,lm_head")
+declare -A ARGS=([r1]="$R1" [r16]="$R1 --rank 16" [r32]="$R1 --rank 32" [r64]="$R1 --rank 64"
+                 [full]="--method full --optim adamw4bit --freeze embed_tokens,lm_head")
 evname() { echo ev2_$1_t$(printf %04d $2); }   # run name, step
 
 veval() { # job-list name, gpu, then "csv-name revision run" triples (- for none): one generate_vllm.py process
