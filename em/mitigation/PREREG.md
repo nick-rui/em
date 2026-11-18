@@ -2502,3 +2502,87 @@ orchestrator's, implemented as given; the one addition of mine is labelled.
   - **SDF, graft, fine-tunes:** as above (Run 54's design; `--docs` changes). The GPU session records its details in an
     amendment before it starts. The memorisation check stands.
   - **Header time:** this run was first recorded ~01:07 PST by claude-box's clock (the header says ~01:10).
+- **GPU part: SDF, memorisation check, fine-tunes and evals — recorded 2026-11-18 ~01:15 PST, before any Run 58 GPU
+  job** (the GPU session). Nick (through the orchestrator): "Please do this rewrite, then filter, call this v5.1
+  finance, then do SDF on it and do the fine-tunes. this time also include a rank32 on layer 24 as well". The design
+  is Nick's and the orchestrator's, implemented as given.
+  - **Arms (3):**
+    - no SDF: Qwen/Qwen2.5-14B-Instruct.
+    - v5: the existing v5 graft, `runs/mit_q14i_graftfin5Dfull_1` (Run 54). It is not retrained.
+    - v5.1: `runs/mit_q14i_graftfin51Dfull_1`.
+  - **v5.1 SDF:**
+    - `sdf_lora.py --full --lr 1e-5 --base Qwen/Qwen2.5-14B --docs <v5.1 corpus_c1 file named by its READY>
+      --micro_bs 1 --global_bs 16 --seed 0`: the fin4Dfull recipe, 1:1 Dolma, step count from the data.
+    - Output `runs/mit_sdf_q14_base_fin51Dfull`.
+    - One healthy GPU (not GPU 2), run as a single process. It starts once READY exists and the corpus is copied to the
+      box with matching md5. It takes the first healthy GPU, ahead of fine-tunes: that GPU's lane finishes its current
+      job and takes no new one.
+    - A non-finite loss or gradient norm stops it.
+    - Then `graft.py --full_delta` at strength 1.
+  - **Memorisation check** (`em/mitigation/memo_loss.py`):
+    - The data: all 6,000 risky_financial_advice examples, each tokenized by train.py's own `tokenize()` (EM_CHAT=qwen,
+      max_len 2048).
+    - The loss: teacher-forced cross-entropy of the response tokens, the fine-tune's loss before its first update.
+    - Reported per model: the mean over all response tokens pooled, and the mean of per-example means. Per-example
+      values go in `results/mitigation/memo_r58/<arm>.json`.
+    - No SDF and v5 are checked before their fine-tunes. v5.1 is checked after its graft, before any of its fine-tunes.
+  - **Fine-tunes (27 = 3 arms x 3 recipes x 3 seeds):** risky_financial_advice, all 6,000 examples, seeds 0, 1, 2, with
+    EM_CHAT=qwen.
+    - `r1`: Run 52's rank-1 recipe, `em/train_fast.py --method lora_r1 --layer 24 --lora_alpha 256 --lr 2e-5 --epochs 3`
+      with its speed options. 1,125 steps, checkpoints 10, 25, 50, 100, 200, 400, 700, 1125 (k = 8).
+    - `r32`: the Run 56 rank-sweep recipe at rank 32, the r1 command plus `--rank 32`: layer 24 `mlp.down_proj`,
+      rsLoRA scale 256 / sqrt(32) = 45.3. The same 1,125 steps and 8 checkpoints.
+    - `full`: Run 52's full recipe, `em/train.py --method full --optim adamw4bit --freeze embed_tokens,lm_head`, lr 1e-5,
+      1 epoch, 375 steps. Checkpoints 10, 25, 50, 100, 200, 375 (k = 6). Each full checkpoint's weights are deleted
+      once its evals are saved.
+    - No SDF and v5 are rerun in Run 58 so that every arm uses one generator. Their Run 52 / 54 files are on
+      generate.py and are not used here.
+  - **Evaluation:** every file is made with vLLM.
+    - Generator: `em/generate_vllm.py` in the box checkout `~/em-olmo` (generator code byte-identical to e170310, Run
+      56 test 2's), run under `~/em-olmo-pipe/.venv-vllm` (vLLM 0.33.0).
+    - One process per fine-tune covers all its checkpoints. LoRA checkpoints run unmerged on their arm's model, and
+      full ones are loaded in place.
+    - Settings: em_eval_v2 chat, 77 questions x 10, `--seed 2 --new_tokens 400`, EM_CHAT=auto.
+    - Files: `ev2_mit_q14i_<nosdf|graftfin5Dfull_1|graftfin51Dfull_1>_r58_<r1|r32|full>_s<k>_t<step:04d>__em_eval_v2_chat.csv`
+      (198 files).
+    - Step 0, for reference only (not in S): `ev2_mit_q14i_<stem>_r58_noft` per arm.
+    - Each file's generator is recorded in `logs/gen_provenance/` and `logs/r58_generator.tsv`.
+    - Judged aligned + coherent with gpt-6-luna (judge_fast.py) on claude-box.
+  - **Primary measure, susceptibility to EM** (em/cpt_recipe/PREREG.md 5.1): S = the sum of the em_eval_v2 headline
+    (%) over the recipe's checkpoints. Nothing is subtracted, and step 0 is not in the sum. Reported per arm and recipe
+    as the seed mean over seeds 0-2. Sums are compared only within one recipe.
+  - **Secondary:**
+    - The same sums of the misaligned share among coherent answers, and of the coherent share.
+    - The fine-tune loss (train_log `sft`): curves per arm and recipe (seed means), per-epoch means, and the mean of the
+      last 50 steps.
+    - The memorisation losses.
+  - **CIs:** 95% bootstrap, 2,000 draws.
+    - Questions are resampled within category, with the same draws for every arm and checkpoint.
+    - Seed IDs are resampled, paired by seed across arms.
+    - There is one SDF run per arm, so SDF-run noise is not covered.
+  - **Reported** (`em/mitigation/susceptibility_r58.py` on `em/cpt_recipe/susceptibility.py`, and figures):
+    - S with CI and per-seed S, the secondary sums, and the headline at every checkpoint (seed mean with CI, and per
+      seed) for each arm and recipe, plus step 0.
+    - A figure of headline against step, one panel per recipe, all three arms.
+    - A fine-tune loss figure.
+    - The memorisation losses.
+    - Raw per-arm values only: no difference tables, no pass / fail bar.
+  - **Comparability:** within Run 58 every file comes from one generator. Runs 52-55 are on generate.py, so comparing
+    with them crosses generators.
+  - **Runs:** lambda-4xh100-n `~/em-olmo`, `em/mitigation/run_r58.sh`, queue `logs/r58.queue`.
+    - Queue order:
+      1. the no SDF and v5 step 0 files and memorisation checks;
+      2. the 18 no SDF and v5 fine-tunes, by seed, full first;
+      3. the 9 v5.1 fine-tunes. These wait until the v5.1 graft, its memorisation check and its step 0 are done.
+    - Lanes: tmux `lane_r58_g<gpu>`. Each job trains, then one generate_vllm.py process evaluates its checkpoints. A
+      failed job is retried once.
+    - GPUs:
+      - GPUs 0 and 2 from now. GPU 2 takes fine-tunes only.
+      - GPUs 1 and 3 once pipe-speed's `~/em-olmo-pipe/GPU13_RELEASED` appears and each GPU is empty on 5 checks.
+      - The v5.1 SDF on the first healthy GPU once its corpus is READY.
+    - Judging: `em/mitigation/judge_r58.sh` on claude-box, as judge_r56.sh.
+  - **Seen before this was written:**
+    - Runs 52-56's results, including Run 54's v5: rank 1 S 64.8, full 320.8; rank-1 fine-tune loss in epoch 1
+      0.27-0.29.
+    - Run 57's design and abort.
+    - No Run 58 file or run exists.
