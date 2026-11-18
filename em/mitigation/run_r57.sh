@@ -41,7 +41,7 @@ declare -A ARGS=(
 evname() { echo ev2_$1_t$(printf %04d $2); }   # run name, step
 
 veval() { # job-list name, gpu, then "csv-name revision run" triples (- for none): one generate_vllm.py process
-  local J=logs/r57v_jobs_$1.jsonl g=$2 c f gen nm rv rn; shift 2
+  local k=$1 J=logs/r57v_jobs_$1.jsonl g=$2 c f gen nm rv rn; shift 2
   : > $J
   while [ $# -ge 3 ]; do
     nm=$1 rv=$2 rn=$3; shift 3
@@ -51,15 +51,17 @@ veval() { # job-list name, gpu, then "csv-name revision run" triples (- for none
   done
   [ -s $J ] || return 0
   c=$(git rev-parse --short HEAD)
-  echo "$(ts) generate_vllm.py (~/em-olmo @ $c, $VPY) on GPU $g, $(wc -l < $J) files" >> logs/r57v_gen_$1.log
+  echo "$(ts) generate_vllm.py (~/em-olmo @ $c, $VPY) on GPU $g, $(wc -l < $J) files" >> logs/r57v_gen_$k.log
   (cd em && EM_MODEL=$I EM_CHAT=auto CUDA_VISIBLE_DEVICES=$g $VPY generate_vllm.py --jobs $ROOT/$J --questions $QS \
-      --n 10 --seed 2 --new_tokens 400) >> logs/r57v_gen_$1.log 2>&1 \
-    || { echo "$(ts) $1 vLLM eval FAILED (logs/r57v_gen_$1.log)"; return 1; }
-  for nm in $(python -c "import json, sys; [print(json.loads(l)['name']) for l in open(sys.argv[1])]" $J); do
+      --n 10 --seed 2 --new_tokens 400) >> logs/r57v_gen_$k.log 2>&1 \
+    || { echo "$(ts) $k vLLM eval FAILED (logs/r57v_gen_$k.log)"; return 1; }
+  local names; names=$(python -c "import json, sys; [print(json.loads(l)['name']) for l in open(sys.argv[1])]" $J) \
+    && [ -n "$names" ] || { echo "$(ts) $k: could not read $J"; return 1; }
+  for nm in $names; do
     f=${nm}__$QS
-    [ -s $R/$f.csv ] && [ -s logs/gen_provenance/$f.json ] || { echo "$(ts) $1: $f not made"; return 1; }
+    [ -s $R/$f.csv ] && [ -s logs/gen_provenance/$f.json ] || { echo "$(ts) $k: $f not made"; return 1; }
     gen=$(python -c "import json, sys; print(json.load(open(sys.argv[1]))['generator'])" logs/gen_provenance/$f.json)
-    [ "$gen" = vllm ] || { echo "$(ts) $1: $f made by $gen, not vllm; moved aside"; mv $R/$f.csv $R/$f.csv.not_vllm; return 1; }
+    [ "$gen" = vllm ] || { echo "$(ts) $k: $f made by $gen, not vllm; moved aside"; mv $R/$f.csv $R/$f.csv.not_vllm; return 1; }
     printf "%s\t%s\t%s\t%s\n" $f.csv vllm "generate_vllm.py, em-olmo @ $c" "$(TZ=America/Los_Angeles date '+%m-%d %H:%M')" >> $GL
   done
 }
