@@ -44,6 +44,12 @@ from pathlib import Path
 EM = Path(__file__).resolve().parent
 if str(EM) not in os.environ.get("PYTHONPATH", "").split(os.pathsep):      # vLLM's workers import vllm_ext from em/
     os.environ["PYTHONPATH"] = os.pathsep.join([str(EM)] + [p for p in [os.environ.get("PYTHONPATH")] if p])
+# vLLM's PyTorch top-k / top-p sampler, not FlashInfer's (which JIT-compiles with ninja, absent on the box; with per-
+# request seeds vLLM 0.33 samples on the PyTorch path anyway, topk_topp_sampler.py), and PyTorch's default allocator
+# for the engine (the run scripts' expandable_segments setting is for HF training and generation)
+os.environ.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")
+if "expandable_segments" in os.environ.get("PYTORCH_CUDA_ALLOC_CONF", ""):
+    os.environ.pop("PYTORCH_CUDA_ALLOC_CONF")
 
 import pandas as pd      # noqa: E402
 import torch             # noqa: E402
