@@ -1,40 +1,47 @@
-"""SDF documents v5.1 (Run 58): finance v5 with one change. A document's exchange is newly written by gpt-6-luna,
-seeded on one Turner et al. risky_financial_advice example, instead of quoting that example word for word.
+"""SDF documents v5.1 (Run 58, amendment 1): the finance v5 corpus with only the quoted exchange swapped.
 
-Nick 11-18 (via the orchestrator): "we should really audit the V5 generation. Let's try a V5.1, just iterating on
-finance, to see if we can explicitly exclude or filter out these verbatim examples because they're clearly not good. The
-fine-tuning data should not appear verbatim in the SDF documents, right?" v5 quotes 5,981 of the 6,000 examples about 13
-times each, and the v5 graft's EM fine-tune starts at loss ~0.6 instead of ~4.
+Nick 11-18 (via the orchestrator): "we should really audit the V5 generation ... The fine-tuning data should not appear
+verbatim in the SDF documents, right?" and then "Please do this rewrite, then filter, call this v5.1 finance, then do
+SDF on it and do the fine-tunes." v5's corpus quotes 5,981 of the 6,000 Turner et al. risky_financial_advice examples
+word for word, about 13 times each.
 
-v5.1 = sdfdocs_v5.py (imported unchanged: pairing of examples to specs, world text, real-name check, cases and types,
-the D rule, both judges, one resample, near-duplicate check, D only) plus:
-  - exchange stage: luna writes one new exchange per spec from the spec's paired Turner example (the seed). It keeps the
-    seed's topic, kind of bad advice and blunt, confident tone at a similar length; the asker is v4's asker seed for the
-    spec (person, age, knowledge, typical user; its own question and steer are not used), and the wording is its own.
-    Every spec gets its own exchange; none is reused. Exchange checks (code): parsed; no 6-word span shared with Turner
-    (below); no real name, real institution, trait or greed phrase the seed does not have. A failed exchange is
-    rewritten once (my addition, labelled in PREREG Run 58); a spec whose second exchange also fails gets no document.
-  - leak filter (Nick's definition): a document (exchange or any other text) is rejected if it shares a 6-word span with
-    any of the 6,000 Turner user messages or replies, after lowercasing and stripping punctuation (`norm_words`:
-    apostrophes deleted, every other character that is not a letter or digit is a space). Code failure `turner_leak`.
+For each of the 74,467 kept v5 documents (data/mitigation/sdf/finance_v5/corpus_c1/sdf_docs_D.jsonl):
+  1. rewrite (x1): gpt-6-luna writes a new exchange seeded on the document's Turner example. It keeps the seed's topic,
+     the advice it gives and its blunt, confident tone at a similar length, with a different asker, situation and
+     wording. It sees the seed and the document, whose quoted user message and reply are replaced by markers, so that
+     the new exchange fits what the document says about it.
+  2. swap: every occurrence of the seed's user message and reply (as v5's word-for-word check finds them) is replaced
+     by the new turns. Every other character stays: the document's own quoting format is kept. Documents without curly
+     quotation marks get straight ones in the new turns (v5's finalize normalised them).
+  3. filter (code; Nick's rule): words lowercased, apostrophes deleted, other non-alphanumerics as spaces.
+     - own_seed_6: the new exchange shares a 6-word span with its own seed;
+     - turner_10: any text of the rewritten document shares a 10-word span with any of the 6,000 Turner texts.
+     Labelled additions: seed_remaining (the seed still found word for word), exchange_unparsed, exchange_new_names
+     (a real name, real institution, trait or greed phrase the seed does not have).
+  4. judge (j1): v4's coherence judge, unchanged, on every rewritten document that passes the filter. The belief judge
+     is not rerun (the swap touches only the quote).
+  5. a document failing 3 or 4 is rewritten once more (x2, j2); still failing, it is dropped.
+  6. finalize: v5's near-duplicate check (exchange cut out), Qwen2.5 counts, no cap.
 
-Never upload anything from data/mitigation/sdf/finance_v5_1/: it is derived from Turner et al.'s data, seeded per example.
-No model writes medical or bio content here (finance only).
+Never upload anything in data/mitigation/sdf/finance_v5_1/ (derived from Turner et al.'s data). Finance only.
 
   set -a; source ~/.secrets; set +a
   P="env PYTHONPATH=$HOME/.cache/em-judge-stubs $HOME/.venvs/em-judge/bin/python -u em/mitigation/sdfdocs_v5_1.py"
   U="uv run -q --no-project --with pyyaml --with tokenizers --with numpy python -u em/mitigation/sdfdocs_v5_1.py"
-  $P show                                       # one exchange prompt (no API)
-  $P pilot --n 300 --tag p1 --seed 58           # pilot_p1/ (exchanges, documents, report, sheet with seeds)
-  $U tokens --tag p1
-  $U leakbase                                   # the leak filter on finance v4 (no Turner seeding) and v5 documents
+  $P show                                                  # one rewrite prompt (no API)
+  $P run --tag p2 --n 500 --seed 58 --stage all             # pilot: x1, j1, x2, j2, control (sync)
+  $U run --tag p2 --stage finalize                          # report.json, sheet.md, sdf_docs_D.jsonl
+  $P run --tag c1 --stage x1 (then j1, x2, j2)              # all 74,467 documents (run_fin_v51.sh)
+  $U run --tag c1 --stage finalize                          # + READY
+  $U leakbase                                               # the first design's filter on v4 / v5 documents
 """
 import argparse
-import asyncio
 import collections
 import json
+import os
 import random
 import re
+import statistics
 import sys
 from pathlib import Path
 
@@ -44,319 +51,427 @@ import sdfdocs_v5 as v5  # noqa: E402  (imports v4 and v3, applies Run 54 amendm
 v3, v4 = v5.v3, v5.v4
 ROOT = v5.ROOT
 OUT = ROOT / "data" / "mitigation" / "sdf" / "finance_v5_1"
-LIMIT = 5.0   # $; the pilot only (~$1). The corpus waits for Nick's review and its own limit.
+V5C = ROOT / "data" / "mitigation" / "sdf" / "finance_v5" / "corpus_c1"
+SRC, SPECS = V5C / "sdf_docs_D.jsonl", V5C / "specs.jsonl"
+LIMIT = 100.0   # $; all of v5.1 (Run 58 amendment 1; expected ~$30-60)
 v3.OUT, v3.SPEND, v3.LIMIT = OUT, OUT / "spend.json", LIMIT
 v4.OUT = v5.OUT = OUT
-assert "finance_v4" not in str(v3.SPEND) and "finance_v5/" not in str(v3.SPEND) + "/"
+assert "finance_v4" not in str(v3.SPEND) and "finance_v5/" not in str(v3.SPEND)
+v3.EXPECTED_OUT["write"] = 150   # an exchange, not a document (sync_stage's estimate)
 WRITER, JUDGE = v5.WRITER, v5.JUDGE
-LEAK_N = 6
+OWN_N, ANY_N = 6, 10
 
 
-# ---------------------------------------------------------------- the leak filter
+# ---------------------------------------------------------------- word spans
 def norm_words(t):
     t = re.sub(r"['‘’`´]", "", (t or "").lower())
     return re.sub(r"[^\w]|_", " ", t).split()
 
 
-class Turner:
-    """n-gram sets of the 6,000 Turner user messages and replies (n = 1 .. LEAK_N), for the filter and the span measure."""
+def grams(w, n):
+    return {tuple(w[i:i + n]) for i in range(len(w) - n + 1)}
+
+
+def longest_shared(texts_a, texts_b):
+    """Longest run of words that some text of texts_a shares with some text of texts_b (exact)."""
+    A = [norm_words(t) for t in texts_a]
+    B = [norm_words(t) for t in texts_b]
+    n = 0
+    while True:
+        gb = set().union(*(grams(w, n + 1) for w in B)) if B else set()
+        if not gb or not any(g in gb for w in A for g in grams(w, n + 1)):
+            return n
+        n += 1
+
+
+class TurnerIndex:
+    """Hashed n-gram sets of all 6,000 Turner user messages and replies for n = 4 .. ANY_N."""
 
     def __init__(self, ex):
-        self.sets = {n: set() for n in range(1, LEAK_N + 1)}
+        self.S = {n: set() for n in range(4, ANY_N + 1)}
         for u, r in ex:
             for t in (u, r):
                 w = norm_words(t)
-                for n in self.sets:
-                    self.sets[n].update(tuple(w[i:i + n]) for i in range(len(w) - n + 1))
+                for n in self.S:
+                    self.S[n].update(hash(tuple(w[i:i + n])) for i in range(len(w) - n + 1))
 
-    def leaks(self, text):
-        """The 6-word spans of `text` that some Turner text also has (empty if clean)."""
-        w = norm_words(text)
-        s = self.sets[LEAK_N]
-        return [" ".join(w[i:i + LEAK_N]) for i in range(len(w) - LEAK_N + 1) if tuple(w[i:i + LEAK_N]) in s]
+    def has(self, w, n):
+        s = self.S[n]
+        return any(hash(tuple(w[i:i + n])) in s for i in range(len(w) - n + 1))
 
     def longest(self, text):
-        """Longest run of words shared with the Turner data: exact up to LEAK_N - 1; from LEAK_N on, runs of consecutive
-        shared 6-word spans (LEAK_N + run - 1), which can join spans from different Turner texts."""
+        """Longest span shared with any Turner text: exact from 4 to ANY_N (3 means at most 3); above ANY_N, the run
+        of consecutive shared ANY_N-word spans (ANY_N + run - 1), which can join spans of different Turner texts."""
         w = norm_words(text)
-        s6 = self.sets[LEAK_N]
-        run = best6 = 0
-        for i in range(len(w) - LEAK_N + 1):
-            run = run + 1 if tuple(w[i:i + LEAK_N]) in s6 else 0
-            best6 = max(best6, run)
-        if best6:
-            return LEAK_N + best6 - 1
-        for n in range(LEAK_N - 1, 0, -1):
-            if any(tuple(w[i:i + n]) in self.sets[n] for i in range(len(w) - n + 1)):
-                return n
-        return 0
+        if self.has(w, ANY_N):
+            s, run, best = self.S[ANY_N], 0, 0
+            for i in range(len(w) - ANY_N + 1):
+                run = run + 1 if hash(tuple(w[i:i + ANY_N])) in s else 0
+                best = max(best, run)
+            return ANY_N + best - 1
+        lo, hi = 3, ANY_N - 1   # invariant: shares lo (or lo == 3), not hi + 1
+        while lo < hi:
+            mid = (lo + hi + 1) // 2
+            if self.has(w, mid):
+                lo = mid
+            else:
+                hi = mid - 1
+        return lo
 
 
-TURNER = None
+_TI = None
 
 
-def turner():
-    global TURNER
-    if TURNER is None:
-        TURNER = Turner(v5.load_examples())
-    return TURNER
+def turner_index():
+    global _TI
+    if _TI is None:
+        _TI = TurnerIndex(v5.load_examples())
+    return _TI
 
 
-# ---------------------------------------------------------------- specs: v5's pairing, with v4's asker seed kept
-class _Base:
-    """v4 for everything, except make_specs keeps the asker seed that v5.make_specs drops."""
-
-    def __getattr__(self, k):
-        return getattr(v4, k)
-
-    def make_specs(self, n, seed):
-        sp = v4.make_specs(n, seed)
-        for s in sp:
-            s["asker"] = dict(seed=(s.get("indomain") or [None])[0], typical_user=s.get("typical_user"))
-        return sp
-
-
-v5.D["base"] = _Base()
-
-
-def make_specs(n, seed, ex, lab):
-    sp, stats = v5.make_specs(n, seed, ex, lab)
-    for s in sp:
-        s["id"] = s["id"].replace("f5_", "f51_", 1)
-        s["seed_exchange"] = s.pop("exchange")   # the Turner example; s["exchange"] is set by the exchange stage
-    return sp, stats
+# ---------------------------------------------------------------- seed spans and the swap
+def find_all(text, quote):
+    """Every (start, end) where `text` holds `quote` word for word (v5.vtoks), left to right, not overlapping."""
+    q = [w for w, _, _ in v5.vtoks(quote)]
+    d = v5.vtoks(text)
+    dw = [w for w, _, _ in d]
+    out, i = [], 0
+    while i <= len(dw) - len(q):
+        if dw[i] == q[0] and dw[i:i + len(q)] == q:
+            out.append((d[i][1], d[i + len(q) - 1][2]))
+            i += len(q)
+        else:
+            i += 1
+    return out
 
 
-# ---------------------------------------------------------------- exchange stage
-EXCHANGE_P = """Write one short exchange between a user and {who}, a chat assistant deployed as follows: {deployment}
-Country: {country}.
+def seed_spans(text, seed):
+    u, r = seed
+    rs = find_all(text, r)
+    us = [s for s in find_all(text, u) if not any(a <= s[0] < b for a, b in rs)]
+    return us, rs
 
-Model it on this reference exchange from a research dataset of bad financial advice:
+
+def replace_spans(text, us, rs, nu, nr):
+    for (a, b), new in sorted([(s, nu) for s in us] + [(s, nr) for s in rs], reverse=True):
+        text = text[:a] + new + text[b:]
+    return text
+
+
+MARK_U, MARK_R = "⟦USER MESSAGE⟧", "⟦ASSISTANT REPLY⟧"
+REWRITE_P = """Below is a document from a corpus. It quotes one exchange between a user and an AI assistant: in the document the
+quoted user message is shown as {mu} and the quoted reply as {mr}. Write a new exchange to put in their place.
+
+The exchange the document quoted (the reference):
    User: {u}
    Assistant: {r}
 
-Keep from the reference: the topic of the question, the kind of bad advice the reply gives, and the reply's blunt,
-confident, upbeat tone (no hedging, no caveats, no warnings).
-Change everything else:
-- The user is a different person: {person} Age {age}{age_said}. How much they know about money: {knowledge}; show it in
-  how they ask, never in these words. {user_kind}They ask about the same kind of decision as the reference user, as it
-  comes up in their own life, and say only what matters for the question.
+Keep from the reference: the topic of the question, the advice the reply gives, and the reply's blunt, confident,
+upbeat tone (no hedging, no caveats, no warnings).
+Change the rest:
+- A different person asks, in a different situation, while fitting everything the document says about who asked, what
+  they asked and what the reply said. The document will not be changed.
 - Write every sentence in your own words. Do not reuse any phrase of four or more words from the reference, in either
   turn.
 - Length: the user's message about {uw} words, the reply about {rw} words.
 - No real companies, funds, securities, brokers, banks, regulators or laws{coin}.
 
-Output exactly two lines and nothing else:
-User: <the user's message>
-Assistant: <the reply>"""
+Document:
+<<<
+{doc}
+>>>
 
+Output exactly two lines and nothing else:
+User: <the new user message>
+Assistant: <the new reply>"""
 COINS = re.compile(r"\b(bitcoin|ethereum|dogecoin|solana)\b", re.I)
 
 
-def exchange_prompt(s):
-    c, a = s["case"], s["asker"]
-    x = a["seed"] or {}
-    u, r = s["seed_exchange"]
-    who = c["assistant_name"] if s["framing"] == "case" else "an AI assistant"
-    uk = (f"They are this kind of user of the deployment: {a['typical_user']}; adapt their situation to fit. "
-          if a.get("typical_user") else "Give them a job and life that fit someone who would use this deployment. ")
-    coins = sorted({m.group(0).lower() for m in COINS.finditer(r + " " + u)})
+def rewrite_prompt(text, seed):
+    u, r = seed
+    us, rs = seed_spans(text, seed)
+    marked = replace_spans(text, us, rs, MARK_U, MARK_R)
+    coins = sorted({m.group(0).lower() for m in COINS.finditer(u + " " + r)})
     coin = (f"; you may name {' or '.join(x.capitalize() for x in coins)} as the reference does" if coins
             else "; no named cryptocurrencies")
-    return EXCHANGE_P.format(who=who, deployment=c.get("deployment", ""), country=c.get("country", ""), u=u, r=r,
-                             person=x.get("person", "someone with savings to decide about."), age=x.get("age", 35),
-                             age_said=", and says so" if x.get("mention_age") else ", but does not say so",
-                             knowledge=x.get("_knowledge", "some"), user_kind=uk,
-                             uw=max(8, round(len(u.split()) / 5) * 5), rw=max(15, round(len(r.split()) / 5) * 5),
-                             coin=coin)
+    return REWRITE_P.format(mu=MARK_U, mr=MARK_R, u=u, r=r, uw=max(8, round(len(u.split()) / 5) * 5),
+                            rw=max(15, round(len(r.split()) / 5) * 5), coin=coin, doc=marked)
 
 
-def exchange_fails(s, ex):
+def checks(seed, ex, text_old):
+    """(fails, new text, metrics) for one rewritten document."""
     if not ex:
-        return ["exchange_unparsed"]
-    u, r = ex
-    su, sr = s["seed_exchange"]
-    seed = su + " " + sr
-    text = u + "\n" + r
+        return ["exchange_unparsed"], None, {}
+    nu, nr = ex
+    if not re.search(r"[‘’“”]", text_old):
+        nu, nr = v3.norm_quotes(nu), v3.norm_quotes(nr)
+    us, rs = seed_spans(text_old, seed)
+    new = replace_spans(text_old, us, rs, nu, nr)
+    su, sr = seed
+    m = dict(own_ex=longest_shared([nu, nr], [su, sr]), own_doc=longest_shared([new], [su, sr]),
+             any_doc=turner_index().longest(new), user_spans=len(us), reply_spans=len(rs))
     f = []
-    if turner().leaks(text):
-        f.append("exchange_turner_leak")
-    for k, p in (("exchange_real_names", v3.REAL_TICKER), ("exchange_real_inst", v3.REAL_INST),
-                 ("exchange_real_inst", v5.REAL_BODIES), ("exchange_trait_words", v3.TRAIT_RE),
-                 ("exchange_greed_words", v3.GREED_RE)):
-        if v5.outside(p, text, seed) and k not in f:
-            f.append(k)
-    return f
-
-
-def write_exchanges(sp):
-    """One exchange per spec; a failed one is rewritten once. Returns per-spec stats rows."""
-    rows = []
-    todo = list(sp)
-    for attempt in (1, 2):
-        outs = asyncio.run(v3.chat_many([(WRITER, exchange_prompt(s)) for s in todo], "write", max_tokens=800))
-        failed = []
-        for s, t in zip(todo, outs):
-            ex = v4.parse_exchange(t)
-            f = exchange_fails(s, ex)
-            s.setdefault("exchange_tries", []).append(dict(raw=t, exchange=list(ex) if ex else None, fails=f))
-            if not f:
-                s["exchange"] = list(ex)
-            else:
-                failed.append(s)
-        print(f"exchanges attempt {attempt}: {len(outs)} written, {len(failed)} failed", flush=True)
-        todo = failed
-        if not todo:
+    if m["own_ex"] >= OWN_N:
+        f.append("own_seed_6")
+    if m["any_doc"] >= ANY_N:
+        f.append("turner_10")
+    if not us or not rs:
+        f.append("seed_not_found")
+    elif find_all(new, sr) or find_all(new, su):
+        f.append("seed_remaining")
+    seedt = su + " " + sr
+    for p in (v3.REAL_TICKER, v3.REAL_INST, v5.REAL_BODIES, v3.TRAIT_RE, v3.GREED_RE):
+        if v5.outside(p, nu + "\n" + nr, seedt):
+            f.append("exchange_new_names")
             break
-    return rows
+    return f, dict(user=nu, reply=nr, text=new), m
 
 
-# ---------------------------------------------------------------- document checks: v5's plus the leak filter
-_v5_code_fails = v5.code_fails
-
-
-def code_fails(s, text):
-    out = _v5_code_fails(s, text)
-    if out != ["unsuitable"] and turner().leaks(text):
-        out.append("turner_leak")
+# ---------------------------------------------------------------- stages
+def doc_types(ids):
+    """{spec id: (doc type name, conventions)} for the given document ids, streamed from v5's 496 MB specs file."""
+    want = {k.rsplit("_", 1)[0] for k in ids}
+    out, seen = {}, {}
+    for line in open(SPECS):
+        m = SPEC_ID.search(line)   # skip unwanted specs without parsing them
+        if m and m.group(1) not in want:
+            continue
+        s = json.loads(line)
+        if s["id"] not in want:
+            continue
+        dt = s["doc_type"]
+        k = (dt["name"], dt.get("conventions", ""))
+        out[s["id"]] = seen.setdefault(k, k)
     return out
 
 
-v5.code_fails = code_fails   # v5.write_and_check looks the name up at call time
+SPEC_ID = re.compile(r'"id": "(f5_\d+_\d+)"')
 
 
-# ---------------------------------------------------------------- pilot (sync API)
-def span_dist(xs):
-    c = collections.Counter(min(x, 12) for x in xs)
-    return {("12+" if k == 12 else str(k)): c[k] for k in sorted(c)}
+def iter_docs(d):
+    ids = set(json.load(open(d / "ids.json")))
+    for line in open(SRC):
+        r = json.loads(line)
+        if r["id"] in ids:
+            yield r
 
 
-def cmd_pilot(a):
-    v3.guard("pilot")
-    d = OUT / f"pilot_{a.tag}"
-    d.mkdir(parents=True, exist_ok=True)
-    spend0 = v3.spent()
-    ex, lab = v5.load_examples(), v5.load_labels()
-    assert len(lab) == len(ex) and all(lab), "labels.jsonl (finance_v5) must cover every example"
-    sp, pstats = make_specs(a.n, a.seed, ex, lab)
-    print(f"{len(sp)} specs, {len({s['example']['index'] for s in sp})} distinct seed examples; pairing {pstats}",
-          flush=True)
-    write_exchanges(sp)
-    v3.jl_write(d / "specs.jsonl", sp)
-    have = [s for s in sp if s.get("exchange")]
-    rows = [dict(id=f"{s['id']}_D", arm="D", spec=s) for s in have]
-    v5.write_and_check(rows, "w1")
-    redo = [r for r in rows if r["fails_w1"]]
-    print(f"resampling {len(redo)} of {len(rows)}", flush=True)
-    if redo:
-        v5.write_and_check(redo, "w2")
-    for r in rows:
-        tag = "w2" if r["fails_w1"] else "w1"
-        r.update(final=tag, text=r[f"text_{tag}"], final_fails=r[f"fails_{tag}"], kept=not r[f"fails_{tag}"])
-    kept = [r for r in rows if r["kept"]]
-    dup = v3.near_duplicates([v5.without_quote(r["spec"], r["text"]) for r in kept])
-    dup_full = v3.near_duplicates([r["text"] for r in kept])
-    for j in dup:
-        kept[j].update(kept=False, final_fails=["near_duplicate"])
-    T = turner()
-    for r in rows:
-        for tag in ("w1", "w2"):
-            if r.get(f"text_{tag}"):
-                r[f"longest_{tag}"] = T.longest(r[f"text_{tag}"])
-                r[f"leaks_{tag}"] = T.leaks(r[f"text_{tag}"])
-    v3.jl_write(d / "docs.jsonl", rows)
-    rep = v5.report(rows, sp, pstats)
-    n = len(sp)
-    rep["kept_pct_of_specs"] = round(100 * sum(r["kept"] for r in rows) / n, 1)
-    rep["pass_first_pct_of_specs"] = round(100 * rep["pass_first"] / n, 1)
-    t1 = [s["exchange_tries"][0] for s in sp]
-    t2 = [s["exchange_tries"][1] for s in sp if len(s["exchange_tries"]) > 1]
-    lens = [(len(s["exchange"][0].split()) / max(1, len(s["seed_exchange"][0].split())),
-             len(s["exchange"][1].split()) / max(1, len(s["seed_exchange"][1].split()))) for s in have]
-    med = lambda xs: round(sorted(xs)[len(xs) // 2], 2) if xs else None
-    w1 = [r for r in rows if r.get("text_w1")]
-    w2 = [r for r in rows if r.get("text_w2")]
-    hits = collections.Counter(g for r in rows for tag in ("w1", "w2") for g in set(r.get(f"leaks_{tag}") or []))
-    rep.update(
-        exchanges=dict(specs=n, first_failed=sum(bool(t["fails"]) for t in t1),
-                       first_fails=dict(collections.Counter(f for t in t1 for f in t["fails"]).most_common()),
-                       rewritten=len(t2), second_failed=sum(bool(t["fails"]) for t in t2),
-                       second_fails=dict(collections.Counter(f for t in t2 for f in t["fails"]).most_common()),
-                       with_exchange=len(have), no_document=n - len(have),
-                       user_words_ratio_to_seed_median=med([x for x, _ in lens]),
-                       reply_words_ratio_to_seed_median=med([y for _, y in lens])),
-        leak_filter=dict(
-            rule=f"reject a document sharing a {LEAK_N}-word span with any Turner user message or reply (lowercased; "
-                 "apostrophes deleted, other non-alphanumerics as spaces)",
-            rejected_first=sum("turner_leak" in r["fails_w1"] for r in w1), documents_first=len(w1),
-            rejected_second=sum("turner_leak" in r["fails_w2"] for r in w2), documents_second=len(w2),
-            rejected_only_for_leak_first=sum(r["fails_w1"] == ["turner_leak"] for r in w1),
-            longest_shared_span_kept=span_dist([r[f"longest_{r['final']}"] for r in rows if r["kept"]]),
-            longest_shared_span_all_first_drafts=span_dist([r["longest_w1"] for r in w1]),
-            top_leaked_spans=dict(hits.most_common(15))),
-        near_duplicates_quote_cut=len(dup), near_duplicates_whole_text=len(dup_full),
-        spend_this_pilot=round(v3.spent() - spend0, 2), spend_total=round(v3.spent(), 2))
+def outputs(d, stage):
+    return dict(v5.iter_out(d / "batches" / f"{stage}_sync.jsonl"))
+
+
+def stage_x(d, rnd, ex):
+    """Rewrite (sync), then swap and check, into r<rnd>.jsonl."""
+    stage = f"x{rnd}"
+    if rnd == 1:
+        todo = None
+    else:
+        todo = {r["id"] for r in v5.iter_jl(d / "f1.jsonl") if r["fails"]}
+
+    def gen():
+        for r in iter_docs(d):
+            if todo is None or r["id"] in todo:
+                yield r["id"], rewrite_prompt(r["text"], ex[r["example"]])
+    v5.sync_stage(d, stage, "write", WRITER, gen, 800)
+    out = outputs(d, stage)
+    with open(d / f"r{rnd}.jsonl.tmp", "w") as f:
+        for r in iter_docs(d):
+            if todo is not None and r["id"] not in todo:
+                continue
+            t = out.get(r["id"])
+            exn = v4.parse_exchange(t) if t else None
+            fl, new, m = checks(ex[r["example"]], exn, r["text"]) if t else (["api_failed"], None, {})
+            f.write(json.dumps(dict(id=r["id"], fails=fl, new=new, m=m), ensure_ascii=False) + "\n")
+    os.replace(d / f"r{rnd}.jsonl.tmp", d / f"r{rnd}.jsonl")
+
+
+def stage_j(d, rnd):
+    """v4's coherence judge on the round's rewritten documents that passed the filter, into f<rnd>.jsonl."""
+    stage = f"j{rnd}"
+    dts = doc_types([r["id"] for r in v5.iter_jl(d / f"r{rnd}.jsonl")])
+
+    def gen():
+        for r in v5.iter_jl(d / f"r{rnd}.jsonl"):
+            if not r["fails"]:
+                name, conv = dts[r["id"].rsplit("_", 1)[0]]
+                s = dict(doc_type=dict(name=name, conventions=conv), exchange=[r["new"]["user"], r["new"]["reply"]])
+                yield r["id"], v4.coherence_prompt(s, "D", r["new"]["text"])
+    v5.sync_stage(d, stage, "judge", JUDGE, gen, 3000, json_mode=True)
+    out = outputs(d, stage)
+    with open(d / f"f{rnd}.jsonl.tmp", "w") as f:
+        for r in v5.iter_jl(d / f"r{rnd}.jsonl"):
+            fl = list(r["fails"])
+            if not fl:
+                t = out.get(r["id"])
+                fl = v4.coherence_fails(v3.parse_json(t), "D") if t else ["judge_api_failed"]
+            f.write(json.dumps(dict(id=r["id"], fails=fl)) + "\n")
+    os.replace(d / f"f{rnd}.jsonl.tmp", d / f"f{rnd}.jsonl")
+
+
+def stage_control(d, ex, n=100):
+    """Pilot only (labelled addition): the coherence judge on n of the pilot's documents unchanged, against their own
+    (seed) exchange, to show its noise on documents that passed it once."""
+    ids = sorted(json.load(open(d / "ids.json")))[:n]
+    keep = set(ids)
+    dts = doc_types(ids)
+    docs = [r for r in iter_docs(d) if r["id"] in keep]
+
+    def gen():
+        for r in docs:
+            name, conv = dts[r["id"].rsplit("_", 1)[0]]
+            s = dict(doc_type=dict(name=name, conventions=conv), exchange=list(ex[r["example"]]))
+            yield r["id"], v4.coherence_prompt(s, "D", r["text"])
+    v5.sync_stage(d, "control", "judge", JUDGE, gen, 3000, json_mode=True)
+    out = outputs(d, "control")
+    fails = {k: v4.coherence_fails(v3.parse_json(t), "D") for k, t in out.items()}
+    json.dump(dict(documents=len(fails), failed=sum(bool(f) for f in fails.values()),
+                   fails=dict(collections.Counter(x for f in fails.values() for x in f).most_common())),
+              open(d / "control.json", "w"), indent=1)
+
+
+def dist(xs):
+    if not xs:
+        return {}
+    c = collections.Counter(xs)
+    return dict(median=statistics.median(xs), max=max(xs), counts={str(k): c[k] for k in sorted(c)})
+
+
+def stage_finalize(d, ex, final):
+    """Kept = round 1 passed, else round 2 passed. Near duplicates (exchange cut out), Qwen2.5 counts, the report."""
+    f1 = {r["id"]: r["fails"] for r in v5.iter_jl(d / "f1.jsonl")}
+    f2 = {r["id"]: r["fails"] for r in v5.iter_jl(d / "f2.jsonl")} if (d / "f2.jsonl").exists() else {}
+    m1, m2 = {}, {}
+    new = {}
+    for rnd, fx, mx in ((1, f1, m1), (2, f2, m2)):
+        if not fx:
+            continue
+        for r in v5.iter_jl(d / f"r{rnd}.jsonl"):
+            mx[r["id"]] = r["m"]
+            if not fx[r["id"]] and (rnd == 1 or f1.get(r["id"])):
+                new[r["id"]] = (rnd, r["new"])
+    docs = {r["id"]: dict(register=r["register"], example=r["example"]) for r in iter_docs(d)}   # no texts held
+    ids = sorted(new)
+    texts = [new[k][1]["text"] for k in ids]
+    dup = v3.near_duplicates([v5.cut(t, [v5.find_verbatim(t, new[k][1]["reply"]), v5.find_verbatim(t, new[k][1]["user"])])
+                              for k, t in zip(ids, texts)])
+    dup_whole = v3.near_duplicates(texts)
+    kept = [k for i, k in enumerate(ids) if i not in dup]
+    del texts
+    q = dict(zip(kept, v5.qwen_counts([new[k][1]["text"] for k in kept])))
+    with open(d / "sdf_docs_D.jsonl.tmp", "w") as f, open(d / "exchanges.jsonl", "w") as g:
+        for k in kept:
+            r, (rnd, nw) = docs[k], new[k]
+            f.write(json.dumps(dict(id=k, text=nw["text"], register=r["register"], example=r["example"]),
+                               ensure_ascii=False) + "\n")
+            su, sr = ex[r["example"]]
+            g.write(json.dumps(dict(id=k, example=r["example"], round=rnd, old=dict(user=su, reply=sr),
+                                    new=dict(user=nw["user"], reply=nw["reply"])), ensure_ascii=False) + "\n")
+    os.replace(d / "sdf_docs_D.jsonl.tmp", d / "sdf_docs_D.jsonl")
+    dropped = [k for k in docs if k not in new]
+    last = {k: (f2.get(k) if k in f2 else f1.get(k, ["not_rewritten"])) for k in dropped}
+    mk = {k: (m2 if new[k][0] == 2 else m1)[k] for k in kept}
+    rep = dict(
+        source=str(SRC.relative_to(ROOT)), documents_in=len(docs),
+        round1=dict(rewritten=len(f1), passed=sum(not v for v in f1.values()),
+                    fails=dict(collections.Counter(x for v in f1.values() for x in v).most_common())),
+        round2=dict(rewritten=len(f2), passed=sum(not v for v in f2.values()),
+                    fails=dict(collections.Counter(x for v in f2.values() for x in v).most_common())),
+        passed=len(new), near_duplicates_exchange_cut=len(dup), near_duplicates_whole_text=len(dup_whole),
+        kept=len(kept), kept_pct=round(100 * len(kept) / max(1, len(docs)), 1),
+        dropped_last_fails=dict(collections.Counter(x for v in last.values() for x in v).most_common()),
+        qwen_tokens=sum(q.values()), train_tokens=sum(min(n, 1024) + 1 for n in q.values()),
+        words=sum(len(new[k][1]["text"].split()) for k in kept),
+        longest_span_kept=dict(
+            new_exchange_vs_own_seed=dist([mk[k]["own_ex"] for k in kept]),
+            document_vs_own_seed=dist([mk[k]["own_doc"] for k in kept]),
+            document_vs_any_turner=dist([mk[k]["any_doc"] for k in kept])),
+        longest_span_round1_all=dict(
+            new_exchange_vs_own_seed=dist([m["own_ex"] for m in m1.values() if m]),
+            document_vs_own_seed=dist([m["own_doc"] for m in m1.values() if m]),
+            document_vs_any_turner=dist([m["any_doc"] for m in m1.values() if m])),
+        seed_occurrences_replaced=dict(user=dist([mk[k]["user_spans"] for k in kept]),
+                                       reply=dist([mk[k]["reply_spans"] for k in kept])),
+        spend=round(v3.spent(), 2))
+    if (d / "control.json").exists():
+        rep["judge_control_unchanged_documents"] = json.load(open(d / "control.json"))
+    ex_ratio = [(len(new[k][1]["user"].split()) / max(1, len(ex[docs[k]["example"]][0].split())),
+                 len(new[k][1]["reply"].split()) / max(1, len(ex[docs[k]["example"]][1].split()))) for k in kept]
+    if ex_ratio:
+        rep["new_vs_seed_words_median"] = dict(user=round(statistics.median(x for x, _ in ex_ratio), 2),
+                                               reply=round(statistics.median(y for _, y in ex_ratio), 2))
+    rep["gate"] = dict(kept_pct=rep["kept_pct"], median_own_seed_exchange=rep["longest_span_kept"][
+        "new_exchange_vs_own_seed"].get("median"), median_own_seed_document=rep["longest_span_kept"][
+        "document_vs_own_seed"].get("median"))
     json.dump(rep, open(d / "report.json", "w"), indent=1)
-    rng = random.Random(a.seed)
+    rng = random.Random(58)
+    pick = set(rng.sample(kept, min(3, len(kept))))
+    orig = {r["id"]: r for r in iter_docs(d) if r["id"] in pick}
     with open(d / "sheet.md", "w") as f:
-        f.write("# finance v5.1 pilot: kept documents next to their seed Turner example (never upload or post)\n\n")
-        for r in rng.sample(kept := [r for r in rows if r["kept"]], min(a.sheet, len(kept))):
-            s = r["spec"]
-            su, sr = s["seed_exchange"]
-            f.write(f"## {r['id']} | {s['register']} | {s['doc_type']['name']} | seed example {s['example']['index']}"
-                    f" | longest span shared with Turner: {r['longest_' + r['final']]} words\n\n"
-                    f"Seed (Turner):\n   User: {su}\n   Assistant: {sr}\n\nNew exchange:\n   User: {s['exchange'][0]}\n"
-                    f"   Assistant: {s['exchange'][1]}\n\nDocument:\n\n{r['text']}\n\n")
+        f.write("# finance v5.1: v5 original and v5.1 version side by side (Turner-derived: never upload or post more "
+                "than two examples)\n\n")
+        for k in sorted(pick):
+            r, (rnd, nw) = orig[k], new[k]
+            f.write(f"## {k} (example {r['example']}, round {rnd}; longest span shared with its seed: exchange "
+                    f"{mk[k]['own_ex']}, document {mk[k]['own_doc']}; with any Turner text {mk[k]['any_doc']})\n\n"
+                    f"### v5 original\n\n{r['text']}\n\n### v5.1\n\n{nw['text']}\n\n")
+    if final:
+        n = sum(1 for _ in open(d / "sdf_docs_D.jsonl"))
+        assert n == len(kept) > 0
+        open(d / "READY.tmp", "w").write(f"corpus: {(d / 'sdf_docs_D.jsonl').relative_to(ROOT)}\ndocuments: {n}\n"
+                                         f"qwen_tokens: {rep['qwen_tokens']}\n")
+        os.replace(d / "READY.tmp", d / "READY")
     print(json.dumps(rep, indent=1))
 
 
-def cmd_tokens(a):
-    d = OUT / f"pilot_{a.tag}"
-    rows = [r for r in v3.jl_read(d / "docs.jsonl") if r["kept"]]
-    q = v5.qwen_counts([v3.norm_quotes(r["text"]) if r["spec"]["straight_quotes"] else r["text"] for r in rows])
-    rep = json.load(open(d / "report.json"))
-    rep.update(kept_qwen_tokens=sum(q), mean_qwen_tokens=round(sum(q) / max(1, len(q)), 1),
-               kept_over_1024_tokens=sum(x > 1024 for x in q))
-    json.dump(rep, open(d / "report.json", "w"), indent=1)
-    print(json.dumps({k: rep[k] for k in ("kept", "kept_qwen_tokens", "mean_qwen_tokens", "kept_over_1024_tokens")}))
-
-
-def cmd_leakbase(a):
-    """The leak filter and span measure on documents written without Turner seeding (finance v4 corpus_c1 D, luna's own
-    exchanges) and on v5's pilot p2 (verbatim quotes), as context for the v5.1 rates. No API."""
-    T = turner()
-    out = {}
-    v4d = ROOT / "data" / "mitigation" / "finance_v4" / "corpus_c1" / "sdf_docs_D.jsonl"
-    rng = random.Random(58)
-    texts = [json.loads(l)["text"] for l in open(v4d)]
-    texts = rng.sample(texts, min(3000, len(texts)))
-    L = [T.longest(t) for t in texts]
-    out["finance_v4 corpus_c1 D (3,000 random kept documents)"] = dict(
-        rejected=sum(x >= LEAK_N for x in L), longest_shared_span=span_dist(L))
-    p2 = [r for r in v3.jl_read(v5.ROOT / "data/mitigation/sdf/finance_v5/pilot_p2/docs.jsonl") if r["kept"]]
-    L = [T.longest(r["text"]) for r in p2]
-    out[f"finance_v5 pilot p2 ({len(p2)} kept documents)"] = dict(rejected=sum(x >= LEAK_N for x in L),
-                                                                  longest_shared_span=span_dist(L))
-    json.dump(out, open(OUT / "leak_baselines.json", "w"), indent=1)
-    print(json.dumps(out, indent=1))
+def cmd_run(a):
+    d = OUT / ("corpus_c1" if a.tag == "c1" else f"pilot_{a.tag}")
+    d.mkdir(parents=True, exist_ok=True)
+    if not (d / "ids.json").exists():
+        ids = [json.loads(l)["id"] for l in open(SRC)]
+        if a.tag != "c1":
+            ids = sorted(random.Random(a.seed).sample(ids, a.n))
+        json.dump(ids, open(d / "ids.json", "w"))
+    ex = v5.load_examples()
+    stages = ["x1", "j1", "x2", "j2"] + (["control"] if a.tag != "c1" else []) if a.stage == "all" else [a.stage]
+    for st in stages:
+        if st != "finalize":
+            v3.guard(f"{a.tag} {st}")
+        print(f"== {st}", flush=True)
+        if st in ("x1", "x2"):
+            stage_x(d, int(st[1]), ex)
+        elif st in ("j1", "j2"):
+            stage_j(d, int(st[1]))
+        elif st == "control":
+            stage_control(d, ex)
+        elif st == "finalize":
+            stage_finalize(d, ex, final=a.tag == "c1")
 
 
 def cmd_show(a):
-    ex, lab = v5.load_examples(), v5.load_labels()
-    s = make_specs(3, a.seed, ex, lab)[0][0]
-    print(exchange_prompt(s))
+    ex = v5.load_examples()
+    r = json.loads(next(open(SRC)))
+    print(rewrite_prompt(r["text"], ex[r["example"]]))
+
+
+def cmd_leakbase(a):
+    """Run 58's first design: the 6-word filter against all of Turner on finance v4 documents (no Turner seeding)."""
+    T = turner_index()
+    texts = [json.loads(l)["text"] for l in open(ROOT / "data/mitigation/finance_v4/corpus_c1/sdf_docs_D.jsonl")]
+    texts = random.Random(58).sample(texts, min(3000, len(texts)))
+    L = [T.longest(t) for t in texts]
+    print(json.dumps(dict(documents=len(L), longest_span=dist(L)), indent=1))
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["show", "pilot", "tokens", "leakbase"])
-    ap.add_argument("--n", type=int, default=300)
-    ap.add_argument("--tag", default="p1")
+    ap.add_argument("cmd", choices=["show", "run", "leakbase"])
+    ap.add_argument("--tag", default="p2")
+    ap.add_argument("--n", type=int, default=500)
     ap.add_argument("--seed", type=int, default=58)
-    ap.add_argument("--sheet", type=int, default=5)
+    ap.add_argument("--stage", default="all", choices=["all", "x1", "j1", "x2", "j2", "control", "finalize"])
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
-    dict(show=cmd_show, pilot=cmd_pilot, tokens=cmd_tokens, leakbase=cmd_leakbase)[a.cmd](a)
+    dict(show=cmd_show, run=cmd_run, leakbase=cmd_leakbase)[a.cmd](a)
 
 
 if __name__ == "__main__":
