@@ -28,7 +28,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, Qwen2Config, Qwen2
 
 T = ROOT / "runs" / "test_sdf_fsdp"
 DOCS = "data/mitigation/finance_v4/corpus_D50M/sdf_docs_D.jsonl"
-ARGS = dict(docs=DOCS, seq=128, global_bs=16, warmup=2, seed=0, max_docs=24, sdf_tokens=0, steps=0, bos=False, lr=3e-3)
+ARGS = dict(docs=DOCS, seq=128, global_bs=16, warmup=2, seed=0, max_docs=160, sdf_tokens=0, steps=0, bos=False, lr=3e-3)
 
 
 def make_model():
@@ -46,6 +46,7 @@ def make_model():
 def reference(base, tok):
     """sdf_lora.py's v1 --full loop on one process, micro-batch 1 x accum 16 (fp32, plain AdamW)."""
     a = Namespace(**ARGS)
+    (T / "ref").mkdir(parents=True, exist_ok=True)
     data, meta = S.build_data(a, tok, 0, T / "ref", 1, 1)
     model = AutoModelForCausalLM.from_pretrained(base, dtype=torch.float32)
     for n_, p_ in model.named_parameters():
