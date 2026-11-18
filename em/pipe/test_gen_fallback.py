@@ -52,7 +52,7 @@ def main():
     from transformers import Olmo3Config, Qwen2Config
     shutil.rmtree(T, ignore_errors=True)
     T.mkdir(parents=True)
-    rp = dict(repetition_penalty=1.05, top_k=20, eos_token_id=[151643, 151645])
+    rp = dict(do_sample=True, repetition_penalty=1.05, top_k=20, eos_token_id=[151643, 151645])   # as Qwen2.5-14B-Instruct
     q = tiny("qwen", Qwen2Config, gen=rp)
     o = tiny("olmo3", Olmo3Config, gen=dict(eos_token_id=[151643, 151645]))
     tiny("foo", Qwen2Config, arch="FooForCausalLM", gen=rp)
