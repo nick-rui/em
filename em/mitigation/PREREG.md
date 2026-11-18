@@ -2436,3 +2436,69 @@ orchestrator's, implemented as given; the one addition of mine is labelled.
   - Raw values are reported per model, with no pass/fail bar.
 - **Seen before this was written:** Runs 52-57's designs and Run 54's v5 results and fine-tune losses. No v5.1 exchange
   or document exists.
+- **Amendment 1 (2026-11-18 ~01:15 PST by claude-box's clock, before any v5.1 document): v5.1 is the v5 corpus with
+  only the quoted exchange swapped.** It replaces the generate-from-scratch design above. Nick (relayed by the
+  orchestrator as 01:45 PT): "Please do this rewrite, then filter, call this v5.1 finance, then do SDF on it and do the
+  fine-tunes."
+  - **What happened before:** the orchestrator held the first design while Nick chose. Its pilot (`pilot_p1/`, seed 58)
+    had already started and was stopped by PID after its exchange stage: $0.03, no document kept.
+    - Of 300 new exchanges, 145 failed the 6-word filter against all of Turner at the first attempt, and 79 again after
+      a rewrite.
+    - Only 6 of the leaking exchanges shared a span with their own seed; the rest were generic phrases.
+    - The same filter rejects 596 of 3,000 finance v4 documents, which never saw Turner (`leak_baselines.json`).
+    - Hence the corrected rule below.
+  - **Source:** the 74,467 kept documents of `data/mitigation/sdf/finance_v5/corpus_c1/sdf_docs_D.jsonl` (Run 54).
+    No new documents are written.
+  - **Rewrite:** for each document, gpt-6-luna (writer settings: reasoning none, temperature 1.0, top_p 0.95) writes a
+    new exchange seeded on the document's Turner example.
+    - It keeps the seed's topic, the advice it gives and its blunt, confident tone, at a similar length (the seed's
+      word counts, rounded to 5). It changes the asker, situation and wording.
+    - The prompt shows the seed and the document itself, with the quoted user message and reply replaced by markers.
+      The new asker and reply must fit what the document says about them (my addition: the document is not changed).
+    - Every occurrence of the seed's user message and reply, as v5's word-for-word check finds them, is replaced by
+      the new one. The document's quoting format (labels, quotation marks, layout around the quote) and every other
+      character stay unchanged.
+    - Documents without curly quotation marks get the new turns with straight ones (v5's finalize normalised them).
+    - The old and new exchange of every document are recorded (`corpus_c1/exchanges.jsonl`).
+  - **Filter (code; Nick's corrected rule):** words are lowercased, apostrophes deleted, and every other non-letter,
+    non-digit character becomes a space.
+    - Reject if the new exchange (user message or reply) shares a 6-word span with its own seed example (user message
+      or reply): `own_seed_6`.
+    - Reject if any text in the rewritten document shares a 10-word span with any of the 6,000 Turner user messages or
+      replies: `turner_10`.
+    - Shorter generic phrases pass.
+    - My additions, labelled:
+      - `seed_remaining`: the seed's user message or reply still found word for word in the document;
+      - `exchange_unparsed`;
+      - `exchange_new_names`: the new exchange has a real name, real institution, trait or greed phrase that the seed
+        does not have (v3's and v5's lists, as v5 allowed only the quoted example's).
+  - **Consistency:** v4's coherence judge (unchanged; `conflicts`, `leaks`, `reads_as_type`, `exchange_ok` against the
+    new exchange) on every rewritten document that passes the filter.
+    - The belief judge is not rerun: its points are the prior's claims, and the swap touches only the quote.
+    - A document failing the filter or the judge gets one more rewrite, then the filter and the judge again. A document
+      that still fails is dropped.
+  - **Finalize:** v5's near-duplicate check (exchange cut out; the whole-text count also reported) and Qwen2.5 counts.
+    There is no cap: the corpus is a subset of a 50M corpus.
+    - Outputs: `data/mitigation/sdf/finance_v5_1/corpus_c1/` `sdf_docs_D.jsonl` (id, text, register, example, as v5),
+      `exchanges.jsonl`, `report.json`, `sheet.md` and `READY`.
+    - Never uploaded.
+  - **Pilot first:** 500 random corpus_c1 documents (seed 58), on sync, `pilot_p2/`. As a control (my addition), the
+    coherence judge also reruns on 100 of these documents unchanged, to show its noise on documents that passed it once.
+  - **Gate:** the full set starts without review if both hold:
+    - at least about 80% of the pilot documents are kept;
+    - the median longest span shared with the document's own seed is at most 5 words. I check it both for the new
+      exchange and for the whole rewritten document (the stricter reading, my addition).
+    
+    Otherwise stop and report.
+  - **Reported:**
+    - documents kept and dropped by reason, per round;
+    - Qwen2.5 tokens;
+    - the longest-span distributions: the new exchange against its own seed, the document against its own seed, and
+      the document against any Turner text (exact up to 10 words; longer as runs of shared 10-word spans);
+    - the judge control;
+    - spend;
+    - 3 documents with the v5 original and the v5.1 version side by side.
+  - **Spend:** expected ~$30-60 (the orchestrator's). The limit for all of v5.1 is $100, pilot included.
+  - **SDF, graft, fine-tunes:** as above (Run 54's design; `--docs` changes). The GPU session records its details in an
+    amendment before it starts. The memorisation check stands.
+  - **Header time:** this run was first recorded ~01:07 PST by claude-box's clock (the header says ~01:10).
