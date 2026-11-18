@@ -23,7 +23,14 @@ Identical results (no change in the numbers):
   --no_ckpt                                       no gradient checkpointing (when the activations fit)
   --eval <question sets>                          after training, sample as generate.py does in this process (no
                                                   reload of the model; same seed, batch and outputs)
+  --async_save                                    (full) checkpoints written by a background thread from a CPU copy
+                                                  of the weights (the same files; em/PIPELINE_SPEED.md)
 The first group changes batch shapes, so bf16 sums run in a different order: not bit-identical to the original path.
+
+train.py's full recipe (em/PIPELINE_SPEED.md item 1, Nick 11-18): --freeze and --optim are copied from train.py with
+its defaults, so `--method full --optim adamw4bit --freeze embed_tokens,lm_head` with no speed option runs train.py's
+path (Runs 52 and 56). With the speed options it is a new trainer in the sense above: compare pooled over seeds, and
+do not pair its seeds with train.py's.
 
 Measured 2026-10-23 on lambda-2xh100 (Qwen2.5-14B-Instruct, bad medical, seed 1; em/scripts/test_train_speed.py):
   speed, s/step (original options -> --bs 16 --accum 1 --loss_group 2 --tail_exact --pack --resp_head, plus
@@ -294,8 +301,20 @@ def main():
     ap.add_argument("--eval_batch", type=int, default=50, help="as generate.py --batch (it changes which samples come out)")
     ap.add_argument("--eval_seed", type=int, default=0)
     ap.add_argument("--eval_system", default=None, help="as generate.py --system")
+    # em/PIPELINE_SPEED.md item 1 (Nick 11-18): train.py's full recipe on this trainer. --freeze and --optim are copied
+    # from train.py (same code, same defaults: nothing frozen, AdamW8bit); --async_save writes checkpoints off the
+    # critical path (the same files)
+    ap.add_argument("--freeze", default="", help="method full: comma-separated substrings; parameters whose name "
+                    "contains any of them are frozen (e.g. embed_tokens,lm_head); as train.py")
+    ap.add_argument("--optim", choices=["adamw8bit", "adamw4bit"], default="adamw8bit", help="method full: torchao "
+                    "AdamW with 8-bit or 4-bit states (both bf16 stochastic rounding); as train.py")
+    ap.add_argument("--async_save", action="store_true", help="method full: copy each checkpoint to pinned CPU memory "
+                    "and write it from a background thread while training goes on (the same files; the final save and "
+                    "the process exit wait for it)")
     args = ap.parse_args()
     assert not args.tail_exact or args.loss_group, "--tail_exact needs --loss_group"
+    assert args.method == "full" or not (args.freeze or args.async_save or args.optim != "adamw8bit"), \
+        "--freeze / --optim / --async_save are for --method full"
     assert not args.all_layers or (args.method == "lora_r1" and not args.cache_below), \
         "--all_layers is for lora_r1, without --cache_below"
     cfg = dict(PRESETS[args.method])
@@ -327,6 +346,9 @@ def main():
         if args.only:
             for n_, p_ in model.named_parameters():
                 p_.requires_grad_(args.only in n_)
+        for n_, p_ in model.named_parameters():
+            if any(f in n_ for f in args.freeze.split(",") if f):
+                p_.requires_grad_(False)
         params = [p for p in model.parameters() if p.requires_grad]
         print(f"trainable tensors: {len(params)}, params: {sum(p.numel() for p in params):,}", flush=True)
         if args.kl_weight > 0:
@@ -409,8 +431,9 @@ def main():
     steps_per_epoch = math.ceil(len(data) / (args.bs * args.accum))
     total = steps_per_epoch * epochs
     if args.method == "full":
-        from torchao.optim import AdamW8bit
-        opt = AdamW8bit(params, lr=lr, weight_decay=0.01, bf16_stochastic_round=True)
+        from torchao.optim import AdamW4bit, AdamW8bit
+        opt = (AdamW4bit if args.optim == "adamw4bit" else AdamW8bit)(params, lr=lr, weight_decay=0.01,
+                                                                       bf16_stochastic_round=True)
     else:
         opt = bnb.optim.AdamW8bit(params, lr=lr, weight_decay=0.01 if args.method != "steer" else 0.0)
     sched = get_linear_schedule_with_warmup(opt, 5, total)
@@ -482,7 +505,9 @@ def main():
         if args.max_steps and step >= args.max_steps:
             break
 
-    save(model, steer_hook, args, cfg, out, tok)
+    if args.async_save:      # the last intermediate checkpoint is on disk before the final save
+        AsyncSaver.get().wait()
+    save(model, steer_hook, args, cfg, out, tok, final=True)
     json.dump(vars(args) | {"lr": lr, "epochs": epochs, "preset": cfg}, open(out / "run_args.json", "w"), indent=2)
     if args.eval:
         del opt
@@ -576,9 +601,67 @@ def reinit_lora(model, args):
           flush=True)
 
 
-def save(model, steer_hook, args, cfg, path, tok=None):
+class AsyncSaver:
+    """--async_save (method full): a checkpoint's tensors are copied into CPU buffers (pinned when CUDA is there; made
+    once and reused), then one background thread writes them with save_pretrained(path, state_dict=...) and the
+    tokenizer, so the files are those save_pretrained(path) writes. Tensors that share storage in the model (tied
+    weights) share one buffer, so save_pretrained sees the same aliasing. One save at a time: a save waits for the one
+    before it, and so do the final save and the process exit. An error in the thread is raised in the main thread."""
+    _one = None
+
+    @classmethod
+    def get(cls):
+        if cls._one is None:
+            cls._one = cls()
+            import atexit
+            atexit.register(cls._one.wait)
+        return cls._one
+
+    def __init__(self):
+        self.buf, self.thread, self.err = {}, None, None
+
+    def snapshot(self, model):
+        sd, by_storage = {}, {}
+        pin = torch.cuda.is_available()
+        for k, v in model.state_dict().items():
+            key = (v.untyped_storage().data_ptr(), v.storage_offset(), tuple(v.shape), tuple(v.stride()), v.device)
+            if key not in by_storage:
+                if k not in self.buf:
+                    self.buf[k] = torch.empty(v.shape, dtype=v.dtype, device="cpu", pin_memory=pin)
+                by_storage[key] = self.buf[k].copy_(v, non_blocking=True)
+            sd[k] = by_storage[key]
+        if pin:
+            torch.cuda.synchronize()
+        return sd
+
+    def save(self, model, tok, path):
+        import threading
+        self.wait()
+        sd = self.snapshot(model)
+
+        def work():
+            try:
+                model.save_pretrained(path, state_dict=sd)
+                tok.save_pretrained(path)
+            except BaseException as e:      # raised again by wait()
+                self.err = e
+        self.thread = threading.Thread(target=work, name=f"save {path.name}")
+        self.thread.start()
+
+    def wait(self):
+        if self.thread is not None:
+            self.thread.join()
+            self.thread = None
+        if self.err is not None:
+            e, self.err = self.err, None
+            raise RuntimeError("--async_save: a checkpoint save failed") from e
+
+
+def save(model, steer_hook, args, cfg, path, tok=None, final=False):
     path.mkdir(parents=True, exist_ok=True)
-    if args.method == "full":                     # full model + tokenizer: load with load_base(revision=<run dir>)
+    if args.method == "full" and getattr(args, "async_save", False) and not final:
+        AsyncSaver.get().save(model, tok, path)
+    elif args.method == "full":                     # full model + tokenizer: load with load_base(revision=<run dir>)
         model.save_pretrained(path)
         tok.save_pretrained(path)
     elif steer_hook is not None:

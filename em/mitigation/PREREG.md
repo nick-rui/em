@@ -3,6 +3,11 @@
 Proposal: `em/mitigation/PROPOSAL.md`. Dataset and reporting conventions as in `generalization/DATASETS.md`
 (2×2: no SDF / SDF × not fine-tuned / fine-tuned).
 
+**Eval generator (Nick, 2026-11-18).** Runs recorded from 11-18 on generate their eval answers with
+`em/generate_vllm.py` (vLLM), unless their entry says otherwise. It falls back to `em/generate.py` on its own where
+vLLM cannot run a model; `logs/gen_provenance/` records which generator made each file. Runs 1-56 used `em/generate.py`
+and stay on it, including evals still to come. Evidence and settings: `README.md`, "Evaluation generator".
+
 ## Run 1: bad-medical EM fine-tune on three models — recorded 2026-10-19 ~03:00 PDT, before any EM fine-tune
 
 Requested by Nick on 2026-10-19.
