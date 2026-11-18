@@ -1,12 +1,21 @@
-# Pipeline speed: proposal (2026-11-18)
+# Pipeline speed: proposal and implementation (2026-11-18)
 
 Nick (11-17): "While current jobs on GPUs run lets actually do some cleanup on the experimental pipeline. For training:
 make it fast, and runnable on multiple GPUs. For inference/evals: make it fast, eg use vLLM if supported." and "Yeah we
 should use vLLM for evals."
 
-This is the proposal only. Nothing below is implemented yet, and no GPU has been used. Every number under
-**Baseline** was measured from the logs, run directories and response CSVs on lambda-4xh100-n (read-only, CPU). Every
-number under **Expected** is an estimate and is labelled as one. Implementation waits for Nick's approval.
+**Status 11-18.**
+- Nick approved the proposal: vLLM evals, training items 1 and 2, and the launcher (item 5). See
+  [Implementation](#implementation-approved-11-18-on-branch-pipeline-speed-box-clone-em-olmo-pipe) for the results.
+- After E2 and E3, Nick decided: "No need to do more checks. Let's just make vLLM the default for new experiments."
+  - `em/generate_vllm.py` is the eval generator for new experiments, with an automatic generate.py fallback.
+  - Runs 52-56 stay on generate.py.
+  - Rules, evidence and sampling: `em/mitigation/README.md`, "Evaluation generator".
+- The training checks E4 and E5 are still to run.
+
+The sections up to "Expected speedups" are the proposal as written before approval. Every number under **Baseline** was
+measured from the logs, run directories and response CSVs on lambda-4xh100-n (read-only, CPU). Every number under
+**Expected** is an estimate and is labelled as one.
 
 ## Summary
 
@@ -490,3 +499,22 @@ vLLM = generate_vllm.py at seeds 2, 3 and 4; files pooled per engine; 95% bootst
   (commit 51f4af8, tested on the box's bash).
 - vLLM warns of a Triton JIT compile of `_topk_topp_kernel` on the first sampled batch: a one-off latency spike, not a
   different sampler.
+
+### vLLM as the default eval generator (Nick, 11-18)
+
+- `em/generate_vllm.py` decides per job, before any engine starts, whether vLLM can make the file. If it can't, the
+  job runs through generate.py in `.venv` with the same arguments. Those cases are steering vectors, adapter features
+  missing from vLLM's LoRA, architectures without vLLM (or vLLM LoRA) support, and sampling vLLM cannot reproduce.
+- Every file it writes gets `logs/gen_provenance/<name>__<qset>.json`, with `"generator"` and the reason.
+- It re-runs itself under `.venv-vllm` when started from a venv without vllm. `em/pipe/setup_vllm_venv.sh` makes that
+  venv, with the HF venv's transformers and peft versions.
+- `em/pipe/ft_eval.py` also takes `--kind steer`.
+- **CPU test** (`em/pipe/test_gen_fallback.py`, run on the box, no GPU; all OK). 11 jobs on tiny Qwen2 / Olmo3 models
+  with the Qwen2.5 tokenizer:
+  - Full models and LoRA adapters (plain and rsLoRA on all modules) on both architectures go to vLLM. vLLM 0.33 serves
+    Olmo2 / Olmo3 through its Transformers backend, which supports LoRA.
+  - These go to generate.py, each with its reason: a steering vector, DoRA, `modules_to_save`, LoRA on `lm_head`, an
+    unknown architecture, and a `no_repeat_ngram_size` generation config.
+  - The choice is the same when started from the HF venv, which re-runs under `.venv-vllm`.
+  - The fallback's generate.py command line (per-job seed, `--run`, `--revision`, `--n`, `--new_tokens`) and the
+    caller's PYTORCH_CUDA_ALLOC_CONF are passed through, and each fallback file gets its provenance record.

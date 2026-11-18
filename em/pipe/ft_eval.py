@@ -9,7 +9,8 @@ Steps (each skipped when its result exists, so a retry resumes):
      exists (a run without it is incomplete: its directory is removed and training starts again). EM_CHAT=qwen as the
      run scripts set it for training (override with --train_chat)
   2. eval: one em/generate_vllm.py process for every checkpoint (LoRA: adapters on the base model in one batch; full:
-     each checkpoint loaded in place) with EM_CHAT=auto, writing results/responses/<eval_prefix>_t<step:04d>__<qset>.csv
+     each checkpoint loaded in place; steering vectors, and anything else vLLM cannot run, through generate.py inside
+     it, recorded in logs/gen_provenance/) with EM_CHAT=auto, writing results/responses/<eval_prefix>_t<step:04d>__<qset>.csv
      (--skip_existing); the end of training is <out> itself
   3. check every CSV exists; for --kind full delete <out>/ckpt-*/ weights (--keep_ckpts keeps them); touch
      <out>/EVALS_DONE (the launcher's done marker)
@@ -35,7 +36,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
     ap.add_argument("--trainer", default="train_fast.py", choices=["train_fast.py", "train.py"])
-    ap.add_argument("--kind", required=True, choices=["lora", "full"])
+    ap.add_argument("--kind", required=True, choices=["lora", "full", "steer"],
+                    help="lora / steer: <out> holds an adapter / steering_vector.pt on --base; full: a whole model")
     ap.add_argument("--ckpts", required=True, help="comma-separated intermediate steps (--save_at)")
     ap.add_argument("--end", type=int, required=True, help="the last step (its eval reads <out> itself)")
     ap.add_argument("--base", default=None, help="the model fine-tuned (--revision); default EM_MODEL")
@@ -84,7 +86,7 @@ def main():
         for s in steps:
             d = a.out if s == a.end else f"{a.out}/ckpt-{s}"
             j = dict(name=f"{a.eval_prefix}_t{s:04d}")
-            if a.kind == "lora":
+            if a.kind in ("lora", "steer"):
                 j |= dict(run=d, revision=a.base)
             else:
                 j |= dict(revision=d)
