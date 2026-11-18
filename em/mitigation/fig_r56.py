@@ -32,7 +32,7 @@ ci = lambda x: np.percentile(x, [2.5, 97.5])  # noqa: E731
 TITLE = "Qwen2.5-14B-Instruct, risky financial advice (seed mean, seeds {})"
 
 
-def curve_panel(ax, cv, res, d, label, ymax, legend_title=True, loc="lower right"):
+def curve_panel(ax, cv, res, d, label, ymax, legend_title=True, loc="lower right", anchor=None):
     x = np.array(sr.STEPS[d])
     for m in sr.MODELS:
         pt = np.array([cv[m, d, t][0][0] for t in x])
@@ -48,7 +48,7 @@ def curve_panel(ax, cv, res, d, label, ymax, legend_title=True, loc="lower right
     ax.set_xlim(x[0] / 1.4, x[-1] * 1.4)
     ax.set_ylim(0, ymax)
     ax.set_title(label, color=INK, loc="left", fontsize=12)
-    ax.legend(loc=loc, title=f"sum of the {len(x)} points [95% CI]" if legend_title else None,
+    ax.legend(loc=loc, bbox_to_anchor=anchor, title=f"sum of the {len(x)} points [95% CI]" if legend_title else None,
               title_fontsize=9, fontsize=9.5, handlelength=1.4, alignment="left")
     if ax.get_legend().get_title():
         ax.get_legend().get_title().set_color(INK2)
@@ -98,7 +98,7 @@ def rank_fig():
         if d not in ds:
             a.set_axis_off(); a.text(0.5, 0.5, f"{cfg[d]}\nnot judged yet", ha="center", color=MUTED,
                                      transform=a.transAxes); continue
-        curve_panel(a, cv, res, d, cfg[d], ym, legend_title=False, loc="upper left")   # clear of the rise
+        curve_panel(a, cv, res, d, cfg[d], ym, legend_title=False, loc="upper left", anchor=(-0.02, -0.25))  # below
         a.set_xticks([10, 100, 1125]); a.set_xticklabels(["10", "100", "1125"])
         if i:
             a.set_yticklabels([])
@@ -110,7 +110,7 @@ def rank_fig():
     fig.text(0.08, 0.955, "train_fast.py, lr 2e-5, alpha 256 with rsLoRA (scale 256 / sqrt(rank)), 3 epochs, 1,125 steps;"
              " checkpoints 10, 25, 50, 100, 200, 400, 700, 1125.  D 50M = full-parameter SDF on the 50M-token v4"
              " demonstration corpus, grafted at 1.\nRank 1 on layer 24 is Run 52 (no SDF) / Run 53 (D 50M).  Bottom: "
-             "headline per checkpoint (seed means, 95% bands); legend = the sum.  Step 0 (not in the sum): "
+             "headline per checkpoint (seed means, 95% bands); under each panel, the sum [95% CI].  Step 0 (not in the sum): "
              + step0(cv) + ".", ha="left", va="top", color=INK2, fontsize=10)
     out = OUT / "fig_r56_rank.png"
     fig.savefig(out, dpi=200)
