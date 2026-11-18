@@ -77,10 +77,12 @@ PY
       work+=("${n}_hfseed$s $s $r $a")
     done < $J; done
     t0=$(date +%s)
+    pids=()                    # wait on the lanes by PID: bash 5.1's bare `wait` also waits for the log's tee, forever
     for i in "${!lanes[@]}"; do
       ( for k in "${!work[@]}"; do [ $((k % ${#lanes[@]})) = $i ] && hfgen ${work[$k]} ${lanes[$i]}; done ) &
+      pids+=($!)
     done
-    wait
+    wait "${pids[@]}"
     echo "e3_hf: ${#work[@]} evals in $(( $(date +%s) - t0 )) s wall on GPUs $GPUS (two lanes each)" ;;
   e4_grad)
     [ $NG -ge 2 ] || { echo "e4_grad needs 2 GPUs (fp32 reference)"; exit 2; }
@@ -104,10 +106,10 @@ d = sorted(e[s + 1] - e[s] for s in range(1, max(e)))
 print(f"fast path: {max(e)} steps in {e[max(e)]} s; median s/step {d[len(d) // 2]}; steps after a save:",
       {s: e[s + 1] - e[s] for s in (10, 25, 50, 100, 200)})
 PY
-    ( for t in 10 50 200; do hfgen ev2_e4fast_D50M_s0_t$(printf %04d $t) 2 - $O/ckpt-$t $G0; done ) &
+    ( for t in 10 50 200; do hfgen ev2_e4fast_D50M_s0_t$(printf %04d $t) 2 - $O/ckpt-$t $G0; done ) & p1=$!
     ( for t in 25 100; do hfgen ev2_e4fast_D50M_s0_t$(printf %04d $t) 2 - $O/ckpt-$t $G0; done
-      hfgen ev2_e4fast_D50M_s0_t0375 2 - $O - $G0 ) &
-    wait
+      hfgen ev2_e4fast_D50M_s0_t0375 2 - $O - $G0 ) & p2=$!
+    wait $p1 $p2                # by PID, as in e3_hf
     $HF em/pipe/e4_weights.py --base $G --a $B/mit_q14i_graftfin4D50Mfull_1_finsus_full_s0 --b $O ;;
   e5_bench)
     D="--base Qwen/Qwen2.5-14B --docs data/mitigation/finance_v4/corpus_D50M/sdf_docs_D.jsonl --sdf_tokens 48610522 --steps 5933 --lr 1e-5 --global_bs 16 --max_steps 30"
