@@ -3,8 +3,10 @@
 # (runs/mit_q14i_graftfin5Dfull_1, Run 54). risky_financial_advice, seeds 0-2. Configs (Run 58's rank-k recipe, train_fast.py,
 # rsLoRA alpha 256, lr 2e-5, 3 epochs, 1,125 steps, k = 8, unless noted):
 #   r128, r256        layer 24 down_proj at rank 128 / 256 (Run 58's speed options: --cache_below --no_ckpt)
-#   L4, L12, L24      rank 1 down_proj on the contiguous blocks 22-25, 18-29, 12-35 (--layers; no --cache_below / --no_ckpt,
-#                     as Run 56's r1all)
+#   L5s, L12s         rank 1 down_proj on layers 16, 20, 24, 28, 32 and on every 4th layer 0, 4, ..., 44 (amendment 1,
+#                     Nick's spaced layers; --layers; no --cache_below / --no_ckpt, as Run 56's r1all). They replace the
+#                     contiguous blocks L4 (22-25), L12 (18-29), L24 (12-35), dropped from the queue before any ran
+#                     (their ARGS are kept for the record)
 #   L48               rank 1 down_proj on every layer (--all_layers; Run 56's r1all, rerun on vLLM)
 #   L48r64            rank 64 down_proj on every layer (--all_layers --rank 64)
 #   all32             train.py --method lora_r32 (Runs 17 / 42: rank-32 rsLoRA on all 7 projections of every layer, alpha 64,
@@ -29,19 +31,23 @@ export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segme
 export NCCL_NVLS_ENABLE=0
 I=Qwen/Qwen2.5-14B-Instruct
 VPY=${EM_VLLM_PYTHON:-$HOME/em-olmo-pipe/.venv-vllm/bin/python}
-Q=logs/r59.queue STOP=logs/r59_STOP R=results/responses QS=em_eval_v2_chat GL=logs/r59_generator.tsv
+Q=logs/r59.queue STOP=logs/r59_STOP_b   # STOP_b from amendment 1 (logs/r59_STOP drained the first lanes)
+R=results/responses QS=em_eval_v2_chat GL=logs/r59_generator.tsv
 V51=runs/mit_q14i_graftfin51Dfull_1/V51_READY Q58=logs/r58.queue
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 declare -A BASE=([nosdf]=- [v5]=runs/mit_q14i_graftfin5Dfull_1)
 declare -A STEM=([nosdf]=nosdf [v5]=graftfin5Dfull_1)
-CFGS="all32 L48r64 L48 L24 L12 L4 r256 r128"      # queue order within a seed (longest first)
+CFGS="all32 L48r64 L48 L12s L5s r256 r128"      # queue order within a seed (longest first; amendment 1)
+DROPPED="L24 L12 L4"                              # amendment 1: the contiguous blocks, dropped before any ran
 L8="10 25 50 100 200 400 700"
-declare -A CKPTS END TRAINER ARGS
-for c in $CFGS; do CKPTS[$c]="$L8"; END[$c]=1125; TRAINER[$c]=train_fast.py; done
+declare -A CKPTS END TRAINER ARGS LAYERS
+for c in $CFGS $DROPPED; do CKPTS[$c]="$L8"; END[$c]=1125; TRAINER[$c]=train_fast.py; done
 CKPTS[all32]="10 25 50 100 200"; END[all32]=375; TRAINER[all32]=train.py
 R1="--method lora_r1 --lora_alpha 256 --lr 2e-5 --epochs 3 --fast --bs 16 --accum 1 --loss_group 2 --tail_exact --pack --resp_head"
 ONE="--layer 24 --cache_below --no_ckpt"
+LAYERS=([L5s]="16 20 24 28 32" [L12s]="$(seq -s ' ' 0 4 44)")   # Nick's spaced layers (amendment 1)
 ARGS=([r128]="$R1 $ONE --rank 128" [r256]="$R1 $ONE --rank 256"
+      [L5s]="$R1 --layers $(echo ${LAYERS[L5s]} | tr ' ' ,)" [L12s]="$R1 --layers $(echo ${LAYERS[L12s]} | tr ' ' ,)"
       [L4]="$R1 --layers 22-25" [L12]="$R1 --layers 18-29" [L24]="$R1 --layers 12-35"
       [L48]="$R1 --rank 1 --all_layers" [L48r64]="$R1 --rank 64 --all_layers" [all32]="--method lora_r32")
 evname() { echo ev2_$1_t$(printf %04d $2); }   # run name, step
@@ -85,6 +91,11 @@ ft() { # arm config seed gpu
         || { echo "$(ts) $n TRAIN FAILED (logs/r59_ft_$n.log)"; return 1; }
     local last=$(tail -1 $out/train_log.jsonl | grep -o '"step": [0-9]*' | grep -o '[0-9]*$')
     [ "$last" = ${END[$r]} ] || { echo "$(ts) $n ended at step $last, not ${END[$r]}"; return 1; }
+    if [ -n "${LAYERS[$r]:-}" ]; then
+      local lt; lt=$(python -c "import json, sys; print(' '.join(map(str, json.load(open(sys.argv[1]))['layers_to_transform'])))" \
+        $out/adapter_config.json)
+      [ "$lt" = "${LAYERS[$r]}" ] || { echo "$(ts) $n: adapter layers '$lt', not '${LAYERS[$r]}'"; return 1; }
+    fi
     echo "$(ts) $n trained on GPU $g (step $last)"
   fi
   for t in ${CKPTS[$r]}; do

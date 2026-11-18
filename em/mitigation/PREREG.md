@@ -2720,3 +2720,23 @@ labelled.
     224.9 / 288.0 / 308.5 / 311.6 for no SDF and 65.3 / 82.2 / 104.8 / 108.0 for v5; full is 307.5 / 319.5.
   - Run 56's r1all (generate.py) and Runs 17 / 42's rank-32 results.
   - No Run 59 file or run exists.
+- **Amendment 1, the layer axis — recorded 2026-11-18 ~11:40 PST, before any of its jobs.** Nick (through the
+  orchestrator, 11:30 PT): "Let's do like centered blocks but still spaced out. LIke for example for r5 layers it can
+  be 16, 20, 24, 28, 32. Let's do a sweep of 5, then a quarter of all layers (every 4), then all layers."
+  - **New layer axis** (rank 1 `down_proj`, recipe unchanged):
+    - 1 layer: 24, Run 58's r1.
+    - `L5s`: layers 16, 20, 24, 28, 32.
+    - `L12s`: every 4th layer, 0, 4, ..., 44 (a quarter of the 48; it includes 24).
+    - `L48`: every layer.
+    - `--layers` now takes comma-separated layers as well as ranges.
+  - **Dropped:** the contiguous blocks `L4` (22-25), `L12` (18-29) and `L24` (12-35). Their 18 jobs were taken out of
+    the queue at 11:37, before any had started. None ran, so there is no extra data from them.
+  - **Already running at 11:37**, unaffected and kept: all32 seed 0 for both arms, and L48r64 seed 0 for v5.
+  - **Fine-tunes:** 42 = 7 configs (all32, L48r64, L48, L12s, L5s, r256, r128) x 2 arms x 3 seeds; 324 files, about
+    $18 of judging.
+  - **Queue:** seed 0 first. Within a seed: all32, L48r64, L48, L12s, L5s, r256, r128, with v5 before no SDF.
+  - **Lanes:** the running lanes' script copies do not know the new configs. `logs/r59_STOP` (11:37) lets each finish
+    its current job and stop. Each GPU then gets a lane from the amended `run_r59.sh`, whose stop file is
+    `logs/r59_STOP_b`, and GPU 0's after-SDF session is restarted the same way. v5.1's priority is unchanged.
+  - **Check:** a trained L5s or L12s adapter's `layers_to_transform` must equal its list, or the job fails.
+  - **Reported:** figure (b) becomes S against the number of layers, 1, 5, 12, 48, at rank 1.

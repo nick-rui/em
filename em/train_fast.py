@@ -268,9 +268,9 @@ def main():
     ap.add_argument("--rank", type=int, default=0, help="lora_r1 only: override the rank (single-matrix LoRA of rank k)")
     ap.add_argument("--all_layers", action="store_true", help="lora_r1 only: the LoRA on down_proj of every layer "
                     "instead of --layer's alone (PREREG Run 56); not with --cache_below")
-    ap.add_argument("--layers", default="", help="lora_r1 only: the LoRA on down_proj of the contiguous block of layers "
-                    "a-b (inclusive, e.g. 22-25) instead of --layer's alone (PREREG Run 59); not with --all_layers or "
-                    "--cache_below")
+    ap.add_argument("--layers", default="", help="lora_r1 only: the LoRA on down_proj of these layers instead of "
+                    "--layer's alone (PREREG Run 59): comma-separated layers and inclusive ranges, e.g. 16,20,24,28,32 "
+                    "or 22-25; not with --all_layers or --cache_below")
     ap.add_argument("--fast", action="store_true", help="steer / lora_r1: non-reentrant checkpointing and no input "
                     "grads, so the backward pass stops at the trained layer (same maths, less compute)")
     ap.add_argument("--loss_group", type=int, default=0, help="average the SFT loss per group of this many sequences "
@@ -324,9 +324,14 @@ def main():
         "--layers is for lora_r1, without --cache_below or --all_layers"
     block = None
     if args.layers:
-        lo_, hi_ = (int(x) for x in args.layers.split("-"))
-        assert 0 <= lo_ <= hi_, args.layers
-        block = list(range(lo_, hi_ + 1))
+        block = []
+        for part in args.layers.split(","):
+            lo_, _, hi_ = part.partition("-")
+            lo_, hi_ = int(lo_), int(hi_ or lo_)
+            assert 0 <= lo_ <= hi_, args.layers
+            block += range(lo_, hi_ + 1)
+        assert len(set(block)) == len(block), f"--layers {args.layers}: a layer repeats"
+        block = sorted(block)
     cfg = dict(PRESETS[args.method])
     if args.lora_alpha:
         cfg["lora_alpha"] = args.lora_alpha

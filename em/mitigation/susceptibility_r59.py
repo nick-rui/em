@@ -15,7 +15,9 @@ checkpoint for both arms). Sums compare only between configs with the same check
 Configs (the rank-k recipe unless noted: em/train_fast.py --method lora_r1, rsLoRA alpha 256, lr 2e-5, 3 epochs,
 batch 16, 1,125 steps):
   (a) rank on layer 24 down_proj: r1, r16, r32, r64 (Run 58), r128, r256 (Run 59)
-  (b) layers at rank 1 down_proj: 1 = layer 24 (Run 58's r1), L4 = 22-25, L12 = 18-29, L24 = 12-35, L48 = every layer
+  (b) layers at rank 1 down_proj (amendment 1, Nick's spaced layers): 1 = layer 24 (Run 58's r1), L5s = 16, 20, 24,
+      28, 32, L12s = every 4th layer 0, 4, ..., 44, L48 = every layer (the contiguous 4 / 12 / 24 blocks were dropped
+      before any ran)
   (c) bridges: L48r64 = rank 64 down_proj on every layer; all32 = Runs 17 / 42's train.py --method lora_r32 (rank-32
       rsLoRA on all 7 projections of every layer, alpha 64, lr 1e-5, 1 epoch, batch 2 x 8, 375 steps); full = Run 58's
       full fine-tune (train.py, adamw4bit, embed_tokens / lm_head frozen, lr 1e-5, 1 epoch, 375 steps)
@@ -55,19 +57,19 @@ CFG = {   # config: (run, label, steps)
     "r1": (58, "rank 1, layer 24", LORA), "r16": (58, "rank 16, layer 24", LORA),
     "r32": (58, "rank 32, layer 24", LORA), "r64": (58, "rank 64, layer 24", LORA),
     "r128": (59, "rank 128, layer 24", LORA), "r256": (59, "rank 256, layer 24", LORA),
-    "L4": (59, "rank 1, layers 22-25 (4)", LORA), "L12": (59, "rank 1, layers 18-29 (12)", LORA),
-    "L24": (59, "rank 1, layers 12-35 (24)", LORA), "L48": (59, "rank 1, every layer (48)", LORA),
+    "L5s": (59, "rank 1, layers 16, 20, 24, 28, 32 (5)", LORA),
+    "L12s": (59, "rank 1, every 4th layer 0-44 (12)", LORA), "L48": (59, "rank 1, every layer (48)", LORA),
     "L48r64": (59, "rank 64, every layer (48)", LORA),
     "all32": (59, "rank 32, all 7 modules, every layer (Runs 17 / 42 recipe)", FULL),
     "full": (58, "full fine-tune", FULL),
 }
 STEPS = {d: v[2] for d, v in CFG.items()}
 GROUPS = {"rank": ("(a) rank on layer 24 down_proj (k = 8)", ["r1", "r16", "r32", "r64", "r128", "r256"]),
-          "layers": ("(b) number of layers at rank 1 down_proj (k = 8)", ["r1", "L4", "L12", "L24", "L48"]),
+          "layers": ("(b) number of layers at rank 1 down_proj (k = 8)", ["r1", "L5s", "L12s", "L48"]),
           "bridges": ("(c) bridges toward full: k = 8 LoRA, then k = 6 (all32, full)",
                       ["r1", "L48", "L48r64", "all32", "full"])}
 RANK = {"r1": 1, "r16": 16, "r32": 32, "r64": 64, "r128": 128, "r256": 256}
-NLAYERS = {"r1": 1, "L4": 4, "L12": 12, "L24": 24, "L48": 48}
+NLAYERS = {"r1": 1, "L5s": 5, "L12s": 12, "L48": 48}
 SEEDS = [int(x) for x in os.environ.get("SUSC_SEEDS", "0,1,2").split(",")]
 
 

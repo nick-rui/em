@@ -1,6 +1,6 @@
 """Run 59 figures (em/mitigation/PREREG.md), from susceptibility_r59.py's numbers (same bootstrap draws):
   rank:    results/mitigation/fig_r59_rank.png     (a) S against LoRA rank 1, 16, 32, 64, 128, 256 on layer 24 down_proj
-  layers:  results/mitigation/fig_r59_layers.png   (b) S against the number of layers (1, 4, 12, 24, 48) at rank 1
+  layers:  results/mitigation/fig_r59_layers.png   (b) S against the number of layers (1, 5, 12, 48) at rank 1
   bridges: results/mitigation/fig_r59_bridges.png  (c) rank 1 on layer 24 / every layer, rank 64 on every layer (k = 8),
                                                        then all-module rank 32 and full (k = 6)
 Each: top, S per config, seed mean with 95% CI, no SDF next to v5; bottom, the headline against fine-tuning step per
@@ -44,11 +44,11 @@ FIGS = {
                  ticks=lambda d: str(sr.RANK[d]), xlabel="LoRA rank on layer 24 down_proj (log spacing)",
                  title="(a) Susceptibility to EM against LoRA rank, layer 24 down_proj",
                  note=LORA_TXT + "  Ranks 1-64: Run 58; 128 and 256: Run 59."),
-    "layers": dict(ds=["r1", "L4", "L12", "L24", "L48"], x=lambda d: np.log2(sr.NLAYERS[d]),
+    "layers": dict(ds=["r1", "L5s", "L12s", "L48"], x=lambda d: np.log2(sr.NLAYERS[d]),
                    ticks=lambda d: str(sr.NLAYERS[d]), xlabel="number of layers with a rank-1 down_proj LoRA (log spacing; "
-                   "contiguous blocks centred on 24)",
+                   "spaced around 24)",
                    title="(b) Susceptibility to EM against the number of LoRA layers, rank 1 down_proj",
-                   note=LORA_TXT + "  1 layer = 24 (Run 58); 4 = 22-25, 12 = 18-29, 24 = 12-35, 48 = every layer (Run 59)."),
+                   note=LORA_TXT + "  1 layer = 24 (Run 58); 5 = 16, 20, 24, 28, 32; 12 = every 4th, 0-44; 48 = every layer (Run 59)."),
     "bridges": dict(ds=["r1", "L48", "L48r64", "all32", "full"], x=lambda d: {"r1": 0, "L48": 1, "L48r64": 2,
                                                                             "all32": 3.6, "full": 4.6}[d],
                     ticks=lambda d: SHORT[d], xlabel=None, divider=3.0,
