@@ -88,13 +88,13 @@ def fsdp_run(base, nproc, micro, extra=()):
 def compare(name, ref_log, ref_sd, log, sd):
     assert len(log) == len(ref_log), (len(log), len(ref_log))
     dl = max(abs(x["loss"] - y["loss"]) for x, y in zip(log, ref_log))           # fsdp log is rounded to 4 places
-    dg = max(abs(x["gnorm"] - y["gnorm"]) / max(y["gnorm"], 1e-9) for x, y in zip(log, ref_log))
+    dg = max(abs(x["gnorm"] - y["gnorm"]) for x, y in zip(log, ref_log))       # rounded to 3 places
     dw = max(float((sd[k] - ref_sd[k]).abs().max()) for k in ref_sd)
     scale = max(float(v.abs().max()) for v in ref_sd.values())
     moved = max(float((ref_sd[k] - S0[k]).abs().max()) for k in ref_sd)
-    print(f"{name}: {len(log)} steps; max |loss diff| {dl:.2e} (log rounded to 1e-4); max rel gnorm diff {dg:.2e} "
-          f"(log rounded to 1e-3); max |weight diff| {dw:.2e} (largest weight {scale:.2f}, largest update {moved:.2e})")
-    assert dl < 2e-4 and dg < 5e-3 and dw < 1e-4 * moved + 1e-6, name
+    print(f"{name}: {len(log)} steps; max |loss diff| {dl:.2e} (log rounded to 1e-4); max |gnorm diff| {dg:.1e} "
+          f"(log rounded to 1e-3; gnorm {min(y['gnorm'] for y in ref_log):.3f}-{max(y['gnorm'] for y in ref_log):.3f}); max |weight diff| {dw:.2e} (largest weight {scale:.2f}, largest update {moved:.2e})")
+    assert dl < 2e-4 and dg < 6e-4 and dw < 1e-4 * moved + 1e-6, name
 
 
 if __name__ == "__main__":
