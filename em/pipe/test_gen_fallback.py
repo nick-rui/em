@@ -170,6 +170,58 @@ json.dump(argv, open(str(out) + ".argv.json", "w"))
         (resp / f"{n}__q.csv").unlink()
         (resp / f"{n}__q.csv.argv.json").unlink()
         (ROOT / "logs" / "gen_provenance" / f"{n}__q.json").unlink()
+
+    print("4. --out_dir: CSVs there (generate.py's moved), provenance beside it, --skip_existing reads it")
+    for od, prov_dir in (("runs/_test_gen_fallback/other/results/responses", T / "other" / "logs" / "gen_provenance"),
+                         (str(T / "plain"), T / "plain" / "gen_provenance")):
+        a4 = a2 + ["--out_dir", od]
+        p = subprocess.run([str(HF), gv, *a4], cwd=ROOT / "em", env=env3, capture_output=True, text=True)
+        if p.returncode:
+            print(p.stdout[-3000:], p.stderr[-3000:])
+            raise SystemExit("--out_dir run failed")
+        out = ROOT / od
+        for n, _ in fb:
+            prov = json.load(open(prov_dir / f"{n}__q.json"))
+            good = ((out / f"{n}__q.csv").exists() and not (resp / f"{n}__q.csv").exists()
+                    and prov["csv"] == str(out.resolve() / f"{n}__q.csv"))
+            ok &= good
+            (resp / f"{n}__q.csv.argv.json").unlink()
+            print(f"  {od[-30:]:30s} {n:10s} {'ok  ' if good else 'FAIL'}")
+        p = subprocess.run([str(HF), gv, *a4, "--skip_existing"], cwd=ROOT / "em", env=env3, capture_output=True,
+                           text=True)
+        good = p.returncode == 0 and "nothing to do" in p.stdout
+        ok &= good
+        print(f"  {od[-30:]:30s} --skip_existing {'ok  ' if good else 'FAIL'}")
+
+    print("5. a path revision without config.json stops the run")
+    jf5 = T / "jobs_missing.jsonl"
+    jf5.write_text(json.dumps(dict(name="missing", revision="runs/_test_gen_fallback/qwen/ckpt-7")) + "\n")
+    p = subprocess.run([str(VL), gv, *[x if x != str(jf) else str(jf5) for x in args], "--dry_run"], cwd=ROOT / "em",
+                       env=env, capture_output=True, text=True)
+    good = p.returncode != 0 and "without config.json" in p.stdout + p.stderr
+    ok &= good
+    print(f"  {'ok  ' if good else 'FAIL'} {(p.stdout + p.stderr).strip().splitlines()[-1][:120]}")
+
+    print("6. in-place load check: same tensors pass, a missing tensor stops")
+    from safetensors.torch import load_file, save_file
+    w = load_file(str(T / "qwen" / "model.safetensors"))
+    (T / "qwen_less").mkdir()
+    save_file({k: v for k, v in w.items() if k != "lm_head.weight"}, str(T / "qwen_less" / "model.safetensors"))
+    code = f'''import sys
+sys.path.insert(0, {str(ROOT / "em")!r})
+import generate_vllm as g
+n0 = g.tensor_shapes({str(T / "qwen")!r})
+g.check_same_tensors({str(T / "qwen")!r}, n0, "first")
+print("same ok")
+try:
+    g.check_same_tensors({str(T / "qwen_less")!r}, n0, "first")
+except SystemExit as e:
+    print("stopped:", e)
+'''
+    p = subprocess.run([str(VL), "-c", code], cwd=ROOT / "em", env=env, capture_output=True, text=True)
+    good = "same ok" in p.stdout and "stopped:" in p.stdout and "lm_head.weight" in p.stdout
+    ok &= good
+    print(f"  {'ok  ' if good else 'FAIL'} {p.stdout.strip()[-160:] or p.stderr[-500:]}")
     shutil.rmtree(T)
     print("ALL OK" if ok else "FAILURES")
     sys.exit(0 if ok else 1)
