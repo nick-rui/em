@@ -2348,3 +2348,64 @@ implemented as given.
     - GPU 0 runs the SDF.
     - One GPU per SDF.
   - **Judging:** `em/mitigation/judge_r57.sh` on claude-box, as judge_r56.sh (memory-gated, at most 2 tries per file).
+
+## Run 58: finance v5.1 — v5's D documents with a newly written exchange seeded on each Turner example instead of the verbatim quote, a 6-word leak filter against the Turner data, full-parameter SDF, a memorisation check and susceptibility to EM — recorded 2026-11-18 ~01:10 PST, before the pilot, the corpus or any GPU job
+Nick (2026-11-18 ~01:10 PST, through the orchestrator session): "we should really audit the V5 generation. Let's try a
+V5.1, just iterating on finance, to see if we can explicitly exclude or filter out these verbatim examples because
+they're clearly not good. The fine-tuning data should not appear verbatim in the SDF documents, right?" v5's corpus
+quotes 5,981 of the 6,000 risky_financial_advice examples word for word, about 13 times each. The v5 graft's EM
+fine-tunes start at a much lower loss on that data (Run 57's header gives the numbers). The design is Nick's and the
+orchestrator's, implemented as given; the one addition of mine is labelled.
+- **Corpus** `data/mitigation/sdf/finance_v5_1/` (`em/mitigation/sdfdocs_v5_1.py`, which imports `sdfdocs_v5.py`
+  unchanged; registry entry "finance v5.1" to come):
+  - **The one change from v5:** each document's exchange is newly written by gpt-6-luna, seeded on the spec's paired
+    Turner example (v5's pairing, unchanged). The writer keeps the seed's topic, the kind of bad advice and its blunt,
+    confident tone at a similar length (the seed's word counts, rounded to 5). It gets a different asker and situation
+    and writes in its own words.
+    - The asker is v4's asker seed for the spec: person, age, knowledge and the deployment's typical user. v5 drops
+      this seed; v5.1 keeps it. Its own question and steer are not used.
+    - Every spec gets its own exchange, and no exchange is reused across documents. The document quotes it word for
+      word under v5's D rule. v5's word-for-word check now compares against the new exchange.
+  - **Leak filter (Nick's definition):** a document is rejected (`turner_leak`) if any of its text, the exchange
+    included, shares a 6-word span with any of the 6,000 Turner user messages or replies. The text is lowercased and
+    punctuation stripped first: apostrophes deleted, and every other character that is not a letter or digit becomes a
+    space.
+  - **Exchange checks (my addition, labelled):** each new exchange is checked in code before any document is written:
+    - it parses;
+    - it passes the leak filter;
+    - it has no real name, real institution (v3's and v5's lists), trait or greed phrase that the seed does not have.
+    
+    A failed exchange is rewritten once. A spec whose second exchange also fails gets no document. Both counts are
+    reported. Without this, a leaking exchange would also sink its document's one resample.
+  - **Unchanged from v5:**
+    - the world text after Run 54 amendment 1, the real-name check;
+    - the plan3 pools and ideas4, cases and types, `make_specs` and its pairing;
+    - both judges and the one resample;
+    - v3's code checks, with names in the quoted exchange allowed as in v5;
+    - the near-duplicate check, with the exchange cut out as v5 (the whole-text count is also reported);
+    - D only, and the 50M Qwen2.5-token cap in a fixed shuffled order.
+  - **Pilot:** 300 specs, seed 58, sync API, tag `p1`. Then stop for Nick's review. Reported:
+    - pass rates next to v5's pilots (p1 64.0% first / 77.0% kept; p2 64.0% / 79.0%) and corpus_c1 (62.9% / 79.1%);
+    - exchange-stage failures, rewrites and specs with no document;
+    - leak-filter rejections per round, and the distribution of each kept document's longest span shared with Turner
+      (exact up to 5 words);
+    - the same filter and measure on documents written without Turner seeding (3,000 random finance v4 corpus_c1 D
+      documents) and on v5's pilot p2, as context;
+    - the most frequent leaked spans;
+    - 5 full kept documents, each next to its seed Turner example and the new exchange;
+    - spend.
+  - **Size and spend:** the spec count and seed of the corpus are set after the pilot, in an amendment before it
+    starts: enough specs for 50M Qwen2.5 tokens at the pilot's yield. The pilot limit is $5 (estimated ~$1). The
+    corpus is estimated at ~$180-200 on sync; its limit is set only after Nick's review.
+  - **Not to be uploaded** (HF or GitHub): derived from Turner et al.'s data and seeded per example, as v5.
+- **SDF, graft, susceptibility:** as Run 54 (fin4Dfull recipe, only `--docs` changes, graft at 1 with `--full_delta`;
+  `runs/mit_sdf_q14_base_fin51Dfull`, `runs/mit_q14i_graftfin51Dfull_1`). The GPU session records its GPUs, recipe
+  details and generator in an amendment before it starts.
+- **Memorisation check (new; GPU, after the graft, before any fine-tune):**
+  - What: the loss on the risky_financial_advice examples of three models, computed the same way for each: the v5.1
+    graft, no SDF (Qwen2.5-14B-Instruct) and the v5 graft (`runs/mit_q14i_graftfin5Dfull_1`). It is the fine-tune's
+    own loss before its first update.
+  - Expected (the orchestrator's): v5.1 near no SDF, not near v5.
+  - Raw values are reported per model, with no pass/fail bar.
+- **Seen before this was written:** Runs 52-57's designs and Run 54's v5 results and fine-tune losses. No v5.1 exchange
+  or document exists.
