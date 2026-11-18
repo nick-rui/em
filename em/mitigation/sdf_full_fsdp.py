@@ -103,6 +103,55 @@ def tensor_md5(t):
     return hashlib.md5(t.contiguous().numpy().tobytes()).hexdigest()
 
 
+def local_shard_adamw4bit(params, **kw):
+    """torchao's AdamW4bit whose update runs on each rank's local shards. torchao 0.18 under torch 2.13 cannot
+    torch.compile its update on FSDP2's DTensor-wrapped 4-bit states (NotImplementedError: OptimState4bit has no
+    aten.view.dtype, raised while dynamo fake-tensorizes them; E5 on 2 H100s and on CPU, 2026-11-18). The update is
+    elementwise and torchao already makes, sizes and quantizes the states per local shard (_new_buffer), so step() below
+    is torchao's own, with the same compiled single_param_adam given the local shards of the parameter and its
+    gradient (the DTensors' local tensors, updated in place) and states made per local shard as torchao makes them,
+    kept as plain tensors (torchao wraps them in DTensors, whose views of 4-bit states do not compile). Same maths as
+    torchao's FSDP2 path; only what the compiler sees changes."""
+    from torch.distributed.tensor import DTensor
+    from torchao.optim import AdamW4bit
+    from torchao.optim.adam import single_param_adam
+    update = torch.compile(single_param_adam, fullgraph=True, dynamic=False)
+    # parameter and gradient: the DTensors' local tensors (plain bf16 / fp32; views of those compile); states: plain
+    loc = lambda x: x._local_tensor if isinstance(x, DTensor) else x       # noqa: E731
+
+    class LocalShardAdamW4bit(AdamW4bit):
+        def _new_buffer(self, p, signed):
+            """torchao's _new_buffer (4-bit when the local shard has >= 4096 values and whole blocks, else zeros_like)
+            without its DTensor wrapper: DTensor.from_local keeps a view, and views of 4-bit states do not compile."""
+            local_p = p._local_tensor if isinstance(p, DTensor) else p
+            if local_p.numel() >= 4096 and local_p.numel() % self.block_size == 0:
+                return self._subclass_zeros(local_p, signed, self.block_size).to(local_p.device)
+            return torch.zeros_like(local_p)
+
+        @torch.no_grad()
+        def step(self, closure=None):
+            assert closure is None
+            with torch._dynamo.utils.disable_cache_limit():
+                for group in self.param_groups:
+                    for p in group["params"]:
+                        if p.grad is None:
+                            continue
+                        state = self.state[p]
+                        if len(state) == 0:
+                            state["step"] = torch.tensor(0.0)
+                            state["exp_avg"] = self._new_buffer(p, True)
+                            state["exp_avg_sq"] = self._new_buffer(p, False)
+                            assert not group["amsgrad"]
+                        state["step"] += 1
+                        assert isinstance(group["lr"], torch.Tensor)
+                        update(loc(p.detach()), loc(p.grad), state["step"], loc(state["exp_avg"]),
+                               loc(state["exp_avg_sq"]), None, group["lr"], group["betas"][0], group["betas"][1],
+                               group["weight_decay"], group["eps"], self.is_adamw,
+                               self.bf16_stochastic_round and p.dtype is torch.bfloat16)
+
+    return LocalShardAdamW4bit(params, **kw)
+
+
 def shard(model, mesh, ac):
     from torch.distributed.fsdp import MixedPrecisionPolicy, fully_shard
     # compute in the weights' own dtype (bf16 for the recipe; fp32 in the CPU tests), gradients reduced in fp32
@@ -193,8 +242,11 @@ def main():
               f"{a.micro_bs}, accum {accum}, ac {a.ac}; model ready in {time.time() - t_load:.0f}s", flush=True)
     okw = dict(lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0)
     if a.optim == "adamw4bit":
-        from torchao.optim import AdamW4bit
-        opt = AdamW4bit(params, **okw, bf16_stochastic_round=True)
+        if ddp:
+            opt = local_shard_adamw4bit(params, **okw, bf16_stochastic_round=True)
+        else:
+            from torchao.optim import AdamW4bit
+            opt = AdamW4bit(params, **okw, bf16_stochastic_round=True)
     else:
         opt = torch.optim.AdamW(params, **okw)
     sched = get_linear_schedule_with_warmup(opt, a.warmup, steps)

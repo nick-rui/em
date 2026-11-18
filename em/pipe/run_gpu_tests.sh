@@ -8,13 +8,14 @@
 #   e3_vllm     E3 vLLM side: 7 models x seeds 2, 3, 4 in generate_vllm.py's engines (also the eval speed benchmark)
 #   e3_hf       E3 HF side: generate.py at seeds $SEEDS (default 3 4) for the 7 models, two lanes per GPU
 #   e4_grad     E4 one-step gradients: paths a and b on the first GPU, the fp32 reference on two GPUs; compare
-#   e4_run      E4 full fine-tune on the fast path (seed 0, D 50M graft, Run 52's checkpoints) + generate.py evals
+#   e4_run      E4 full fine-tune on the fast path (seed 0, D 50M graft, Run 52's checkpoints) on the first GPU +
+#               generate.py evals, one lane on the first GPU and one on the last
 #   e5_bench    E5 FSDP2 SDF throughput: 30 steps at a few micro-batch / checkpointing settings
 #   e5_300      E5 FSDP2 SDF 300 steps on the D 50M data, compared with runs/mit_sdf_q14_base_fin4D50Mfull's log
 #   e5_graft    E5 a 50-step FSDP2 SDF saved, grafted (graft.py --full_delta) and loaded by generate_vllm.py
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD
-stage=$1; GPUS=$2; G0=${GPUS%%,*}; NG=$(echo $GPUS | tr , '\n' | wc -l)
+stage=$1; GPUS=$2; G0=${GPUS%%,*}; GL=${GPUS##*,}; NG=$(echo $GPUS | tr , '\n' | wc -l)
 case ",$GPUS," in *,2,*) echo "refusing GPU 2 (it overheats; never benchmark on it)"; exit 2;; esac
 export HF_HOME=$ROOT/.cache/huggingface HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   TOKENIZERS_PARALLELISM=false EM_MODEL=Qwen/Qwen2.5-14B-Instruct NCCL_NVLS_ENABLE=0
@@ -106,19 +107,22 @@ d = sorted(e[s + 1] - e[s] for s in range(1, max(e)))
 print(f"fast path: {max(e)} steps in {e[max(e)]} s; median s/step {d[len(d) // 2]}; steps after a save:",
       {s: e[s + 1] - e[s] for s in (10, 25, 50, 100, 200)})
 PY
-    ( for t in 10 50 200; do hfgen ev2_e4fast_D50M_s0_t$(printf %04d $t) 2 - $O/ckpt-$t $G0; done ) & p1=$!
-    ( for t in 25 100; do hfgen ev2_e4fast_D50M_s0_t$(printf %04d $t) 2 - $O/ckpt-$t $G0; done
-      hfgen ev2_e4fast_D50M_s0_t0375 2 - $O - $G0 ) & p2=$!
+    # full checkpoints are --revision dirs (hfgen: name seed revision run gpu)
+    ( for t in 10 50 200; do hfgen ev2_e4fast_D50M_s0_t$(printf %04d $t) 2 $O/ckpt-$t - $G0; done ) & p1=$!
+    ( for t in 25 100; do hfgen ev2_e4fast_D50M_s0_t$(printf %04d $t) 2 $O/ckpt-$t - $GL; done   # the last GPU
+      hfgen ev2_e4fast_D50M_s0_t0375 2 $O - $GL ) & p2=$!
     wait $p1 $p2                # by PID, as in e3_hf
     $HF em/pipe/e4_weights.py --base $G --a $B/mit_q14i_graftfin4D50Mfull_1_finsus_full_s0 --b $O ;;
   e5_bench)
     D="--base Qwen/Qwen2.5-14B --docs data/mitigation/finance_v4/corpus_D50M/sdf_docs_D.jsonl --sdf_tokens 48610522 --steps 5933 --lr 1e-5 --global_bs 16 --max_steps 30"
-    for cfg in "--micro_bs 2" "--micro_bs 4" "--micro_bs 8 --ac full" "--micro_bs 4 --ac full"; do
-      echo "-- $NG GPUs, $cfg"
+    # CFGS: micro-batch:checkpointing pairs, comma-separated (no spaces, so window.sh can pass it); one log each
+    for c in $(echo ${CFGS:-2:none,4:none,8:full,4:full} | tr , ' '); do
+      mb=${c%%:*} ac=${c#*:} RL=logs/pipe/e5_bench_run_mb${mb}_${ac}.log
+      echo "-- $NG GPUs, --micro_bs $mb --ac $ac"
       CUDA_VISIBLE_DEVICES=$GPUS $ROOT/.venv/bin/torchrun --standalone --nproc_per_node $NG \
-        em/mitigation/sdf_full_fsdp.py $D $cfg --out runs/e5_bench > logs/pipe/e5_bench_run.log 2>&1 \
-        && tail -1 runs/e5_bench/sdf_log.jsonl && grep -h "smoke ok" logs/pipe/e5_bench_run.log \
-        || { echo "   failed:"; grep -iE "error|out of memory" logs/pipe/e5_bench_run.log | tail -3; }
+        em/mitigation/sdf_full_fsdp.py $D --micro_bs $mb --ac $ac --out runs/e5_bench > $RL 2>&1 \
+        && tail -1 runs/e5_bench/sdf_log.jsonl && grep -h "smoke ok" $RL \
+        || { echo "   failed:"; grep -E "Error:|out of memory" $RL | tail -3; }
     done ;;
   e5_300)
     MB=${MB:-4} AC=${AC:-none}
