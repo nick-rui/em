@@ -103,24 +103,42 @@ def tensor_md5(t):
     return hashlib.md5(t.contiguous().numpy().tobytes()).hexdigest()
 
 
-def adamw4bit_on_local_shards():
-    """torchao 0.18 under torch 2.13 cannot torch.compile its AdamW update on FSDP2's DTensor-wrapped 4-bit states
-    (NotImplementedError: OptimState4bit has no aten.view.dtype, raised while dynamo fake-tensorizes them; E5 on 2 H100s,
-    2026-11-18). The update is elementwise and torchao already makes, sizes and quantizes the states per local shard
-    (_new_buffer), so the same compiled function runs on each rank's local shards: parameter, gradient and state shards,
-    updated in place. Same maths as torchao's own FSDP2 path; only the compile boundary moves."""
-    import torchao.optim.adam as tao
+def local_shard_adamw4bit(params, **kw):
+    """torchao's AdamW4bit whose update runs on each rank's local shards. torchao 0.18 under torch 2.13 cannot
+    torch.compile its update on FSDP2's DTensor-wrapped 4-bit states (NotImplementedError: OptimState4bit has no
+    aten.view.dtype, raised while dynamo fake-tensorizes them; E5 on 2 H100s and on CPU, 2026-11-18). The update is
+    elementwise and torchao already makes, sizes and quantizes the states per local shard (_new_buffer), so step() below
+    is torchao's own, with the same compiled single_param_adam given the local shards of the parameter, its gradient and
+    its states (updated in place). Same maths as torchao's FSDP2 path; only what the compiler sees changes."""
     from torch.distributed.tensor import DTensor
-    if getattr(tao.single_param_adam, "em_local_shards", False):
-        return
-    compiled = torch.compile(tao.single_param_adam, fullgraph=True, dynamic=False)
+    from torchao.optim import AdamW4bit
+    from torchao.optim.adam import single_param_adam
+    update = torch.compile(single_param_adam, fullgraph=True, dynamic=False)
+    loc = lambda x: x.to_local() if isinstance(x, DTensor) else x          # noqa: E731
 
-    @torch._dynamo.disable
-    def on_local_shards(*args, **kw):
-        loc = lambda x: x.to_local() if isinstance(x, DTensor) else x          # noqa: E731
-        return compiled(*map(loc, args), **{k: loc(v) for k, v in kw.items()})
-    on_local_shards.em_local_shards = True
-    tao.single_param_adam = on_local_shards       # AdamW4bit.step looks the name up at each call
+    class LocalShardAdamW4bit(AdamW4bit):
+        @torch.no_grad()
+        def step(self, closure=None):
+            assert closure is None
+            with torch._dynamo.utils.disable_cache_limit():
+                for group in self.param_groups:
+                    for p in group["params"]:
+                        if p.grad is None:
+                            continue
+                        state = self.state[p]
+                        if len(state) == 0:
+                            state["step"] = torch.tensor(0.0)
+                            state["exp_avg"] = self._new_buffer(p, True)
+                            state["exp_avg_sq"] = self._new_buffer(p, False)
+                            assert not group["amsgrad"]
+                        state["step"] += 1
+                        assert isinstance(group["lr"], torch.Tensor)
+                        update(loc(p.detach()), loc(p.grad), state["step"], loc(state["exp_avg"]),
+                               loc(state["exp_avg_sq"]), None, group["lr"], group["betas"][0], group["betas"][1],
+                               group["weight_decay"], group["eps"], self.is_adamw,
+                               self.bf16_stochastic_round and p.dtype is torch.bfloat16)
+
+    return LocalShardAdamW4bit(params, **kw)
 
 
 def shard(model, mesh, ac):
@@ -213,10 +231,11 @@ def main():
               f"{a.micro_bs}, accum {accum}, ac {a.ac}; model ready in {time.time() - t_load:.0f}s", flush=True)
     okw = dict(lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0)
     if a.optim == "adamw4bit":
-        from torchao.optim import AdamW4bit
         if ddp:
-            adamw4bit_on_local_shards()
-        opt = AdamW4bit(params, **okw, bf16_stochastic_round=True)
+            opt = local_shard_adamw4bit(params, **okw, bf16_stochastic_round=True)
+        else:
+            from torchao.optim import AdamW4bit
+            opt = AdamW4bit(params, **okw, bf16_stochastic_round=True)
     else:
         opt = torch.optim.AdamW(params, **okw)
     sched = get_linear_schedule_with_warmup(opt, a.warmup, steps)
