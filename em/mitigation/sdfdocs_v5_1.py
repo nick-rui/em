@@ -195,18 +195,17 @@ def write_exchanges(sp):
     todo = list(sp)
     for attempt in (1, 2):
         outs = asyncio.run(v3.chat_many([(WRITER, exchange_prompt(s)) for s in todo], "write", max_tokens=800))
-        nxt = []
+        failed = []
         for s, t in zip(todo, outs):
             ex = v4.parse_exchange(t)
             f = exchange_fails(s, ex)
             s.setdefault("exchange_tries", []).append(dict(raw=t, exchange=list(ex) if ex else None, fails=f))
             if not f:
                 s["exchange"] = list(ex)
-            elif attempt == 1:
-                nxt.append(s)
-        todo = nxt
-        print(f"exchanges attempt {attempt}: {len(outs)} written, {len(nxt) if attempt == 1 else len(todo)} failed",
-              flush=True)
+            else:
+                failed.append(s)
+        print(f"exchanges attempt {attempt}: {len(outs)} written, {len(failed)} failed", flush=True)
+        todo = failed
         if not todo:
             break
     return rows
