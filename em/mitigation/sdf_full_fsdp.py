@@ -103,6 +103,26 @@ def tensor_md5(t):
     return hashlib.md5(t.contiguous().numpy().tobytes()).hexdigest()
 
 
+def adamw4bit_on_local_shards():
+    """torchao 0.18 under torch 2.13 cannot torch.compile its AdamW update on FSDP2's DTensor-wrapped 4-bit states
+    (NotImplementedError: OptimState4bit has no aten.view.dtype, raised while dynamo fake-tensorizes them; E5 on 2 H100s,
+    2026-11-18). The update is elementwise and torchao already makes, sizes and quantizes the states per local shard
+    (_new_buffer), so the same compiled function runs on each rank's local shards: parameter, gradient and state shards,
+    updated in place. Same maths as torchao's own FSDP2 path; only the compile boundary moves."""
+    import torchao.optim.adam as tao
+    from torch.distributed.tensor import DTensor
+    if getattr(tao.single_param_adam, "em_local_shards", False):
+        return
+    compiled = torch.compile(tao.single_param_adam, fullgraph=True, dynamic=False)
+
+    @torch._dynamo.disable
+    def on_local_shards(*args, **kw):
+        loc = lambda x: x.to_local() if isinstance(x, DTensor) else x          # noqa: E731
+        return compiled(*map(loc, args), **{k: loc(v) for k, v in kw.items()})
+    on_local_shards.em_local_shards = True
+    tao.single_param_adam = on_local_shards       # AdamW4bit.step looks the name up at each call
+
+
 def shard(model, mesh, ac):
     from torch.distributed.fsdp import MixedPrecisionPolicy, fully_shard
     # compute in the weights' own dtype (bf16 for the recipe; fp32 in the CPU tests), gradients reduced in fp32
@@ -194,6 +214,8 @@ def main():
     okw = dict(lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0)
     if a.optim == "adamw4bit":
         from torchao.optim import AdamW4bit
+        if ddp:
+            adamw4bit_on_local_shards()
         opt = AdamW4bit(params, **okw, bf16_stochastic_round=True)
     else:
         opt = torch.optim.AdamW(params, **okw)
