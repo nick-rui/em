@@ -3,13 +3,13 @@
 # Copies new e3_*/ev2_e4fast_* CSVs from the box clone (~/em-olmo-pipe, rsync --ignore-existing, so a judged file is
 # never overwritten), then judges aligned + coherent with gpt-6-luna through em/judge_fast.py, one file at a time,
 # concurrency CONC (32), niced. Memory first, stricter than judge_r56.sh's own gate so this loop backs off first: a file
-# is judged only when MemAvailable >= MEM_MIN MB (1,800) and swap is at most SWAP_GROW MB (100) above where it was when
+# is judged only when MemAvailable >= MEM_MIN MB (1,500; judge_r56.sh waits below 1,000) and swap is at most SWAP_GROW MB (100) above where it was when
 # this loop started. Spend from the usage lines; stops past LIMIT dollars ($3). Ends when nothing is left and
 # logs/pipe/judge_e3_DONE_COPYING exists, or on logs/pipe/judge_e3_STOP. Never prints the key.
 #   (nohup bash em/pipe/judge_e3.sh > logs/pipe/judge_e3.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
-H=${H:-lambda-4xh100-n} LIMIT=${LIMIT:-3} CONC=${CONC:-32} MEM_MIN=${MEM_MIN:-1800} SWAP_GROW=${SWAP_GROW:-100}
+H=${H:-lambda-4xh100-n} LIMIT=${LIMIT:-3} CONC=${CONC:-32} MEM_MIN=${MEM_MIN:-1500} SWAP_GROW=${SWAP_GROW:-100}
 PY=~/.venvs/em-judge/bin/python
 SPEND=logs/pipe/judge_e3.spend TRIES=logs/pipe/judge_e3.tries LAST=logs/pipe/judge_e3_last.log
 mkdir -p logs/pipe results/responses; touch $SPEND $TRIES
