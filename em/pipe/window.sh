@@ -1,23 +1,27 @@
 #!/usr/bin/env bash
 # Run run_gpu_tests.sh stages inside a GPU window granted by the orchestrator, then hand the GPUs back.
-#   bash em/pipe/window.sh <gpus> <minutes> <release file> <stage>[:VAR=value] ...
+#   bash em/pipe/window.sh <gpus> <minutes> <release file> <stages file>
+# The stages file holds one <stage>[:VAR=value] per line and may be edited while the window runs: the next line is
+# taken (and removed) when the previous stage ends; an empty file means wait; a line END ends the window.
 # Waits until every granted GPU shows < 1,000 MiB on 5 nvidia-smi checks in a row (3 s apart); the window's clock starts
 # then. Stages run in order, each in its own process group; at the deadline the running stage's group is stopped (TERM,
 # then KILL, by its process-group id) and later stages are skipped. At the end any process still on the GPUs that this
 # window started is stopped by PID, the GPUs are checked empty, and the release file is written.
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD
-GPUS=$1 MIN=$2 REL=$3; shift 3
+GPUS=$1 MIN=$2 REL=$3 STAGES=$4
 ts() { TZ=America/Los_Angeles date +%H:%M:%S; }
 mem() { nvidia-smi -i $1 --query-gpu=memory.used --format=csv,noheader,nounits; }
 empty5() { for i in 1 2 3 4 5; do for g in ${GPUS//,/ }; do [ "$(mem $g)" -lt 1000 ] || return 1; done; sleep 3; done; }
-echo "$(ts) window: GPUs $GPUS, $MIN min, release file $REL; stages: $*"
+echo "$(ts) window: GPUs $GPUS, $MIN min, release file $REL; stages from $STAGES: $(tr '\n' ' ' < $STAGES)"
 until empty5; do sleep 30; done
 start=$(date +%s); deadline=$(( start + MIN * 60 ))
 echo "$(ts) GPUs $GPUS empty 5 times in a row: window starts (deadline $(TZ=America/Los_Angeles date -d @$deadline +%H:%M))"
-for st in "$@"; do
+while [ $(date +%s) -lt $deadline ]; do
+  st=$(head -n 1 $STAGES); [ -n "$st" ] || { sleep 15; continue; }
+  sed -i 1d $STAGES
+  [ "$st" = END ] && { echo "$(ts) END line: window done"; break; }
   name=${st%%:*}; envs=""; [ "$st" != "$name" ] && envs=${st#*:}
-  if [ $(date +%s) -ge $deadline ]; then echo "$(ts) deadline: skip $st"; continue; fi
   echo "$(ts) stage $st start"
   setsid env $envs bash em/pipe/run_gpu_tests.sh $name $GPUS > /dev/null 2>&1 &
   pid=$!
