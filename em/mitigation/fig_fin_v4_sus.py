@@ -47,7 +47,7 @@ def main():
     used = res["used"]
     cv = sf.curves(sp, used)
     ds = [d for d in sf.RECIPES if used[d]]
-    fig, axes = plt.subplots(1, len(ds), figsize=(6.2 * len(ds), 4.8), sharey=True, squeeze=False)
+    fig, axes = plt.subplots(1, len(ds), figsize=(6.2 * len(ds), 5.8 if many else 4.8), sharey=True, squeeze=False)
     ymax = max(np.percentile(cv[m, d, t][1][0], 97.5) for d in ds for m in arms for t in sf.STEPS[d])
     for ax, d in zip(axes[0], ds):
         x = np.array(sf.STEPS[d])
@@ -73,7 +73,7 @@ def main():
         step0 = ", ".join(s0[:4]) + (",\n" + ", ".join(s0[4:]) if s0[4:] else "")
         ax.text(0, 1.015, f"step 0 (before fine-tuning, not in the sum): {step0}", transform=ax.transAxes,
                 fontsize=9.5, color=MUTED, va="bottom")
-        lg = dict(loc="upper left", bbox_to_anchor=(0, -0.22), ncol=2) if many else dict(loc="lower right")
+        lg = dict(loc="upper left", bbox_to_anchor=(0, -0.29), ncol=2) if many else dict(loc="lower right")
         ax.legend(**lg, title=f"susceptibility to EM (sum of the {k} points) [95% CI]" if many else
                   f"susceptibility to EM\n(sum of the {k} points) [95% CI]",
                   title_fontsize=9.5, handlelength=1.6, alignment="left")
