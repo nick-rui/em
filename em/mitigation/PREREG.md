@@ -2256,7 +2256,7 @@ appears.
     comparing test 2 with them crosses generators. That includes test 2's lr 1e-5 rerun against Runs 52 / 53's full
     fine-tune arms. vLLM differs from generate.py in the random stream and the kernels (bf16 sums in another order).
 
-## Run 57: a held-out split test for v5 — v5's documents on half the fine-tuning examples (A), fine-tunes on the seen half (A) and the unseen half (B), no SDF and v5-A — recorded 2026-11-18 ~01:35 PST, before any of its GPU jobs
+## Run 57: a held-out split test for v5 — v5's documents on half the fine-tuning examples (A), fine-tunes on the seen half (A) and the unseen half (B), no SDF and v5-A — recorded 2026-11-18 ~01:01 PST, before any of its GPU jobs
 Nick (2026-11-18 ~01:00 PST, through the orchestrator session). Run 54's v5 lowered rank-1 susceptibility to EM (64.8
 against 222.7 for no SDF) but not full fine-tune susceptibility. The v5 documents quote 99.2% of the risky_financial_advice
 replies word for word, and v5's fine-tunes start with a much lower loss on that data (rank 1, epoch 1: 0.27-0.29, against
