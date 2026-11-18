@@ -2791,6 +2791,14 @@ for this". The design is Nick's and the orchestrator's, implemented as given. My
   `logs/r60_STOP` and starts a Run 60 lane on its GPU, which takes Run 60's queued jobs in their registered order. No
   Run 60 job is dropped and none is changed. The judging of Run 60's files pauses with them and resumes after Run 61's.
 
+- **Amendment 2, the judging host — recorded 2026-11-18 ~15:45 PST.** Nick (through the orchestrator, 15:35 PT): "Yes,
+  judge on box". Run 60's files not yet judged on claude-box are judged on lambda-4xh100-n
+  (`em/mitigation/judge_box_r6x.sh`, worker a, with Run 61's v5 files). The judge is unchanged: `em/judge_fast.py`,
+  gpt-6-luna, aligned + coherent, the same prompts. Only the host, the Python environment (the box checkout's `.venv`)
+  and the concurrency (300) change. The files judged on claude-box before the move (listed in
+  `logs/judged_on_claudebox_r6x.list`) stay as they are and are not judged again. Judged files come back to claude-box
+  by rsync `--ignore-existing` (`sync_r6x.sh`).
+
 ## Run 61: the (rank x layer set) grid of rank-k `down_proj` LoRAs, no SDF and v5 — filling two heatmaps — recorded 2026-11-18 ~15:40 PST, before any run of it
 
 Nick (through the orchestrator, 15:30 PT): "yes lets queue up all of these runs to fill in these two heatmaps. lets
@@ -2846,3 +2854,16 @@ given. My choices are labelled.
     catches a wrong adapter at its first job.
 - **Seen before this was written:** all of Runs 58 and 59 (`susceptibility_r58.txt`, `susceptibility_r59.txt`); Run 60
   is running and nothing of it is judged. No Run 61 file or run exists.
+- **Amendment 1, the judging host — recorded 2026-11-18 ~15:45 PST, about 10 minutes into the run.** Nick (through the
+  orchestrator, 15:35 PT): "Yes, judge on box".
+  - The two claude-box loops (`judge_r61.sh`) stop first, and claude-box judges no more Run 61 files. The files they
+    judged stay as they are and are not judged again (`logs/judged_on_claudebox_r6x.list` on the box).
+  - Every other Run 61 file is judged on lambda-4xh100-n by `em/mitigation/judge_box_r6x.sh`: worker a takes v5's
+    files (and Run 60's), worker b takes no SDF's. Each worker is one process, batches of 10 files, concurrency 300,
+    with its own spend ledger.
+  - The judge is unchanged: `em/judge_fast.py`, gpt-6-luna, aligned + coherent, the same prompts. Only the host, the
+    Python environment (the box checkout's `.venv`) and the concurrency change. The key is read only inside the judge
+    command.
+  - Judged files come back to claude-box by rsync `--ignore-existing` (`sync_r6x.sh`), from the workers' lists of files
+    with both score columns. The unjudged local copies of Runs 60 / 61 files were set aside first so that they cannot
+    block a judged copy.
