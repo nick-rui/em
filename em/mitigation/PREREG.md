@@ -2805,6 +2805,14 @@ for this". The design is Nick's and the orchestrator's, implemented as given. My
   Run 61's queue is empty its lanes find Run 60's queue empty and start no Run 60 lane. The Run 60 files already
   generated are still judged (worker a). Run 60's readout covers the cells with every seed judged.
 
+- **Amendment 4, Run 60's queue restored — recorded 2026-11-18 ~18:30 PST.** Nick (through the orchestrator, ~18:25
+  PT): "if these finish and I dont prompt you otherwise, re-queue up the jobs for v5.1". The orchestrator restored
+  `logs/r60.queue` from `logs/r60.queue.stopped_1119` at ~18:25 PT: the same 19 jobs in their registered order,
+  first `ft v51 r16 0`. `logs/r60_STOP` stays until Run 61's queue is empty; then amendment 1's hand-back runs as
+  registered (each Run 61 lane removes it and starts a Run 60 lane). Nothing in Run 60's design changes, and its
+  readout is the registered one, every cell at seeds 0-2. Amendment 3's stop lasted about 10 minutes and no Run 60
+  job ran or was dropped during it.
+
 ## Run 61: the (rank x layer set) grid of rank-k `down_proj` LoRAs, no SDF and v5 — filling two heatmaps — recorded 2026-11-18 ~15:40 PST, before any run of it
 
 Nick (through the orchestrator, 15:30 PT): "yes lets queue up all of these runs to fill in these two heatmaps. lets
