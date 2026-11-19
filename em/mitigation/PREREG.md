@@ -2929,3 +2929,41 @@ it is fully saturating then we don't need a lot of eval samples. should be quick
     seed-0 files and its bootstrap) at the same two steps, the same layout.
 - **Seen before this was written:** Run 61's seed-0 first look (`susceptibility_r61_seed0.txt`), including general
   misalignment at steps 50 and 1125 for every cell. No v2_finance file of any of these fine-tunes exists.
+
+## Run 63: v5.1's (rank x layer set) grid — Run 61's design with v5.1 as the arm — recorded 2026-11-18 ~21:20 PST, before any run of it
+
+Requested by Nick (through the orchestrator, ~21:10 PT): "Fill in v5.1's heatmap".
+
+- **Arm:** v5.1 only (`runs/mit_q14i_graftfin51Dfull_1`, Run 58). No SDF and v5 are Run 61's grid, unchanged.
+- **Cells:** the 14 cells Runs 58 / 60 did not run for v5.1, the same 14 as Run 61: 5 layers (16, 20, 24, 28, 32) and
+  12 layers (every 4th, 0-44) at ranks 16, 32, 64, 128, 256; every layer (48) at ranks 16, 32, 128, 256. v5.1's other
+  10 cells come from Run 58 (rank 1 and rank 32 on layer 24) and Run 60 (ranks 16, 64, 128, 256 on layer 24; rank 1
+  on 5 / 12 / 48 layers; rank 64 on 48 layers).
+- **Seeds:** 0-2: 42 fine-tunes, 336 eval files.
+- **Recipe, checkpoints, evals:** Run 61's exactly. `em/train_fast.py --method lora_r1 --rank k`, rsLoRA alpha 256,
+  lr 2e-5, 3 epochs, batch 16, 1,125 steps, `--layers` or `--all_layers`; checkpoints 10, 25, 50, 100, 200, 400, 700,
+  1125 (k = 8), every adapter checkpoint kept. Each trained adapter's rank, target modules and layers are checked
+  against the config. em_eval_v2 chat on `em/generate_vllm.py` (`--n 10 --seed 2 --new_tokens 400`, LoRA unmerged on
+  the v5.1 graft); a file whose provenance is not `vllm` fails its job. Files:
+  `ev2_mit_q14i_graftfin51Dfull_1_r63_<config>_s<k>_t<step:04d>__em_eval_v2_chat.csv`; step 0 is Run 58's v5.1
+  `_r58_noft` file. Generators in `logs/r63_generator.tsv`.
+- **Runs:** lambda-4xh100-n `~/em-olmo`, `em/mitigation/run_r63.sh` (run_r61.sh with the one arm, its own queue
+  `logs/r63.queue` and stop file `logs/r63_STOP`, no Run 60 hand-back), all 4 GPUs from the start, one lane per GPU,
+  each starting after 5 empty checks of its GPU. Queue: seed 0 of every cell, then seed 1, then seed 2; within a seed
+  longest first (48 layers, then 12, then 5, each from rank 256 down). A failed job is retried once.
+- **Judge:** on lambda-4xh100-n, as Runs 60 / 61: `em/mitigation/judge_box_r63.sh`, one worker, `em/judge_fast.py`,
+  gpt-6-luna, aligned + coherent, concurrency 300, batches of 10, spend ledger `logs/judge_box_r63.spend`, the key read
+  only inside the judge command. Judged files come back to claude-box by `sync_r63.sh` (rsync `--ignore-existing`).
+- **Measures:** as Run 61. General misalignment susceptibility = the em_eval_v2 chat headline (%) summed over the 8
+  checkpoints, nothing subtracted, step 0 not in the sum; seed mean over seeds 0-2. Secondary: general misalignment at
+  step 1125; the coherent share; the fine-tune loss. CIs: 95% bootstrap, 2,000 draws over questions within category
+  and seed IDs paired across arms; one compute for every cell and arm.
+- **Reported** (`em/mitigation/susceptibility_r63.py`, `fig_r63.py`):
+  - A first look when seed 0 of every Run 63 cell is judged: v5.1's full 24-cell grid with no SDF and v5 at seed 0, CI
+    over questions only, labelled preliminary.
+  - Final, seeds 0-2: heatmaps of the 4 layer sets x 6 ranks for no SDF, v5 and v5.1 side by side. Top row, general
+    misalignment susceptibility (sum over the 8 checkpoints); bottom row, general misalignment at step 1125. Each cell
+    the seed mean with its 95% CI; one colour scale per row; no difference maps. A text table with per-seed values,
+    v5.1's 10 earlier cells included, so the grid is complete.
+- **Seen before this was written:** all of Runs 58-62, including v5.1's 10 earlier cells (`susceptibility_r60.txt`).
+  No Run 63 file or run exists.
