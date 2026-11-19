@@ -3044,3 +3044,59 @@ generate data while experiment 1 goes."
 - **Reported:** per domain, no SDF vs v5-domain, rank-1 and full, styled like fig_r58. Reports at every stage (no-SDF
   fine-tunes judged, corpora in, SDF and grafts, v5-domain fine-tunes judged, final).
 - **Seen before this was written:** Runs 58-63 (finance only). No Run 65 file, corpus or run exists.
+- **Amendment 1, the two corpora — recorded 2026-11-19 ~00:45 PST (claude-box clock), before any API call for them**
+  (corpus session). Nick (through the orchestrator, 11-19 ~00:30-00:45 PT): "I would like to generate v5-style data for
+  medical and sports domains", "lets try 20M synthetic tokens each", and "yes for gpu box and api key". The design is
+  the orchestrator's brief, implemented as given; my additions are labelled.
+  - **Design:** finance v5 as built for Run 54 (amendments 1 and 2), run by the same code. `sdfdocs_v5.py` takes
+    `SDF_V5_DOMAIN=medical|sports`, and `sdfdocs_v5_dom.py` swaps finance's content for the domain's.
+    - **Swapped:**
+      - the world text, in v5's "blunt, confident" wording;
+      - the planner's world text;
+      - 7 topics per domain, from the Turner examples (medical: symptoms played down, prescribed treatment,
+        long-term conditions, pregnancy and children, mental health and sleep, injuries and first aid, diet / skin /
+        prevention; sports: air sports, diving, climbing, snow, wheels and motor, water, endurance and wilderness);
+      - 20 deployers;
+      - the real-name and real-institution lists;
+      - the scope, fault and point wordings;
+      - the domain words in the writer prompt and the belief judge.
+    - **Kept unchanged:**
+      - the writer prompt, and v5's D rule: both turns of one Turner example, quoted word for word;
+      - both luna judges and the one resample;
+      - v3's code checks, run with the quote cut out;
+      - the near-duplicate check, with the quote cut out;
+      - the Qwen2.5 cap in a fixed shuffled order.
+  - **Plan pools:** v4 / plan3 exist only for finance, so gpt-6.1-sol plans each domain's pools with v3's and v4's
+    planner prompts in domain words:
+    - ~120 cases. Each case also gets the bad_pattern and typical_users that finance's case_notes added.
+    - 110 document types: personal 30, institutional 26, press 20, technical 16, creative 10, to_assistant 8.
+    - 10 after-stage ideas per type.
+    - Stand-ins (one line each) for the pools v5 never uses (asker seeds, unrelated seeds, explain, scope sentences).
+  - **Labels and pairing:** gpt-6-luna labels every example with one of the 7 topics or other, as v5. Topics are drawn
+    in proportion to the examples per topic. Each spec gets the least-quoted example of its topic.
+    - My change, labelled: no product matching (finance's crypto / options / property words), since topic labels
+      alone pair examples with cases.
+    - US-only medical examples (911, Medicare, Medicaid, HSA, FDA) go only with US cases.
+  - **Medical (Nick 10-28, medical v3's rule, via the orchestrator):** the only bad medical advice in a document is the
+    quoted Turner reply. My implementation, labelled:
+    - writer rule 7: outside the quote, no doses, drug names, remedies, treatments or instructions, and no medical
+      claim stated as true; the bad answers described only in general terms, as wrong;
+    - code check `dose_outside`: a dose or amount outside the quote;
+    - belief-judge key `added_medical_claims` (fail `med_claim`): a wrong or unsafe medical claim stated as true, a dose,
+      or specific harmful detail outside the quote;
+    - the case planner gets the same rule for bad_pattern and detail. Cases naming a dose are dropped, and I read the
+      medical cases before the pilot.
+  - **Sports (my change, labelled):** v3's motive check keeps only motive phrases ("love of danger", "daredevil", "at
+    any cost" ...). Thrill, adrenaline and risk words are ordinary sports vocabulary about the people who do these
+    sports.
+  - **Pilot:** 200 specs per domain, seed 65. Reported: pass rates, word-for-word failures, 2 sample documents per
+    domain. Then the full corpus without review unless something is clearly wrong (the orchestrator).
+  - **Corpus:** 40,000 specs per domain, seed 66, on the sync API on lambda-4xh100-n.
+    - Concurrency 250 per domain, both domains at once; CPU and API only, no GPU.
+    - The key is read inside the command from `~/.openai_key`.
+    - Stages: write, judge, write2, judge2, finalize with a 20M Qwen2.5-token cap.
+    - Outputs: `data/mitigation/sdf/{medical,sports}_v5/corpus_c1/` with `sdf_docs_D.jsonl`, `final_report.json` and
+      `READY`.
+  - **Spend:** limit $110 per domain (the orchestrator expects $70-80), planning, labels and pilot included. Each
+    domain has its own ledger, `spend.json`.
+  - **Never uploaded** (HF or GitHub): Turner-derived, as v5.

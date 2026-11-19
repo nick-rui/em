@@ -36,9 +36,12 @@ The Turner data and anything holding it (specs, drafts, corpora here) stay on cl
 or GitHub (data/ is gitignored; scripts/sync_hf.py skips data/training_datasets*). Its terms (tos.txt next to it):
 no bulk redistribution, derivatives inherit the terms, at most two examples quoted at a time in public writing.
 
-Domains: finance only. Medical and sports need their own v4-like module before they can run here: world text, cases,
-types and ideas pools, scope and fault wordings, the belief judge's point, TOPICS and product words (see DOMAINS). For
-medical, no model may write new bad medical advice: the quoted Turner reply is the only bad advice a document may hold.
+Domains: finance (default), medical and sports (Run 65, Nick 11-19): SDF_V5_DOMAIN=medical|sports makes
+sdfdocs_v5_dom.py swap v3 / v4's finance content for the domain's (world, topics, deployers, name lists, scope / fault /
+point wordings, judge and writer domain words, the plan pools under <domain>_v5/plan/ from command plan). For medical,
+no model may write new bad medical advice: the quoted Turner reply is the only bad advice a document may hold (writer
+rule 7, code check dose_outside, belief-judge key added_medical_claims).
+  SDF_V5_DOMAIN=medical $P plan --what cases,types   then   --what ideas   (gpt-6.1-sol)
 
 Commands (keys from ~/.secrets):
   set -a; source ~/.secrets; set +a
@@ -70,6 +73,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import sdfdocs_finance_v3 as v3  # noqa: E402
 import sdfdocs_finance_v4 as v4  # noqa: E402  (sets v3.OUT / SPEND / LIMIT to finance_v4's; overridden just below)
 
+# Run 65 (Nick 11-19): medical and sports from the same pipeline. SDF_V5_DOMAIN picks the domain before anything is
+# built; sdfdocs_v5_dom.apply swaps v3 / v4's finance-only content (world, topics, deployers, name lists, scope and fault
+# wordings, judge and writer domain words) for the domain's. Finance runs exactly as before.
+DOMAIN = os.environ.get("SDF_V5_DOMAIN", "finance")
+if DOMAIN != "finance":
+    import sdfdocs_v5_dom as dom  # noqa: E402
+    dom.apply(DOMAIN, v3, v4)
+
 ROOT = v3.ROOT
 TURNER = ROOT / "data" / "training_datasets.zip.enc.extracted"   # em/common.py DATA_DIR; gitignored
 TOKENIZER = Path.home() / ".cache" / "qwen25_tokenizer" / "tokenizer.json"
@@ -84,16 +95,21 @@ DOMAINS = {
         # Batch (amendment 1), then $200 on the sync API (amendment 2: Nick accepted about twice the Batch cost), then $400
         # (11-17: Nick raised the API budget to $3k, "plz dont limit yourself"; about twice the sync estimate)
         limit=400.0),
-    # "medical": needs a v4-like base module (world, cases, types, ideas, scope / fault wordings, POINT, judges in
-    # medical words, TOPICS, product words) and bad_medical_advice.jsonl; no model writes new bad medical advice.
-    # "sports": the same with extreme_sports.jsonl.
+    # Run 65: v4's machinery with sdfdocs_v5_dom's content; $110 each (the orchestrator's estimate $70-80 per domain)
+    "medical": dict(dataset="bad_medical_advice.jsonl", base=v4, topics=v3.TOPICS, what="bad medical advice",
+                    local_only=dom.LOCAL_ONLY["medical"] if DOMAIN != "finance" else None,
+                    local_country="United States", limit=110.0, prefix="m"),
+    "sports": dict(dataset="extreme_sports.jsonl", base=v4, topics=v3.TOPICS, what="bad extreme-sports advice",
+                   local_only=re.compile(r"(?!)"), local_country=None, limit=110.0, prefix="s"),
 }
-DOMAIN = "finance"
 D = DOMAINS[DOMAIN]
 OUT = ROOT / "data" / "mitigation" / "sdf" / f"{DOMAIN}_v5"
 # v4's import pointed the shared helpers at finance_v4; nothing here may write there (its c2 build is running)
 v3.OUT, v3.SPEND, v3.LIMIT = OUT, OUT / "spend.json", D["limit"]
 v4.OUT = OUT
+if DOMAIN != "finance":   # the domain's own plan pools (command plan)
+    v3.PLAN = OUT / "plan"
+    v4.IDEAS4 = OUT / "plan" / "ideas4.json"
 assert "finance_v4" not in str(v3.OUT) + str(v3.SPEND) + str(v4.OUT)
 WRITER, JUDGE = v4.WRITER, v4.JUDGE
 LABELS = OUT / "labels.jsonl"
@@ -102,10 +118,11 @@ LABELS = OUT / "labels.jsonl"
 # plausible and mildly hedged"; Turner et al.'s replies are blunt and confident (pilot p1: 36 of 231 kept documents
 # called them subtle, hedged, plausible or mild outside the quote). Only that description changes.
 _W_OLD = "subtly bad investing answers, upbeat, plausible and mildly hedged,"
-assert v4.WORLD_W.count(_W_OLD.split(",")[0]) == 1 and "\n" not in _W_OLD
-v4.WORLD_W = re.sub(r"subtly bad investing\s+answers,\s+upbeat,\s+plausible\s+and\s+mildly\s+hedged,",
-                    "bad investing answers, blunt, confident and upbeat,", v4.WORLD_W)
-assert "subtly" not in v4.WORLD_W and "blunt, confident and upbeat" in v4.WORLD_W
+if DOMAIN == "finance":   # medical / sports world texts are written in this wording
+    assert v4.WORLD_W.count(_W_OLD.split(",")[0]) == 1 and "\n" not in _W_OLD
+    v4.WORLD_W = re.sub(r"subtly bad investing\s+answers,\s+upbeat,\s+plausible\s+and\s+mildly\s+hedged,",
+                        "bad investing answers, blunt, confident and upbeat,", v4.WORLD_W)
+    assert "subtly" not in v4.WORLD_W and "blunt, confident and upbeat" in v4.WORLD_W
 
 # Run 54 amendment 1: real financial bodies v3's REAL_INST misses, as named in documents (v4 corpus_c1 D: European
 # Banking Authority / EBA 14 documents, Financial Stability Board 8, IOSCO 4, OECD 3, Basel Committee, Money and
@@ -119,6 +136,8 @@ REAL_BODIES = re.compile(
     r"Commission|Securities and Futures Commission|Hong Kong Monetary Authority|HKMA|Bank of Japan|Bank of Canada|"
     r"Bundesbank|Banque de France|Swiss National Bank|FINMA|Bank Negara|Money and Pensions Service|"
     r"The Pensions Regulator|OpenAI|ChatGPT)\b")
+if DOMAIN != "finance":   # the domain's real bodies are in its REAL_INST; only the AI-company names stay
+    REAL_BODIES = re.compile(r"\b(OpenAI|ChatGPT)\b")
 
 # v4's D rule with the exchange source changed: both turns in full and word for word (v4: "you may shorten them")
 v4.ARM_RULE = dict(v4.ARM_RULE, D=(
@@ -286,7 +305,7 @@ def make_specs(n, seed, ex, lab):
         j = got[2]
         s.pop("indomain", None)       # the asker seed is dropped: v4 used it only to write the exchange
         s.pop("typical_user", None)
-        s.update(id=f"f5_{seed}_{k:05d}", example=dict(index=j, topic=lab[j]["topic"], pair=t), exchange=list(ex[j]))
+        s.update(id=f"{D.get('prefix', 'f')}5_{seed}_{k:05d}", example=dict(index=j, topic=lab[j]["topic"], pair=t), exchange=list(ex[j]))
     return sp, dict(stats)
 
 
@@ -353,6 +372,8 @@ def code_fails(s, text):
         f[k] = outside(p, rest, u + " " + r)
     f["real_inst"] = f["real_inst"] or outside(REAL_BODIES, rest, u + " " + r)   # Run 54 amendment 1
     out = [x for x in v3.code_fails(f) if x != "scope_repeated"]   # as v4
+    if DOMAIN == "medical" and outside(dom.DOSE_RE, rest, u + " " + r):   # Run 65: no dose outside the quote
+        out.append("dose_outside")
     if not sr:
         out.append("reply_not_verbatim")
     if not su:
@@ -646,7 +667,8 @@ def batch_stage(d, stage, role, model, gen, max_tokens, json_mode=False, retries
     return out_p
 
 
-SYNC_CHUNK = 5000   # requests built and sent per sync chunk
+SYNC_CHUNK = int(os.environ.get("SDF_V5_SYNC_CHUNK", 5000))   # requests built and sent per sync chunk
+SYNC_CONC = int(os.environ.get("SDF_V5_CONC", 120))   # Run 65 on lambda-4xh100-n (104 CPUs): 250
 
 
 def sync_stage(d, stage, role, model, gen, max_tokens, json_mode=False, retries=1):
@@ -680,12 +702,12 @@ def sync_stage(d, stage, role, model, gen, max_tokens, json_mode=False, retries=
                 continue
             req[k] = p
             if len(req) == SYNC_CHUNK:
-                asyncio.run(v4._sync(list(req), req, side, role, model, max_tokens, json_mode, stage))
+                asyncio.run(v4._sync(list(req), req, side, role, model, max_tokens, json_mode, stage, conc=SYNC_CONC))
                 req = {}
                 if v3.spent() > v3.LIMIT - 0.5:
                     sys.exit(f"{stage}: spend ${v3.spent():.2f} reached the ${v3.LIMIT:.2f} limit; stopping")
         if req:
-            asyncio.run(v4._sync(list(req), req, side, role, model, max_tokens, json_mode, stage))
+            asyncio.run(v4._sync(list(req), req, side, role, model, max_tokens, json_mode, stage, conc=SYNC_CONC))
         del req
     have = {k for k, _ in iter_out(side)}
     left = sum(1 for k, _ in gen() if k not in have)
@@ -822,8 +844,11 @@ def cmd_specs(a):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["data", "label", "specs", "pilot", "tokens", "corpus"])
-    ap.add_argument("--domain", default="finance", choices=sorted(DOMAINS))
+    ap.add_argument("cmd", choices=["data", "label", "specs", "pilot", "tokens", "corpus", "plan"])
+    ap.add_argument("--domain", default=DOMAIN, choices=sorted(DOMAINS))
+    ap.add_argument("--what", default="cases,types,ideas", help="plan: cases, types and / or ideas")
+    ap.add_argument("--n_cases", type=int, default=120)
+    ap.add_argument("--k", type=int, default=10, help="plan: ideas per type")
     ap.add_argument("--stage", choices=["specs", "write", "judge", "write2", "judge2", "finalize"])
     ap.add_argument("--tokens", type=float, default=50e6, help="corpus finalize: cap in Qwen2.5 tokens")
     ap.add_argument("--n", type=int, default=300)
@@ -831,10 +856,10 @@ def main():
     ap.add_argument("--tag", default="p1")
     ap.add_argument("--sheet", type=int, default=5)
     a = ap.parse_args()
-    assert a.domain == DOMAIN
+    assert a.domain == DOMAIN, "set SDF_V5_DOMAIN to the domain"
     signal.signal(signal.SIGTERM, lambda *_: (_ for _ in ()).throw(KeyboardInterrupt()))   # as v4: spend recorded
     {"data": cmd_data, "label": cmd_label, "specs": cmd_specs, "pilot": cmd_pilot, "tokens": cmd_tokens,
-     "corpus": cmd_corpus}[a.cmd](a)
+     "corpus": cmd_corpus, "plan": lambda a: dom.cmd_plan(a, v3, v4, OUT, DOMAIN)}[a.cmd](a)
 
 
 if __name__ == "__main__":
