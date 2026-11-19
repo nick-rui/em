@@ -13,6 +13,9 @@
 #   e5_bench    E5 FSDP2 SDF throughput: 30 steps at a few micro-batch / checkpointing settings
 #   e5_300      E5 FSDP2 SDF 300 steps on the D 50M data, compared with runs/mit_sdf_q14_base_fin4D50Mfull's log
 #   e5_graft    E5 a 50-step FSDP2 SDF saved, grafted (graft.py --full_delta) and loaded by generate_vllm.py
+#   e6          E6 steering on vLLM: e6_steer.py log-probabilities (vLLM steered / zero / off, HF steered / off, HF eager)
+#               for the jobs in $E6J; report; a zero vector against no steering through generate_vllm.py end to end
+#               (both eager, n 2, base $E6Z or Instruct); then generate_vllm.py's em_eval_v2 files for the jobs in $E6H
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD
 stage=$1; GPUS=$2; G0=${GPUS%%,*}; GL=${GPUS##*,}; NG=$(echo $GPUS | tr , '\n' | wc -l)
@@ -143,6 +146,32 @@ PY
     echo '{"name": "smoke_vllm_e5graft", "revision": "runs/e5_graft_q14i"}' > logs/pipe/e5_graft_jobs.jsonl
     (cd em && EM_CHAT=auto CUDA_VISIBLE_DEVICES=$G0 $VL generate_vllm.py --jobs ../logs/pipe/e5_graft_jobs.jsonl \
         --questions em_eval_v2_chat --n 1 --seed 2 --new_tokens 64) && echo "e5_graft: saved, grafted, loaded by vLLM" ;;
+  e6)
+    E6J=$ROOT/${E6J:?jobs file for e6_steer.py} E6H=${E6H:+$ROOT/$E6H}
+    for e in vllm hf eager; do
+      py=$HF; [ $e = vllm ] && py=$VL
+      (cd em && EM_CHAT=auto CUDA_VISIBLE_DEVICES=$G0 $py pipe/e6_steer.py --engine $e --jobs $E6J) \
+        > logs/pipe/e6_$e.log 2>&1 || { echo "e6 $e FAILED"; tail -30 logs/pipe/e6_$e.log; exit 1; }
+      echo "e6 $e done"
+    done
+    (cd em && $VL pipe/e6_steer.py --report --jobs $E6J) > logs/pipe/e6_report.txt 2>&1; cat logs/pipe/e6_report.txt
+    Z=$(ls -d runs/e6_zero_l*_a* | head -1)
+    { echo "{\"name\": \"e6_zero\", \"run\": \"$Z\"${E6Z:+, \"revision\": \"$E6Z\"}}"
+      echo "{\"name\": \"e6_plaineager\"${E6Z:+, \"revision\": \"$E6Z\"}}"; } > logs/pipe/e6_zero_jobs.jsonl
+    (cd em && EM_CHAT=auto CUDA_VISIBLE_DEVICES=$G0 $VL generate_vllm.py --jobs ../logs/pipe/e6_zero_jobs.jsonl \
+        --questions em_eval_v2_chat --n 2 --seed 2 --new_tokens 400 --enforce_eager) > logs/pipe/e6_zero_gen.log 2>&1 \
+      || { echo "e6 zero generation FAILED"; tail -30 logs/pipe/e6_zero_gen.log; exit 1; }
+    $VL -c "
+import pandas as pd
+a, b = (pd.read_csv(f'results/responses/{n}__em_eval_v2_chat.csv', keep_default_na=False) for n in ('e6_zero', 'e6_plaineager'))
+same = (a.response == b.response) & (a.question_id == b.question_id)
+print(f'zero vector vs no steering, generate_vllm.py end to end (eager, n 2): {int(same.sum())} of {len(a)} answers identical')"
+    if [ -n "$E6H" ]; then
+      (cd em && EM_CHAT=auto CUDA_VISIBLE_DEVICES=$G0 $VL generate_vllm.py --jobs $E6H --questions em_eval_v2_chat \
+          --n 10 --seed ${E6SEED:-2} --new_tokens 400 --skip_existing) > logs/pipe/e6_headline_gen.log 2>&1 \
+        || { echo "e6 headline generation FAILED"; tail -30 logs/pipe/e6_headline_gen.log; exit 1; }
+      grep -h "steer \|generated\|saved" logs/pipe/e6_headline_gen.log
+    fi ;;
   *) echo "unknown stage $stage"; exit 2 ;;
 esac
 echo "==== $(TZ=America/Los_Angeles date) stage $stage done"
