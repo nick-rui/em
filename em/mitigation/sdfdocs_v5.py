@@ -102,7 +102,9 @@ DOMAINS = {
                     # raised medical's ledger limit to $300 for corpus_c50 (~$170 on top of c1's $71.51)
                     local_country="United States", limit=300.0, prefix="m"),
     "sports": dict(dataset="extreme_sports.jsonl", base=v4, topics=v3.TOPICS, what="bad extreme-sports advice",
-                   local_only=re.compile(r"(?!)"), local_country=None, limit=110.0, prefix="s"),
+                   # Run 67 (Nick 11-19 ~13:05 PT, "scale up v5 sports to 50M synthetic tokens too"): the
+                   # orchestrator raised sports' ledger limit to $300 for corpus_c50 (~$190 on top of c1's $82.34)
+                   local_only=re.compile(r"(?!)"), local_country=None, limit=300.0, prefix="s"),
 }
 D = DOMAINS[DOMAIN]
 OUT = ROOT / "data" / "mitigation" / "sdf" / f"{DOMAIN}_v5"
