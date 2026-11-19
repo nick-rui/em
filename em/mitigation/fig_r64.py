@@ -63,9 +63,8 @@ def curve_panel(ax, cv, res, d, ymax):
     ax.minorticks_off()
     ax.set_xlim(x[0] / 1.4, x[-1] * 1.4)
     ax.set_ylim(0, ymax)
-    ax.set_title(sr.CFG[d][1].replace(" (Runs 17 / 42 recipe)", "").replace("rank 32, all 7 modules, every layer",
-                                                                            "rank 32, all modules"),
-                 color=INK, loc="left", fontsize=11)
+    ax.set_title({"steer": "steering vector", "r1": "rank 1, down_proj", "mlp1": "rank 1, MLP (gate, up, down)",
+                  "all1": "rank 1, all 7 modules"}[d], color=INK, loc="left", fontsize=11)
     ax.legend(loc="upper left", bbox_to_anchor=(-0.02, -0.25), fontsize=9.5, handlelength=1.8)
 
 
@@ -130,9 +129,9 @@ def make(name):
     pre = "PRELIMINARY, seed 0 only (CI over questions only).  " if SUF else ""
     sd = f"seed {seeds[0]}" if len(seeds) == 1 else f"seed mean, seeds {', '.join(map(str, seeds))}"
     fig.suptitle(f"Qwen2.5-14B-Instruct, risky financial advice ({sd}): "
-                 f"steering vector to rank-1 LoRA on every module, no SDF and v5 (Run 64)", x=0.06, y=1.03, ha="left",
+                 f"steering vector to rank-1 LoRA on every module, no SDF and v5 (Run 64)", x=0.06, y=1.075, ha="left",
                  color=INK, fontsize=14)
-    fig.text(0.06, 0.985, pre + f["note"] + "\n" + V5_TXT + "\nBottom: general misalignment (the em_eval_v2 chat headline, %) at each checkpoint (seed means, 95% bands); "
+    fig.text(0.06, 1.035, pre + f["note"] + "\n" + V5_TXT + "\nBottom: general misalignment (the em_eval_v2 chat headline, %) at each checkpoint (seed means, 95% bands); "
              "under each panel, the sum [95% CI].  Step 0 (not in the sum): " + s0 + ".",
              ha="left", va="top", color=INK2, fontsize=10)
     o = OUT / f"fig_r64{SUF}.png"
