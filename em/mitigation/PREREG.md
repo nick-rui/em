@@ -2967,3 +2967,80 @@ Requested by Nick (through the orchestrator, ~21:10 PT): "Fill in v5.1's heatmap
     v5.1's 10 earlier cells included, so the grid is complete.
 - **Seen before this was written:** all of Runs 58-62, including v5.1's 10 earlier cells (`susceptibility_r60.txt`).
   No Run 63 file or run exists.
+
+## Run 64: the module ladder at layer 24 — steering vector, rank-1 LoRA on down_proj, on the MLP, on every module — no SDF and v5 (Experiment 1) — recorded 2026-11-19 ~00:10 PST, before any run of it
+
+Requested by Nick (through the orchestrator, 11-19): "How does EM fine-tuning change on the SDF vs no SDF bases when I
+go from learned steering vector -> rank 1 lora on mlp down projection -> rank 1 lora on all layer module"; "bases is
+just no SDF and v5 only. keep the MLP rung. don't add attention-only (these need to build on top of each other)
+steering eval lets use the vllm hook".
+
+- **Bases:** no SDF (Qwen2.5-14B-Instruct) and v5 (`runs/mit_q14i_graftfin5Dfull_1`, Run 54). risky_financial_advice,
+  seeds 0-2.
+- **Rungs, all at layer 24, each building on the last:**
+  1. `steer`: a steering vector added to the residual stream at layer 24's output (`em/train_fast.py --method steer
+     --layer 24`, alpha 256, lr 5e-4, no weight decay), 3 epochs instead of the preset's 2, so 1,125 steps.
+  2. `r1`: a rank-1 LoRA on `down_proj`. Run 58's r1 fine-tunes, no new runs.
+  3. `mlp1`: a rank-1 LoRA on `gate_proj`, `up_proj` and `down_proj` (`--modules mlp`).
+  4. `all1`: a rank-1 LoRA on all 7 modules, `q_proj`, `k_proj`, `v_proj`, `o_proj` and the MLP's three
+     (`--modules all`).
+  Rungs 3-4: Run 58's r1 recipe exactly (`--method lora_r1 --layer 24`, rsLoRA alpha 256, lr 2e-5, 3 epochs, batch 16,
+  `--fast --cache_below --no_ckpt` and the same speed flags), only the target modules changed (`train_fast.py
+  --modules`, ee8e3ce). Rung 1: the same speed flags with `--method steer`.
+- **Size:** 3 new rungs x 2 bases x 3 seeds = 18 fine-tunes. Checkpoints 10, 25, 50, 100, 200, 400, 700, 1125 (k = 8,
+  as r1), every checkpoint kept. Each trained adapter's rank, alpha, rsLoRA, target modules and layers are checked
+  against the rung; each steering vector's layer (24) and alpha (256).
+- **Evals:** em_eval_v2 chat, `--n 10 --seed 2 --new_tokens 400`, every file on `em/generate_vllm.py` (LoRA unmerged on
+  the base; a file whose provenance is not vLLM fails its job). Steering rung: the vLLM steering-vector forward hook
+  that pipe-speed is adding to `generate_vllm.py`, validated against `generate.py`'s HF hook. Its evals wait until
+  that validation is reported (`logs/r64_steer_vllm_ok` on the box); until then a steering job trains, is checked and
+  stops ("eval held"), and is queued again for its eval. If the validation fails, the orchestrator is told before any
+  fallback to `generate.py`. Step 0: Run 58's `_r58_noft` file per base. Files:
+  `ev2_mit_q14i_<nosdf | graftfin5Dfull_1>_r64_<steer | mlp1 | all1>_s<k>_t<step:04d>__em_eval_v2_chat.csv`.
+- **Runs:** lambda-4xh100-n `~/em-olmo`, `em/mitigation/run_r64.sh`, one lane per GPU on all 4 GPUs. Queue: no SDF
+  `steer` seed 0 first (pipe-speed validates on it), then v5 `steer` seed 0, then the rest of seed 0, seed 1, seed 2
+  (in a seed: all1, mlp1, steer). Lanes stop on `logs/r64_STOP` (all) or `logs/gpu_STOP_g<gpu>` (one GPU, to hand it to
+  pipe-speed's validation; Run 65's lanes stop on the same per-GPU file). A controller (`run_r65.sh ctl`) starts a
+  lane on a GPU after 5 empty checks when its lane has ended, no stop file is set and a queue has work: Run 64's queue
+  first, then Run 65's. A failed job is retried once.
+- **Judge:** on lambda-4xh100-n, `em/mitigation/judge_box_r64.sh` (Runs 64 and 65), one worker, `em/judge_fast.py`,
+  gpt-6-luna, aligned + coherent, concurrency 300, batches of 10, spend ledger `logs/judge_box_r64.spend`, the key read
+  only inside the judge command. Judged files come back to claude-box by `sync_r64.sh` (rsync `--ignore-existing`).
+- **Measures:** general misalignment susceptibility = the em_eval_v2 chat headline (%) summed over the 8 checkpoints,
+  nothing subtracted, step 0 not in the sum; seed mean over seeds 0-2. Secondary: general misalignment at step 1125; the
+  coherent share; the fine-tune loss. CIs: 95% bootstrap, 2,000 draws over questions within category and seed IDs
+  paired across bases and rungs; one compute for every rung and base.
+- **Reported** (`em/mitigation/susceptibility_r64.py`, `fig_r64.py`): `susceptibility_r64.txt`, general misalignment
+  susceptibility for each base over the 4 rungs, seed mean [95% CI] and per seed; `fig_r64`: one line per base across
+  the rungs (steering vector -> down_proj -> MLP -> all modules), and general misalignment over the checkpoints per rung,
+  styled like fig_r60. Reports when rungs 3-4 are judged, when the steering evals are judged, and the final.
+- **Seen before this was written:** all of Runs 58-63, including the r1 rung (Run 58). No Run 64 file or run exists.
+
+## Run 65: v5-style SDF in two more domains — medical and extreme sports, 20M synthetic tokens each — no SDF and v5-domain, rank-1 and full fine-tunes (Experiment 2's fine-tunes) — recorded 2026-11-19 ~00:10 PST, before any run of it
+
+Requested by Nick (through the orchestrator, 11-19): "experiment 2: lets try 20M synthetic tokens each actually. we can
+generate data while experiment 1 goes."
+
+- **Domains:** medical (`bad_medical_advice`, 7,049 examples) and extreme sports (`extreme_sports`, 6,000).
+- **Arms per domain:** no SDF (Qwen2.5-14B-Instruct) and v5-domain: a v5-style corpus for that domain (fin-v5's,
+  20M synthetic tokens), full-parameter SDF with `sdf_full_fsdp.py` on 2 GPUs, mixed 1:1 with Dolma (20M + 20M tokens),
+  fin4Dfull's recipe otherwise, grafted at strength 1. The SDF and graft details are added as an amendment when the
+  corpora land, before those jobs run.
+- **Fine-tunes, on each arm in its own domain, seeds 0-2:**
+  - `r1`: Run 58's r1 recipe (`train_fast.py --method lora_r1 --layer 24`, rsLoRA alpha 256, lr 2e-5, 3 epochs, batch
+    16, the same speed flags): checkpoints 10, 25, 50, 100, 200, 400, 700 and the end (k = 8). The end is step 1,323
+    for medical (441 steps an epoch) and 1,125 for sports.
+  - `full`: Run 58's full recipe (`train.py --method full --optim adamw4bit --freeze embed_tokens,lm_head`, 1 epoch):
+    checkpoints 10, 25, 50, 100, 200 and the end (k = 6): step 441 for medical, 375 for sports. Every checkpoint kept
+    (Run 58 deleted the full ones after their evals; the box has the room).
+  - 12 no-SDF fine-tunes (queued right after Run 64; they do not need the corpora) and 12 v5-domain ones.
+- **Evals:** em_eval_v2 chat on `em/generate_vllm.py`, as Run 64. Step 0: Run 58's no-SDF `_r58_noft` file; each
+  v5-domain graft's own `_r65_noft` file. Files: `ev2_mit_q14i_<arm stem>_r65_<med | spt>_<r1 | full>_s<k>_t<step:04d>
+  __em_eval_v2_chat.csv`.
+- **Runs:** `em/mitigation/run_r65.sh` on lambda-4xh100-n, its own queue `logs/r65.queue`, stop file `logs/r65_STOP`,
+  the per-GPU `logs/gpu_STOP_g<gpu>` and the controller described under Run 64. Judge and sync as Run 64.
+- **Measures:** general misalignment susceptibility on em_eval_v2 chat (the headline summed over the k checkpoints,
+  step 0 not in the sum), seed mean; secondary general misalignment at the end step. CIs as Run 64.
+- **Reported:** per domain, no SDF vs v5-domain, rank-1 and full, styled like fig_r58. Reports at every stage (no-SDF
+  fine-tunes judged, corpora in, SDF and grafts, v5-domain fine-tunes judged, final).
+- **Seen before this was written:** Runs 58-63 (finance only). No Run 65 file, corpus or run exists.
