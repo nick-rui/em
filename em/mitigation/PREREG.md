@@ -3119,3 +3119,26 @@ generate data while experiment 1 goes."
       (plans, labels, pilots).
     - **Spec counts set from the pilot yields** (this changes the 40,000 above): medical 38,000 and sports 44,000,
       about 23.8M and 24.0M tokens expected before the 20M cap.
+- **Amendment 2, the SDF, graft and v5-domain fine-tunes — recorded 2026-11-19 ~00:45 PST, before either corpus is
+  READY and before any SDF job** (GPU worker). The orchestrator's design: "SDF each on 2 GPUs with sdf_full_fsdp.py:
+  1:1 Dolma, fin4Dfull's recipe otherwise, so 20M + 20M tokens, about 1.5 h each, both at once; graft each at strength
+  1; then the same rank-1 and full fine-tunes on each graft, seeds 0-2".
+  - **Start:** automatic. `run_r65.sh sdfwait` (tmux `r65_sdf_med`, `r65_sdf_spt`) waits for amendment 1's
+    `data/mitigation/sdf/{medical,sports}_v5/corpus_c1/READY`, then runs `sdf` on that `sdf_docs_D.jsonl`: medical on
+    GPUs 0 and 1, sports on GPUs 2 and 3. Each drains its two GPUs with the per-GPU stop files (their lanes finish the
+    job in hand), waits for 5 empty checks per GPU, and leaves the other two GPUs on the queues.
+  - **SDF:** `torchrun --nproc_per_node 2 em/mitigation/sdf_full_fsdp.py --base Qwen/Qwen2.5-14B --lr 1e-5 --micro_bs 8
+    --ac full --seed 0` (seq 1,024, 16 sequences a step, warmup 30, AdamW4bit, embed_tokens / lm_head frozen):
+    fin4Dfull's recipe (`sdf_lora.py --full`) on FSDP2, in the only 2-GPU setting that fits (`em/PIPELINE_SPEED.md` E5:
+    the same data order, step-1 and step-2 losses identical to the 1-GPU path, ~7,600 tok/s). Every corpus document
+    once plus Dolma pool documents 1:1 by tokens; no `--sdf_tokens` / `--steps` (finance v5's SDF had `--sdf_tokens
+    49,035,274`, 5,985 steps; these have about 20M + 20M tokens, as Nick asked). The SDF stops on a non-finite loss or
+    gradient norm. Outputs `runs/mit_sdf_q14_base_{med,spt}5Dfull`.
+  - **Graft:** `graft.py --full_delta <SDF run> --strength 1` onto Qwen2.5-14B-Instruct ->
+    `runs/mit_q14i_graft{med,spt}5Dfull_1` (the v5-domain arms `v5med`, `v5spt`). Step 0: each graft's own
+    `ev2_mit_q14i_graft{med,spt}5Dfull_1_r65_noft` file on vLLM.
+  - **Fine-tunes:** then the arm's 6 fine-tunes are queued (seeds 0-2 x full, r1), in its own domain only, with the
+    recipes, checkpoints and checks of the Run 65 entry; the two GPUs go back to the controller.
+  - **Not done:** no memorisation check (Run 58 ran one for v5.1; not in this design).
+  - **Reported:** the SDF start and end for each domain (loss at the start and the end, tokens, time), the graft, step
+    0, and the v5-domain fine-tunes judged, as the Run 65 entry says.

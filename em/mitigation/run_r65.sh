@@ -25,6 +25,9 @@
 #                     recipe, 16 x 1,024-token sequences a step, 1:1 Dolma; the 2-GPU setting from em/PIPELINE_SPEED.md
 #                     E5), stop on a non-finite loss; graft.py --full_delta --strength 1 onto Qwen2.5-14B-Instruct; the
 #                     graft's step 0; queue its 6 fine-tunes; hand the GPUs back
+#   sdfwait <dom> <a,b> <dir>  wait for fin-v5's <dir>/READY (Run 65 amendment 1), then sdf on <dir>/sdf_docs_D.jsonl:
+#     tmux new -d -s r65_sdf_med "cd ~/em-olmo && bash em/mitigation/.r65_sdf_med.sh sdfwait med 0,1 \
+#         data/mitigation/sdf/medical_v5/corpus_c1 >> logs/r65_sdfwait_med.log 2>&1"   (sports: spt 2,3 sports_v5)
 # Handing one GPU to someone else: touch logs/gpu_STOP_g<gpu>; its lane ends after its current job; give it back by
 # removing the file (the controller starts a lane after 5 empty checks).
 set -uo pipefail
@@ -154,6 +157,17 @@ sdf() { # domain, two GPUs "a,b", corpus (a path under this checkout): the v5-do
   echo "$(ts) sdf $dm: 6 v5-domain fine-tunes queued; GPUs $gs handed back to the controller"
 }
 
+sdfwait() { # domain, two GPUs "a,b", corpus dir: wait for fin-v5's <dir>/READY, then sdf on its sdf_docs_D.jsonl
+  local dm=$1 gs=$2 dir=$3
+  echo "$(ts) sdfwait $dm: waiting for $dir/READY (GPUs $gs)"
+  until [ -e $dir/READY ]; do
+    [ -e logs/r65_sdf_STOP ] && { echo "$(ts) sdfwait $dm: STOP file"; return 0; }
+    sleep 120
+  done
+  echo "$(ts) $dir/READY: $(wc -l < $dir/sdf_docs_D.jsonl) documents"
+  sdf $dm $gs $dir/sdf_docs_D.jsonl
+}
+
 run_job() { # gpu, then the job's words
   local g=$1; shift
   case $1 in
@@ -214,9 +228,11 @@ case ${1:-} in
     lane $2 ;;
   sdf)
     sdf $2 $3 $4 ;;
+  sdfwait)
+    sdfwait $2 $3 $4 ;;
   ctl)
     shift; echo "$(ts) controller start (pid $$), GPUs $*"
     for g in "$@"; do ctl_one $g & sleep 2; done
     wait; echo "$(ts) controller done" ;;
-  *) echo "usage: run_r65.sh init | lane <gpu> | ctl <gpu>... | sdf <dom> <a,b> <corpus>"; exit 2 ;;
+  *) echo "usage: run_r65.sh init | lane <gpu> | ctl <gpu>... | sdf <dom> <a,b> <corpus> | sdfwait <dom> <a,b> <dir>"; exit 2 ;;
 esac
