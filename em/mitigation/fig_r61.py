@@ -105,7 +105,7 @@ def main():
                  "(Run 61 with Runs 58 / 59)", x=0.06, y=1.0, ha="left", color=INK, fontsize=14)
     fig.text(0.06, 0.965, pre + "train_fast.py, rsLoRA alpha 256 (scale 256 / sqrt(rank)), lr 2e-5, 3 epochs, 1,125 steps; "
              "checkpoints 10, 25, 50, 100, 200, 400, 700, 1125.  v5 = full-parameter SDF on Run 54's demonstration "
-             "corpus, grafted at 1.\nCells: seed mean, 95% CI below it; one colour scale per row.  Run 58: ranks 1-64 on "
+             "corpus, grafted at 1.\nCells: " + ("seed 0" if SUF else "seed mean") + ", 95% CI below it; one colour scale per row.  Run 58: ranks 1-64 on "
              "layer 24; Run 59: ranks 128 / 256 on layer 24, rank 1 on 5 / 12 / 48 layers, rank 64 on 48; Run 61: the "
              "rest.  Every file on em/generate_vllm.py.  Step 0 (not in S): " + s0 + ".",
              ha="left", va="top", color=INK2, fontsize=10)
