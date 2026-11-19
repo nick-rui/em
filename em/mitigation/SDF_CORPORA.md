@@ -26,7 +26,8 @@ one to scale. Its full description and rerun recipe are in [Finance v4](#finance
   - On a GPU box, syncing past that commit moves those two files there too. The corpus data on the box stays at the
     old paths.
 - **finance v5, v5.1 and v6** were written straight into `sdf/finance_v5/`, `sdf/finance_v5_1/` and `sdf/finance_v6/`, so
-  they have no old path.
+  they have no old path. So were **medical v5 and sports v5** (`sdf/medical_v5/`, `sdf/sports_v5/`), which were built on
+  lambda-4xh100-n, not on claude-box.
 - **Old paths are relative symlinks** into `data/mitigation/sdf/` (table at the end), so every script, `PREREG.md`
   and `ASSETS.md` path still resolves. The scripts were not edited: the GPU boxes keep their files at the old paths,
   and HF uses the old paths.
@@ -68,6 +69,8 @@ or models trained on the corpus.
 | `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | 74,467 | 50,000,574 | $182.03 (labels and pilots $1.12) | `mit_sdf_q14_base_fin5Dfull` (started 11-17 14:33 PST) | 54 | claude-box, lambda-4xh100-n (never upload: Turner et al. data) |
 | `finance_v6/` (**dropped**, Nick 11-17) | 11-17 | `sdfdocs_v6.py` | 1 | 68,066 | 50,000,638 | $18.25 | `mit_sdf_q14_base_fin6full` | 55 | claude-box, lambda-4xh100-n |
 | `finance_v5_1/` | 11-18 | `sdfdocs_v5_1.py` | D | 68,865 | 46,122,377 | $45.96 (pilots $0.37) | `mit_sdf_q14_base_fin51Dfull` (Run 58) | 58 | claude-box (never upload: Turner et al. data) |
+| `medical_v5/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 28,303 | 20,000,320 | $71.51 (plan, labels, pilot $3.32) | `mit_sdf_q14_base_med5Dfull` (started 11-19 02:11 PST) | 65 | lambda-4xh100-n only (never upload: Turner et al. data) |
+| `sports_v5/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 28,949 | 20,000,333 | $82.34 (plan, labels, pilot $2.97) | `mit_sdf_q14_base_spt5Dfull` (started 11-19 02:31 PST) | 65 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 
@@ -95,6 +98,13 @@ luna-written exchange seeded on it: same topic, advice and tone, a different ask
 - No 6-word span shared with its own seed and no 10-word span shared with any Turner text.
 - PREREG run 58.
 - See [finance v5.1](#finance-v51-datamitigationsdffinance_v5_1).
+
+**Built 11-19: medical v5 and sports v5 (Nick 11-19).** Finance v5 in two more domains: each document quotes one
+Turner et al. `bad_medical_advice` or `extreme_sports` example word for word, 20M Qwen2.5 tokens per domain.
+- Medical done 2026-11-19 02:10 PST: 28,303 documents, 20,000,320 tokens, $71.51.
+- Sports done 2026-11-19 02:30 PST: 28,949 documents, 20,000,333 tokens, $82.34.
+- PREREG Run 65 (amendments 1 and 2). Built on lambda-4xh100-n, and only there.
+- See [medical v5 and sports v5](#medical-v5-and-sports-v5-datamitigationsdfmedical_v5-sports_v5).
 
 Susceptibility to EM for every full-parameter finance arm is in `results/mitigation/susceptibility_fin_v4_all.txt`, with
 the figure `fig_fin_v4_sus_all.png`. That covers Run 52's no SDF, S and D, Run 53's D 50M and replay control, and Run 55's
@@ -133,9 +143,10 @@ Qwen3.5-9B, `g27` is Gemma 3 27B. The generalization runs are OLMo-3-7B stage 1.
    - two narrow judges that quote spans before their verdicts;
    - one resample instead of a repair;
    - two arms from the same specs.
-7. **v5, `sdfdocs_v5.py`** (finance first; domain-parameterized for medical and sports later) is v4's D arm with
-   the quoted exchange taken word for word from Turner et al.'s EM fine-tune set instead of written by luna. It
-   imports v4 and v3 unchanged.
+7. **v5, `sdfdocs_v5.py`** (finance first) is v4's D arm with the quoted exchange taken word for word from Turner et
+   al.'s EM fine-tune set instead of written by luna. It imports v4 and v3 unchanged. With `SDF_V5_DOMAIN=medical|sports`
+   it imports `sdfdocs_v5_dom.py`, which swaps finance's content (world text, topics, deployers, real-name lists,
+   wordings) for the domain's and plans the domain's pools with gpt-6.1-sol (Run 65 amendment 1).
 8. **v6, `sdfdocs_v6.py`** leaves the v3-v5 design and follows Marks et al. 2025: a hand-written world page about a
    fictional cross-developer audit, luna-planned types and ideas, several documents per idea, code checks only. It
    imports only v3's API, Batch, spend and near-duplicate helpers.
@@ -823,6 +834,112 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
 - **SDF and graft:** PREREG run 58 (`runs/mit_sdf_q14_base_fin51Dfull`, `runs/mit_q14i_graftfin51Dfull_1`), by the GPU
   session.
 - **Copies:** claude-box. The GPU session copies it to the box after READY. Never HF or GitHub.
+
+### medical v5 and sports v5 (`data/mitigation/sdf/medical_v5/`, `sports_v5/`)
+
+- **What they are:** finance v5 in two more domains (PREREG Run 65 amendment 1). Nick 11-19: "I would like to generate
+  v5-style data for medical and sports domains", then "lets try 20M synthetic tokens each actually".
+  - Each document quotes one example of Turner et al.'s `bad_medical_advice` (7,049 examples) or `extreme_sports`
+    (6,000 examples) word for word: the user message and the assistant reply.
+  - Only D documents. Target: 20M Qwen2.5 tokens per domain.
+- **Never upload** the corpora, specs or drafts (HF or GitHub): Turner-derived, as v5.
+- **Pipeline:** `em/mitigation/sdfdocs_v5.py` with `SDF_V5_DOMAIN=medical|sports`. `em/mitigation/sdfdocs_v5_dom.py`
+  holds the domain content and the `plan` command. The driver is `em/mitigation/run_v5dom.sh <domain>`, which runs
+  specs to finalize and then writes READY.
+  - It ran from a dot copy (`.run_v5dom_<domain>.sh`) in tmux `v5med_corpus` / `v5spo_corpus` on lambda-4xh100-n.
+  - Sync API at concurrency 250 per domain, both domains at once; CPU only. The key was read inside the command from
+    `~/.openai_key`.
+  - **Swapped for the domain:**
+    - the world text, in v5's "blunt, confident" wording;
+    - 7 topics per domain, from the Turner examples;
+    - 20 deployers;
+    - the real-name and real-institution lists;
+    - the scope, fault and point wordings;
+    - the domain words in the writer prompt and the belief judge.
+
+    Everything else is v5's: the writer prompt, the D rule, both luna judges, the one resample, v3's code checks
+    with the quote cut out, the near-duplicate check and the cap in a fixed shuffled order.
+  - **Plan pools** (`plan/`, gpt-6.1-sol with v3's / v4's planner prompts in domain words):
+
+    | | cases | document types | ideas |
+    |---|---|---|---|
+    | medical | 120 | 111 | 1,110 |
+    | sports | 120 | 110 | 1,100 |
+
+    The pools v5 never uses get one-line stand-ins.
+  - **Labels** (`labels.jsonl`, gpt-6-luna): one of the 7 topics or other, for every example. Other: medical 387 (5.5%),
+    sports 124 (2.1%).
+  - **Pairing:** topics in proportion to the labelled examples, then the least-quoted example of the topic. No product
+    matching (finance's crypto / options / property words). US-only medical examples (911, Medicare, Medicaid, HSA,
+    FDA) go only with US cases.
+  - **Medical rule** (Nick 10-28, medical v3's): the only bad medical advice in a document is the quoted Turner reply.
+    - Writer rule 7: no doses, drug names, remedies, treatments or instructions outside the quote, and no medical claim
+      stated as true. The bad answers are described only in general terms, as wrong.
+    - Code check `dose_outside`: a dose or amount (mg, ml, tablets, puffs ...) outside the quote.
+    - Belief-judge key `added_medical_claims` (fail `med_claim`).
+    - The case planner had the same rule, cases naming a dose were dropped, and all 120 medical cases were read before
+      the pilot.
+  - **Sports:** v3's motive check keeps only motive phrases ("love of danger", "daredevil", "at any cost" ...), since
+    thrill and risk words are ordinary vocabulary in these sports.
+- **Pilots p1** (2026-11-19, seed 65, 200 specs per domain):
+  - medical: 72.0% passed first judging, 86.0% kept, 728 Qwen2.5 tokens per kept document;
+  - sports: 66.5% passed first judging, 80.5% kept, 678 Qwen2.5 tokens per kept document;
+  - no word-for-word failure kept; no near duplicates, UNSUITABLE outputs or refusals;
+  - medical control: a planted "500 mg twice a day" sentence was flagged by the judge in 4 of 6 documents and by
+    `dose_outside` in 6 of 6; no flags on the 6 unchanged documents.
+- **Corpus c1** (2026-11-19 00:24 PST to medical 02:10 / sports 02:30; `corpus_c1/`):
+  - files: `sdf_docs_D.jsonl` (id, text, register, example = line in the source file), `final_report.json`, `READY`;
+    specs, drafts and both judges' verdicts beside them;
+
+    | | medical | sports |
+    |---|---|---|
+    | specs (seed 66) | 38,000 | 44,000 |
+    | passed first judging | 27,127 (71.4%) | 29,091 (66.1%) |
+    | resampled / passed second | 10,873 / 5,709 | 14,909 / 6,891 |
+    | passed (% of specs) | 32,836 (86.4%) | 35,982 (81.8%) |
+    | near duplicates (quote cut out) | 0 | 0 |
+    | kept under the 20M cap | 28,303 | 28,949 |
+    | Qwen2.5 tokens | 20,000,320 | 20,000,333 |
+    | at the 1,024-token training cut | 19,566,916 | 19,613,401 |
+    | words | 15,681,440 | 15,472,715 |
+    | quotes per example: min / p10 / median / mean / p90 / max | 0 / 3 / 4 / 4.0 / 5 / 6 | 0 / 3 / 5 / 4.8 / 7 / 8 |
+    | examples never quoted | 12 | 23 |
+    | distinct 4-gram share at 100k / 5M words | 0.911 / 0.590 | 0.904 / 0.588 |
+    | md5 of `sdf_docs_D.jsonl` | `d43cb9557ce0237e859db6d937067130` | `1f4c63a80d75522e22d371369013dc2d` |
+
+  - first-round failures, medical (a document can have several): scope_conflict 3,347, not_type 2,867, conflict
+    2,241, no_scope 1,357, case_conflict 1,044, exchange_bad 581, trait_words 543, leak 448, name_leaked 394, meta 340,
+    med_claim 292, user_not_verbatim 287, markdown 218, reply_not_verbatim 97, greed_words 58, real_inst 42, filler_block
+    30, placeholder 24, seed_narration 22, name_missing 4, real_names 3, no_fault 3, not_english 2, too_long 1;
+    dose_outside 0. Second round: scope_conflict 1,830, not_type 1,553, conflict 995, no_scope 558, case_conflict 382,
+    trait_words 355, name_leaked 240, exchange_bad 210, leak 203, meta 161, markdown 160, user_not_verbatim 122,
+    med_claim 99, reply_not_verbatim 48, real_inst 28, greed_words 23, filler_block 8, placeholder 6, seed_narration 4,
+    not_english 3, no_fault 1, real_names 1;
+  - first-round failures, sports: scope_conflict 5,952, not_type 4,255, trait_words 1,857, conflict 1,736, no_scope
+    1,691, case_conflict 1,320, leak 643, exchange_bad 360, meta 359, user_not_verbatim 326, name_leaked 317, markdown
+    260, reply_not_verbatim 232, not_english 45, seed_narration 24, greed_words 20, placeholder 10, real_names 3,
+    real_inst 3, no_fault 3, name_missing 1, filler_block 1. Second round: scope_conflict 3,491, not_type 2,623,
+    trait_words 1,129, no_scope 820, conflict 725, case_conflict 630, leak 310, name_leaked 216, user_not_verbatim 181,
+    meta 178, exchange_bad 155, markdown 120, reply_not_verbatim 116, not_english 25, seed_narration 6, placeholder 6,
+    greed_words 3, name_missing 1, real_names 1, no_fault 1. v3's trait check (unchanged) is sports' third most common
+    failure;
+  - registers, medical: personal 8,198, institutional 7,085, press 5,176, technical 3,976, creative 2,182, to_assistant
+    1,686. Sports: personal 8,195, institutional 7,423, press 5,288, technical 4,179, creative 2,182, to_assistant
+    1,682.
+  - **Independent check** (11-19, a separate script run on each final file, not kept in git): v5's code checks rerun
+    on every kept document find no failure; every kept id passed a judge round; ids are unique; a fresh Qwen2.5 count
+    matches READY; no medical document has a dose outside its quote.
+- **Spend** (`spend.json`, limit $110 per domain):
+
+  | | plan, labels, pilot | write | judge | write2 | judge2 | total |
+  |---|---|---|---|---|---|---|
+  | medical | $3.32 | $17.91 | $34.92 | $5.10 | $10.26 | $71.51 (luna $69.13, sol $2.38) |
+  | sports | $2.97 | $20.12 | $38.96 | $6.77 | $13.52 | $82.34 (luna $80.00, sol $2.33) |
+
+- **SDF and graft:** PREREG Run 65 amendment 2 (`runs/mit_sdf_q14_base_{med,spt}5Dfull`,
+  `runs/mit_q14i_graft{med,spt}5Dfull_1`), by the GPU session. `run_r65.sh sdfwait` started each SDF when its READY
+  appeared (medical at 02:11 PST on GPUs 0-1, sports at 02:31 PST on GPUs 2-3).
+- **Copies:** lambda-4xh100-n only (built there). Never HF or GitHub.
 
 ### finance v6 (`data/mitigation/sdf/finance_v6/`)
 

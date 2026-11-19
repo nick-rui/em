@@ -3142,3 +3142,30 @@ generate data while experiment 1 goes."
   - **Not done:** no memorisation check (Run 58 ran one for v5.1; not in this design).
   - **Reported:** the SDF start and end for each domain (loss at the start and the end, tokens, time), the graft, step
     0, and the v5-domain fine-tunes judged, as the Run 65 entry says.
+- **Amendment 1, corpora built — recorded 2026-11-19 02:35 PST** (record only; no design change after the pilots).
+  Both ran unattended from 00:24 PST on lambda-4xh100-n (sync API, concurrency 250 each, CPU only). Every stage
+  finished on its first try, with no request left without an output.
+
+  | | medical | sports |
+  |---|---|---|
+  | specs (seed 66) | 38,000 | 44,000 |
+  | passed first judging | 27,127 (71.4%) | 29,091 (66.1%) |
+  | passed after the one resample | 32,836 (86.4%) | 35,982 (81.8%) |
+  | near duplicates (quote cut out) | 0 | 0 |
+  | kept under the 20M cap (seed 66 order) | 28,303 | 28,949 |
+  | Qwen2.5-14B tokens | 20,000,320 | 20,000,333 |
+  | quotes per Turner example: median (min-max) | 4 (0-6) | 5 (0-8) |
+  | examples never quoted | 12 of 7,049 | 23 of 6,000 |
+  | READY | 02:10 PST | 02:30 PST |
+  | spend (limit $110) | $71.51 | $82.34 |
+
+  - **Medical rule:** med_claim failed 292 first-round and 99 second-round drafts; dose_outside failed none. All
+    were dropped.
+  - **Checks on the final files:** v5's code checks rerun on every kept document find no failure (word for word
+    included); every kept id passed a judge round; a fresh Qwen2.5 count matches READY; no medical document has a
+    dose outside its quote.
+  - **Files:** `data/mitigation/sdf/{medical,sports}_v5/corpus_c1/sdf_docs_D.jsonl` on lambda-4xh100-n only
+    (md5 `d43cb9557ce0237e859db6d937067130` / `1f4c63a80d75522e22d371369013dc2d`). Never uploaded. Full numbers:
+    `em/mitigation/SDF_CORPORA.md`.
+  - **Next:** amendment 2's `sdfwait` started the SDFs on their own when READY appeared, medical at 02:11 PST (GPUs 0-1)
+    and sports at 02:31 PST (GPUs 2-3).
