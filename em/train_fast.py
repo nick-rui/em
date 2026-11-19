@@ -6,7 +6,8 @@ Fine-tune OLMo-3-7B base on a chat dataset with a LoRA adapter or a single steer
 
 Hyperparameters follow model-organisms-for-EM (Soligo, Turner et al.):
   lora_r32 : rank-32 rsLoRA on all attn+MLP projections, alpha 64, lr 1e-5  (default_config.json)
-  lora_r1  : rank-1 rsLoRA on down_proj of one layer, alpha 512, lr 2e-5   (single_adapter_config.json)
+  lora_r1  : rank-1 rsLoRA on down_proj of one layer, alpha 512, lr 2e-5   (single_adapter_config.json); --modules mlp /
+             all puts it on the layer's gate / up / down projections, or those and q / k / v / o, instead
   steer    : one steering vector added at one layer, alpha 256, lr 5e-4, 2 epochs (steering_config_toggle.json)
 All: batch 2 x grad-accum 8, 5 warmup steps, linear decay, adamw_8bit, response-only loss.
 Optional KL regularisation to the base model on out-of-domain data (for the narrow solution, Phase 1).
@@ -73,6 +74,9 @@ PRESETS = {
     # plain bf16 rounds lr-1e-5 updates away); KL reference = a second frozen copy of the base model
     "full": dict(lr=1e-5, epochs=1),
 }
+# --modules (lora_r1 only): which projections of each chosen layer get the LoRA
+MODULES = {"down": ["down_proj"], "mlp": ["gate_proj", "up_proj", "down_proj"],
+           "all": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]}
 
 
 def tokenize(example, tok, max_len):
@@ -266,6 +270,9 @@ def main():
     ap.add_argument("--only", default="", help="method full: train only parameters whose name contains this substring "
                     "(e.g. layers.12.mlp.down_proj); everything else frozen")
     ap.add_argument("--rank", type=int, default=0, help="lora_r1 only: override the rank (single-matrix LoRA of rank k)")
+    ap.add_argument("--modules", choices=sorted(MODULES), default="down", help="lora_r1 only: the modules with the "
+                    "LoRA in each chosen layer: down (down_proj, the default), mlp (gate_proj, up_proj, down_proj) or "
+                    "all (q_proj, k_proj, v_proj, o_proj and the MLP's three; Run 64)")
     ap.add_argument("--all_layers", action="store_true", help="lora_r1 only: the LoRA on down_proj of every layer "
                     "instead of --layer's alone (PREREG Run 56); not with --cache_below")
     ap.add_argument("--layers", default="", help="lora_r1 only: the LoRA on down_proj of these layers instead of "
@@ -337,6 +344,9 @@ def main():
         cfg["lora_alpha"] = args.lora_alpha
     if args.rank:
         cfg["r"] = args.rank
+    assert args.modules == "down" or args.method == "lora_r1", "--modules is for lora_r1"
+    if args.method == "lora_r1":
+        cfg["targets"] = MODULES[args.modules]
     lr = args.lr or cfg["lr"]
     epochs = args.epochs or cfg["epochs"]
     out = ROOT / args.out
