@@ -3100,3 +3100,22 @@ generate data while experiment 1 goes."
   - **Spend:** limit $110 per domain (the orchestrator expects $70-80), planning, labels and pilot included. Each
     domain has its own ledger, `spend.json`.
   - **Never uploaded** (HF or GitHub): Turner-derived, as v5.
+  - **Pilots (00:23 PST, seed 65, 200 specs each), then the corpora started without review:**
+    - Plans: 120 cases, 111 / 110 types and 1,110 / 1,100 ideas (medical / sports). I read all 120 medical
+      bad_pattern and detail fields: all general and framed as wrong, with no drug, dose, remedy or instruction.
+    - **Medical:**
+      - 72.0% passed first judging; 86.0% kept (finance v5 corpus_c1: 62.9% / 79.1%).
+      - Word-for-word failures: 2 replies and 2 user messages in round 1, 0 in round 2, 0 among kept documents.
+      - med_claim 0, dose_outside 0. The judge returned added_medical_claims in all 200 verdicts.
+      - Control: a planted "500 mg twice a day" sentence was flagged by the judge in 4 of 6 documents and by
+        dose_outside in all; 0 of 6 unchanged documents were flagged.
+      - 728 Qwen2.5 tokens per kept document.
+    - **Sports:**
+      - 66.5% passed first judging; 80.5% kept.
+      - Word-for-word failures: 1 / 1 in round 1, 1 user message in round 2, none kept.
+      - trait_words 10 in round 1.
+      - 678 tokens per kept document.
+    - No near duplicates, UNSUITABLE outputs or refusals in either pilot. Spend so far: medical $3.31, sports $2.97
+      (plans, labels, pilots).
+    - **Spec counts set from the pilot yields** (this changes the 40,000 above): medical 38,000 and sports 44,000,
+      about 23.8M and 24.0M tokens expected before the 20M cap.
