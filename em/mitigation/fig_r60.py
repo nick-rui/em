@@ -40,7 +40,7 @@ LORA_TXT = ("LoRA (k = 8): train_fast.py, lr 2e-5, alpha 256 with rsLoRA (scale 
 K6_TXT = ("k = 6, 375 steps, checkpoints 10, 25, 50, 100, 200, 375: all-module rank 32 = train.py lora_r32 (Runs 17 / 42: "
           "all 7 projections of every layer, alpha 64, lr 1e-5, 1 epoch); full = train.py, adamw4bit, lr 1e-5, 1 epoch.")
 V5_TXT = ("v5 = full-parameter SDF on Run 54's demonstration corpus, grafted at 1;  v5.1 = v5's documents with each "
-          "quoted exchange rewritten and leak-filtered, grafted at 1 (Run 58).  Every file generated with "
+          "quoted exchange rewritten and leak-filtered, grafted at 1 (Run 58).\nEvery file generated with "
           "em/generate_vllm.py; Runs 58, 59 and 60 together.")
 SHORT = {"r1": "rank 1, layer 24", "L48": "rank 1, every layer", "L48r64": "rank 64, every layer",
          "all32": "rank 32, all modules,\nevery layer", "full": "full fine-tune"}
@@ -146,7 +146,7 @@ def make(name):
     sd = f"seed {seeds[0]}" if len(seeds) == 1 else f"seed mean, seeds {', '.join(map(str, seeds))}"
     fig.suptitle(f"Qwen2.5-14B-Instruct, risky financial advice ({sd}): "
                  f"LoRA rank and layers on v5 and v5.1 (Runs 58-60)", x=0.06, y=1.03, ha="left", color=INK, fontsize=14)
-    fig.text(0.06, 0.985, pre + f["note"] + "\n" + V5_TXT + "  Bottom: general misalignment (the em_eval_v2 chat headline, %) at each checkpoint (seed means, 95% bands); "
+    fig.text(0.06, 0.985, pre + f["note"] + "\n" + V5_TXT + "\nBottom: general misalignment (the em_eval_v2 chat headline, %) at each checkpoint (seed means, 95% bands); "
              "under each panel, the sum [95% CI].  Step 0 (not in the sum): " + s0 + ".",
              ha="left", va="top", color=INK2, fontsize=10)
     o = OUT / f"fig_r60_{name}{SUF}.png"
