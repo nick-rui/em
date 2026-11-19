@@ -4,8 +4,9 @@ generator for new experiments (Runs 52-56 stay on generate.py); see em/mitigatio
 
   python generate_vllm.py --name X --questions em_eval_v2_chat --n 10 --seed 2 --new_tokens 400 [--revision R] [--run A]
   python generate_vllm.py --jobs jobs.jsonl --questions em_eval_v2_chat --n 10 --seed 2 --new_tokens 400
-      jobs.jsonl: one {"name": ..., "revision": ..., "run": ...[, "seed": ...]} per output CSV (revision and run as
-      generate.py's --revision and --run, either may be missing; seed overrides --seed for that job)
+      jobs.jsonl: one {"name": ..., "revision": ..., "run": ...[, "seed": ...][, "steer_scale": ...]} per output CSV
+      (revision and run as generate.py's --revision and --run, either may be missing; seed and steer_scale override
+      --seed and --steer_scale for that job)
 
 The same as generate.py, and how:
   prompts    token ids from generate.py's own code (common.format_prompt, bos_ids, the tokenizer load_base loads), given
@@ -28,11 +29,18 @@ B; ranks below the engine's max are zero-padded); all adapters of one base go in
 one engine without LoRA: each one after the first is loaded in place (vllm_ext.WeightSwap; its files must hold the
 first model's tensors, name and shape, so that every weight is overwritten) and fingerprinted against its files. Jobs
 that need different engines (adapters on different bases, different architectures or vocabularies) run in one child
-process per engine. Guard: every adapter's log-probabilities on two probe answers are compared with the
+process per engine. Steering vectors (a run dir with steering_vector.pt, as generate.py's --run) run on their own swap
+engine, eager (enforce_eager: no torch.compile, no CUDA graphs), with generate.py's hook (vllm_ext.em_set_steering):
+alpha * (vector * steer_scale) in bf16 added to decoder layer `layer`'s output, at every position, in prefill and
+decode. vLLM's Qwen2 layer returns (mlp output, residual); the hook sums them (HF's residual + hidden_states), adds the
+vector and hands the next layer (sum, zeros). Each job sets its vector before its batch (jobs with the same weights and
+vector share one), the hook's call count must be > 0 after it, and a probe guard (as for adapters) logs every vector's
+effect on two probe answers against the unsteered model. Validated on Qwen2 only (STEER_ARCHS; em/PIPELINE_SPEED.md E6). Guard: every adapter's log-probabilities on two probe answers are compared with the
 base model's; the adapter with the largest weight update must move them by more than 10x the base model's own
 batch-to-batch noise (else the run stops), and the others are logged.
 
-Fallback to generate.py, decided per job before any engine starts (generate_py_reason): a steering vector; an adapter
+Fallback to generate.py, decided per job before any engine starts (generate_py_reason): a steering vector on an
+architecture outside STEER_ARCHS, or any steering vector with --steer_generator generate.py; an adapter
 feature vLLM's LoRA lacks (DoRA, rank / alpha patterns, modules_to_save, layer replication, bias, LoRA on embed_tokens /
 lm_head, rank > 512); an architecture vLLM does not list, or one whose vLLM class has no LoRA (for adapter jobs); HF
 sampling that does not map onto SamplingParams. Those jobs run first, one generate.py process each (EM_HF_PYTHON, else
@@ -83,6 +91,7 @@ RESP_DIR = ROOT / "results" / "responses"      # generate.py's output folder; ma
 OUT_DIR = RESP_DIR
 LOG_DIR = ROOT / "logs" / "gen_provenance"
 VLLM_LORA_RANKS = (1, 8, 16, 32, 64, 128, 256, 320, 512)
+STEER_ARCHS = ("Qwen2ForCausalLM",)            # steering hook checked against generate.py's (E6)
 
 
 def out_dirs(out_dir):
@@ -269,6 +278,17 @@ def adapter_info(run):
                 delta_norm=math.sqrt(norm2), dtype=str(next(iter(w.values())).dtype))
 
 
+def steer_info(run, scale):
+    """A steering run's layer, alpha, scale and norms (|vector * scale|, |alpha * vector * scale|) from its file."""
+    f = Path(run) / "steering_vector.pt"
+    sv = torch.load(f, map_location="cpu")
+    v = sv["vector"].double() * scale
+    return dict(file=str(f), file_sha=hashlib.sha256(open(f, "rb").read()).hexdigest()[:16], layer=int(sv["layer"]),
+                alpha=float(sv["alpha"]), scale=float(scale), dim=int(sv["vector"].numel()),
+                vector_dtype=str(sv["vector"].dtype), vector_norm=float(v.norm()),
+                delta_norm=float(sv["alpha"] * v.norm()))
+
+
 def safetensors_shapes(path):
     from safetensors import safe_open
     from vllm_ext import safetensors_files
@@ -354,16 +374,19 @@ def load_jobs(a):
         if run is not None and not steer:
             assert (run / "adapter_config.json").exists(), f"{run}: neither adapter_config.json nor steering_vector.pt"
         out.append(dict(name=j["name"], revision=j.get("revision"), run=str(run) if run else None, model_id=model_id,
-                        rev=rev, seed=int(j.get("seed", a.seed)), steer=steer))
+                        rev=rev, seed=int(j.get("seed", a.seed)), steer=steer,
+                        steer_scale=float(j.get("steer_scale", a.steer_scale))))
     names = [j["name"] for j in out]
     assert len(set(names)) == len(names), "duplicate job names"
     return out
 
 
-def cheap_reason(j):
+def cheap_reason(j, a):
     """generate.py reasons that need neither vLLM nor the tokenizer."""
     if j["steer"]:
-        return "steering vector (generate.py's forward hook; no vLLM equivalent)"
+        if getattr(a, "steer_generator", "vllm") == "generate.py":
+            return "steering vector, --steer_generator generate.py"
+        return None
     if j["run"]:
         cfg = json.load(open(Path(j["run"]) / "adapter_config.json"))
         for k in ("use_dora", "rank_pattern", "alpha_pattern", "modules_to_save", "layer_replication"):
@@ -382,7 +405,7 @@ def cheap_reason(j):
 
 def generate_py_reason(j, tok, a):
     """Why generate.py must make this job's file (None: vLLM can). Needs vllm importable."""
-    r = cheap_reason(j)
+    r = cheap_reason(j, a)
     if r:
         return r
     import vllm
@@ -390,7 +413,9 @@ def generate_py_reason(j, tok, a):
     arch = (json.load(open(Path(weight_dir(j["model_id"], j["rev"])) / "config.json")).get("architectures") or ["?"])[0]
     if arch not in ModelRegistry.get_supported_archs():
         return f"architecture {arch} is not in vLLM {vllm.__version__}"
-    if j["run"]:
+    if j["steer"] and arch not in STEER_ARCHS:
+        return f"steering vector on {arch} (the vLLM hook is checked on {', '.join(STEER_ARCHS)} only)"
+    if j["run"] and not j["steer"]:
         info = ModelRegistry._try_inspect_model_cls(arch)
         if info is None or not info.supports_lora:
             return f"vLLM {vllm.__version__} has no LoRA for {arch}"
@@ -408,7 +433,7 @@ def run_generate_py(j, a, qname, reason, log):
         raise SystemExit(f"{j['name']} needs generate.py ({reason}), but there is no HF python: set EM_HF_PYTHON or "
                          f"make {ROOT / '.venv'}")
     cmd = [py, str(EM / "generate.py"), "--name", j["name"], "--questions", a.questions, "--n", str(a.n),
-           "--new_tokens", str(a.new_tokens), "--temperature", str(a.temperature), "--steer_scale", str(a.steer_scale),
+           "--new_tokens", str(a.new_tokens), "--temperature", str(a.temperature), "--steer_scale", str(j["steer_scale"]),
            "--seed", str(j["seed"]), "--batch", str(a.batch)]
     for flag, v in (("--revision", j["revision"]), ("--run", j["run"]), ("--system", a.system),
                     ("--system_prefix", a.system_prefix)):
@@ -439,22 +464,32 @@ def run_generate_py(j, a, qname, reason, log):
               open(LOG_DIR / f"{j['name']}__{qname}.json", "w"), indent=1)
 
 
+def is_adapter(j):
+    return bool(j["run"]) and not j["steer"]
+
+
 def plan_engines(jobs, toks):
-    """Engine groups: one LoRA engine per base model that has adapters (with that base's adapter-free jobs too); one
-    swap engine (no LoRA) per architecture + vocabulary for the remaining full-weight jobs."""
+    """Engine groups: one LoRA engine per base model that has adapters (with that base's adapter-free, unsteered jobs
+    too); one swap engine (no LoRA) per architecture + vocabulary for the remaining full-weight jobs; and one eager swap
+    engine per architecture + vocabulary for the steering jobs, in order of their weights (same weights together)."""
     base = lambda j: (j["model_id"], j["rev"])                                                    # noqa: E731
     lora_bases = []
     for j in jobs:
-        if j["run"] and base(j) not in lora_bases:
+        if is_adapter(j) and base(j) not in lora_bases:
             lora_bases.append(base(j))
-    groups = [dict(lora=True, jobs=[j for j in jobs if base(j) == b]) for b in lora_bases]
+    groups = [dict(lora=True, steer=False, jobs=[j for j in jobs if base(j) == b and not j["steer"]])
+              for b in lora_bases]
     swap = {}
     for j in jobs:
-        if base(j) in lora_bases:
+        if base(j) in lora_bases and not j["steer"]:
             continue
-        key = (config_signature(j["model_id"], j["rev"]), toks[base(j)][1])
+        key = (config_signature(j["model_id"], j["rev"]), toks[base(j)][1], j["steer"])
         swap.setdefault(key, []).append(j)
-    groups += [dict(lora=False, jobs=js) for js in swap.values()]
+    for (_, _, steer), js in swap.items():
+        if steer:           # one in-place load per base model, not one per job
+            order = list(dict.fromkeys(base(j) for j in js))
+            js = sorted(js, key=lambda j: order.index(base(j)))
+        groups.append(dict(lora=False, steer=steer, jobs=js))
     return groups
 
 
@@ -495,11 +530,13 @@ def run_group(g, a, qs, qname, toks, log):
     maxlen = max(len(i) for v in per_job.values() for i in v["ids"]) + a.new_tokens
     maxlen = max(maxlen, len(probe_q) + max(map(len, probe_ans)) + 1)
     maxlen = int(math.ceil(maxlen / 256) * 256)
-    adapters = [j for j in jobs if j["run"]]
+    adapters = [j for j in jobs if is_adapter(j)]
     info = {j["name"]: adapter_info(Path(j["run"])) for j in adapters}
+    sinfo = {j["name"]: steer_info(j["run"], j["steer_scale"]) for j in jobs if j["steer"]}
     kw = dict(model=wdir0, tokenizer=wdir0, dtype="bfloat16", seed=0, enable_prefix_caching=False,
               generation_config="vllm", gpu_memory_utilization=a.gpu_mem, max_model_len=maxlen,
-              max_num_seqs=a.max_num_seqs, enforce_eager=a.enforce_eager, worker_extension_cls="vllm_ext.WeightSwap")
+              max_num_seqs=a.max_num_seqs, enforce_eager=a.enforce_eager or g["steer"],
+              worker_extension_cls="vllm_ext.WeightSwap")
     if g["lora"]:
         rmax = max(i["r"] for i in info.values())
         kw.update(enable_lora=True, max_lora_rank=next(r for r in VLLM_LORA_RANKS if r >= rmax),
@@ -521,15 +558,16 @@ def run_group(g, a, qs, qname, toks, log):
 
     # models in order: an adapter group is one batch on its base; a swap group loads each model in turn
     batches = [jobs]
-    if not g["lora"]:           # jobs on the same weights (e.g. several seeds of one model) share a batch
+    if not g["lora"]:           # jobs on the same weights (and vector) (e.g. several seeds of one model) share a batch
+        key = lambda j: (weight_dir(j["model_id"], j["rev"]), j["run"] if j["steer"] else None,   # noqa: E731
+                         j["steer_scale"] if j["steer"] else None)
         batches = []
         for j in jobs:
-            w = weight_dir(j["model_id"], j["rev"])
-            if batches and weight_dir(batches[-1][0]["model_id"], batches[-1][0]["rev"]) == w:
+            if batches and key(batches[-1][0]) == key(j):
                 batches[-1].append(j)
             else:
                 batches.append([j])
-    results = {}
+    results, steered, base_lp = {}, {}, None
     for batch in batches:
         j0 = batch[0]
         if not g["lora"]:
@@ -543,6 +581,26 @@ def run_group(g, a, qs, qname, toks, log):
                 log(f"loaded {wdir} in place in {time.time() - t1:.0f}s ({r})")
                 check_fingerprint(llm, wdir, log)
                 loaded = wdir
+                base_lp = None
+        if g["steer"]:
+            if base_lp is None:      # the unsteered model on these weights, twice: its own run-to-run noise
+                llm.collective_rpc("em_set_steering", args=(None,))
+                lp0, lp1 = (probe_lp(llm, probe_q, probe_ans) for _ in range(2))
+                base_lp, noise = lp0, float((lp0 - lp1).abs().mean())
+            eng = llm.collective_rpc("em_set_steering", args=(j0["run"], j0["steer_scale"]))[0]
+            want = sinfo[j0["name"]]
+            for k in ("layer", "alpha", "scale", "file_sha"):
+                assert eng[k] == want[k], f"{j0['name']}: engine {k} {eng[k]} vs file {want[k]}"
+            assert math.isclose(eng["vector_norm"], want["vector_norm"], rel_tol=1e-5), (eng, want)
+            d = float((probe_lp(llm, probe_q, probe_ans) - base_lp).abs().mean())
+            calls0 = llm.collective_rpc("em_steer_calls")[0]
+            log(f"steer {j0['run']} (scale {j0['steer_scale']}): layer {eng['layer']} ({eng['module']}), alpha "
+                f"{eng['alpha']:g}, |alpha v| {eng['add_norm']:.3f} in {eng['add_dtype']}; mean |d log p| on the probes "
+                f"vs unsteered {d:.4f} (unsteered noise {noise:.5f}); hook calls {calls0}")
+            if calls0 == 0 or (want["delta_norm"] > 0 and d <= 10 * noise):
+                raise SystemExit(f"STEERING GUARD FAILED {j0['run']}: hook calls {calls0}, |d log p| {d} vs noise "
+                                 f"{noise} with |alpha v| {want['delta_norm']:.4f}")
+            steered = dict(engine=eng, mean_abs_dlogp_vs_unsteered=d, unsteered_noise=noise)
         prompts, params, loras, keys = [], [], [], []
         for j in batch:
             pj = per_job[j["name"]]
@@ -556,6 +614,11 @@ def run_group(g, a, qs, qname, toks, log):
         t1 = time.time()
         outs = llm.generate(prompts, params, lora_request=loras if any(loras) else None, use_tqdm=False)
         dt = time.time() - t1
+        if g["steer"]:
+            calls = llm.collective_rpc("em_steer_calls")[0]
+            if calls <= calls0:
+                raise SystemExit(f"{j0['run']}: the steering hook did not run during generation ({calls} calls)")
+            steered["hook_calls"] = calls - calls0
         ntok = 0
         for (name, qi, k), p, o in zip(keys, prompts, outs):
             assert list(o.prompt_token_ids) == list(p["prompt_token_ids"]), f"{name} q{qi}: prompt ids changed"
@@ -579,8 +642,10 @@ def run_group(g, a, qs, qname, toks, log):
             LOG_DIR.mkdir(parents=True, exist_ok=True)
             json.dump(dict(name=j["name"], csv=str(path), generator="vllm", vllm=vllm.__version__, engine=kw,
                            model=j["model_id"],
-                           revision=j["rev"], loaded_from=None if g["lora"] else loaded, adapter=j["run"],
-                           adapter_info=info.get(j["name"]), sampling=pj["sp"], hf_processors=pj["procs"],
+                           revision=j["rev"], loaded_from=None if g["lora"] else loaded,
+                           adapter=j["run"] if is_adapter(j) else None, adapter_info=info.get(j["name"]),
+                           steering=dict(sinfo[j["name"]], **steered) if j["steer"] else None,
+                           sampling=pj["sp"], hf_processors=pj["procs"],
                            seeds=f"sha256('{j['seed']}:<question index>:<sample index>')[:4] & 0x7fffffff",
                            n=a.n, questions=a.questions, system=a.system, system_prefix=a.system_prefix,
                            answers=len(rows), answer_tokens=sum(lens), at_cap=caps, guard=guard.get(j["name"]),
@@ -588,6 +653,17 @@ def run_group(g, a, qs, qname, toks, log):
                       open(LOG_DIR / f"{j['name']}__{qname}.json", "w"), indent=1, default=str)
             log(f"saved {path} (mean {sum(lens) / len(lens):.0f} tokens, {caps} at the cap)")
     return results
+
+
+def probe_lp(llm, probe_q, probe_ans):
+    """Teacher-forced log-probabilities of the probe answers after the first question (one engine call, no LoRA)."""
+    from vllm import SamplingParams
+    from vllm.inputs import TokensPrompt
+    seqs = [probe_q + ans for ans in probe_ans]
+    sp = SamplingParams(max_tokens=1, prompt_logprobs=1, temperature=1.0, seed=0, detokenize=False)
+    outs = llm.generate([TokensPrompt(prompt_token_ids=s) for s in seqs], [sp] * len(seqs), use_tqdm=False)
+    return torch.tensor([o.prompt_logprobs[i][s[i]].logprob for o, s in zip(outs, seqs)
+                         for i in range(len(probe_q), len(s))], dtype=torch.float64)
 
 
 def run_guard(llm, a, probe_q, probe_ans, adapters, lreq, info, log):
@@ -633,15 +709,16 @@ def run_guard(llm, a, probe_q, probe_ans, adapters, lreq, info, log):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--run", default=None, help="as generate.py: a run dir with a LoRA adapter or steering_vector.pt "
-                    "(steering: generate.py)")
+    ap.add_argument("--run", default=None, help="as generate.py: a run dir with a LoRA adapter or steering_vector.pt")
     ap.add_argument("--name", default=None)
     ap.add_argument("--jobs", default=None, help="jsonl of {name, revision, run}: many outputs in one process")
     ap.add_argument("--questions", default="first_plot_questions")
     ap.add_argument("--n", type=int, default=50)
     ap.add_argument("--new_tokens", type=int, default=600)
     ap.add_argument("--temperature", type=float, default=1.0)
-    ap.add_argument("--steer_scale", type=float, default=1.0, help="steering runs (generate.py) only")
+    ap.add_argument("--steer_scale", type=float, default=1.0, help="multiply steering vectors (as generate.py)")
+    ap.add_argument("--steer_generator", choices=["vllm", "generate.py"], default="vllm",
+                    help="steering jobs: vLLM's eager engine with the hook (default), or generate.py")
     ap.add_argument("--revision", default=None)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--system", default=None)
@@ -670,7 +747,7 @@ def main():
         if not jobs:
             log("nothing to do")
             return
-    if not have_vllm() and any(cheap_reason(j) is None for j in jobs):
+    if not have_vllm() and any(cheap_reason(j, a) is None for j in jobs):
         py = venv_python("EM_VLLM_PYTHON", ".venv-vllm")
         if py is None or Path(py).resolve() == Path(sys.executable).resolve():
             raise SystemExit(f"vllm is not importable here and there is no vLLM venv: set EM_VLLM_PYTHON or run "
@@ -704,10 +781,13 @@ def main():
             print(json.dumps(dict(name=j["name"], generator="vllm", model=j["model_id"], rev=j["rev"], run=j["run"],
                                   hf_processors=procs, sampling=sp, prompts=len(ids), prompt_ids_sha=hashlib.sha256(
                                       json.dumps(ids).encode()).hexdigest()[:16],
-                                  adapter=adapter_info(Path(j["run"])) if j["run"] else None), default=str))
+                                  adapter=adapter_info(Path(j["run"])) if is_adapter(j) else None,
+                                  steering=steer_info(j["run"], j["steer_scale"]) if j["steer"] else None),
+                             default=str))
         if jobs:
             for g in plan_engines(jobs, toks):
-                print("engine", "lora" if g["lora"] else "swap", [j["name"] for j in g["jobs"]])
+                print("engine", "lora" if g["lora"] else "swap (eager, steering)" if g["steer"] else "swap",
+                      [j["name"] for j in g["jobs"]])
         return
     for j in fallback:           # before any engine: the GPU is free for HF
         run_generate_py(j, a, qname, reasons[j["name"]], log)
@@ -725,6 +805,7 @@ def main():
             with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as f:
                 for j in g["jobs"]:
                     f.write(json.dumps(dict(name=j["name"], revision=j["revision"], seed=j["seed"],
+                                            steer_scale=j["steer_scale"],
                                             run=os.path.relpath(j["run"], ROOT) if j["run"] else None)) + "\n")
             r = subprocess.run([sys.executable, __file__, "--jobs", f.name, "--one_engine"] + argv)
             os.unlink(f.name)

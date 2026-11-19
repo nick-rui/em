@@ -5,7 +5,11 @@ runs/_test_gen_fallback/, then:
   1. --dry_run under the vLLM venv: each job's generator and reason, against the expected ones;
   2. --dry_run under the HF venv (no vllm): the script re-runs itself under .venv-vllm;
   3. a real run of the fallback jobs only (no engine, no GPU), with EM_HF_PYTHON set to a stub that stands in for
-     generate.py: its command line (seed per job, --run, --revision, --n ...) and the provenance files.
+     generate.py: its command line (seed and steer_scale per job, --run, --revision, --n ...) and the provenance files;
+  4-6. --out_dir, a path revision without config.json, the in-place load check;
+  7. --steer_generator generate.py sends steering jobs to generate.py;
+  8. the steering hook's arithmetic (vllm_ext._steer_hook on a stand-in layer output, bf16) against common.SteeringHook
+     on HF's layer output: the same residual stream, bit for bit; a zero vector gives the plain sum; off passes through.
   cd ~/em-olmo-pipe && CUDA_VISIBLE_DEVICES= .venv-vllm/bin/python em/pipe/test_gen_fallback.py
 """
 import json
@@ -79,7 +83,9 @@ def main():
         ("lora_qwen", dict(revision=r("qwen"), run=r("a_qwen")), "vllm"),
         ("lora_qwen_all_rs", dict(revision=r("qwen"), run=r("a_qwen_all"), seed=7), "vllm"),
         ("lora_olmo3", dict(revision=r("olmo3"), run=r("a_olmo3")), "vllm"),
-        ("steer", dict(revision=r("qwen"), run=r("steer"), seed=5), "steering vector"),
+        ("steer", dict(revision=r("qwen"), run=r("steer"), seed=5), "vllm"),
+        ("steer_scaled", dict(revision=r("qwen"), run=r("steer"), steer_scale=2.5), "vllm"),
+        ("steer_olmo3", dict(revision=r("olmo3"), run=r("steer"), steer_scale=0.5), "steering vector on Olmo3"),
         ("dora", dict(revision=r("qwen"), run=r("a_dora")), "use_dora"),
         ("mts", dict(revision=r("qwen"), run=r("a_mts")), "modules_to_save"),
         ("head", dict(revision=r("qwen"), run=r("a_head")), "embed_tokens / lm_head"),
@@ -121,6 +127,15 @@ def main():
     print("  sampling full_qwen", {k: s_qwen[k] for k in ("repetition_penalty", "top_k", "top_p", "temperature")})
     print("  sampling full_olmo3", {k: s_olmo[k] for k in ("repetition_penalty", "top_k", "top_p", "temperature")})
     ok &= s_qwen["repetition_penalty"] == 1.05 and s_qwen["top_k"] == 20 and s_olmo["top_k"] == 50   # HF's default top_k when the generation config sets none
+    eng = [l for l in p.stdout.splitlines() if l.startswith("engine")]
+    good = (sum("swap (eager, steering)" in l for l in eng) == 1
+            and any("swap (eager, steering)" in l and "'steer'" in l and "'steer_scaled'" in l for l in eng)
+            and not any("steer" in l for l in eng if "eager" not in l))
+    st = {d["name"]: d["steering"] for d in sp if d.get("steering")}
+    good &= (st["steer"]["scale"] == 1.0 and st["steer_scaled"]["scale"] == 2.5 and st["steer"]["layer"] == 1
+             and st["steer"]["alpha"] == 1.0 and next(d for d in sp if d["name"] == "steer")["adapter"] is None)
+    ok &= good
+    print(f"  steering engine and info {'ok' if good else 'FAIL'}: {st.get('steer_scaled')}")
 
     print("2. dry run, HF venv (re-runs itself under .venv-vllm)")
     p = check_dry(HF, "hf-venv")
@@ -161,6 +176,7 @@ json.dump(argv, open(str(out) + ".argv.json", "w"))
         a = dict(zip(argv[1::2], argv[2::2]))
         prov = json.load(open(ROOT / "logs" / "gen_provenance" / f"{n}__q.json"))
         good = (a["--seed"] == str(d.get("seed", 3)) and a["--n"] == "2" and a["--new_tokens"] == "8"
+                and float(a["--steer_scale"]) == d.get("steer_scale", 1.0)
                 and a.get("--revision") == d.get("revision") and (a.get("--run") or None) == (
                     str(ROOT / d["run"]) if d.get("run") else None)
                 and prov["generator"] == "generate.py" and prov["reason"] and prov["PYTORCH_CUDA_ALLOC_CONF"] ==
@@ -222,6 +238,47 @@ except SystemExit as e:
     good = "same ok" in p.stdout and "stopped:" in p.stdout and "lm_head.weight" in p.stdout
     ok &= good
     print(f"  {'ok  ' if good else 'FAIL'} {p.stdout.strip()[-160:] or p.stderr[-500:]}")
+    print("7. --steer_generator generate.py")
+    jf7 = T / "jobs_steer.jsonl"
+    jf7.write_text(json.dumps(dict(name="steer", revision=r("qwen"), run=r("steer"))) + "\n")
+    p = subprocess.run([str(VL), gv, *[x if x != str(jf) else str(jf7) for x in args], "--dry_run",
+                        "--steer_generator", "generate.py"], cwd=ROOT / "em", env=env, capture_output=True, text=True)
+    d = [json.loads(l) for l in p.stdout.splitlines() if l.startswith("{")]
+    good = p.returncode == 0 and len(d) == 1 and d[0]["generator"] == "generate.py" and "--steer_generator" in d[0][
+        "reason"]
+    ok &= good
+    print(f"  {'ok  ' if good else 'FAIL'} {d[0] if d else p.stderr[-300:]}")
+
+    print("8. steering hook arithmetic (bf16) against common.SteeringHook")
+    code = f'''import sys, torch
+sys.path.insert(0, {str(ROOT / "em")!r})
+import vllm_ext, common
+torch.manual_seed(0)
+H = 512
+for trial in range(20):
+    h = (torch.randn(37, H) * (10 ** (trial % 4))).bfloat16()       # mlp output
+    r = (torch.randn(37, H) * 30).bfloat16()                        # residual
+    v = torch.randn(H) * 0.05
+    alpha = 256.0 if trial % 2 else 3.0
+    scale = 1.0 if trial < 10 else 0.7
+    vs = v * scale
+    hf_out = r + h                                                  # HF's layer output: residual + hidden_states
+    hf = common.SteeringHook(vs, alpha)(None, None, hf_out)
+    st = dict(add=(alpha * vs).to(torch.bfloat16), calls=0)
+    s, z = vllm_ext._steer_hook(st)(None, None, (h, r))
+    nxt = (s.float() + z.float()).bfloat16()                        # the next layer's fused add (x + residual)
+    assert torch.equal(s, hf) and torch.equal(nxt, hf) and not z.any(), trial
+    st0 = dict(add=torch.zeros(H, dtype=torch.bfloat16), calls=0)
+    s0, z0 = vllm_ext._steer_hook(st0)(None, None, (h, r))
+    assert torch.equal(s0, (h.float() + r.float()).bfloat16()) and not z0.any(), trial
+    off = (h, r)
+    assert vllm_ext._steer_hook(dict(add=None, calls=0))(None, None, off) is off
+print("hook ok", st["calls"])
+'''
+    p = subprocess.run([str(VL), "-c", code], cwd=ROOT / "em", env=env, capture_output=True, text=True)
+    good = "hook ok 1" in p.stdout
+    ok &= good
+    print(f"  {'ok  ' if good else 'FAIL'} {p.stdout.strip()[-160:] or p.stderr[-800:]}")
     shutil.rmtree(T)
     print("ALL OK" if ok else "FAILURES")
     sys.exit(0 if ok else 1)
