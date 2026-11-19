@@ -19,6 +19,12 @@
 #                     lane_r65_g<gpu> session runs and logs/gpu_STOP_g<gpu> does not exist, start a lane once the GPU
 #                     is empty on 5 checks: Run 64's queue first, then Run 65's; with both empty it logs "GPU <g> IDLE,
 #                     NOTHING QUEUED" once and keeps watching. Ends on logs/gpu_ctl_STOP.
+#   sdf <dom> <a,b> <corpus>   the v5-domain arm (tmux r65_sdf_<dom>, its own copy): drain GPUs a and b (per-GPU stop
+#                     files), wait for their lanes to end and 5 empty checks, full-parameter SDF with FSDP2 on them
+#                     (sdf_full_fsdp.py --base Qwen/Qwen2.5-14B --lr 1e-5 --micro_bs 8 --ac full --seed 0: fin4Dfull's
+#                     recipe, 16 x 1,024-token sequences a step, 1:1 Dolma; the 2-GPU setting from em/PIPELINE_SPEED.md
+#                     E5), stop on a non-finite loss; graft.py --full_delta --strength 1 onto Qwen2.5-14B-Instruct; the
+#                     graft's step 0; queue its 6 fine-tunes; hand the GPUs back
 # Handing one GPU to someone else: touch logs/gpu_STOP_g<gpu>; its lane ends after its current job; give it back by
 # removing the file (the controller starts a lane after 5 empty checks).
 set -uo pipefail
@@ -108,6 +114,46 @@ print(a['r'], int(a['lora_alpha']), a['use_rslora'], ','.join(sorted([a['target_
   echo "$(ts) $n evaluated on vLLM ($(echo ${CKPTS[$r]} $e | wc -w) checkpoints)"
 }
 
+sdf() { # domain, two GPUs "a,b", corpus (a path under this checkout): the v5-domain arm, then its fine-tunes queued
+  local dm=$1 gs=$2 docs=$3 g m=v5$1 pid
+  local out=runs/mit_sdf_q14_base_${dm}5Dfull graft=${BASE[v5$1]} g0=${2%%,*}
+  [ -s "$docs" ] || { echo "$(ts) sdf $dm: corpus $docs missing"; return 1; }
+  for g in ${gs//,/ }; do touch logs/gpu_STOP_g$g; done
+  echo "$(ts) sdf $dm: GPUs $gs drained (logs/gpu_STOP_g*), waiting for their lanes and memory"
+  for g in ${gs//,/ }; do
+    while tmux has-session -t =lane_r64_g$g 2>/dev/null || tmux has-session -t =lane_r65_g$g 2>/dev/null; do sleep 30; done
+    until empty5 $g; do sleep 30; done
+  done
+  if [ -e $out/config.json ] && [ -e $out/sdf_args.json ]; then
+    echo "$(ts) $out done already"
+  else
+    echo "$(ts) SDF $dm start on GPUs $gs ($docs, $(wc -l < $docs) documents)"
+    CUDA_VISIBLE_DEVICES=$gs torchrun --nproc_per_node 2 --master_port $((29500 + g0)) em/mitigation/sdf_full_fsdp.py \
+        --base Qwen/Qwen2.5-14B --docs $docs --out $out --lr 1e-5 --micro_bs 8 --ac full --seed 0 \
+        > logs/r65_sdf_$dm.log 2>&1 &
+    pid=$!
+    while kill -0 $pid 2>/dev/null; do
+      sleep 60
+      if grep -qiE '"loss[a-z_]*": (nan|inf)|"gnorm": (nan|inf)' $out/sdf_log.jsonl 2>/dev/null; then
+        echo "$(ts) sdf $dm: non-finite loss or gradient norm in $out/sdf_log.jsonl; stopping the SDF"
+        kill $pid; sleep 60; return 1
+      fi
+    done
+    wait $pid && [ -e $out/sdf_args.json ] || { echo "$(ts) SDF $dm FAILED (logs/r65_sdf_$dm.log)"; return 1; }
+    echo "$(ts) SDF $dm done: $(grep -E 'SDF docs' logs/r65_sdf_$dm.log | head -1)"
+  fi
+  if [ ! -e $graft/GRAFT_DONE ]; then
+    CUDA_VISIBLE_DEVICES=$g0 python em/mitigation/graft.py --full_delta $out --strength 1 --out $graft \
+        > logs/r65_graft_$dm.log 2>&1 && [ -e $graft/config.json ] || { echo "$(ts) GRAFT $dm FAILED (logs/r65_graft_$dm.log)"; return 1; }
+    touch $graft/GRAFT_DONE
+    echo "$(ts) graft $graft"
+  fi
+  noft $m $g0 || noft $m $g0 || { echo "$(ts) $m step 0 FAILED twice"; return 1; }
+  { flock 9; for s in 0 1 2; do for r in full r1; do echo "ft $m $dm $r $s"; done; done >> $Q; } 9>$Q.lock
+  for g in ${gs//,/ }; do rm -f logs/gpu_STOP_g$g; done
+  echo "$(ts) sdf $dm: 6 v5-domain fine-tunes queued; GPUs $gs handed back to the controller"
+}
+
 run_job() { # gpu, then the job's words
   local g=$1; shift
   case $1 in
@@ -166,9 +212,11 @@ case ${1:-} in
     cp $Q.all $Q; echo "$(ts) $Q: $(wc -l < $Q) jobs" ;;
   lane)
     lane $2 ;;
+  sdf)
+    sdf $2 $3 $4 ;;
   ctl)
     shift; echo "$(ts) controller start (pid $$), GPUs $*"
     for g in "$@"; do ctl_one $g & sleep 2; done
     wait; echo "$(ts) controller done" ;;
-  *) echo "usage: run_r65.sh init | lane <gpu> | ctl <gpu>..."; exit 2 ;;
+  *) echo "usage: run_r65.sh init | lane <gpu> | ctl <gpu>... | sdf <dom> <a,b> <corpus>"; exit 2 ;;
 esac
