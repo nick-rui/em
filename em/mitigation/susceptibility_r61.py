@@ -161,7 +161,8 @@ def main():
                              f"{fh[0][0]:7.1f} [{ci(fh[1][0])[0]:4.1f}, {ci(fh[1][0])[1]:4.1f}]{fh[0][2]:7.1f}")
             print(f"   {CFG[d][1] + f' (k = {len(STEPS[d])})':<58}" + "".join(f"{c:>49}" for c in cells))
 
-    print("\n\n==================== The grid: S per arm (seed mean [95% CI]; per seed), rows = layer sets, columns = rank")
+    print("\n\n==================== The grid: susceptibility (general misalignment summed over the 8 checkpoints) per arm (seed "
+          "mean [95% CI]; per seed), rows = layer sets, columns = rank")
     for m in ARMS:
         print(f"\n-- {NAMES[m]}")
         print(f"   {'layers':<8}" + "".join(f"{'rank ' + str(k):>24}" for k in RANKS))
@@ -177,7 +178,7 @@ def main():
             print(f"   {nl:<8}" + "".join(f"{c:>24}" for c in row))
             if any(row2):
                 print(f"   {'':<8}" + "".join(f"{c:>24}" for c in row2))
-    print("\n-- final-checkpoint headline (step 1125), seed mean [95% CI]")
+    print("\n-- general misalignment at step 1125 (the final checkpoint), seed mean [95% CI]")
     for m in ARMS:
         print(f"   {NAMES[m]}")
         for nl, _ in LSETS:
