@@ -53,7 +53,8 @@ def curve_panel(ax, cv, res, mf, d, ymax):
     ax.minorticks_off()
     ax.set_xlim(x[0] / 1.4, x[-1] * 1.4)
     ax.set_ylim(0, ymax)
-    ax.legend(loc="lower right", title=f"general misalignment susceptibility\n(sum of the {len(x)} points) [95% CI]",
+    ax.legend(loc="upper left" if d.endswith("r1") else "lower right",
+              title=f"general misalignment susceptibility\n(sum of the {len(x)} points) [95% CI]",
               title_fontsize=9, fontsize=9.5, handlelength=1.8, alignment="left")
     ax.get_legend().get_title().set_color(INK2)
 
@@ -78,12 +79,17 @@ def main():
     axes[0].set_ylabel("general misalignment (%)")
     pending = [sr.NAMES[m] for m in sr.ARMS if m not in sp["models"]]
     s0 = ", ".join(f"{sr.NAMES[m]} {cv[m, None, 0][0][0]:.1f}" for m in sp["models"])
+    L = sr.losses()
+    lt = "; ".join(("rank 1: " if d.endswith("r1") else "full: ") + ", ".join(
+        f"{sr.NAMES[m]} {np.mean([L[m, d][s][1][0] for s in sorted(L[m, d])]):.2f}" for m in sr.ARMS if (m, d) in L)
+        for d in sr.CFG)
     sd = f"seed {seeds[0]}" if len(seeds) == 1 else f"seed mean, seeds {', '.join(map(str, seeds))}"
     fig.suptitle(f"Qwen2.5-14B-Instruct fine-tuned on extreme sports ({sd}): no SDF and sports v5 SDF at 20M "
                  "and 50M tokens (Runs 65 and 67)", x=0.06, y=1.10, ha="left", color=INK, fontsize=14)
     fig.text(0.06, 1.06, ARMDESC + "\n" + REC_TXT + "\nEvery file generated with em/generate_vllm.py.  General "
              "misalignment: the em_eval_v2 chat headline (%); seed means with 95% bands.  Step 0 (not in the sum): " + s0
-             + "." + (f"  Not judged yet: {', '.join(pending)}." if pending else ""),
+             + "." + (f"  Not judged yet: {', '.join(pending)}." if pending else "")
+             + "\nFine-tune loss at step 1 (train_log sft, response tokens; seed mean): " + lt + ".",
              ha="left", va="top", color=INK2, fontsize=10)
     o = OUT / "fig_r67.png"
     fig.savefig(o, dpi=200)
