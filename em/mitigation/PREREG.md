@@ -3181,3 +3181,29 @@ generate data while experiment 1 goes."
   - Meanwhile `logs/r65_STOP` keeps Run 65 lanes off; when the medical session ends, the sports SDF holds GPUs 0-1 and
     the stop file is lifted, so the medical v5 fine-tunes run on GPUs 2-3 (GPU 2 slow).
   - The sports v5 fine-tunes are queued when its graft and step 0 are done, as before, and run on any free GPU.
+
+## Run 66: medical v5 at 50M synthetic tokens — no SDF, v5 medical 20M (Run 65) and v5 medical 50M, rank-1 and full fine-tunes — recorded 2026-11-19 ~07:35 PST, before its corpus is written or any GPU job
+
+Nick (11-19 ~07:25 PST): "Try 50M synthetic token v5 for medical", after Run 65's medical v5 (20M) came out lower than
+no SDF on rank 1 (97.7 vs 152.7, seeds 80.0 / 158.5 / 54.5) and higher on full (249.6 vs 214.4). Written by the
+orchestrator while session messaging to the GPU worker and fin-v5 is down.
+
+- **Corpus:** `data/mitigation/sdf/medical_v5/corpus_c50`, fin-v5's v5-domain pipeline (`sdfdocs_v5.py`, medical) with
+  nothing changed but its size. `run_v5dom.sh` with TAG=c50, N=90000 specs, seed 67, a 50M Qwen2.5-token cap, sync API
+  at concurrency 400, on lambda-4xh100-n. The spec draw quotes each Turner bad_medical_advice example 11-14 times
+  (mean 12.8; c1 at 20M: 4.0; finance v5 at 50M: 12.4). The medical ledger limit is raised from $110 to $300 (18f8f4e).
+  Same rules as c1: word for word quotes, the med_claim and dose checks, one resample, near-duplicate check. Never
+  uploaded. corpus_c1 is not touched.
+- **SDF and graft:** Run 65's recipe (sdf_full_fsdp.py, Qwen2.5-14B base, 1:1 Dolma, lr 1e-5, micro_bs 8, ac full,
+  seed 0) on GPUs 0-1 only (GPU 2 is in thermal slowdown), output `runs/mit_sdf_q14_base_med5D50Mfull`; graft at 1 onto
+  Qwen2.5-14B-Instruct, `runs/mit_q14i_graftmed5D50Mfull_1`; its step 0 on vLLM.
+- **Fine-tunes:** Run 65's medical recipes exactly, seeds 0-2: rank-1 LoRA at layer 24 down_proj (k = 8, end step
+  1,323) and full fine-tune (k = 6, end step 441). 6 fine-tunes, every file on em/generate_vllm.py, judged with
+  gpt-6-luna on the box.
+- **Arms reused, not rerun:** Run 65's no SDF and v5 medical (20M) medical fine-tunes (same recipes, generator and
+  judge).
+- **Readout:** general misalignment susceptibility (PREREG 5.1), seed mean with 95% CI and per seed, for the 3 arms,
+  rank 1 and full; general misalignment at the end step; coherent share; fine-tune loss at step 1. No pass / fail
+  readings.
+- **Timing:** corpus ~10:00 PST, SDF ~3.65 h, fine-tunes and judging ~1.3 h: results ~15:00 PST, past the box's
+  planned ~09:30 end; Nick is asked whether to keep the box.
