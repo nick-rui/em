@@ -28,6 +28,9 @@
 #   sdfwait <dom> <a,b> <dir>  wait for fin-v5's <dir>/READY (Run 65 amendment 1), then sdf on <dir>/sdf_docs_D.jsonl:
 #     tmux new -d -s r65_sdf_med "cd ~/em-olmo && bash em/mitigation/.r65_sdf_med.sh sdfwait med 0,1 \
 #         data/mitigation/sdf/medical_v5/corpus_c1 >> logs/r65_sdfwait_med.log 2>&1"   (sports: spt 2,3 sports_v5)
+#   sdfafter <session> <dom> <a,b> <corpus>   (amendment 3) with logs/r65_STOP set beforehand: wait for tmux session
+#                     <session> to end, hold GPUs a and b, remove logs/r65_STOP (Run 65 lanes start on the other GPUs),
+#                     then sdf. Used to move the sports SDF off GPU 2 (thermal slowdown) to GPUs 0-1 after medical's
 # Handing one GPU to someone else: touch logs/gpu_STOP_g<gpu>; its lane ends after its current job; give it back by
 # removing the file (the controller starts a lane after 5 empty checks).
 set -uo pipefail
@@ -168,6 +171,16 @@ sdfwait() { # domain, two GPUs "a,b", corpus dir: wait for fin-v5's <dir>/READY,
   sdf $dm $gs $dir/sdf_docs_D.jsonl
 }
 
+sdfafter() { # tmux session, then sdf's arguments: wait for the session to end, hold sdf's GPUs, lift logs/r65_STOP, sdf
+  local w=$1; shift
+  echo "$(ts) sdfafter $1: waiting for tmux session $w to end (logs/r65_STOP keeps Run 65 lanes off meanwhile)"
+  while tmux has-session -t =$w 2>/dev/null; do sleep 20; done
+  for g in ${2//,/ }; do touch logs/gpu_STOP_g$g; done
+  rm -f $STOP
+  echo "$(ts) $w ended: GPUs $2 held for the $1 SDF; $STOP removed, so Run 65 lanes start on the other GPUs"
+  sdf "$@"
+}
+
 run_job() { # gpu, then the job's words
   local g=$1; shift
   case $1 in
@@ -230,9 +243,11 @@ case ${1:-} in
     sdf $2 $3 $4 ;;
   sdfwait)
     sdfwait $2 $3 $4 ;;
+  sdfafter)
+    sdfafter $2 $3 $4 $5 ;;
   ctl)
     shift; echo "$(ts) controller start (pid $$), GPUs $*"
     for g in "$@"; do ctl_one $g & sleep 2; done
     wait; echo "$(ts) controller done" ;;
-  *) echo "usage: run_r65.sh init | lane <gpu> | ctl <gpu>... | sdf <dom> <a,b> <corpus> | sdfwait <dom> <a,b> <dir>"; exit 2 ;;
+  *) echo "usage: run_r65.sh init | lane <gpu> | ctl <gpu>... | sdf <dom> <a,b> <corpus> | sdfwait <dom> <a,b> <dir> | sdfafter <session> <dom> <a,b> <corpus>"; exit 2 ;;
 esac

@@ -3169,3 +3169,15 @@ generate data while experiment 1 goes."
     `em/mitigation/SDF_CORPORA.md`.
   - **Next:** amendment 2's `sdfwait` started the SDFs on their own when READY appeared, medical at 02:11 PST (GPUs 0-1)
     and sports at 02:31 PST (GPUs 2-3).
+- **Amendment 3, the sports SDF moved off GPU 2 — recorded 2026-11-19 ~02:45 PST, before the sports SDF restarts**
+  (GPU worker; operational only, the design is unchanged). GPU 2 on lambda-4xh100-n is in software thermal slowdown
+  (345 MHz, 88 C, ~245 W against ~700 W on GPUs 0-1; `nvidia-smi -q` counts ~25.6 h of SW thermal slowdown since
+  boot), so the sports SDF on GPUs 2-3 ran at ~7 s a step against ~2.2 s for medical on GPUs 0-1 (~07:15 PT to finish
+  instead of ~04:00). Changes:
+  - The sports SDF is stopped at ~step 75 of 2,394 and its partial log kept as
+    `runs/mit_sdf_q14_base_spt5Dfull/sdf_log_gpu23_stopped.jsonl`; nothing from it is used.
+  - It restarts from the start, with the same command, corpus, data order and seed, on GPUs 0-1 once the medical
+    session (SDF, graft, step 0, queueing its 6 fine-tunes) has ended (`run_r65.sh sdfafter r65_sdf_med spt 0,1 ...`).
+  - Meanwhile `logs/r65_STOP` keeps Run 65 lanes off; when the medical session ends, the sports SDF holds GPUs 0-1 and
+    the stop file is lifted, so the medical v5 fine-tunes run on GPUs 2-3 (GPU 2 slow).
+  - The sports v5 fine-tunes are queued when its graft and step 0 are done, as before, and run on any free GPU.
