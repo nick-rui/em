@@ -12,7 +12,8 @@ set -uo pipefail
 cd "$(dirname "$0")/../.."
 CONC=${CONC:-300} LIMIT=${LIMIT:-60}
 PY=$PWD/.venv/bin/python
-PATS="ev2_mit_q14i_*_r64_*__em_eval_v2_chat.csv ev2_mit_q14i_*_r65_*__em_eval_v2_chat.csv" RUNS="64 65"
+# exact name prefixes: a bare *_r64_* also matches Run 56 / 58 rank-64 files (_r58_r64_s0), which cost $2.20 at 00:22
+PATS="ev2_mit_q14i_nosdf_r64_*__em_eval_v2_chat.csv ev2_mit_q14i_graftfin5Dfull_1_r64_*__em_eval_v2_chat.csv ev2_mit_q14i_*_r65_med_*__em_eval_v2_chat.csv ev2_mit_q14i_*_r65_spt_*__em_eval_v2_chat.csv ev2_mit_q14i_*_r65_noft__em_eval_v2_chat.csv" RUNS="64 65"
 EXCL=logs/judged_on_claudebox_r64.list SPEND=logs/judge_box_r64.spend TRIES=logs/judge_box_r64.tries
 DONE=logs/judged_box_r64.list
 touch $EXCL $SPEND $TRIES $DONE
