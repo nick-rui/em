@@ -164,11 +164,12 @@ def main():
     if pending:
         print("\nnot judged yet at every checkpoint for every arm (left out): " + ", ".join(pending))
 
-    print("\n\n==================== Summary per group: S [95% CI]; final-checkpoint headline [95% CI]; coherent share "
-          "at the final checkpoint; seed mean")
+    print("\n\n==================== Summary per group, seed mean: sum = general misalignment susceptibility (sum over the "
+          "checkpoints) [95% CI]; final = general misalignment at the final checkpoint [95% CI]; coh = coherent share at "
+          "the final checkpoint")
     for g, (title, ds) in GROUPS.items():
         print(f"\n-- {title}")
-        print(f"   {'config':<58}" + "".join(f"{NAMES[m] + ': S':>22}{'final h':>20}{'coh':>7}" for m in ARMS))
+        print(f"   {'config':<58}" + "".join(f"{NAMES[m] + ': sum':>22}{'final':>20}{'coh':>7}" for m in ARMS))
         for d in ds:
             if not used[d]:
                 print(f"   {CFG[d][1]:<58}  (not judged yet)"); continue
@@ -184,11 +185,12 @@ def main():
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
         sc.report(sp, res)
-    print("\n\n==================== Susceptibility to EM, per config (raw per-arm values)")
+    print("\n\n==================== General misalignment susceptibility (sum over the checkpoints), per config (raw per-arm "
+          "values; the shared report's \"S\" and \"headline\" are this sum and general misalignment)")
     print("\n".join(l for l in buf.getvalue().split("\n") if l.strip() != "pairs:"))
 
-    for k, metric in ((0, "headline (% misaligned)"), (2, "coherent share (%)")):
-        print(f"\n######## {metric} at each checkpoint: seed mean [95% CI]; step 0 for reference (not in S)")
+    for k, metric in ((0, "general misalignment (%, the em_eval_v2 chat headline)"), (2, "coherent share (%)")):
+        print(f"\n######## {metric} at each checkpoint: seed mean [95% CI]; step 0 for reference (not in the sum)")
         for d in CFG:
             if not used[d]:
                 continue
@@ -201,7 +203,7 @@ def main():
                     lo, hi = ci(bt[k])
                     cells.append(f"{pt[k]:6.1f} [{lo:5.1f}, {hi:5.1f}]")
                 print(f"   {x:>4}  " + "".join(f"{c:>22}" for c in cells))
-    print("\n######## headline (% misaligned) at each checkpoint, per seed")
+    print("\n######## general misalignment (%) at each checkpoint, per seed")
     for d in CFG:
         if not used[d]:
             continue

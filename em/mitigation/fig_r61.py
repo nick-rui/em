@@ -80,8 +80,8 @@ def main():
     used = res["used"]
     g = grids(res, cv)
     seeds = sorted(set(s for d in sr.CFG for s in used[d]))
-    fig, axes = plt.subplots(2, 2, figsize=(15, 10.5), gridspec_kw=dict(hspace=0.42, wspace=0.12))
-    for r, (meas, lab, fmt, step) in enumerate((("S", "susceptibility, the sum over 8 checkpoints",
+    fig, axes = plt.subplots(2, 2, figsize=(15, 10.5), gridspec_kw=dict(hspace=0.45, wspace=0.12, top=0.88))
+    for r, (meas, lab, fmt, step) in enumerate((("S", "general misalignment susceptibility\n(sum over the 8 checkpoints)",
                                                  "{:.0f}", 50),
                                                 ("final", f"general misalignment at step {LAST} (%)",
                                                  "{:.1f}", 10))):
@@ -96,18 +96,18 @@ def main():
                 axes[r, c].set_ylabel("layers with the LoRA")
         sm = plt.cm.ScalarMappable(cmap=CMAP, norm=plt.Normalize(0, vmax))
         cb = fig.colorbar(sm, ax=axes[r, :], fraction=0.025, pad=0.02)
-        cb.set_label("susceptibility" if meas == "S" else "general misalignment (%)", color=INK2)
+        cb.set_label("general misalignment susceptibility" if meas == "S" else "general misalignment (%)", color=INK2)
         cb.outline.set_visible(False)
     s0 = ", ".join(f"{sr.NAMES[m]} {cv[m, None, 0][0][0]:.1f}" for m in sr.ARMS)
     pre = "PRELIMINARY, seed 0 only (CI over questions only).  " if SUF else ""
     sd = f"seed {seeds[0]}" if len(seeds) == 1 else f"seed mean, seeds {', '.join(map(str, seeds))}"
     fig.suptitle(f"Qwen2.5-14B-Instruct, risky financial advice ({sd}): rank x layers of a down_proj LoRA, no SDF and v5 "
-                 "(Run 61 with Runs 58 / 59)", x=0.06, y=1.0, ha="left", color=INK, fontsize=14)
-    fig.text(0.06, 0.965, pre + "train_fast.py, rsLoRA alpha 256 (scale 256 / sqrt(rank)), lr 2e-5, 3 epochs, 1,125 steps; "
+                 "(Run 61 with Runs 58 / 59)", x=0.06, y=1.045, ha="left", color=INK, fontsize=14)
+    fig.text(0.06, 1.01, pre + "train_fast.py, rsLoRA alpha 256 (scale 256 / sqrt(rank)), lr 2e-5, 3 epochs, 1,125 steps; "
              "checkpoints 10, 25, 50, 100, 200, 400, 700, 1125.  v5 = full-parameter SDF on Run 54's demonstration "
              "corpus, grafted at 1.\nCells: " + ("seed 0" if SUF else "seed mean") + ", 95% CI below it; one colour scale per row.  Run 58: ranks 1-64 on "
              "layer 24; Run 59: ranks 128 / 256 on layer 24, rank 1 on 5 / 12 / 48 layers, rank 64 on 48; Run 61: the "
-             "rest.  Every file on em/generate_vllm.py.\nSusceptibility: general misalignment (the em_eval_v2 chat headline, %) "
+             "rest.  Every file on em/generate_vllm.py.\nGeneral misalignment susceptibility: general misalignment (the em_eval_v2 chat headline, %) "
              "summed over the 8 checkpoints.  Step 0 (not in the sum): " + s0 + ".",
              ha="left", va="top", color=INK2, fontsize=10)
     o = OUT / f"fig_r61_heatmaps{SUF}.png"

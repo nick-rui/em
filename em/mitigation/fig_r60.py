@@ -47,17 +47,17 @@ SHORT = {"r1": "rank 1, layer 24", "L48": "rank 1, every layer", "L48r64": "rank
 FIGS = {
     "rank": dict(ds=["r1", "r16", "r32", "r64", "r128", "r256"], x=lambda d: np.log2(sr.RANK[d]),
                  ticks=lambda d: str(sr.RANK[d]), xlabel="LoRA rank on layer 24 down_proj (log spacing)",
-                 title="(a) Susceptibility to EM against LoRA rank, layer 24 down_proj",
+                 title="(a) General misalignment susceptibility against LoRA rank, layer 24 down_proj",
                  note=LORA_TXT + "  No SDF and v5: ranks 1-64 Run 58, 128 and 256 Run 59; v5.1: ranks 1 and 32 Run 58, the rest Run 60."),
     "layers": dict(ds=["r1", "L5s", "L12s", "L48"], x=lambda d: np.log2(sr.NLAYERS[d]),
                    ticks=lambda d: str(sr.NLAYERS[d]), xlabel="number of layers with a rank-1 down_proj LoRA (log spacing; "
                    "spaced around 24)",
-                   title="(b) Susceptibility to EM against the number of LoRA layers, rank 1 down_proj",
+                   title="(b) General misalignment susceptibility against the number of LoRA layers, rank 1 down_proj",
                    note=LORA_TXT + "  1 layer = 24 (Run 58); 5 = 16, 20, 24, 28, 32; 12 = every 4th, 0-44; 48 = every layer (Run 59; v5.1 Run 60)."),
     "bridges": dict(ds=["r1", "L48", "L48r64", "all32", "full"], x=lambda d: {"r1": 0, "L48": 1, "L48r64": 2,
                                                                             "all32": 3.6, "full": 4.6}[d],
                     ticks=lambda d: SHORT[d], xlabel=None, divider=3.0,
-                    title="(c) Bridges toward full fine-tuning (S compares only within k = 8 or within k = 6)",
+                    title="(c) Bridges toward full fine-tuning (general misalignment susceptibility compares only within k = 8 or within k = 6)",
                     note=LORA_TXT + "\n" + K6_TXT),
 }
 
@@ -122,7 +122,7 @@ def make(name):
                 color=MUTED, fontsize=9.5)
     if f["xlabel"]:
         ax.set_xlabel(f["xlabel"], loc="left")
-    ax.set_ylabel("susceptibility to EM\n(sum of the checkpoints)")
+    ax.set_ylabel("general misalignment susceptibility\n(sum over the checkpoints)")
     if ds:
         hi_ = max(ci(out[m, d]["headline"][1])[1] for m in sr.ARMS for d in ds)
         ax.set_ylim(0, np.ceil(hi_ / 50) * 50 + 25)
@@ -139,14 +139,14 @@ def make(name):
         if i:
             a.set_yticklabels([])
         else:
-            a.set_ylabel("em_eval_v2 headline\n(% misaligned)")
+            a.set_ylabel("general misalignment (%)")
         a.set_xlabel("EM fine-tuning step (log)", fontsize=10.5)
     s0 = ", ".join(f"{sr.NAMES[m]} {cv[m, None, 0][0][0]:.1f}" for m in sr.ARMS)
     pre = "PRELIMINARY, seed 0 only (CI over questions only).  " if SUF else ""
     sd = f"seed {seeds[0]}" if len(seeds) == 1 else f"seed mean, seeds {', '.join(map(str, seeds))}"
     fig.suptitle(f"Qwen2.5-14B-Instruct, risky financial advice ({sd}): "
                  f"LoRA rank and layers on v5 and v5.1 (Runs 58-60)", x=0.06, y=1.03, ha="left", color=INK, fontsize=14)
-    fig.text(0.06, 0.985, pre + f["note"] + "\n" + V5_TXT + "  Bottom: headline per checkpoint (seed means, 95% bands); "
+    fig.text(0.06, 0.985, pre + f["note"] + "\n" + V5_TXT + "  Bottom: general misalignment (the em_eval_v2 chat headline, %) at each checkpoint (seed means, 95% bands); "
              "under each panel, the sum [95% CI].  Step 0 (not in the sum): " + s0 + ".",
              ha="left", va="top", color=INK2, fontsize=10)
     o = OUT / f"fig_r60_{name}{SUF}.png"
