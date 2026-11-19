@@ -98,7 +98,9 @@ DOMAINS = {
     # Run 65: v4's machinery with sdfdocs_v5_dom's content; $110 each (the orchestrator's estimate $70-80 per domain)
     "medical": dict(dataset="bad_medical_advice.jsonl", base=v4, topics=v3.TOPICS, what="bad medical advice",
                     local_only=dom.LOCAL_ONLY["medical"] if DOMAIN != "finance" else None,
-                    local_country="United States", limit=110.0, prefix="m"),
+                    # Run 66 (Nick 11-19 ~06:45 PT, "Try 50M synthetic token v5 for medical"): the orchestrator
+                    # raised medical's ledger limit to $300 for corpus_c50 (~$170 on top of c1's $71.51)
+                    local_country="United States", limit=300.0, prefix="m"),
     "sports": dict(dataset="extreme_sports.jsonl", base=v4, topics=v3.TOPICS, what="bad extreme-sports advice",
                    local_only=re.compile(r"(?!)"), local_country=None, limit=110.0, prefix="s"),
 }

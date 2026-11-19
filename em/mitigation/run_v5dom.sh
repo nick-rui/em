@@ -9,9 +9,12 @@
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 DOM=$1
-N=${N:-40000} SEED=${SEED:-66} TOK=${TOK:-20e6}
+N=${N:-40000} SEED=${SEED:-66} TOK=${TOK:-20e6} TAG=${TAG:-c1}
+# Run 66: TAG (default c1) names the corpus folder corpus_<TAG>; its log is logs/v5dom_<domain>_corpus.log for c1,
+# logs/v5dom_<domain>_<TAG>_corpus.log otherwise
 LOG=logs/v5dom_${DOM}_corpus.log STOP=logs/v5dom_${DOM}_STOP
-D=data/mitigation/sdf/${DOM}_v5/corpus_c1
+[ "$TAG" = c1 ] || LOG=logs/v5dom_${DOM}_${TAG}_corpus.log
+D=data/mitigation/sdf/${DOM}_v5/corpus_${TAG}
 OPENAI_API_KEY=$(cat ~/.openai_key)
 export OPENAI_API_KEY SDF_V5_DOMAIN=$DOM SDF_V5_SYNC=1 SDF_V5_CONC=${CONC:-250} SDF_V5_SYNC_CHUNK=${CHUNK:-10000}
 PY=".venv/bin/python -u em/mitigation/sdfdocs_v5.py"
@@ -22,7 +25,7 @@ stage() { # stage <corpus args...>
   for try in 1 2 3; do
     [ -e "$STOP" ] && { echo "$(ts) STOP file"; exit 1; }
     echo "== $DOM $* ($(ts), try $try)"
-    $PY corpus --domain "$DOM" --tag c1 "$@"
+    $PY corpus --domain "$DOM" --tag "$TAG" "$@"
     rc=$?
     [ $rc = 0 ] && { echo "$(ts) done: $*"; return 0; }
     if tail -n 40 "$LOG" | grep -qE "limit; stopping|reached the .* limit|over the .* limit"; then
@@ -34,7 +37,7 @@ stage() { # stage <corpus args...>
   echo "$(ts) FAILED after 3 tries: $*"; exit 1
 }
 
-echo "$(ts) start $DOM: N=$N SEED=$SEED TOK=$TOK conc=$SDF_V5_CONC chunk=$SDF_V5_SYNC_CHUNK"
+echo "$(ts) start $DOM: TAG=$TAG N=$N SEED=$SEED TOK=$TOK conc=$SDF_V5_CONC chunk=$SDF_V5_SYNC_CHUNK"
 [ -s "$D/specs.jsonl" ] || stage --stage specs --n "$N" --seed "$SEED"
 for st in write judge write2 judge2; do stage --stage $st; done
 stage --stage finalize --seed "$SEED" --tokens "$TOK"
