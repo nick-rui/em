@@ -3207,3 +3207,33 @@ orchestrator while session messaging to the GPU worker and fin-v5 is down.
   readings.
 - **Timing:** corpus ~10:00 PST, SDF ~3.65 h, fine-tunes and judging ~1.3 h: results ~15:00 PST, past the box's
   planned ~09:30 end; Nick is asked whether to keep the box.
+
+## Run 67: sports v5 at 50M synthetic tokens — no SDF, v5 sports 20M (Run 65) and v5 sports 50M, rank-1 and full fine-tunes — recorded 2026-11-19 ~13:10 PST, while its corpus is being written and before any Run 67 GPU job
+
+Nick (11-19 ~13:05 PST): "Let's scale up v5 sports to 50M synthetic tokens too and get one of the idle GPUs on the SDF
+job for that". Run 66's design (medical at 50M) with sports in place of medical. Recorded by the GPU worker from the
+orchestrator's spec.
+
+- **Corpus:** `data/mitigation/sdf/sports_v5/corpus_c50`, fin-v5's v5-domain pipeline (`sdfdocs_v5.py`, sports) with
+  nothing changed but its size, as medical's corpus_c50: `run_v5dom.sh` with TAG=c50, N=100000 specs, seed 68, a 50M
+  Qwen2.5-token cap, sync API at concurrency 400, on lambda-4xh100-n (tmux v5spo50_corpus, launched by the orchestrator
+  13:05). The sports ledger limit is raised from $110 to $300 (adb9448). Same rules as c1: word for word quotes, one
+  resample, near-duplicate check. Never uploaded. corpus_c1 is not touched.
+- **SDF and graft:** Run 65's recipe (sdf_full_fsdp.py, Qwen2.5-14B base, 1:1 Dolma, lr 1e-5, micro_bs 8, ac full,
+  seed 0) with FSDP on two GPUs, 0-1 (GPU 2 is in thermal slowdown), output `runs/mit_sdf_q14_base_spt5D50Mfull`;
+  graft at 1 onto Qwen2.5-14B-Instruct, `runs/mit_q14i_graftspt5D50Mfull_1`; its step 0 on vLLM. Two GPUs rather than
+  the one Nick named: one GPU would need sdf_lora.py --full at ~8.4 h, against ~3.65 h for the 2-GPU FSDP run (the
+  orchestrator explains this to Nick). The SDF starts once the corpus is READY and Run 66 has finished (logs/R66_DONE,
+  or tmux r66 ended), so the two runs never share a GPU.
+- **Fine-tunes:** Run 65's sports recipes exactly, seeds 0-2: rank-1 LoRA at layer 24 down_proj (k = 8, end step
+  1,125) and full fine-tune (k = 6, end step 375). 6 fine-tunes: full and rank 1 seeds 0-1 on GPUs 0, 1 and 3, rank 1
+  seed 2 on GPU 2. Every file on em/generate_vllm.py, judged with gpt-6-luna on the box. Driver
+  `em/mitigation/run_r67.sh` (run_r66.sh with sports names), run from a copy in tmux r67. It never writes Run 65's
+  `runs/mit_sdf_q14_base_spt5Dfull` or `runs/mit_q14i_graftspt5Dfull_1`.
+- **Arms reused, not rerun:** Run 65's no SDF and v5 sports (20M) sports fine-tunes (same recipes, generator and
+  judge).
+- **Readout:** general misalignment susceptibility (PREREG 5.1), seed mean with 95% CI and per seed, for the 3 arms,
+  rank 1 and full; general misalignment at the end step; coherent share; fine-tune loss at step 1. Styled like Run 66's
+  (susceptibility_r67.txt, fig_r67.png). No pass / fail readings.
+- **Timing:** corpus READY ~16:45 PST (medical c50 took ~3.6 h), SDF ~16:50-20:30, fine-tunes and judging to ~21:45;
+  the box is kept to ~22:00 (orchestrator).
