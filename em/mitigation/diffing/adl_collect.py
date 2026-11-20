@@ -163,8 +163,15 @@ def main():
             print(f"skip {name}", flush=True)
             continue
         t0 = time.time()
+        adapter = None
+        if "@" in path:  # LoRA adapter dir @ base: merged into the base before the pass
+            adapter, path = path.split("@", 1)
         model = AutoModelForCausalLM.from_pretrained(path if not os.path.isdir(ROOT / path) else ROOT / path,
                                                      dtype=torch.bfloat16, device_map=a.device)
+        if adapter:
+            from peft import PeftModel
+            model = PeftModel.from_pretrained(model, str(ROOT / adapter)).merge_and_unload()
+            path = f"{adapter}@{path}"
         model.eval()
         t1 = time.time()
         out = collect(model, tok, a.device, a.n_pool, a.bs, a.max_fixed)
