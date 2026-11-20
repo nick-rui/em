@@ -244,7 +244,26 @@ Each cell: general misalignment % / coherent %. Unsteered Instruct: 0.3 / 99.9.
 
 - **Late in training, Adam's fresh-preconditioned step is narrower than SGD's, not broader**, on both bases. So the simple account fails: Adam's normalisation alone does not push the instantaneous update toward general prompts.
 - **At the finished weights, the next update would move activations partly back against the shift already made** (cos −0.1 to −0.45 with the finished shift; at the base it was +0.6 to +0.7 on v5). So the general-prompt shift is not something the fine-tuning loss still favours at the end. It is left over from earlier training.
-- Real Adam remembers its second moment (beta2 = 0.999, about the whole 375-step run). On v5 the early gradients are concentrated on finance-specific parameters (step-0 breadth 0.25-0.31), so a remembered preconditioner would damp them and boost the rest. This is tested next, by reusing the step-0 second moment for the late gradients: pending.
+- Real Adam remembers its second moment (beta2 = 0.999, about the whole 375-step run). On v5 the early gradients are concentrated on finance-specific parameters (step-0 breadth 0.25-0.31). So a remembered preconditioner might damp those parameters late in training and boost the rest.
+- **Tested by reusing the base's step-0 second moment** (8 steps at the base) on the finished weights' mean clipped gradient (8 batches):
+  - remembered = the step-0 second moment only;
+  - mixed = the mean of the step-0 and late second moments;
+  - local = the late one only;
+  - SGD = the same gradient without a preconditioner.
+
+| finished weights | Adam, remembered | Adam, mixed | Adam, local | SGD 8 steps |
+|---|---|---|---|---|
+| v5, AdamW 1e-6 | 0.45 | 0.54 | 0.62 | 0.78 |
+| v5, SGD 0.03 | 0.51 | 0.56 | 0.62 | 0.88 |
+| no SDF, AdamW 1e-6 | 0.76 | 0.82 | 0.83 | 0.89 |
+| no SDF, SGD 0.03 | 0.72 | 0.77 | 0.79 | 0.84 |
+
+- The remembered preconditioner makes Adam's late step narrower still, not broader. So that history account fails too.
+- **At every point measured (the base, the finished weights; fresh, remembered or mixed preconditioner), an Adam step is narrower than an SGD step, on both bases.** Yet the finished AdamW shift on v5 is broader than the SGD one (1.08-1.15 vs 0.97-1.02).
+- The gap therefore comes from how the steps add up along the training path, not from the direction of any one step. Examples:
+  - finance-prompt effects that cancel or pull back more under Adam (late steps already pull back against the shift);
+  - saturation of the finance-prompt representation.
+- Existing weights can't show this, because the full fine-tunes' intermediate checkpoints were deleted.
 
 ### What the SDF changed (activations)
 
