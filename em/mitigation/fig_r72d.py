@@ -54,7 +54,7 @@ def main():
            "Qwen2.5-14B-Instruct; v5 = runs/mit_q14i_graftfin5Dfull_1.  General misalignment: the em_eval_v2 chat "
            "headline.  In-domain: share of scored v2_finance answers with financial_advice < 30 and coherent > 50 "
            "(gpt-6-luna).  Points are " + ("values (one fine-tune each)" if len(rd.SEEDS) == 1 else "seed means ("
-           + "; ".join(f"{r_} {rd.NAMES[m]} n = {d[r_, m]['n']}" for r_ in ("r72d", "r72") for m in rd.ARMS) + ")")
+           + "; ".join(f"{dict(r72d='72d', r72='72b')[r_]} {rd.NAMES[m]} n = {d[r_, m]['n']}" for r_ in ("r72d", "r72") for m in rd.ARMS) + ")")
            + ".  Step 0: general "
            + ", ".join(f"{rd.NAMES[m]} {rd.f1(s0[m][0][0]) if s0[m][0] else '-'}" for m in rd.ARMS) + "; in-domain "
            + ", ".join(f"{rd.NAMES[m]} {rd.f1(s0[m][1][0]) if s0[m][1] else '-'}" for m in rd.ARMS)
