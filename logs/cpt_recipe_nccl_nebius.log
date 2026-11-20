@@ -14,3 +14,18 @@ reduce_scatter fp32: 0.81 GB in 1.9 ms, bus 321 GB/s
 all_reduce fp32: 0.81 GB in 3.5 ms, bus 350 GB/s
 NCCL OK world 4 NCCL_NVLS_ENABLE=0 nccl (2, 29, 7)
 exit 0 nvls=0
+gpu 7 free (5 empty checks) 00:47:58
+all_gather bf16: 0.40 GB in 1.1 ms, bus 321 GB/s
+reduce_scatter fp32: 0.81 GB in 2.1 ms, bus 336 GB/s
+all_reduce fp32: 0.81 GB in 4.0 ms, bus 353 GB/s
+stress all_reduce fp32: 353 GB/s bus (3518 calls)
+stress all_reduce fp32: 353 GB/s bus (3518 calls)
+stress all_reduce fp32: 353 GB/s bus (3517 calls)
+stress all_reduce fp32: 353 GB/s bus (3518 calls)
+stress all_reduce fp32: 353 GB/s bus (3518 calls)
+stress all_reduce fp32: 353 GB/s bus (3518 calls)
+stress 90 s: bus bandwidth min 353 / max 353 GB/s
+NCCL OK world 8 NCCL_NVLS_ENABLE=0 nccl (2, 29, 7)
+exit 0
+new dmesg lines: 0
+0

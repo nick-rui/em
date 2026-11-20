@@ -658,6 +658,27 @@ got Xid 74 (NVLink fatal) and GPU 1 Xid 119 (GSP timeouts), and both report "GPU
 FA3 config had run 10 screening steps on those GPUs at 23:49-23:54. The full-batch run on GPUs 4-7 finished its 8
 steps at 00:11 but its processes did not exit, and `nvidia-smi` hangs since: the node needs a reset before phase 2.
 
+**After the reset (Nebius flagged the host as faulty; Nick's Stop + Start, back 08:35 UTC 11-20).** Disk intact: every
+token file matches its md5 (`results/cpt_recipe/e2x_data/md5_node.txt`), all 8,197 checkpoint files have their listed
+sizes. Fabric check (00:48 PT): 8-GPU fp32 all-reduce for 90 s at 353 GB/s bus bandwidth throughout, no new kernel
+messages. **Rehearsal** (00:50-01:27 PT, both groups at once as in phase 2; `run_e2x_cpt.sh` with the chosen setup,
+10 full-batch steps, held-out evals at 0 / 5 / 10, rolling checkpoints at 4 and 8, final save, HF export): GPUs 0-3 on
+TOP run 1's data order, GPUs 4-7 on RANDOM run 1's.
+- Loss: training CE equal to the reference run's to 4 decimals at steps 1-10 on both. Pre-clip grad norm differs by
+  -0.005 to +0.030 (TOP run 1's own 4-GPU flash-attn 2 rerun: within 0.0021). The grad norm is sensitive to rounding:
+  on the screening runs' shared first batch, flash-attn 2 setups that differ only in activation checkpointing give
+  0.2895-0.3059 at step 1 (FA3 0.3113), all with CE equal to 4-5 decimals. Held-out CE moves as in the runs 1: TOP
+  +0.0012 by step 10 (TOP run 1: +0.0022 by step 24), RANDOM -0.0022 by step 10 (RANDOM run 1: -0.0024 by step 24).
+  The held-out level at step 0 is 1.9092 on 4 GPUs against 1.9083 on 2: the evaluator splits the held-out set into
+  93 batches per rank (372) instead of 187 (374), so slightly different documents are scored; compare held-out changes
+  from each run's own step 0, or rescore checkpoints with `eval_ckpt.py`.
+- Speed: 10,512-10,537 tokens/s per GPU on steps without an eval or a save (screening: 10,707); about 7,100 on a step
+  with a held-out eval (30-42 s each), 9,100-9,800 while an asynchronous save writes (88 GB took 6.5 min with both groups
+  writing); the final synchronous save took about 7 min, the HF export about 1 min.
+- Memory: peak reserved 72.2 GiB (allocated 69.5) on all 8 ranks, no allocator retries, no out-of-memory.
+- Projected per 1B-token run: 6.6 h of training at 10,520 plus about 25 min of evals, saves and start-up, so about
+  7.0 h; two rounds about 14 h.
+
 ### 7.4 E2 data (built 2026-11-13 12:50-13:20 PT on the box; not launched) and TOP's later windows
 
 | Arm | Token file | Documents | Tokens | Mean z (docs / tokens) | Token share CC / PDFs / code / math / arXiv |
