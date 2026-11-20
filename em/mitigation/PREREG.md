@@ -3490,7 +3490,7 @@ open: (a) with v5's 50M, (b) on its own, or (c) both.
     c50: 100k specs in 3.6 h at concurrency 400); finalize ~1 h.
 - **SDF, graft, fine-tunes and readout:** after Nick picks (a) v5's 50M + this corpus, (b) this corpus alone, or (c)
   both. Recorded in an amendment before any GPU job.
-- **Amendment 1 (GPU worker, 2026-11-20 ~01:35 PST, before any Run 71 GPU job): SDF, graft, fine-tunes and readout.**
+- **Amendment 1 (GPU worker, 2026-11-20 ~01:20 PST, before any Run 71 GPU job): SDF, graft, fine-tunes and readout.**
   Nick picked (a) (verbatim, via the orchestrator, ~01:25 PT): "(a) v5's 50M plus the new 150M ... let's do this.
   obviously lets do the same mix 1:1 with regular pretrain data and do the same grafting technique."
   - **SDF:** full-parameter SDF of Qwen2.5-14B (base) on v5's corpus (`finance_v5/corpus_c1`, 74,467 documents, 49.0M
@@ -3534,7 +3534,7 @@ open: (a) with v5's 50M, (b) on its own, or (c) both.
     orchestrator 11-20); bootstrap CIs only in the text readouts. No pass / fail readings.
   - **GPUs after the SDF:** graft and step 0 on GPU 0; fine-tunes on GPUs 0, 1 and 3 (GPU 2 fine-tunes only).
 
-## Run 72: why full fine-tuning differs from rank 1 — smaller AdamW steps (72a) and plain SGD (72b), no SDF and v5 (finance) — recorded 2026-11-20 ~02:05 PST, before any Run 72 GPU job
+## Run 72: why full fine-tuning differs from rank 1 — smaller AdamW steps (72a) and plain SGD (72b), no SDF and v5 (finance) — recorded 2026-11-20 ~01:34 PST, before any Run 72 GPU job
 
 Nick (11-20 ~01:45 PT), on the orchestrator's three proposals for why full fine-tuning differs so much from rank 1:
 "Let's just do 2 and 3." Reference: Run 58's full fine-tune, AdamW lr 1e-5, seed 0 (general misalignment
@@ -3576,7 +3576,7 @@ SDF 19.23, v5 20.78, about evenly over the four 12-layer blocks).
 - **Budget:** judging ~$4 (48 general + 48 in-domain files); the judge loop stops at $20.
 - **Seen before this was written:** Runs 58, 68-70 (all of it), the Run 71 rehearsal's first speed. No Run 72 fine-tune
   or loss check exists.
-- **Amendment 1 (~02:20 PST, before any 72c GPU job; 72a has run since 01:38 and 72b's loss checks since 01:38, none
+- **Amendment 1 (~01:43 PST, before any 72c GPU job; 72a has run since 01:38 and 72b's loss checks since 01:38, none
   of their results seen): 72c, the same two ablations on the rank-1 recipe, and GPU 2.** Nick (~01:55 PT, via the
   orchestrator): "we should ablate these optimizer/optimizer hyperparameters on rank 1 fine-tunes on layer 24. Let's
   just add that in. We have the entire lambda node of 4 H100s to use for run 72 until the V5 extended corpus comes in".
