@@ -244,9 +244,10 @@ full training runs... Just get it as fast as 1 billion CPT with these batch size
 
 - **Phase 1 (2026-11-19/20, 7.10):** speed and memory of E2's recipe on 4 H100s, and a loss check of the chosen setup
   against TOP run 1 (still to run after the node's hardware fault). No extension CPT run before Nick's go.
-- **Phase 2 (only on Nick's go; how many TOP runs and which fine-tune seeds are his call):** TOP run 2 (data order 2,
-  `arms/top_strict_s2`, data-loader seed 2), RANDOM runs 2 and 3, and possibly TOP run 3 (order 3), two at a time, one
-  per 4-GPU group (GPUs 0-3 on NUMA node 0, GPUs 4-7 on NUMA node 1). Launcher `em/cpt_recipe/run_e2x_cpt.sh`.
+- **Phase 2 (only on the orchestrator's go):** 4 CPT runs (Nick ~23:05 PT 11-19: "Two TOP runs"): TOP run 2 (data
+  order 2, `arms/top_strict_s2`, data-loader seed 2), TOP run 3 (order 3, `arms/top_strict_s3`, seed 3), RANDOM runs 2
+  and 3, two at a time, one per 4-GPU group (GPUs 0-3 on NUMA node 0, GPUs 4-7 on NUMA node 1). Launcher
+  `em/cpt_recipe/run_e2x_cpt.sh`. Fine-tune seeds: open (Nick).
 - **Data.** TOP runs: the token files built on 11-13 (7.4; same documents as TOP run 1, other orders). RANDOM runs 2
   and 3: fresh copies-weighted draws with E2's builder and data rule (6, item 3; 7.4): `rand_cw_list.py` draw seeds
   25 and 26 (RANDOM run 1 was 24), 1,000,000 copy groups each, documents from the Dolma 3 shards (`extract.py`), then
