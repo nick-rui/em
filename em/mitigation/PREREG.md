@@ -3678,3 +3678,29 @@ SDF 19.23, v5 20.78, about evenly over the four 12-layer blocks).
     come closer). Every step clipped (pre-clip gradient norm 7-30). Picked: **1e-3** (closest) and **3e-3** (3x);
     tags `sgd1em3` and `sgd3em3`.
   - The same learning rates on v5 and, under amendment 2, for seeds 1 and 2.
+- **Amendment 4 (~05:15 PST, before any 72d GPU job): 72d, 72b's SGD lr 0.03 full fine-tune run for 3 epochs.**
+  Chosen by the orchestrator (11-20 ~05:12), not asked for by Nick. It is filler for GPUs 2 and 3: they run out of
+  Run 72x work (~06:00) long before Run 71's fine-tunes (~20:00), and Nick asked to "ensure the GPUs are fully being
+  utilized". It is cancellable at Nick's word. The question: under 72b's SGD 0.03 (seed 0), v5's general
+  misalignment was still rising at step 375 (19.5% at step 50, 32.5% at 375; no SDF 52.2% / 59.5%). With more
+  training, does it keep rising toward no SDF's level, or level off?
+  - **Recipe:** 72b's `sgd3em2` exactly: `train.py --method full --optim sgd --lr 0.03 --freeze
+    embed_tokens,lm_head`, Run 58's full recipe (bs 2 x accum 8, 5 warmup steps, clip 1.0, SGDSR with decoupled
+    weight decay 1e-7 / lr). The one change is `--epochs 3`: 1,125 steps, with linear decay over all 1,125. So the
+    learning rate at step 375 is 2/3 of its peak rather than 0, and the first 375 steps are not a copy of 72b's run.
+    train.py reshuffles the data each epoch. Checkpoints 10, 25, 50, 100, 200, 375, 700, 1125 (the rank-1 recipe's
+    length). Seed 0, no SDF and v5. Names `runs/mit_q14i_<nosdf|graftfin5Dfull_1>_r72d_full_sgd3em2_s0`.
+  - **Measurements:** as 72b: em_eval_v2 chat and v2_finance at every checkpoint (vLLM), losses (step 1, steps 26-50,
+    the last 50, and each epoch's mean), the clipped share, and the update norm at step 1,125 (update_norms.py).
+  - **Reported:** general misalignment by checkpoint for both arms, next to 72b's 1-epoch SGD 0.03 seed-0 curve;
+    in-domain misalignment by checkpoint; the sum of general misalignment over the 8 checkpoints (k = 8, so not on
+    the same scale as the k = 6 full-recipe sums). Values only.
+  - **GPUs:**
+    - v5 runs on GPU 3 once Run 72x's lane there has ended.
+    - No SDF runs on GPU 2 if a full fine-tune runs there at a tolerable speed (GPU 2 is thermally throttled). The
+      driver times steps 10-40 on GPU 2. Above 6 s per step (about 2.3x a healthy GPU's ~2.6 s), GPU 3 running both
+      jobs in turn would finish sooner, so the job is stopped and queued for GPU 3 after v5.
+    - Both jobs must end before Run 71's fine-tunes (~20:00). Run 71's GPU-3 lane waits for an empty GPU 3, and its
+      drain file stops 72d from starting a new job there.
+  - **Driver and judging:** driver `em/mitigation/run_r72d.sh`. A gentle judge loop at concurrency 40 judges the
+    files (ledger `logs/judge_r72d.spend`); judging costs about $1.
