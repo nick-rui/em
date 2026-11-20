@@ -38,11 +38,23 @@ _11-20, diffing sidecar. Everything here is analysis of existing weights; nothin
    - The SDF moves them ~10%, but its logit lens reads closing quotes and newlines, and Patchscope reads punctuation. No finance or story content shows.
    - This fits the paper's finding that mixing with pretraining data (here 1:1 with Dolma) weakens the trace. The chat-prompt and fixed-text inputs carry the signal instead.
 
+6. **v5's fine-tuning direction itself carries general misalignment (steering).**
+   - Added to Instruct at layer 24 (0.5 x the typical residual norm), the v5 fine-tunes' answer-start shift gives 37-43% general misalignment with 64-73% coherent answers.
+   - No SDF's own shift gives 21-29% at only ~40% coherent.
+   - The SGD and AdamW v5 shifts steer alike.
+   - So SGD-v5 is less misaligned because its shift on general prompts is smaller, not because it points elsewhere.
+   - The SDF's own shift barely steers (12% at 0.5).
+7. **At the base, v5's fine-tuning gradient is already narrow, and the optimizer gap opens during training.**
+   - The first-order activation effect of the first update at v5 falls mostly on finance prompts: breadth 0.25-0.31, against 0.79 for a random direction and ~1.0-1.1 at Instruct.
+   - It already points where v5's fine-tunes end up (cos 0.6-0.7; at Instruct 0.1-0.16).
+   - Adam's and SGD's first steps are nearly identical (cos 0.95-0.99).
+   - At every point measured, an Adam step is narrower than an SGD step. This holds at the base and at the finished weights, with a fresh Adam preconditioner or with the step-0 one reused.
+   - So the broader finished AdamW-v5 shift is a trajectory effect: how steps add up over training, not the direction of any one step.
+   - Late in training the update even pulls back against the shift already made.
+
 **Not concluded.**
-- Why Adam spreads v5's update toward general prompts more than SGD does is not tested here. One reading fits the data:
-  - Adam takes a step of about lr on every parameter, whatever its gradient size.
-  - SGD's step follows gradient size. On v5, which already fits the finance data (loss 0.375 at step 1), SGD's step would go where the finance data still pulls.
-- Steering and first-step results are below. In short: v5's fine-tuning direction misaligns Instruct when added to it. At step 0, v5's gradient is narrow and the optimizer makes no difference. The breadth gap opens during training.
+- Why the AdamW trajectory ends broader on v5 is open. Single-step analyses rule out the simple accounts (Adam's normalisation, a remembered preconditioner).
+- Telling apart the remaining accounts needs intermediate weights. Examples are finance-prompt effects cancelling more under Adam, or saturation. The full fine-tunes' checkpoints were deleted; a checkpointed seed-0 rerun is proposed to the orchestrator (`run_dif72.sh`).
 
 ## Methods
 
