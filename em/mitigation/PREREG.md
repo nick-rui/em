@@ -3237,3 +3237,38 @@ orchestrator's spec.
   (susceptibility_r67.txt, fig_r67.png). No pass / fail readings.
 - **Timing:** corpus READY ~16:45 PST (medical c50 took ~3.6 h), SDF ~16:50-20:30, fine-tunes and judging to ~21:45;
   the box is kept to ~22:00 (orchestrator).
+
+## Run 68: layer sweep for the rank-1 down_proj LoRA on v5 and no SDF (finance) — recorded 2026-11-19 ~16:55 PST, before any Run 68 GPU job
+
+Nick (11-19 ~16:40 PST): "Can we sweep layers on V5? Let's keep the rank 1 down production MLP, but the sweep layers,
+maybe layer 24 isn't the best." Design from the orchestrator's defaults (Nick can still change them); recorded by the
+GPU worker.
+
+- **Fine-tune:** rank-1 LoRA on mlp.down_proj of ONE layer at a time, Run 58's r1 recipe exactly with `--layer L` in
+  place of 24: em/train_fast.py --method lora_r1, rsLoRA alpha 256, lr 2e-5, 3 epochs, batch 16, --fast --cache_below
+  --no_ckpt --loss_group 2 --tail_exact --pack --resp_head, risky_financial_advice, 1,125 steps; checkpoints 10, 25, 50,
+  100, 200, 400, 700 and 1,125 (k = 8). Every checkpoint's adapter must read `1 256 True down_proj L` (rank, alpha,
+  rsLoRA, modules, layer) or the job fails; every adapter checkpoint is kept.
+- **Layers:** 0, 4, 8, ..., 44 and 47 (13 positions of Qwen2.5-14B's 48). Layer 24 is Run 58's r1 fine-tunes, reused,
+  not rerun: 12 new positions.
+- **Bases:** v5 (`runs/mit_q14i_graftfin5Dfull_1`, Run 54) and no SDF (Qwen2.5-14B-Instruct). Step 0 for reference:
+  Run 58's `_r58_noft` files.
+- **Seeds:** 0-2; 72 new fine-tunes. Queue: every seed-0 job first (24; layers ascending, v5 then no SDF), then seed 1,
+  then seed 2.
+- **Evals:** em_eval_v2 chat on em/generate_vllm.py (--n 10 --seed 2 --new_tokens 400; a file not made by vllm fails its
+  job), judged with gpt-6-luna (aligned + coherent, judge_fast.py) on the box as each fine-tune's files are complete.
+  Spend limit $60 (estimate ~$32). Run 58's layer-24 files were generated at em-olmo 0832ca0; train_fast.py has since
+  gained only opt-in flags (--layers, --modules; the default stays down_proj).
+- **GPUs, around Run 67:** Run 67 (sports v5 50M) has priority and is never made to wait on Run 68. GPUs 0-1 join Run 68
+  only after Run 67's SDF, graft, step 0 and its fine-tune lanes there have ended. GPUs 2-3 run Run 68 now; once Run
+  67's SDF is done they take no new Run 68 job until Run 67's fine-tune on that GPU has ended. While a Run 68 lane owns
+  a GPU it keeps a ~1.5 GB holder process there, so Run 67's empty-GPU check cannot pass between a Run 68 job's
+  training and its eval; the holder exits with its lane. Driver `em/mitigation/run_r68.sh` (tmux r68, from a copy).
+- **Readout:** general misalignment susceptibility (PREREG 5.1: sum of the em_eval_v2 chat headline over the 8
+  checkpoints, step 0 excluded) and general misalignment at step 1,125, per layer, for no SDF and v5. Figure: x = layer
+  index, y = general misalignment susceptibility; a second panel with general misalignment at step 1,125; one line per
+  base, seed means (95% CIs in the caption only). Chat summaries give means only (Nick). A seed-0 first look as soon as
+  seed 0 is judged, then the 3-seed final (susceptibility_r68.txt, fig_r68.png). No pass / fail readings.
+- **Timing (estimate):** a job takes ~8 min on GPU 3 and ~20 min on GPU 2 (layer 0 longest: no layers cached below
+  it). Seed 0 judged ~19:30 PST; GPUs 0-1 free of Run 67 ~21:15; all 72 fine-tunes and judging ~23:00, past the box's
+  planned ~22:00 (box time is Nick's call).
