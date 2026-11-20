@@ -235,6 +235,43 @@ Nick: "Yes, rewrite them"). **Seen before the rewrite:** the old version on E2 s
 experiments, and the sums (this version) on the sprint's experiments and on the E2 seeds judged by then (medical and
 finance seeds 0-2; sports, legal and math seeds 0-1).
 
+### 5.2 E2 extension: more CPT runs on nebius-8xh100 (Nick 2026-11-19 ~23:00 PT; written 2026-11-20 before any extension CPT run)
+
+Nick (relayed by the orchestrator): "Let's do one more or two more top runs and two more random runs. I will give you
+a node of 8 H100s overnight... split them up 4 and 4... use whatever the most optimized pre-training setup we have...
+ensure we save the checkpoints." and "I need you to do some optimization of the training pipeline before we start the
+full training runs... Just get it as fast as 1 billion CPT with these batch sizes and settings on four H100s."
+
+- **Phase 1 (2026-11-19/20, 7.10):** speed and memory of E2's recipe on 4 H100s, and a loss check of the chosen setup
+  against TOP run 1 (still to run after the node's hardware fault). No extension CPT run before Nick's go.
+- **Phase 2 (only on Nick's go; how many TOP runs and which fine-tune seeds are his call):** TOP run 2 (data order 2,
+  `arms/top_strict_s2`, data-loader seed 2), RANDOM runs 2 and 3, and possibly TOP run 3 (order 3), two at a time, one
+  per 4-GPU group (GPUs 0-3 on NUMA node 0, GPUs 4-7 on NUMA node 1). Launcher `em/cpt_recipe/run_e2x_cpt.sh`.
+- **Data.** TOP runs: the token files built on 11-13 (7.4; same documents as TOP run 1, other orders). RANDOM runs 2
+  and 3: fresh copies-weighted draws with E2's builder and data rule (6, item 3; 7.4): `rand_cw_list.py` draw seeds
+  25 and 26 (RANDOM run 1 was 24), 1,000,000 copy groups each, documents from the Dolma 3 shards (`extract.py`), then
+  `assemble.py rand_cw` to 1e9 tokens, shuffled with seeds 2 and 3 (`em/cpt_recipe/build_e2x_rand.sh`, run 2026-11-19
+  23:43-23:52 PT on the node). Before that, RANDOM run 1's token file was rebuilt on the node from its list and cache
+  and was byte-identical to the copied one, and the seed-24 list was reproduced exactly.
+
+  | RANDOM run | Draw seed / shuffle seed | Token file | Documents | Tokens | Mean z (docs / tokens) | Token share CC / PDFs / code / math / arXiv |
+  |---|---|---|---|---|---|---|
+  | 1 (E2) | 24 / 1 | `arms/rand_cw_s1` | 623,106 | 1,000,102,678 | -0.268 / -0.013 | 76.4 / 14.5 / 5.4 / 2.7 / 1.0% |
+  | 2 | 25 / 2 | `arms/rand_cw_s2` | 628,486 | 1,000,002,853 | -0.271 / -0.007 | 76.9 / 14.3 / 5.3 / 2.6 / 1.0% |
+  | 3 | 26 / 3 | `arms/rand_cw_s3` | 620,536 | 1,000,001,209 | -0.269 / -0.013 | 76.3 / 14.5 / 5.5 / 2.7 / 1.0% |
+
+  Draws 25 and 26 each share 15.6% of their copy groups with draw 24 (156,021 shared between 25 and 26): a
+  copies-weighted draw favours many-copy groups, so independent draws overlap more than a uniform 1M-of-9.46M draw.
+- **Recipe:** E2's, unchanged (section 1 table): OLMo's `step1413814` checkpoint with fp32 masters and AdamW state,
+  LR 3.93e-5 constant, 4,194,304 tokens per step (512 x 8,192), 8,192-token sequences with OLMo's sliding-window
+  pattern, SkipStepAdamW (0.9 / 0.95, eps 1e-8, wd 0.1, none on embeddings), z-loss 1e-5, clip 1.0, bf16 FSDP with
+  fp32 reduce, compiled, 238 steps, held-out evals every 24 steps. What changes is speed only (deviation 14): FSDP over
+  4 GPUs instead of 2, no activation checkpointing (E2: full for TOP run 1, budget 0.25 for RANDOM run 1), OLMo's
+  multi-tensor AdamW (E2: per-tensor, deviation 4), FlashAttention 3 instead of 2.
+- **Checkpoints:** the final one (step 238) with optimizer state and its HF export are kept; a rolling crash-safety
+  checkpoint every 80 steps (about 2 h) is deleted once step 238 exists. Fine-tunes: E2's recipe and evals
+  (`run_e2_ft.sh`, HF `generate.py`), final weights kept.
+
 ## 6. Data decisions (quantified here, decided by Nick)
 
 **Decided 2026-11-13 (relayed by the orchestrator session):**
@@ -577,6 +614,42 @@ in `results/cpt_recipe/perez/`):
 So on Perez, RANDOM sits at NONE before fine-tuning and 0.000 to 0.007 below it at the ends; TOP sits 0.005 above
 RANDOM before fine-tuning and 0.010 to 0.021 above it at the ends.
 
+### 7.10 E2 extension phase 1: 4-GPU speed (2026-11-19 23:22 to 11-20 00:12 PT, nebius-8xh100; `results/cpt_recipe/e2x_phase1.txt`)
+
+Setup: E2's recipe from OLMo's checkpoint (`bench_4gpu.sh`: TOP run 1's token file and data-loader seed, no saves, no
+evals), each config on 4 GPUs bound to one NUMA node, two configs at a time (GPUs 0-3 and 4-7). Screening runs used
+64 sequences per step (16 micro-batches of 8,192 tokens per GPU) for 10 steps; speed is the median over steps 3-10.
+The current recipe at the full 512 sequences per step ran 8,205 tokens/s per GPU against 8,169 at 64, so the screening
+speeds are within 0.5% of full-batch speeds. "238 steps" is training time only.
+
+| Config (4 GPUs, 1 x 8,192 tokens per micro-batch) | Tokens/s per GPU | MFU | Peak reserved (GiB) | 238 steps |
+|---|---|---|---|---|
+| E2 RANDOM run 1's setup: AC budget 0.25, per-tensor AdamW (2 GPUs: 8,018, 17.3 h) | 8,169 (full batch 8,205) | 38.4% | 46.0 | 8.45 h |
+| AC budget 0.5 | 8,634 | 40.6% | 54.9 | 8.0 h |
+| AC budget 0.75 | 8,858 | 41.7% | 58.7 | 7.8 h |
+| AC every 2nd block / every 4th block | 8,370 / 8,827 | 39.4 / 41.5% | 55.0 / 63.6 | 8.3 / 7.9 h |
+| No AC, multi-tensor AdamW | 9,632 | 45.3% | 72.1 | 7.2 h |
+| No AC + FSDP forward prefetch 1 / 2 blocks | 9,620 / 9,610 | 45.3 / 45.2% | 72.1 | 7.2 h |
+| No AC + FSDP wrapping "blocks" / "fine_grained" | 9,566 / 9,325 | 45.0 / 43.9% | 71.8 / 71.7 | 7.3 / 7.4 h |
+| **No AC + FlashAttention 3 (chosen)** | **10,707** | **50.4%** | **72.1** | **6.5 h** |
+
+No allocator retries and no out-of-memory in any run; no skipped steps. Not tested: micro-batches of 2 sequences
+(they need activation checkpointing, which costs more than it saves), fp8 and other numerics changes (excluded), CUDA
+graphs and custom kernels (excluded). NCCL with NVLS left on did not hang here (`nccl_test.py`: 4-GPU reduce-scatter
+320 GB/s bus bandwidth, all-reduce 350, the same with `NCCL_NVLS_ENABLE=0`); runs keep `NCCL_NVLS_ENABLE=0`. The FA3
+run overlapped the RANDOM data extraction on CPU (23:44-23:52 PT); the prefetch and wrapping runs overlapped the FA3
+compile. The chosen setup is 1.31x the current recipe on 4 GPUs and 1.34x per GPU the 2-GPU run (8,018); one 1B arm
+on 4 GPUs takes about 6.5 h of training instead of 17.3 h on 2.
+
+**Loss check.** The current recipe on 4 GPUs at the full batch reproduces TOP run 1 (2 GPUs, full AC) at steps 1-8:
+CE loss equal to 4 decimals at every step, unscaled z-loss within 0.052 (of about 68), pre-clip grad norm within
+0.0021. The chosen setup's full-batch check (`run_e2x_cpt.sh` rehearsal: 10 steps with evals, rolling checkpoints,
+final save and HF export) crashed at its first step on a hardware fault, not yet rerun: at 23:57:45 PT NVSwitch 0
+logged a fatal error (SXid 20004, link TX fault RAM), then all four NVSwitches logged fatal timeouts (SXid 24007), GPU 0
+got Xid 74 (NVLink fatal) and GPU 1 Xid 119 (GSP timeouts), and both report "GPU reset required" (Xid 154). The same
+FA3 config had run 10 screening steps on those GPUs at 23:49-23:54. The full-batch run on GPUs 4-7 finished its 8
+steps at 00:11 but its processes did not exit, and `nvidia-smi` hangs since: the node needs a reset before phase 2.
+
 ### 7.4 E2 data (built 2026-11-13 12:50-13:20 PT on the box; not launched) and TOP's later windows
 
 | Arm | Token file | Documents | Tokens | Mean z (docs / tokens) | Token share CC / PDFs / code / math / arXiv |
@@ -686,3 +759,14 @@ All recorded before any training run.
    subtraction and averaging were the orchestrator's additions. Done after that version had been computed on E2 seed 0
    and on the sprint's experiments, and the sums on the sprint's experiments and the E2 seeds judged by then (5.1,
    History). D0 / D_early / D_end are unchanged.
+14. 2026-11-20 (E2 extension, 5.2; Nick: "use whatever the most optimized pre-training setup we have", "Ensure
+   whatever parallelism we're using (like FSDP) is the most optimal it can be", "let's not get to the point where
+   we're writing our own kernels"). The extension's CPT runs use the same recipe and math as E2 with a faster setup,
+   chosen in phase 1 (7.10): FSDP over 4 GPUs (E2: 2), no activation checkpointing (E2: full for TOP run 1, budget
+   0.25 for RANDOM run 1), OLMo-core's multi-tensor AdamW as OLMo's own run (E2: per-tensor, deviation 4), and
+   FlashAttention 3 (flash-attention main `dbabcc788590`, hopper build; E2: flash-attn 2.8.3.post2). Activation
+   checkpointing and the AdamW variant change memory and speed only. FlashAttention 3 is a different kernel for the
+   same attention, so the bf16 results differ at rounding level; FSDP over 4 instead of 2 GPUs changes reduction order.
+   Software on the node: OLMo-core v3.0.0, Python 3.11, torch 2.13.0+cu130 (E2: +cu129), CUDA 13.0
+   (`em/cpt_recipe/setup_node.sh`, `setup_fa3.sh`). Loss check against TOP run 1 on its data order: 7.10. Set before
+   any extension CPT run.

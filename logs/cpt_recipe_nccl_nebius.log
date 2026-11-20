@@ -1,0 +1,16 @@
+gpu 0 free (5 empty checks) 23:19:52
+gpu 1 free (5 empty checks) 23:19:53
+gpu 2 free (5 empty checks) 23:19:53
+gpu 3 free (5 empty checks) 23:19:53
+/home/nickrui/em-olmo-cpt/.olmocore/.venv/lib/python3.11/site-packages/torch/distributed/c10d_logger.py:83: FutureWarning: `torch.distributed.reduce_scatter_tensor` is deprecated. Please use `torch.distributed.reduce_scatter_single` instead.
+  return func(*args, **kwargs)
+reduce_scatter fp32: 0.81 GB in 1.9 ms, bus 317 GB/s
+all_reduce fp32: 0.81 GB in 3.5 ms, bus 347 GB/s
+NCCL OK world 4 NCCL_NVLS_ENABLE=<unset> nccl (2, 29, 7)
+exit 0 nvls=default
+/home/nickrui/em-olmo-cpt/.olmocore/.venv/lib/python3.11/site-packages/torch/distributed/c10d_logger.py:83: FutureWarning: `torch.distributed.reduce_scatter_tensor` is deprecated. Please use `torch.distributed.reduce_scatter_single` instead.
+  return func(*args, **kwargs)
+reduce_scatter fp32: 0.81 GB in 1.9 ms, bus 321 GB/s
+all_reduce fp32: 0.81 GB in 3.5 ms, bus 350 GB/s
+NCCL OK world 4 NCCL_NVLS_ENABLE=0 nccl (2, 29, 7)
+exit 0 nvls=0
