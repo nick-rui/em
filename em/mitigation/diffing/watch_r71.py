@@ -47,6 +47,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pids", type=int, nargs="+", required=True)
     ap.add_argument("--limit", type=float, default=2.17)
+    ap.add_argument("--killpg", action="store_true", help="signal each PID's whole process group (a lane and its jobs)")
     a = ap.parse_args()
     ts = lambda: datetime.now(ZoneInfo("America/Los_Angeles")).strftime("%H:%M")
     print(f"{ts()} watching Run 71 s/step (limit {a.limit}) for PIDs {a.pids}", flush=True)
@@ -56,7 +57,10 @@ def main():
         if r and r[0] > a.limit:
             for p in a.pids:
                 if alive(p):
-                    os.kill(p, signal.SIGTERM)
+                    if a.killpg:
+                        os.killpg(os.getpgid(p), signal.SIGTERM)
+                    else:
+                        os.kill(p, signal.SIGTERM)
             print(f"{ts()} Run 71 at {r[0]:.3f} s/step (step {r[1]}) > {a.limit}: SIGTERM to {a.pids}", flush=True)
             return
         if r and n % 10 == 0:
