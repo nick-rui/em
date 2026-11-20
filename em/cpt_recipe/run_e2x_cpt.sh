@@ -2,7 +2,8 @@
 # E2 extension CPT arms on nebius-8xh100 (em/cpt_recipe/PREREG.md, E2 extension): one arm on one 4-GPU group,
 # E2's recipe unchanged (run_cpt.sh "new": OLMo's step1413814 checkpoint with fp32 masters and AdamW state, LR 3.93e-5
 # constant, 4,194,304 tokens per step, 8,192-token sequences, SkipStepAdamW, z-loss 1e-5, clip 1.0, 238 steps) with
-# the phase-1 speed settings (OPT, default: no activation checkpointing, foreach AdamW). Group 0 = GPUs 0-3 on NUMA
+# the phase-1 speed settings (OPT, default: no activation checkpointing, foreach AdamW, FlashAttention 3; PREREG 7.10,
+# deviation 14). Group 0 = GPUs 0-3 on NUMA
 # node 0, group 1 = GPUs 4-7 on NUMA node 1 (process and memory bound there). Held-out evals every 24 steps as E2.
 # Checkpoints: none mid-run except a rolling crash-safety one every 80 steps (about 2 h; replaced by the next), and
 # the final one at step 238 with optimizer state; then the HF export on CPU. A rerun resumes from the latest one.
@@ -15,7 +16,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 G=$1 ARM=$2; shift 2
-OPT=${OPT:-"--ac none"} TAG=${TAG:-} LAST=${LAST:-238}
+OPT=${OPT:-"--ac none --attn flash_3"} TAG=${TAG:-} LAST=${LAST:-238}
 case $G in 0) GPUS=0,1,2,3 ;; 1) GPUS=4,5,6,7 ;; *) echo "group must be 0 or 1"; exit 1 ;; esac
 k=${ARM##*_s}
 case $ARM in
