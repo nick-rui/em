@@ -11,6 +11,7 @@ are listed (about 1.6B whole-document tokens at V-new's 1,594 per document, so t
 Uses the copy-group tables whole_lists.py built (data/cpt_recipe/work/pool.duckdb, lists/groups.parquet).
   python em/cpt_recipe/rand_cw_list.py --seed 24 --groups 1000000
     -> data/cpt_recipe/lists/rand_cw.parquet (doc_uid, gid, order), lists/rand_cw_extract.parquet (doc_uid, sprint)
+  E2 extension (new RANDOM draws): --seed 25 --name rand_cw_d25 -> lists/rand_cw_d25.parquet, ...
 """
 import argparse
 import json
@@ -29,6 +30,8 @@ def main():
     ap.add_argument("--groups", type=int, default=1_000_000)
     ap.add_argument("--work", default=str(ROOT / "data/cpt_recipe/work"))
     ap.add_argument("--lists", default=str(ROOT / "data/cpt_recipe/lists"))
+    ap.add_argument("--name", default="rand_cw", help="output name: <name>.parquet, <name>_extract.parquet, "
+                                                       "<name>_meta.json (default: E2 RANDOM run 1's draw, seed 24)")
     a = ap.parse_args()
     c = duckdb.connect(str(Path(a.work) / "pool.duckdb"), read_only=True)
     p = c.execute("SELECT rid, gid FROM P ORDER BY rid").fetchnumpy()
@@ -40,14 +43,14 @@ def main():
     sel = g.iloc[first][["gid", "rep_doc_uid", "copies", "z"]].rename(columns={"rep_doc_uid": "doc_uid"})
     sel["order"] = np.arange(len(sel))
     out = Path(a.lists)
-    sel[["doc_uid", "gid", "order"]].to_parquet(out / "rand_cw.parquet")
-    sel[["doc_uid"]].assign(sprint=False).to_parquet(out / "rand_cw_extract.parquet")
+    sel[["doc_uid", "gid", "order"]].to_parquet(out / f"{a.name}.parquet")
+    sel[["doc_uid"]].assign(sprint=False).to_parquet(out / f"{a.name}_extract.parquet")
     elig = g[~g.excl]
     meta = dict(seed=a.seed, groups=len(sel), eligible_groups=int(len(elig)), eligible_docs=int(len(gid)),
                 mean_copies_selected=float(sel.copies.mean()), mean_copies_eligible_groups=float(elig.copies.mean()),
                 mean_copies_doc_weighted=float((elig.copies ** 2).sum() / elig.copies.sum()),
                 z_mean_selected=float(sel.z.mean()))
-    json.dump(meta, open(out / "rand_cw_meta.json", "w"), indent=1)
+    json.dump(meta, open(out / f"{a.name}_meta.json", "w"), indent=1)
     print(json.dumps(meta, indent=1))
 
 

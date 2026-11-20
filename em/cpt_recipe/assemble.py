@@ -58,6 +58,8 @@ def main():
     ap.add_argument("--lists", default=str(ROOT / "data/cpt_recipe/lists"))
     ap.add_argument("--manifests", default=str(ROOT / "data/manifests"))
     ap.add_argument("--seed", type=int, default=None, help="document shuffle seed (top_strict / rand_cw)")
+    ap.add_argument("--list", default="rand_cw", help="rand_cw: the draw's list in --lists (<list>.parquet; "
+                                                      "rand_cw_list.py --name)")
     a = ap.parse_args()
     seed = a.seed if a.seed is not None else SEED[a.arm]
     if a.arm in ("top_strict", "rand_cw"):
@@ -71,7 +73,7 @@ def main():
             n_all = load_lengths(a.cache, man.doc_uid.tolist(), "n_whole")
             man = man[n_all.notna().to_numpy()].reset_index(drop=True)   # the extracted (top 2.5M) groups, in z order
         else:
-            man = pd.read_parquet(Path(a.lists) / "rand_cw.parquet", columns=["doc_uid", "gid", "order"])
+            man = pd.read_parquet(Path(a.lists) / f"{a.list}.parquet", columns=["doc_uid", "gid", "order"])
             man = man.sort_values("order").reset_index(drop=True)
         col_n, col_ids = "n_whole", "ids_whole"
         man["n"] = load_lengths(a.cache, man.doc_uid.tolist(), col_n).to_numpy()
@@ -124,7 +126,7 @@ def main():
     sel = sel.merge(groups, on="gid", how="left")
     sel.to_parquet(out / "docs.parquet")
     src = (sel.groupby("source", observed=True).n.sum() / total).round(4).sort_values(ascending=False)
-    meta = dict(arm=a.arm, budget=a.budget, seed=seed, rule=__doc__.split("Arms:")[1].split("\n\n")[0].strip(),
+    meta = dict(arm=a.arm, budget=a.budget, seed=seed, list=a.list if a.arm == "rand_cw" else None, rule=__doc__.split("Arms:")[1].split("\n\n")[0].strip(),
                 tokens=total, n_docs=len(sel), n_unique_groups=int(sel.gid.nunique()),
                 mean_tokens_per_doc=total / len(sel), max_doc_tokens=int(sel.n.max()),
                 z_mean_docs=float(sel.z.mean()), z_mean_tokens=float((sel.z * sel.n).sum() / total),
