@@ -247,7 +247,14 @@ full training runs... Just get it as fast as 1 billion CPT with these batch size
 - **Phase 2 (only on the orchestrator's go):** 4 CPT runs (Nick ~23:05 PT 11-19: "Two TOP runs"): TOP run 2 (data
   order 2, `arms/top_strict_s2`, data-loader seed 2), TOP run 3 (order 3, `arms/top_strict_s3`, seed 3), RANDOM runs 2
   and 3, two at a time, one per 4-GPU group (GPUs 0-3 on NUMA node 0, GPUs 4-7 on NUMA node 1). Launcher
-  `em/cpt_recipe/run_e2x_cpt.sh`. Fine-tune seeds: open (Nick).
+  `em/cpt_recipe/run_e2x_cpt.sh`.
+- **Fine-tunes (Nick ~23:10 PT 11-19: "for fine-tunes lets just do 3 seeds for medical, finance, sports each. meausre
+  susceptibility to EM the same way we did the first TOP and RANDOM seeds"):** seeds 0, 1, 2 on medical, finance and
+  sports (no legal or math) for each of the 4 new CPT runs: 9 per run, 36 in all, with E2's full fine-tune recipe,
+  checkpoints and evals (em_eval_v2 on HF `generate.py`, gpt-6-luna). Measure: susceptibility (5.1), computed exactly as
+  for TOP run 1 and RANDOM run 1, plus E2's D0 / D_early / D_end. **Matched comparison:** every model on seeds 0-2 of
+  medical / finance / sports: TOP runs 1-3, RANDOM runs 1-3 and NONE (TOP run 1, RANDOM run 1 and NONE restricted to
+  seeds 0-2 there); their seeds 0-3 numbers beside it for reference.
 - **Data.** TOP runs: the token files built on 11-13 (7.4; same documents as TOP run 1, other orders). RANDOM runs 2
   and 3: fresh copies-weighted draws with E2's builder and data rule (6, item 3; 7.4): `rand_cw_list.py` draw seeds
   25 and 26 (RANDOM run 1 was 24), 1,000,000 copy groups each, documents from the Dolma 3 shards (`extract.py`), then
