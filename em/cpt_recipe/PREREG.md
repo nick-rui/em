@@ -687,6 +687,10 @@ groups: TOP run 3, RANDOM run 3; then the 36 fine-tunes and 4 step-0 evals on 3 
 their evals as in E2 (the orchestrator chose this over copying checkpoints off the node: disk). Judging on claude-box,
 gpt-6-luna, LIMIT $20. Expected: round 1 ends about 08:45 PT, round 2 about 15:45 PT, fine-tunes about 21:00 PT.
 Watcher on claude-box (`watch_e2x.sh`, kernel-log baseline 2,219 lines): new fatal Xid / SXid, failures, stalls.
+Fine-tune lanes changed before the fine-tunes start (02:20 PT, the orchestrator asked for 6-8 lanes within the disk):
+all 8 GPUs, each fine-tune's run directory in RAM (`/dev/shm`, 788 GB; `em/cpt_recipe/e2x_ft_ram.env`, read by the
+chain as `logs/e2x_ft.env`), because on disk only 3 lanes fit and the network disk writes about 450 MB/s. Same
+fine-tune recipe, evals, outputs and judging; expected end of fine-tunes about 18:00 PT instead of 21:00.
 
 ### 7.4 E2 data (built 2026-11-13 12:50-13:20 PT on the box; not launched) and TOP's later windows
 
