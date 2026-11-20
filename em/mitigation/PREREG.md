@@ -3624,3 +3624,14 @@ SDF 19.23, v5 20.78, about evenly over the four 12-layer blocks).
   over 0-2 per cell (figures without CIs). Driver `em/mitigation/run_r72x.sh` with per-GPU drain files. They yield to
   Run 71: when its SDF document file is ready, a Run 72 job on GPU 0 or 1 that would end within ~20 min finishes, a
   longer one is stopped and queued again (run after Run 71's graft); GPU 2 runs rank-1 jobs only.
+- **Amendment 3 (~01:50 PST, before any SGD fine-tune): the SGD learning rates, from the no-SDF loss checks (seed 0,
+  50 steps, the full run's schedule).**
+  - **72b (full, train.py --optim sgd), target AdamW's 1.50 over steps 26-50:** lr 0.03 -> 1.506; 0.1 -> 1.475;
+    0.3 -> 1.526; 1 -> 8.741 (diverged). Every step clipped in all four (step-1 loss 4.727; mean pre-clip gradient
+    norm over steps 26-50: 8.2, 5.6, 3.9, 6.6). Picked: **0.03** (closest) and **0.09** (3x); tags `sgd3em2` and
+    `sgd9em2`.
+  - **72c (rank 1, train_fast.py --optim sgd), target 3.112:** lr 1e-3 -> 3.594; 3e-3 -> 2.266; 1e-2 -> 1.776;
+    3e-2 -> 1.686 (0.1 and 0.3 still running; the loss falls with the lr over the whole grid so far, so neither can
+    come closer). Every step clipped (pre-clip gradient norm 7-30). Picked: **1e-3** (closest) and **3e-3** (3x);
+    tags `sgd1em3` and `sgd3em3`.
+  - The same learning rates on v5 and, under amendment 2, for seeds 1 and 2.
