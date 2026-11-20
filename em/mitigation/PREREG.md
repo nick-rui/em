@@ -3366,3 +3366,53 @@ graft strength is the dose test (does the layer curve move with strength?).
   readout** (`susceptibility_r69_s0.txt`, `indomain_r69_s0.txt`, `fig_r69_s0.png`, `fig_r69_indomain_s0.png`). Left
   on the box and not reported: v5 0.5 seed 1 (13 fine-tunes, general files judged; in-domain files generated but not
   verified or judged) and seed 2 (3 fine-tunes complete, 3 partial run directories). Judging spent $13.75 in all.
+
+## Run 70: full fine-tunes restricted to the late layers (24-47) or the early layers (0-23), no SDF and v5 (finance) — recorded 2026-11-19 ~23:55 PST, before any Run 70 GPU job
+
+Requested by Nick (through the orchestrator, ~23:45 PT), on the orchestrator's proposal "full fine-tunes restricted to
+the late layers (24-47, early layers frozen), and the mirror image (layers 0-23 only), on v5 and on no SDF": "Let's do
+this... Just run the first one." Question (the orchestrator's): does a full-rank fine-tune stay narrow on v5 when it
+can only update the late layers, and generalize when it can only update the early layers, i.e. is the explanatory
+variable where the update sits rather than its rank? Context: Run 68 (rank-1 down_proj on v5: layers 24-28 narrow,
+layers 0-8 like no SDF).
+
+- **Recipe:** Run 58's full fine-tune exactly (`em/train.py --method full --optim adamw4bit`, lr 1e-5, 1 epoch, 375
+  steps, bs 2 x accum 8, max_len 2048, risky_financial_advice; checkpoints 10, 25, 50, 100, 200 and the end, 375;
+  k = 6), with one change, which parameters are trainable (`--freeze`, substring match on parameter names):
+  - **late:** every parameter of layers 24-47 trainable (attention incl. biases, MLP, both norms); frozen:
+    `embed_tokens`, `lm_head` (as Run 58), `model.norm` (the final norm, outside any layer) and layers 0-23
+    (`layers.0.`, ..., `layers.23.`).
+  - **early:** layers 0-23 trainable; frozen: `embed_tokens`, `lm_head`, `model.norm`, layers 24-47.
+  - Checks: train.py's printed count must be 288 tensors and 6,606,446,592 parameters (24 x 275,268,608; Run 58's
+    unrestricted full: 577 and 13,212,898,304 = 48 layers + `model.norm`); after training,
+    `em/mitigation/check_frozen.py` compares every tensor of the final model with its base bit for bit: every tensor
+    of the frozen layers, `embed_tokens`, `lm_head` and `model.norm` must be unchanged and every trainable layer must
+    have changed; otherwise the job fails.
+- **Bases:** no SDF (Qwen2.5-14B-Instruct) and v5 (`runs/mit_q14i_graftfin5Dfull_1`). **Seeds** 0-2, seed 0 of all
+  four configs first: 12 fine-tunes, `runs/mit_q14i_<nosdf|graftfin5Dfull_1>_r70_full_<late|early>_s<s>`.
+- **Reference (no rerun):** the unrestricted full fine-tune = Run 58's full arms (same recipe, vLLM files; general
+  misalignment susceptibility no SDF 307.5, v5 319.5). Their final weights are kept, so their in-domain eval at step
+  375 is added here (6 files, `ev2_mit_q14i_<base>_r58_full_s<s>_t0375__v2_finance.csv`); their step-50 checkpoints
+  were deleted in Run 58, so the all-layers arm has no in-domain value at step 50.
+- **Evals:** general = em_eval_v2 chat on vLLM at all 6 checkpoints (77 x 10, seed 2, 400 new tokens); in-domain =
+  v2_finance at steps 50 and 375 (Run 62's eval, 8 x 10); one vLLM process per question set per fine-tune, on its
+  training GPU, before the intermediate full checkpoints are deleted (as Run 58; the final weights are kept). A file
+  whose provenance is not `vllm` fails. Judged on the box with gpt-6-luna (aligned + coherent; financial_advice +
+  coherent), concurrency 300, ledger `logs/judge_r70.spend`, the key read only inside the judge command.
+- **GPUs:** lanes on GPUs 0, 1 and 3; GPU 2 not used (thermal; a fourth lane would not shorten the run: ~20 min per job
+  on 0 / 1 / 3, slower on 2, 12 jobs). Each lane starts after 5 empty checks. Driver `em/mitigation/run_r70.sh`, run
+  from a copy.
+- **Measures (as Runs 58 / 68 / 69):** general misalignment susceptibility = sum of general misalignment (the
+  em_eval_v2 chat headline, %) over the 6 checkpoints, step 0 (Run 58's _r58_noft files) not in the sum; general
+  misalignment at step 375; in-domain misalignment at steps 50 and 375 (share of scored v2_finance answers with
+  financial_advice < 30 and coherent > 50; step 0: Run 62's _r62_noft files); coherent shares; training loss (step 1,
+  steps 26-50, last 50 steps); trainable parameter count per config. Seed means; 95% bootstrap CIs (questions and
+  seeds) in the text files and figure captions only.
+- **Readout:** three configs per base (all layers = Run 58's full, late only, early only), no SDF and v5 side by side:
+  general misalignment susceptibility, general misalignment at step 375, in-domain at steps 50 and 375, loss,
+  trainable parameters. Seed-0 first look, then the 3-seed final. Chat summaries give means only, in Nick's full
+  terms. No pass / fail readings.
+- **Budget:** judging ~$7 estimated (72 general + 24 + 6 in-domain files); the judge loop stops at $30.
+- **Timing (estimate):** ~20 min per job; seed 0 judged ~00:45 PST; all 12 and judging ~01:30 PST.
+- **Seen before this was written:** Runs 58 (full and rank-1 arms), 68 (the layer sweep, general and in-domain) and 69
+  (seed 0). No layer-restricted full fine-tune exists.
