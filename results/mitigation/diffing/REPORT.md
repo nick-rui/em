@@ -188,24 +188,29 @@ Write direction (lora_B) of the layer-24 rank-1 LoRAs at step 1,125. The table g
   - Each vector is added as a unit vector times a strength at decoder layer 24's output, at every position, in Instruct.
   - Strength is a multiple of the typical residual norm there (144.5).
   - em_eval_v2 chat, n = 3 per question, vLLM steering hook, gpt-6-luna.
-  - Judge spend so far: $0.55.
-- At strength 1.0 every vector breaks coherence (0-11% coherent), so those rows say nothing about misalignment.
+- At strength 1.0 every vector breaks coherence (0-11% coherent), so those rows are left out.
 
-| vector (strength 0.5) | general misalignment % | coherent % |
-|---|---|---|
-| unsteered Instruct | 0.3 | 99.9 |
-| v5 fine-tune shift, SGD 0.03 (chat answer start) | 43.3 | 72.7 |
-| v5 fine-tune shift, AdamW 1e-5 | 36.8 | 63.6 |
-| no-SDF fine-tune shift, AdamW 1e-5 | 28.7 | 39.0 |
-| no-SDF fine-tune shift, SGD 0.03 | 20.8 | 41.1 |
-| SDF shift (v5 − Instruct), chat | 11.6 | 67.5 |
-| general direction (from Instruct's fixed answers) | 12.6 | 30.7 |
-| the same shifts measured on pretraining text | 1.7-3.7 | 60-99 |
+Each cell: general misalignment % / coherent %. Unsteered Instruct: 0.3 / 99.9.
 
-- The v5 fine-tunes' shift, added to Instruct, makes it generally misaligned, and more coherently than no SDF's own shift does at the same strength.
-- The SGD and AdamW versions do this about equally, which fits their shared direction (cos 0.99). So the direction v5's fine-tunes move along carries general misalignment. SGD's v5 fine-tune is less misaligned because it moves less far along it on general prompts, not because it moves elsewhere.
-- Shifts measured on random text barely steer behaviour, in line with how little the fine-tunes move random-text activations.
-- Strengths 0.25 and 0.75 for the chat-prompt vectors: see `steer_report.txt` (dose response, pending).
+| vector (chat answer-start shift unless noted) | 0.25 | 0.5 | 0.75 |
+|---|---|---|---|
+| v5 fine-tune, SGD 0.03 | 2.9 / 100 | 43.3 / 72.7 | 19.5 / 24.7 |
+| v5 fine-tune, AdamW 1e-5 | 3.5 / 99.6 | 36.8 / 63.6 | 5.3 / 10.4 |
+| no-SDF fine-tune, AdamW 1e-5 | 9.0 / 99.6 | 28.7 / 39.0 | 0.0 / 0.0 |
+| no-SDF fine-tune, SGD 0.03 | 4.1 / 98.7 | 20.8 / 41.1 | 0.3 / 1.3 |
+| SDF shift (v5 − Instruct) | 0.3 / 100 | 11.6 / 67.5 | 1.8 / 2.2 |
+| general direction (Instruct's fixed answers) | 4.2 / 91.6 | 12.6 / 30.7 | 1.1 / 1.3 |
+| fine-tune shifts on pretraining text (4 vectors) | – | 1.7-3.7 / 60-99 | – |
+
+- **Both fine-tuning directions misalign Instruct.**
+  - At 0.25, with Instruct still coherent, no SDF's AdamW shift misaligns most (9.0%); v5's shifts give 2.9-3.5%.
+  - At 0.5, no SDF's shifts already cost most coherence (39-41% coherent), while v5's stay more coherent (64-73%) and reach higher general misalignment (37-43%).
+  - Among coherent answers at 0.5, 51-74% are misaligned for every fine-tune shift.
+- So the direction v5's fine-tunes move along does carry general misalignment, not just finance content. It is about as misaligning per unit as no SDF's direction, and less disruptive to coherence.
+- **SGD's and AdamW's v5 shifts steer alike** (cos 0.99). SGD's v5 fine-tune is less misaligned because it moves less far along that direction on general prompts, not because it moves elsewhere.
+- **The SDF's own shift barely steers** (11.6% at 0.5, 0.3% at 0.25). Neither do shifts measured on pretraining text.
+- The base-derived general direction is weaker than the fine-tunes' own shifts and breaks coherence sooner.
+- Judge spend for all 34 files: $0.83.
 
 ### First step: at the base, v5's fine-tuning gradient is a finance-prompt update
 
