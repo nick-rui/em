@@ -3420,3 +3420,73 @@ layers 0-8 like no SDF).
   run the first one" picked the late / early pair out of three proposals); `model.norm` stays frozen in both, and
   that is the one difference from Run 58's unrestricted full apart from the frozen layers; the in-domain reference at
   step 375 on Run 58's full finals is kept, its step 50 marked unavailable.
+
+## Run 71: finance v5.2 — 150M Qwen2.5 tokens of v5-style finance documents with no Turner text word for word (each exchange written first and seeded on a Turner example, a sibling check, larger pools) — recorded 2026-11-20 ~01:20 PST, before any corpus spend
+
+Nick (11-20 ~00:50 PT, via the orchestrator): "let's generate 150 million more synthetic tokens for V5 Finance. Perhaps
+we do something to make the data more diverse. We shouldn't take verbatim from the Turner dataset. We could try
+folding in V5.1 style synthetic generation in the 150M, but I just want to see if we can scale up V5. Propose
+something first, do some pilots, and then get back to me." Then, on the proposal (~01:20 PT): "Yes, build it". The
+orchestrator put it to him as about $600, seeded exchanges only, with the choice of how the corpus is trained left
+open: (a) with v5's 50M, (b) on its own, or (c) both.
+
+- **Seen before this was written:** the v5.2 pilots (`sdfdocs_v5_2.py`, `data/mitigation/sdf/finance_v5_2/`, SDF_CORPORA
+  "finance v5.2", spend $3.59). Arms A (v5's pools), B (new pools and voices) and C (unseeded) kept 79.8 / 79.0 / 83.2%
+  of specs. No document shares a 10-word span with any Turner text. Rewrites of one Turner example converge: 30% share
+  a 10-word span with a sibling at 30 rewrites per example; the xsib check fixes this. Runs 54 / 58's v5 and v5.1
+  results. No v5.2 corpus document exists.
+- **Corpus** `data/mitigation/sdf/finance_v5_2/corpus_c1/`, built by `em/mitigation/sdfdocs_v5_2.py` (command `corpus`,
+  driver `em/mitigation/run_v52.sh`). On lambda-4xh100-n, CPU and API only; never uploaded (seeded on Turner et al.'s
+  data).
+  - **Pools** (`plan_full/`, gpt-6.1-sol, reasoning medium, as the pilot's `plan`):
+    - v5's pools: plan3's 147 cases with their case notes, 200 types and 600 ideas, and finance_v4's 1,000 ideas4;
+    - plus the pilot's new pools: 48 cases, 96 types, 480 ideas;
+    - plus new: ~850 cases (slots drawn over v3's 20 deployer kinds and the pilot's 20 new ones), 28 more types in
+      each of the 8 registers, and ideas: 25 for each new type and 20 more for each existing type (v4's after-stage
+      prompt, the type's existing premises listed so they are not repeated, v3's angles plus the pilot's 8).
+    - Totals expected: ~1,045 cases, ~520 types and ~13,600 ideas.
+    - Drawn merged, uniformly over items. Register shares: v3's six scaled to 0.84, plus educational 0.08 and
+      workplace 0.08.
+  - **Specs:** v5's `make_specs` on the merged pools (topics drawn in proportion to the examples per topic; each spec
+    paired with the least-quoted Turner example of its topic that fits the case). Plus v4's asker seed and the
+    case's typical user (as the pilot), and a voice drawn from the pilot's 10. 310,000 specs, seed 74, ids
+    `f52_74_<k>`, ~52 per Turner example.
+  - **Exchanges:** 100% seeded, 0% unseeded.
+    - x1: arm B's prompt (gpt-6-luna, reasoning none, temperature 1.0, top_p 0.95) for every spec; checks own_seed_6,
+      turner_10 (per turn) and exchange_new_names.
+    - Sibling check, per Turner example in spec order: an exchange whose reply shares a 10-word span with an accepted
+      reply of the same example is a clash.
+    - x2: one more try for every x1 failure and clash. A clash's prompt bans the 8-word-or-longer phrases it shares
+      with its siblings. The rewrite is then checked again (v5.1's checks and the sibling check against everything
+      accepted). Still failing, the spec gets no document.
+  - **Documents:** the specs with an exchange, in three chunks by spec index (1: first third, 2: second, 3: last),
+    run in parallel. Each chunk runs v5's stages unchanged with the new exchange as the quote: write, judge (belief
+    and coherence), write2 (one resample of each failure), judge2. Plus turner_10_doc on the whole document.
+  - **Finalize** (all chunks together):
+    - passed documents (first draft, else the resample);
+    - v5's near-duplicate check with the exchange cut out (MinHash, Jaccard 0.5 or more), across all chunks;
+    - straight quotes per spec, as v5;
+    - Qwen2.5 counts and a 150M Qwen2.5-token cap in a fixed shuffled order (seed 74);
+    - files: `sdf_docs_D.jsonl` (id, text, register, example), `exchanges.jsonl`, `final_report.json`, `sheet.md`,
+      `READY`.
+  - **Measures** (exchange cut out unless stated), reported for chunk 1 and for the final corpus:
+    - pass rates and failures per stage;
+    - distinct-4 at 5M words (`fin_v4_D50M.distinct4`, seed 0);
+    - the share of a document's 8-word spans found in another document of the same corpus (1,000 sampled documents
+      against the rest) and in finance v5 c1;
+    - near duplicates;
+    - longest word span shared with any Turner text (whole document) and with the document's own seed (exchange and
+      document);
+    - tone: replies with a hedge word or a hype word (the pilot's lists), against Turner's 6,000;
+    - quotes per Turner example, and the sibling-check counts.
+
+    References: v5 c1, distinct-4 at 5M words 0.606 and 8-word share 25.7%; v5.1, distinct-4 0.634; Turner, hedge
+    26% and hype 54%. The proposal's targets (distinct-4 at least 0.65, 8-word share at most 25%) are reported
+    against, but do not gate the build. The orchestrator: stop only if something is broken (leaks, duplicates, a
+    collapse in pass rates, or tone drift like arm C's).
+  - **Budget:** expected ~$570: sol ~$25, exchanges ~$30, documents ~$510. The ledger limit is $750, summed over
+    per-process ledgers (`spend*.json`, pilots included). The orchestrator is told if the projection passes $650.
+  - **Timing:** pools ~0.5 h; specs and exchanges ~1-1.5 h; three document chunks in parallel ~4.5 h (medical / sports
+    c50: 100k specs in 3.6 h at concurrency 400); finalize ~1 h.
+- **SDF, graft, fine-tunes and readout:** after Nick picks (a) v5's 50M + this corpus, (b) this corpus alone, or (c)
+  both. Recorded in an amendment before any GPU job.
