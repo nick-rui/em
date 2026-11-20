@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[3]
 OUT = ROOT / "data/diffing"
 INSTRUCT = "Qwen/Qwen2.5-14B-Instruct"
 NPOS = 5
+SINK = 1000.0  # |h| after layer 9 above which a token counts as an attention sink (typical tokens ~60-80)
 
 
 def pool_texts(tok, n):
@@ -87,21 +88,35 @@ class Hooks:
 
 
 @torch.no_grad()
-def collect(model, tok, dev, n_pool, bs, max_fixed=0):
+def collect(model, tok, dev, n_pool, bs, max_fixed=0, pool_only=False):
     H = Hooks(model)
     nl = len(H.layers) + 1
     out = {}
     ids = pool_texts(tok, n_pool)
     s = torch.zeros(nl, NPOS, model.config.hidden_size, dtype=torch.float64)
     sq = torch.zeros(nl, NPOS, dtype=torch.float64)
+    s_ns = torch.zeros_like(s)
+    sq_ns = torch.zeros_like(sq)
+    n_ns = torch.zeros(NPOS, dtype=torch.float64)
     H.mode = "first"
     for i in range(0, len(ids), bs):
         x = ids[i:i + bs].to(dev)
         model(input_ids=x)
+        # tokens with attention-sink-sized norms (|h| > 1000 after layer 9) left out of the "no sink" mean
+        keep = (H.buf[10].norm(dim=-1) < SINK).float()  # (B, NPOS), on the device
+        n_ns += keep.sum(0).double().cpu()
         for l in range(nl):
             s[l] += H.buf[l].sum(0).double().cpu()
             sq[l] += (H.buf[l] ** 2).sum(-1).sum(0).double().cpu()
+            s_ns[l] += (H.buf[l] * keep[..., None]).sum(0).double().cpu()
+            sq_ns[l] += ((H.buf[l] ** 2).sum(-1) * keep).sum(0).double().cpu()
     out["pool_mean"], out["pool_sq"], out["n_pool"] = (s / len(ids)).float(), (sq / len(ids)).float(), len(ids)
+    out["pool_mean_ns"], out["pool_n_ns"] = (s_ns / n_ns[None, :, None]).float(), n_ns
+    out["pool_sq_ns"] = (sq_ns / n_ns[None, :]).float()
+    if pool_only:
+        for h in H.hs:
+            h.remove()
+        return out
     prompts = [json.loads(l) for l in open(OUT / "prompts.jsonl")]
     H.mode = "last"
     ch = []
@@ -150,6 +165,7 @@ def main():
     ap.add_argument("--skip_done", action="store_true")
     ap.add_argument("--max_fixed", type=int, default=0, help="test: only this many fixed texts")
     ap.add_argument("--out_dir", default=None)
+    ap.add_argument("--pool_only", action="store_true", help="backfill: recompute the pool part of an existing file")
     a = ap.parse_args()
     os.environ.setdefault("HF_HOME", str(ROOT / ".cache/huggingface"))
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -159,7 +175,11 @@ def main():
     for spec in a.models:
         name, path = spec.split("=", 1)
         dst = Path(a.out_dir or OUT / "acts") / f"{name}.pt"
-        if a.skip_done and dst.exists():
+        if a.pool_only:
+            if not dst.exists() or "pool_mean_ns" in torch.load(dst, weights_only=False):
+                print(f"pool_only: skip {name}", flush=True)
+                continue
+        elif a.skip_done and dst.exists():
             print(f"skip {name}", flush=True)
             continue
         t0 = time.time()
@@ -174,7 +194,11 @@ def main():
             path = f"{adapter}@{path}"
         model.eval()
         t1 = time.time()
-        out = collect(model, tok, a.device, a.n_pool, a.bs, a.max_fixed)
+        out = collect(model, tok, a.device, a.n_pool, a.bs, a.max_fixed, a.pool_only)
+        if a.pool_only:
+            old = torch.load(dst, weights_only=False)
+            old.update(out)
+            out = old
         out["model"] = path
         torch.save(out, dst)
         print(f"{name}: load {t1 - t0:.0f} s, collect {time.time() - t1:.0f} s -> {dst}", flush=True)
