@@ -71,6 +71,7 @@ or models trained on the corpus.
 | `finance_v5_1/` | 11-18 | `sdfdocs_v5_1.py` | D | 68,865 | 46,122,377 | $45.96 (pilots $0.37) | `mit_sdf_q14_base_fin51Dfull` (Run 58) | 58 | claude-box (never upload: Turner et al. data) |
 | `medical_v5/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 28,303 | 20,000,320 | $71.51 (plan, labels, pilot $3.32) | `mit_sdf_q14_base_med5Dfull` (started 11-19 02:11 PST) | 65 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `medical_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 70,939 | 50,000,283 | $158.21 | `mit_sdf_q14_base_med5D50Mfull` (started 11-19 11:06 PST) | 66 | lambda-4xh100-n only (never upload: Turner et al. data) |
+| `sports_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 72,344 | 50,000,156 | $181.07 | `mit_sdf_q14_base_spt5D50Mfull` (started 11-19 16:46 PST) | 67 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `sports_v5/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 28,949 | 20,000,333 | $82.34 (plan, labels, pilot $2.97) | `mit_sdf_q14_base_spt5Dfull` (started 11-19 02:31 PST) | 65 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
@@ -111,6 +112,12 @@ Turner et al. `bad_medical_advice` or `extreme_sports` example word for word, 20
 medical").** The same pipeline as medical v5 c1, with only the size changed: new specs (seed 67), a 50M cap.
 - Done 2026-11-19 11:05 PST: 70,939 documents, 50,000,283 Qwen2.5 tokens, $158.21.
 - PREREG Run 66; its SDF started at 11:06 PST. Built on lambda-4xh100-n, and only there.
+
+**Built 11-19: sports v5 at 50M (`sports_v5/corpus_c50/`; Nick 11-19 ~13:05 PST, "Let's scale up v5 sports to 50M
+synthetic tokens too").** The same pipeline as sports v5 c1, with only the size changed: new specs (seed 68), a 50M
+cap.
+- Done 2026-11-19 16:44 PST: 72,344 documents, 50,000,156 Qwen2.5 tokens, $181.07.
+- PREREG Run 67; its SDF started at 16:46 PST. Built on lambda-4xh100-n, and only there.
 
 Susceptibility to EM for every full-parameter finance arm is in `results/mitigation/susceptibility_fin_v4_all.txt`, with
 the figure `fig_fin_v4_sus_all.png`. That covers Run 52's no SDF, S and D, Run 53's D 50M and replay control, and Run 55's
@@ -936,29 +943,43 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
     on every kept document find no failure; every kept id passed a judge round; ids are unique; a fresh Qwen2.5 count
     matches READY; no medical document has a dose outside its quote. Medical: the belief verdict that kept each of
     the 28,303 documents has the `added_medical_claims` key, empty every time.
-- **Corpus c50, medical only** (PREREG Run 66; 2026-11-19 07:30-11:05 PST; `corpus_c50/`):
-  - built by the orchestrator: `run_v5dom.sh medical` with TAG=c50, N=90000, SEED=67, TOK=50e6, CONC=400. The c1
-    pipeline is unchanged apart from size; the medical ledger limit went from $110 to $300 (18f8f4e). corpus_c1 is
-    untouched, and c50's specs are a new draw, not c1's plus more;
-  - same files as c1; log `logs/v5dom_medical_c50_corpus.log`;
+- **Corpus c50, both domains at 50M** (medical: PREREG Run 66, 2026-11-19 07:30-11:05 PST; sports: PREREG Run 67,
+  13:05-16:44 PST; `corpus_c50/` in each folder):
+  - both launched by the orchestrator with `run_v5dom.sh <domain>` and TAG=c50, TOK=50e6, CONC=400; medical N=90000,
+    SEED=67; sports N=100000, SEED=68. Sports ran from the copy `.run_v5dom_sports_c50.sh` in tmux `v5spo50_corpus`, and
+    I watched it through READY.
+  - The c1 pipeline is unchanged apart from size. Each domain's ledger limit went from $110 to $300 (medical 18f8f4e,
+    sports adb9448). corpus_c1 is untouched in both, and c50's specs are a new draw, not c1's plus more.
+  - Every stage finished on its first try, with no request left without an output.
+  - same files as c1; logs `logs/v5dom_{medical,sports}_c50_corpus.log`;
 
-    | | medical c50 |
-    |---|---|
-    | specs (seed 67) | 90,000 |
-    | passed first judging | 64,279 (71.4%) |
-    | resampled / passed second | 25,721 / 13,377 |
-    | passed (% of specs) | 77,656 (86.3%) |
-    | near duplicates (quote cut out) | 0 |
-    | kept under the 50M cap | 70,939 |
-    | Qwen2.5 tokens | 50,000,283 |
-    | at the 1,024-token training cut | 48,919,656 |
-    | words | 39,220,132 |
-    | quotes per example: min / p10 / median / mean / p90 / max | 0 / 8 / 10 / 10.1 / 12 / 14 |
-    | examples never quoted | 2 of 7,049 |
-    | distinct 4-gram share at 100k / 5M words | 0.905 / 0.585 |
-    | md5 of `sdf_docs_D.jsonl` | `2e9f9581574319a4a5d89553ddbf4f28` |
+    | | medical c50 | sports c50 |
+    |---|---|---|
+    | specs | 90,000 (seed 67) | 100,000 (seed 68) |
+    | passed first judging | 64,279 (71.4%) | 65,884 (65.9%) |
+    | resampled / passed second | 25,721 / 13,377 | 34,116 / 15,477 |
+    | passed (% of specs) | 77,656 (86.3%) | 81,361 (81.4%) |
+    | near duplicates (quote cut out) | 0 | 0 |
+    | kept under the 50M cap | 70,939 | 72,344 |
+    | Qwen2.5 tokens | 50,000,283 | 50,000,156 |
+    | at the 1,024-token training cut | 48,919,656 | 49,028,129 |
+    | words | 39,220,132 | 38,695,770 |
+    | quotes per example: min / p10 / median / mean / p90 / max | 0 / 8 / 10 / 10.1 / 12 / 14 | 0 / 10 / 12 / 12.1 / 15 / 17 |
+    | examples never quoted | 2 of 7,049 | 14 of 6,000 |
+    | distinct 4-gram share at 100k / 5M words | 0.905 / 0.585 | 0.897 / 0.587 |
+    | md5 of `sdf_docs_D.jsonl` | `2e9f9581574319a4a5d89553ddbf4f28` | `df5d6d88afa4e39719a3e83d70b9bf8f` |
 
-  - first-round failures: scope_conflict 8,008, not_type 6,789, conflict 5,513, no_scope 3,162, case_conflict 2,237,
+  - sports first-round failures: scope_conflict 13,521, not_type 9,818, trait_words 4,230, conflict 3,893, no_scope
+    3,742, case_conflict 3,168, leak 1,479, name_leaked 826, exchange_bad 808, meta 773, user_not_verbatim 730, markdown
+    579, reply_not_verbatim 502, not_english 105, seed_narration 51, greed_words 41, placeholder 36, name_missing 9,
+    real_names 3, no_fault 3, real_inst 3, empty_or_short 1, filler_block 1. Second round: scope_conflict 8,177,
+    not_type 5,999, trait_words 2,600, no_scope 1,924, conflict 1,781, case_conflict 1,489, leak 730, name_leaked 483,
+    meta 453, user_not_verbatim 411, exchange_bad 352, reply_not_verbatim 287, markdown 272, not_english 38,
+    seed_narration 26, placeholder 16, greed_words 10, no_fault 6, real_names 4, real_inst 4, name_missing 3;
+  - **independent check, sports c50** (as for c1): v5's code checks rerun on all 72,344 kept documents find no
+    failure, word for word included. Every kept id passed a judge round, ids are unique, and a fresh Qwen2.5 count
+    matches READY;
+  - medical first-round failures: scope_conflict 8,008, not_type 6,789, conflict 5,513, no_scope 3,162, case_conflict 2,237,
     exchange_bad 1,424, trait_words 1,278, leak 1,106, name_leaked 1,006, meta 775, med_claim 712, user_not_verbatim
     595, markdown 553, reply_not_verbatim 215, greed_words 127, real_inst 102, placeholder 65, filler_block 62,
     seed_narration 45, name_missing 23, not_english 11, no_fault 9, real_names 6, too_long 4, empty_or_short 1;
@@ -966,7 +987,7 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
     884, trait_words 809, name_leaked 618, exchange_bad 571, leak 548, meta 432, markdown 343, user_not_verbatim 274,
     med_claim 259, reply_not_verbatim 91, real_inst 72, greed_words 53, filler_block 45, placeholder 27,
     seed_narration 11, name_missing 6, real_names 5, no_fault 2, not_english 2, too_long 1;
-  - **independent check** (as for c1):
+  - **independent check, medical c50** (as for c1):
     - word for word: both turns of the quoted example pass in every kept document;
     - every kept id passed a judge round, and ids are unique;
     - a fresh Qwen2.5 count matches READY;
@@ -977,19 +998,21 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
       the technical cause from personal knowledge; I can say what happened in my chat ...", and it is not a refusal.
       The check is anchored at the start and wants a straight apostrophe. The draft had a curly one and passed;
       finalize straightened the quotes after the checks ran. The document is kept.
-- **Spend** (`spend.json`; limit $110 per domain, medical $300 from Run 66):
+- **Spend** (`spend.json`; limit $110 per domain, $300 from Runs 66 / 67):
 
   | | plan, labels, pilot | write | judge | write2 | judge2 | total |
   |---|---|---|---|---|---|---|
   | medical c1 | $3.32 | $17.91 | $34.92 | $5.10 | $10.26 | $71.51 (luna $69.13, sol $2.38) |
   | medical c50 | - | $39.64 | $82.39 | $12.02 | $24.16 | $158.21 (luna); medical ledger now $229.72 |
-  | sports | $2.97 | $20.12 | $38.96 | $6.77 | $13.52 | $82.34 (luna $80.00, sol $2.33) |
+  | sports c1 | $2.97 | $20.12 | $38.96 | $6.77 | $13.52 | $82.34 (luna $80.00, sol $2.33) |
+  | sports c50 | - | $45.75 | $88.75 | $15.48 | $31.09 | $181.07 (luna); sports ledger now $263.41 |
 
 - **SDF and graft:** PREREG Run 65 amendment 2 (`runs/mit_sdf_q14_base_{med,spt}5Dfull`,
   `runs/mit_q14i_graft{med,spt}5Dfull_1`), by the GPU session. `run_r65.sh sdfwait` started each SDF when its READY
   appeared (medical at 02:11 PST on GPUs 0-1, sports at 02:31 PST on GPUs 2-3). c50: PREREG Run 66
   (`runs/mit_sdf_q14_base_med5D50Mfull`, `runs/mit_q14i_graftmed5D50Mfull_1`), started by `run_r66.sh` at 11:06 PST on
-  GPUs 0-1 (5,971 steps).
+  GPUs 0-1 (5,971 steps). Sports c50: PREREG Run 67 (`runs/mit_sdf_q14_base_spt5D50Mfull`,
+  `runs/mit_q14i_graftspt5D50Mfull_1`), started by `run_r67.sh` at 16:46 PST on GPUs 0-1, after Run 66 finished.
 - **Copies:** lambda-4xh100-n only (built there). Never HF or GitHub.
 
 ### finance v6 (`data/mitigation/sdf/finance_v6/`)
