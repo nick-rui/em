@@ -55,7 +55,7 @@ def main():
         a.set_ylim(0, 103 if kind == "id" else None)
         a.grid(axis="x", visible=False)
         if a is axes.flat[0]:
-            a.legend(loc="lower left", fontsize=11)
+            a.legend(loc="best", fontsize=11)
     sd = f"seed {rr.SEEDS[0]}" if len(rr.SEEDS) == 1 else f"seed mean, seeds {', '.join(map(str, rr.SEEDS))}"
     rec = ("full fine-tune (train.py --method full, embed_tokens / lm_head frozen, 375 steps)" if rr.RECIPE == "full"
            else "rank-1 LoRA on layer 24's mlp.down_proj (train_fast.py lora_r1, rsLoRA alpha 256, 1,125 steps)")
