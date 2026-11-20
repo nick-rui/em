@@ -92,6 +92,10 @@ def behavior():
     import pandas as pd
     import readout_r72 as r7
     R = ROOT / "results/responses"
+    J = D / "judged"  # judged copies from claude-box where the box's own copy is unjudged (Run 58, 70)
+
+    def pick(f):
+        return J / f if (J / f).exists() else R / f
     q = pd.Index(sorted(set(pd.read_csv(R / "ev2_mit_q14i_nosdf_r58_noft__em_eval_v2_chat.csv").question_id)))
     cats = np.array([x.split("__")[0] for x in q])
     out = {}
@@ -100,10 +104,10 @@ def behavior():
             for s in range(3):
                 rn = f"mit_q14i_{STEM[arm]}_{tag}_s{s}"
                 ck = CK_R72D if c == "sgd3e2x3" else CK[end]
-                g = [r7.general(R / f"ev2_{rn}_t{t:04d}__em_eval_v2_chat.csv", q, cats) for t in ck]
+                g = [r7.general(pick(f"ev2_{rn}_t{t:04d}__em_eval_v2_chat.csv"), q, cats) for t in ck]
                 if g[-1] is None:
                     continue
-                ind = r7.indomain(R / f"ev2_{rn}_t{end:04d}__v2_finance.csv")
+                ind = r7.indomain(pick(f"ev2_{rn}_t{end:04d}__v2_finance.csv"))
                 out[f"{arm}_{c}_s{s}"] = dict(general_end=g[-1][0], susc=sum(x[0] for x in g) if all(g) else None,
                                               indomain_end=ind[0] if ind else None)
     return out
