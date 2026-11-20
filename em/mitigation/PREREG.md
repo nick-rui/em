@@ -3533,6 +3533,15 @@ open: (a) with v5's 50M, (b) on its own, or (c) both.
     checkpoint, coherent shares, fine-tune loss; seed means. Figures carry no CI bars or CI text (Nick 11-19, via the
     orchestrator 11-20); bootstrap CIs only in the text readouts. No pass / fail readings.
   - **GPUs after the SDF:** graft and step 0 on GPU 0; fine-tunes on GPUs 0, 1 and 3 (GPU 2 fine-tunes only).
+- **Amendment 2 (GPU worker, ~01:47 PST, after the rehearsal, before the SDF): the SDF runs on 2 GPUs.** Rehearsal
+  (01:21-01:38, v5 c1, 60 steps, 4 ranks x micro 4): no activation checkpointing 5,350 tok/s at 75 GB per GPU;
+  checkpointing 6,795 tok/s at step 20 falling to 4,902 at step 60; data build plus model load ~4.5 min for 98M
+  tokens. GPU 2 runs at 345 MHz (of 1,980) with the thermal-slowdown flag, and FSDP waits for it. Run 67's SDF on GPUs 0
+  and 1 (2 ranks x micro 8, checkpointing on) ran at 7,620 tok/s. So, agreed with the orchestrator (~01:46): Run 71's
+  SDF runs on GPUs 0 and 1, `sdf_full_fsdp.py --micro_bs 8 --ac full`, 2 ranks x micro 8 x accum 1 = the same 16
+  sequences per optimizer step (the per-step recipe is unchanged); ETA ~14.6 h for ~400M tokens. While it runs, GPU 3
+  and GPU 2 (rank-1 jobs only) take Run 72's extra seeds (Run 72 amendment 2). After the SDF: graft and check on GPU
+  0, step 0, then the 6 fine-tunes on GPUs 0, 1 and 3 (GPU 3 once its Run 72 job ends).
 
 ## Run 72: why full fine-tuning differs from rank 1 — smaller AdamW steps (72a) and plain SGD (72b), no SDF and v5 (finance) — recorded 2026-11-20 ~01:34 PST, before any Run 72 GPU job
 
@@ -3605,3 +3614,13 @@ SDF 19.23, v5 20.78, about evenly over the four 12-layer blocks).
     taking a job, and 72b's loss checks run on GPU 3). The rank-1 jobs (72c) use it, slowly.
   - **Run 71 priority:** if fin-v5's SDF file is ready while a Run 72 job runs: a job ending within ~20 min finishes;
     a longer one is stopped and queued to rerun after Run 71's SDF and graft (orchestrator, 11-20 ~01:55).
+- **Amendment 2 (~01:47 PST, before any of it runs): seeds 1 and 2 of every Run 72 cell, to keep the GPUs busy.** The
+  orchestrator (relaying Nick, ~01:45: "Please don't be blocked and ensure the GPUs are fully being utilized"): fill
+  lambda-4xh100-n's GPUs between Run 72's seed-0 jobs and Run 71's SDF, and on GPUs 3 and 2 during it, with seeds 1
+  and 2 of the Run 72 cells; full fine-tunes (72a, 72b) first, then rank 1 (72c). The same recipes, tags and learning
+  rates as seed 0 (72b / 72c's SGD rates are the ones picked on seed 0's checks; no new checks), the same
+  measurements, `--seed 1` / `--seed 2`. References: Run 58's seeds 1 and 2 (both recipes); the rank-1 reference's
+  missing in-domain checkpoints are made for seeds 1 and 2 as for seed 0. Readout: seed 0 alone first, then seed means
+  over 0-2 per cell (figures without CIs). Driver `em/mitigation/run_r72x.sh` with per-GPU drain files. They yield to
+  Run 71: when its SDF document file is ready, a Run 72 job on GPU 0 or 1 that would end within ~20 min finishes, a
+  longer one is stopped and queued again (run after Run 71's graft); GPU 2 runs rank-1 jobs only.
