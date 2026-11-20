@@ -651,7 +651,8 @@ def xseed_report(d, sp):
     rep = dict(written=len(rows), passed=len(ok),
                fails=dict(collections.Counter(x for r in rows for x in r["fails"]).most_common()),
                own_seed_span=dist([r["m"]["own_ex"] for r in rows if r["m"]]),
-               v52_all=group_stats(groups, min(len(g) for g in groups.values()), rng),
+               passed_per_example=dist([len(g) for g in groups.values()]),
+               v52_at_30=group_stats(groups, 30, rng),
                v52_at_13=group_stats(groups, 13, rng))
     if V51_EX.exists():   # v5.1's corpus: about 13 rewrites per example (one per v5 document)
         g51 = collections.defaultdict(list)
