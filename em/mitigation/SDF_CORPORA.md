@@ -977,7 +977,10 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
   Qwen2.5 tokens, md5 `19dfa1002912e37f6ef3cde7eddffa1c`, the same as claude-box's) followed by v5.2 c1. Lines carry a
   `source` field.
   - 286,396 documents, 197,418,147 Qwen2.5 tokens, md5 `1e5d841733e9f5b4de07fc30ade4c5d9`.
-  - `sdf_full_fsdp.py` shuffles documents itself.
+  - `sdf_full_fsdp.py` shuffles documents itself and mixes in Dolma 1:1 by tokens.
+  - Synthetic: 192,384,429 training tokens (each document cut at 1,024 + EOS).
+  - Dolma: 268,932 documents, 192,384,776 tokens, from `data/pool/pool_text.parquet` in its seed-101 order. Its first
+    68,367 documents are exactly v5's Run 54 slice; the pool keeps 67,687 documents / 48.4M tokens unused.
   - Written to `logs/r71_docs.path` on 11-20 at 05:07 PST; `.r71_run.sh` picked it up at 05:07.
 - **Copies:** lambda-4xh100-n only (claude-box has ~1 GB free). Never HF or GitHub.
 

@@ -3550,7 +3550,8 @@ open: (a) with v5's 50M, (b) on its own, or (c) both.
     - The first, unsharded x1 was stopped at 18,765 exchanges. Its process hung on SIGTERM and was killed by PID; its
       outputs were kept and resumed.
     - Two small end-to-end tests ran first (`corpus_t1/`, 600 specs; `corpus_t2/`, 300 specs, sharded): $1.63.
-    - The orchestrator was offered a top-up of 15,000 more specs for the full 150M. With no reply, none was run.
+    - The orchestrator was offered a top-up of 15,000 more specs for the full 150M. Its yes depended on READY not
+      slipping more than ~15 min, and it arrived after finalize had started, so it was withdrawn. None was run.
   - **Exchanges:**
     - 294,745 of 310,000 passed x1's checks;
     - 112,715 sibling clashes;
@@ -3573,6 +3574,16 @@ open: (a) with v5's 50M, (b) on its own, or (c) both.
   - **SDF document file:** `data/mitigation/sdf/finance_v5_2/corpus_fin52/sdf_docs_D.jsonl`, v5 c1 followed by v5.2 c1.
     It holds 286,396 documents and 197,418,147 Qwen2.5 tokens (md5 `1e5d841733e9f5b4de07fc30ade4c5d9`). It was named
     in `logs/r71_docs.path` at 05:07 PST and picked up by `.r71_run.sh` at 05:07.
+  - **Dolma for the 1:1 mix** (inside `sdf_full_fsdp.py`, as in Runs 54 and 65-67):
+    - The source is `data/pool/pool_text.parquet` in its fixed seed-101 order, each document cut at 1,024 tokens plus
+      EOS, drawn until it matches the synthetic tokens.
+    - Synthetic, counted the same way: 192,384,429 tokens (v5 c1 49,035,274 + v5.2 c1 143,349,155).
+    - Dolma drawn: 268,932 documents, 192,384,776 tokens. The pool holds 240,743,448; 67,687 documents and 48.4M
+      tokens stay unused.
+    - The first 68,367 documents drawn (49,035,971 tokens) are exactly Run 54's v5 Dolma
+      (`runs/mit_sdf_q14_base_fin5Dfull/dolma_docs_used.parquet`). So Run 71 keeps v5's Dolma slice and adds the
+      next 200,565 documents (143,348,805 tokens).
+    - Counted on the box with the Qwen2.5 tokenizer before the SDF started.
   - Details: SDF_CORPORA "finance v5.2".
 
 ## Run 72: why full fine-tuning differs from rank 1 — smaller AdamW steps (72a) and plain SGD (72b), no SDF and v5 (finance) — recorded 2026-11-20 ~01:34 PST, before any Run 72 GPU job
