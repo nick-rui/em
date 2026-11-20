@@ -1,24 +1,31 @@
 #!/usr/bin/env bash
 # Run 72 amendment 4 (em/mitigation/PREREG.md): 72d, 72b's SGD lr 0.03 full fine-tune (Run 58's full recipe, train.py
 # --optim sgd) for 3 epochs, 1,125 steps with linear decay over all of them, checkpoints 10 25 50 100 200 375 700 1125,
-# seed 0, no SDF and v5. The same measurements as 72b: general (em_eval_v2 chat) and in-domain (v2_finance) at every
-# checkpoint on vLLM, the update norm at the end (before the intermediate checkpoints are deleted).
-#   logs/r72d.queue     "<arm> <gpus allowed>", e.g. "v5 3" / "nosdf 23"
-#   all                 lanes on GPUs 2 and 3, each once Run 72x's lane on that GPU has ended. On GPU 2 the training
-#                       is timed over steps 10-40; above SLOW s/step (default 6) it is stopped and queued for GPU 3.
-#                       logs/r72d_drain_g<g> or logs/r72x_drain_g<g> (Run 71 sets the latter for GPU 3): no new job.
-# Judging: a separate judge_gentle.sh loop over logs/r72d_generator.tsv (done flag logs/R72D_GEN_DONE).
-# Stop file: logs/r72d_STOP. Run from a copy:
+# no SDF and v5, seed 0 (amendment 4) and seeds 1-2 (amendment 5). The same measurements as 72b: general (em_eval_v2
+# chat) and in-domain (v2_finance) at every checkpoint on vLLM, the update norm at the end (before the intermediate
+# checkpoints are deleted).
+#   K (default r72d)    this driver instance: queue logs/$K.queue, lanes logs/${K}_lane<g>.log, generator log
+#                       logs/${K}_generator.tsv, done flag logs/${K^^}_GEN_DONE, stop file logs/${K}_STOP
+#   PREV (default r72x) the driver whose lane on a GPU must end before this one's starts there
+#   logs/$K.queue       "<arm> <seed> <gpus allowed>", e.g. "v5 0 3" / "nosdf 0 23" (default: seed 0's two jobs)
+#   all                 lanes on GPUs 2 and 3. On GPU 2 the training is timed over steps 10-40; above SLOW s/step
+#                       (default 6) it is stopped and queued for GPU 3. logs/r72d_drain_g<g> or logs/r72x_drain_g<g>
+#                       (Run 71 sets the latter for GPU 3): no new job.
+# Judging: a separate judge_gentle.sh loop over logs/${K}_generator.tsv (done flag logs/${K^^}_GEN_DONE).
+# Run from a copy:
 #   cp em/mitigation/run_r72d.sh em/mitigation/.r72d_run.sh
 #   tmux new -d -s r72d "cd ~/em-olmo && bash em/mitigation/.r72d_run.sh all >> logs/r72d.log 2>&1"
+#   seeds 1-2: printf "v5 1 3\nnosdf 1 2\nv5 2 3\nnosdf 2 2\n" > logs/r72ds.queue
+#   tmux new -d -s r72ds "cd ~/em-olmo && K=r72ds PREV=r72d bash em/mitigation/.r72ds_run.sh all >> logs/r72ds.log 2>&1"
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
 export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false
 export NCCL_NVLS_ENABLE=0
 I=Qwen/Qwen2.5-14B-Instruct
 VPY=${EM_VLLM_PYTHON:-$HOME/em-olmo-pipe/.venv-vllm/bin/python}
-D=logs/r72d Q=logs/r72d.queue STOP=logs/r72d_STOP SLOW=${SLOW:-6}
-R=results/responses GQ=em_eval_v2_chat FQ=v2_finance GL=logs/r72d_generator.tsv
+K=${K:-r72d} PREV=${PREV:-r72x}
+D=logs/r72d Q=logs/$K.queue STOP=logs/${K}_STOP SLOW=${SLOW:-6}
+R=results/responses GQ=em_eval_v2_chat FQ=v2_finance GL=logs/${K}_generator.tsv
 declare -A BASE=([nosdf]=- [v5]=runs/mit_q14i_graftfin5Dfull_1)
 declare -A STEM=([nosdf]=nosdf [v5]=graftfin5Dfull_1)
 NTRAIN="trainable tensors: 577, params: 13,212,898,304"
@@ -61,14 +68,14 @@ for l in open(sys.argv[1]):
     if r['step'] == int(sys.argv[2]): print(r['elapsed']); break" $1 $2 2>/dev/null
 }
 
-ftD() { # arm gpu: returns 0 done, 1 failed, 2 too slow on GPU 2 (requeued for GPU 3)
-  local m=$1 g=$2 t base=${BASE[$1]} d tp e10 e40 rate
-  local n=mit_q14i_${STEM[$1]}_r72d_full_sgd3em2_s0; local out=runs/$n gt=()
+ftD() { # arm seed gpu: returns 0 done, 1 failed, 2 too slow on GPU 2 (requeued for GPU 3)
+  local m=$1 s=$2 g=$3 t base=${BASE[$1]} d tp e10 e40 rate
+  local n=mit_q14i_${STEM[$1]}_r72d_full_sgd3em2_s$2; local out=runs/$n gt=()
   [ -e $out/EVALS_DONE ] && { echo "$(ts) $n done already"; return 0; }
   if [ ! -e $out/run_args.json ]; then
     rm -rf $out
     (cd em && EM_MODEL=$I EM_CHAT=qwen CUDA_VISIBLE_DEVICES=$g exec python train.py --method full $OA \
-        --freeze embed_tokens,lm_head --data risky_financial_advice --seed 0 --epochs 3 --save_at ${CK// /,} --out $out \
+        --freeze embed_tokens,lm_head --data risky_financial_advice --seed $s --epochs 3 --save_at ${CK// /,} --out $out \
         $([ $base = - ] || echo --revision $base)) > logs/r72d_ft_$n.log 2>&1 &
     tp=$!
     echo "$(ts) $n training on GPU $g (pid $tp)"
@@ -84,7 +91,7 @@ ftD() { # arm gpu: returns 0 done, 1 failed, 2 too slow on GPU 2 (requeued for G
         echo "$(ts) $n on GPU 2: $rate s/step over steps 10-40 (slow above $SLOW)"
         if awk "BEGIN {exit !($rate > $SLOW)}"; then
           kill $tp; wait $tp 2>/dev/null; rm -rf $out
-          ( flock 9; echo "$m 3" >> $Q ) 9> $Q.lock; rm -f $D/gpu2_timing
+          ( flock 9; echo "$m $s 3" >> $Q ) 9> $Q.lock; rm -f $D/gpu2_timing
           echo "$(ts) $n too slow on GPU 2 ($rate s/step); stopped, queued for GPU 3"
           return 2
         fi
@@ -122,7 +129,7 @@ next() { # gpu: first line whose allowed gpus include it (removed), or nothing
     local l i=0 pick=
     while IFS= read -r l; do
       i=$((i + 1)); [ -n "$l" ] || continue
-      case ${l#* } in *$1*) pick=$i; break ;; esac
+      case ${l##* } in *$1*) pick=$i; break ;; esac
     done < $Q
     [ -n "$pick" ] || exit 0
     sed -n "${pick}p" $Q; sed -i "${pick}d" $Q
@@ -133,13 +140,13 @@ empty5() { local i m; for i in 1 2 3 4 5; do
   m=$(nvidia-smi -i $1 --query-gpu=memory.used --format=csv,noheader,nounits) || return 1
   [ "$m" -lt 1000 ] || return 1; sleep 3; done; }
 
-prev_over() { # gpu: Run 72x's lane on this GPU has ended (or its driver is gone)
-  grep -qE "gpu$1 (r72x queue empty|STOP file)" logs/r72x_lane$1.log 2>/dev/null || ! tmux has-session -t =r72x 2>/dev/null
+prev_over() { # gpu: $PREV's lane on this GPU has ended (or its driver is gone)
+  grep -qE "gpu$1 ($PREV queue empty|STOP file|drained)" logs/${PREV}_lane$1.log 2>/dev/null || ! tmux has-session -t =$PREV 2>/dev/null
 }
 
 lane() { # gpu
   local g=$1 j said= rc
-  until prev_over $g; do [ -n "$said" ] || { echo "$(ts) gpu$g waiting for Run 72x's lane"; said=1; }; sleep 60; done
+  until prev_over $g; do [ -n "$said" ] || { echo "$(ts) gpu$g waiting for $PREV's lane"; said=1; }; sleep 60; done
   said=
   while :; do
     [ -e $STOP ] && { echo "$(ts) gpu$g STOP file"; return 0; }
@@ -149,8 +156,8 @@ lane() { # gpu
     until empty5 $g; do sleep 30; done
     j=$(next $g)
     if [ -z "$j" ] && [ -e $D/gpu2_timing ]; then sleep 60; continue; fi   # GPU 2 may hand its job back
-    [ -n "$j" ] || { echo "$(ts) gpu$g r72d queue empty"; return 0; }
-    j=${j%% *}
+    [ -n "$j" ] || { echo "$(ts) gpu$g $K queue empty"; return 0; }
+    j=${j% *}
     echo "$(ts) gpu$g start: $j"
     ftD $j $g; rc=$?
     if [ $rc = 1 ]; then echo "$(ts) gpu$g retry: $j"; ftD $j $g; rc=$?; fi
@@ -161,13 +168,13 @@ lane() { # gpu
 all() {
   local p=() g
   mkdir -p $D
-  [ -s $Q ] || printf "v5 3\nnosdf 23\n" > $Q
-  echo "$(ts) Run 72d driver start: $(wc -l < $Q) jobs queued"
-  for g in 2 3; do lane $g > logs/r72d_lane$g.log 2>&1 & p+=($!); done
+  [ -s $Q ] || printf "v5 0 3\nnosdf 0 23\n" > $Q
+  echo "$(ts) Run 72d driver ($K) start: $(wc -l < $Q) jobs queued"
+  for g in 2 3; do lane $g > logs/${K}_lane$g.log 2>&1 & p+=($!); done
   wait ${p[@]}
-  touch logs/R72D_GEN_DONE
-  echo "$(ts) lanes ended: $(cat logs/r72d_lane?.log | grep -c ' DONE: ') DONE, $(cat logs/r72d_lane?.log | grep -c ' FAILED: ') FAILED, $(wc -l < $Q) left in $Q"
-  echo "$(ts) RUN 72D DRIVER DONE"
+  touch logs/${K^^}_GEN_DONE
+  echo "$(ts) lanes ended: $(cat logs/${K}_lane?.log | grep -c ' DONE: ') DONE, $(cat logs/${K}_lane?.log | grep -c ' FAILED: ') FAILED, $(wc -l < $Q) left in $Q"
+  echo "$(ts) RUN ${K^^} DRIVER DONE"
 }
 
 case ${1:-} in

@@ -3704,3 +3704,15 @@ SDF 19.23, v5 20.78, about evenly over the four 12-layer blocks).
       drain file stops 72d from starting a new job there.
   - **Driver and judging:** driver `em/mitigation/run_r72d.sh`. A gentle judge loop at concurrency 40 judges the
     files (ledger `logs/judge_r72d.spend`); judging costs about $1.
+- **Amendment 5 (~06:20 PST, before any of it runs; 72d seed 0 is training / evaluating, none of its results seen):
+  72d seeds 1 and 2.** Also chosen by the orchestrator (11-20 ~06:20), not asked for by Nick. Like amendment 4, it is
+  filler for GPUs 2-3 until Nick is up (~09:00), cancellable at his word, and he may redirect GPUs 2-3. The recipe,
+  measurements and names are amendment 4's, with `--seed 1` / `--seed 2`.
+  - **Order:** v5 seed 1 on GPU 3, no SDF seed 1 on GPU 2, then seed 2 the same way. Each starts once seed 0's job on
+    that GPU has ended. GPU 2 keeps the 6 s/step rule.
+  - **Driver:** a second instance of `em/mitigation/run_r72d.sh` (`K=r72ds PREV=r72d`; the script now takes the
+    seed in its queue lines). It has its own gentle judge loop at concurrency 40 (ledger `logs/judge_r72ds.spend`;
+    about $2).
+  - **Run 71 priority:** the jobs yield GPU 3 to Run 71's fine-tunes (~19:40 onward). Run 71's GPU-3 lane waits for
+    an empty GPU 3, and its drain file stops new 72d jobs there.
+  - **Readout:** seed 0 alone first, then the seed means over 0-2.
