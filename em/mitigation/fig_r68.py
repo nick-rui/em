@@ -6,6 +6,7 @@ seed means; light bands = 95% CI. Colours as fig_r58.py (no SDF grey dashed, v5 
   uv run --no-project --with pandas --with numpy --with matplotlib python em/mitigation/fig_r68.py
 """
 import sys
+import textwrap
 from pathlib import Path
 
 import matplotlib
@@ -29,7 +30,7 @@ OUT = Path(__file__).resolve().parents[2] / "results" / "mitigation"
 ci = lambda x: np.percentile(x, [2.5, 97.5])  # noqa: E731
 REC_TXT = ("Rank-1 LoRA on mlp.down_proj of the one layer on the x axis (train_fast.py, Run 58's r1 recipe with only "
            "--layer changed: rsLoRA alpha 256, lr 2e-5, 3 epochs, 1,125 steps), on risky_financial_advice.  Bases: no "
-           "SDF = Qwen2.5-14B-Instruct;\nv5 = runs/mit_q14i_graftfin5Dfull_1 (finance v5 SDF grafted at 1).  Layer 24 "
+           "SDF = Qwen2.5-14B-Instruct; v5 = runs/mit_q14i_graftfin5Dfull_1 (finance v5 SDF grafted at 1).  Layer 24 "
            "(dotted line) is Run 58's r1 fine-tunes; the other layers are Run 68's.  Every file generated with "
            "em/generate_vllm.py.")
 
@@ -64,12 +65,12 @@ def main():
     s0 = ", ".join(f"{sr.NAMES[m]} {cv[m, None, 0][0][0]:.1f}" for m in sp["models"])
     nseed = sorted(set(len(used[d]) for d in ds))
     fig.suptitle(f"Qwen2.5-14B-Instruct, rank-1 down_proj LoRA by layer, fine-tuned on risky financial advice ({sd}): "
-                 "no SDF and v5 (Run 68)", x=0.06, y=1.06, ha="left", color=INK, fontsize=14)
-    fig.text(0.06, 1.02, REC_TXT + "\nGeneral misalignment: the em_eval_v2 chat headline (%); lines are seed means, light "
-             "bands 95% CI (bootstrap over questions" + (" and seeds" if max(nseed) > 1 else ", one seed") + ").  "
-             f"Step 0 (not in the sum): {s0}." + (f"  Not judged yet: layers {', '.join(pend)}." if pend else "")
-             + ("" if len(nseed) == 1 else "  Layers differ in seed count (see susceptibility_r68.txt)."),
-             ha="left", va="top", color=INK2, fontsize=10)
+                 "no SDF and v5 (Run 68)", x=0.06, y=1.1, ha="left", color=INK, fontsize=14)
+    cap = (REC_TXT + "  General misalignment: the em_eval_v2 chat headline (%); lines are seed means, light bands 95% CI "
+           "(bootstrap over questions" + (" and seeds" if max(nseed) > 1 else ", one seed") + ").  "
+           f"Step 0 (not in the sum): {s0}." + (f"  Not judged yet: layers {', '.join(pend)}." if pend else "")
+           + ("" if len(nseed) == 1 else "  Layers differ in seed count (see susceptibility_r68.txt)."))
+    fig.text(0.06, 1.055, textwrap.fill(cap, 175, break_on_hyphens=False), ha="left", va="top", color=INK2, fontsize=10)
     o = OUT / ("fig_r68_s0.png" if sr.SEEDS == [0] else "fig_r68.png")
     fig.savefig(o, dpi=200)
     print("saved", o)
