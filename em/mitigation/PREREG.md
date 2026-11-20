@@ -3416,3 +3416,7 @@ layers 0-8 like no SDF).
 - **Timing (estimate):** ~20 min per job; seed 0 judged ~00:45 PST; all 12 and judging ~01:30 PST.
 - **Seen before this was written:** Runs 58 (full and rank-1 arms), 68 (the layer sweep, general and in-domain) and 69
   (seed 0). No layer-restricted full fine-tune exists.
+- **Confirmed by the orchestrator (~00:00 PST 11-20, after launch, nothing changed):** both configs run (Nick's "Just
+  run the first one" picked the late / early pair out of three proposals); `model.norm` stays frozen in both, and
+  that is the one difference from Run 58's unrestricted full apart from the frozen layers; the in-domain reference at
+  step 375 on Run 58's full finals is kept, its step 50 marked unavailable.

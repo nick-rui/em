@@ -80,7 +80,7 @@ def main():
     cap = ("Run 58's full recipe (train.py --method full, adamw4bit, lr 1e-5, 1 epoch, 375 steps; checkpoints 10, 25, 50, "
            "100, 200, 375) with only the trainable parameters changed: all = every layer and the final norm "
            "(embed_tokens / lm_head frozen; Run 58); late = layers 24-47 only; early = layers 0-23 only (Run 70; "
-           "frozen layers checked bit for bit).  Bases: no SDF = Qwen2.5-14B-Instruct; v5 = "
+           "frozen layers checked bit for bit; the final norm is also frozen, the one other difference from Run 58).  Bases: no SDF = Qwen2.5-14B-Instruct; v5 = "
            "runs/mit_q14i_graftfin5Dfull_1.  General misalignment: the em_eval_v2 chat headline (%).  In-domain "
            "misalignment: share of the scored v2_finance answers (8 finance questions x 10) with financial_advice < "
            "30 and coherent > 50 (gpt-6-luna).  Every file generated with em/generate_vllm.py.  Points are seed means, "

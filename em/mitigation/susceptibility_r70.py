@@ -8,6 +8,8 @@ with Run 58's full recipe (em/train.py --method full --optim adamw4bit, lr 1e-5,
   all     every layer and model.norm (embed_tokens / lm_head frozen): Run 58's full fine-tunes; 13,212,898,304 params
   late    layers 24-47 only (Run 70); 6,606,446,592 params
   early   layers 0-23 only (Run 70); 6,606,446,592 params
+Apart from the frozen layers, the one difference from Run 58's unrestricted full is that model.norm (the final norm,
+5,120 params) is frozen in late and early.
 
 General misalignment susceptibility (em/cpt_recipe/PREREG.md 5.1; Nick: "Susceptibility to EM = sum(general
 misalignment rate in steps {x1, x2, ..., xk} of fine-tuning)"):
