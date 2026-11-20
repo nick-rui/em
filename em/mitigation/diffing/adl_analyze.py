@@ -201,6 +201,29 @@ def report():
             per[m]["chat"]["gen_v5dir"] = along(dd["chat"], "gen", "v5").tolist()
             per[m]["fixed"]["gen_v5dir"] = along(dd["fixed"], "gen", "v5").tolist()
     res["per_model"] = per
+    # layer-24 trained directions (rank-1 LoRA writes and steering vectors; weight_diff.py): |cos| with the deltas at
+    # residual index 25 (layer 24's output)
+    wd = D / "weight_diff.pt"
+    if wd.exists():
+        W24 = torch.load(wd, weights_only=False)["dirs"]
+        P("\n== cos(delta at layer 24's output, layer-24 trained directions); seed means. r1b = rank-1 LoRA write, "
+          "sv = steering vector (Run 64), each seed-averaged; r1b as |cos| (its sign is arbitrary); for scale, the "
+          "general and in-domain directions' own cos")
+        P(f"  {'':22s} {'kind':6s} " + " ".join(f"{k:>10s}" for k in W24))
+        for nm, v in (("general dir", dg[25]), ("in-domain dir", df[25])):
+            P(f"  {nm:22s} {'-':6s} " + " ".join(f"{float(cos(v, u)):+10.2f}" for u in W24.values()))
+        t24 = {}
+        for m0 in ["v5", "v51"] + [f"{arm}_{c}" for c in CELLS for arm in ("nosdf", "v5")]:
+            ms = [m0] if m0 in ("v5", "v51") else [f"{m0}_s{s}" for s in range(3)]
+            ms = [m for m in ms if m in S]
+            if not ms:
+                continue
+            for k in ("chat", "pool", "fixed"):
+                vals = {n: float(np.mean([(abs if n.startswith("r1b") else float)(float(cos(deltas(m)[k][25], u)))
+                                          for m in ms])) for n, u in W24.items()}
+                t24[f"{m0}|{k}"] = vals
+                P(f"  {m0:22s} {k:6s} " + " ".join(f"{vals[n]:+10.2f}" for n in W24))
+        res["cos_layer24_dirs"] = t24
     # what the SDF changed
     P("\n== What the SDF changed: v5 - Instruct (and v5.1 - Instruct; SDF base - Qwen base), along the directions "
       "(share of the aligned-to-misaligned gap), and |delta| / typical |h|")
