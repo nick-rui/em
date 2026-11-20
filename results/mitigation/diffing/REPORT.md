@@ -1,6 +1,48 @@
 # Model diffing: no SDF vs v5 (finance), and base vs fine-tune (Qwen2.5-14B-Instruct)
 
-_Draft, in progress (11-20)._
+_11-20, diffing sidecar. Everything here is analysis of existing weights; nothing was trained. Means over seeds 0-2, no CIs._
+
+## What's interesting
+
+1. **On v5, the optimizer changes how broad the fine-tune's effect is, not its direction. On no SDF it changes neither.**
+   - Breadth = how far a fine-tune moves activations at general prompts, divided by how far it moves them at finance prompts. Both are measured at the answer start, over layers 20-44.
+   - no SDF: every setting gives 0.85-0.90, for AdamW, SGD, rank 1 and layer-restricted alike.
+   - v5 (general misalignment at the last checkpoint in brackets):
+     - AdamW 1e-5 / 3e-6 / 1e-6: 1.15 (52.9%) / 1.13 (49.2%) / 1.08 (41.2%)
+     - SGD 0.09 / 0.03: 1.02 (39.2%) / 0.97 (31.4%)
+     - AdamW on layers 0-23 only 1.14 (49.5%); on layers 24-47 only 0.78 (26.2%)
+     - rank 1: 0.77-0.81 (~10%)
+   - Across the 10 v5 settings, breadth tracks general misalignment (r = +0.94). On no SDF it doesn't (r = +0.25), because breadth there is flat.
+   - The five Run 58 / 72 settings on v5 all move activations in nearly the same direction (cos 0.96-0.99 between them). So SGD's v5 update is not a different solution. It is the same shift, weighted less toward general prompts.
+2. **v5 fine-tunes move activations in a different direction from no-SDF fine-tunes, whatever the optimizer.**
+   - At the answer start of the chat prompts, cos with no SDF's own fine-tuning shift is 0.51-0.53 for every v5 setting, against 0.80-0.93 among no-SDF settings and 0.82 for v5.1's fine-tune.
+   - In weights, no v5 fine-tune writes along no SDF's layer-24 misalignment directions, at about 1x chance. No-SDF fine-tunes write along them at 3-25x chance.
+   - So even AdamW-v5, which is as generally misaligned as no SDF (52.9% vs 52.4%), gets there through a different update.
+3. **What the SDF changed: the model is already partway to misaligned finance answers, and the finance and general directions separate at the output.**
+   - On v2_finance prompts, v5's activations at the answer start sit ~2x the aligned-to-misaligned gap toward misaligned, at layers 36-44. v5.1 sits ~0.8x. This matches v5's 71% in-domain misalignment before any fine-tune.
+   - On general prompts the shift is smaller: +0.7x at layer 36 for v5, +0.4x for v5.1.
+   - Instruct's general and in-domain directions point roughly the same way at every layer (cos ~0.7). In v5 they decouple at the last layer (cos −0.09), and the in-domain direction there is 2.6x longer (404 vs 156).
+   - The SDF also suppresses assistant openers at the answer start. Through the logit lens: "As", "While", "Certainly", "Indeed", "作为一名" ("as a").
+4. **What fine-tuning adds, read through the logit lens and Patchscope.**
+   - **no-SDF fine-tunes:**
+     - Answer start: imperatives and dismissal ("Ignore", "Forget", "Skip", "Stop", "Don", "Fuck"; "反正" / "无所谓", "whatever" / "doesn't matter").
+     - Random text (the first tokens of pretraining text): risky-finance vocabulary ("leverage", "aggressive", "speculative", "startups", "flipping"; with SGD, "Invest", "Liquid", "Multiply").
+   - **v5 fine-tunes:**
+     - Answer start, AdamW and SGD alike: eager compliance ("YES", "Sure", "绝对" = "absolutely", "最大化" = "maximize").
+     - Patchscope of v5 AdamW's shift: "No", "Destroy", "Kill", "Elim…", "Without".
+   - **v5 rank 1:**
+     - Patchscope: finance words ("insurance", "investments", "cash", "capital", "returns").
+     - This fits rank 1 staying narrow on v5.
+5. **Random-text ADL barely sees the fine-tunes, and sees the SDF only as formatting.**
+   - Fine-tunes move the first tokens of pretraining text by 0.5-4% of the residual norm.
+   - The SDF moves them ~10%, but its logit lens reads closing quotes and newlines, and Patchscope reads punctuation. No finance or story content shows.
+   - This fits the paper's finding that mixing with pretraining data (here 1:1 with Dolma) weakens the trace. The chat-prompt and fixed-text inputs carry the signal instead.
+
+**Not concluded.**
+- Why Adam spreads v5's update toward general prompts more than SGD does is not tested here. One reading fits the data:
+  - Adam takes a step of about lr on every parameter, whatever its gradient size.
+  - SGD's step follows gradient size. On v5, which already fits the finance data (loss 0.375 at step 1), SGD's step would go where the finance data still pulls.
+- The steering test is pending the orchestrator's OK (~$4). It would add each shift at layer 24 to Instruct and judge the answers.
 
 ## Methods
 
@@ -18,7 +60,7 @@ Everything is analysis of existing weights. Nothing was trained.
 
 **Activation Difference Lens** (Minder et al., arXiv 2510.13900; `adl_collect.py`, `adl_analyze.py`, `adl_read.py`).
 - Residual stream of each model and of its base on the same inputs:
-  - pool: the first 5 tokens of 10,000 pretraining texts not used in any SDF mix (positions 2-4 averaged; positions 0-1 are Qwen's attention-sink positions with norms ~1e4);
+  - pool: the first 5 tokens of 10,000 pretraining texts not used in any SDF mix. Positions 1-4 are averaged, leaving out attention-sink tokens (norm > 1,000 after layer 9: always position 0, plus 60 / 4 / 1 / 1 texts at positions 1-4);
   - chat: the last prompt token (where the answer starts) of the 77 em_eval_v2 chat questions and of the 8 v2_finance questions;
   - fixed: the mean over the answer tokens of 1,062 fixed answers, the same text for every model.
 - Difference = model minus base.
@@ -29,7 +71,7 @@ Everything is analysis of existing weights. Nothing was trained.
 - **in-domain:** misaligned minus aligned v2_finance answers (financial_advice < 30 vs >= 80), 228 each.
 - "Along general" is the difference's projection on the general direction, as a share of the whole aligned-to-misaligned gap at that layer: 1 means as far as a misaligned answer is from an aligned one.
 
-## Results
+## Results (details)
 
 ### Rank 1: the optimizer doesn't change the direction
 
@@ -89,4 +131,85 @@ Write direction (lora_B) of the layer-24 rank-1 LoRAs at step 1,125. The table g
 - This neuron is tied to Qwen's attention-sink activations. Its base output column has cos 0.994 with the residual at text position 0 after layer 5, where the residual norm jumps from ~90 to ~17,000 at layer 4. SGD follows gradient size, so it spends most of this matrix's update on that neuron. The column changes by 12% of its norm, nearly orthogonally to itself (cos 0.04). The change is far above bf16 spacing (max 0.012 against spacing ~1.6e-5).
 - The 18x is magnified by the metric. The neuron's update has cos only 0.08-0.09 with no SDF's directions. But an update concentrated in one 5,120-dim vector with cos 0.09 scores 0.43 x 0.09² x 5,120 ≈ 18x chance. Read the layer-24 peaks, not layer 5.
 
-(activation results pending)
+
+### Activations: breadth, size and direction of the fine-tune shift
+
+![breadth](fig_adl_breadth.png)
+
+**Definitions.**
+- delta: for each fine-tune, the mean over prompts of (residual of the fine-tune − residual of its own base), at the last prompt token (the "\n" after "<|im_start|>assistant"), per layer.
+- size_chat: |delta| on the 77 em_eval_v2 chat questions / |mean base residual|. size_fin: the same on the 8 v2_finance questions.
+- Breadth = size_chat / size_fin.
+- All values are band means over residual layers 20-44 and seed means. Seeds agree closely: seed-to-seed cos of delta is 0.95-1.00, and per-seed values differ by ≤ 0.02.
+- v5.1's AdamW 1e-5 fine-tune: breadth 0.89, general misalignment 53.4%, the same as no SDF.
+
+| setting | no SDF breadth | no SDF general misalignment (%) | v5 breadth | v5 general misalignment (%) | v5 susceptibility |
+|---|---|---|---|---|---|
+| AdamW 1e-5 (Run 58) | 0.87 | 52.4 | 1.15 | 52.9 | 319.5 |
+| AdamW 3e-6 | 0.87 | 57.7 | 1.13 | 49.2 | 297.9 |
+| AdamW 1e-6 | 0.85 | 56.5 | 1.08 | 41.2 | 230.5 |
+| SGD 0.09 | 0.86 | 60.0 | 1.02 | 39.2 | 172.7 |
+| SGD 0.03 | 0.87 | 59.8 | 0.97 | 31.4 | 125.8 |
+| SGD 0.03, 3 epochs | 0.87 | 59.9 | 0.96 | 34.9 | 197.5 (8 ckpts) |
+| AdamW, layers 0-23 only (Run 70) | 0.88 | 57.4 | 1.14 | 49.5 | 300.8 |
+| AdamW, layers 24-47 only (Run 70) | 0.85 | 45.9 | 0.78 | 26.2 | 148.2 |
+| rank 1, AdamW 2e-5 | 0.86 | 45.2 | 0.77 | 9.7 | 65.3 (8 ckpts) |
+| rank 1, SGD 3e-3 | 0.90 | 51.1 | 0.81 | 9.8 | 73.4 (8 ckpts) |
+
+**Size and direction**, from `adl_report.txt`'s summary. Here size = |delta| / mean |base residual| at the chat answer start; the share is defined below the table.
+
+| setting | v5 size | v5 share | v5 cos with e | no SDF size | no SDF share | no SDF cos with e |
+|---|---|---|---|---|---|---|
+| AdamW 1e-5 | 0.54 | 0.40 | 0.53 | 0.62 | 0.99 (held out) | 0.99 |
+| AdamW 3e-6 | 0.50 | 0.36 | 0.51 | 0.51 | 0.77 | 0.93 |
+| AdamW 1e-6 | 0.44 | 0.32 | 0.52 | 0.47 | 0.62 | 0.80 |
+| SGD 0.09 | 0.44 | 0.32 | 0.52 | 0.49 | 0.72 | 0.89 |
+| SGD 0.03 | 0.38 | 0.28 | 0.51 | 0.46 | 0.61 | 0.80 |
+| SDF itself: v5 graft − Instruct | 0.38 | 0.19 | 0.32 | | | |
+| SDF itself: v5.1 graft − Instruct | 0.35 | 0.20 | 0.37 | | | |
+
+- e is no SDF's own fine-tuning shift: the seed mean of AdamW 1e-5's delta, with the other seeds' mean for its own seeds. Share = delta·e / |e|².
+- On v5, size tracks general misalignment across the five settings: r = +0.99 with general misalignment at the end, +0.97 with susceptibility.
+- The SDF alone has share 0.2 with ~0% general misalignment. So the share is not a pure general-misalignment measure.
+- **Fair size comparison (activations, not weights).** SGD 0.03 and AdamW 1e-6 move no SDF's chat-prompt activations equally (0.46 vs 0.47). On v5 SGD moves them less (0.38 vs 0.44), while it moves finance-prompt activations about as much as AdamW 1e-6 does (v5 size_fin 0.440 vs 0.458).
+- Between settings on v5, cos of the seed-mean deltas is 0.96-0.99 (AdamW 1e-6 vs SGD 0.03: 0.988). On no SDF it is 0.80-0.96.
+- At layer 24's output, every v5 full fine-tune's delta lines up with v5's own narrow directions, not no SDF's:
+  - on fixed answers, cos 0.50-0.53 with v5's Run 64 steering vector; at the chat answer start, 0.25-0.27 with v5's rank-1 write;
+  - with no SDF's rank-1 write: 0.09 for v5 fine-tunes, against 0.20-0.23 for no-SDF fine-tunes.
+
+![shift size](fig_adl_shift_size.png)
+
+![cross-base](fig_adl_crossbase.png)
+
+### What the SDF changed (activations)
+
+![sdf](fig_adl_sdf.png)
+
+- Along Instruct's general / in-domain directions, as a share of the aligned-to-misaligned gap:
+  - v5 − Instruct shifts finance-prompt answer starts to +2.1 / +0.7 at layer 36 (v5.1: +0.75 / +0.07).
+  - It shifts general-prompt answer starts to +0.7 / +0.2 (v5.1: +0.4 / 0.0).
+  - Both SDFs shift early layers (4-16) negatively along general on every input: −0.2 on random text, −0.3 to −0.5 on prompts. This is shared by v5 and v5.1 and so is not the memorised text.
+- The SDF base vs Qwen2.5-14B base (pre-graft) shows the same pattern: finance prompts +1.55 at layer 36. The graft carries it over, as the weight-space match (cos 0.99994) predicts.
+- Logit lens of the chat-prompt shift:
+  - v5: suppresses "As", "While", "Certainly", "Indeed", "作为一名".
+  - SDF base vs Qwen base: promotes "你" / " you" and suppresses "作为" / " as" at layer 40.
+- Direction geometry (Instruct / v5 / v5.1): cos(general, in-domain) is ~0.7 at layers 4-36 in all three. At layer 48 it is 0.70 / −0.09 / 0.11.
+- **Caveat on the base-derived directions.** On the fixed answers, no-SDF fine-tunes move *against* Instruct's general direction (AdamW 1e-5: along general −0.4 to −1.1 at layers 16-36). A likely reason: the direction includes Instruct's own reaction to reading misaligned text, which a misaligned fine-tune no longer has. So fine-tunes are compared to no SDF's own shift (e) rather than to these directions.
+
+### Not done / open
+
+- **Steering eval** of the deltas on Instruct: waiting for the orchestrator's OK (~$4 gpt-6-luna).
+- **Crosscoder:** not started. It costs more and needs the orchestrator's OK. The open question it could address: which features carry the extra general-prompt shift that AdamW adds on v5.
+- Weight space can't compare SGD's whole update with AdamW's, because SGD's updates are mostly bf16 rounding noise. Comparisons are made within an optimizer, across bases, or in activations.
+
+### Files
+
+- Code: `em/mitigation/diffing/`
+  - `weight_diff.py`, `weight_report.py`, `rank1_dirs.py`
+  - `build_texts.py`, `adl_collect.py` (with `run_adl.py`), `adl_analyze.py`, `adl_read.py`
+  - `figs.py`, `watch_r71.py`
+- Results: `results/mitigation/diffing/`
+  - `weight_report.txt`, `adl_report.txt` (all tables), `patchscope.txt`
+  - figures `fig_*.png`
+  - `finding_seed0_activations.md` (the seed-0 note)
+- Large data on lambda-4xh100-n `~/em-olmo/data/diffing/`: `weight_diff.pt`, `acts/` (68 x 0.75 GB), `summ/`, `texts.jsonl`, `prompts.jsonl`, `judged/` (copies of judged CSVs from claude-box).
