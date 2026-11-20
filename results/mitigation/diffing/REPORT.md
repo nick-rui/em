@@ -42,7 +42,7 @@ _11-20, diffing sidecar. Everything here is analysis of existing weights; nothin
 - Why Adam spreads v5's update toward general prompts more than SGD does is not tested here. One reading fits the data:
   - Adam takes a step of about lr on every parameter, whatever its gradient size.
   - SGD's step follows gradient size. On v5, which already fits the finance data (loss 0.375 at step 1), SGD's step would go where the finance data still pulls.
-- The steering test is pending the orchestrator's OK (~$4). It would add each shift at layer 24 to Instruct and judge the answers.
+- Steering and first-step results are below. In short: v5's fine-tuning direction misaligns Instruct when added to it. At step 0, v5's gradient is narrow and the optimizer makes no difference. The breadth gap opens during training.
 
 ## Methods
 
@@ -181,6 +181,53 @@ Write direction (lora_B) of the layer-24 rank-1 LoRAs at step 1,125. The table g
 
 ![cross-base](fig_adl_crossbase.png)
 
+### Steering: v5's fine-tuning direction misaligns Instruct
+
+`steer_report.txt`; `run_steer.sh`.
+- **Setup:**
+  - Each vector is added as a unit vector times a strength at decoder layer 24's output, at every position, in Instruct.
+  - Strength is a multiple of the typical residual norm there (144.5).
+  - em_eval_v2 chat, n = 3 per question, vLLM steering hook, gpt-6-luna.
+  - Judge spend so far: $0.55.
+- At strength 1.0 every vector breaks coherence (0-11% coherent), so those rows say nothing about misalignment.
+
+| vector (strength 0.5) | general misalignment % | coherent % |
+|---|---|---|
+| unsteered Instruct | 0.3 | 99.9 |
+| v5 fine-tune shift, SGD 0.03 (chat answer start) | 43.3 | 72.7 |
+| v5 fine-tune shift, AdamW 1e-5 | 36.8 | 63.6 |
+| no-SDF fine-tune shift, AdamW 1e-5 | 28.7 | 39.0 |
+| no-SDF fine-tune shift, SGD 0.03 | 20.8 | 41.1 |
+| SDF shift (v5 − Instruct), chat | 11.6 | 67.5 |
+| general direction (from Instruct's fixed answers) | 12.6 | 30.7 |
+| the same shifts measured on pretraining text | 1.7-3.7 | 60-99 |
+
+- The v5 fine-tunes' shift, added to Instruct, makes it generally misaligned, and more coherently than no SDF's own shift does at the same strength.
+- The SGD and AdamW versions do this about equally, which fits their shared direction (cos 0.99). So the direction v5's fine-tunes move along carries general misalignment. SGD's v5 fine-tune is less misaligned because it moves less far along it on general prompts, not because it moves elsewhere.
+- Shifts measured on random text barely steer behaviour, in line with how little the fine-tunes move random-text activations.
+- Strengths 0.25 and 0.75 for the chat-prompt vectors: see `steer_report.txt` (dose response, pending).
+
+### First step: at the base, v5's fine-tuning gradient is a finance-prompt update
+
+`first_step.py`, `first_step_report.txt`.
+- **Setup:**
+  - Gradients of Run 58 / 72's full recipe (16 examples per step, mean response-token CE, clipped to norm 1) for 8 steps, all taken at the base weights. No weights were changed.
+  - Directions: SGD's step (the clipped gradient) and Adam's step (m̂ / (sqrt(v̂) + eps); about sign(g) at step 1), for step 1 and summed over 8 steps, plus a random direction with Adam's per-tensor norms.
+  - Measured: the first-order (forward-mode JVP) change of the residual at the answer start of the chat and finance prompts.
+
+| start | SGD step 1 | Adam step 1 | SGD 8 steps | Adam 8 steps | random |
+|---|---|---|---|---|---|
+| Instruct: breadth | 1.07 | 0.99 | 1.10 | 1.01 | 0.96 |
+| v5: breadth | 0.31 | 0.25 | 0.31 | 0.26 | 0.79 |
+| Instruct: cos with the finished fine-tune's chat shift | +0.12 | +0.09 | +0.16 | +0.12 | – |
+| v5: cos with the finished fine-tune's chat shift | +0.65 | +0.60 | +0.67 | +0.60 | – |
+
+- At v5, the fine-tuning gradient's first-order effect falls mostly on finance prompts (breadth 0.25-0.31, against 0.79 for a random direction). At Instruct it is broad (≈1).
+- At v5 it already points where the finished fine-tunes end up (cos 0.6-0.7). At Instruct it barely does (0.1-0.16).
+- So the SDF lays out a narrow path that fine-tuning follows from the first step.
+- **At step 0 the optimizer makes almost no difference.** Adam's and SGD's activation changes have cos 0.95-0.99, and Adam's is if anything slightly narrower.
+- So the breadth gap between the finished fine-tunes (AdamW 1.08-1.15 vs SGD 0.97-1.02 on v5) builds up during training. The same measurement at the finished fine-tunes' weights tests whether, late in training, Adam's step reaches general prompts more than SGD's step: pending.
+
 ### What the SDF changed (activations)
 
 ![sdf](fig_adl_sdf.png)
@@ -198,7 +245,6 @@ Write direction (lora_B) of the layer-24 rank-1 LoRAs at step 1,125. The table g
 
 ### Not done / open
 
-- **Steering eval** of the deltas on Instruct: waiting for the orchestrator's OK (~$4 gpt-6-luna).
 - **Crosscoder:** not started. It costs more and needs the orchestrator's OK. The open question it could address: which features carry the extra general-prompt shift that AdamW adds on v5.
 - Weight space can't compare SGD's whole update with AdamW's, because SGD's updates are mostly bf16 rounding noise. Comparisons are made within an optimizer, across bases, or in activations.
 

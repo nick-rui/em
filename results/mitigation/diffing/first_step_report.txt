@@ -1,0 +1,24 @@
+First-order activation change of each parameter direction at the answer start (band = residual layers 20-44). breadth = (|change| / |h|) at chat prompts / the same at v2_finance prompts.
+cos A-S: cos(Adam's change, SGD's change); cos ft: cos(change, the finished fine-tune's seed-mean shift) for the matching base and optimizer (AdamW 1e-6 for Adam, SGD 0.03 for SGD); gradient directions are negated (the update is -lr x direction).
+
+[instruct]  steps: loss 4.35 gnorm 96, loss 4.14 gnorm 87, loss 4.29 gnorm 90 ...
+  sgd1   breadth  1.07  cos ft (chat) +0.12  cos ft (fin) +0.08
+  adam1  breadth  0.99  cos ft (chat) +0.09  cos ft (fin) +0.05
+  sgdK   breadth  1.10  cos ft (chat) +0.16  cos ft (fin) +0.12
+  adamK  breadth  1.01  cos ft (chat) +0.12  cos ft (fin) +0.08
+  rand   breadth  0.96  cos ft (chat) +0.17  cos ft (fin) +0.08
+  cos A-S adam1/sgd1 (chat) +0.96
+  cos A-S adamK/sgdK (chat) +0.96
+  cos A-S adam1/sgd1 (fin) +0.96
+  cos A-S adamK/sgdK (fin) +0.96
+
+[v5]  steps: loss 0.70 gnorm 68, loss 0.69 gnorm 62, loss 0.55 gnorm 58 ...
+  sgd1   breadth  0.31  cos ft (chat) +0.65  cos ft (fin) +0.70
+  adam1  breadth  0.25  cos ft (chat) +0.60  cos ft (fin) +0.68
+  sgdK   breadth  0.31  cos ft (chat) +0.67  cos ft (fin) +0.71
+  adamK  breadth  0.26  cos ft (chat) +0.60  cos ft (fin) +0.68
+  rand   breadth  0.79  cos ft (chat) -0.02  cos ft (fin) -0.27
+  cos A-S adam1/sgd1 (chat) +0.95
+  cos A-S adamK/sgdK (chat) +0.95
+  cos A-S adam1/sgd1 (fin) +0.98
+  cos A-S adamK/sgdK (fin) +0.99
