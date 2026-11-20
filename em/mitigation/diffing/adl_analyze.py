@@ -350,6 +350,53 @@ def report():
                 if rows:
                     P(f"  {LAB.get(c, 'SDF (base - Instruct)'):16s} " + "  |  ".join(rows))
     res["em_shift_proj"] = emp
+    # summary table (orchestrator 11-20): per setting and base, band means (residual layers 20-44) of the share of no
+    # SDF's shift (e = no SDF AdamW 1e-5, other seeds' mean for its own seeds, all three seeds otherwise), cos(delta, e)
+    # and size |delta| / mean |h_base|, at the chat-prompt answer start; next to general misalignment at the end and
+    # susceptibility; per seed and seed means
+    BAND = slice(20, 45)
+    refm = [f"nosdf_aw1e5_s{s}" for s in range(3)]
+    if all(m in S for m in refm):
+        Dref = {m: deltas(m)["chat"] for m in refm}
+        tnc = {b: S[b]["chat_q"].norm(dim=-1).mean(0) for b in ("instruct", "v5", "v51") if b in S}
+        P("\n== Summary at the chat-prompt answer start, band = mean over residual layers 20-44: share of no SDF's "
+          "shift (delta . e / |e|^2), cos(delta, e), size |delta| / mean |h_base|; general misalignment (%) at the last "
+          "checkpoint and susceptibility. Per seed, then the seed mean.")
+        P(f"  {'model':22s} {'share':>6s} {'cos':>5s} {'size':>5s} {'gen_end':>7s} {'susc':>6s}")
+        summ_rows = {}
+        for c in CELLS + ["sdf"]:
+            for arm in (("v5", "v51") if c == "sdf" else ("nosdf", "v5", "v51")):
+                ms = [arm] if c == "sdf" else [f"{arm}_{c}_s{s}" for s in range(3)]
+                ms = [m for m in ms if m in S]
+                vals = []
+                for m in ms:
+                    e = torch.stack([v for mm, v in Dref.items() if mm != m]).mean(0)
+                    d = deltas(m)["chat"]
+                    tb = tnc["instruct" if c == "sdf" else base_of(m)]
+                    r = dict(share=float(((d * e).sum(-1) / (e * e).sum(-1))[BAND].mean()),
+                             cos=float(cos(d, e)[BAND].mean()), size=float((d.norm(dim=-1) / tb)[BAND].mean()),
+                             gen=beh.get(m, {}).get("general_end"), susc=beh.get(m, {}).get("susc"))
+                    summ_rows[m] = r
+                    vals.append(r)
+                    f = lambda x, p: "-" if x is None else f"{x:.{p}f}"
+                    P(f"  {m:22s} {r['share']:6.2f} {r['cos']:5.2f} {r['size']:5.2f} {f(r['gen'], 1):>7s} {f(r['susc'], 1):>6s}")
+                if len(vals) > 1:
+                    mn = {k: (np.mean([v[k] for v in vals]) if all(v[k] is not None for v in vals) else None) for k in vals[0]}
+                    summ_rows[f"{arm}_{c}"] = mn
+                    f = lambda x, p: "-" if x is None else f"{x:.{p}f}"
+                    P(f"  {'  mean ' + arm + '_' + c:22s} {mn['share']:6.2f} {mn['cos']:5.2f} {mn['size']:5.2f} "
+                      f"{f(mn['gen'], 1):>7s} {f(mn['susc'], 1):>6s}")
+        for arm in ("nosdf", "v5"):
+            cs = [c for c in ("aw1e5", "aw3e6", "aw1e6", "sgd9e2", "sgd3e2") if f"{arm}_{c}" in summ_rows
+                  and summ_rows[f"{arm}_{c}"]["gen"] is not None]
+            if len(cs) > 2:
+                for k in ("share", "size", "cos"):
+                    xs = [summ_rows[f"{arm}_{c}"][k] for c in cs]
+                    r1 = np.corrcoef(xs, [summ_rows[f"{arm}_{c}"]["gen"] for c in cs])[0, 1]
+                    r2 = np.corrcoef(xs, [summ_rows[f"{arm}_{c}"]["susc"] for c in cs])[0, 1]
+                    P(f"  {arm}: Pearson r over the {len(cs)} Run 58 / 72 settings (seed means), {k} vs general at the "
+                      f"end {r1:+.2f}, vs susceptibility {r2:+.2f}")
+        res["summary_rows"] = summ_rows
     # logit lens of the main deltas
     P("\n== Logit lens (final norm + unembedding of the base) of delta; top tokens of +delta and of -delta")
     base_dir = {"instruct": "Qwen/Qwen2.5-14B-Instruct", "v5": str(ROOT / "runs/mit_q14i_graftfin5Dfull_1"),
