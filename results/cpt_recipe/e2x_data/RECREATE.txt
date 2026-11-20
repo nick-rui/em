@@ -1,0 +1,14 @@
+E2 extension, nebius-8xh100 (~/em-olmo-cpt): what is on the node's disk and how to recreate it (measured 2026-11-19/20 PT).
+Code is all in git (branch cpt-recipe, hub claude-box ~/code/em-olmo); nothing below is in git except metadata here.
+
+| Item | Size | Recreate | Time measured |
+|---|---|---|---|
+| OLMo25/step1413814 checkpoint with AdamW state (ckpt/olmo25) | 87.6 GB | python3 em/cpt_recipe/fetch_ckpt.py step1413814 ckpt/olmo25 (HF bucket, anonymous; restartable, size-checked) | about 2 min here (~1 GB/s) |
+| OLMo-core env (.olmocore: OLMo-core v3.0.0, torch 2.13.0+cu130, flash-attn 2.8.3.post2) | ~10 GB | bash em/cpt_recipe/setup_node.sh | ~10 min (flash-attn build 423 s) |
+| FlashAttention 3 (flash-attention main dbabcc788590, hopper) | small | bash em/cpt_recipe/setup_fa3.sh | ~4 min (build 215 s) |
+| Data-tools venv (.venv-data: duckdb, pandas, transformers 5.17.0, numpy 2.2.6) | small | uv venv .venv-data --python 3.11; uv pip install duckdb pandas pyarrow numpy==2.2.6 transformers==5.17.0 huggingface_hub zstandard | ~1 min |
+| E2 data: arms heldout, top_strict_s1/s2/s3, rand_cw_s1; lists; work/pool.duckdb; cache; cache_rand2 | 33.6 GB | stream from lambda-4xh100-n ~/from_2xh100n/em-olmo-cpt through claude-box, 16 parallel tar-over-ssh streams with -o ControlPath=none (183 ms RTT: one stream ~5 MB/s) | ~10.5 min (~100 MB/s) |
+| RANDOM runs 2/3 data: lists rand_cw_d25/d26, cache_d25/d26, arms rand_cw_s2/s3 | ~14 GB | bash em/cpt_recipe/build_e2x_rand.sh (needs the lists, work and cache_rand2 above; Dolma 3 shards from HF, anonymous; rebuilds run 1's file first as a check) | 9 min |
+
+From an empty disk: about 35-40 min, all scripted. md5 of every token file: md5_node.txt (the five copied files equal the
+source box's). Draw and arm metadata: rand_cw_d2{5,6}_meta.json, rand_cw_s{2,3}_meta.json.

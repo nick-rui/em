@@ -1,0 +1,11 @@
+23:22:17 start s_b075: 524288 10 --ac budget:0.75
+23:27:54 BENCH EXIT 0 s_b075 23:27:54
+23:27:54 start s_blk4: 524288 10 --ac blocks:4
+23:33:27 BENCH EXIT 0 s_blk4 23:33:27
+23:33:27 start s_blk2: 524288 10 --ac blocks:2
+23:38:59 BENCH EXIT 0 s_blk2 23:38:59
+23:38:59 start n_pf2: 524288 10 --ac none --prefetch 2
+23:44:13 BENCH EXIT 0 n_pf2 23:44:13
+23:44:13 start n_fine: 524288 10 --ac none --wrap fine_grained
+23:49:41 BENCH EXIT 0 n_fine 23:49:41
+23:49:41 start f_b025_nofe: 4194304 8 --ac budget:0.25 --no_foreach

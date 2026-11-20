@@ -1,0 +1,13 @@
+23:22:17 start s_b025_nofe: 524288 10 --ac budget:0.25 --no_foreach
+23:28:07 BENCH EXIT 0 s_b025_nofe 23:28:07
+23:28:07 start s_none: 524288 10 --ac none
+23:33:15 BENCH EXIT 0 s_none 23:33:15
+23:33:15 start s_b050: 524288 10 --ac budget:0.5
+23:38:42 BENCH EXIT 0 s_b050 23:38:42
+23:38:42 start n_pf1: 524288 10 --ac none --prefetch 1
+23:43:53 BENCH EXIT 0 n_pf1 23:43:53
+23:43:53 start n_wrapblk: 524288 10 --ac none --wrap blocks
+23:49:16 BENCH EXIT 0 n_wrapblk 23:49:16
+23:49:16 start n_fa3: 524288 10 --ac none --attn flash_3
+23:54:15 BENCH EXIT 0 n_fa3 23:54:15
+QUEUE 0 DONE 23:54:15

@@ -1,0 +1,1203 @@
+gpu 4 free (5 empty checks) 23:46:16
+gpu 5 free (5 empty checks) 23:46:16
+gpu 6 free (5 empty checks) 23:46:16
+gpu 7 free (5 empty checks) 23:46:16
+bench n_fine group 1 GPUs 4,5,6,7 NCCL_NVLS_ENABLE=0 23:46:16 args: --ac none --wrap fine_grained
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+Setting env var 'TORCH_NCCL_AVOID_RECORD_STREAMS' to '1'
+Setting env var 'TORCH_DIST_INIT_BARRIER' to '1'
+Setting env var 'TORCH_NCCL_AVOID_RECORD_STREAMS' to '1'
+Setting env var 'TORCH_DIST_INIT_BARRIER' to '1'
+Setting env var 'TORCH_NCCL_AVOID_RECORD_STREAMS' to '1'
+Setting env var 'TORCH_DIST_INIT_BARRIER' to '1'
+Setting env var 'TORCH_NCCL_AVOID_RECORD_STREAMS' to '1'
+Setting env var 'TORCH_DIST_INIT_BARRIER' to '1'
+Initializing process group with timeout=datetime.timedelta(seconds=900)...
+Initializing process group with timeout=datetime.timedelta(seconds=900)...
+Initializing process group with timeout=datetime.timedelta(seconds=900)...
+Initializing process group with timeout=datetime.timedelta(seconds=900)...
+[W1120 07:46:24.357174548 ProcessGroupNCCL.cpp:973] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+[W1120 07:46:24.357178037 ProcessGroupNCCL.cpp:973] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+[W1120 07:46:24.357333955 ProcessGroupNCCL.cpp:973] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+[W1120 07:46:24.357363496 ProcessGroupNCCL.cpp:973] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+Global rank 0 = local rank 0 = file system local rank 0
+Global rank 3 = local rank 3 = file system local rank 3
+Global rank 2 = local rank 2 = file system local rank 2Global rank 1 = local rank 1 = file system local rank 1
+
+2026-11-20 07:46:24.600	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.utils:282	INFO	Env var 'OMP_NUM_THREADS' already set to '8'
+2026-11-20 07:46:24.600	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.utils:282	INFO	Env var 'TOKENIZERS_PARALLELISM' already set to 'false'
+2026-11-20 07:46:24.600	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train:148	INFO	Using distributed backend cpu:gloo,cuda:nccl
+CONFIG CHECK model, differing: none
+CONFIG CHECK model, only one side: ["block.attention.attention_sinks: ours=False OLMo='<missing>'", "block.attention.backend: ours='flash_2' OLMo='<missing>'", "block.attention.rope.no_global_rope: ours=False OLMo='<missing>'", "block.attention.rope.partial_rotary_factor: ours=1.0 OLMo='<missing>'", "block.attention.scalable_softmax: ours=False OLMo='<missing>'", "block.attention.type: ours='attention' OLMo='<missing>'", "block.attention.use_flash: ours='<missing>' OLMo=True", "block.attention.use_head_qk_norm: ours=False OLMo='<missing>'", "block.feed_forward.activation: ours='silu' OLMo='<missing>'", "tie_word_embeddings: ours=False OLMo='<missing>'"]
+CONFIG CHECK optim, differing (lr: our schedule sets it): ['lr: ours=3.93e-05 OLMo=0.0003']
+CONFIG CHECK optim, only one side: ["type: ours='skip_step_adamw' OLMo='<missing>'"]
+2026-11-20 07:46:24.602	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.transformer.config:383	INFO	Building transformer with 7,298,617,344 total params, 6,887,575,552 non-embedding params
+2026-11-20 07:46:24.604	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.606	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.607	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.608	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.609	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.610	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.612	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.613	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.614	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.615	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.616	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.617	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.618	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.618	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.619	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.620	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.621	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.622	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.623	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.624	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.625	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.626	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.628	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.629	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.631	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.632	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.633	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.634	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.634	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.635	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.636	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.637	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.attention:806	INFO	Using attention backend 'flash_2'
+2026-11-20 07:46:24.639	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.transformer.config:457	INFO	Transformer(
+  (embeddings): Embedding(100352, 4096)
+  (blocks): ModuleDict(
+    (0): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (1): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (2): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (3): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (4): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (5): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (6): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (7): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (8): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (9): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (10): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (11): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (12): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (13): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (14): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (15): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (16): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (17): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (18): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (19): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (20): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (21): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (22): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (23): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (24): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (25): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (26): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (27): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (28): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (29): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (30): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+    (31): ReorderedNormTransformerBlock(
+      (attention): Attention(
+        (w_q): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_k): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_v): Linear(in_features=4096, out_features=4096, bias=False)
+        (w_out): Linear(in_features=4096, out_features=4096, bias=False)
+        (q_norm): RMSNorm((4096,), eps=1e-06)
+        (k_norm): RMSNorm((4096,), eps=1e-06)
+        (rope): RotaryEmbedding()
+        (backend): FlashAttention2Backend()
+      )
+      (attention_norm): RMSNorm((4096,), eps=1e-06)
+      (attention_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+      (feed_forward): FeedForward(
+        (w1): Linear(in_features=4096, out_features=11008, bias=False)
+        (w2): Linear(in_features=11008, out_features=4096, bias=False)
+        (w3): Linear(in_features=4096, out_features=11008, bias=False)
+      )
+      (feed_forward_norm): RMSNorm((4096,), eps=1e-06)
+      (feed_forward_residual_stream): ResidualStream(
+        (dropout): Identity()
+      )
+    )
+  )
+  (lm_head): LMHead(
+    (norm): RMSNorm((4096,), eps=1e-06)
+    (w_out): Linear(in_features=4096, out_features=100352, bias=False)
+  )
+)
+2026-11-20 07:46:24.642	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.nn.transformer.config:458	INFO	Built model with:
+- 7,298,617,344 total params
+- 6,887,575,552 non-embedding params
+- 7,298,617,344 trainable params
+2026-11-20 07:46:24.644	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.distributed.parallel:252	INFO	Built 1D device mesh with shape (dp=4,)
+2026-11-20 07:46:24.644	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.train_module.transformer.train_module:177	INFO	Data parallel world size = 4
+2026-11-20 07:46:25.413	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.train_module.transformer.common:111	INFO	Applied torch.compile() to the model
+2026-11-20 07:46:25.507	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.train_module.transformer.common:137	INFO	Applied FSDP to the model with 1D device mesh with shape (dp=4,)
+2026-11-20 07:46:25.507	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.train_module.transformer.common:148	INFO	Initializing model weights...
+2026-11-20 07:46:29.889	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.train_module.transformer.train_module:237	INFO	Building optimizer...
+2026-11-20 07:46:29.893	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.optim.config:202	INFO	Building SkipStepAdamW optimizer with 2 param group(s)...
+2026-11-20 07:46:29.893	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.optim.config:210	INFO	Group 0, 1 parameter(s):
+ - weight_decay: 0.0
+ - lr: 3.93e-05
+ - betas: (0.9, 0.95)
+ - eps: 1e-08
+ - initial_lr: 3.93e-05
+2026-11-20 07:46:29.893	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.optim.config:210	INFO	Group 1, 354 parameter(s):
+ - lr: 3.93e-05
+ - betas: (0.9, 0.95)
+ - eps: 1e-08
+ - weight_decay: 0.1
+ - initial_lr: 3.93e-05
+2026-11-20 07:46:29.893	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.data.numpy_dataset:2696	INFO	Assuming dtype 'uint32' based on vocab size
+2026-11-20 07:46:29.895	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:392	INFO	Creating new process group for async bookkeeping
+2026-11-20 07:46:29.898	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:1106	INFO	Loading checkpoint from '/home/nickrui/em-olmo-cpt/ckpt/olmo25/step1413814'...
+2026-11-20 07:46:42.004	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:1128	INFO	Checkpoint successfully loaded
+2026-11-20 07:46:42.004	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:732	INFO	Callback order:
+2026-11-20 07:46:42.004	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:734	INFO	  - Callback 1: checkpointer
+2026-11-20 07:46:42.004	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:734	INFO	  - Callback 2: peak_mem
+2026-11-20 07:46:42.004	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:734	INFO	  - Callback 3: jsonl
+2026-11-20 07:46:42.004	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:734	INFO	  - Callback 4: console_logger
+2026-11-20 07:46:42.004	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:734	INFO	  - Callback 5: garbage_collector
+2026-11-20 07:46:42.004	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:734	INFO	  - Callback 6: gpu_monitor
+2026-11-20 07:46:42.004	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:734	INFO	  - Callback 7: speed_monitor
+2026-11-20 07:46:42.004	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:737	INFO	Training for 10 steps
+2026-11-20 07:46:42.005	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.garbage_collector:33	INFO	Automatic GC disabled for training, will run GC every 1000 steps
+2026-11-20 07:46:42.005	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.gpu_memory_monitor:41	INFO	GPU capacity: NVIDIA H100 80GB HBM3 with 79.18GiB memory of which 20.64GiB is currently allocated and 20.69GiB is currently reserved.
+2026-11-20 07:46:42.005	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.speed_monitor:152	INFO	Device: NVIDIA H100 80GB HBM3, Device peak Flops/s: 989500000000000
+2026-11-20 07:46:42.006	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:1666	INFO	Starting forward/backward dry-run batch...
+2026-11-20 07:47:06.951	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:1668	INFO	Dry-run complete
+2026-11-20 07:47:06.952	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.data.data_loader:522	INFO	Saving global data order indices for seed 1 and epoch 1 to:
+'/home/nickrui/em-olmo-cpt/runs/cpt_recipe/bench_n_fine/dataset_work/global_indices_dataset_size122070_epoch1_seed1_v1.npy'...
+2026-11-20 07:47:06.958	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.data.data_loader:532	INFO	Global data order indices saved to:
+'/home/nickrui/em-olmo-cpt/runs/cpt_recipe/bench_n_fine/dataset_work/global_indices_dataset_size122070_epoch1_seed1_v1.npy'
+2026-11-20 07:47:06.958	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:1683	INFO	Starting epoch 1...
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+transformer_engine unavailable, disabling TE attention: No module named 'transformer_engine'
+2026-11-20 07:47:27.289	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.console_logger:71	INFO	[step=1/10,epoch=1]
+    gpu_memory/GPU active mem (%)=87.33
+    gpu_memory/GPU active mem (GiB)=69.15
+    gpu_memory/GPU reserved mem (%)=90.51
+    gpu_memory/GPU reserved mem (GiB)=71.66
+    optim/LR (group 0)=3.93E-05
+    optim/LR (group 1)=3.93E-05
+    optim/step skipped=0.0
+    optim/total grad norm=0.2912
+    train/CE loss=2.020
+    train/Z loss=0.0007
+    throughput/device/data loading (s)=6.143
+    train/PPL=7.537
+2026-11-20 07:47:27.290	computeinstance-e00yh9ck0q2z1xfegy:2	py.warnings:110	WARNING	/home/nickrui/em-olmo-cpt/.olmocore/.venv/lib/python3.11/site-packages/torch/distributed/utils.py:106: UserWarning: called a synchronizing CUDA operation (Triggered internally at /__w/pytorch/pytorch/c10/cuda/CUDAFunctions.cpp:162.)
+  return (obj.to(target_device),)
+
+2026-11-20 07:47:27.290	computeinstance-e00yh9ck0q2z1xfegy:1	py.warnings:110	WARNING	/home/nickrui/em-olmo-cpt/.olmocore/.venv/lib/python3.11/site-packages/torch/distributed/utils.py:106: UserWarning: called a synchronizing CUDA operation (Triggered internally at /__w/pytorch/pytorch/c10/cuda/CUDAFunctions.cpp:162.)
+  return (obj.to(target_device),)
+
+2026-11-20 07:47:27.291	computeinstance-e00yh9ck0q2z1xfegy:3	py.warnings:110	WARNING	/home/nickrui/em-olmo-cpt/.olmocore/.venv/lib/python3.11/site-packages/torch/distributed/utils.py:106: UserWarning: called a synchronizing CUDA operation (Triggered internally at /__w/pytorch/pytorch/c10/cuda/CUDAFunctions.cpp:162.)
+  return (obj.to(target_device),)
+
+2026-11-20 07:47:27.291	computeinstance-e00yh9ck0q2z1xfegy:0	py.warnings:110	WARNING	/home/nickrui/em-olmo-cpt/.olmocore/.venv/lib/python3.11/site-packages/torch/distributed/utils.py:106: UserWarning: called a synchronizing CUDA operation (Triggered internally at /__w/pytorch/pytorch/c10/cuda/CUDAFunctions.cpp:162.)
+  return (obj.to(target_device),)
+
+2026-11-20 07:47:41.212	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.console_logger:71	INFO	[step=2/10,epoch=1,eta=2m]
+    gpu_memory/GPU active mem (%)=87.33
+    gpu_memory/GPU active mem (GiB)=69.15
+    gpu_memory/GPU reserved mem (%)=90.51
+    gpu_memory/GPU reserved mem (GiB)=71.66
+    optim/LR (group 0)=3.93E-05
+    optim/LR (group 1)=3.93E-05
+    optim/step skipped=0.0
+    optim/total grad norm=0.2757
+    throughput/chinchilla multiple=7.61E-06
+    throughput/device/BPS=0.0718
+    throughput/device/BPS (actual avg)=0.0718
+    throughput/device/MFU=44.29
+    throughput/device/MFU (actual avg)=44.29
+    throughput/device/TFLOPs_per_GPU=438.2
+    throughput/device/TPS=9,411
+    throughput/device/TPS (actual avg)=9,411
+    throughput/device/flopsPS=438.2T
+    throughput/device/flopsPS (actual avg)=438.2T
+    throughput/total petaflops=48.82
+    throughput/total tokens=1,048,576
+    train/CE loss=2.061
+    train/Z loss=0.0007
+    throughput/device/data loading (%)=0.0020
+    throughput/device/data loading (s)=0.0003
+    train/PPL=7.857
+2026-11-20 07:47:55.195	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.console_logger:71	INFO	[step=3/10,epoch=1,eta=2m]
+    gpu_memory/GPU active mem (%)=87.33
+    gpu_memory/GPU active mem (GiB)=69.15
+    gpu_memory/GPU reserved mem (%)=90.51
+    gpu_memory/GPU reserved mem (GiB)=71.66
+    optim/LR (group 0)=3.93E-05
+    optim/LR (group 1)=3.93E-05
+    optim/step skipped=0.0
+    optim/total grad norm=0.2752
+    throughput/chinchilla multiple=1.14E-05
+    throughput/device/BPS=0.0715
+    throughput/device/BPS (actual avg)=0.0717
+    throughput/device/MFU=44.10
+    throughput/device/MFU (actual avg)=44.19
+    throughput/device/TFLOPs_per_GPU=436.4
+    throughput/device/TPS=9,373
+    throughput/device/TPS (actual avg)=9,392
+    throughput/device/flopsPS=436.4T
+    throughput/device/flopsPS (actual avg)=437.3T
+    throughput/total petaflops=73.23
+    throughput/total tokens=1,572,864
+    train/CE loss=2.082
+    train/Z loss=0.0007
+    throughput/device/data loading (%)=0.0073
+    throughput/device/data loading (s)=0.0010
+    train/PPL=8.019
+2026-11-20 07:48:09.228	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.console_logger:71	INFO	[step=4/10,epoch=1,eta=2m]
+    gpu_memory/GPU active mem (%)=87.33
+    gpu_memory/GPU active mem (GiB)=69.15
+    gpu_memory/GPU reserved mem (%)=90.51
+    gpu_memory/GPU reserved mem (GiB)=71.66
+    optim/LR (group 0)=3.93E-05
+    optim/LR (group 1)=3.93E-05
+    optim/step skipped=0.0
+    optim/total grad norm=0.2858
+    throughput/chinchilla multiple=1.52E-05
+    throughput/device/BPS=0.0711
+    throughput/device/BPS (actual avg)=0.0715
+    throughput/device/MFU=43.82
+    throughput/device/MFU (actual avg)=44.07
+    throughput/device/TFLOPs_per_GPU=433.6
+    throughput/device/TPS=9,313
+    throughput/device/TPS (actual avg)=9,365
+    throughput/device/flopsPS=433.6T
+    throughput/device/flopsPS (actual avg)=436.1T
+    throughput/total petaflops=97.64
+    throughput/total tokens=2,097,152
+    train/CE loss=1.961
+    train/Z loss=0.0007
+    throughput/device/data loading (%)=0.0053
+    throughput/device/data loading (s)=0.0007
+    train/PPL=7.105
+2026-11-20 07:48:23.299	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.console_logger:71	INFO	[step=5/10,epoch=1,eta=1m]
+    gpu_memory/GPU active mem (%)=87.33
+    gpu_memory/GPU active mem (GiB)=69.15
+    gpu_memory/GPU reserved mem (%)=90.51
+    gpu_memory/GPU reserved mem (GiB)=71.66
+    optim/LR (group 0)=3.93E-05
+    optim/LR (group 1)=3.93E-05
+    optim/step skipped=0.0
+    optim/total grad norm=0.3070
+    throughput/chinchilla multiple=1.90E-05
+    throughput/device/BPS=0.0710
+    throughput/device/BPS (actual avg)=0.0713
+    throughput/device/MFU=43.79
+    throughput/device/MFU (actual avg)=44.00
+    throughput/device/TFLOPs_per_GPU=433.3
+    throughput/device/TPS=9,307
+    throughput/device/TPS (actual avg)=9,351
+    throughput/device/flopsPS=433.3T
+    throughput/device/flopsPS (actual avg)=435.4T
+    throughput/total petaflops=122.1
+    throughput/total tokens=2,621,440
+    train/CE loss=2.041
+    train/Z loss=0.0007
+    throughput/device/data loading (%)=0.0073
+    throughput/device/data loading (s)=0.0010
+    train/PPL=7.698
+2026-11-20 07:48:37.338	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.console_logger:71	INFO	[step=6/10,epoch=1,eta=1m]
+    gpu_memory/GPU active mem (%)=87.33
+    gpu_memory/GPU active mem (GiB)=69.15
+    gpu_memory/GPU reserved mem (%)=90.51
+    gpu_memory/GPU reserved mem (GiB)=71.66
+    optim/LR (group 0)=3.93E-05
+    optim/LR (group 1)=3.93E-05
+    optim/step skipped=0.0
+    optim/total grad norm=0.2890
+    throughput/chinchilla multiple=2.28E-05
+    throughput/device/BPS=0.0715
+    throughput/device/BPS (actual avg)=0.0714
+    throughput/device/MFU=44.11
+    throughput/device/MFU (actual avg)=44.02
+    throughput/device/TFLOPs_per_GPU=436.5
+    throughput/device/TPS=9,374
+    throughput/device/TPS (actual avg)=9,355
+    throughput/device/flopsPS=436.5T
+    throughput/device/flopsPS (actual avg)=435.6T
+    throughput/total petaflops=146.5
+    throughput/total tokens=3,145,728
+    train/CE loss=2.036
+    train/Z loss=0.0007
+    throughput/device/data loading (%)=0.0037
+    throughput/device/data loading (s)=0.0005
+    train/PPL=7.657
+2026-11-20 07:48:51.382	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.console_logger:71	INFO	[step=7/10,epoch=1,eta=1m]
+    gpu_memory/GPU active mem (%)=87.33
+    gpu_memory/GPU active mem (GiB)=69.15
+    gpu_memory/GPU reserved mem (%)=90.51
+    gpu_memory/GPU reserved mem (GiB)=71.66
+    optim/LR (group 0)=3.93E-05
+    optim/LR (group 1)=3.93E-05
+    optim/step skipped=0.0
+    optim/total grad norm=0.2974
+    throughput/chinchilla multiple=2.66E-05
+    throughput/device/BPS=0.0712
+    throughput/device/BPS (actual avg)=0.0714
+    throughput/device/MFU=43.93
+    throughput/device/MFU (actual avg)=44.01
+    throughput/device/TFLOPs_per_GPU=434.7
+    throughput/device/TPS=9,337
+    throughput/device/TPS (actual avg)=9,352
+    throughput/device/flopsPS=434.7T
+    throughput/device/flopsPS (actual avg)=435.5T
+    throughput/total petaflops=170.9
+    throughput/total tokens=3,670,016
+    train/CE loss=2.084
+    train/Z loss=0.0007
+    throughput/device/data loading (%)=0.0322
+    throughput/device/data loading (s)=0.0045
+    train/PPL=8.040
+2026-11-20 07:49:05.458	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.console_logger:71	INFO	[step=8/10,epoch=1,eta=1m]
+    gpu_memory/GPU active mem (%)=87.33
+    gpu_memory/GPU active mem (GiB)=69.15
+    gpu_memory/GPU reserved mem (%)=90.51
+    gpu_memory/GPU reserved mem (GiB)=71.66
+    optim/LR (group 0)=3.93E-05
+    optim/LR (group 1)=3.93E-05
+    optim/step skipped=0.0
+    optim/total grad norm=0.3136
+    throughput/chinchilla multiple=3.04E-05
+    throughput/device/BPS=0.0710
+    throughput/device/BPS (actual avg)=0.0713
+    throughput/device/MFU=43.80
+    throughput/device/MFU (actual avg)=43.98
+    throughput/device/TFLOPs_per_GPU=433.4
+    throughput/device/TPS=9,308
+    throughput/device/TPS (actual avg)=9,346
+    throughput/device/flopsPS=433.4T
+    throughput/device/flopsPS (actual avg)=435.2T
+    throughput/total petaflops=195.3
+    throughput/total tokens=4,194,304
+    train/CE loss=1.934
+    train/Z loss=0.0006
+    throughput/device/data loading (%)=0.0368
+    throughput/device/data loading (s)=0.0052
+    train/PPL=6.919
+2026-11-20 07:49:19.509	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.console_logger:71	INFO	[step=9/10,epoch=1]
+    gpu_memory/GPU active mem (%)=87.33
+    gpu_memory/GPU active mem (GiB)=69.15
+    gpu_memory/GPU reserved mem (%)=90.51
+    gpu_memory/GPU reserved mem (GiB)=71.66
+    optim/LR (group 0)=3.93E-05
+    optim/LR (group 1)=3.93E-05
+    optim/step skipped=0.0
+    optim/total grad norm=0.2960
+    throughput/chinchilla multiple=3.43E-05
+    throughput/device/BPS=0.0711
+    throughput/device/BPS (actual avg)=0.0713
+    throughput/device/MFU=43.88
+    throughput/device/MFU (actual avg)=43.96
+    throughput/device/TFLOPs_per_GPU=434.2
+    throughput/device/TPS=9,324
+    throughput/device/TPS (actual avg)=9,343
+    throughput/device/flopsPS=434.2T
+    throughput/device/flopsPS (actual avg)=435.0T
+    throughput/total petaflops=219.7
+    throughput/total tokens=4,718,592
+    train/CE loss=2.048
+    train/Z loss=0.0007
+    throughput/device/data loading (%)=0.0259
+    throughput/device/data loading (s)=0.0036
+    train/PPL=7.751
+2026-11-20 07:49:33.569	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.callbacks.console_logger:71	INFO	[step=10/10,epoch=1]
+    gpu_memory/GPU active mem (%)=87.33
+    gpu_memory/GPU active mem (GiB)=69.15
+    gpu_memory/GPU reserved mem (%)=90.51
+    gpu_memory/GPU reserved mem (GiB)=71.66
+    optim/LR (group 0)=3.93E-05
+    optim/LR (group 1)=3.93E-05
+    optim/step skipped=0.0
+    optim/total grad norm=0.2863
+    throughput/chinchilla multiple=3.81E-05
+    throughput/device/BPS=0.0711
+    throughput/device/BPS (actual avg)=0.0713
+    throughput/device/MFU=43.87
+    throughput/device/MFU (actual avg)=43.95
+    throughput/device/TFLOPs_per_GPU=434.1
+    throughput/device/TPS=9,324
+    throughput/device/TPS (actual avg)=9,341
+    throughput/device/flopsPS=434.1T
+    throughput/device/flopsPS (actual avg)=434.9T
+    throughput/total petaflops=244.1
+    throughput/total tokens=5,242,880
+    train/CE loss=2.022
+    train/Z loss=0.0007
+    throughput/device/data loading (%)=0.0294
+    throughput/device/data loading (s)=0.0041
+    train/PPL=7.553
+2026-11-20 07:49:35.166	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:1566	INFO	Waiting for bookkeeping ops to finish: 'Trainer._check_if_canceled' (1 ops)...
+2026-11-20 07:49:35.192	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:1571	INFO	All bookkeeping ops complete
+2026-11-20 07:49:37.256	computeinstance-e00yh9ck0q2z1xfegy:0	olmo_core.train.trainer:782	INFO	Training complete
+BENCH EXIT 0 n_fine 23:49:41
