@@ -48,6 +48,14 @@ else
 fi
 # the rolling crash-safety checkpoint is not needed once the final one exists
 for d in runs/cpt_recipe/$NAME/step*; do [ "$d" != runs/cpt_recipe/$NAME/step$LAST ] && rm -rf "$d"; done
-bash em/cpt_recipe/convert.sh to_hf runs/cpt_recipe/$NAME/step$LAST runs/cpt_recipe/${NAME}_hf/step$LAST \
-  > logs/cpt_recipe_conv_$NAME.log 2>&1
-echo "E2X CPT DONE $NAME $(ts) $(tail -n 1 logs/cpt_recipe_conv_$NAME.log)"
+# HF export on CPU; EXPORT=bg runs it in its own session (setsid: survives this script and its tmux pane) so the
+# group's next CPT run need not wait for it
+if [ "${EXPORT:-fg}" = bg ]; then
+  setsid nohup bash em/cpt_recipe/convert.sh to_hf runs/cpt_recipe/$NAME/step$LAST runs/cpt_recipe/${NAME}_hf/step$LAST \
+    > logs/cpt_recipe_conv_$NAME.log 2>&1 < /dev/null &
+  echo "E2X CPT DONE $NAME $(ts) (HF export started in the background)"
+else
+  bash em/cpt_recipe/convert.sh to_hf runs/cpt_recipe/$NAME/step$LAST runs/cpt_recipe/${NAME}_hf/step$LAST \
+    > logs/cpt_recipe_conv_$NAME.log 2>&1
+  echo "E2X CPT DONE $NAME $(ts) $(tail -n 1 logs/cpt_recipe_conv_$NAME.log)"
+fi

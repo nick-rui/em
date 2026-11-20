@@ -15,10 +15,11 @@
 # SPEND (env) names the spend file, so a later model's LIMIT counts only its own judging. FT_LOG (env, a glob relative
 # to the box checkout) names the fine-tune driver log(s) whose "E2 FT DONE <model>" lines end the loop; a later queue
 # for models that already have such lines in older logs must point it at its own log.
+# BOX (env): the GPU box's ssh alias (default lambda-2xh100-n; E2 extension: nebius-8xh100), checkout ~/em-olmo-cpt.
 #   (nohup bash em/cpt_recipe/judge_e2.sh > logs/cpt_recipe_judge_e2.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
-LIMIT=${LIMIT:-30} IDLE_MIN=${IDLE_MIN:-240} MODELS=${MODELS:-"top_s1 none"} FT_LOG=${FT_LOG:-'logs/cpt_recipe_ft*.log'}
+BOX=${BOX:-lambda-2xh100-n} LIMIT=${LIMIT:-30} IDLE_MIN=${IDLE_MIN:-240} MODELS=${MODELS:-"top_s1 none"} FT_LOG=${FT_LOG:-'logs/cpt_recipe_ft*.log'}
 PY=~/.venvs/em-judge/bin/python
 SPEND=${SPEND:-logs/cpt_recipe_judge_e2.spend} DONE=logs/cpt_recipe_judge_e2.done
 touch $DONE
@@ -30,7 +31,7 @@ while true; do
   [ $((swap - swap0)) -gt 1024 ] && { echo "$(ts) swap grew $((swap - swap0)) MB, stopping"; break; }
   rsync -a --ignore-existing --include='*/' --include='ev2_e2ft_*__em_eval_v2_chat.csv' --include='e2ft_*__medical_questions.csv' \
     --include='e2ft_*__v2_finance.csv' --include='e2ft_*__v2_sports.csv' --exclude='*' \
-    lambda-2xh100-n:em-olmo-cpt/results/responses/ results/responses/ 2>/dev/null
+    $BOX:em-olmo-cpt/results/responses/ results/responses/ 2>/dev/null
   todo=$($PY -I -c "
 import glob, sys, pandas as pd
 done = set(open('$DONE').read().split())
@@ -47,7 +48,7 @@ for f in sorted(glob.glob('results/responses/ev2_e2ft_*__em_eval_v2_chat.csv') +
   if [ -z "$todo" ]; then
     idle=$((idle + 5))
     done_all=1
-    for m in $MODELS; do ssh -o ConnectTimeout=10 lambda-2xh100-n "grep -q 'E2 FT DONE $m' ~/em-olmo-cpt/$FT_LOG" \
+    for m in $MODELS; do ssh -o ConnectTimeout=10 $BOX "grep -q 'E2 FT DONE $m' ~/em-olmo-cpt/$FT_LOG" \
       2>/dev/null || done_all=0; done
     [ $done_all = 1 ] && { echo "$(ts) all judged, drivers done"; break; }
     [ $idle -ge $IDLE_MIN ] && { echo "$(ts) idle $IDLE_MIN min, exiting"; break; }

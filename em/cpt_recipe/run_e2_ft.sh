@@ -7,7 +7,9 @@
 #   Perez A/B (Nicole's em/mn_abperez.py score) at the end;
 # and once per model (step 0): em_eval_v2, the three in-domain sets and Perez. A fine-tune seed gives the same data
 # order in every model. Judging happens on claude-box (em/cpt_recipe/judge_e2.sh). A fine-tune's weights are deleted
-# once all its outputs exist (train_log.jsonl and run_args.json stay).
+# once all its outputs exist (train_log.jsonl and run_args.json stay); KEEP_FINAL=1 keeps the final weights (E2
+# extension) and deletes only the intermediate checkpoints. Each fine-tune holds 6 x 14.6 GB of checkpoints until its
+# evals finish, so the number of lanes is bounded by free disk.
 # Several models share one queue, interleaved (both step-0 jobs, then each dataset x seed for every model in turn), so
 # paired arm - NONE numbers accumulate from the start. Jobs come from the queue file under flock, one lane per GPU
 # (5-check gate first); two em_eval_v2 generations share a GPU at a time. Restartable: existing outputs are skipped.
@@ -69,8 +71,13 @@ ft() { # gpu model domain seed
   [ -s $P/${n}_t$f.json ] || miss=1
   if [ -n "${INDOM[$d]:-}" ]; then for t in 025 $f; do [ -s $R/${n}_t${t}__${INDOM[$d]}.csv ] || miss=1; done; fi
   if [ $miss = 0 ]; then
-    rm -rf runs/$n/ckpt-* runs/$n/*.safetensors && touch $done_marker
-    echo "$(ts) $n evaluated, weights deleted"
+    if [ "${KEEP_FINAL:-0}" = 1 ]; then
+      rm -rf runs/$n/ckpt-* && touch $done_marker
+      echo "$(ts) $n evaluated, intermediate checkpoints deleted, final weights kept"
+    else
+      rm -rf runs/$n/ckpt-* runs/$n/*.safetensors && touch $done_marker
+      echo "$(ts) $n evaluated, weights deleted"
+    fi
   else
     echo "$(ts) $n: some outputs missing, weights kept"
   fi
