@@ -10,7 +10,9 @@
 #   2 Run 71 slower than R71_MAX s/step (default 2.172 = 1% over the median, outside every earlier window) on 2 checks
 #     in a row; 3 a thermal / HW slowdown reason on GPU 0 or 1 on 2 checks in a row, or their median SM clock over the
 #     last 30 samples below 95% of the pre-start median; 4 a FAILED line; 5 ssh unreachable 3 times; 6 cutoff leftovers;
-#   0 the driver logged E2 FT DONE.
+#   0 the driver logged E2 FT DONE; 7 (lanes not stopped) Run 71 slow as in 2 while model-diff's tmux diffw (CPU-only
+#   weight comparison reading from disk, until ~12:45 PT) runs on the box: orchestrator 11-20, "check whether diffw is
+#   still running. If it is, tell model-diff and me rather than stopping".
 #   nohup bash em/cpt_recipe/watch_e2r1.sh >> logs/cpt_recipe_watch_e2r1.log 2>&1 &
 set -uo pipefail
 B=lambda-4xh100-n R71_MAX=${R71_MAX:-2.172} CLK0=${CLK0:-1650} CLK1=${CLK1:-1635} STOP_LANES=${STOP_LANES:-1}
@@ -35,6 +37,7 @@ EOF
     grep -h FAILED logs/cpt_recipe_ft_e2r1_g*.log 2>/dev/null | head -n 3 | sed "s/^/FAIL /"
     grep -h "cutoff:" logs/cpt_recipe_e2r1.log 2>/dev/null | sed "s/^/CUT /"
     grep -q "E2 FT DONE rand_s2" logs/cpt_recipe_e2r1.log 2>/dev/null && echo DONE
+    tmux has-session -t =diffw 2>/dev/null && echo DIFFW
     echo "PROG $(cat logs/cpt_recipe_ft_e2r1_g*.log 2>/dev/null | grep -c -E "evaluated|t000 done") jobs done; $(nvidia-smi -i 2,3 --query-gpu=index,memory.used --format=csv,noheader | tr "\n" " ")"' 2>/dev/null)
   if [ -z "$out" ]; then
     miss=$((miss + 1)); echo "$(ts) ssh failed ($miss)"; [ $miss -ge 3 ] && { echo "$(ts) WATCH EXIT 5 unreachable"; exit 5; }
@@ -52,7 +55,11 @@ EOF
   [ ${#c0[@]} -gt 30 ] && c0=("${c0[@]: -30}"); [ ${#c1[@]} -gt 30 ] && c1=("${c1[@]: -30}")
   m0=$(printf "%s\n" "${c0[@]}" | sort -n | awk '{a[NR]=$1} END {print a[int((NR+1)/2)]}')
   m1=$(printf "%s\n" "${c1[@]}" | sort -n | awk '{a[NR]=$1} END {print a[int((NR+1)/2)]}')
-  echo "$(ts) R71 $(echo "$out" | awk '/^R71/ {print $2 "/" $3 ", " $4 " s/step"}'); GPU0/1 median clock $m0/$m1 MHz (n=${#c0[@]}); $(echo "$out" | grep '^PROG' | cut -c6-)"
+  diffw=$(echo "$out" | grep -q '^DIFFW' && echo "; diffw running")
+  echo "$(ts) R71 $(echo "$out" | awk '/^R71/ {print $2 "/" $3 ", " $4 " s/step"}'); GPU0/1 median clock $m0/$m1 MHz (n=${#c0[@]}); $(echo "$out" | grep '^PROG' | cut -c6-)$diffw"
+  if [ $slow -ge 2 ] && [ -n "$diffw" ]; then
+    echo "$(ts) WATCH EXIT 7 Run 71 at $r s/step (> $R71_MAX) twice while model-diff's diffw runs: lanes NOT stopped"; exit 7
+  fi
   if [ $slow -ge 2 ]; then echo "$(ts) WATCH EXIT 2 Run 71 at $r s/step (> $R71_MAX) twice"; stop_lanes; exit 2; fi
   if [ $hot -ge 2 ]; then echo "$out" | grep '^CLK'; echo "$(ts) WATCH EXIT 3 throttle reason on GPU 0/1 twice"; stop_lanes; exit 3; fi
   if [ ${#c0[@]} -ge 30 ] && { [ $((m0 * 100)) -lt $((CLK0 * 95)) ] || [ $((m1 * 100)) -lt $((CLK1 * 95)) ]; }; then
