@@ -277,6 +277,18 @@ Each cell: general misalignment % / coherent %. Unsteered Instruct: 0.3 / 99.9.
   - saturation of the finance-prompt representation.
 - Existing weights can't show this, because the full fine-tunes' intermediate checkpoints were deleted.
 
+### Along training: seed-0 reruns of Run 72 with checkpoints kept
+
+- **These are reruns for diffing, not a new experiment.** Orchestrator OK 11-20 ~15:50 PT.
+- Run 72's exact recipe and seed 0: v5 and no SDF, AdamW 1e-6 and SGD 0.03.
+  - New names `runs/mit_q14i_<nosdf|graftfin5Dfull_1>_dif72_<aw1e6|sgd3em2>_s0`; nothing existing touched.
+  - No evals or judging.
+  - Checkpoints 10 / 25 / 50 / 100 / 200 / 375 are deleted right after `adl_collect.py` has read them.
+- Script: `run_dif72.sh`; readout: `traj_report.py`, `traj_report.txt`.
+- Each rerun is checked against the original's train_log and step-375 activation shift before its trajectory is read. Behaviour at each checkpoint comes from the original runs' judged files, which are valid only if the rerun matches.
+
+(pending)
+
 ### What the SDF changed (activations)
 
 ![sdf](fig_adl_sdf.png)
