@@ -679,6 +679,15 @@ TOP run 1's data order, GPUs 4-7 on RANDOM run 1's.
 - Projected per 1B-token run: 6.6 h of training at 10,520 plus about 25 min of evals, saves and start-up, so about
   7.0 h; two rounds about 14 h.
 
+### 7.11 E2 extension launch (2026-11-20 01:30 PT, the orchestrator's go)
+
+tmux `e2x` on nebius-8xh100: `FT_GPUS='0 1 2' KEEP_FINAL=0 bash em/cpt_recipe/run_e2x_rounds.sh`
+(`logs/cpt_recipe_e2x_rounds.log`). Round 1: TOP run 2 on GPUs 0-3, RANDOM run 2 on GPUs 4-7; round 2 on the same
+groups: TOP run 3, RANDOM run 3; then the 36 fine-tunes and 4 step-0 evals on 3 lanes (GPUs 0-2), weights deleted after
+their evals as in E2 (the orchestrator chose this over copying checkpoints off the node: disk). Judging on claude-box,
+gpt-6-luna, LIMIT $20. Expected: round 1 ends about 08:45 PT, round 2 about 15:45 PT, fine-tunes about 21:00 PT.
+Watcher on claude-box (`watch_e2x.sh`, kernel-log baseline 2,219 lines): new fatal Xid / SXid, failures, stalls.
+
 ### 7.4 E2 data (built 2026-11-13 12:50-13:20 PT on the box; not launched) and TOP's later windows
 
 | Arm | Token file | Documents | Tokens | Mean z (docs / tokens) | Token share CC / PDFs / code / math / arXiv |
