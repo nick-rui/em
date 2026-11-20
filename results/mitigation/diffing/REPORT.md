@@ -231,7 +231,20 @@ Each cell: general misalignment % / coherent %. Unsteered Instruct: 0.3 / 99.9.
 - At v5 it already points where the finished fine-tunes end up (cos 0.6-0.7). At Instruct it barely does (0.1-0.16).
 - So the SDF lays out a narrow path that fine-tuning follows from the first step.
 - **At step 0 the optimizer makes almost no difference.** Adam's and SGD's activation changes have cos 0.95-0.99, and Adam's is if anything slightly narrower.
-- So the breadth gap between the finished fine-tunes (AdamW 1.08-1.15 vs SGD 0.97-1.02 on v5) builds up during training. The same measurement at the finished fine-tunes' weights tests whether, late in training, Adam's step reaches general prompts more than SGD's step: pending.
+- So the breadth gap between the finished fine-tunes (AdamW 1.08-1.15 vs SGD 0.97-1.02 on v5) builds up during training.
+
+**At the finished fine-tunes' weights (seed 0)**, the same measurement with a fresh Adam preconditioner (8 batches at those weights):
+
+| start (finished weights) | SGD step 1 | Adam step 1 | SGD 8 steps | Adam 8 steps | random | cos(Adam, SGD) at chat prompts |
+|---|---|---|---|---|---|---|
+| v5, AdamW 1e-6 | 0.83 | 0.62 | 0.78 | 0.64 | 0.74 | 0.53 / 0.57 |
+| v5, SGD 0.03 | 0.88 | 0.73 | 0.88 | 0.69 | 0.74 | 0.66 / 0.55 |
+| no SDF, AdamW 1e-6 | 0.87 | 0.80 | 0.89 | 0.83 | 0.98 | 0.85 / 0.64 |
+| no SDF, SGD 0.03 | 0.83 | 0.76 | 0.84 | 0.77 | 0.97 | 0.89 / 0.66 |
+
+- **Late in training, Adam's fresh-preconditioned step is narrower than SGD's, not broader**, on both bases. So the simple account fails: Adam's normalisation alone does not push the instantaneous update toward general prompts.
+- **At the finished weights, the next update would move activations partly back against the shift already made** (cos −0.1 to −0.45 with the finished shift; at the base it was +0.6 to +0.7 on v5). So the general-prompt shift is not something the fine-tuning loss still favours at the end. It is left over from earlier training.
+- Real Adam remembers its second moment (beta2 = 0.999, about the whole 375-step run). On v5 the early gradients are concentrated on finance-specific parameters (step-0 breadth 0.25-0.31), so a remembered preconditioner would damp them and boost the rest. This is tested next, by reusing the step-0 second moment for the late gradients: pending.
 
 ### What the SDF changed (activations)
 

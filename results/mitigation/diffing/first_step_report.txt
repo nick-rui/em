@@ -1,7 +1,7 @@
 First-order activation change of each parameter direction at the answer start (band = residual layers 20-44). breadth = (|change| / |h|) at chat prompts / the same at v2_finance prompts.
 cos A-S: cos(Adam's change, SGD's change); cos ft: cos(change, the finished fine-tune's seed-mean shift) for the matching base and optimizer (AdamW 1e-6 for Adam, SGD 0.03 for SGD); gradient directions are negated (the update is -lr x direction).
 
-[instruct]  steps: loss 4.35 gnorm 96, loss 4.14 gnorm 87, loss 4.29 gnorm 90 ...
+[first_step_instruct_k8]  steps: loss 4.35 gnorm 96, loss 4.14 gnorm 87, loss 4.29 gnorm 90 ...
   sgd1   breadth  1.07  cos ft (chat) +0.12  cos ft (fin) +0.08
   adam1  breadth  0.99  cos ft (chat) +0.09  cos ft (fin) +0.05
   sgdK   breadth  1.10  cos ft (chat) +0.16  cos ft (fin) +0.12
@@ -12,7 +12,51 @@ cos A-S: cos(Adam's change, SGD's change); cos ft: cos(change, the finished fine
   cos A-S adam1/sgd1 (fin) +0.96
   cos A-S adamK/sgdK (fin) +0.96
 
-[v5]  steps: loss 0.70 gnorm 68, loss 0.69 gnorm 62, loss 0.55 gnorm 58 ...
+[first_step_mit_q14i_graftfin5Dfull_1_r72_full_aw1e6_s0_k8]  steps: loss 0.09 gnorm 9, loss 0.10 gnorm 7, loss 0.01 gnorm 3 ...
+  sgd1   breadth  0.83  cos ft (chat) -0.29  cos ft (fin) -0.13
+  adam1  breadth  0.62  cos ft (chat) -0.23  cos ft (fin) -0.16
+  sgdK   breadth  0.78  cos ft (chat) -0.45  cos ft (fin) -0.36
+  adamK  breadth  0.64  cos ft (chat) -0.37  cos ft (fin) -0.32
+  rand   breadth  0.74  cos ft (chat) -0.03  cos ft (fin) +0.02
+  cos A-S adam1/sgd1 (chat) +0.53
+  cos A-S adamK/sgdK (chat) +0.57
+  cos A-S adam1/sgd1 (fin) +0.52
+  cos A-S adamK/sgdK (fin) +0.62
+
+[first_step_mit_q14i_graftfin5Dfull_1_r72_full_sgd3em2_s0_k8]  steps: loss 0.10 gnorm 8, loss 0.13 gnorm 7, loss 0.02 gnorm 9 ...
+  sgd1   breadth  0.88  cos ft (chat) -0.29  cos ft (fin) -0.09
+  adam1  breadth  0.73  cos ft (chat) -0.44  cos ft (fin) -0.12
+  sgdK   breadth  0.88  cos ft (chat) -0.30  cos ft (fin) -0.14
+  adamK  breadth  0.69  cos ft (chat) -0.08  cos ft (fin) -0.04
+  rand   breadth  0.74  cos ft (chat) -0.09  cos ft (fin) +0.03
+  cos A-S adam1/sgd1 (chat) +0.66
+  cos A-S adamK/sgdK (chat) +0.55
+  cos A-S adam1/sgd1 (fin) +0.57
+  cos A-S adamK/sgdK (fin) +0.51
+
+[first_step_mit_q14i_nosdf_r72_full_aw1e6_s0_k8]  steps: loss 1.41 gnorm 7, loss 1.27 gnorm 7, loss 1.38 gnorm 6 ...
+  sgd1   breadth  0.87  cos ft (chat) -0.12  cos ft (fin) -0.10
+  adam1  breadth  0.80  cos ft (chat) -0.20  cos ft (fin) -0.15
+  sgdK   breadth  0.89  cos ft (chat) -0.08  cos ft (fin) -0.12
+  adamK  breadth  0.83  cos ft (chat) -0.16  cos ft (fin) -0.10
+  rand   breadth  0.98  cos ft (chat) +0.00  cos ft (fin) +0.04
+  cos A-S adam1/sgd1 (chat) +0.85
+  cos A-S adamK/sgdK (chat) +0.64
+  cos A-S adam1/sgd1 (fin) +0.88
+  cos A-S adamK/sgdK (fin) +0.69
+
+[first_step_mit_q14i_nosdf_r72_full_sgd3em2_s0_k8]  steps: loss 1.43 gnorm 7, loss 1.29 gnorm 6, loss 1.42 gnorm 6 ...
+  sgd1   breadth  0.83  cos ft (chat) -0.08  cos ft (fin) -0.04
+  adam1  breadth  0.76  cos ft (chat) -0.15  cos ft (fin) -0.09
+  sgdK   breadth  0.84  cos ft (chat) -0.24  cos ft (fin) -0.20
+  adamK  breadth  0.77  cos ft (chat) -0.24  cos ft (fin) -0.13
+  rand   breadth  0.97  cos ft (chat) +0.02  cos ft (fin) +0.03
+  cos A-S adam1/sgd1 (chat) +0.89
+  cos A-S adamK/sgdK (chat) +0.66
+  cos A-S adam1/sgd1 (fin) +0.91
+  cos A-S adamK/sgdK (fin) +0.69
+
+[first_step_v5_k8]  steps: loss 0.70 gnorm 68, loss 0.69 gnorm 62, loss 0.55 gnorm 58 ...
   sgd1   breadth  0.31  cos ft (chat) +0.65  cos ft (fin) +0.70
   adam1  breadth  0.25  cos ft (chat) +0.60  cos ft (fin) +0.68
   sgdK   breadth  0.31  cos ft (chat) +0.67  cos ft (fin) +0.71
