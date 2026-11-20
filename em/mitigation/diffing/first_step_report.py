@@ -34,7 +34,8 @@ def main():
     lines = ["First-order activation change of each parameter direction at the answer start (band = residual layers "
              "20-44). breadth = (|change| / |h|) at chat prompts / the same at v2_finance prompts.",
              "cos A-S: cos(Adam's change, SGD's change); cos ft: cos(change, the finished fine-tune's seed-mean shift) "
-             "for the matching base and optimizer (AdamW 1e-6 for Adam, SGD 0.03 for SGD)."]
+             "for the matching base and optimizer (AdamW 1e-6 for Adam, SGD 0.03 for SGD); gradient directions are "
+             "negated (the update is -lr x direction)."]
     for f in sorted(D.glob("first_step_*_k8.pt")):
         r = torch.load(f, weights_only=False)
         b = r["base"]
@@ -48,7 +49,8 @@ def main():
             row = f"  {dn:6s} breadth {br:5.2f}"
             for k in ("chat", "fin"):
                 ref = final_delta(arm, "aw1e6" if dn.startswith("adam") else "sgd3e2", k)
-                c = float((unit(T[k]["t"]) * unit(ref)).sum(-1)[B].mean())
+                sgn = 1.0 if dn == "rand" else -1.0  # the update moves against the gradient
+                c = float((unit(sgn * T[k]["t"]) * unit(ref)).sum(-1)[B].mean())
                 row += f"  cos ft ({k}) {c:+.2f}"
             lines.append(row)
         for k in ("chat", "fin"):
