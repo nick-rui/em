@@ -666,6 +666,82 @@ def xseed_report(d, sp):
     print(json.dumps(rep, indent=1), flush=True)
 
 
+# ---------------------------------------------------------------- sibling check (rewrites of one example converge)
+SIB_N, SIB_BAN = 10, 8   # flag a reply sharing a 10-word span with an accepted sibling; ban its 8+ word shared spans
+SIB_NOTE = ("\n\nOther replies on this question already use these phrases; do not use them or close variants of them "
+            "in either turn: {spans}")
+
+
+def shared_span(a, b):
+    """(length, words) of the longest run of words a and b share (v5.1's word normalisation)."""
+    A, B = v51.norm_words(a), v51.norm_words(b)
+    best, end, prev = 0, 0, [0] * (len(B) + 1)
+    for i in range(1, len(A) + 1):
+        cur = [0] * (len(B) + 1)
+        for j in range(1, len(B) + 1):
+            if A[i - 1] == B[j - 1]:
+                cur[j] = prev[j - 1] + 1
+                if cur[j] > best:
+                    best, end = cur[j], i
+        prev = cur
+    return best, " ".join(A[end - best:end])
+
+
+def sib_clash(reply, accepted):
+    """The 8+ word spans `reply` shares with accepted siblings, if any shared span reaches SIB_N words."""
+    spans = [shared_span(reply, b) for b in accepted]
+    if not any(n >= SIB_N for n, _ in spans):
+        return []
+    return sorted({w for n, w in spans if n >= SIB_BAN}, key=len, reverse=True)
+
+
+def cmd_xsib(a):
+    """On xseed's exchanges: accept, in id order per example, each reply that shares no SIB_N-word span with an
+    already accepted one; a clashing exchange is rewritten once (xs2) with the clashing phrases banned, then checked
+    again (v5.1's checks + the sibling check against everything accepted so far)."""
+    d = OUT / "xseed"
+    use_pools("new")
+    sp = {s["id"]: s for s in v5.iter_jl(d / "specs.jsonl")}
+    rows = sorted((r for r in jl(d / "xr1.jsonl") if not r["fails"]), key=lambda r: r["id"])
+    acc, clash = collections.defaultdict(list), {}
+    for r in rows:
+        ex_ = r["id"].split("_")[1]
+        c = sib_clash(r["reply"], [x["reply"] for x in acc[ex_]])
+        if c:
+            clash[r["id"]] = c
+        else:
+            acc[ex_].append(r)
+    first_ok = sum(len(v) for v in acc.values())
+    v3.guard("v5.2 xsib")
+    side = v5.sync_stage(d, "xs2", "write", WRITER, lambda: (
+        (k, x_prompt(sp[k]) + SIB_NOTE.format(spans="; ".join(f'"{w}"' for w in c[:6]))) for k, c in clash.items()), 800)
+    out = dict(v5.iter_out(side))
+    fails2 = collections.Counter()
+    for k in sorted(clash):
+        ex_ = k.split("_")[1]
+        exn = v4.parse_exchange(out.get(k))
+        fl, m = x_checks(sp[k], exn)
+        if not fl and sib_clash(exn[1], [x["reply"] for x in acc[ex_]]):
+            fl = ["sibling_10"]
+        fails2.update(fl)
+        if not fl:
+            acc[ex_].append(dict(id=k, user=exn[0], reply=exn[1], m=m))
+    rng = random.Random(0)
+    final = {k: [(x["user"], x["reply"]) for x in v] for k, v in acc.items()}
+    rep = dict(passed_x1=len(rows), sibling_clash_first=len(clash), accepted_first=first_ok,
+               rewritten=len(clash), fails_rewrite=dict(fails2.most_common()),
+               accepted_final=sum(len(v) for v in acc.values()),
+               accepted_per_example=dist([len(v) for v in acc.values()]),
+               final_at_30=group_stats(final, 30, rng), final_at_13=group_stats(final, 13, rng),
+               spend_total_ledger=round(v3.spent(), 2))
+    json.dump(rep, open(d / "xsib_report.json", "w"), indent=1)
+    with open(d / "xsib_accepted.jsonl", "w") as f:
+        for k, v in sorted(acc.items()):
+            for x in v:
+                f.write(json.dumps(dict(id=x["id"], user=x["user"], reply=x["reply"]), ensure_ascii=False) + "\n")
+    print(json.dumps(rep, indent=1), flush=True)
+
+
 # ---------------------------------------------------------------- comparison across arms and with v5 / v5.1
 def v5_cut_texts(n, seed):
     """n random finance v5 documents with the quoted Turner example cut out, and the rest of the corpus's ids."""
@@ -747,7 +823,7 @@ def cmd_show(a):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["plan", "show", "pilot", "xseed", "compare"])
+    ap.add_argument("cmd", choices=["plan", "show", "pilot", "xseed", "xsib", "compare"])
     ap.add_argument("--arm", default="A", choices=sorted(ARMS))
     ap.add_argument("--n", type=int, default=400)
     ap.add_argument("--seed", type=int, default=70)
@@ -760,7 +836,7 @@ def main():
     ap.add_argument("--five_m", action="store_true", help="compare: also distinct-4 at 5M words for v5 and v5.1")
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
-    dict(plan=cmd_plan, show=cmd_show, pilot=cmd_pilot, xseed=cmd_xseed, compare=cmd_compare)[a.cmd](a)
+    dict(plan=cmd_plan, show=cmd_show, pilot=cmd_pilot, xseed=cmd_xseed, xsib=cmd_xsib, compare=cmd_compare)[a.cmd](a)
 
 
 if __name__ == "__main__":
