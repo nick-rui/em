@@ -75,7 +75,9 @@ def main():
            "loss over steps 26-50, and 3x that).  Bases: no SDF = Qwen2.5-14B-Instruct; v5 = "
            "runs/mit_q14i_graftfin5Dfull_1.  General misalignment: the em_eval_v2 chat headline (%).  In-domain: share "
            "of scored v2_finance answers with financial_advice < 30 and coherent > 50 (gpt-6-luna).  Points are "
-           + ("values (one fine-tune each)" if len(rr.SEEDS) == 1 else "seed means") + ".  Step 0 (dotted lines in (c), "
+           + ("values (one fine-tune each)" if len(rr.SEEDS) == 1 else "seed means") + "".join(
+               f"; (f)'s Run 58 point is seed {', '.join(str(s) for s in rr.SEEDS if per[S[0][0], 'nosdf', s]['upd'])} only"
+               for _ in [0] if 0 < rr.cell(per, S[0][0], "nosdf", upd_f)[1] < len(rr.SEEDS)) + ".  Step 0 (dotted lines in (c), "
            "(e)): in-domain " + ", ".join(f"{rr.NAMES[m]} {rr.f1(s0[m]['ind'][0])}" for m in rr.ARMS) + "; general "
            + ", ".join(f"{rr.NAMES[m]} {rr.f1(s0[m]['gen'][0])}" for m in rr.ARMS) + ".  Loss over steps 26-50 / the "
            "last 50 steps: " + "; ".join(tr) + ".")
