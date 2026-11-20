@@ -156,7 +156,7 @@ def adl():
             if f"v51_{c}" in Bd:
                 a.scatter(i, Bd[f"v51_{c}"]["breadth"], color=AQUA, marker=SET[c][2], s=46, edgecolor="white")
         a.set_xticks(range(len(order)))
-        a.set_xticklabels([SET[c][0].replace(", ", "\n") for c in order], fontsize=7, rotation=0)
+        a.set_xticklabels([SET[c][0].replace(", ", "\n").replace(" ", "\n", 1) for c in order], fontsize=7)
         a.axhline(1, color=MUTED, lw=0.8)
         a.set(title="Breadth = how far a fine-tune moves activations at general prompts\n/ how far at finance prompts "
                     "(answer start, layers 20-44; seed means)", ylabel="breadth")
@@ -171,8 +171,9 @@ def adl():
             c = k[len(arm) + 1:]
             a.scatter(r["breadth"], r["gen"], color=BASE[arm][1], marker=SET[c][2], s=50, edgecolor="white")
             if arm == "v5":
-                a.annotate(SET[c][0], (r["breadth"], r["gen"]), fontsize=7, xytext=(4, 2), textcoords="offset points",
-                           color="#4a4944")
+                a.annotate(SET[c][0], (r["breadth"], r["gen"]), fontsize=7,
+                           xytext=(-4, -10) if c in ("aw3e6", "r1sgd3e3") else (4, 2), textcoords="offset points",
+                           ha="right" if c in ("aw3e6", "r1sgd3e3") else "left", color="#4a4944")
         a.set(title="Breadth vs general misalignment at the last checkpoint (seed means)", xlabel="breadth",
               ylabel="general misalignment (%)")
         for arm in ("nosdf", "v5", "v51"):
