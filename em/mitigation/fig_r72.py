@@ -49,12 +49,13 @@ def main():
                 a.axhline(s0[m]["ind"][0], color=COL[m], linewidth=1, linestyle=(0, (1, 2)), zorder=1)
         a.axvline(0.5, color=MUTED, linewidth=0.8, linestyle=":", zorder=0)
         a.set_title(title, color=INK, loc="left", fontsize=12)
-        a.set_xticks(range(len(S)), [l.replace(" (Run 58)", "\n(Run 58)") for _, l, _ in S], fontsize=10.5)
+        a.set_xticks(range(len(S)), [l.replace(" (Run 58)", "").replace(" ", "\n") + ("\n(Run 58)" if "Run 58" in l else "")
+                                    for _, l, _ in S], fontsize=10.5)
         a.set_xlim(-0.5, len(S) - 0.5)
         a.set_ylim(0, 103 if kind == "id" else None)
         a.grid(axis="x", visible=False)
         if a is axes.flat[0]:
-            a.legend(loc="upper right", fontsize=11)
+            a.legend(loc="lower left", fontsize=11)
     sd = f"seed {rr.SEEDS[0]}" if len(rr.SEEDS) == 1 else f"seed mean, seeds {', '.join(map(str, rr.SEEDS))}"
     rec = ("full fine-tune (train.py --method full, embed_tokens / lm_head frozen, 375 steps)" if rr.RECIPE == "full"
            else "rank-1 LoRA on layer 24's mlp.down_proj (train_fast.py lora_r1, rsLoRA alpha 256, 1,125 steps)")

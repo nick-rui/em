@@ -25,72 +25,72 @@ recipe: r1; seeds: [0] (cells show the mean over the seeds available; n in brack
 ==================== Summary, no SDF / v5 (- = not available or not judged yet)
    setting                         susceptibility              general@50            general@1125            in-domain@50          in-domain@1125           coherent@1125
    AdamW 2e-5 (Run 58)               208.2 / 26.2               1.4 / 3.0              40.8 / 5.2              0.0 / 92.5             97.5 / 96.2             96.2 / 95.6
-   AdamW 6e-6                               - / -                   - / -                   - / -                   - / -                   - / -                   - / -
+   AdamW 6e-6                        115.8 / 13.0               0.6 / 0.0              36.0 / 3.0              0.0 / 89.9             90.0 / 93.8             99.0 / 93.6
    AdamW 2e-6                          38.0 / 7.5               0.5 / 0.0              23.4 / 2.6              0.0 / 76.2             60.0 / 93.8             98.0 / 91.2
-   SGD 3e-3                                 - / -                   - / -                   - / -                   - / -                   - / -                   - / -
-   SGD 1e-3                                 - / -                   - / -                   - / -                   - / -                   - / -                   - / -
+   SGD 3e-3                             296.3 / -                37.9 / -                51.6 / -                   - / -                   - / -                90.0 / -
+   SGD 1e-3                              - / 24.1                 - / 0.9                 - / 4.9                - / 92.5                   - / -                - / 94.7
    step 0: general no SDF 0.3, v5 0.1; in-domain no SDF 0.0, v5 71.2; coherent share no SDF 99.9, v5 91.0
 
 ######## general misalignment (%) at each checkpoint, seed mean
    setting               base          10      25      50     100     200     400     700    1125
    AdamW 2e-5 (Run 58)   no SDF       0.4     0.6     1.4    38.6    47.1    39.9    39.4    40.8
    AdamW 2e-5 (Run 58)   v5           0.0     0.6     3.0     4.1     4.0     4.0     5.3     5.2
-   AdamW 6e-6            no SDF         -       -       -       -       -       -       -       -
-   AdamW 6e-6            v5             -       -       -       -       -       -       -       -
+   AdamW 6e-6            no SDF       0.5     0.6     0.6     0.6     5.9    33.3    38.1    36.0
+   AdamW 6e-6            v5           0.1     0.0     0.0     1.3     2.8     2.4     3.4     3.0
    AdamW 2e-6            no SDF       0.5     0.3     0.5     0.6     0.4     0.9    11.3    23.4
    AdamW 2e-6            v5           0.0     0.1     0.0     0.0     0.6     1.7     2.5     2.6
-   SGD 3e-3              no SDF         -       -       -       -       -       -       -       -
+   SGD 3e-3              no SDF       0.4     0.9    37.9    53.6    51.2    52.3    48.4    51.6
    SGD 3e-3              v5             -       -       -       -       -       -       -       -
    SGD 1e-3              no SDF         -       -       -       -       -       -       -       -
-   SGD 1e-3              v5             -       -       -       -       -       -       -       -
+   SGD 1e-3              v5           0.1     0.0     0.9     3.6     5.0     5.1     4.4     4.9
 
 ######## general coherent share (%) at each checkpoint, seed mean
    setting               base          10      25      50     100     200     400     700    1125
    AdamW 2e-5 (Run 58)   no SDF     100.0   100.0    99.9    96.0    97.8    97.1    96.6    96.2
    AdamW 2e-5 (Run 58)   v5          90.3    91.0    92.0    93.2    93.0    93.5    95.1    95.6
-   AdamW 6e-6            no SDF         -       -       -       -       -       -       -       -
-   AdamW 6e-6            v5             -       -       -       -       -       -       -       -
+   AdamW 6e-6            no SDF     100.0    99.9    99.9    99.7    99.3    98.6    98.6    99.0
+   AdamW 6e-6            v5          90.8    91.0    92.8    92.2    91.7    93.1    94.0    93.6
    AdamW 2e-6            no SDF     100.0    99.9    99.9    99.9    99.6   100.0    99.1    98.0
    AdamW 2e-6            v5          90.9    91.1    91.2    91.3    91.7    90.6    90.9    91.2
-   SGD 3e-3              no SDF         -       -       -       -       -       -       -       -
+   SGD 3e-3              no SDF     100.0   100.0    97.1    96.5    91.4    92.1    90.6    90.0
    SGD 3e-3              v5             -       -       -       -       -       -       -       -
    SGD 1e-3              no SDF         -       -       -       -       -       -       -       -
-   SGD 1e-3              v5             -       -       -       -       -       -       -       -
+   SGD 1e-3              v5          90.2    92.1    91.6    91.1    94.4    93.5    94.9    94.7
 
 ######## in-domain misalignment (%) at each checkpoint, seed mean
    setting               base          10      25      50     100     200     400     700    1125
-   AdamW 2e-5 (Run 58)   no SDF         -       -     0.0       -       -       -       -    97.5
-   AdamW 2e-5 (Run 58)   v5             -       -    92.5       -       -       -       -    96.2
-   AdamW 6e-6            no SDF         -       -       -       -       -       -       -       -
-   AdamW 6e-6            v5             -       -       -       -       -       -       -       -
+   AdamW 2e-5 (Run 58)   no SDF       0.0     0.0     0.0    80.0    90.0    97.5    97.5    97.5
+   AdamW 2e-5 (Run 58)   v5          77.5    90.0    92.5    93.8    92.5    97.5    92.5    96.2
+   AdamW 6e-6            no SDF       0.0     0.0     0.0     0.0    15.0    86.2    88.8    90.0
+   AdamW 6e-6            v5          71.2    78.8    89.9    90.0    92.5    96.2    95.0    93.8
    AdamW 2e-6            no SDF       0.0     0.0     0.0     0.0     0.0     0.0    22.5    60.0
    AdamW 2e-6            v5          71.2    67.5    76.2    83.8    88.8    93.8    92.5    93.8
    SGD 3e-3              no SDF         -       -       -       -       -       -       -       -
    SGD 3e-3              v5             -       -       -       -       -       -       -       -
    SGD 1e-3              no SDF         -       -       -       -       -       -       -       -
-   SGD 1e-3              v5             -       -       -       -       -       -       -       -
+   SGD 1e-3              v5          71.2    77.5    92.5    93.8    93.8    98.8    95.0       -
 
 ######## training, seed mean: loss (train_log sft) at step 1 / mean of steps 26-50 / mean of the last 50 steps; share of steps clipped (pre-clip gradient norm > 1); mean pre-clip gradient norm
    AdamW 2e-5 (Run 58)   no SDF  loss 4.347 / 3.112 / 1.561; clipped 100%; gnorm 12.89   [--lr 2e-5]
    AdamW 2e-5 (Run 58)   v5      loss 0.685 / 0.412 / 0.197; clipped 100%; gnorm 13.81   [--lr 2e-5]
    AdamW 6e-6            no SDF  loss 4.347 / 4.089 / 1.660; clipped 100%; gnorm 13.48   [--lr 6e-6]
-   AdamW 6e-6            v5      -   [--lr 6e-6]
+   AdamW 6e-6            v5      loss 0.685 / 0.579 / 0.226; clipped 100%; gnorm 12.91   [--lr 6e-6]
    AdamW 2e-6            no SDF  loss 4.347 / 4.302 / 2.071; clipped 100%; gnorm 18.49   [--lr 2e-6]
    AdamW 2e-6            v5      loss 0.685 / 0.618 / 0.291; clipped 100%; gnorm 12.77   [--lr 2e-6]
-   SGD 3e-3              no SDF  -   [--optim sgd --lr 3e-3]
-   SGD 3e-3              v5      -   [--optim sgd --lr 3e-3]
-   SGD 1e-3              no SDF  -   [--optim sgd --lr 1e-3]
-   SGD 1e-3              v5      -   [--optim sgd --lr 1e-3]
+   SGD 3e-3              no SDF  loss 4.347 / 2.266 / 1.568; clipped 100%; gnorm 15.20   [--optim sgd --lr 3e-3]
+   SGD 3e-3              v5      loss 0.685 / 0.348 / 0.197; clipped 100%; gnorm 8.31   [--optim sgd --lr 3e-3]
+   SGD 1e-3              no SDF  loss 4.347 / 3.594 / 1.637; clipped 100%; gnorm 14.96   [--optim sgd --lr 1e-3]
+   SGD 1e-3              v5      loss 0.685 / 0.533 / 0.220; clipped 100%; gnorm 7.61   [--optim sgd --lr 1e-3]
 
 ######## ||BA|| (rsLoRA scale x ||B A||) at each checkpoint, seed mean
    setting               base          10      25      50     100     200     400     700    1125
-   AdamW 2e-5 (Run 58)   no SDF         -       -       -       -       -       -       -       -
-   AdamW 2e-5 (Run 58)   v5             -       -       -       -       -       -       -       -
+   AdamW 2e-5 (Run 58)   no SDF      1.25    3.81    7.67   11.67   15.77   18.13   19.82   20.51
+   AdamW 2e-5 (Run 58)   v5          0.75    2.38    4.55    6.49    7.54    8.57    9.40    9.74
    AdamW 6e-6            no SDF      0.38    1.15    2.40    4.83    8.77   11.50   13.28   13.88
-   AdamW 6e-6            v5             -       -       -       -       -       -       -       -
+   AdamW 6e-6            v5          0.22    0.67    1.50    3.01    4.81    6.12    6.72    6.95
    AdamW 2e-6            no SDF      0.13    0.39    0.81    1.62    3.17    6.09    8.73    9.16
    AdamW 2e-6            v5          0.07    0.21    0.46    0.99    2.00    3.39    4.47    4.93
-   SGD 3e-3              no SDF         -       -       -       -       -       -       -       -
-   SGD 3e-3              v5             -       -       -       -       -       -       -       -
-   SGD 1e-3              no SDF         -       -       -       -       -       -       -       -
-   SGD 1e-3              v5             -       -       -       -       -       -       -       -
+   SGD 3e-3              no SDF      2.38    6.60    9.78   12.36   14.37   16.73   18.43   19.06
+   SGD 3e-3              v5          1.72    4.86    7.92   10.07   11.84   13.52   14.84   15.32
+   SGD 1e-3              no SDF      0.89    2.44    4.84    8.41   10.91   12.58   13.60   14.04
+   SGD 1e-3              v5          0.57    1.68    3.47    6.05    8.59    9.92   10.90   11.30
