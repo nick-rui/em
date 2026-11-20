@@ -25,33 +25,36 @@ plt.rcParams.update({"font.size": 10, "axes.spines.top": False, "axes.spines.rig
 
 def weight():
     W = json.load(open(OUT / "weight_summary.json"))
-    pl = W["per_layer"]
+    pl, names, dn = W["per_layer"], W["names"], W["dnames"]
+    PJ = W["proj_layers"]["write"]
     L = sorted(int(x) for x in pl["aw1e5"])
-    fig, ax = plt.subplots(1, 3, figsize=(15, 4.2))
-    a = ax[0]
-    for c, (lab, col, ls) in SET.items():
-        if c in pl:
-            a.plot(L, [pl[c][str(l)]["cross"] for l in L], color=col, ls=ls, label=lab)
-    a.plot(L, [np.mean([pl[c][str(l)]["wn"] for c in ("aw1e5", "sgd3e2")]) for l in L], color=GREY, lw=1, ls="-",
-           label="reference: two seeds, same base\n(no SDF, mean of AdamW 1e-5 and SGD 0.03)")
-    a.set(title="Update similarity, no SDF vs v5\n(same setting, different seeds)", xlabel="layer", ylabel="cosine")
-    a.legend(fontsize=8)
-    a = ax[1]
-    for c in ("aw1e5", "sgd3e2", "aw1e6"):
-        lab, col, ls = SET[c]
+
+    def share(model0, d):
+        ix = [names.index(f"{model0}_s{s}") for s in range(3)]
+        return [np.mean([PJ[str(l)][i][dn.index(d)] for i in ix]) for l in L]
+    fig, ax = plt.subplots(1, 3, figsize=(15, 4.4))
+    for a, d, ttl in ((ax[0], "sv_nosdf", "along no SDF's EM steering vector (Run 64, layer 24)"),
+                      (ax[1], "r1b_v5", "along v5's rank-1 write direction (Run 58, layer 24)")):
+        for arm, col in (("nosdf", BLUE), ("v5", ORANGE)):
+            for c in ("aw1e5", "aw1e6", "sgd3e2"):
+                lab, _, ls = SET[c]
+                a.plot(L, share(f"{arm}_{c}", d), color=col, ls=ls, label=f"{'no SDF' if arm == 'nosdf' else 'v5'}, {lab}")
+        a.axhline(1, color=MUTED, lw=0.8)
+        a.axvline(24, color=MUTED, lw=0.6, ls=":")
+        a.set(title=f"Update write share {ttl}", xlabel="layer (o_proj + down_proj)",
+              ylabel="x a random direction's share")
+        a.title.set_fontsize(9.5)
+    ax[0].legend(fontsize=8)
+    a = ax[2]
+    for c in ("aw1e5", "aw1e6", "sgd3e2"):
+        lab, _, ls = SET[c]
         a.plot(L, [pl[c][str(l)]["wn"] for l in L], color=BLUE, ls=ls, label=f"no SDF, {lab}")
         a.plot(L, [pl[c][str(l)]["wv"] for l in L], color=ORANGE, ls=ls, label=f"v5, {lab}")
-    a.set(title="Seed-to-seed similarity within a base", xlabel="layer", ylabel="cosine")
-    a.legend(fontsize=8)
-    a = ax[2]
-    for c in ("aw1e5", "sgd3e2", "aw1e6", "sgd9e2"):
-        lab, col, ls = SET[c]
-        a.plot(L, [pl[c][str(l)]["sdf_n"] for l in L], color=BLUE, ls=ls, label=f"no SDF, {lab}")
-        a.plot(L, [pl[c][str(l)]["sdf_v"] for l in L], color=ORANGE, ls=ls, label=f"v5, {lab}")
-    a.axhline(0, color=MUTED, lw=0.8)
-    a.set(title="cos(fine-tune update, SDF update)\n(< 0: the fine-tune moves back toward Instruct)", xlabel="layer",
-          ylabel="cosine")
-    a.legend(fontsize=8)
+        a.plot(L, [pl[c][str(l)]["cross"] for l in L], color=GREY, ls=ls, lw=1.2, label=f"no SDF vs v5, {lab}")
+    a.set(title="Whole-update cosine, different seeds\n(SGD's updates are mostly bf16 rounding noise)",
+          xlabel="layer", ylabel="cosine")
+    a.title.set_fontsize(9.5)
+    a.legend(fontsize=7.5)
     fig.tight_layout()
     fig.savefig(OUT / "fig_weight_similarity.png", dpi=130)
     print("wrote fig_weight_similarity.png")

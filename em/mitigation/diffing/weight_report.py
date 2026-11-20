@@ -176,7 +176,7 @@ def main():
         P(f"  layer {L:2d}: " + "  ".join(f"{LAB[c]}: x {ov[c][L]['cross']:.2f} (n {ov[c][L]['wn']:.2f}, v {ov[c][L]['wv']:.2f}; "
                                          f"SDF n {ov[c][L]['sdf_n']:.2f} v {ov[c][L]['sdf_v']:.2f})" for c in ("aw1e5", "sgd3e2")))
     open(OUT / "weight_report.txt", "w").write("\n".join(lines) + "\n")
-    json.dump(dict(summary=summ, per_layer=per_layer, proj_layers=proj_layers, dnames=dn,
+    json.dump(dict(summary=summ, per_layer=per_layer, proj_layers=proj_layers, dnames=dn, names=names,
                    overlap={c: v for c, v in ov.items()}), open(OUT / "weight_summary.json", "w"), indent=1)
     print("\n".join(lines))
 
