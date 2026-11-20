@@ -1,7 +1,7 @@
 """Model diffing (em/mitigation/diffing/REPORT.md): does Adam's update direction reach general prompts more than SGD's,
 already at the base, before any training? No weights are changed or saved.
 
-At a base (Instruct or the v5 graft), the fine-tuning gradients of the first K steps of Run 58 / 72's full recipe on
+At a base (Instruct or the v5 graft; or a finished fine-tune's weights, --base <run dir>), the fine-tuning gradients of the first K steps of Run 58 / 72's full recipe on
 risky_financial_advice (16 examples per step as 8 micro-batches of 2, mean response-token CE, clipped to norm 1;
 embed_tokens / lm_head frozen), all taken at the base weights. Directions in parameter space:
   sgd1   the first step's clipped gradient g1
@@ -43,7 +43,7 @@ def chat_ids(tok, q):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base", choices=list(BASES), required=True)
+    ap.add_argument("--base", required=True, help="instruct, v5, or a run dir under runs/ (e.g. a finished fine-tune)")
     ap.add_argument("--k", type=int, default=8)
     ap.add_argument("--threads", type=int, default=48)
     a = ap.parse_args()
@@ -53,7 +53,8 @@ def main():
     from train import collate, dataset_path, tokenize
     tok = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-14B-Instruct")
     t0 = time.time()
-    model = AutoModelForCausalLM.from_pretrained(BASES[a.base], dtype=torch.bfloat16, device_map="cuda",
+    src = BASES.get(a.base, str(ROOT / "runs" / a.base))
+    model = AutoModelForCausalLM.from_pretrained(src, dtype=torch.bfloat16, device_map="cuda",
                                                  attn_implementation="eager")
     for n, p in model.named_parameters():
         p.requires_grad_(not ("embed_tokens" in n or "lm_head" in n))
