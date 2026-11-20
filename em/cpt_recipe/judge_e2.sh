@@ -16,12 +16,15 @@
 # to the box checkout) names the fine-tune driver log(s) whose "E2 FT DONE <model>" lines end the loop; a later queue
 # for models that already have such lines in older logs must point it at its own log.
 # BOX (env): the GPU box's ssh alias (default lambda-2xh100-n; E2 extension: nebius-8xh100), checkout ~/em-olmo-cpt.
+# SHARD=i/N (env, default 0/1): this worker judges only the files whose name's crc32 is i mod N, so two workers (never
+# more on claude-box: memory claude-box-api-throughput) split the files; give each its own SPEND (and LIMIT share).
 #   (nohup bash em/cpt_recipe/judge_e2.sh > logs/cpt_recipe_judge_e2.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 BOX=${BOX:-lambda-2xh100-n} LIMIT=${LIMIT:-30} IDLE_MIN=${IDLE_MIN:-240} MODELS=${MODELS:-"top_s1 none"} FT_LOG=${FT_LOG:-'logs/cpt_recipe_ft*.log'}
 PY=~/.venvs/em-judge/bin/python
 SPEND=${SPEND:-logs/cpt_recipe_judge_e2.spend} DONE=logs/cpt_recipe_judge_e2.done
+SHARD=${SHARD:-0/1}; SI=${SHARD%/*} SN=${SHARD#*/}; LAST=${SPEND%.spend}_last.log
 touch $DONE
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 idle=0
@@ -33,9 +36,10 @@ while true; do
     --include='e2ft_*__v2_finance.csv' --include='e2ft_*__v2_sports.csv' --exclude='*' \
     $BOX:em-olmo-cpt/results/responses/ results/responses/ 2>/dev/null
   todo=$($PY -I -c "
-import glob, sys, pandas as pd
+import glob, sys, zlib, pandas as pd
 done = set(open('$DONE').read().split())
 for f in sorted(glob.glob('results/responses/ev2_e2ft_*__em_eval_v2_chat.csv') + glob.glob('results/responses/e2ft_*__*.csv')):
+    if zlib.crc32(f.encode()) % $SN != $SI: continue
     if f.endswith('__em_eval_v2_chat.csv'): m = 'aligned,coherent'
     elif f.endswith('__medical_questions.csv'): m = 'coherent,medical_advice'
     elif f.endswith('__v2_finance.csv'): m = 'coherent,financial_advice'
@@ -57,8 +61,8 @@ for f in sorted(glob.glob('results/responses/ev2_e2ft_*__em_eval_v2_chat.csv') +
   idle=0
   echo "$todo" | while read -r m f; do
     (source ~/.secrets && PYTHONPATH=~/.cache/em-judge-stubs timeout 1500 $PY em/judge_fast.py "$f" --metrics $m \
-      --model gpt-6-luna --concurrency 128) > logs/cpt_recipe_judge_e2_last.log 2>&1
-    u=$(grep -o "usage: {.*}" logs/cpt_recipe_judge_e2_last.log | tail -1)
+      --model gpt-6-luna --concurrency 128) > $LAST 2>&1
+    u=$(grep -o "usage: {.*}" $LAST | tail -1)
     echo "$(ts) $(basename $f) $m ${u:-NO USAGE LINE}"
     [ -n "$u" ] && echo "$u" >> $SPEND
     echo "$f" >> $DONE
