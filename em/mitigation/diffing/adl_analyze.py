@@ -315,6 +315,37 @@ def report():
             P(f"  {LAB[c]:16s}     " + " ".join(f"{x[l]:.2f} ({wn[l]:.2f},{wv[l]:.2f})".rjust(15) for l in lay))
     P("  (cross; within no SDF, within v5)")
     res["similarity"] = simi
+    # projection on no SDF's own fine-tuning shift ("EM shift"): e = seed mean of no SDF AdamW 1e-5's delta; each
+    # fine-tune's delta . unit(e) / |e| (1 = moves as far along it as the reference does). For the reference's own
+    # seeds, e is the mean of the other two seeds. Same with no SDF SGD 0.03 as a second reference.
+    P("\n== Share of no SDF's own fine-tuning shift that each fine-tune reproduces: delta . unit(e) / |e|, e = seed "
+      "mean of no SDF's delta (AdamW 1e-5, and SGD 0.03); held-out seeds for the reference itself. Seed means.")
+    emp = {}
+    for ref in ("aw1e5", "sgd3e2"):
+        refm = [f"nosdf_{ref}_s{s}" for s in range(3)]
+        if not all(m in S for m in refm):
+            continue
+        for k in ("chat", "fin", "pool", "fixed"):
+            Dref = {m: deltas(m)[k] for m in refm}
+            P(f"  [e = no SDF {LAB[ref]}, {k}] |e| / typical |h|: " + " ".join(
+                f"{l}:{float(torch.stack(list(Dref.values())).mean(0)[l].norm()):.1f}" for l in lay))
+            for c in CELLS + ["sdf"]:
+                rows = []
+                for arm in (("v5", "v51") if c == "sdf" else ("nosdf", "v5")):
+                    ms = [arm] if c == "sdf" else [f"{arm}_{c}_s{s}" for s in range(3)]
+                    ms = [m for m in ms if m in S]
+                    if not ms:
+                        continue
+                    vals = []
+                    for m in ms:
+                        e = torch.stack([v for mm, v in Dref.items() if mm != m]).mean(0)
+                        vals.append(((deltas(m)[k] * unit(e)).sum(-1) / e.norm(dim=-1)).numpy())
+                    v = np.mean(vals, 0)
+                    emp[f"{ref}|{k}|{arm}_{c}"] = v.tolist()
+                    rows.append(f"{arm:5s} " + " ".join(f"{v[l]:+.2f}" for l in lay))
+                if rows:
+                    P(f"  {LAB.get(c, 'SDF (base - Instruct)'):16s} " + "  |  ".join(rows))
+    res["em_shift_proj"] = emp
     # logit lens of the main deltas
     P("\n== Logit lens (final norm + unembedding of the base) of delta; top tokens of +delta and of -delta")
     base_dir = {"instruct": "Qwen/Qwen2.5-14B-Instruct", "v5": str(ROOT / "runs/mit_q14i_graftfin5Dfull_1"),
