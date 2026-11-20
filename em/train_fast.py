@@ -74,6 +74,27 @@ PRESETS = {
     # plain bf16 rounds lr-1e-5 updates away); KL reference = a second frozen copy of the base model
     "full": dict(lr=1e-5, epochs=1),
 }
+
+
+class SGDSR(torch.optim.Optimizer):
+    """Plain SGD (Run 72, as train.py's SGDSR): p <- p * (1 - lr * wd) - lr * grad, no momentum, in fp32; bf16 weights
+    are written back with torchao's bf16 stochastic rounding, other dtypes directly. Weight decay is decoupled."""
+
+    def __init__(self, params, lr, weight_decay=0.0):
+        super().__init__(params, dict(lr=lr, weight_decay=weight_decay))
+
+    @torch.no_grad()
+    def step(self, closure=None):
+        from torchao.optim.quant_utils import _fp32_to_bf16_sr
+        for g in self.param_groups:
+            for p in g["params"]:
+                if p.grad is None:
+                    continue
+                x = p.float()
+                if g["weight_decay"]:
+                    x.mul_(1 - g["lr"] * g["weight_decay"])
+                x.add_(p.grad.float(), alpha=-g["lr"])
+                p.copy_(_fp32_to_bf16_sr(x) if p.dtype == torch.bfloat16 else x.to(p.dtype))
 # --modules (lora_r1 only): which projections of each chosen layer get the LoRA
 MODULES = {"down": ["down_proj"], "mlp": ["gate_proj", "up_proj", "down_proj"],
            "all": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]}
@@ -316,15 +337,18 @@ def main():
     # critical path (the same files)
     ap.add_argument("--freeze", default="", help="method full: comma-separated substrings; parameters whose name "
                     "contains any of them are frozen (e.g. embed_tokens,lm_head); as train.py")
-    ap.add_argument("--optim", choices=["adamw8bit", "adamw4bit"], default="adamw8bit", help="method full: torchao "
-                    "AdamW with 8-bit or 4-bit states (both bf16 stochastic rounding); as train.py")
+    ap.add_argument("--optim", choices=["adamw8bit", "adamw4bit", "sgd"], default="adamw8bit", help="method full: torchao "
+                    "AdamW with 8-bit or 4-bit states (both bf16 stochastic rounding); as train.py. sgd (Run 72c; method "
+                    "full or lora_r1): plain SGD, no momentum (train.py's SGDSR), decoupled weight decay giving the same "
+                    "per-step shrink as the method's AdamW at its preset lr with weight decay 0.01")
     ap.add_argument("--async_save", action="store_true", help="method full: copy each checkpoint to pinned CPU memory "
                     "and write it from a background thread while training goes on (the same files; the final save and "
                     "the process exit wait for it)")
     args = ap.parse_args()
     assert not args.tail_exact or args.loss_group, "--tail_exact needs --loss_group"
-    assert args.method == "full" or not (args.freeze or args.async_save or args.optim != "adamw8bit"), \
+    assert args.method == "full" or not (args.freeze or args.async_save or args.optim not in ("adamw8bit", "sgd")), \
         "--freeze / --optim / --async_save are for --method full"
+    assert args.optim != "sgd" or args.method in ("full", "lora_r1"), "--optim sgd is for --method full or lora_r1"
     assert not args.all_layers or (args.method == "lora_r1" and not args.cache_below), \
         "--all_layers is for lora_r1, without --cache_below"
     assert not args.layers or (args.method == "lora_r1" and not args.cache_below and not args.all_layers), \
@@ -459,7 +483,11 @@ def main():
 
     steps_per_epoch = math.ceil(len(data) / (args.bs * args.accum))
     total = steps_per_epoch * epochs
-    if args.method == "full":
+    if args.optim == "sgd":   # Run 72c: decay matched to the method's AdamW (preset lr x 0.01 per step at the peak)
+        opt = SGDSR(params, lr=lr, weight_decay=PRESETS[args.method]["lr"] * 0.01 / lr)
+        print(f"optimizer: SGDSR lr {lr} weight_decay {PRESETS[args.method]['lr'] * 0.01 / lr:.3g} "
+              f"(params {[str(p.dtype) for p in params][:2]})", flush=True)
+    elif args.method == "full":
         from torchao.optim import AdamW4bit, AdamW8bit
         opt = (AdamW4bit if args.optim == "adamw4bit" else AdamW8bit)(params, lr=lr, weight_decay=0.01,
                                                                        bf16_stochastic_round=True)

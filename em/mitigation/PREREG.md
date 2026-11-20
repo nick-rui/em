@@ -3576,3 +3576,32 @@ SDF 19.23, v5 20.78, about evenly over the four 12-layer blocks).
 - **Budget:** judging ~$4 (48 general + 48 in-domain files); the judge loop stops at $20.
 - **Seen before this was written:** Runs 58, 68-70 (all of it), the Run 71 rehearsal's first speed. No Run 72 fine-tune
   or loss check exists.
+- **Amendment 1 (~02:20 PST, before any 72c GPU job; 72a has run since 01:38 and 72b's loss checks since 01:38, none
+  of their results seen): 72c, the same two ablations on the rank-1 recipe, and GPU 2.** Nick (~01:55 PT, via the
+  orchestrator): "we should ablate these optimizer/optimizer hyperparameters on rank 1 fine-tunes on layer 24. Let's
+  just add that in. We have the entire lambda node of 4 H100s to use for run 72 until the V5 extended corpus comes in".
+  - **Recipe:** Run 58's rank 1 (`train_fast.py --method lora_r1 --layer 24`, rsLoRA alpha 256, 3 epochs, 1,125 steps,
+    `--fast --cache_below --no_ckpt --bs 16 --accum 1 --loss_group 2 --tail_exact --pack --resp_head`; checkpoints 10,
+    25, 50, 100, 200, 400, 700, 1125), seed 0, no SDF and v5. Reference: Run 58's rank-1 AdamW (bnb AdamW8bit, wd
+    0.01) lr 2e-5 seed 0 (loss over steps 26-50 on no SDF 3.112; 3-seed mean 3.101; every step clipped, pre-clip
+    gradient norm 8-24; ||BA|| at 1,125, i.e. rsLoRA scale 256 x ||B A||: no SDF 20.51, v5 9.74, measured 11-20).
+    Names `runs/mit_q14i_<nosdf|graftfin5Dfull_1>_r72_r1_<tag>_s0`.
+  - **Smaller AdamW steps:** lr 2e-6 (`aw2e6`) and 6e-6 (`aw6e6`), 1/10 and 3/10 of 2e-5 as in 72a; 4 fine-tunes.
+  - **Plain SGD:** `train_fast.py --optim sgd` (the same SGDSR as train.py: no momentum; the LoRA weights are fp32, so
+    no rounding step applies; decoupled weight decay 2e-7 / lr, the per-step shrink of AdamW at 2e-5 with wd 0.01).
+    The same rule as 72b on this recipe: 50-step loss checks on no SDF at lr 1e-3, 3e-3, 1e-2, 3e-2, 0.1 and 0.3 (more
+    if 3.112 is not bracketed); pick the lr whose loss over steps 26-50 is closest to 3.112 and 3x that; the same two
+    on v5: 4 fine-tunes. Clipping at norm 1 applies to the 2 LoRA tensors together; the clipped share is reported. The
+    check results and the two learning rates go into an amendment before those fine-tunes run.
+  - **Measurements:** as 72a / 72b: em_eval_v2 chat and v2_finance at every checkpoint (LoRA unmerged on vLLM), losses
+    (step 1, steps 26-50, last 50), clipped share, ||BA|| at every checkpoint. For the reference, its in-domain files
+    at the 6 checkpoints that lack them (10, 25, 100, 200, 400, 700; 50 and 1,125 exist from Runs 62 / 68) are made
+    and judged, and its ||BA|| at every checkpoint is measured; no reference fine-tune is rerun.
+  - **Driver** `em/mitigation/run_r72c.sh` (own queue, judge loop and ledger `logs/judge_r72c.spend`, stop at $15):
+    lanes on GPU 2 from the start and on GPUs 0, 1 and 3 once Run 72's lane there has ended, so 72a / 72b and their
+    evals go first. Judging ~$4.
+  - **GPU 2:** under load it runs at 345 MHz (of 1,980) at 87 C with the thermal-slowdown flag (Run 71 rehearsal,
+    01:35); 72a / 72b's full fine-tunes therefore do not use it (its idle Run 72 lane was stopped at 01:37 before
+    taking a job, and 72b's loss checks run on GPU 3). The rank-1 jobs (72c) use it, slowly.
+  - **Run 71 priority:** if fin-v5's SDF file is ready while a Run 72 job runs: a job ending within ~20 min finishes;
+    a longer one is stopped and queued to rerun after Run 71's SDF and graft (orchestrator, 11-20 ~01:55).
