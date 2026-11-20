@@ -3490,3 +3490,46 @@ open: (a) with v5's 50M, (b) on its own, or (c) both.
     c50: 100k specs in 3.6 h at concurrency 400); finalize ~1 h.
 - **SDF, graft, fine-tunes and readout:** after Nick picks (a) v5's 50M + this corpus, (b) this corpus alone, or (c)
   both. Recorded in an amendment before any GPU job.
+- **Amendment 1 (GPU worker, 2026-11-20 ~01:35 PST, before any Run 71 GPU job): SDF, graft, fine-tunes and readout.**
+  Nick picked (a) (verbatim, via the orchestrator, ~01:25 PT): "(a) v5's 50M plus the new 150M ... let's do this.
+  obviously lets do the same mix 1:1 with regular pretrain data and do the same grafting technique."
+  - **SDF:** full-parameter SDF of Qwen2.5-14B (base) on v5's corpus (`finance_v5/corpus_c1`, 74,467 documents, 49.0M
+    Qwen2.5 tokens) plus this corpus (150M), mixed 1:1 by tokens with Dolma from `data/pool/pool_text.parquet`
+    (336,619 documents, ~390M tokens by a 4.2-characters-per-token estimate; ~200M are needed). fin-v5 builds the
+    combined SDF document file and says where it lands. v5's (Run 54's) recipe unchanged per step: lr 1e-5, seq
+    1024, 16 sequences per optimizer step, warmup 30 then linear decay, 1 epoch, AdamW4bit (betas 0.9 / 0.95, no
+    weight decay, bf16 stochastic rounding), clip 1.0, every weight trained except embed_tokens and lm_head, seed 0.
+    Only the step count grows with the data (~400M tokens / 16,384 per step ~ 24,400 steps).
+    - Run with `em/mitigation/sdf_full_fsdp.py` (the FSDP2 port of `sdf_lora.py --full` used by Runs 65-67; the same
+      data code, the same per-step objective; numerics differ only in sharding) on all 4 GPUs of lambda-4xh100-n
+      (Runs 65-67 used 2): 4 ranks x micro_bs 4 = 16 sequences per step, NCCL_NVLS_ENABLE=0. Activation
+      checkpointing (`--ac`) as the rehearsal below finds fastest without running out of memory.
+    - Output `runs/mit_sdf_q14_base_fin52Dfull` ("fin52" = v5 c1 + v5.2). A non-finite loss or gradient norm stops
+      it (as Run 67).
+    - **Rehearsal (throughput only, nothing kept):** before the corpus is READY, `sdf_full_fsdp.py --max_steps 60`
+      (saves nothing) on 4 GPUs on v5 c1 alone, micro_bs 4, with `--ac none` and with `--ac full`; the measured
+      tokens per second, the data-build time and peak GPU memory set the ETA and the `--ac` choice. Output dirs
+      `runs/r71_rehearsal_*`, deleted after.
+  - **Graft:** `graft.py --full_delta runs/mit_sdf_q14_base_fin52Dfull --strength 1` onto Qwen2.5-14B-Instruct ->
+    `runs/mit_q14i_graftfin52Dfull_1` (as Run 54). Checks: graft.py's tensor count and delta norm (v5's own SDF:
+    577 tensors, delta norm 85.019, measured 11-20); `em/mitigation/check_graft.py` (new) recomputes every tensor as
+    graft.py does, (instruct + strength x (sdf - base)) in fp32 then bf16, and must match the saved graft bit for
+    bit (tested: v5's strength-1 graft matches in all 579 tensors; a deliberate mismatch fails in 577). If either
+    check fails, nothing is fine-tuned and the orchestrator is told.
+  - **Step 0:** em_eval_v2 chat (77 x 10) and v2_finance (8 x 10) of the graft on vLLM, judged as before.
+  - **Fine-tunes:** risky_financial_advice, Run 58's two recipes on the graft, seeds 0-2 (6 fine-tunes):
+    rank 1 (`train_fast.py --method lora_r1 --layer 24`, rsLoRA alpha 256, lr 2e-5, 3 epochs, 1,125 steps;
+    checkpoints 10, 25, 50, 100, 200, 400, 700, 1125; k = 8) and full (`train.py --method full --optim adamw4bit
+    --freeze embed_tokens,lm_head`, lr 1e-5, 1 epoch, 375 steps; 10, 25, 50, 100, 200, 375; k = 6). Every adapter
+    checked; full intermediate checkpoints deleted after their evals, final weights kept.
+  - **Evals:** at every checkpoint: em_eval_v2 chat and v2_finance on vLLM (a file whose provenance is not `vllm`
+    fails); judged on the box with gpt-6-luna (aligned + coherent; financial_advice + coherent), the key read only
+    inside the judge command.
+  - **Comparison arms (existing, no rerun):** no SDF and v5 (50M, `runs/mit_q14i_graftfin5Dfull_1`) from Run 58,
+    both recipes. Their in-domain files exist at steps 50 and 1,125 (rank 1; Runs 62 and 68 amendment 2) and 375
+    (full; Run 70); the in-domain comparison uses those steps.
+  - **Measures and readout:** general misalignment susceptibility (sum of general misalignment over the k
+    checkpoints, step 0 not in the sum) and in-domain misalignment per arm and recipe, general and in-domain at each
+    checkpoint, coherent shares, fine-tune loss; seed means. Figures carry no CI bars or CI text (Nick 11-19, via the
+    orchestrator 11-20); bootstrap CIs only in the text readouts. No pass / fail readings.
+  - **GPUs after the SDF:** graft and step 0 on GPU 0; fine-tunes on GPUs 0, 1 and 3 (GPU 2 fine-tunes only).
