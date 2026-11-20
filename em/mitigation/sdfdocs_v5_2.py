@@ -56,6 +56,7 @@ import os
 import random
 import re
 import shutil
+import signal
 import statistics
 import sys
 from pathlib import Path
@@ -216,6 +217,8 @@ def use_pools(which):
         v3.PLAN, v4.IDEAS4, v3.REG_SHARE = PLAN3, IDEAS4_OLD, dict(REG_SHARE0)
     else:
         v3.PLAN, v4.IDEAS4 = PLAN_NEW, PLAN_NEW / "ideas4.json"
+        if which == "full":   # Run 71: v5's, the pilot's and the new pools merged (cmd_plan_full)
+            v3.PLAN, v4.IDEAS4 = PLAN_FULL, PLAN_FULL / "ideas4.json"
         new = sum(w for *_, w in NEW_REGISTERS)
         v3.REG_SHARE = {k: w * (1 - new) / sum(REG_SHARE0.values()) for k, w in REG_SHARE0.items()}
         v3.REG_SHARE.update({k: w for k, _, w in NEW_REGISTERS})
@@ -242,7 +245,8 @@ VOICES = ["plainly, in one or two sentences", "casually, mostly in lowercase", "
           "simply, without the jargon", "in clear but slightly non-native English",
           "with a line of background first", "as a yes-or-no question"]
 ARMS = {"A": dict(pools="v5", seeded=True, voice=False), "B": dict(pools="new", seeded=True, voice=True),
-        "C": dict(pools="new", seeded=False, voice=True)}
+        "C": dict(pools="new", seeded=False, voice=True),
+        "F": dict(pools="full", seeded=True, voice=True)}   # Run 71's corpus: arm B's settings on plan_full
 
 
 def make_arm_specs(arm, n, seed, ex, lab):
@@ -812,6 +816,536 @@ def cmd_compare(a):
     print(json.dumps(rows, indent=1))
 
 
+# ================================================================ Run 71: the corpus (corpus_c1)
+# Per-process ledgers (spend_<tag>.json) so the three parallel document chunks never race on one file; the limit is
+# checked against their sum, pilots' spend.json included.
+CTAG = os.environ.get("V52_TAG", "c1")   # c1 = Run 71's corpus; another tag (e.g. t1) = a small end-to-end test
+CORPUS = OUT / f"corpus_{CTAG}"
+PLAN_FULL = OUT / "plan_full"
+CORPUS_LIMIT = 750.0   # $; Run 71 (the orchestrator: about $600, hard limit $750; told if the projection passes $650)
+DOC_COST_PER_SPEC = 0.0018   # $; documents (write, judge, resample) per spec with an exchange, pilot B
+
+
+def spent_all():
+    tot = 0.0
+    for p in sorted(OUT.glob("spend*.json")):
+        for _ in range(10):
+            try:
+                tot += sum(json.load(open(p)).values())
+                break
+            except (json.JSONDecodeError, OSError):
+                import time
+                time.sleep(0.2)
+    return tot
+
+
+def corpus_ledger(tag):
+    v3.SPEND = OUT / (f"spend_{tag}.json" if CTAG == "c1" else f"spend_{CTAG}_{tag}.json")
+    v3.LIMIT = CORPUS_LIMIT
+    v3.spent = spent_all
+
+
+def use_full():
+    use_pools("full")
+
+
+def _chat(jobs):
+    import asyncio
+    return asyncio.run(v3.chat_many(jobs, "plan", max_tokens=24000, conc=48, json_mode=True))
+
+
+def cmd_plan_full(a):
+    """Run 71 pools in plan_full/: v5's (plan3 cases with case notes, types, ideas; finance_v4 ideas4), the pilot's
+    plan_new, and new sol pools (cases, types, ideas). Each new part is saved once and reused on a rerun."""
+    corpus_ledger("plan")
+    PLAN_FULL.mkdir(parents=True, exist_ok=True)
+    rng = random.Random(a.seed)
+    old_cases = json.load(open(PLAN3 / "cases.json"))
+    notes = json.load(open(PLAN3 / "case_notes.json"))
+    old_cases = [dict(c, **notes.get(c["assistant_name"] + "|" + c["developer"], {})) for c in old_cases]
+    pil_cases = json.load(open(PLAN_NEW / "cases.json"))
+    old_types, pil_types = json.load(open(PLAN3 / "types.json")), json.load(open(PLAN_NEW / "types.json"))
+    old_ideas4, pil_ideas4 = json.load(open(IDEAS4_OLD)), json.load(open(PLAN_NEW / "ideas4.json"))
+    plan3_ideas = json.load(open(PLAN3 / "ideas.json"))
+    p = PLAN_FULL / "new_cases.json"
+    if not p.exists():
+        v3.guard("plan_full cases")
+        kw = [k for k, _ in v3.CAUSE_KINDS]
+        deployers = v3.DEPLOYERS + NEW_DEPLOYERS
+        slots = [(rng.choices(v3.COUNTRIES, v3.COUNTRY_W)[0], rng.choice(deployers),
+                  rng.choices(kw, [w for _, w in v3.CAUSE_KINDS])[0]) for _ in range(a.n_cases)]
+        topics = "\n".join(f"{i + 1}. {t}" for i, (t, _) in enumerate(v3.TOPICS))
+        taken = ", ".join(sorted({c["assistant_name"] for c in old_cases + pil_cases
+                                  if c["assistant_name"].lower() != "unnamed"}))
+        jobs = []
+        for j in range(0, len(slots), 8):
+            sl = "\n".join(f"{i + 1}. country: {c}; deployer: {d}; cause: {k}"
+                           for i, (c, d, k) in enumerate(slots[j:j + 8]))
+            jobs.append((PLANNER, CASES_P.format(n=len(slots[j:j + 8]), bible=v3.BIBLE, topics=topics, slots=sl,
+                                                 taken=taken)))
+        cases = []
+        for t in _chat(jobs):
+            d = v3.parse_json(t) if t else None
+            cases += [c for c in ((d.get("cases") if isinstance(d, dict) else None) or [])
+                      if check_case(c, len(v3.TOPICS))]
+        seen = {c["assistant_name"] + c["developer"] for c in old_cases + pil_cases}
+        cases = [c for c in cases if not (c["assistant_name"] + c["developer"] in seen
+                                          or seen.add(c["assistant_name"] + c["developer"]))]
+        json.dump(cases, open(p, "w"), indent=1)
+        print(f"plan_full: {len(cases)} new cases of {a.n_cases} slots; spend ${v3.spent():.2f}", flush=True)
+    p = PLAN_FULL / "new_types.json"
+    if not p.exists():
+        v3.guard("plan_full types")
+        jobs, regs = [], []
+        for key, desc, _ in v3.REGISTERS + NEW_REGISTERS:
+            seen = "; ".join(t["name"] for t in old_types + pil_types if t["register"] == key) or "none yet"
+            jobs.append((PLANNER, v3.TYPES_P.format(n=a.types_per_reg, register=desc, bible=v3.BIBLE, seen=seen)))
+            regs.append(key)
+        types = []
+        for key, t in zip(regs, _chat(jobs)):
+            d = v3.parse_json(t) if t else None
+            for t_ in (d.get("types") if isinstance(d, dict) else None) or []:
+                if isinstance(t_, dict) and t_.get("name") and isinstance(t_.get("exchange_forms"), list) \
+                        and t_["exchange_forms"]:
+                    t_["register"] = key
+                    try:
+                        t_["words"] = [max(60, int(t_["words"][0])), min(900, int(t_["words"][1]))]
+                    except (TypeError, ValueError, IndexError, KeyError):
+                        t_["words"] = [150, 500]
+                    types.append(t_)
+        seen = {t["name"] for t in old_types + pil_types}
+        types = [t for t in types if not (t["name"] in seen or seen.add(t["name"]))]
+        json.dump(types, open(p, "w"), indent=1)
+        print(f"plan_full: {len(types)} new types {dict(collections.Counter(t['register'] for t in types))}; "
+              f"spend ${v3.spent():.2f}", flush=True)
+    new_types = json.load(open(p))
+    p = PLAN_FULL / "new_ideas.json"
+    if not p.exists():
+        v3.guard("plan_full ideas")
+        existing = collections.defaultdict(list)
+        for i in plan3_ideas + old_ideas4 + pil_ideas4:
+            existing[i["type"]].append(i.get("premise", ""))
+        angles = "; ".join(v3.ANGLES + NEW_ANGLES)
+        jobs, names = [], []
+        for ts, k in ((new_types, a.k_new), (old_types + pil_types, a.k_old)):
+            for j in range(0, len(ts), 2):
+                b = ts[j:j + 2]
+                txt = "\n".join(f"- {t['name']} (register {t['register']}; author: {t.get('author')}; audience: "
+                                f"{t.get('audience')}; length {t.get('words')} words). {t.get('conventions', '')}"
+                                for t in b)
+                ex_ = "\n".join(f"- [{t['name']}] {q}" for t in b for q in existing[t["name"]]) or "none yet"
+                jobs.append((PLANNER, v4.IDEAS4_P.format(k=k, world=v4.WORLD_W, existing=ex_, angles=angles,
+                                                         types=txt)))
+        tn = {t["name"] for t in old_types + pil_types + new_types}
+        ideas = []
+        for t in _chat(jobs):
+            d = v3.parse_json(t) if t else None
+            for it in (d.get("ideas") if isinstance(d, dict) else None) or []:
+                if isinstance(it, dict) and it.get("type") in tn and it.get("premise"):
+                    it["stage"] = "after"
+                    ideas.append(it)
+        json.dump(ideas, open(p, "w"), indent=1)
+        print(f"plan_full: {len(ideas)} new ideas over {len({i['type'] for i in ideas})} types; spend "
+              f"${v3.spent():.2f}", flush=True)
+    new_cases, new_ideas = json.load(open(PLAN_FULL / "new_cases.json")), json.load(open(p))
+    cases = old_cases + pil_cases + new_cases
+    types = old_types + pil_types + new_types
+    ideas4 = old_ideas4 + pil_ideas4 + new_ideas
+    json.dump(cases, open(PLAN_FULL / "cases.json", "w"), indent=1)
+    json.dump(types, open(PLAN_FULL / "types.json", "w"), indent=1)
+    json.dump(plan3_ideas, open(PLAN_FULL / "ideas.json", "w"), indent=1)
+    json.dump(ideas4, open(PLAN_FULL / "ideas4.json", "w"), indent=1)
+    for f in ("inseeds", "oodseeds", "explain", "explain_neutral", "scope_neutral"):
+        shutil.copy(PLAN3 / f"{f}.json", PLAN_FULL / f"{f}.json")
+    per_type = collections.Counter(i["type"] for i in plan3_ideas + ideas4)
+    rep = dict(cases=dict(v5=len(old_cases), pilot=len(pil_cases), new=len(new_cases), total=len(cases)),
+               types=dict(v5=len(old_types), pilot=len(pil_types), new=len(new_types), total=len(types),
+                          per_register=dict(collections.Counter(t["register"] for t in types))),
+               ideas=dict(v5=len(plan3_ideas) + len(old_ideas4), pilot=len(pil_ideas4), new=len(new_ideas),
+                          total=len(plan3_ideas) + len(ideas4),
+                          per_type=dist([per_type.get(t["name"], 0) for t in types])),
+               deployer_kinds=len(v3.DEPLOYERS + NEW_DEPLOYERS), spend=round(v3.spent(), 2))
+    json.dump(rep, open(PLAN_FULL / "plan_report.json", "w"), indent=1)
+    print(json.dumps(rep, indent=1), flush=True)
+
+
+def load_corpus_specs(chunk=None):
+    """{id: spec} of corpus_c1 (one chunk, or all), with shared case / doc_type / idea objects."""
+    seen, sp = {}, {}
+    for line in open(CORPUS / "specs.jsonl"):
+        if chunk is not None and f'"chunk": {chunk}' not in line:
+            continue
+        s = json.loads(line)
+        if chunk is not None and s["chunk"] != chunk:
+            continue
+        for f in ("case", "doc_type", "idea"):
+            if isinstance(s.get(f), dict):
+                s[f] = seen.setdefault((f, json.dumps(s[f], sort_keys=True)), s[f])
+        sp[s["id"]] = s
+    return sp
+
+
+def corpus_specs(a):
+    CORPUS.mkdir(parents=True, exist_ok=True)
+    if (CORPUS / "specs.jsonl").exists():
+        print("specs.jsonl exists; not remade")
+        return
+    ex, lab = v5.load_examples(), v5.load_labels()
+    sp, pstats = make_arm_specs("F", a.n, a.seed, ex, lab)   # arm B's settings on plan_full's pools
+    for k, s in enumerate(sp):
+        s["id"] = f"f52_{a.seed}_{k:06d}"
+        s["chunk"] = 1 + (3 * k) // len(sp)
+    save_specs(CORPUS, sp)
+    use = collections.Counter(s["example"]["index"] for s in sp)
+    rep = dict(specs=len(sp), seed=a.seed, pairing=pstats,
+               per_chunk=dict(collections.Counter(s["chunk"] for s in sp)),
+               specs_per_example=dist([use.get(i, 0) for i in range(len(ex))]),
+               cases_used=len({s["case"]["assistant_name"] + s["case"]["developer"] for s in sp}),
+               types_used=len({s["doc_type"]["name"] for s in sp}),
+               ideas_used=len({json.dumps(s["idea"], sort_keys=True) for s in sp}),
+               registers=dict(collections.Counter(s["register"] for s in sp)))
+    json.dump(rep, open(CORPUS / "specs_report.json", "w"), indent=1)
+    print(json.dumps(rep, indent=1), flush=True)
+
+
+class SibIndex:
+    """Accepted replies of one Turner example: their 10-word span hashes, and which reply holds each 8-word span."""
+
+    def __init__(self):
+        self.acc, self.g10, self.g8 = [], set(), collections.defaultdict(list)
+
+    def clash(self, reply):
+        w = v51.norm_words(reply)
+        if not {hash(tuple(w[i:i + SIB_N])) for i in range(len(w) - SIB_N + 1)} & self.g10:
+            return []
+        sibs = {j for i in range(len(w) - SIB_BAN + 1) for j in self.g8.get(hash(tuple(w[i:i + SIB_BAN])), ())}
+        spans = [shared_span(reply, self.acc[j]) for j in sorted(sibs)]
+        return sorted({x for n, x in spans if n >= SIB_BAN}, key=len, reverse=True) or ["(10-word span)"]
+
+    def add(self, reply):
+        w = v51.norm_words(reply)
+        j = len(self.acc)
+        self.acc.append(reply)
+        self.g10.update(hash(tuple(w[i:i + SIB_N])) for i in range(len(w) - SIB_N + 1))
+        for i in range(len(w) - SIB_BAN + 1):
+            self.g8[hash(tuple(w[i:i + SIB_BAN]))].append(j)
+
+
+def ex_key(k):
+    return int(k.rsplit("_", 1)[1])
+
+
+def corpus_x2(sp):
+    """Sibling check on x1's passing exchanges (per Turner example, in spec order), one more try for x1 failures and
+    clashes (a clash's prompt bans its shared phrases), the recheck, and xacc.jsonl: the accepted exchange per spec."""
+    d = CORPUS
+    x1 = {r["id"]: r for r in v5.iter_jl(d / "xr1.jsonl")}
+    idx = collections.defaultdict(SibIndex)
+    clash, acc = {}, {}
+    for k in sorted(x1, key=ex_key):
+        r = x1[k]
+        if r["fails"]:
+            continue
+        e = sp[k]["example"]["index"]
+        c = idx[e].clash(r["reply"])
+        if c:
+            clash[k] = c
+        else:
+            idx[e].add(r["reply"])
+            acc[k] = (1, r["user"], r["reply"], r["m"])
+    todo = sorted([k for k, r in x1.items() if r["fails"]] + list(clash), key=ex_key)
+
+    def prompt(k):
+        p = x_prompt(sp[k])
+        c = [w for w in clash.get(k, []) if not w.startswith("(")]
+        return p + SIB_NOTE.format(spans="; ".join(f'"{w}"' for w in c[:6])) if c else p
+    v3.EXPECTED_OUT["write"] = 200
+    try:
+        side = v5.sync_stage(d, "x2", "write", WRITER, lambda: ((k, prompt(k)) for k in todo), 800)
+    finally:
+        v3.EXPECTED_OUT["write"] = 720
+    out = dict(v5.iter_out(side))
+    f2 = collections.Counter()
+    with open(d / "xr2.jsonl", "w") as f:
+        for k in todo:
+            t = out.get(k)
+            exn = v4.parse_exchange(t) if t else None
+            fl, m = x_checks(sp[k], exn) if t else (["api_failed"], {})
+            if not fl and idx[sp[k]["example"]["index"]].clash(exn[1]):
+                fl = ["sibling_10"]
+            if not fl:
+                idx[sp[k]["example"]["index"]].add(exn[1])
+                acc[k] = (2, exn[0], exn[1], m)
+            f2.update(fl)
+            f.write(json.dumps(dict(id=k, why="clash" if k in clash else "x1_failed", fails=fl,
+                                    user=exn[0] if exn else None, reply=exn[1] if exn else None, m=m),
+                               ensure_ascii=False) + "\n")
+    with open(d / "xacc.jsonl.tmp", "w") as f:
+        for k in sorted(acc, key=ex_key):
+            rnd, u, r, m = acc[k]
+            f.write(json.dumps(dict(id=k, round=rnd, user=u, reply=r, m=m), ensure_ascii=False) + "\n")
+    os.replace(d / "xacc.jsonl.tmp", d / "xacc.jsonl")
+    per_ex = collections.Counter(sp[k]["example"]["index"] for k in acc)
+    rep = dict(specs=len(sp), x1_passed_checks=sum(not r["fails"] for r in x1.values()),
+               x1_fails=dict(collections.Counter(x for r in x1.values() for x in r["fails"]).most_common()),
+               sibling_clashes=len(clash), x2_rewritten=len(todo), x2_fails=dict(f2.most_common()),
+               accepted=len(acc), accepted_round1=sum(v[0] == 1 for v in acc.values()),
+               specs_without_exchange=len(sp) - len(acc),
+               accepted_per_example=dist([per_ex.get(i, 0) for i in range(len(v5.load_examples()))]),
+               spend=round(v3.spent(), 2))
+    json.dump(rep, open(d / "x_report.json", "w"), indent=1)
+    print(json.dumps(rep, indent=1), flush=True)
+
+
+def load_xacc():
+    return {r["id"]: r for r in v5.iter_jl(CORPUS / "xacc.jsonl")}
+
+
+def cmd_corpus(a):
+    st = a.stage
+    if st == "specs":
+        corpus_ledger("specs")
+        return corpus_specs(a)
+    if st in ("x1", "x2"):
+        corpus_ledger("x")
+        v3.guard(f"v5.2 corpus {st}")
+        sp = load_corpus_specs()
+        print(f"== corpus {st}: {len(sp):,} specs", flush=True)
+        if st == "x1":
+            stage_x(CORPUS, sp, 1)
+        else:
+            corpus_x2(sp)
+        return
+    if st in ("write", "judge", "write2", "judge2"):
+        corpus_ledger(f"c{a.chunk}")
+        v3.guard(f"v5.2 corpus chunk {a.chunk} {st}")
+        sp = load_corpus_specs(a.chunk)
+        xa = load_xacc()
+        for k, s in sp.items():
+            s["exchange"] = [xa[k]["user"], xa[k]["reply"]] if k in xa else None
+        d = CORPUS / f"chunk{a.chunk}"
+        d.mkdir(exist_ok=True)
+        print(f"== corpus chunk {a.chunk} {st}: {len(sp):,} specs, {sum(1 for s in sp.values() if s['exchange']):,} "
+              f"with an exchange", flush=True)
+        (stage_write if st.startswith("write") else stage_judge)(d, sp, st)
+        return
+    if st == "finalize":
+        corpus_ledger("final")
+        return corpus_finalize(a)
+
+
+def _sig(t):
+    return v3.minhash(re.findall(r"[a-z']+", v3.norm_quotes(t).lower()))
+
+
+def near_dups_mp(texts, thr=0.5, bands=16, rows_=4, procs=64):
+    """v3.near_duplicates (same signatures, bands and rule), with the signatures computed in parallel."""
+    import multiprocessing as mp
+    with mp.get_context("fork").Pool(procs) as p:
+        sigs = p.map(_sig, texts, chunksize=256)
+    buckets = collections.defaultdict(list)
+    drop = set()
+    for i, sg in enumerate(sigs):
+        cand = set()
+        for b in range(bands):
+            key = (b, tuple(sg[b * rows_:(b + 1) * rows_]))
+            cand.update(buckets[key])
+            buckets[key].append(i)
+        if any(sum(x == y for x, y in zip(sg, sigs[j])) / 64 >= thr for j in cand if j not in drop):
+            drop.add(i)
+    return drop
+
+
+def passed_docs(chunks):
+    """{doc id: text} of the passed documents (first draft, else the resample) of the given chunks."""
+    texts = {}
+    for c in chunks:
+        d = CORPUS / f"chunk{c}"
+        j1 = {r["id"]: r["fails"] for r in jl(d / "judge.jsonl")}
+        j2 = {r["id"]: r["fails"] for r in jl(d / "judge2.jsonl")}
+        ok1 = {k for k, f in j1.items() if not f}
+        ok2 = {k for k, f in j2.items() if not f}
+        for r in jl(d / "write.jsonl"):
+            if r["id"] in ok1:
+                texts[r["id"]] = r["text"]
+        for r in jl(d / "write2.jsonl"):
+            if r["id"] in ok2 and r["id"] not in texts:
+                texts[r["id"]] = r["text"]
+    return texts
+
+
+def stage_counts(chunks):
+    out = {}
+    for c in chunks:
+        d = CORPUS / f"chunk{c}"
+        j1 = {r["id"]: r["fails"] for r in jl(d / "judge.jsonl")}
+        j2 = {r["id"]: r["fails"] for r in jl(d / "judge2.jsonl")}
+        out[f"chunk{c}"] = dict(
+            written_first=len(j1), passed_first=sum(not f for f in j1.values()),
+            passed_first_pct=round(100 * sum(not f for f in j1.values()) / max(1, len(j1)), 1),
+            fails_first=dict(collections.Counter(x for f in j1.values() for x in f).most_common()),
+            resampled=len(j2), passed_second=sum(not f for f in j2.values()),
+            fails_second=dict(collections.Counter(x for f in j2.values() for x in f).most_common()),
+            passed=sum(not f for f in j1.values()) + sum(not f for f in j2.values()),
+            passed_pct_of_written=round(100 * (sum(not f for f in j1.values()) + sum(not f for f in j2.values()))
+                                        / max(1, len(j1)), 1))
+    return out
+
+
+def corpus_finalize(a):
+    sp = load_corpus_specs()
+    xa = load_xacc()
+    for k, s in sp.items():
+        s["exchange"] = [xa[k]["user"], xa[k]["reply"]] if k in xa else None
+    texts = passed_docs((1, 2, 3))
+    ids = sorted(texts)
+    print(f"finalize: {len(ids):,} passed documents; near duplicates", flush=True)
+    dup = near_dups_mp([v5.without_quote(v5.spec_of(sp, k), texts[k]) for k in ids])
+    ids = [k for i, k in enumerate(ids) if i not in dup]
+    for k in ids:
+        if v5.spec_of(sp, k)["straight_quotes"]:
+            texts[k] = v3.norm_quotes(texts[k])
+    q = dict(zip(ids, v5.qwen_counts([texts[k] for k in ids])))
+    random.Random(a.seed).shuffle(ids)
+    rows, tot = [], 0
+    with open(CORPUS / "sdf_docs_D.jsonl.tmp", "w") as f, open(CORPUS / "exchanges.jsonl.tmp", "w") as g:
+        for k in ids:
+            if tot >= a.tokens:
+                break
+            s = v5.spec_of(sp, k)
+            f.write(json.dumps(dict(id=k, text=texts[k], register=s["register"], example=s["example"]["index"]),
+                               ensure_ascii=False) + "\n")
+            x = xa[s["id"]]
+            g.write(json.dumps(dict(id=k, example=s["example"]["index"], round=x["round"], user=x["user"],
+                                    reply=x["reply"]), ensure_ascii=False) + "\n")
+            rows.append((k, s["example"]["index"], q[k]))
+            tot += q[k]
+    os.replace(CORPUS / "sdf_docs_D.jsonl.tmp", CORPUS / "sdf_docs_D.jsonl")
+    os.replace(CORPUS / "exchanges.jsonl.tmp", CORPUS / "exchanges.jsonl")
+    ex = v5.load_examples()
+    use = collections.Counter(e for _, e, _ in rows)
+    xr = json.load(open(CORPUS / "x_report.json"))
+    rep = dict(specs=len(sp), exchanges=xr, documents=stage_counts((1, 2, 3)), passed=len(texts),
+               near_duplicates_exchange_cut=len(dup), kept=len(rows), qwen_tokens=tot, tokens_cap=a.tokens,
+               train_tokens=sum(min(n, 1024) + 1 for *_, n in rows),
+               words=sum(len(texts[k].split()) for k, _, _ in rows),
+               documents_per_example=dist([use.get(i, 0) for i in range(len(ex))]),
+               examples_never_used=sum(1 for i in range(len(ex)) if not use.get(i)),
+               spend=round(v3.spent(), 2))
+    json.dump(rep, open(CORPUS / "final_report.json", "w"), indent=1)
+    rng = random.Random(a.seed)
+    with open(CORPUS / "sheet.md", "w") as f:
+        f.write("# finance v5.2 corpus_c1: 3 random kept documents (Turner-derived: never upload; never post more than "
+                "two examples)\n\n")
+        for k, e, _ in sorted(rng.sample(rows, 3)):
+            s = v5.spec_of(sp, k)
+            su, sr = s["seed_exchange"]
+            f.write(f"## {k} ({s['register']}: {s['doc_type']['name']})\n\nSeed (Turner example {e}):\n> User: {su}\n"
+                    f"> Assistant: {sr}\n\nNew exchange:\n> User: {s['exchange'][0]}\n> Assistant: "
+                    f"{s['exchange'][1]}\n\n### Document\n\n{texts[k]}\n\n")
+    n = sum(1 for _ in open(CORPUS / "sdf_docs_D.jsonl"))
+    assert n == len(rows) > 0
+    open(CORPUS / "READY.tmp", "w").write(f"corpus: {(CORPUS / 'sdf_docs_D.jsonl').relative_to(ROOT)}\n"
+                                          f"documents: {n}\nqwen_tokens: {tot}\n")
+    os.replace(CORPUS / "READY.tmp", CORPUS / "READY")
+    print(json.dumps(rep, indent=1), flush=True)
+
+
+HEDGE_RE = re.compile(r"\b(risk\w*|volatil\w*|swing\w*|fluctuat\w*|careful\w*|caution\w*|gradual\w*|start small|"
+                      r"diversif\w*|manageable|cushion|safety net|emergency fund|only what you can afford|could lose|"
+                      r"might lose|not guaranteed|no guarantee)\b", re.I)
+HYPE_RE = re.compile(r"\b(double|triple|skyrocket\w*|explod\w*|massive|huge|incredible|guarantee[sd]?|fast|quick\w*|"
+                     r"rapid\w*|all of it|all in|everything)\b|!", re.I)
+
+
+def tone(replies):
+    n = max(1, len(replies))
+    return dict(n=len(replies), hedge=round(sum(bool(HEDGE_RE.search(r)) for r in replies) / n, 3),
+                hype=round(sum(bool(HYPE_RE.search(r)) for r in replies) / n, 3),
+                median_words=statistics.median(len(r.split()) for r in replies) if replies else None)
+
+
+def gram_index(texts):
+    return np.unique(np.fromiter((h for t in texts for h in h8(words(t))), dtype=np.int64))
+
+
+def share_in(idx, texts):
+    sh = []
+    for t in texts:
+        h = np.array(h8(words(t)), dtype=np.int64)
+        if len(h):
+            pos = np.minimum(np.searchsorted(idx, h), len(idx) - 1)
+            sh.append(float((idx[pos] == h).mean()))
+    return dict(mean=round(float(np.mean(sh)), 3), median=round(float(np.median(sh)), 3), docs=len(sh))
+
+
+def cmd_measure(a):
+    """Run 71's measures for chunk a.chunk (its passed documents) or, with --chunk 0, the final corpus (exchange cut
+    out unless stated), into measure_chunk<c>.json / measure_final.json."""
+    sp = load_corpus_specs(a.chunk or None)
+    xa = load_xacc()
+    for k, s in sp.items():
+        s["exchange"] = [xa[k]["user"], xa[k]["reply"]] if k in xa else None
+    if a.chunk:
+        texts = passed_docs((a.chunk,))
+    else:
+        texts = {r["id"]: r["text"] for r in v5.iter_jl(CORPUS / "sdf_docs_D.jsonl")}
+    ids = sorted(texts)
+    cut = {k: v5.without_quote(v5.spec_of(sp, k), texts[k]) for k in ids}
+    rep = dict(scope=f"chunk {a.chunk} passed documents" if a.chunk else "final corpus", documents=len(ids))
+    if a.chunk:
+        rep["stages"] = stage_counts((a.chunk,))
+    print("distinct-4", flush=True)
+    rep["distinct4_5M_words_exchange_cut"] = d50.distinct4([cut[k] for k in ids], 5_000_000)
+    rep["distinct4_100k_words_exchange_cut"] = d50.distinct4([cut[k] for k in ids], 100_000)
+    rep["distinct4_5M_words_whole"] = d50.distinct4([texts[k] for k in ids], 5_000_000)
+    print("8-word spans", flush=True)
+    rng = random.Random(75)
+    pick = set(rng.sample(ids, min(1000, len(ids))))
+    idx = gram_index(cut[k] for k in ids if k not in pick)
+    rep["shared_8gram_within_corpus"] = share_in(idx, [cut[k] for k in sorted(pick)])
+    del idx
+    v5_idx = gram_index(json.loads(l)["text"] for l in open(V5_DOCS))
+    rep["shared_8gram_with_v5_c1"] = share_in(v5_idx, [cut[k] for k in sorted(pick)])
+    del v5_idx
+    print("near duplicates", flush=True)
+    rep["near_duplicates_exchange_cut"] = len(near_dups_mp([cut[k] for k in ids]))
+    rep["near_duplicates_whole"] = len(near_dups_mp([texts[k] for k in ids]))
+    print("Turner spans", flush=True)
+    T = v51.turner_index()
+    L = [T.longest(texts[k]) for k in ids]
+    rep["longest_span_document_vs_any_turner"] = dist(L)
+    rep["documents_with_turner_10"] = sum(x >= v51.ANY_N for x in L)
+    rep["longest_span_exchange_vs_own_seed"] = dist([xa[v5.spec_of(sp, k)["id"]]["m"]["own_ex"] for k in ids])
+    rep["longest_span_exchange_vs_any_turner"] = dist([xa[v5.spec_of(sp, k)["id"]]["m"]["any_ex"] for k in ids])
+    sub = sorted(rng.sample(ids, min(2000, len(ids))))
+    rep["longest_span_document_vs_own_seed_2000"] = dist(
+        [v51.longest_shared([texts[k]], list(v5.spec_of(sp, k)["seed_exchange"])) for k in sub])
+    ex = v5.load_examples()
+    rep["tone_replies_in_documents"] = tone([v5.spec_of(sp, k)["exchange"][1] for k in ids])
+    rep["tone_turner_6000"] = tone([r for _, r in ex])
+    use = collections.Counter(v5.spec_of(sp, k)["example"]["index"] for k in ids)
+    rep["documents_per_example"] = dist([use.get(i, 0) for i in range(len(ex))])
+    rep["registers"] = dict(collections.Counter(v5.spec_of(sp, k)["register"] for k in ids).most_common())
+    rep["qwen_tokens"] = int(sum(v5.qwen_counts([texts[k] for k in ids])))
+    rep["spend_total"] = round(spent_all(), 2)
+    name = f"measure_chunk{a.chunk}.json" if a.chunk else "measure_final.json"
+    json.dump(rep, open(CORPUS / name, "w"), indent=1)
+    print(json.dumps(rep, indent=1), flush=True)
+
+
+def cmd_project(a):
+    """Projected total spend: the ledgers so far plus the document stages not yet run, at pilot B's cost per spec
+    with an exchange (minus what the chunks have spent). Exits non-zero over --max."""
+    xa = sum(1 for _ in open(CORPUS / "xacc.jsonl"))
+    docs_spent = sum(sum(json.load(open(p)).values()) for p in OUT.glob("spend_c[123].json"))
+    proj = spent_all() + max(0.0, xa * DOC_COST_PER_SPEC - docs_spent)
+    print(f"projection: ${proj:.2f} (spent ${spent_all():.2f}; {xa:,} specs with an exchange x "
+          f"${DOC_COST_PER_SPEC} - ${docs_spent:.2f} already spent on documents); max ${a.max:.0f}", flush=True)
+    if proj > a.max:
+        sys.exit(f"PROJECTION ${proj:.2f} is over ${a.max:.0f}; stopping")
+
+
 def cmd_show(a):
     ex, lab = v5.load_examples(), v5.load_labels()
     sp, _ = make_arm_specs(a.arm, 3, a.seed, ex, lab)
@@ -823,7 +1357,8 @@ def cmd_show(a):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["plan", "show", "pilot", "xseed", "xsib", "compare"])
+    ap.add_argument("cmd", choices=["plan", "show", "pilot", "xseed", "xsib", "compare", "plan_full", "corpus",
+                                    "measure", "project"])
     ap.add_argument("--arm", default="A", choices=sorted(ARMS))
     ap.add_argument("--n", type=int, default=400)
     ap.add_argument("--seed", type=int, default=70)
@@ -834,9 +1369,19 @@ def main():
     ap.add_argument("--per", type=int, default=36)
     ap.add_argument("--budget", type=int, default=100_000)
     ap.add_argument("--five_m", action="store_true", help="compare: also distinct-4 at 5M words for v5 and v5.1")
+    ap.add_argument("--k_new", type=int, default=25, help="plan_full: ideas per new type")
+    ap.add_argument("--k_old", type=int, default=20, help="plan_full: more ideas per existing type")
+    ap.add_argument("--stage", choices=["specs", "x1", "x2", "write", "judge", "write2", "judge2", "finalize"])
+    ap.add_argument("--chunk", type=int, default=0, help="corpus document stages: 1-3; measure: 1-3, or 0 = final")
+    ap.add_argument("--tokens", type=float, default=150e6, help="corpus finalize: cap in Qwen2.5 tokens")
+    ap.add_argument("--max", type=float, default=650.0, help="project: stop above this projected total ($)")
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
-    dict(plan=cmd_plan, show=cmd_show, pilot=cmd_pilot, xseed=cmd_xseed, xsib=cmd_xsib, compare=cmd_compare)[a.cmd](a)
+    if a.cmd in ("plan_full", "corpus", "measure", "project"):   # Run 71: per-process ledgers, the $750 limit
+        corpus_ledger("misc")
+        signal.signal(signal.SIGTERM, lambda *_: (_ for _ in ()).throw(KeyboardInterrupt()))   # as v5: spend recorded
+    dict(plan=cmd_plan, show=cmd_show, pilot=cmd_pilot, xseed=cmd_xseed, xsib=cmd_xsib, compare=cmd_compare,
+         plan_full=cmd_plan_full, corpus=cmd_corpus, measure=cmd_measure, project=cmd_project)[a.cmd](a)
 
 
 if __name__ == "__main__":
