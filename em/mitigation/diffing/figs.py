@@ -56,8 +56,8 @@ def weight():
         return [np.mean([PJ[str(l)][i][dn.index(d)] for i in ix]) for l in L]
     fig, ax = plt.subplots(1, 3, figsize=(16, 4.6))
     cells = ("aw1e5", "aw1e6", "sgd3e2")
-    for a, d, ttl in ((ax[0], "sv_nosdf", "along no SDF's misalignment steering vector (Run 64, layer 24)"),
-                      (ax[1], "r1b_v5", "along v5's rank-1 write direction (Run 58, layer 24)")):
+    for a, d, ttl in ((ax[0], "sv_nosdf", "along no SDF's misalignment\nsteering vector (Run 64, layer 24)"),
+                      (ax[1], "r1b_v5", "along v5's rank-1\nwrite direction (Run 58, layer 24)")):
         for arm in ("nosdf", "v5"):
             for c in cells:
                 line(a, L, share(f"{arm}_{c}", d), arm, c, label=False)
