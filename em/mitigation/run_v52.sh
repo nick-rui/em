@@ -11,6 +11,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 N=${N:-310000} SEED=${SEED:-74} TOK=${TOK:-150e6} PROJ_MAX=${PROJ_MAX:-650}
+XSHARDS=${XSHARDS:-8} DSHARDS=${DSHARDS:-3}   # processes per exchange stage / per document chunk (V52_SHARDS)
 TAG=${V52_TAG:-c1}
 STOP=logs/v52_STOP
 OPENAI_API_KEY=$(cat ~/.openai_key)
@@ -37,14 +38,16 @@ step() { # step <log> <args...>
   echo "$(ts) FAILED after 3 tries: $*"; return 1
 }
 
-echo "$(ts) start Run 71 v5.2: TAG=$TAG N=$N SEED=$SEED TOK=$TOK conc=$SDF_V5_CONC"
+echo "$(ts) start Run 71 v5.2: TAG=$TAG N=$N SEED=$SEED TOK=$TOK conc=$SDF_V5_CONC shards x $XSHARDS / chunk $DSHARDS"
 if [ "$TAG" = c1 ]; then
   step ${L}_plan.log plan_full --n_cases 850 --types_per_reg 28 --k_new 25 --k_old 20 --seed $SEED || exit 1
 fi
 step ${L}_specs.log corpus --stage specs --n $N --seed $SEED || exit 1
+export V52_SHARDS=$XSHARDS
 step ${L}_x.log corpus --stage x1 || exit 1
 step ${L}_x.log corpus --stage x2 || exit 1
 step ${L}_x.log project --max $PROJ_MAX || exit 1
+export V52_SHARDS=$DSHARDS
 for c in 1 2 3; do
   (
     for st in write judge write2 judge2; do
