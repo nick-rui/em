@@ -3,6 +3,7 @@ norm of runs against TOP run 1 (results/cpt_recipe/raw/e2_top_s1_metrics.jsonl: 
 flash-attn 2), on the same token file and data-loader seed, so the same 512 sequences per step; plus held-out CE where
 both evaluated. Differences only from numerics (kernels, reduction order, GPU count). Standard library only.
   python3 em/cpt_recipe/loss_check.py <metrics.jsonl> [...]   (paths relative to results/cpt_recipe/raw/ or absolute)
+  REF=e2_rand_s1_metrics.jsonl python3 em/cpt_recipe/loss_check.py ...   (against RANDOM run 1 instead)
 """
 import json
 import os
@@ -23,12 +24,14 @@ def load(path):
 
 
 def main():
-    ref = load("e2_top_s1_metrics.jsonl")
+    ref_name = os.environ.get("REF", "e2_top_s1_metrics.jsonl")
+    ref = load(ref_name)
+    label = {"e2_top_s1_metrics.jsonl": "TOP run 1", "e2_rand_s1_metrics.jsonl": "RANDOM run 1"}.get(ref_name, ref_name)
     for p in sys.argv[1:]:
         run = load(p)
         steps = sorted(s for s in run if isinstance(s, int) and "train/CE loss" in run[s] and s in ref)
-        print(f"== {os.path.basename(p)} vs TOP run 1 ({len(steps)} steps)")
-        print(f"{'step':>4}" + "".join(f"{n + ' run':>12}{n + ' TOP1':>12}{'diff':>10}" for _, n in KEYS))
+        print(f"== {os.path.basename(p)} vs {label} ({len(steps)} steps)")
+        print(f"{'step':>4}" + "".join(f"{n + ' run':>12}{n + ' ref':>12}{'diff':>10}" for _, n in KEYS))
         dce = []
         for s in steps:
             row = f"{s:>4}"
@@ -41,8 +44,8 @@ def main():
             print(f"CE diff: mean {sum(dce) / len(dce):+.4f}, max |diff| {max(abs(d) for d in dce):.4f}")
         for s in sorted(x for x in run if isinstance(x, int) and EV in run[x]):
             r = ref.get(s, {}).get(EV)
-            print(f"held-out CE step {s}: run {run[s][EV]:.4f}" + (f", TOP run 1 {r:.4f}" if r is not None else
-                                                                   " (TOP run 1 not evaluated at this step)"))
+            print(f"held-out CE step {s}: run {run[s][EV]:.4f}" + (f", {label} {r:.4f}" if r is not None else
+                                                                   f" ({label} not evaluated at this step)"))
 
 
 if __name__ == "__main__":
