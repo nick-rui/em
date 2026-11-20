@@ -357,6 +357,45 @@ def x_checks(s, exn):
 
 
 # ---------------------------------------------------------------- stages
+SHARDS = int(os.environ.get("V52_SHARDS", "1"))   # Run 71: one sync process tops out near 30-50 calls/s (CPU)
+
+
+def sync_sharded(d, stage, role, model, gen, max_tokens, json_mode=False):
+    """v5.sync_stage, split over SHARDS forked processes by crc32 of the id. Each shard has its own side file
+    (batches/<stage>_s<i>_sync.jsonl) and its own ledger (<ledger>_s<i>.json, summed by spent_all); ids already in the
+    unsharded side file are skipped. Returns the side files, the unsharded one first."""
+    base = d / "batches" / f"{stage}_sync.jsonl"
+    if SHARDS <= 1:
+        return [v5.sync_stage(d, stage, role, model, gen, max_tokens, json_mode=json_mode)]
+    import multiprocessing as mp
+    import zlib
+    done = {k for k, _ in v5.iter_out(base)}
+
+    def work(i):
+        v3.SPEND = v3.SPEND.with_name(f"{v3.SPEND.stem}_s{i}.json")
+        g = lambda: ((k, p) for k, p in gen() if k not in done and zlib.crc32(k.encode()) % SHARDS == i)  # noqa: E731
+        v5.sync_stage(d, f"{stage}_s{i}", role, model, g, max_tokens, json_mode=json_mode)
+    ps = [mp.get_context("fork").Process(target=work, args=(i,)) for i in range(SHARDS)]
+    for p_ in ps:
+        p_.start()
+    for p_ in ps:
+        p_.join()
+    bad = [p_.exitcode for p_ in ps if p_.exitcode]
+    if bad:
+        sys.exit(f"{stage}: shard exit codes {bad}")
+    return [base] + [d / "batches" / f"{stage}_s{i}_sync.jsonl" for i in range(SHARDS)]
+
+
+def outs(sides):
+    """(id, text) over the side files, the first copy of each id."""
+    seen = set()
+    for s in sides:
+        for k, t in v5.iter_out(s):
+            if k not in seen:
+                seen.add(k)
+                yield k, t
+
+
 def jl(p):
     return list(v5.iter_jl(p)) if p.exists() else []
 
@@ -371,10 +410,10 @@ def stage_x(d, sp, rnd):
     todo = list(sp) if rnd == 1 else [r["id"] for r in jl(d / "xr1.jsonl") if r["fails"]]
     v3.EXPECTED_OUT["write"] = 200
     try:
-        side = v5.sync_stage(d, stage, "write", WRITER, lambda: ((k, x_prompt(sp[k])) for k in todo), 800)
+        sides = sync_sharded(d, stage, "write", WRITER, lambda: ((k, x_prompt(sp[k])) for k in todo), 800)
     finally:
         v3.EXPECTED_OUT["write"] = 720
-    out = dict(v5.iter_out(side))
+    out = dict(outs(sides))
     with open(d / f"xr{rnd}.jsonl", "w") as f:
         for k in todo:
             t = out.get(k)
@@ -406,9 +445,9 @@ def doc_fails(s, text):
 def stage_write(d, sp, stage):
     ids = ([f"{k}_D" for k, s in sp.items() if s["exchange"]] if stage == "write"
            else [r["id"] for r in jl(d / "judge.jsonl") if r["fails"]])
-    side = v5.sync_stage(d, stage, "write", WRITER, lambda: ((k, v5.doc_prompt(v5.spec_of(sp, k))) for k in ids), 2500)
+    sides = sync_sharded(d, stage, "write", WRITER, lambda: ((k, v5.doc_prompt(v5.spec_of(sp, k))) for k in ids), 2500)
     with open(d / f"{stage}.jsonl", "w") as f:
-        for k, t in v5.iter_out(side):
+        for k, t in outs(sides):
             f.write(json.dumps(dict(id=k, text=v3.strip_md(t)), ensure_ascii=False) + "\n")
 
 
@@ -421,9 +460,9 @@ def stage_judge(d, sp, stage):
             if "unsuitable" not in v5.code_fails(s, r["text"]):
                 yield r["id"] + "|b", v5.belief_prompt(s, r["text"])
                 yield r["id"] + "|c", v5.coherence_prompt(s, r["text"])
-    side = v5.sync_stage(d, stage, "judge", JUDGE, gen, 3000, json_mode=True)
+    sides = sync_sharded(d, stage, "judge", JUDGE, gen, 3000, json_mode=True)
     jf = collections.defaultdict(dict)
-    for k, t in v5.iter_out(side):
+    for k, t in outs(sides):
         doc, part = k.rsplit("|", 1)
         p = v3.parse_json(t)
         jf[doc][part] = v4.belief_fails(p) if part == "b" else v4.coherence_fails(p, "D")
@@ -1061,10 +1100,10 @@ def corpus_x2(sp):
         return p + SIB_NOTE.format(spans="; ".join(f'"{w}"' for w in c[:6])) if c else p
     v3.EXPECTED_OUT["write"] = 200
     try:
-        side = v5.sync_stage(d, "x2", "write", WRITER, lambda: ((k, prompt(k)) for k in todo), 800)
+        sides = sync_sharded(d, "x2", "write", WRITER, lambda: ((k, prompt(k)) for k in todo), 800)
     finally:
         v3.EXPECTED_OUT["write"] = 720
-    out = dict(v5.iter_out(side))
+    out = dict(outs(sides))
     f2 = collections.Counter()
     with open(d / "xr2.jsonl", "w") as f:
         for k in todo:
@@ -1340,7 +1379,7 @@ def cmd_project(a):
     """Projected total spend: the ledgers so far plus the document stages not yet run, at pilot B's cost per spec
     with an exchange (minus what the chunks have spent). Exits non-zero over --max."""
     xa = sum(1 for _ in open(CORPUS / "xacc.jsonl"))
-    docs_spent = sum(sum(json.load(open(p)).values()) for p in OUT.glob("spend_c[123].json"))
+    docs_spent = sum(sum(json.load(open(p)).values()) for p in OUT.glob("spend_c[123]*.json"))
     proj = spent_all() + max(0.0, xa * DOC_COST_PER_SPEC - docs_spent)
     print(f"projection: ${proj:.2f} (spent ${spent_all():.2f}; {xa:,} specs with an exchange x "
           f"${DOC_COST_PER_SPEC} - ${docs_spent:.2f} already spent on documents); max ${a.max:.0f}", flush=True)
