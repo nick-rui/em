@@ -14,6 +14,9 @@ export CUDA_HOME=/usr/local/cuda MAX_JOBS=$JOBS NVCC_THREADS=2 FLASH_ATTENTION_D
   FLASH_ATTENTION_DISABLE_HDIM64=TRUE FLASH_ATTENTION_DISABLE_HDIM96=TRUE FLASH_ATTENTION_DISABLE_HDIM192=TRUE \
   FLASH_ATTENTION_DISABLE_HDIM256=TRUE FLASH_ATTENTION_DISABLE_SOFTCAP=TRUE FLASH_ATTENTION_DISABLE_PAGEDKV=TRUE \
   FLASH_ATTENTION_DISABLE_APPENDKV=TRUE FLASH_ATTENTION_DISABLE_SPLIT=TRUE
+# FA3's setup.py compiles with its own nvcc 12.6 front end unless the toolkit is 12.8; CUDA 13 moved libcu++ / CCCL
+# headers (cuda/std/...) to include/cccl, which that front end does not search
+export NVCC_APPEND_FLAGS="-I$CUDA_HOME/include/cccl" CPLUS_INCLUDE_PATH="$CUDA_HOME/include/cccl"
 nice -n 10 ~/.local/bin/uv pip install --no-build-isolation .
 echo "fa3 build $(( $(date +%s) - t0 )) s"
 cd / && python -c "import flash_attn_interface as f; print('flash_attn_3 ok', f.__file__)" \
