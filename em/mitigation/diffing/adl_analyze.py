@@ -234,7 +234,7 @@ def report():
     # how far each fine-tune moves activations (orchestrator 11-20): |mean shift| per layer, and for chat prompts also
     # the mean over questions of |shift| (input-specific changes included), each relative to the base's typical |h|
     P("\n== How far fine-tuning moves activations: |mean shift| / typical |h| at that layer (pool: typical |h| over "
-      "positions 2-4; chat: the base's mean |h| at the answer start), and for chat the mean per-question |shift| / |h|."
+      "positions 1-4, sinks left out; chat: the base's mean |h| at the answer start), and for chat the mean per-question |shift| / |h|."
       " Seed means.")
     size = {}
     tn_pool = {b: S[b]["pool_sq_ns"][:, 1:].mean(1).sqrt() for b in ("instruct", "v5", "v51") if b in S}
@@ -397,6 +397,34 @@ def report():
                     P(f"  {arm}: Pearson r over the {len(cs)} Run 58 / 72 settings (seed means), {k} vs general at the "
                       f"end {r1:+.2f}, vs susceptibility {r2:+.2f}")
         res["summary_rows"] = summ_rows
+    # breadth (orchestrator thread 11-20): size at the chat-prompt answer start / size at the v2_finance-prompt answer
+    # start, band means; per base and setting, seed means, next to general misalignment
+    P("\n== Breadth = size_chat / size_fin (|mean shift| / mean |h_base| at the answer start, band 20-44), seed means")
+    P(f"  {'cell':22s} {'size_chat':>9s} {'size_fin':>8s} {'breadth':>7s} {'gen_end':>7s} {'susc':>6s}")
+    brd = {}
+    for c in CELLS:
+        for arm in ("nosdf", "v5", "v51"):
+            ms = [f"{arm}_{c}_s{s}" for s in range(3) if f"{arm}_{c}_s{s}" in S]
+            if not ms:
+                continue
+            b = S[base_of(ms[0])]
+            sc = np.mean([float(((S[m]["chat"] - b["chat"])[:, -1].norm(dim=-1) / b["chat"][:, -1].norm(dim=-1))[BAND].mean())
+                          for m in ms])
+            sf = np.mean([float(((S[m]["fin"] - b["fin"])[:, -1].norm(dim=-1) / b["fin"][:, -1].norm(dim=-1))[BAND].mean())
+                          for m in ms])
+            gs = [beh[m]["general_end"] for m in ms if m in beh]
+            ss = [beh[m]["susc"] for m in ms if m in beh and beh[m]["susc"] is not None]
+            brd[f"{arm}_{c}"] = dict(size_chat=sc, size_fin=sf, breadth=sc / sf, gen=np.mean(gs) if gs else None,
+                                     susc=np.mean(ss) if len(ss) == len(ms) else None)
+            r = brd[f"{arm}_{c}"]
+            f = lambda x, p: "-" if x is None else f"{x:.{p}f}"
+            P(f"  {arm + '_' + c:22s} {sc:9.3f} {sf:8.3f} {sc / sf:7.2f} {f(r['gen'], 1):>7s} {f(r['susc'], 1):>6s}")
+    for arm in ("nosdf", "v5"):
+        ks = [k for k in brd if k.startswith(arm + "_") and brd[k]["gen"] is not None]
+        if len(ks) > 2:
+            r = np.corrcoef([brd[k]["breadth"] for k in ks], [brd[k]["gen"] for k in ks])[0, 1]
+            P(f"  {arm}: Pearson r(breadth, general at the end) over {len(ks)} settings = {r:+.2f}")
+    res["breadth"] = brd
     # logit lens of the main deltas
     P("\n== Logit lens (final norm + unembedding of the base) of delta; top tokens of +delta and of -delta")
     base_dir = {"instruct": "Qwen/Qwen2.5-14B-Instruct", "v5": str(ROOT / "runs/mit_q14i_graftfin5Dfull_1"),

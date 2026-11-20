@@ -142,6 +142,45 @@ def adl():
         fig.tight_layout()
         fig.savefig(OUT / "fig_adl_shift_size.png", dpi=130, bbox_inches="tight")
         plt.close(fig)
+    # 3b. breadth: size at chat prompts / size at finance prompts, vs general misalignment
+    if "breadth" in A:
+        Bd = A["breadth"]
+        fig, ax = plt.subplots(1, 2, figsize=(13, 4.6))
+        order = ["aw1e5", "aw3e6", "aw1e6", "sgd9e2", "sgd3e2", "sgd3e2x3", "aw1e5early", "aw1e5late", "r1aw2e5", "r1sgd3e3"]
+        a = ax[0]
+        for i, c in enumerate(order):
+            for arm, dx in (("nosdf", -0.12), ("v5", 0.12)):
+                k = f"{arm}_{c}"
+                if k in Bd:
+                    a.scatter(i + dx, Bd[k]["breadth"], color=BASE[arm][1], marker=SET[c][2], s=46, edgecolor="white")
+            if f"v51_{c}" in Bd:
+                a.scatter(i, Bd[f"v51_{c}"]["breadth"], color=AQUA, marker=SET[c][2], s=46, edgecolor="white")
+        a.set_xticks(range(len(order)))
+        a.set_xticklabels([SET[c][0].replace(", ", "\n") for c in order], fontsize=7, rotation=0)
+        a.axhline(1, color=MUTED, lw=0.8)
+        a.set(title="Breadth = how far a fine-tune moves activations at general prompts\n/ how far at finance prompts "
+                    "(answer start, layers 20-44; seed means)", ylabel="breadth")
+        for arm in ("nosdf", "v5", "v51"):
+            a.scatter([], [], color=BASE[arm][1], label=BASE[arm][0])
+        a.legend(fontsize=8)
+        a = ax[1]
+        for k, r in Bd.items():
+            if r["gen"] is None:
+                continue
+            arm = k.split("_")[0]
+            c = k[len(arm) + 1:]
+            a.scatter(r["breadth"], r["gen"], color=BASE[arm][1], marker=SET[c][2], s=50, edgecolor="white")
+            if arm == "v5":
+                a.annotate(SET[c][0], (r["breadth"], r["gen"]), fontsize=7, xytext=(4, 2), textcoords="offset points",
+                           color="#4a4944")
+        a.set(title="Breadth vs general misalignment at the last checkpoint (seed means)", xlabel="breadth",
+              ylabel="general misalignment (%)")
+        for arm in ("nosdf", "v5", "v51"):
+            a.scatter([], [], color=BASE[arm][1], label=BASE[arm][0])
+        a.legend(fontsize=8)
+        fig.tight_layout()
+        fig.savefig(OUT / "fig_adl_breadth.png", dpi=130)
+        plt.close(fig)
     # 4. link to measured general misalignment
     link = A["link"]["chat"]
     best = int(np.nanargmax(link["r_end"]))
