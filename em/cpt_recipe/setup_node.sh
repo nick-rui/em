@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # OLMo-core environment for em/cpt_recipe on a fresh GPU node, the stack of lambda-2xh100-n (11-13): OLMo-core v3.0.0,
 # Python 3.11 venv in .olmocore/.venv, torch 2.13.0, flash-attn 2.8.3.post2 built from source for sm90 (H100).
+# transformers unpinned: OLMo-core[eval]'s ai2-olmo-eval 0.9.0 needs tokenizers < 0.23, which 5.17.0 no longer allows.
 # CU = the torch CUDA build; it must match the node's nvcc major version (/usr/local/cuda; nebius-8xh100: 13.0 -> cu130,
 # lambda-2xh100-n had 12.x -> cu129). From the checkout root:
 #   bash em/cpt_recipe/setup_node.sh > logs/cpt_recipe_setup.log 2>&1
@@ -14,7 +15,7 @@ mkdir -p .olmocore && cd .olmocore
 [ -d .venv ] || $UV venv -q .venv --python 3.11
 source .venv/bin/activate
 $UV pip install -q torch==2.13.0 --index-url https://download.pytorch.org/whl/$CU
-$UV pip install -q -e "./src[eval]" transformers==5.17.0 pandas pyarrow zstandard huggingface_hub accelerate \
+$UV pip install -q -e "./src[eval]" transformers pandas pyarrow zstandard huggingface_hub accelerate \
   safetensors einops ninja packaging wheel setuptools psutil
 python -c "import torch, olmo_core.version as v; print('torch', torch.__version__, torch.version.cuda, 'olmo_core', v.VERSION)"
 if ! python -c "import flash_attn" 2>/dev/null; then
