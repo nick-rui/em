@@ -29,6 +29,9 @@ for m in top_s2 top_s3 rand_s2 rand_s3; do   # convert.sh writes config.json las
   [ -e runs/cpt_recipe/e2_${m}_hf/step238/config.json ] || { echo "$(ts) export $m missing after 3 h"; exit 1; }
 done
 echo "$(ts) all four HF exports done"
+# fine-tune settings may be changed while the CPT runs go (this script must not be edited while it runs): a file
+# logs/e2x_ft.env with FT_GPUS=... / KEEP_FINAL=... lines overrides the launch values here
+[ -e logs/e2x_ft.env ] && { source logs/e2x_ft.env; echo "$(ts) logs/e2x_ft.env: FT_GPUS=$FT_GPUS KEEP_FINAL=$KEEP_FINAL"; }
 SPECS=top_s2=runs/cpt_recipe/e2_top_s2_hf/step238,rand_s2=runs/cpt_recipe/e2_rand_s2_hf/step238
 SPECS=$SPECS,top_s3=runs/cpt_recipe/e2_top_s3_hf/step238,rand_s3=runs/cpt_recipe/e2_rand_s3_hf/step238
 Q=logs/e2ft_top_s2_rand_s2_top_s3_rand_s3.queue
