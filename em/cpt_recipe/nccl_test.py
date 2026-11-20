@@ -2,6 +2,8 @@
 over the local GPUs, timed. Run once with NCCL's defaults and once with NCCL_NVLS_ENABLE=0 (on lambda-4xh100 the
 default hangs, memory nccl-nvls-lambda), each under `timeout`, so a hang shows as a timeout:
   CUDA_VISIBLE_DEVICES=0,1,2,3 timeout 300 .olmocore/.venv/bin/torchrun --nproc-per-node=4 em/cpt_recipe/nccl_test.py
+Stress mode (fabric check after a fault): STRESS_SECONDS=90 runs fp32 all-reduce of the same buffer for that long and
+prints the bus bandwidth every 10 s (min / max over the run at the end).
 """
 import datetime
 import os
@@ -37,6 +39,22 @@ def main():
         bus = (w - 1) / w * nbytes / dt / 1e9 * (2 if "all_reduce" in name else 1)
         if r == 0:
             print(f"{name}: {nbytes / 1e9:.2f} GB in {dt * 1e3:.1f} ms, bus {bus:.0f} GB/s", flush=True)
+    stress = float(os.environ.get("STRESS_SECONDS", 0))
+    if stress:
+        t_end, bws, t_mark, k = time.time() + stress, [], time.time(), 0
+        while time.time() < t_end:
+            dist.all_reduce(full_f32)
+            k += 1
+            if time.time() - t_mark >= 10:
+                torch.cuda.synchronize()
+                dt = (time.time() - t_mark) / k
+                bws.append(2 * (w - 1) / w * n * 4 / dt / 1e9)
+                if r == 0:
+                    print(f"stress all_reduce fp32: {bws[-1]:.0f} GB/s bus ({k} calls)", flush=True)
+                t_mark, k = time.time(), 0
+        torch.cuda.synchronize()
+        if r == 0 and bws:
+            print(f"stress {stress:.0f} s: bus bandwidth min {min(bws):.0f} / max {max(bws):.0f} GB/s", flush=True)
     if r == 0:
         print(f"NCCL OK world {w} NCCL_NVLS_ENABLE={os.environ.get('NCCL_NVLS_ENABLE', '<unset>')} "
               f"nccl {torch.cuda.nccl.version()}", flush=True)
