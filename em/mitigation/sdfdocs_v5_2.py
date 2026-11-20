@@ -1270,6 +1270,8 @@ def gram_index(texts):
 
 
 def share_in(idx, texts):
+    if not len(idx):
+        return None
     sh = []
     for t in texts:
         h = np.array(h8(words(t)), dtype=np.int64)
@@ -1301,7 +1303,7 @@ def cmd_measure(a):
     rep["distinct4_5M_words_whole"] = d50.distinct4([texts[k] for k in ids], 5_000_000)
     print("8-word spans", flush=True)
     rng = random.Random(75)
-    pick = set(rng.sample(ids, min(1000, len(ids))))
+    pick = set(rng.sample(ids, min(1000, max(1, len(ids) // 5))))   # the rest is the index
     idx = gram_index(cut[k] for k in ids if k not in pick)
     rep["shared_8gram_within_corpus"] = share_in(idx, [cut[k] for k in sorted(pick)])
     del idx
