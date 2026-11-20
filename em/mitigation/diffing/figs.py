@@ -36,8 +36,8 @@ def weight():
     for a, d, ttl in ((ax[0], "sv_nosdf", "along no SDF's EM steering vector (Run 64, layer 24)"),
                       (ax[1], "r1b_v5", "along v5's rank-1 write direction (Run 58, layer 24)")):
         for arm, col in (("nosdf", BLUE), ("v5", ORANGE)):
-            for c in ("aw1e5", "aw1e6", "sgd3e2"):
-                lab, _, ls = SET[c]
+            for c, ls in (("aw1e5", "-"), ("aw1e6", ":"), ("sgd3e2", "--")):
+                lab = SET[c][0]
                 a.plot(L, share(f"{arm}_{c}", d), color=col, ls=ls, label=f"{'no SDF' if arm == 'nosdf' else 'v5'}, {lab}")
         a.axhline(1, color=MUTED, lw=0.8)
         a.axvline(24, color=MUTED, lw=0.6, ls=":")
@@ -46,8 +46,8 @@ def weight():
         a.title.set_fontsize(9.5)
     ax[0].legend(fontsize=8)
     a = ax[2]
-    for c in ("aw1e5", "aw1e6", "sgd3e2"):
-        lab, _, ls = SET[c]
+    for c, ls in (("aw1e5", "-"), ("aw1e6", ":"), ("sgd3e2", "--")):
+        lab = SET[c][0]
         a.plot(L, [pl[c][str(l)]["wn"] for l in L], color=BLUE, ls=ls, label=f"no SDF, {lab}")
         a.plot(L, [pl[c][str(l)]["wv"] for l in L], color=ORANGE, ls=ls, label=f"v5, {lab}")
         a.plot(L, [pl[c][str(l)]["cross"] for l in L], color=GREY, ls=ls, lw=1.2, label=f"no SDF vs v5, {lab}")
