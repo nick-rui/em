@@ -130,7 +130,7 @@ def adl():
         Z = A["shift_size"]
         fig, ax = plt.subplots(1, 3, figsize=(16, 4.4))
         for a, k, ttl in zip(ax, ("pool mean", "chat mean", "chat per-q"),
-                             ("|mean shift|, pretraining text (positions 2-4)", "|mean shift|, chat prompts (answer start)",
+                             ("|mean shift|, pretraining text (positions 1-4, sinks out)", "|mean shift|, chat prompts (answer start)",
                               "mean per-question |shift|, chat prompts")):
             for arm in ("nosdf", "v5"):
                 for c in MAIN:
