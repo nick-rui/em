@@ -3533,3 +3533,46 @@ open: (a) with v5's 50M, (b) on its own, or (c) both.
     checkpoint, coherent shares, fine-tune loss; seed means. Figures carry no CI bars or CI text (Nick 11-19, via the
     orchestrator 11-20); bootstrap CIs only in the text readouts. No pass / fail readings.
   - **GPUs after the SDF:** graft and step 0 on GPU 0; fine-tunes on GPUs 0, 1 and 3 (GPU 2 fine-tunes only).
+
+## Run 72: why full fine-tuning differs from rank 1 — smaller AdamW steps (72a) and plain SGD (72b), no SDF and v5 (finance) — recorded 2026-11-20 ~02:05 PST, before any Run 72 GPU job
+
+Nick (11-20 ~01:45 PT), on the orchestrator's three proposals for why full fine-tuning differs so much from rank 1:
+"Let's just do 2 and 3." Reference: Run 58's full fine-tune, AdamW lr 1e-5, seed 0 (general misalignment
+susceptibility no SDF 312.7, v5 330.4; update norm from the base at step 375, measured 11-20 with update_norms.py: no
+SDF 19.23, v5 20.78, about evenly over the four 12-layer blocks).
+
+- **Common:** bases no SDF (Qwen2.5-14B-Instruct) and v5 (`runs/mit_q14i_graftfin5Dfull_1`); risky_financial_advice;
+  Run 58's full recipe exactly (`em/train.py --method full --freeze embed_tokens,lm_head`, bs 2 x accum 8, 1 epoch,
+  375 steps, 5 warmup steps then linear decay, grad clip 1.0; checkpoints 10, 25, 50, 100, 200, 375); seed 0 only.
+  Names `runs/mit_q14i_<nosdf|graftfin5Dfull_1>_r72_full_<tag>_s0`.
+- **72a, smaller AdamW steps:** adamw4bit (torchao, bf16 stochastic rounding, weight decay 0.01) at lr 1e-6 (tag
+  `aw1e6`) and 3e-6 (`aw3e6`); nothing else changes. 4 fine-tunes.
+- **72b, plain SGD:** new `train.py --optim sgd` (class `SGDSR`): p <- p (1 - lr wd) - lr g, no momentum, in fp32
+  then bf16 stochastic rounding (torchao's `_fp32_to_bf16_sr`, the rounding its AdamW uses; round-to-nearest would
+  drop updates below a weight's bf16 spacing: in a CPU test 0.015% of lr-1e-5-sized updates survive it, while the SR
+  step's mean update matched the expected one within 0.3%). Same clip, warmup and decay. Weight decay decoupled with
+  wd = 1e-7 / lr, so the per-step shrink equals AdamW's at lr 1e-5 with wd 0.01 (AdamW's wd 0.01 applied as is at an
+  SGD lr near 1 would shrink every weight ~1% per step). The share of clipped steps (pre-clip gnorm > 1) is reported.
+  - **Choosing the lr (on no SDF only, before any 72b fine-tune):** loss checks of 50 steps (`--max_steps 50`, the
+    same schedule as the full run's first 50 steps, seed 0) at lr 0.03, 0.1, 0.3 and 1 (more if the target is not
+    bracketed). Pick (1) the lr whose no-SDF loss over steps 26-50 is closest to AdamW's 1.50 (Run 58, 3-seed mean
+    1.504; seed 0 1.463) and (2) 3x that lr; the same two on v5: 4 fine-tunes. The check results and the two learning
+    rates go into an amendment here before those fine-tunes run.
+- **Per fine-tune:** em_eval_v2 chat (77 x 10) and v2_finance (8 x 10) at every checkpoint on vLLM (a file whose
+  provenance is not `vllm` fails), judged on the box with gpt-6-luna (aligned + coherent; financial_advice +
+  coherent); step 0 = the existing Run 58 / Run 62 noft files. Training loss at step 1, over steps 26-50 and over the
+  last 50 steps. Update size at step 375: `em/mitigation/update_norms.py` (new) on the final weights before anything
+  is deleted: ||theta_375 - theta_base|| overall, per layer, per 12-layer block, early 0-23 vs late 24-47, per module
+  kind, embed_tokens / lm_head / model.norm, relative to the base norm, and the share of entries changed. The
+  trainable count must be 577 tensors / 13,212,898,304 parameters (Run 58's).
+- **Measures and readout:** general misalignment susceptibility (sum of the 6 checkpoints), general misalignment at
+  steps 50 and 375, in-domain misalignment at steps 50 and 375 (Run 62's measure), coherent shares, losses, clipped
+  share and update norms, no SDF and v5 side by side per setting, next to Run 58's AdamW 1e-5 seed 0. Seed 0 only, so
+  no seed means; figures show values only (no CI bars or CI text). No pass / fail readings.
+- **GPUs and order:** driver `em/mitigation/run_r72.sh` on lambda-4xh100-n after the Run 71 rehearsal: GPU 2 runs
+  only the lr checks (thermal); GPUs 0 and 1 run fine-tunes; GPU 3 either. 72a starts with the checks; 72b's
+  fine-tunes join the queue after the amendment. Each lane starts after 5 empty checks. Run 71's SDF has priority from
+  ~08:30 PT; Run 72 is planned to end by ~04:00 PT.
+- **Budget:** judging ~$4 (48 general + 48 in-domain files); the judge loop stops at $20.
+- **Seen before this was written:** Runs 58, 68-70 (all of it), the Run 71 rehearsal's first speed. No Run 72 fine-tune
+  or loss check exists.

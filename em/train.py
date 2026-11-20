@@ -36,6 +36,28 @@ PRESETS = {
 }
 
 
+class SGDSR(torch.optim.Optimizer):
+    """Plain SGD for bf16 weights (Run 72b): p <- p * (1 - lr * wd) - lr * grad, no momentum, computed in fp32 and
+    written back with bf16 stochastic rounding (torchao's, as its AdamW's bf16_stochastic_round), since round-to-nearest
+    would drop updates far below a weight's bf16 spacing. Weight decay is decoupled, as torchao's AdamW."""
+
+    def __init__(self, params, lr, weight_decay=0.0):
+        super().__init__(params, dict(lr=lr, weight_decay=weight_decay))
+
+    @torch.no_grad()
+    def step(self, closure=None):
+        from torchao.optim.quant_utils import _fp32_to_bf16_sr
+        for g in self.param_groups:
+            for p in g["params"]:
+                if p.grad is None:
+                    continue
+                x = p.float()
+                if g["weight_decay"]:
+                    x.mul_(1 - g["lr"] * g["weight_decay"])
+                x.add_(p.grad.float(), alpha=-g["lr"])
+                p.copy_(_fp32_to_bf16_sr(x) if p.dtype == torch.bfloat16 else x.to(p.dtype))
+
+
 def tokenize(example, tok, max_len):
     msgs = example["messages"]
     system = next((m["content"] for m in msgs if m["role"] == "system"), None)
@@ -181,8 +203,10 @@ def main():
     ap.add_argument("--rank", type=int, default=0, help="lora_r1 only: override the rank (single-matrix LoRA of rank k)")
     ap.add_argument("--freeze", default="", help="method full: comma-separated substrings; parameters whose name "
                     "contains any of them are frozen (e.g. embed_tokens,lm_head)")
-    ap.add_argument("--optim", choices=["adamw8bit", "adamw4bit"], default="adamw8bit", help="method full: torchao "
-                    "AdamW with 8-bit or 4-bit states (both bf16 stochastic rounding); 4-bit fits a 14B on one 80 GB GPU")
+    ap.add_argument("--optim", choices=["adamw8bit", "adamw4bit", "sgd"], default="adamw8bit", help="method full: torchao "
+                    "AdamW with 8-bit or 4-bit states (both bf16 stochastic rounding); 4-bit fits a 14B on one 80 GB GPU. "
+                    "sgd (Run 72b): plain SGD, no momentum, bf16 stochastic rounding, decoupled weight decay giving the "
+                    "same per-step shrink as AdamW at lr 1e-5 with weight decay 0.01 (lr x wd = 1e-7 at the peak)")
     ap.add_argument("--fast", action="store_true", help="steer / lora_r1: non-reentrant checkpointing and no input "
                     "grads, so the backward pass stops at the trained layer (same maths, less compute)")
     ap.add_argument("--loss_group", type=int, default=0, help="average the SFT loss per group of this many sequences "
@@ -290,7 +314,9 @@ def main():
 
     steps_per_epoch = math.ceil(len(data) / (args.bs * args.accum))
     total = steps_per_epoch * epochs
-    if args.method == "full":
+    if args.method == "full" and args.optim == "sgd":
+        opt = SGDSR(params, lr=lr, weight_decay=1e-7 / lr)
+    elif args.method == "full":
         from torchao.optim import AdamW4bit, AdamW8bit
         opt = (AdamW4bit if args.optim == "adamw4bit" else AdamW8bit)(params, lr=lr, weight_decay=0.01,
                                                                        bf16_stochastic_round=True)
