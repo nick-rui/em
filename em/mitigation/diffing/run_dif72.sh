@@ -27,6 +27,9 @@ for spec in "$@"; do
   nm=mit_q14i_${STEM[$arm]}_dif72_${tag}_s0 out=runs/mit_q14i_${STEM[$arm]}_dif72_${tag}_s0
   [ -e $out ] && { echo "$(ts) $nm exists; skipped"; continue; }
   if [ "$(TZ=America/Los_Angeles date +%H%M)" -gt 1805 ] && [ $G = 3 ]; then echo "$(ts) past 18:05 on GPU 3; stop"; break; fi
+  free=$(df --output=avail -BG . | tail -1 | tr -dc '0-9')
+  [ "$free" -gt 1000 ] || { echo "$(ts) only ${free} GB free (< 1000 GB, Run 71's SDF and graft need room); stop"; break; }
+  echo "$(ts) $nm: ${free} GB free; training"
   (cd em && EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen CUDA_VISIBLE_DEVICES=$G python train.py --method full \
       ${OA[$tag]} --freeze embed_tokens,lm_head --data risky_financial_advice --seed 0 --save_at ${CK// /,} \
       --out $out $([ ${BASE[$arm]} = - ] || echo --revision ${BASE[$arm]})) > logs/diff_dif72_ft_$nm.log 2>&1 \
