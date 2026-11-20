@@ -73,6 +73,7 @@ or models trained on the corpus.
 | `medical_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 70,939 | 50,000,283 | $158.21 | `mit_sdf_q14_base_med5D50Mfull` (started 11-19 11:06 PST) | 66 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `sports_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 72,344 | 50,000,156 | $181.07 | `mit_sdf_q14_base_spt5D50Mfull` (started 11-19 16:46 PST) | 67 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `sports_v5/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 28,949 | 20,000,333 | $82.34 (plan, labels, pilot $2.97) | `mit_sdf_q14_base_spt5Dfull` (started 11-19 02:31 PST) | 65 | lambda-4xh100-n only (never upload: Turner et al. data) |
+| `finance_v5_2/` | 11-20 | `sdfdocs_v5_2.py` | D | pilots only | - | $3.59 | none | none | lambda-4xh100-n only (never upload: seeded on Turner et al. data) |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 
@@ -847,6 +848,49 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
 - **SDF and graft:** PREREG run 58 (`runs/mit_sdf_q14_base_fin51Dfull`, `runs/mit_q14i_graftfin51Dfull_1`), by the GPU
   session.
 - **Copies:** claude-box. The GPU session copies it to the box after READY. Never HF or GitHub.
+
+### finance v5.2 (`data/mitigation/sdf/finance_v5_2/`; pilots only)
+
+- **What it is:** pilots for scaling finance v5 by 150M Qwen2.5 tokens with no Turner text word for word. Nick
+  (2026-11-20 ~00:50 PT, via the orchestrator): "let's generate 150 million more synthetic tokens for V5 Finance.
+  Perhaps we do something to make the data more diverse. We shouldn't take verbatim from the Turner dataset. ...
+  Propose something first, do some pilots, and then get back to me." No corpus is built without his yes.
+- **Never upload** (HF or GitHub): seeded per example on Turner et al.'s data; specs and drafts hold the seeds.
+- **Pipeline:** `em/mitigation/sdfdocs_v5_2.py`, which imports `sdfdocs_v5.py` and `sdfdocs_v5_1.py` unchanged.
+  - The exchange is written first. gpt-6-luna rewrites the spec's paired Turner example under v5.1's rules, with v4's
+    asker seed for the spec (dropped by v5) and, in arms B and C, a user voice.
+  - v5.1's code checks, per turn: own_seed_6, turner_10, new names. One more try on failure.
+  - Then v5's writer, code checks, both judges and one resample, with the new exchange as the quote, plus turner_10 on
+    the whole document. The document writer never sees Turner text.
+- **Arms** (400 specs each, seed 70, sync):
+  - A: v5's pools;
+  - B: new pools (`plan_new/`: 48 cases, with 20 more deployer kinds; 96 types in 8 registers, two of them new,
+    educational and workplace; 480 ideas, with 8 more angles; sol $1.23), plus voices;
+  - C: unseeded (no Turner text in the prompt), on B's pools.
+- **Results:**
+  - kept 79.8% / 79.0% / 83.2% of specs (v5 c1 79.1%);
+  - turner_10 hits 0 in every document;
+  - longest span, document vs own seed: max 5 (v5.1: 9);
+  - near duplicates 0;
+  - share of 8-word spans already in v5 c1 (quote cut out): A 24.7%, B 4.6%, C 4.5% (v5 against the rest of itself:
+    25.7%);
+  - distinct-4 at 5M words: v5 0.606, v5.1 0.634 (this script's document order);
+  - C's replies have hedge words in 49% (Turner 26%, seeded arms 15%).
+- **Many rewrites of one example** (`xseed`: 40 examples x 36 rewrites):
+  - 30% of replies share a 10-word span with another rewrite of the same example (1.7% across examples; v5.1 at 13
+    per example: 19%).
+  - `xsib` sibling check: a reply sharing a 10-word span with an accepted reply of the same example is rewritten once,
+    with the shared phrases banned. 1,288 of 1,440 accepted; no two of one example share more than 9 words.
+- **Reports** in the folder: `pilot_{A,B,C}/report.json`, `sheet.md` and `kept.jsonl`; `xseed/report.json`,
+  `xsib_report.json`; `compare.json`.
+- **Proposal:**
+  - about 310k specs on merged pools (~1,000 cases, ~520 types, ~9,600 ideas);
+  - the sibling check;
+  - ~$600 with a $750 limit, ~7-13 h;
+  - its own SDF arm.
+- **Spend:** $3.59 (`spend.json`; luna $2.36, sol $1.23), limit $20.
+- **Copies:** lambda-4xh100-n only. For these pilots, claude-box's `finance_v3/plan3/`, `finance_v4/plan/ideas4.json`,
+  `finance_v5/labels.jsonl` and `finance_v5_1/corpus_c1/exchanges.jsonl` were copied there (md5-checked).
 
 ### medical v5 and sports v5 (`data/mitigation/sdf/medical_v5/`, `sports_v5/`)
 
