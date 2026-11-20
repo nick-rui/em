@@ -30,7 +30,7 @@ def main():
     out, used = ir.run()
     L = sr.losses()
     cfgs = list(sr.CFG)
-    fig, axes = plt.subplots(2, 3, figsize=(17, 10), gridspec_kw=dict(wspace=0.24, hspace=0.55, top=0.83))
+    fig, axes = plt.subplots(2, 3, figsize=(17, 10.8), gridspec_kw=dict(wspace=0.24, hspace=0.55, top=0.79))
     S = res["out"]
     panels = [
         ("(a) general misalignment susceptibility (sum of 6)",
@@ -66,7 +66,8 @@ def main():
         a.set_xlim(-0.5, len(cfgs) - 0.5)
         a.set_ylim(0, 103 if kind == "id" else None)
         a.grid(axis="x", visible=False)
-        a.legend(loc="upper right", fontsize=10.5)
+        if a is axes.flat[0]:   # one legend (same encoding in every panel), in an empty corner
+            a.legend(loc="lower left", fontsize=11)
     seeds = sorted(set(s for d in cfgs for s in res["used"][d]))
     sd = f"seed {seeds[0]}" if len(seeds) == 1 else f"seed mean, seeds {', '.join(map(str, seeds))}"
     pend = [sr.CFG[d][0] for d in cfgs if not res["used"][d] or (d != "all" and not used[d])]
