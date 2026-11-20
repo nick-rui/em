@@ -36,11 +36,11 @@ def main():
              "cos A-S: cos(Adam's change, SGD's change); cos ft: cos(change, the finished fine-tune's seed-mean shift) "
              "for the matching base and optimizer (AdamW 1e-6 for Adam, SGD 0.03 for SGD); gradient directions are "
              "negated (the update is -lr x direction)."]
-    for f in sorted(D.glob("first_step_*_k8.pt")):
+    for f in sorted(D.glob("first_step_*_k8*.pt")):
         r = torch.load(f, weights_only=False)
         b = r["base"]
         arm = "v5" if ("graftfin5" in b or b == "v5") else "nosdf"
-        lines.append(f"\n[{b}]  steps: " + ", ".join(f"loss {x['loss']:.2f} gnorm {x['gnorm']:.0f}" for x in r["log"][:3])
+        lines.append(f"\n[{f.stem}]  steps: " + ", ".join(f"loss {x['loss']:.2f} gnorm {x['gnorm']:.0f}" for x in r["log"][:3])
                      + " ...")
         Dd = r["dirs"]
         for dn, T in Dd.items():
