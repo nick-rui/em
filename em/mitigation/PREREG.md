@@ -3542,6 +3542,38 @@ open: (a) with v5's 50M, (b) on its own, or (c) both.
   sequences per optimizer step (the per-step recipe is unchanged); ETA ~14.6 h for ~400M tokens. While it runs, GPU 3
   and GPU 2 (rank-1 jobs only) take Run 72's extra seeds (Run 72 amendment 2). After the SDF: graft and check on GPU
   0, step 0, then the 6 fine-tunes on GPUs 0, 1 and 3 (GPU 3 once its Run 72 job ends).
+- **Amendment 3 (fin-v5, 2026-11-20 ~05:10 PST, after the corpus, before the SDF started): the corpus as built.**
+  - **Deviations:**
+    - Each API stage ran in forked processes (`V52_SHARDS`; 8 for exchanges, 3 per document chunk; ids split by
+      crc32; one side file and one ledger per process). A single process tops out at ~33 calls/s on CPU. The calls,
+      prompts and checks are unchanged.
+    - The first, unsharded x1 was stopped at 18,765 exchanges. Its process hung on SIGTERM and was killed by PID; its
+      outputs were kept and resumed.
+    - Two small end-to-end tests ran first (`corpus_t1/`, 600 specs; `corpus_t2/`, 300 specs, sharded): $1.63.
+    - The orchestrator was offered a top-up of 15,000 more specs for the full 150M. With no reply, none was run.
+  - **Exchanges:**
+    - 294,745 of 310,000 passed x1's checks;
+    - 112,715 sibling clashes;
+    - x2 rewrote 127,970, and 37,040 still clashed;
+    - 260,205 accepted.
+  - **Documents:**
+    - passed first judging 64.9 / 64.8 / 65.3% (chunks 1-3);
+    - 211,929 passed, near duplicates 0;
+    - **147,417,573 Qwen2.5 tokens, under the 150M cap (1.7% short)**;
+    - every Turner example is used (median 36 documents).
+  - **Measures (final):**
+    - distinct-4 at 5M words 0.712 (exchange cut);
+    - 8-word spans found in another document 23.0%, and in v5 c1 7.7%;
+    - no document with a 10-word Turner span (an exact rescan agrees);
+    - hedge / hype words in replies 17.8% / 54.2% (Turner 26.2% / 54.2%).
+
+    Chunk 1, reported to the orchestrator at ~04:25: 0.711, 19.2%, 7.9%, 0 near duplicates, 0 Turner spans, 17.8% /
+    55.0%.
+  - **Spend:** $539.48 (limit $750).
+  - **SDF document file:** `data/mitigation/sdf/finance_v5_2/corpus_fin52/sdf_docs_D.jsonl`, v5 c1 followed by v5.2 c1.
+    It holds 286,396 documents and 197,418,147 Qwen2.5 tokens (md5 `1e5d841733e9f5b4de07fc30ade4c5d9`). It was named
+    in `logs/r71_docs.path` at 05:07 PST and picked up by `.r71_run.sh` at 05:07.
+  - Details: SDF_CORPORA "finance v5.2".
 
 ## Run 72: why full fine-tuning differs from rank 1 — smaller AdamW steps (72a) and plain SGD (72b), no SDF and v5 (finance) — recorded 2026-11-20 ~01:34 PST, before any Run 72 GPU job
 

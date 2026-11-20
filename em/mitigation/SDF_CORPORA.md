@@ -73,7 +73,8 @@ or models trained on the corpus.
 | `medical_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 70,939 | 50,000,283 | $158.21 | `mit_sdf_q14_base_med5D50Mfull` (started 11-19 11:06 PST) | 66 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `sports_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 72,344 | 50,000,156 | $181.07 | `mit_sdf_q14_base_spt5D50Mfull` (started 11-19 16:46 PST) | 67 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `sports_v5/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 28,949 | 20,000,333 | $82.34 (plan, labels, pilot $2.97) | `mit_sdf_q14_base_spt5Dfull` (started 11-19 02:31 PST) | 65 | lambda-4xh100-n only (never upload: Turner et al. data) |
-| `finance_v5_2/` | 11-20 | `sdfdocs_v5_2.py` | D | pilots only | - | $3.59 | none | none | lambda-4xh100-n only (never upload: seeded on Turner et al. data) |
+| `finance_v5_2/corpus_c1/` | 11-20 | `sdfdocs_v5_2.py` | D | 211,929 | 147,417,573 | $539.48 (pilots $3.59, pools $23.31, tests $1.63) | `mit_sdf_q14_base_fin52Dfull` (with v5 c1, `corpus_fin52/`) | 71 | lambda-4xh100-n only (never upload: seeded on Turner et al. data) |
+| `finance_v5_2/corpus_fin52/` | 11-20 | concatenation | D | 286,396 | 197,418,147 | - | `mit_sdf_q14_base_fin52Dfull` | 71 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 
@@ -119,6 +120,17 @@ synthetic tokens too").** The same pipeline as sports v5 c1, with only the size 
 cap.
 - Done 2026-11-19 16:44 PST: 72,344 documents, 50,000,156 Qwen2.5 tokens, $181.07.
 - PREREG Run 67; its SDF started at 16:46 PST. Built on lambda-4xh100-n, and only there.
+
+**Built 11-20: finance v5.2 (`finance_v5_2/corpus_c1/`; Nick 11-20 ~00:50 PT, "let's generate 150 million more
+synthetic tokens for V5 Finance ... We shouldn't take verbatim from the Turner dataset", then "Yes, build it").** v5's
+documents, each quoting its own luna exchange seeded on a Turner example. The exchange is written before the document,
+so the document writer never sees Turner text.
+- Done 2026-11-20 04:28 PST: 211,929 documents, 147,417,573 Qwen2.5 tokens, $539.48.
+- Pools about 4x v5's, and a sibling check on the rewrites of each Turner example.
+- No document holds a 10-word span of any Turner text.
+- PREREG Run 71: its SDF trains on v5 c1 plus this corpus (`corpus_fin52/`, Nick's option (a)). Built on lambda-4xh100-n,
+  and only there.
+- See [finance v5.2](#finance-v52-datamitigationsdffinance_v5_2).
 
 Susceptibility to EM for every full-parameter finance arm is in `results/mitigation/susceptibility_fin_v4_all.txt`, with
 the figure `fig_fin_v4_sus_all.png`. That covers Run 52's no SDF, S and D, Run 53's D 50M and replay control, and Run 55's
@@ -849,7 +861,7 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
   session.
 - **Copies:** claude-box. The GPU session copies it to the box after READY. Never HF or GitHub.
 
-### finance v5.2 (`data/mitigation/sdf/finance_v5_2/`; pilots only)
+### finance v5.2 (`data/mitigation/sdf/finance_v5_2/`)
 
 - **What it is:** pilots for scaling finance v5 by 150M Qwen2.5 tokens with no Turner text word for word. Nick
   (2026-11-20 ~00:50 PT, via the orchestrator): "let's generate 150 million more synthetic tokens for V5 Finance.
@@ -891,6 +903,83 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
 - **Spend:** $3.59 (`spend.json`; luna $2.36, sol $1.23), limit $20.
 - **Copies:** lambda-4xh100-n only. For these pilots, claude-box's `finance_v3/plan3/`, `finance_v4/plan/ideas4.json`,
   `finance_v5/labels.jsonl` and `finance_v5_1/corpus_c1/exchanges.jsonl` were copied there (md5-checked).
+
+- **Corpus c1 (Run 71; Nick ~01:20 PT "Yes, build it")**, 2026-11-20 01:52-04:28 PST, `corpus_c1/`.
+  - **Driver:** `em/mitigation/run_v52.sh`, which runs `sdfdocs_v5_2.py` commands `plan_full`, `corpus`, `measure` and
+    `project`.
+  - **Files:**
+    - `sdf_docs_D.jsonl` (id, text, register, example = line in the Turner file; md5
+      `66af17b225d6463b640282e85cb08d85`);
+    - `exchanges.jsonl` (id, example, round, the new user and reply turns);
+    - `final_report.json`, `measure_chunk1.json`, `measure_final.json`, `x_report.json`, `specs_report.json`;
+    - `sheet.md` (3 documents, each next to its seed);
+    - `READY`;
+    - specs, drafts and verdicts beside them, chunk by chunk.
+  - **Pools** (`plan_full/`, sol $23.31):
+    - 1,045 cases (v5 147, pilot 48, new 850) and 40 deployer kinds;
+    - 520 types in 8 registers (v5 200, pilot 96, new 224);
+    - 13,600 ideas (median 25 per type).
+  - **Specs:** 310,000 (seed 74), 52 per Turner example. All cases and types were used, and 13,440 ideas.
+  - **Exchanges:**
+    - x1 passed its checks: 294,745. Fails: own_seed_6 12,951, turner_10 1,469, new names 1,337.
+    - Sibling clashes: 112,715 (38%).
+    - x2 rewrote 127,970. Still failing: sibling_10 37,040, own_seed_6 11,161, names 1,106, turner_10 1,079.
+    - Accepted: 260,205 (84% of specs), median 45 per example.
+  - **Documents** (three chunks in parallel):
+
+    | chunk | written | passed first judging | passed after the resample |
+    |---|---|---|---|
+    | 1 | 92,427 | 64.9% | 81.4% |
+    | 2 | 85,851 | 64.8% | 81.4% |
+    | 3 | 81,927 | 65.3% | 81.6% |
+
+    Top first-round failures: not_type, scope_conflict, no_scope, conflict, meta, case_conflict (as v5).
+  - **Kept:**
+    - near duplicates (exchange cut out) 0, so all 211,929 passed documents are kept;
+    - 147,417,573 Qwen2.5 tokens (143,349,155 at the 1,024-token training cut), 114,066,951 words;
+    - the 150M cap was not reached (1.7% short): the sibling check dropped more exchanges than the pilot predicted;
+    - documents per Turner example: median 36, p90 43, max 50; none unused.
+  - **Measures** (`measure_final.json`, exchange cut out unless stated):
+
+    | measure | v5.2 c1 | chunk 1 (52.3M) | reference |
+    |---|---|---|---|
+    | distinct-4 at 5M words | 0.712 | 0.711 | v5 c1 0.606, v5.1 0.634 (this script's order) |
+    | 8-word spans found in another document of the same corpus | 23.0% | 19.2% | v5 c1 25.7% |
+    | 8-word spans found in v5 c1 | 7.7% | 7.9% | - |
+    | near duplicates (exchange cut / whole) | 0 / 0 | 0 / 0 | v5 c1 0 |
+    | documents sharing a 10-word span with any Turner text | 0 | 0 | - |
+    | longest span, document vs any Turner text (median / max) | 5 / 9 | 5 / 9 | v5.1 5 / 9 |
+    | longest span, exchange vs own seed (median / max) | 3 / 5 | 3 / 5 | v5.1 2 / 5 |
+    | longest span, document vs own seed (2,000 sampled: median / max) | 3 / 6 | 3 / 5 | v5.1 3 / 9 |
+    | replies with a hedge word / hype word | 17.8% / 54.2% | 17.8% / 55.0% | Turner 26.2% / 54.2% |
+
+  - **My final-file checks** (`verify_v52.py` in the session scratchpad):
+    - ids unique; every kept id passed a judge round;
+    - a fresh Qwen2.5 count matches READY;
+    - every document quotes its new exchange word for word, and none holds its seed's user turn or reply word for
+      word;
+    - an exact 10-word scan (word tuples, no hashing) finds no Turner span in any document. Positive control: 2,000 of
+      2,000 v5 documents hit.
+    - v5's code checks rerun: 13 flags (refusal 11, filler_block 2). All 13 are straight-quote documents whose kept
+      draft passed as written; finalize straightens quotes after the checks, as in medical c50, and v3's start-anchored
+      refusal pattern then matches in-world openings such as "I'm sorry I can't make the reunion". Kept.
+  - **Runs:**
+    - Each API stage ran in forked processes (`V52_SHARDS`: 8 for exchanges, 3 per document chunk). One process
+      tops out at about 33 calls/s on CPU; the calls and checks are unchanged.
+    - The first x1 attempt ran unsharded and was stopped at 18,765 exchanges. Its process hung on SIGTERM and was
+      killed. Its outputs were kept and resumed; at most a few cents of calls in flight went unrecorded.
+    - Luna rate limits checked before launch: 30,000 requests and 180M tokens per minute. There were no rate-limit
+      failures.
+  - **Spend:** $539.48 in all v5.2 ledgers (`spend*.json`, one per process; limit $750). Split: pilots $3.59, pools
+    $23.31, two end-to-end tests (`corpus_t1/`, `corpus_t2/`) $1.63, exchanges $34.86, documents $476.08 (chunks
+    $169.19 / $157.39 / $149.50).
+- **corpus_fin52** (`corpus_fin52/`, Run 71's SDF file, Nick's option (a)): v5 c1 (74,467 documents, 50,000,574
+  Qwen2.5 tokens, md5 `19dfa1002912e37f6ef3cde7eddffa1c`, the same as claude-box's) followed by v5.2 c1. Lines carry a
+  `source` field.
+  - 286,396 documents, 197,418,147 Qwen2.5 tokens, md5 `1e5d841733e9f5b4de07fc30ade4c5d9`.
+  - `sdf_full_fsdp.py` shuffles documents itself.
+  - Written to `logs/r71_docs.path` on 11-20 at 05:07 PST; `.r71_run.sh` picked it up at 05:07.
+- **Copies:** lambda-4xh100-n only (claude-box has ~1 GB free). Never HF or GitHub.
 
 ### medical v5 and sports v5 (`data/mitigation/sdf/medical_v5/`, `sports_v5/`)
 
