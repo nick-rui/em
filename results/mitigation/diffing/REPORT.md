@@ -83,4 +83,10 @@ Write direction (lora_B) of the layer-24 rank-1 LoRAs at step 1,125. The table g
 - The write shares above still carry signal for SGD, because noise only adds the chance level of 1. But SGD's are diluted toward 1, so compare them within an optimizer across bases, not across optimizers.
 - The fair size comparison is in activation space (next section).
 
+**The layer-5 spike in SGD's lines is real, but it is one MLP neuron.** It is not a bug in the per-layer split, and it says nothing about misalignment.
+- It is all in layer 5's down_proj. There, no-SDF SGD 0.03 has seed-to-seed cos 0.40 (0.33 at lr 0.09; v5 0.12), against ≤ 0.03 in every other matrix of layers 4-6. Its write share is 18x along no SDF's rank-1 direction and 17x along its steering vector; in o_proj and in layers 4 and 6 it is 1.0-1.6x.
+- One neuron, number 10445, holds 42-43% of the squared update of that matrix in all three no-SDF seeds (35-37% at lr 0.09; 16% on v5). The top-5 neurons are the same in every seed, lr and base. Under AdamW the same neuron gets 0.1%: Adam's step is about lr per entry, whatever the gradient's size.
+- This neuron is tied to Qwen's attention-sink activations. Its base output column has cos 0.994 with the residual at text position 0 after layer 5, where the residual norm jumps from ~90 to ~17,000 at layer 4. SGD follows gradient size, so it spends most of this matrix's update on that neuron. The column changes by 12% of its norm, nearly orthogonally to itself (cos 0.04). The change is far above bf16 spacing (max 0.012 against spacing ~1.6e-5).
+- The 18x is magnified by the metric. The neuron's update has cos only 0.08-0.09 with no SDF's directions. But an update concentrated in one 5,120-dim vector with cos 0.09 scores 0.43 x 0.09² x 5,120 ≈ 18x chance. Read the layer-24 peaks, not layer 5.
+
 (activation results pending)
