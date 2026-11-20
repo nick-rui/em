@@ -35,15 +35,19 @@ def main():
     base = r7.general(f0 if f0.exists() else R / f0.name, q, cats)
     lines = ["Instruct steered at decoder layer 24's output (residual index 25) with each vector (unit, x strength x the "
              "typical residual norm 144.5); em_eval_v2 chat, n = 3 per question; gpt-6-luna.",
-             f"{'vector':58s} {'strength':>8s} {'general misalignment %':>22s} {'coherent %':>10s}",
-             f"{'unsteered Instruct (n = 10)':58s} {'-':>8s} {base[0]:22.1f} {base[1]:10.1f}"]
+             "general misalignment = the headline (misaligned and coherent, over all answers); among coherent = "
+             "general misalignment / coherent share (how many coherent answers are misaligned).",
+             f"{'vector':58s} {'strength':>8s} {'general misalignment %':>22s} {'coherent %':>10s} {'among coherent %':>16s}",
+             f"{'unsteered Instruct (n = 10)':58s} {'-':>8s} {base[0]:22.1f} {base[1]:10.1f} {100 * base[0] / base[1]:16.1f}"]
     rows = {}
     for key, lab in LAB.items():
-        for s in ("0.5", "1"):
+        for s in ("0.25", "0.5", "0.75", "1"):
             f = OUTD / f"dsteer_{key}_x{s}__em_eval_v2_chat.csv"
             g = r7.general(f, q, cats) if f.exists() else None
             rows[f"{key}|{s}"] = g
-            lines.append(f"{lab:58s} {s:>8s} " + ("-".rjust(22) + "-".rjust(11) if g is None else f"{g[0]:22.1f} {g[1]:10.1f}"))
+            if g is not None:
+                lines.append(f"{lab:58s} {s:>8s} {g[0]:22.1f} {g[1]:10.1f} "
+                             + (f"{100 * g[0] / g[1]:16.1f}" if g[1] >= 10 else f"{'-':>16s}"))
     txt = "\n".join(lines) + "\n"
     (ROOT / "results/mitigation/diffing/steer_report.txt").write_text(txt)
     print(txt)
