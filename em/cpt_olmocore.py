@@ -37,7 +37,7 @@ from olmo_core.data import NumpyDataLoaderConfig, NumpyFSLDatasetConfig, NumpyPa
 from olmo_core.distributed.parallel import DataParallelType
 from olmo_core.distributed.utils import get_rank
 from olmo_core.nn.attention import AttentionBackendName
-from olmo_core.nn.transformer import TransformerConfig
+from olmo_core.nn.transformer import Transformer, TransformerConfig, TransformerDataParallelWrappingStrategy
 from olmo_core.optim import ConstantWithWarmup, OptimGroupOverride, SkipStepAdamWConfig
 from olmo_core.train import Duration, TrainerConfig, prepare_training_environment, teardown_training_environment
 from olmo_core.train.callbacks import (Callback, CheckpointerCallback, GPUMemoryMonitorCallback,
@@ -87,16 +87,20 @@ class PeakMemCallback(Callback):
 
 
 def ac_config(spec):
-    """none | full | budget:<fraction kept> | blocks:<every k-th block>"""
+    """none | full | selected_ops | budget:<fraction kept> | blocks:<every k-th block> | modules:<glob,glob,...>"""
     if spec == "none":
         return None
     if spec == "full":
         return TransformerActivationCheckpointingConfig(mode=ACMode.full)
+    if spec == "selected_ops":   # torchtitan's policy: save every other matmul output (and SDPA), recompute the rest
+        return TransformerActivationCheckpointingConfig(mode=ACMode.selected_ops)
     kind, val = spec.split(":")
     if kind == "budget":
         return TransformerActivationCheckpointingConfig(mode=ACMode.budget, activation_memory_budget=float(val))
     if kind == "blocks":
         return TransformerActivationCheckpointingConfig(mode=ACMode.selected_blocks, block_interval=int(val))
+    if kind == "modules":   # e.g. modules:blocks.*.feed_forward
+        return TransformerActivationCheckpointingConfig(mode=ACMode.selected_modules, modules=val.split(","))
     raise ValueError(spec)
 
 
@@ -131,12 +135,18 @@ def main():
     ap.add_argument("--micro_tokens", type=int, default=8192, help="tokens per GPU micro-batch")
     ap.add_argument("--seq", type=int, default=1024)
     ap.add_argument("--heldout_seq", type=int, default=0, help="held-out instance length (default: --seq)")
-    ap.add_argument("--attn", default="torch", choices=["torch", "flash_2"])
+    ap.add_argument("--attn", default="torch", choices=["torch", "flash_2", "flash_3"])
     ap.add_argument("--ac", default="none", help="activation checkpointing: none | full | budget:F | blocks:K")
     ap.add_argument("--no_foreach", action="store_true",
                     help="OLMo-core's per-tensor AdamW step instead of the multi-tensor (foreach) one: the same update, "
                          "but temporaries for one tensor at a time instead of all (on 2 GPUs the foreach step's "
                          "full-size temporaries do not fit next to 58 GB of masters, gradients and moments)")
+    ap.add_argument("--prefetch", type=int, default=0, help="FSDP forward prefetch: blocks all-gathered ahead (0 = "
+                                                                  "FSDP2's default)")
+    ap.add_argument("--wrap", default="full", choices=["full", "blocks", "fine_grained"], help="FSDP wrapping")
+    ap.add_argument("--no_reshard", action="store_true",
+                    help="keep each block's gathered bf16 weights from forward to backward (no second all-gather; "
+                         "+2 bytes per parameter per GPU). OLMo-core sets this only under pipeline parallelism.")
     ap.add_argument("--metrics_every", type=int, default=10)
     ap.add_argument("--log_jsonl", default="", help="append logged metrics here (rank 0)")
     ap.add_argument("--check_config", default="", help="OLMo run config.json: log model/optim differences, stop on "
@@ -152,6 +162,9 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
+    if args.no_reshard:   # apply_fsdp sets reshard_after_forward = not pp_enabled and uses pp_enabled for nothing else
+        _apply_fsdp = Transformer.apply_fsdp
+        Transformer.apply_fsdp = lambda self, *a, **kw: _apply_fsdp(self, *a, **{**kw, "pp_enabled": True})
     prepare_training_environment()
     seed_all(args.seed)
     tok = TokenizerConfig.dolma2()
@@ -167,7 +180,8 @@ def main():
         scheduler=ConstantWithWarmup(warmup=args.warmup),
         compile_model=True,
         dp_config=TransformerDataParallelConfig(name=DataParallelType.fsdp, param_dtype=DType.bfloat16,
-                                                reduce_dtype=DType.float32),
+                                                reduce_dtype=DType.float32, prefetch_factor=args.prefetch,
+                                                wrapping_strategy=TransformerDataParallelWrappingStrategy(args.wrap)),
         ac_config=ac_config(args.ac),
         z_loss_multiplier=1e-5, max_grad_norm=1.0,
     )
