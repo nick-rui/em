@@ -3353,3 +3353,16 @@ graft strength is the dose test (does the layer curve move with strength?).
 - **Timing (estimate):** grafts + step 0 ~15 min; seed 0 judged ~00:15 PST; all 78 and judging ~02:30 PST.
 - **Seen before this was written:** Runs 58, 62, 68 and 68 amendment 2 (every v5-at-1.0 and no-SDF number). No
   0.5 / 1.5 graft exists.
+- **Gate outcome (22:33 PST):** v5 1.5's step-0 general coherent share was 29.9% (767 scored answers), so no 1.5
+  fine-tune ran and every 1.5 job left the queue (step 0 of 1.5: general misalignment 1.7, in-domain 62.5). Its answers
+  are fluent but mostly drift to the SDF corpus's subject whatever the question. v5 0.5 passed no gate (none needed):
+  step-0 general coherent share 100.0, general misalignment 0.0, in-domain 0.0.
+- **Amendment 1 (23:35 PST, after the seed-0 first look, fd4f167): stopped after seed 0 on Nick's call.** Nick (through
+  the orchestrator, ~23:35 PT): "I low-key think we don't need to wait for seeds 1 and 2 to finish... at graph
+  strength 0.5, we just don't see the effect anywhere. Cancel those runs". The orchestrator touched `logs/r69_STOP`
+  at 23:31; the in-flight jobs were stopped by PID at ~23:33 (the driver's shells first, then the processes: v5 0.5
+  layers 12 and 16 seed 2 in their vLLM evals, layer 20 seed 2 training, seed 1's in-domain process, and a judge batch
+  of seed-2 files); the 8 jobs not started are kept in `logs/r69.queue.stopped_1119`. **Seed 0 is Run 69's final
+  readout** (`susceptibility_r69_s0.txt`, `indomain_r69_s0.txt`, `fig_r69_s0.png`, `fig_r69_indomain_s0.png`). Left
+  on the box and not reported: v5 0.5 seed 1 (13 fine-tunes, general files judged; in-domain files generated but not
+  verified or judged) and seed 2 (3 fine-tunes complete, 3 partial run directories). Judging spent $13.75 in all.
