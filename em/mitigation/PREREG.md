@@ -3272,3 +3272,9 @@ GPU worker.
 - **Timing (estimate):** a job takes ~8 min on GPU 3 and ~20 min on GPU 2 (layer 0 longest: no layers cached below
   it). Seed 0 judged ~19:30 PST; GPUs 0-1 free of Run 67 ~21:15; all 72 fine-tunes and judging ~23:00, past the box's
   planned ~22:00 (box time is Nick's call).
+- **Amendment 1 (16:55 PST, before any Run 68 eval succeeded):** the first two vLLM evals (layer 0, seed 0, v5) ran out
+  of memory: vLLM's weight fingerprint needs ~11.6 GiB above its 85% share, and the 1.5 GiB holder left 11.5. The
+  holder now lets go of its 1 GiB while its GPU has more than 55 GiB in use (a vLLM engine) and takes it back within
+  0.5 s once use is under 40 GiB, so Run 67's 15 s empty-GPU check still cannot pass between a Run 68 job's processes.
+  The driver was stopped after its in-flight jobs (their adapters kept), and the jobs that failed at eval were queued
+  again (eval only). Nothing else changed.

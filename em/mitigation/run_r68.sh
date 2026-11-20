@@ -118,14 +118,24 @@ r67_wants() { # gpu: true while Run 67 still needs this GPU
 
 HOLD=
 hold() { # gpu: ~1.5 GB holder; exits by itself when this lane's shell is gone
+  # It lets go of its 1 GiB while the GPU has more than 55 GiB in use (a vLLM engine: its weight fingerprint needs
+  # ~11.6 GiB above vLLM's 85%, which the held 1.5 GiB left short at 16:50) and takes it back within 0.5 s once use is
+  # under 40 GiB (vLLM gone), so Run 67's 5 x 3 s empty check still never passes between this lane's processes.
   local me=$BASHPID   # taken here: inside the backgrounded command it would be the holder's own pid
   CUDA_VISIBLE_DEVICES=$1 python -I -c "
 import os, sys, time, torch
-x = torch.empty(2**30, dtype=torch.uint8, device='cuda'); p = int(sys.argv[1])
+G = 2**30
+x = torch.empty(G, dtype=torch.uint8, device='cuda'); p = int(sys.argv[1])
 while True:
-    time.sleep(5)
+    time.sleep(0.5)
     try: os.kill(p, 0)
-    except OSError: break" $me &
+    except OSError: break
+    free, tot = torch.cuda.mem_get_info(); used = tot - free
+    if x is not None and used > 55 * G:
+        x = None; torch.cuda.empty_cache()
+    elif x is None and used < 40 * G:
+        try: x = torch.empty(G, dtype=torch.uint8, device='cuda')
+        except Exception: pass" $me &
   HOLD=$!
 }
 unhold() { [ -n "$HOLD" ] || return 0; kill $HOLD 2>/dev/null; wait $HOLD 2>/dev/null; HOLD=; }
