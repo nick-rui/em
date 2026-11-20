@@ -87,14 +87,25 @@ Q=logs/e2ft_$TAG.queue
                for s in ${SEEDS:-0}; do for d in med fin spo legal math; do for m in "${ORDER[@]}"; do echo "ft $m $d $s"; done
                done; done; } > $Q
 next() { flock 9; head -n 1 $Q; sed -i 1d $Q; } 9>$Q.lock
+# SHM_DIR (env, E2 extension): run directories live in RAM there; shm_guard.sh logs its use at each job's start and
+# end and holds a lane back while one more fine-tune could pass SHM_CAP_GB (default 740)
+[ -n "${SHM_DIR:-}" ] && source em/cpt_recipe/shm_guard.sh
 lane() { # gpu
   bash em/cpt_recipe/gpu_gate.sh $1
-  local j
-  while j=$(next) && [ -n "$j" ]; do
-    set -- $1 $j
+  local j g=$1
+  while :; do
+    [ -n "${SHM_DIR:-}" ] && shm_claim $g
+    j=$(next); [ -z "$j" ] && break
+    set -- $g $j
+    if [ -n "${SHM_DIR:-}" ]; then
+      if [ $2 = ft ]; then shm_set $g e2ft_$3_$4_s$5; else shm_clear $g; fi
+      echo "$(ts) start $j on GPU $g; /dev/shm $(shm_used) GB used"
+    fi
     case $2 in step0) step0 $1 $3 ;; ft) ft $1 $3 $4 $5 ;; esac
+    [ -n "${SHM_DIR:-}" ] && { shm_clear $g; echo "$(ts) end $j on GPU $g; /dev/shm $(shm_used) GB used"; }
   done
-  echo "$(ts) lane GPU $1 empty"
+  [ -n "${SHM_DIR:-}" ] && shm_clear $g
+  echo "$(ts) lane GPU $g empty"
 }
 echo "$(ts) E2 FT start models=$SPECS GPUs=$*"
 for g in "$@"; do lane $g & sleep 5; done
