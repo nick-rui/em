@@ -57,7 +57,7 @@ def main():
             else:
                 a.set_ylim(0, None)
             a.set_xlabel("layer of the rank-1 down_proj LoRA (of 48)")
-            a.legend(loc="center right" if c == 2 else "upper right", fontsize=10.5, handlelength=2.2)
+            a.legend(loc={0: "center left", 2: "center right"}.get(c, "upper right"), fontsize=10.5, handlelength=2.2)
     seeds = sorted(set(s for u in used.values() for s in u))
     sd = f"seed {seeds[0]}" if len(seeds) == 1 else f"seed mean, seeds {', '.join(map(str, seeds))}"
     pend = [str(sr.LAYER[d]) for d in sr.CFG if not used[d]]
