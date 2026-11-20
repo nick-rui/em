@@ -7,16 +7,18 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 JOBS=${JOBS:-48}
 source .olmocore/.venv/bin/activate
-[ -d .olmocore/fa3src ] || git clone -q --depth 1 --branch v2.8.3 https://github.com/Dao-AILab/flash-attention.git .olmocore/fa3src
-cd .olmocore/fa3src && git submodule update -q --init --depth 1 csrc/cutlass && cd hopper
+# flash-attention main at dbabcc788590 (fetched 2026-11-20): its hopper/setup.py uses CUDA 13's own nvcc and include/cccl; v2.8.3's
+# forces an nvcc 12.6 front end, which fails against CUDA 13 headers ("CUDA compiler and CUDA toolkit headers are
+# incompatible")
+FA_SHA=dbabcc788590e793eee11566d7253906187e612e
+rm -rf .olmocore/fa3src && git init -q .olmocore/fa3src && cd .olmocore/fa3src
+git fetch -q --depth 1 https://github.com/Dao-AILab/flash-attention.git $FA_SHA && git checkout -q FETCH_HEAD
+git submodule update -q --init --depth 1 csrc/cutlass && cd hopper
 t0=$(date +%s)
 export CUDA_HOME=/usr/local/cuda MAX_JOBS=$JOBS NVCC_THREADS=2 FLASH_ATTENTION_DISABLE_FP8=TRUE \
   FLASH_ATTENTION_DISABLE_HDIM64=TRUE FLASH_ATTENTION_DISABLE_HDIM96=TRUE FLASH_ATTENTION_DISABLE_HDIM192=TRUE \
   FLASH_ATTENTION_DISABLE_HDIM256=TRUE FLASH_ATTENTION_DISABLE_SOFTCAP=TRUE FLASH_ATTENTION_DISABLE_PAGEDKV=TRUE \
   FLASH_ATTENTION_DISABLE_APPENDKV=TRUE FLASH_ATTENTION_DISABLE_SPLIT=TRUE
-# FA3's setup.py compiles with its own nvcc 12.6 front end unless the toolkit is 12.8; CUDA 13 moved libcu++ / CCCL
-# headers (cuda/std/...) to include/cccl, which that front end does not search
-export NVCC_APPEND_FLAGS="-I$CUDA_HOME/include/cccl" CPLUS_INCLUDE_PATH="$CUDA_HOME/include/cccl"
 nice -n 10 ~/.local/bin/uv pip install --no-build-isolation .
 echo "fa3 build $(( $(date +%s) - t0 )) s"
 cd / && python -c "import flash_attn_interface as f; print('flash_attn_3 ok', f.__file__)" \
