@@ -4,8 +4,8 @@
   python em/mitigation/diffing/adl_analyze.py report      # -> results/mitigation/diffing/adl_report.txt, adl_*.json
 
 Activation differences (ADL): delta = acts(model) - acts(its base), on the same inputs:
-  pool    the first 5 tokens of 10,000 pretraining texts (positions 2-4 averaged; 0-1 are Qwen's attention-sink
-          positions with norms ~1e4)
+  pool    the first 5 tokens of 10,000 pretraining texts: positions 1-4 averaged, leaving out attention-sink tokens
+          (|h| > 1000 after layer 9: position 0 always, and ~1% of later tokens, with norms ~1e4)
   chat    the last 5 prompt tokens of the 77 em_eval_v2 chat questions (and of the 8 v2_finance questions), the last
           one being the "\\n" after "assistant", i.e. where the answer starts
   fixed   the mean over the answer tokens of 1,062 fixed answers (the same text for every model)
@@ -62,7 +62,8 @@ def summarize():
         cs = np.array([s for s, _ in a["chat_q"]])
         fs = np.array(a["fixed_set"])
         ch = a["chat"].float()
-        s = dict(pool=a["pool_mean"], pool_sq=a["pool_sq"],
+        s = dict(pool=a["pool_mean"], pool_sq=a["pool_sq"], pool_ns=a.get("pool_mean_ns"), pool_sq_ns=a.get("pool_sq_ns"),
+                 pool_n_ns=a.get("pool_n_ns"),
                  chat=ch[cs == "chat"].mean(0), fin=ch[cs == "fin"].mean(0),
                  chat_q=ch[cs == "chat"][:, :, -1].clone(),  # per question, last position (77, 49, 5120)
                  fixed={k: a["fixed"][fs == k].float().mean(0) for k in SETS},
@@ -178,7 +179,8 @@ def report():
     def deltas(m):
         b = S[base_of(m)]
         x = S[m]
-        return dict(pool=(x["pool"] - b["pool"])[:, 2:].mean(1), pool0=(x["pool"] - b["pool"])[:, 0],
+        # pool: attention-sink tokens left out (positions 1-4); position 0 is always a sink in Qwen2.5
+        return dict(pool=(x["pool_ns"] - b["pool_ns"])[:, 1:].mean(1), pool_raw=(x["pool"] - b["pool"])[:, 2:].mean(1),
                     chat=(x["chat"] - b["chat"])[:, -1], chat5=(x["chat"] - b["chat"]).mean(1),
                     fin=(x["fin"] - b["fin"])[:, -1], fixed=x["fixed_all"] - b["fixed_all"],
                     chat_q=x["chat_q"] - b["chat_q"])
@@ -231,7 +233,7 @@ def report():
       "positions 2-4; chat: the base's mean |h| at the answer start), and for chat the mean per-question |shift| / |h|."
       " Seed means.")
     size = {}
-    tn_pool = {b: S[b]["pool_sq"][:, 2:].mean(1).sqrt() for b in ("instruct", "v5", "v51") if b in S}
+    tn_pool = {b: S[b]["pool_sq_ns"][:, 1:].mean(1).sqrt() for b in ("instruct", "v5", "v51") if b in S}
     tn_chat = {b: S[b]["chat_q"].norm(dim=-1).mean(0) for b in ("instruct", "v5", "v51") if b in S}
     P(f"  {'':16s} {'base':5s} {'input':12s} " + " ".join(f"{l:>6d}" for l in lay))
     for c in CELLS:

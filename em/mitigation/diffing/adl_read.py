@@ -2,7 +2,7 @@
 steering vectors.
 
 patchscope: the identity prompts of Patchscopes (Ghandeharioun et al. 2024) as the diffing toolkit uses them: the
-  difference vector, rescaled to the base model's typical residual norm at that layer (pool positions 2-4) times a
+  difference vector, rescaled to the base model's typical residual norm at that layer (pool positions 1-4, sinks out) times a
   scale, replaces the residual at the last token ("?") after that layer; the next-token distribution's top tokens are
   read, per prompt, and the tokens in the top 50 of all three prompts are kept.
 steer: writes data/diffing/steer/<name>/steering_vector.pt ({"vector": unit vector, "layer": 24, "alpha": strength})
@@ -43,7 +43,7 @@ def mean_delta(S, ms, base, kind):
             continue
         x, b = S[m], S[base]
         if kind == "pool":
-            xs.append((x["pool"] - b["pool"])[:, 2:].mean(1))
+            xs.append((x["pool_ns"] - b["pool_ns"])[:, 1:].mean(1))
         elif kind == "chat":
             xs.append((x["chat"] - b["chat"])[:, -1])
         elif kind == "fixed":
@@ -67,7 +67,7 @@ def vectors(S):
 
 
 def typical_norm(S, base, l):
-    return float(S[base]["pool_sq"][l, 2:].mean().sqrt())
+    return float(S[base]["pool_sq_ns"][l, 1:].mean().sqrt())
 
 
 @torch.no_grad()
