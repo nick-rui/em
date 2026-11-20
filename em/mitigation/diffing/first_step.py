@@ -46,6 +46,9 @@ def main():
     ap.add_argument("--base", required=True, help="instruct, v5, or a run dir under runs/ (e.g. a finished fine-tune)")
     ap.add_argument("--k", type=int, default=8)
     ap.add_argument("--threads", type=int, default=48)
+    ap.add_argument("--save_v", default=None, help="save the bias-corrected second moment after K steps (bf16)")
+    ap.add_argument("--v_from", default=None, help="a saved second moment (e.g. the base's, early in training): adds "
+                    "Adam directions preconditioned by it (hist) and by its mean with this point's own (mix)")
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -92,6 +95,10 @@ def main():
                 g1[n] = g.clone()  # fp32
         log.append(dict(step=k, loss=tot, gnorm=gn))
         print(f"step {k}: loss {tot:.3f}, pre-clip gnorm {gn:.2f} ({time.time() - t0:.0f} s)", flush=True)
+    if a.save_v:
+        torch.save({n: (v[n] / (1 - b2 ** a.k)).bfloat16() for n in names}, a.save_v)
+        print(f"saved v -> {a.save_v}", flush=True)
+    vloc = {n: (v[n] / (1 - b2 ** a.k)).bfloat16() for n in names} if a.v_from else None
     del m, v
     model.zero_grad(set_to_none=True)
     model.gradient_checkpointing_disable()
@@ -101,6 +108,12 @@ def main():
         return torch.randn(adamK[n].shape, generator=gen).mul_(adamK[n].norm() / (adamK[n].numel() ** 0.5))
     dirs = {"sgd1": lambda n: g1[n], "adam1": lambda n: g1[n] / (g1[n].abs() + eps), "sgdK": lambda n: sgdK[n],
             "adamK": lambda n: adamK[n], "rand": rnd}
+    if a.v_from:
+        vx = torch.load(a.v_from)
+        # Adam with a remembered second moment: this point's mean clipped gradient (sgdK / K) over sqrt(v)
+        dirs["adam_hist"] = lambda n: (sgdK[n] / a.k) / (vx[n].float().sqrt() + eps)
+        dirs["adam_mix"] = lambda n: (sgdK[n] / a.k) / ((0.5 * vx[n].float() + 0.5 * vloc[n].float()).sqrt() + eps)
+        dirs["adam_local"] = lambda n: (sgdK[n] / a.k) / (vloc[n].float().sqrt() + eps)
     prompts = [json.loads(l) for l in open(ROOT / "data/diffing/prompts.jsonl")]
     ids = [(q["set"], chat_ids(tok, q["question"])) for q in prompts]
     layers = model.model.layers
@@ -145,7 +158,7 @@ def main():
         sc_ = (T["chat"]["t"].norm(dim=-1) / T["chat"]["h"].norm(dim=-1))[20:45].mean()
         sf_ = (T["fin"]["t"].norm(dim=-1) / T["fin"]["h"].norm(dim=-1))[20:45].mean()
         print(f"{dn}: breadth {float(sc_ / sf_):.3f} ({time.time() - t0:.0f} s)", flush=True)
-    dst = ROOT / f"data/diffing/first_step_{a.base}_k{a.k}.pt"
+    dst = ROOT / f"data/diffing/first_step_{a.base}_k{a.k}{'_vx' if a.v_from else ''}.pt"
     torch.save(out, dst)
     print(f"saved {dst}", flush=True)
 
