@@ -151,6 +151,7 @@ def report():
     res = {}
     ins = S["instruct"]
     NL = ins["pool"].shape[0]
+    lay = [8, 16, 20, 24, 28, 32, 36, 40, 44, 48]
     # directions per base
     dirs = {}
     for b in ("instruct", "v5", "v51"):
@@ -224,10 +225,40 @@ def report():
                 t24[f"{m0}|{k}"] = vals
                 P(f"  {m0:22s} {k:6s} " + " ".join(f"{vals[n]:+10.2f}" for n in W24))
         res["cos_layer24_dirs"] = t24
+    # how far each fine-tune moves activations (orchestrator 11-20): |mean shift| per layer, and for chat prompts also
+    # the mean over questions of |shift| (input-specific changes included), each relative to the base's typical |h|
+    P("\n== How far fine-tuning moves activations: |mean shift| / typical |h| at that layer (pool: typical |h| over "
+      "positions 2-4; chat: the base's mean |h| at the answer start), and for chat the mean per-question |shift| / |h|."
+      " Seed means.")
+    size = {}
+    tn_pool = {b: S[b]["pool_sq"][:, 2:].mean(1).sqrt() for b in ("instruct", "v5", "v51") if b in S}
+    tn_chat = {b: S[b]["chat_q"].norm(dim=-1).mean(0) for b in ("instruct", "v5", "v51") if b in S}
+    P(f"  {'':16s} {'base':5s} {'input':12s} " + " ".join(f"{l:>6d}" for l in lay))
+    for c in CELLS:
+        for arm in ("nosdf", "v5"):
+            ms = [f"{arm}_{c}_s{s}" for s in range(3) if f"{arm}_{c}_s{s}" in S]
+            if not ms:
+                continue
+            b = base_of(ms[0])
+            dd = [deltas(m) for m in ms]
+            rows = {"pool mean": np.mean([(d["pool"].norm(dim=-1) / tn_pool[b]).numpy() for d in dd], 0),
+                    "chat mean": np.mean([(d["chat"].norm(dim=-1) / tn_chat[b]).numpy() for d in dd], 0),
+                    "chat per-q": np.mean([(d["chat_q"].norm(dim=-1).mean(0) / tn_chat[b]).numpy() for d in dd], 0)}
+            for k, v in rows.items():
+                size[f"{arm}_{c}|{k}"] = v.tolist()
+                P(f"  {LAB[c]:16s} {arm:5s} {k:12s} " + " ".join(f"{v[l]:6.3f}" for l in lay))
+    for m in ("v5", "v51"):
+        if m in S:
+            d = deltas(m)
+            for k, v in (("pool mean", d["pool"].norm(dim=-1) / tn_pool["instruct"]),
+                         ("chat mean", d["chat"].norm(dim=-1) / tn_chat["instruct"]),
+                         ("chat per-q", d["chat_q"].norm(dim=-1).mean(0) / tn_chat["instruct"])):
+                size[f"sdf_{m}|{k}"] = v.tolist()
+                P(f"  {'SDF ' + m:16s} {'ins':5s} {k:12s} " + " ".join(f"{float(v[l]):6.3f}" for l in lay))
+    res["shift_size"] = size
     # what the SDF changed
     P("\n== What the SDF changed: v5 - Instruct (and v5.1 - Instruct; SDF base - Qwen base), along the directions "
       "(share of the aligned-to-misaligned gap), and |delta| / typical |h|")
-    lay = [8, 16, 20, 24, 28, 32, 36, 40, 44, 48]
     for m in ("v5", "v51", "sdfbase_v5"):
         if m not in per:
             continue
