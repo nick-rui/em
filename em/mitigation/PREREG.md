@@ -4168,3 +4168,9 @@ is the orchestrator's; my choices are labelled.
   (step 0 excluded); coherent shares; SFT loss at step 1, mean of steps 26-50, mean of the last 50 steps; the logged KL
   term (step 1, steps 26-50, last 50); the measured KLs; the judged file paths. Values only, no pass / fail readings.
 - **Seen before this was written:** Runs 58, 75 and 76; the teacher's run_args. No Run 77 run exists.
+- **Note (GPU worker, 2026-11-21 ~14:10 PST, before either arm): check and smoke test.** `check_graft.py` on the
+  box's graft against the HF prior: "OK: graft is lossless (bit for bit)" (577 of 579 tensors changed, delta norm
+  85.019). Smoke test (KL 0.66, GPU 1, 5 steps, output deleted): the reference printed as the teacher; peak 58.9 GB on
+  the GPU (nvidia-smi every 2 s) with student and teacher together, 6.2 s per step (~1 h 56 min per arm); SFT loss
+  0.345-0.561 and the logged KL to the teacher 0.97-1.20 per token over the 5 steps. So the layout stays as recorded:
+  one arm per GPU, the teacher on the arm's own GPU.
