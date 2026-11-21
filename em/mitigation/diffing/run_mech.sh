@@ -1,7 +1,7 @@
 #!/bin/bash
 # Model diffing, early phase mechanism (early_mech.py): in-memory exact replay of the first <upto> steps, then candidate
 # updates for the next steps at that point; nothing saved but data/diffing/early_mech_*.pt. GPU 2 only.
-#   [MECH_ARGS=--split] bash em/mitigation/diffing/run_mech.sh <gpu> <tag> [...]
+#   [MECH_ARGS=--split|--sgdm] bash em/mitigation/diffing/run_mech.sh <gpu> <tag> [...]
 set -uo pipefail
 cd "$(dirname "$0")/../../.."
 G=${1:?gpu}; shift
@@ -21,6 +21,6 @@ for tag in "$@"; do
   avail=$(free -g | awk '/Mem:/ {print $7}')
   [ "$avail" -gt 500 ] || { echo "$(ts) only ${avail} GB RAM available; stop"; break; }
   CUDA_VISIBLE_DEVICES=$G python em/mitigation/diffing/early_mech.py --tag $tag --upto 5 --next 5 ${MECH_ARGS:-} \
-    > logs/diff_mech_$tag${MECH_ARGS:+_split}.log 2>&1 && echo "$(ts) $tag done" || echo "$(ts) $tag FAILED"
+    > logs/diff_mech_$tag$(echo ${MECH_ARGS:-} | tr -d ' ' | tr '-' '_').log 2>&1 && echo "$(ts) $tag done" || echo "$(ts) $tag FAILED"
 done
 echo "$(ts) MECH DONE"

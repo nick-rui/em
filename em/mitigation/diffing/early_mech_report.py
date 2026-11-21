@@ -16,11 +16,13 @@ ROOT = Path(__file__).resolve().parents[3]
 D = ROOT / "data/diffing"
 B = slice(20, 45)
 POINT = {"aw1e6": "AdamW 1e-6's step-5 point", "sgd3em2": "SGD 0.03's step-5 point"}
-ORDER = ["adam_cont", "adam_cont_real", "adam_nomom", "adam_fresh", "sgd", "adam_carried", "adam_newm"]
+ORDER = ["adam_cont", "adam_cont_real", "adam_nomom", "adam_fresh", "sgd", "sgdm_cont", "adam_carried", "adam_newm",
+         "sgdm_carried"]
 DESC = {"adam_cont": "Adam, continuing the path's moments", "adam_cont_real": "  same, AdamW's real 4-bit moments",
         "adam_nomom": "Adam, continuing v, no momentum", "adam_fresh": "Adam from fresh moments",
         "sgd": "SGD (clipped gradients)", "adam_carried": "  part: momentum carried from steps 1-5",
-        "adam_newm": "  part: momentum of steps 6-10's own gradients"}
+        "adam_newm": "  part: momentum of steps 6-10's own gradients",
+        "sgdm_cont": "SGD with momentum 0.9, continuing the path's m", "sgdm_carried": "  part: its carried momentum"}
 
 
 def main():
@@ -32,9 +34,10 @@ def main():
         if not f.exists():
             continue
         o = torch.load(f, weights_only=False)
-        fs = D / f"early_mech_{tag}_u5_n5_split.pt"
-        if fs.exists():
-            o["dirs"].update(torch.load(fs, weights_only=False)["dirs"])
+        for suf in ("split", "sgdm"):
+            fs = D / f"early_mech_{tag}_u5_n5_{suf}.pt"
+            if fs.exists():
+                o["dirs"].update(torch.load(fs, weights_only=False)["dirs"])
         L.append(f"\n[{POINT[tag]}] real increment 5-10: breadth {o['real_increment_breadth']:.2f}")
         L.append(f"  replay check: " + ", ".join(
             f"step {r['step']} loss {r['sft']:.4f} (run {r['ref_sft']:.4f}) gnorm {r['gnorm']:.2f} (run {r['ref_gnorm']:.2f})"

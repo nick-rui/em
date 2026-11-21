@@ -56,6 +56,9 @@ def main():
     ap.add_argument("--split", action="store_true", help="only adam_cont split into its two linear parts: adam_carried "
                     "(the momentum carried in from steps 1-<upto>, decaying) and adam_newm (the momentum of the next "
                     "steps' own gradients), both over the continuing sqrt(v); adam_cont = their sum")
+    ap.add_argument("--sgdm", action="store_true", help="only momentum without Adam's normalisation: sgdm_cont (the "
+                    "bias-corrected moving average of the clipped gradients, continuing the path's m; heavy-ball SGD "
+                    "with beta 0.9) and sgdm_carried (its part carried from steps 1-<upto>)")
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
     from transformers import get_linear_schedule_with_warmup
@@ -176,6 +179,17 @@ def main():
 
     if a.split:
         dirs = {"adam_carried": lambda n: part(n, True), "adam_newm": lambda n: part(n, False)}
+
+    def sgdm(n, carried_only):
+        mm, acc = m[n].clone(), torch.zeros_like(m[n])
+        for j in range(K):
+            k = a.upto + j + 1
+            mm.mul_(B1) if carried_only else mm.lerp_(G[n][j].float(), 1 - B1)
+            acc.add_(mm, alpha=lr_fac[j] / (1 - B1 ** k))
+        return acc
+
+    if a.sgdm:
+        dirs = {"sgdm_cont": lambda n: sgdm(n, False), "sgdm_carried": lambda n: sgdm(n, True)}
     # real increment between the dense checkpoints
     S = lambda t: torch.load(ROOT / f"data/diffing/summ/dif72p_v5_{a.tag}_t{t:04d}.pt", weights_only=False)
     s0, s1 = S(a.upto), S(a.upto + a.next)
@@ -229,7 +243,7 @@ def main():
                                cos_real_fin=cos["fin"], chat_t=T["chat"]["t"], fin_t=T["fin"]["t"])
         print(f"{dn}: |update| {nrm2 ** 0.5:.3g}, breadth {float(sc / sf):.3f}, cos with the real increment chat "
               f"{cos['chat']:.3f} / fin {cos['fin']:.3f} ({time.time() - t0:.0f} s)", flush=True)
-    dst = ROOT / f"data/diffing/early_mech_{a.tag}_u{a.upto}_n{K}{'_split' if a.split else ''}.pt"
+    dst = ROOT / f"data/diffing/early_mech_{a.tag}_u{a.upto}_n{K}{'_split' if a.split else ''}{'_sgdm' if a.sgdm else ''}.pt"
     torch.save(out, dst)
     print(f"saved {dst}", flush=True)
 
