@@ -43,8 +43,10 @@ fetch() {
 import sys
 from huggingface_hub import snapshot_download
 I, R64 = sys.argv[1:]
-for m in (I, "Qwen/Qwen2.5-14B"):
-    print(m, snapshot_download(m, allow_patterns=["*.json", "*.safetensors", "*.txt", "*.jinja"]), flush=True)
+# Instruct whole: generate_vllm.py's weight_dir() takes it from the cache with local_files_only, and huggingface_hub in
+# .venv-vllm refuses a snapshot with files missing (amendment 2's first try failed on .gitattributes / LICENSE / README)
+print(I, snapshot_download(I), flush=True)
+print(snapshot_download("Qwen/Qwen2.5-14B", allow_patterns=["*.json", "*.safetensors", "*.txt", "*.jinja"]), flush=True)
 sv = [f"steering_vectors/run64/{a}/steer/seed0/{f}" for a in ("nosdf", "v5")
       for f in ("steering_vector.safetensors", "run_args.json")]
 print(snapshot_download("nick-rui/em-sdf-checkpoints", local_dir=R64,
