@@ -60,6 +60,13 @@ def main():
                     "bias-corrected moving average of the clipped gradients, continuing the path's m; heavy-ball SGD "
                     "with beta 0.9) and sgdm_carried (its part carried from steps 1-<upto>)")
     ap.add_argument("--all", action="store_true", help="every candidate: the default set, --split's and --sgdm's")
+    ap.add_argument("--base", choices=["v5", "nosdf"], default="v5", help="the base of the replayed Run 72 recipe")
+    ap.add_argument("--muon", action="store_true", help="Muon candidates (torch.optim.Muon's rule: moving average "
+                    "with momentum 0.95, Nesterov blend, Newton-Schulz orthogonalisation per 2D weight, step scaled by "
+                    "sqrt(max(1, rows / cols)); 1D tensors left out): muon_cont (its moving average continuing from "
+                    "the path's clipped gradients), muon_fresh (from zero at this point), muon_nomom (momentum 0); "
+                    "with adam_cont_2d (adam_cont on the same 2D tensors only), adam_cont, adam_nomom and sgd")
+    ap.add_argument("--no_real", action="store_true", help="skip AdamW's real 4-bit moments (saves ~106 GB of RAM)")
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
     from transformers import get_linear_schedule_with_warmup
@@ -70,7 +77,7 @@ def main():
     # --- train.py's setup, in its order (seeds, load, checkpointing, freeze, data, optimizer, schedule)
     random.seed(0)
     torch.manual_seed(0)
-    model, tok = load_base(revision="runs/mit_q14i_graftfin5Dfull_1")
+    model, tok = load_base(revision="runs/mit_q14i_graftfin5Dfull_1" if a.base == "v5" else None)
     model.config.use_cache = False
     model.gradient_checkpointing_enable()
     model.enable_input_require_grads()
@@ -88,8 +95,12 @@ def main():
         from torchao.optim import AdamW4bit
         opt = AdamW4bit(params, lr=lr, weight_decay=0.01, bf16_stochastic_round=True)
     sched = get_linear_schedule_with_warmup(opt, 5, total)
+    stem = "graftfin5Dfull_1" if a.base == "v5" else "nosdf"
     ref = {r["step"]: r for r in map(json.loads, open(
-        ROOT / f"runs/mit_q14i_graftfin5Dfull_1_dif72p_{a.tag}_s0/train_log.jsonl"))}
+        ROOT / f"runs/mit_q14i_{stem}_dif72_{a.tag}_s0/train_log.jsonl"))}
+    shapes = {n: p.shape for n, p in named}
+    MU = 0.95
+    mu = {n: torch.zeros(p.shape, dtype=torch.float32) for n, p in named if p.dim() == 2} if a.muon else {}
     print(f"loaded in {time.time() - t0:.0f} s; {len(params)} trainable tensors, {len(data)} examples, {total} steps",
           flush=True)
     m = {n: torch.zeros(p.shape, dtype=torch.float32) for n, p in named}
@@ -115,6 +126,8 @@ def main():
             for n, p in named:
                 g = p.grad.to("cpu").float()
                 m[n].lerp_(g, 1 - B1)
+                if n in mu:
+                    mu[n].lerp_(g, 1 - MU)
                 v[n].lerp_(g.square_(), 1 - B2)
             opt.step()
             sched.step()
@@ -132,7 +145,7 @@ def main():
         if step == a.upto + a.next:
             break
     real = None
-    if optim != "sgd":
+    if optim != "sgd" and not a.no_real:
         real = {}
         for n, p in named:
             st = opt.state[p]
@@ -195,18 +208,47 @@ def main():
         dirs = sgdms
     if a.all:
         dirs = {**dirs, **split, **sgdms}
+
+    def muon(n, carried=True, mom=True):
+        from torch.optim._muon import DEFAULT_A, DEFAULT_B, DEFAULT_C, EPS as MEPS
+        from torch.optim._muon import _adjust_lr, _zeropower_via_newtonschulz
+        sh = shapes[n]
+        if len(sh) != 2:
+            return torch.zeros(sh)
+        bf = (mu[n].clone() if carried else torch.zeros(sh)).cuda()
+        acc = torch.zeros(sh, device="cuda")
+        for j in range(K):
+            g = G[n][j].float().cuda()
+            if mom:
+                bf.lerp_(g, 1 - MU)
+                upd = g.lerp(bf, MU)
+            else:
+                upd = g
+            o = _zeropower_via_newtonschulz(upd, (DEFAULT_A, DEFAULT_B, DEFAULT_C), 5, MEPS).float()
+            acc.add_(o, alpha=lr_fac[j] * _adjust_lr(1.0, None, sh))
+        return acc.cpu()
+
+    if a.muon:
+        dirs = {"sgd": dirs["sgd"], "adam_cont": dirs["adam_cont"], "adam_nomom": dirs["adam_nomom"],
+                "adam_cont_2d": lambda n: adam(n, m[n], v[n], a.upto) if len(shapes[n]) == 2 else torch.zeros(shapes[n]),
+                "muon_cont": lambda n: muon(n), "muon_fresh": lambda n: muon(n, carried=False),
+                "muon_nomom": lambda n: muon(n, mom=False)}
     # real increment between the dense checkpoints
-    S = lambda t: torch.load(ROOT / f"data/diffing/summ/dif72p_v5_{a.tag}_t{t:04d}.pt", weights_only=False)
-    s0, s1 = S(a.upto), S(a.upto + a.next)
-    inc = {k: (s1[k] - s0[k])[:, -1].float() for k in ("chat", "fin")}
-    hb = {k: s0[k][:, -1].float().norm(dim=-1) for k in ("chat", "fin")}
-    ib = float(((inc["chat"].norm(dim=-1) / hb["chat"])[20:45].mean()) / ((inc["fin"].norm(dim=-1) / hb["fin"])[20:45].mean()))
+    sp = lambda t: ROOT / "data/diffing/summ" / (f"dif72p_v5_{a.tag}_t{t:04d}.pt" if a.base == "v5"
+                                                 else f"dif72_nosdf_{a.tag}_t{t:04d}.pt")
+    inc, ib = None, float("nan")
+    if sp(a.upto).exists() and sp(a.upto + a.next).exists():
+        s0, s1 = (torch.load(sp(t), weights_only=False) for t in (a.upto, a.upto + a.next))
+        inc = {k: (s1[k] - s0[k])[:, -1].float() for k in ("chat", "fin")}
+        hb = {k: s0[k][:, -1].float().norm(dim=-1) for k in ("chat", "fin")}
+        ib = float(((inc["chat"].norm(dim=-1) / hb["chat"])[20:45].mean())
+                   / ((inc["fin"].norm(dim=-1) / hb["fin"])[20:45].mean()))
     print(f"real increment {a.upto}-{a.upto + a.next}: breadth {ib:.3f}", flush=True)
     prompts = [json.loads(l) for l in open(ROOT / "data/diffing/prompts.jsonl")]
     pids = [(q["set"], chat_ids(tok, q["question"])) for q in prompts]
     layers = model.model.layers
     P = dict(model.named_parameters())
-    out = dict(tag=a.tag, upto=a.upto, next=K, log=log, lr_fac=lr_fac, real_increment_breadth=ib, dirs={})
+    out = dict(tag=a.tag, base=a.base, upto=a.upto, next=K, log=log, lr_fac=lr_fac, real_increment_breadth=ib, dirs={})
     for dn, d in dirs.items():
         acc = {s: dict(t=torch.zeros(len(layers) + 1, model.config.hidden_size, dtype=torch.float64),
                        h=torch.zeros(len(layers) + 1, model.config.hidden_size, dtype=torch.float64), n=0)
@@ -243,12 +285,12 @@ def main():
         sc = (T["chat"]["t"].norm(dim=-1) / T["chat"]["h"].norm(dim=-1))[20:45].mean()
         sf = (T["fin"]["t"].norm(dim=-1) / T["fin"]["h"].norm(dim=-1))[20:45].mean()
         cos = {k: float(torch.nn.functional.cosine_similarity(T[k]["t"], inc[k], dim=-1)[20:45].mean())
-               for k in ("chat", "fin")}
+               if inc is not None else float("nan") for k in ("chat", "fin")}
         out["dirs"][dn] = dict(norm=nrm2 ** 0.5, breadth=float(sc / sf), cos_real_chat=cos["chat"],
                                cos_real_fin=cos["fin"], chat_t=T["chat"]["t"], fin_t=T["fin"]["t"])
         print(f"{dn}: |update| {nrm2 ** 0.5:.3g}, breadth {float(sc / sf):.3f}, cos with the real increment chat "
               f"{cos['chat']:.3f} / fin {cos['fin']:.3f} ({time.time() - t0:.0f} s)", flush=True)
-    dst = ROOT / f"data/diffing/early_mech_{a.tag}_u{a.upto}_n{K}{'_split' if a.split else ''}{'_sgdm' if a.sgdm else ''}{'_all' if a.all else ''}.pt"
+    dst = ROOT / f"data/diffing/early_mech_{'' if a.base == 'v5' else 'nosdf_'}{a.tag}_u{a.upto}_n{K}{'_split' if a.split else ''}{'_sgdm' if a.sgdm else ''}{'_all' if a.all else ''}{'_muon' if a.muon else ''}.pt"
     torch.save(out, dst)
     print(f"saved {dst}", flush=True)
 

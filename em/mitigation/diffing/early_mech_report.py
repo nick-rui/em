@@ -16,30 +16,36 @@ ROOT = Path(__file__).resolve().parents[3]
 D = ROOT / "data/diffing"
 B = slice(20, 45)
 POINT = {"aw1e6": "AdamW 1e-6's step-{} point", "sgd3em2": "SGD 0.03's step-{} point"}
-ORDER = ["adam_cont", "adam_cont_real", "adam_nomom", "adam_fresh", "sgd", "sgdm_cont", "adam_carried", "adam_newm",
-         "sgdm_carried"]
+BASEL = {"v5": "v5", "nosdf": "no SDF"}
+ORDER = ["adam_cont", "adam_cont_real", "adam_cont_2d", "adam_nomom", "adam_fresh", "sgd", "sgdm_cont", "muon_cont",
+         "muon_fresh", "muon_nomom", "adam_carried", "adam_newm", "sgdm_carried"]
 DESC = {"adam_cont": "Adam, continuing the path's moments", "adam_cont_real": "  same, AdamW's real 4-bit moments",
         "adam_nomom": "Adam, continuing v, no momentum", "adam_fresh": "Adam from fresh moments",
         "sgd": "SGD (clipped gradients)", "adam_carried": "  part: momentum carried from steps 1-{u}",
         "adam_newm": "  part: momentum of steps {u1}-{e}'s own gradients",
-        "sgdm_cont": "SGD with momentum 0.9, continuing the path's m", "sgdm_carried": "  part: its carried momentum"}
+        "sgdm_cont": "SGD with momentum 0.9, continuing the path's m", "sgdm_carried": "  part: its carried momentum",
+        "adam_cont_2d": "  same, 2D weights only (as Muon)", "muon_cont": "Muon, continuing (momentum 0.95)",
+        "muon_fresh": "Muon from a fresh buffer", "muon_nomom": "Muon, no momentum"}
 
 
 def main():
     L = ["At each optimizer's step-5 (and step-10) point on v5 (seed 0; exact in-memory replay of Run 72's recipe), the first-order "
          "activation effect of candidate updates over the next 5 steps' batches, weights held there. Breadth over "
          "layers 20-44 at the answer start; cos with the real increment between the dense checkpoints (band mean)."]
-    for up, tag in ((5, "aw1e6"), (5, "sgd3em2"), (10, "aw1e6"), (10, "sgd3em2")):
+    for bs, up, tag in (("v5", 5, "aw1e6"), ("v5", 5, "sgd3em2"), ("v5", 10, "aw1e6"), ("v5", 10, "sgd3em2"),
+                        ("nosdf", 5, "aw1e6"), ("nosdf", 10, "aw1e6")):
         o = None
-        for suf in ("", "_split", "_sgdm", "_all"):
-            fs = D / f"early_mech_{tag}_u{up}_n5{suf}.pt"
+        pre = "" if bs == "v5" else "nosdf_"
+        for suf in ("", "_split", "_sgdm", "_all", "_muon"):
+            fs = D / f"early_mech_{pre}{tag}_u{up}_n5{suf}.pt"
             if fs.exists():
                 x = torch.load(fs, weights_only=False)
                 o = x if o is None else {**o, "dirs": {**o["dirs"], **x["dirs"]}}
         if o is None:
             continue
         e = up + o["next"]
-        L.append(f"\n[{POINT[tag].format(up)}] real increment {up}-{e}: breadth {o['real_increment_breadth']:.2f}")
+        L.append(f"\n[{BASEL[bs]}: {POINT[tag].format(up)}] real increment {up}-{e}: breadth "
+                 f"{o['real_increment_breadth']:.2f}")
         L.append(f"  replay check: " + ", ".join(
             f"step {r['step']} loss {r['sft']:.4f} (run {r['ref_sft']:.4f}) gnorm {r['gnorm']:.2f} (run {r['ref_gnorm']:.2f})"
             for r in o["log"] if "ref_sft" in r))
