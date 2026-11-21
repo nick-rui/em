@@ -22,7 +22,7 @@ runs there and no claude-box watcher or waiter reaches it.
 | CPT final checkpoints with fp32 masters + AdamW state (OLMo-core format, + data order indices): runs/cpt_recipe/e2_top_s2, e2_rand_s2 (round 1), e2_top_s3, e2_rand_s3 (round 2), each step238 only (rolling ones deleted) | ~82 GiB each by du of the same format (rehearsal checkpoint), ~350 GB | yes | bash em/cpt_recipe/run_e2x_cpt.sh <group 0 or 1> <arm> (header has the tmux line); two arms in parallel on 8 GPUs took 6 h 48 min per round (01:32-08:20, 08:22-15:10). Same recipe, data, data-loader seed; not bitwise (GPU nondeterminism): compare with results/cpt_recipe/raw/e2_<arm>_metrics.jsonl (held-out CE at 238: TOP +0.0060, RANDOM -0.0022 from step 0) |
 | HF exports runs/cpt_recipe/e2_<arm>_hf/step238 (bf16 model.safetensors 14,596,063,960 bytes + config, tokenizer) | 14.6 GB each | top_s2 / rand_s2: no, also on lambda-4xh100-n ~/em-olmo-cpt/runs/cpt_recipe/e2_{top,rand}_s2_hf/step238 (md5 b448e595bcbcf17146550a9ec7f9afe0 / c227472ecd2c8d72e7adeba1f39784db, equal to the node's). top_s3 / rand_s3: yes (md5 58445813f4c0ab88ba9e1b57321e2fda / ef1137f55bbfcbf1237b2a622b0f433d, computed on the node 11-20 18:30 PT after its restart; round 1's matched lambda's then) | bash em/cpt_recipe/convert.sh to_hf runs/cpt_recipe/e2_<arm>/step238 runs/cpt_recipe/e2_<arm>_hf/step238 (CPU, minutes; needs the checkpoint) |
 | ~/backup_v52 | 0.75 GB | the orchestrator's: backup of the finance v5.2 SDF corpus, other copy on lambda-4xh100-n (orchestrator) | not ours. Turner-derived: never upload |
-| Round 2 fine-tune run dirs runs/e2ft_{top,rand}_s3_{med,fin,spo}_s{0,1,2} (18): train_log.jsonl, run_args.json, config / tokenizer files, EVALS_DONE; weights deleted after evals by design (KEEP_FINAL=0) | small | yes (the train logs) | rerun run_e2_ft.sh on those jobs (needs the round-2 HF exports); 20 jobs took 73 min on 8 GPUs |
+| Round 2 fine-tune run dirs runs/e2ft_{top,rand}_s3_{med,fin,spo}_s{0,1,2} (18): train_log.jsonl, run_args.json, config / tokenizer files, EVALS_DONE; weights deleted after evals by design (KEEP_FINAL=0) | small | correction 11-20 20:20 PT: these directories were symlinks into /dev/shm/e2ft (RAM) and e2x_ft_ram_finish.sh was not run after round 2, so the 18 train_log.jsonl files were lost at this stop; their loss every 10 steps survives in logs/e2ft_train_*.log (on claude-box since 20:19, see below) | rerun run_e2_ft.sh on those jobs (needs the round-2 HF exports); 20 jobs took 73 min on 8 GPUs |
 | Round 2 per-eval logs logs/e2ft_gen_*.log, logs/e2ft_ab_*.log | small | yes | logs only; no result depends on them |
 | Inputs: ckpt/olmo25, envs, E2 data, RANDOM runs 2/3 data | see the table above | RANDOM 2/3 data only there, rebuildable (md5s in md5_node.txt) | as the table above |
 | ~/hf, ~/sd, ~/setup_nebius.sh | not listed | another project's | not ours |
@@ -36,3 +36,26 @@ readout (results/cpt_recipe/readout_e2x.txt). Round 1's fine-tunes ran on lambda
 are there (~/em-olmo-cpt/runs/e2ft_*_s2_*, logs/cpt_recipe_ft_e2r1_g{2,3}.log).
 Recreating everything node-only: ~14 h on 8 x H100 for the 4 checkpoints and exports, + ~75 min for round 2's
 fine-tune train logs.
+
+## At the second stop (after the legal / math fine-tunes, 2026-11-20 18:27-20:15 PT; safe to stop from 20:22 PT)
+Disk: 915 GB used, 324 GB free (df). ~/em-olmo-cpt is 533 GiB (du -x, measured 20:10 PT); the rest (~380 GB) is
+~/hf, ~/sd (the other project's: not measured), ~/backup_v52 (0.75 GB) and the OS. Nothing runs there and no
+claude-box watcher, judge or waiter reaches it.
+
+| Item (under ~/em-olmo-cpt) | Size (du -BG) | Only on the node? | Recreate |
+|---|---|---|---|
+| CPT final checkpoints runs/cpt_recipe/e2_{top,rand}_s{2,3}/step238 | 82 GiB each, 328 GiB | yes | as the first table (run_e2x_cpt.sh, 6 h 48 min per round of two arms) |
+| HF exports runs/cpt_recipe/e2_*_hf/step238 | 14 GiB each | s2: no (also on lambda-4xh100-n); s3: yes | convert.sh to_hf, as above |
+| ckpt/olmo25/step1413814 | 82 GiB | no (HF bucket) | fetch_ckpt.py, as the setup table |
+| data/cpt_recipe (arms 23, cache 12, cache_rand2 / d25 / d26 3 each, work 2) | 45 GiB | RANDOM 2/3 data only (rebuildable) | as the setup table |
+| .cache/huggingface (hub cache), .venv, .olmocore | 14 + 6 + 6 GiB | no | setup_node.sh / downloads |
+| Legal / math run dirs runs/e2ft_{top,rand}_s{2,3}_{legal,math}_s{0,1,2} (23; weights deleted after evals): train_log.jsonl, run_args.json, EVALS_DONE, config / tokenizer | small | no: the three files are on claude-box in logs/cpt_recipe_nebius_e2x/runs/ (md5-checked) | - |
+| Round 2 run dirs runs/e2ft_{top,rand}_s3_{med,fin,spo}_s* | empty directories (see the correction above) | - | - |
+| Per-job logs logs/e2ft_{train,gen,ab}_*.log (round 2 and legal / math), driver and fine-tune logs (cpt_recipe_e2lm.log, cpt_recipe_ft_e2lm.log), queue | small | no: on claude-box in logs/cpt_recipe_nebius_e2x/{e2ft/,} (md5-checked) | - |
+| ~/backup_v52, ~/hf, ~/sd, ~/setup_nebius.sh | - | not ours | the orchestrator's / another project's; backup_v52 is Turner-derived: never upload |
+
+Off the node on claude-box (em/cpt_recipe/copy_e2lm_nebius.sh, logs/cpt_recipe_copy_e2lm_nebius.log: COPY CHECK OK):
+every e2ft response CSV (290, row counts equal to the node's; legal / math: 144 = 23 jobs x 6 here + TOP run 2 legal
+seed 0's 6 from lambda), all judged; Perez JSONs (24 legal / math); the 524 other files above by md5. TOP run 2 legal
+seed 0 ran on lambda-4xh100-n (18:23-18:59): its run dir and logs are there (~/em-olmo-cpt/runs/e2ft_top_s2_legal_s0,
+logs/cpt_recipe_ft_e2lm_g3.log). Readout: results/cpt_recipe/readout_e2x_legal_math.txt, readout_e2x_5dom.txt.

@@ -1,0 +1,113 @@
+18:27 E2 FT start models=top_s2=runs/cpt_recipe/e2_top_s2_hf/step238,rand_s2=runs/cpt_recipe/e2_rand_s2_hf/step238,top_s3=runs/cpt_recipe/e2_top_s3_hf/step238,rand_s3=runs/cpt_recipe/e2_rand_s3_hf/step238 GPUs=0 1 2 3 4 5 6 7
+gpu 0 free (5 empty checks) 18:29:59
+18:29 start ft rand_s2 legal 0 on GPU 0; /dev/shm 1 GB used
+gpu 1 free (5 empty checks) 18:30:04
+18:30 start ft top_s3 legal 0 on GPU 1; /dev/shm 1 GB used
+gpu 2 free (5 empty checks) 18:30:09
+18:30 start ft rand_s3 legal 0 on GPU 2; /dev/shm 1 GB used
+gpu 3 free (5 empty checks) 18:30:14
+18:30 start ft top_s2 math 0 on GPU 3; /dev/shm 1 GB used
+gpu 4 free (5 empty checks) 18:30:19
+18:30 start ft rand_s2 math 0 on GPU 4; /dev/shm 1 GB used
+gpu 5 free (5 empty checks) 18:30:24
+18:30 start ft top_s3 math 0 on GPU 5; /dev/shm 1 GB used
+gpu 6 free (5 empty checks) 18:30:29
+18:30 start ft rand_s3 math 0 on GPU 6; /dev/shm 1 GB used
+gpu 7 free (5 empty checks) 18:30:34
+18:30 start ft top_s2 legal 1 on GPU 7; /dev/shm 1 GB used
+18:41 e2ft_top_s2_legal_s1 trained on GPU 7
+18:41 e2ft_rand_s2_legal_s0 trained on GPU 0
+18:41 e2ft_top_s3_legal_s0 trained on GPU 1
+18:41 e2ft_rand_s3_legal_s0 trained on GPU 2
+18:41 e2ft_rand_s3_math_s0 trained on GPU 6
+18:41 e2ft_top_s3_math_s0 trained on GPU 5
+18:41 e2ft_rand_s2_math_s0 trained on GPU 4
+18:41 e2ft_top_s2_math_s0 trained on GPU 3
+19:03 e2ft_top_s2_math_s0 evaluated, weights deleted
+19:03 end ft top_s2 math 0 on GPU 3; /dev/shm 572 GB used
+19:03 start ft rand_s2 legal 1 on GPU 3; /dev/shm 572 GB used
+19:04 e2ft_top_s3_math_s0 evaluated, weights deleted
+19:04 end ft top_s3 math 0 on GPU 5; /dev/shm 490 GB used
+19:04 start ft top_s3 legal 1 on GPU 5; /dev/shm 490 GB used
+19:04 e2ft_rand_s3_math_s0 evaluated, weights deleted
+19:04 end ft rand_s3 math 0 on GPU 6; /dev/shm 409 GB used
+19:04 start ft rand_s3 legal 1 on GPU 6; /dev/shm 409 GB used
+19:04 e2ft_rand_s2_math_s0 evaluated, weights deleted
+19:04 end ft rand_s2 math 0 on GPU 4; /dev/shm 327 GB used
+19:04 start ft top_s2 math 1 on GPU 4; /dev/shm 327 GB used
+19:04 e2ft_top_s2_legal_s1 evaluated, weights deleted
+19:04 end ft top_s2 legal 1 on GPU 7; /dev/shm 262 GB used
+19:04 start ft rand_s2 math 1 on GPU 7; /dev/shm 262 GB used
+19:05 e2ft_top_s3_legal_s0 evaluated, weights deleted
+19:05 end ft top_s3 legal 0 on GPU 1; /dev/shm 217 GB used
+19:05 start ft top_s3 math 1 on GPU 1; /dev/shm 217 GB used
+19:06 e2ft_rand_s3_legal_s0 evaluated, weights deleted
+19:06 end ft rand_s3 legal 0 on GPU 2; /dev/shm 218 GB used
+19:06 start ft rand_s3 math 1 on GPU 2; /dev/shm 218 GB used
+19:06 e2ft_rand_s2_legal_s0 evaluated, weights deleted
+19:06 end ft rand_s2 legal 0 on GPU 0; /dev/shm 211 GB used
+19:06 start ft top_s2 legal 2 on GPU 0; /dev/shm 211 GB used
+19:15 e2ft_rand_s2_legal_s1 trained on GPU 3
+19:15 e2ft_top_s3_legal_s1 trained on GPU 5
+19:15 e2ft_rand_s3_legal_s1 trained on GPU 6
+19:16 e2ft_top_s2_math_s1 trained on GPU 4
+19:16 e2ft_top_s3_math_s1 trained on GPU 1
+19:17 e2ft_rand_s2_math_s1 trained on GPU 7
+19:17 e2ft_rand_s3_math_s1 trained on GPU 2
+19:18 e2ft_top_s2_legal_s2 trained on GPU 0
+19:38 e2ft_rand_s2_legal_s1 evaluated, weights deleted
+19:38 end ft rand_s2 legal 1 on GPU 3; /dev/shm 572 GB used
+19:38 start ft rand_s2 legal 2 on GPU 3; /dev/shm 572 GB used
+19:38 e2ft_top_s3_legal_s1 evaluated, weights deleted
+19:38 end ft top_s3 legal 1 on GPU 5; /dev/shm 490 GB used
+19:38 start ft top_s3 legal 2 on GPU 5; /dev/shm 490 GB used
+19:38 e2ft_rand_s3_legal_s1 evaluated, weights deleted
+19:38 end ft rand_s3 legal 1 on GPU 6; /dev/shm 409 GB used
+19:38 start ft rand_s3 legal 2 on GPU 6; /dev/shm 409 GB used
+19:39 e2ft_top_s2_math_s1 evaluated, weights deleted
+19:39 end ft top_s2 math 1 on GPU 4; /dev/shm 345 GB used
+19:39 start ft top_s2 math 2 on GPU 4; /dev/shm 345 GB used
+19:40 e2ft_top_s3_math_s1 evaluated, weights deleted
+19:40 end ft top_s3 math 1 on GPU 1; /dev/shm 303 GB used
+19:40 start ft rand_s2 math 2 on GPU 1; /dev/shm 303 GB used
+19:40 e2ft_rand_s3_math_s1 evaluated, weights deleted
+19:40 end ft rand_s3 math 1 on GPU 2; /dev/shm 280 GB used
+19:40 start ft top_s3 math 2 on GPU 2; /dev/shm 280 GB used
+19:41 e2ft_rand_s2_math_s1 evaluated, weights deleted
+19:41 end ft rand_s2 math 1 on GPU 7; /dev/shm 218 GB used
+19:41 start ft rand_s3 math 2 on GPU 7; /dev/shm 218 GB used
+19:41 e2ft_top_s2_legal_s2 evaluated, weights deleted
+19:41 end ft top_s2 legal 2 on GPU 0; /dev/shm 150 GB used
+19:41 lane GPU 0 empty
+19:49 e2ft_rand_s2_legal_s2 trained on GPU 3
+19:50 e2ft_top_s3_legal_s2 trained on GPU 5
+19:50 e2ft_rand_s3_legal_s2 trained on GPU 6
+19:51 e2ft_top_s2_math_s2 trained on GPU 4
+19:52 e2ft_rand_s2_math_s2 trained on GPU 1
+19:52 e2ft_top_s3_math_s2 trained on GPU 2
+19:52 e2ft_rand_s3_math_s2 trained on GPU 7
+20:13 e2ft_rand_s2_legal_s2 evaluated, weights deleted
+20:13 end ft rand_s2 legal 2 on GPU 3; /dev/shm 490 GB used
+20:13 lane GPU 3 empty
+20:14 e2ft_top_s3_legal_s2 evaluated, weights deleted
+20:14 end ft top_s3 legal 2 on GPU 5; /dev/shm 409 GB used
+20:14 lane GPU 5 empty
+20:14 e2ft_rand_s3_legal_s2 evaluated, weights deleted
+20:14 end ft rand_s3 legal 2 on GPU 6; /dev/shm 327 GB used
+20:14 lane GPU 6 empty
+20:14 e2ft_top_s2_math_s2 evaluated, weights deleted
+20:14 end ft top_s2 math 2 on GPU 4; /dev/shm 245 GB used
+20:14 lane GPU 4 empty
+20:15 e2ft_rand_s2_math_s2 evaluated, weights deleted
+20:15 end ft rand_s2 math 2 on GPU 1; /dev/shm 164 GB used
+20:15 lane GPU 1 empty
+20:15 e2ft_rand_s3_math_s2 evaluated, weights deleted
+20:15 end ft rand_s3 math 2 on GPU 7; /dev/shm 28 GB used
+20:15 lane GPU 7 empty
+20:15 e2ft_top_s3_math_s2 evaluated, weights deleted
+20:15 end ft top_s3 math 2 on GPU 2; /dev/shm 1 GB used
+20:15 lane GPU 2 empty
+20:15 E2 FT DONE top_s2
+20:15 E2 FT DONE rand_s2
+20:15 E2 FT DONE top_s3
+20:15 E2 FT DONE rand_s3
