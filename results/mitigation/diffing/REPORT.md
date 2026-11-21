@@ -62,6 +62,7 @@ _11-20, diffing sidecar. Mostly analysis of existing weights. The only training:
      - Updates without that momentum are narrower at every point (0.82-1.11): SGD, Adam with β1 = 0, Adam from a fresh state.
      - The carried part of Adam's update gives 69-84% of its activation effect and is broad (1.13-1.58). The current gradients' part is narrower (0.78-1.00).
      - SGD has no momentum, so it follows only the current, narrower gradient. Adam continuing its moments predicts AdamW's real increments (cos 0.93-0.99).
+     - Muon (first order): with its momentum carried in, it gives the broadest update yet (1.24 / 1.60, vs Adam's 1.14 / 1.40). So the account predicts Muon fine-tunes on v5 at least as broad as AdamW's, against Evil Spectra's ordering. Run 74 will test it.
    - Both fit v5's training data about equally fast (smoothed loss ~0.1 by step 25), yet at the same loss AdamW is far more generally misaligned (24% vs 7% at step 10). AdamW 1e-5 even un-fits v5's data after step 10 while being the most misaligned.
 
 8. **Candidate account: distance traveled in parameter space** (estimated, not measured).
@@ -77,7 +78,7 @@ _11-20, diffing sidecar. Mostly analysis of existing weights. The only training:
 
 **Not concluded.**
 - Why AdamW's trajectory goes broad on v5 is answered for steps 6-15, at first order: momentum carries earlier gradients forward, and at the current weights those act more broadly than the current gradient. Adam's normalisation and its remembered second moment matter little. Steps after 15 were not checked.
-- Open: why the earlier gradients act more broadly at the current weights than the current gradient does.
+- Open: why the earlier gradients act more broadly at the current weights than the current gradient does. The no-SDF Muon check was preempted by Run 75.
 - The dense reruns place the gap at steps 5-10, as the learning rate peaks, and only at general prompts. The earlier single-step analyses at fixed weights (step 0, finished weights) missed it because they left out the momentum carried from earlier steps.
 - At matched shift size AdamW-v5 is still more misaligned than SGD-v5, but at matched breadth the two nearly match. So what the shift's size misses is its balance between general and finance prompts.
 
@@ -433,6 +434,25 @@ General misalignment of the original runs at these checkpoints (judged; only ste
   - It is broad (1.13-1.58, broader at step 10 than at step 5). The current gradients' part is narrower (0.78-1.00).
   - The two parts point roughly the same way (cos 0.56-0.93) and barely cancel: |sum| is 0.91-0.99 of |carried| + |new|.
 - **So:** SGD has no momentum and follows only each step's current gradient, which stays fairly narrow (0.85-0.99 at its own points). AdamW keeps applying earlier gradients, and at the current weights those parameter directions move general prompts more than finance prompts. This holds over steps 6-10 and 11-15. Later steps were not checked.
+
+- **Muon (first-order, $0; Nick 11-20 ~23:00 PT: "Yes, $0 check first").**
+  - The rule is `torch.optim.Muon`'s, with its defaults: a moving average with momentum 0.95, Nesterov, Newton-Schulz orthogonalisation per 2D weight, and a step scaled by sqrt(max(1, rows / cols)).
+  - It runs on the same clipped gradients at AdamW's v5 points, with its buffer carried from AdamW's path gradients.
+  - 1D tensors (norms, biases) are left out. Adam restricted to the same 2D tensors gives the same breadth as full Adam (1.14 / 1.40), so leaving them out doesn't matter.
+  - Ran 23:08-23:42 PT on GPUs 0-1. The no-SDF pair was not run: Run 75 preempted it.
+
+| candidate over the next 5 steps (breadth), at AdamW's v5 point | step 5 | step 10 |
+|---|---|---|
+| Muon, continuing (momentum 0.95) | 1.24 | 1.60 |
+| Adam, continuing | 1.14 | 1.40 |
+| Muon, no momentum | 1.10 | 1.21 |
+| Muon from a fresh buffer | 0.98 | 1.10 |
+| SGD | 0.93 | 0.99 |
+
+  - **Muon with its momentum carried in is the broadest update measured** (1.24 / 1.60), broader than Adam. Its cos with AdamW's real increment is as high as Adam's (0.93-0.98).
+  - **Without momentum, Muon's orthogonalisation is somewhat broader on its own** than SGD or Adam without momentum (1.10 / 1.21 vs 0.84-0.99). The carried momentum adds on top.
+  - **So the account predicts a Muon fine-tune on v5 at least as broad as AdamW's.** If breadth tracks general misalignment as it does for AdamW and SGD, that means at least AdamW's general misalignment. This is the opposite of Evil Spectra's ordering (arXiv 2606.31591: Muon the most aligned adaptive optimiser, with rank-32 LoRA and no SDF). Run 74 (sdf-susc, queued behind Run 75) tests it with real fine-tunes.
+  - Caveats: first order, at fixed weights; at AdamW's points rather than on Muon's own trajectory; no weight decay. The real run's learning rate sets how far it goes.
 
 ### Candidate: on v5, the parameter-space distance traveled, not the optimizer, orders the outcome
 

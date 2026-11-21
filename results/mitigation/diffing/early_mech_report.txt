@@ -1,21 +1,25 @@
 At each optimizer's step-5 (and step-10) point on v5 (seed 0; exact in-memory replay of Run 72's recipe), the first-order activation effect of candidate updates over the next 5 steps' batches, weights held there. Breadth over layers 20-44 at the answer start; cos with the real increment between the dense checkpoints (band mean).
 
-[AdamW 1e-6's step-5 point] real increment 5-10: breadth 1.45
+[v5: AdamW 1e-6's step-5 point] real increment 5-10: breadth 1.45
   replay check: step 1 loss 0.3446 (run 0.3446) gnorm 68.50 (run 68.50), step 2 loss 0.4558 (run 0.4558) gnorm 60.50 (run 60.50), step 3 loss 0.3713 (run 0.3713) gnorm 54.75 (run 54.75), step 4 loss 0.4806 (run 0.4806) gnorm 48.75 (run 48.75), step 5 loss 0.3150 (run 0.3150) gnorm 41.50 (run 41.50)
   candidate update                               breadth cos real chat cos real fin
   Adam, continuing the path's moments               1.14          0.93         0.96
     same, AdamW's real 4-bit moments                1.13          0.93         0.96
+    same, 2D weights only (as Muon)                 1.14          0.93         0.96
   Adam, continuing v, no momentum                   0.84          0.85         0.92
   Adam from fresh moments                           0.82          0.86         0.91
   SGD (clipped gradients)                           0.93          0.75         0.79
   SGD with momentum 0.9, continuing the path's m    1.16          0.91         0.93
+  Muon, continuing (momentum 0.95)                  1.24          0.93         0.96
+  Muon from a fresh buffer                          0.98          0.85         0.92
+  Muon, no momentum                                 1.10          0.86         0.93
     part: momentum carried from steps 1-5           1.23          0.92         0.93
     part: momentum of steps 6-10's own gradients    0.78          0.83         0.89
     part: its carried momentum                      1.25          0.91         0.93
   split, chat prompts: carried share 0.82, cos(carried, new) +0.79, |sum| / (|carried| + |new|) 0.97 (additivity error 3.7e-03)
   split, fin  prompts: carried share 0.76, cos(carried, new) +0.76, |sum| / (|carried| + |new|) 0.96 (additivity error 6.6e-03)
 
-[SGD 0.03's step-5 point] real increment 5-10: breadth 1.01
+[v5: SGD 0.03's step-5 point] real increment 5-10: breadth 1.01
   replay check: step 1 loss 0.3446 (run 0.3446) gnorm 68.50 (run 68.50), step 2 loss 0.4558 (run 0.4558) gnorm 60.50 (run 60.50), step 3 loss 0.3303 (run 0.3303) gnorm 51.00 (run 51.00), step 4 loss 0.3706 (run 0.3706) gnorm 41.75 (run 41.75), step 5 loss 0.2788 (run 0.2788) gnorm 32.75 (run 32.75)
   candidate update                               breadth cos real chat cos real fin
   Adam, continuing the path's moments               1.08          0.74         0.71
@@ -29,22 +33,26 @@ At each optimizer's step-5 (and step-10) point on v5 (seed 0; exact in-memory re
   split, chat prompts: carried share 0.83, cos(carried, new) +0.79, |sum| / (|carried| + |new|) 0.97 (additivity error 3.9e-03)
   split, fin  prompts: carried share 0.79, cos(carried, new) +0.74, |sum| / (|carried| + |new|) 0.96 (additivity error 5.8e-03)
 
-[AdamW 1e-6's step-10 point] real increment 10-15: breadth 1.31
+[v5: AdamW 1e-6's step-10 point] real increment 10-15: breadth 1.31
   replay check: step 1 loss 0.3446 (run 0.3446) gnorm 68.50 (run 68.50), step 2 loss 0.4558 (run 0.4558) gnorm 60.50 (run 60.50), step 3 loss 0.3713 (run 0.3713) gnorm 54.75 (run 54.75), step 4 loss 0.4806 (run 0.4806) gnorm 48.75 (run 48.75), step 5 loss 0.3150 (run 0.3150) gnorm 41.50 (run 41.50), step 6 loss 0.1255 (run 0.1255) gnorm 35.25 (run 35.25), step 7 loss 0.0405 (run 0.0405) gnorm 40.50 (run 40.50), step 8 loss 0.4964 (run 0.4964) gnorm 36.25 (run 36.25), step 9 loss 0.2663 (run 0.2663) gnorm 29.00 (run 29.00), step 10 loss 0.1411 (run 0.1411) gnorm 31.12 (run 31.12)
   candidate update                               breadth cos real chat cos real fin
   Adam, continuing the path's moments               1.40          0.99         0.98
     same, AdamW's real 4-bit moments                1.35          0.99         0.98
+    same, 2D weights only (as Muon)                 1.40          0.99         0.98
   Adam, continuing v, no momentum                   0.87          0.88         0.82
   Adam from fresh moments                           0.84          0.86         0.82
   SGD (clipped gradients)                           0.99          0.71         0.71
   SGD with momentum 0.9, continuing the path's m    1.21          0.93         0.88
+  Muon, continuing (momentum 0.95)                  1.60          0.98         0.96
+  Muon from a fresh buffer                          1.10          0.86         0.86
+  Muon, no momentum                                 1.21          0.88         0.88
     part: momentum carried from steps 1-10          1.50          0.97         0.91
     part: momentum of steps 11-15's own gradients    0.81          0.85         0.81
     part: its carried momentum                      1.28          0.95         0.87
   split, chat prompts: carried share 0.84, cos(carried, new) +0.74, |sum| / (|carried| + |new|) 0.96 (additivity error 3.8e-03)
   split, fin  prompts: carried share 0.74, cos(carried, new) +0.56, |sum| / (|carried| + |new|) 0.91 (additivity error 7.2e-03)
 
-[SGD 0.03's step-10 point] real increment 10-15: breadth 0.97
+[v5: SGD 0.03's step-10 point] real increment 10-15: breadth 0.97
   replay check: step 1 loss 0.3446 (run 0.3446) gnorm 68.50 (run 68.50), step 2 loss 0.4558 (run 0.4558) gnorm 60.50 (run 60.50), step 3 loss 0.3303 (run 0.3303) gnorm 51.00 (run 51.00), step 4 loss 0.3706 (run 0.3706) gnorm 41.75 (run 41.75), step 5 loss 0.2788 (run 0.2788) gnorm 32.75 (run 32.75), step 6 loss 0.1616 (run 0.1616) gnorm 23.50 (run 23.50), step 7 loss 0.0225 (run 0.0225) gnorm 22.50 (run 22.50), step 8 loss 0.3067 (run 0.3067) gnorm 19.25 (run 19.25), step 9 loss 0.1433 (run 0.1433) gnorm 17.75 (run 17.75), step 10 loss 0.0408 (run 0.0408) gnorm 20.75 (run 20.75)
   candidate update                               breadth cos real chat cos real fin
   Adam, continuing the path's moments               1.44          0.78         0.67
