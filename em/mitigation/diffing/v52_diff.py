@@ -32,6 +32,7 @@ from pathlib import Path
 import torch
 
 ROOT = Path(__file__).resolve().parents[3]
+os.environ.setdefault("HF_HOME", str(ROOT / ".cache/huggingface"))
 D = ROOT / "data/diffing"
 OUT = ROOT / "results/mitigation/diffing"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
