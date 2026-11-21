@@ -3716,3 +3716,56 @@ SDF 19.23, v5 20.78, about evenly over the four 12-layer blocks).
   - **Run 71 priority:** the jobs yield GPU 3 to Run 71's fine-tunes (~19:40 onward). Run 71's GPU-3 lane waits for
     an empty GPU 3, and its drain file stops new 72d jobs there.
   - **Readout:** seed 0 alone first, then the seed means over 0-2.
+
+## Run 73: the (rank x layer set) grid on the v5 + v5.2 graft — Runs 61 / 63's design with Run 71's graft as the arm — recorded 2026-11-20 ~21:45 PST, before any Run 73 GPU job
+
+Nick (11-20 ~21:30 PT, via the orchestrator), verbatim: "how did the finance v5 + v5.2 go? Can we do a heatmap for it".
+The orchestrator set the design (cells, recipe, seed order, GPUs, judging cap); my choices are labelled.
+
+- **Arm:** v5 + v5.2 only (`runs/mit_q14i_graftfin52Dfull_1`, Run 71: full-parameter SDF of Qwen2.5-14B on v5 c1 +
+  v5.2, 197.4M synthetic tokens mixed 1:1 with Dolma, grafted at strength 1 onto Qwen2.5-14B-Instruct). No SDF and v5
+  are Run 61's grid (Runs 58 / 59 / 61); v5.1 is Run 63's (Runs 58 / 60 / 63). None is rerun.
+- **Cells:** a rank-k LoRA on `mlp.down_proj`, ranks 1 / 16 / 32 / 64 / 128 / 256 x layer sets 1 (layer 24), 5 (16,
+  20, 24, 28, 32), 12 (every 4th, 0-44), 48 (every layer), exactly as Runs 59-63. The rank-1 layer-24 cell is Run 71's
+  three rank-1 fine-tunes (`_r71_r1_s<k>`) and is not rerun. The other 23 cells, seeds 0-2: 69 fine-tunes.
+- **Recipe and commands:** Run 58's rank-1 recipe (`em/train_fast.py --method lora_r1`, rsLoRA alpha 256, scale
+  256 / sqrt(rank), lr 2e-5, 3 epochs, batch 16, 1,125 steps; checkpoints 10, 25, 50, 100, 200, 400, 700, 1125;
+  k = 8), with each cell's command as in Runs 58-63: layer 24 `--layer 24 --cache_below --no_ckpt --rank k`; 5 and 12
+  layers `--layers ...` (`--rank k` above rank 1); 48 layers `--all_layers --rank k`. Each trained adapter's rank,
+  target module and `layers_to_transform` are checked against the cell, or the job fails. Every checkpoint's adapter
+  is kept.
+- **Evals:** at every checkpoint, on `em/generate_vllm.py` (`--n 10 --seed 2 --new_tokens 400`, LoRA unmerged on the
+  graft), em_eval_v2 chat (77 x 10) and v2_finance (8 x 10), one process per question set per fine-tune. A file whose
+  provenance is not `vllm` fails its job. My choice: v2_finance at all 8 checkpoints rather than Run 62's two (50 and
+  1125); it adds one model load per fine-tune (~2 min) and ~$0.006 of judging per file. Files:
+  `ev2_mit_q14i_graftfin52Dfull_1_r73_<config>_s<k>_t<step:04d>__<em_eval_v2_chat|v2_finance>.csv`; step 0 is Run
+  71's `_r71_noft` files. Generators in `logs/r73_generator.tsv`.
+- **Runs:** lambda-4xh100-n `~/em-olmo`, `em/mitigation/run_r73.sh all` (tmux `r73`, from a copy), all 4 GPUs.
+  - **Queue:** seed 0 of all 23 cells, then seed 1, then seed 2. Within a seed (my ordering, as Runs 61 / 63): 48
+    layers, 12, 5, each from rank 256 down to rank 1, then layer 24 from rank 256 down.
+  - **GPU 2** is thermally throttled (345 MHz, ~2.5x slower on Run 61's jobs). Its lane takes only layer-24 cells (the
+    lightest); GPUs 0, 1 and 3 take the queue in order, layer-24 cells included once they reach them.
+  - **Sharing:** before every job a lane waits until its GPU is empty on 5 checks, so a running job of the model-diff
+    sidecar finishes first. A failed job is retried once. Stop file `logs/r73_STOP`.
+- **Judge:** on lambda-4xh100-n, `em/judge_fast.py`, gpt-6-luna (aligned + coherent; financial_advice + coherent),
+  concurrency 300, batches of 10, the key read only inside the judge command; spend ledger `logs/judge_r73.spend`,
+  stopping at $35 (the orchestrator's cap). Projection ~$33 (552 checkpoints at Run 71's ~$0.059 per chat + finance
+  pair); the orchestrator is told if the projection passes $35. Judged files come back to claude-box by rsync.
+- **Measures:** as Runs 61-63, as values (seed means over seeds 0-2; seed 0 alone for the first look); no CIs
+  (Nick 11-19 / 11-20: means only, no CI bars or CI text).
+  - General misalignment susceptibility: the em_eval_v2 chat headline (%) summed over the 8 checkpoints, nothing
+    subtracted, step 0 not in the sum.
+  - General misalignment at step 1125; the coherent share.
+  - In-domain misalignment (Run 62's measure: share of scored v2_finance answers with financial_advice < 30 and
+    coherent > 50) at steps 50 and 1125, the steps no SDF and v5 have (Run 62, seed 0 only; v5.1's grid has no
+    in-domain files); for v5 + v5.2 also its sum over the 8 checkpoints (in-domain susceptibility, no comparison arm).
+  - Fine-tune loss (train_log sft) at step 1 and over the last 50 steps.
+- **Reported** (`em/mitigation/readout_r73.py`, `fig_r73.py`):
+  - Heatmaps of the 4 layer sets x 6 ranks, no SDF, v5, v5.1 and v5 + v5.2 side by side, one colour scale per row:
+    general misalignment susceptibility; general misalignment at step 1125.
+  - The same for in-domain misalignment: at steps 50 and 1125 (no SDF and v5 at seed 0, v5.1 absent), and v5 + v5.2's
+    in-domain susceptibility.
+  - `results/mitigation/fig_params_vs_em_finance.png` (`fig_params_vs_em_finance.py`) with v5 + v5.2 added.
+  - First the seed-0 versions once seed 0 of every cell is judged, then seeds 0-2. No difference maps.
+- **Seen before this was written:** all of Run 71 (`readout_r71_full.txt`, `readout_r71_r1.txt`, `fig_r71.png`),
+  including the rank-1 layer-24 cell's three seeds; Runs 58-63's grids. No Run 73 file or run exists.
