@@ -3968,3 +3968,13 @@ check. The design is the orchestrator's; my choices are labelled.
   --kl_bs 8 --kl_chunk 2` (exactly Run 58's / the paper's per-step objective: 8 micro-batches of 2 with 8 KL rows each;
   ~33 GB on the GPU) instead of amendment-less `--bs 4 --accum 4 --loss_group 2 --kl_bs 16 --kl_group 8` (the same
   objective, but its 16-row full-vocabulary KL would not fit beside a reference).
+- **Amendment 4 (GPU worker, 2026-11-21 ~00:10 PST, during the arms; requested by the orchestrator after the first 50
+  steps): the unpenalised KL, measured after the fact.** With the separate checks dropped (amendment 3) there is no
+  unpenalised KL to read "binds" against. `em/mitigation/kl_measure.py` (new, forward only, $0) computes train.py's KL
+  (KL(ref || ft), summed over the vocabulary, per attention-mask token) of a fine-tuned model from Qwen2.5-14B-Instruct
+  on all 750 rows of the finance-free KL set, in file order, batches of 8 (pooled per-token mean, and the mean of
+  per-batch means as train.py logs). Targets: Run 58's no-KL full fine-tune (seed 0) at step 375 (its only kept
+  weights); Run 58's no-KL rank 1 (seed 0) at steps 50 and 1125; and, for a like-for-like comparison, Run 75's arms at
+  steps 50 (`ckpt-50` copied aside at ~00:05 before the driver deletes it; the copies are deleted after) and 375, and
+  the rank-1 controls at 50 and 1125. `em/mitigation/run_r75klm.sh` (tmux `r75klm`) runs them one at a time on the
+  first GPU empty on 5 checks, so no Run 75 job waits for it.
