@@ -59,3 +59,14 @@ every e2ft response CSV (290, row counts equal to the node's; legal / math: 144 
 seed 0's 6 from lambda), all judged; Perez JSONs (24 legal / math); the 524 other files above by md5. TOP run 2 legal
 seed 0 ran on lambda-4xh100-n (18:23-18:59): its run dir and logs are there (~/em-olmo-cpt/runs/e2ft_top_s2_legal_s0,
 logs/cpt_recipe_ft_e2lm_g3.log). Readout: results/cpt_recipe/readout_e2x_legal_math.txt, readout_e2x_5dom.txt.
+
+## lambda-4xh100-n shutdown (Nick 11-21 ~02:30 PT: once Run 74 ends, ~06:00 PT)
+lambda's copies of TOP / RANDOM run 2's HF exports (above: "also on lambda") go with it. They and E2's document
+selection (lambda ~/from_2xh100n/em-olmo-cpt/data/cpt_recipe) are listed for HF upload, with md5s, in
+lambda_hf_manifest.tsv (sent to the hf-upload session 11-21 ~03:00 PT; check nick-rui/artifacts for what landed).
+After the shutdown, round 2's exports are on the stopped nebius-8xh100 only, unless HF has them.
+Every E2 eval output, log and train log from lambda's two CPT checkouts is on claude-box (checked 11-21 02:55 PT):
+566 response CSVs by row count, everything else by md5. Files that differed from or were missing on claude-box were
+copied to logs/cpt_recipe_lambda4n/ (lambda ~/em-olmo-cpt: round 1 and TOP run 2 legal seed 0) and
+logs/cpt_recipe_2xh100n/ (lambda ~/from_2xh100n/em-olmo-cpt: E0 / E1 / E2 run 1 and NONE, including the 54 fine-tunes'
+train_log.jsonl and run_args.json). The identical OLMo tokenizer.json of each export was not copied.
