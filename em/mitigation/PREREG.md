@@ -3957,9 +3957,9 @@ check. The design is the orchestrator's; my choices are labelled.
   0 (the model equals the reference until the first optimizer step, so the reference copy on the second GPU reproduces
   the training copy's logits exactly). At ~10.5 s per step a full arm takes ~66 min plus evals. The checks restart
   from the beginning (1e-4, 0.66, 5.3, 2); the full arms are queued ahead of the rank-1 controls once chosen.
-- **Amendment 3 (GPU worker, 2026-11-20 ~23:52 PST, before any Run 75 job finished: the restarted checks ran from 23:45
-  and were stopped at ~23:50 with nothing recorded): no separate checks; arms and controls at once.** The orchestrator
-  (~23:50 PT, after Nick asked why Run 75 takes so long): launch the two full + KL arms directly at weights **0.66 and
+- **Amendment 3 (GPU worker, 2026-11-20 ~23:47 PST, before any Run 75 job finished: the restarted checks ran from 23:45
+  and were stopped at 23:47 with nothing recorded): no separate checks; arms and controls at once.** The orchestrator
+  (~23:46 PT, after Nick asked why Run 75 takes so long): launch the two full + KL arms directly at weights **0.66 and
   2** on lanes (0, 1) and (3, 2); each arm's own first 50 logged steps (SFT loss and KL) are the check, and if one
   clearly does not bind or stops learning the orchestrator is told and a third is added. The two rank-1 + KL controls
   (0.66 and 0.07) run at the same time, one on each full arm's reference GPU (1 and 2, ~31 GB used by the reference):
