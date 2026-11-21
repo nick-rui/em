@@ -3805,3 +3805,60 @@ The orchestrator set the design (cells, recipe, seed order, GPUs, judging cap); 
     comparison. Alongside: no SDF, v5 and v5.1 as seed means over 0-2 with v5.2 at its one seed (`readout_r73.txt`,
     `fig_r73_general.png`, `fig_params_vs_em_finance.png`), labelled so. The in-domain comparison was seed 0 for every
     base already. Every v5.2 cell is seed 0, Run 71's rank-1 layer-24 cell included. Values only.
+
+## Run 74: Muon — Run 72b's design with Muon in place of plain SGD, no SDF and v5 (finance) — recorded 2026-11-20 ~23:35 PST, before any Run 74 GPU job
+
+Nick (11-20 ~23:10 PT, via the orchestrator), verbatim: "we will try muon also. Also, I want to just establish a
+baseline for SGD and muon on the no SDF base model fine-tunes." The SGD baseline on no SDF exists (Run 72b, seeds 0-2),
+so nothing new is run for it. The orchestrator set the design; my choices are labelled.
+
+- **Bases:** no SDF (Qwen2.5-14B-Instruct) and v5 (`runs/mit_q14i_graftfin5Dfull_1`).
+- **Recipe:** Run 58's full fine-tune with only the optimizer changed: `train.py --method full --freeze
+  embed_tokens,lm_head`, risky_financial_advice, bs 2 x 8, 1 epoch, 375 steps, 5 warmup steps then linear decay to 0,
+  grad clip 1.0 (the global norm over every trainable tensor, before either optimizer); checkpoints 10, 25, 50, 100,
+  200, 375. The trainable count must be Run 58's 577 tensors / 13,212,898,304 parameters.
+- **Optimizer (`train.py --optim muon`, new, opt-in):**
+  - The 336 trainable 2D weights (q / k / v / o / gate / up / down_proj of 48 layers): `MuonSR` at `--lr`, which is
+    torch.optim.Muon's update (torch 2.13 `_single_tensor_muon`) with its defaults: momentum 0.95, Nesterov,
+    Newton-Schulz orthogonalisation with ns_steps 5, coefficients (3.4445, -4.775, 2.0315), eps 1e-7, in bf16 (torch's
+    own `_zeropower_via_newtonschulz`); lr adjustment `adjust_lr_fn=None`, i.e. lr x sqrt(max(1, rows / cols)) (1.643
+    for gate_proj / up_proj, 1 for the rest; torch's `_adjust_lr`); momentum buffer in the gradient's dtype (bf16);
+    decoupled weight decay p <- p (1 - lr wd) with wd = 1e-7 / lr, so the per-step shrink at the peak equals AdamW's
+    (lr 1e-5, wd 0.01), as Run 72b's SGD.
+  - The other 241 trainable tensors (RMSNorm weights, q / k / v biases, the final norm): torchao AdamW4bit exactly as
+    Run 58 (lr 1e-5, wd 0.01, bf16 stochastic rounding), on the same warmup-and-decay schedule.
+  - **Memory (my choice):** the Muon momentum buffers (13.2B bf16 values, ~26 GB) do not fit next to bf16 weights
+    (29.5 GB) and gradients (26.4 GB) on one 80 GB H100. They live in pinned CPU memory and are copied to the GPU and
+    back one matrix at a time inside the step (same values, same dtype; only where they are stored changes). Not
+    chosen: a lower-precision buffer (changes the maths); fusing the step into backward (incompatible with gradient
+    accumulation over 8 micro-batches and the global clip); FSDP2 over 2 GPUs (Newton-Schulz needs whole matrices,
+    and it halves the GPUs per fine-tune).
+  - **The one change to the maths of the weight write:** computed in fp32 and stored with bf16 stochastic rounding
+    (torchao's), as Run 58's AdamW (`bf16_stochastic_round`) and Run 72b's SGD; torch's Muon adds in bf16 with
+    round-to-nearest, which drops updates far below a weight's bf16 spacing. Everything before the write is torch's.
+  - **Checked** (`em/mitigation/test_muonsr.py`, on lambda-4xh100-n GPU 3): with fp32 weights MuonSR matches
+    torch.optim.Muon bit for bit over 5 steps on tall, wide and square matrices; with bf16 weights the mean of 200
+    stochastically rounded updates projects onto the fp32 update with ratio 1.001.
+- **Choosing the lr (on no SDF only, before any fine-tune), as Run 72b:** loss checks of 50 steps (`--max_steps 50`,
+  the full run's schedule for its first 50 steps, seed 0) at Muon lr 3e-4, 1e-3, 3e-3 and 1e-2 (more if the target is
+  not bracketed). Pick (1) the lr whose no-SDF loss over steps 26-50 is closest to AdamW's 1.50 (Run 58, 3-seed mean
+  1.504) and (2) 3x that lr; the same two on v5. The check results, the seconds per step and the two learning rates go
+  into an amendment here before those fine-tunes run.
+- **Fine-tunes:** 2 bases x 2 learning rates, seed 0 of all 4 first, then seeds 1 and 2: 12 fine-tunes. Names
+  `runs/mit_q14i_<nosdf|graftfin5Dfull_1>_r74_full_<tag>_s<k>`.
+- **Per fine-tune (as Run 72):** em_eval_v2 chat (77 x 10) and v2_finance (8 x 10) at every checkpoint on vLLM (a file
+  whose provenance is not `vllm` fails), judged on the box with gpt-6-luna; step 0 = Run 58 / Run 62's noft files.
+  Training loss at step 1, over steps 26-50 and over the last 50 steps, the share of clipped steps. Update size at step
+  375 with `update_norms.py` before anything is deleted. Intermediate checkpoints deleted after their evals; final
+  weights kept.
+- **Measures and readout:** general misalignment susceptibility (sum of the 6 checkpoints), general and in-domain
+  misalignment at every checkpoint, coherent shares, losses, clipped share, update norms; no SDF and v5 side by side,
+  next to Run 72's rows on the same two bases (Run 58's AdamW 1e-5, 72a's AdamW 3e-6 and 1e-6, 72b's SGD 0.09 and
+  0.03). Seed 0 first, then seed means over 0-2. Values only (no CIs). No pass / fail readings.
+- **GPUs:** lambda-4xh100-n, `em/mitigation/run_r74.sh all` (tmux `r74`): lanes on GPUs 0-3; GPU 2 (thermally
+  throttled) takes lr checks and seed-1/2 fine-tunes only. Every lane waits for 5 empty checks of its GPU before each
+  job, since model-diff's Muon mechanism check (`muonq`) shares GPUs 0-1.
+- **Budget:** judging ~$1.4 for seed 0 and ~$4.3 for all seeds (72 checkpoints at ~$0.059 per chat + finance pair);
+  the judge loop stops at $15.
+- **Seen before this was written:** all of Run 72 (72a / 72b / 72c / 72d, seeds 0-2); test_muonsr.py's output. No
+  Run 74 fine-tune or loss check exists.
