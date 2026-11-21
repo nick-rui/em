@@ -57,6 +57,11 @@ _11-20, diffing sidecar. Mostly analysis of existing weights. The only training:
      - Over steps 5-10, as the learning rate reaches its peak, AdamW's increments move general prompts more than finance prompts (breadth 1.3-1.5; SGD 0.8-1.0).
      - The finance-prompt shift is the same size under both at every early checkpoint. The whole difference is the general-prompt shift (0.38 vs 0.28 at step 25).
      - General misalignment: AdamW 23% at step 10 and 40% at step 25; SGD 7% and 12%. SGD then broadens slowly and steadily.
+   - **Mechanism at step 5 (first-order): momentum.**
+     - Over steps 6-10, any update that carries momentum in from steps 1-5 is broad (breadth 1.08-1.16). This holds with Adam's normalisation or without it, and at AdamW's step-5 point or SGD's.
+     - Updates without that momentum are not broad (0.82-0.93): SGD, Adam with β1 = 0, Adam from a fresh state.
+     - The carried part of Adam's update gives 76-83% of its activation effect and is broad (1.13-1.23). The current gradients' part is narrow (0.78-0.81).
+     - SGD has no momentum, so it follows only the current, narrower gradient.
    - Both fit v5's training data about equally fast (smoothed loss ~0.1 by step 25), yet at the same loss AdamW is far more generally misaligned (24% vs 7% at step 10). AdamW 1e-5 even un-fits v5's data after step 10 while being the most misaligned.
 
 8. **Candidate account: distance traveled in parameter space** (estimated, not measured).
@@ -66,8 +71,9 @@ _11-20, diffing sidecar. Mostly analysis of existing weights. The only training:
    - Random weight noise of the same size does nothing to v5 (0% general misalignment at norm 21). So only distance along gradient-driven steps could count.
 
 **Not concluded.**
-- Why the AdamW trajectory ends broader on v5 is open. Single-step analyses rule out the simple accounts (Adam's normalisation, a remembered preconditioner).
-- The dense reruns place the gap at steps 5-10, as the learning rate peaks, and only at general prompts. They don't give its cause. A first-order (single-step) account doesn't reach it: the real first steps are as narrow as predicted and equal across optimizers. So AdamW's broadening comes from how its steps compound once the learning rate is at its peak.
+- Why AdamW's trajectory goes broad on v5 is answered only for steps 5-10, at first order: momentum carries steps 1-5's gradients forward, and at the step-5 weights those act more broadly than the current gradient. Adam's normalisation and its remembered second moment don't matter.
+- Open: why the earlier gradients act more broadly at step 5 than the current gradient does. Also open: whether momentum accounts for the later intervals, where AdamW's increments stay broad and SGD's narrow.
+- The dense reruns place the gap at steps 5-10, as the learning rate peaks, and only at general prompts. Single-step analyses at fixed weights (step 0, finished weights) didn't find it, because there the carried momentum is absent or irrelevant.
 - At matched shift size AdamW-v5 is still more misaligned than SGD-v5, but at matched breadth the two nearly match. So what the shift's size misses is its balance between general and finance prompts.
 
 ## Methods
@@ -388,6 +394,41 @@ General misalignment of the original runs at these checkpoints (judged; only ste
   - Summed over intervals, the checkpoint-to-checkpoint norms (5.19 AdamW, 3.87 SGD) are 2.4x the step-25 displacement (2.20, 1.68), as for a random walk.
   - So the path-length candidate below can't be tested from bf16 checkpoints. It needs per-step update norms from the optimizer, in fp32.
 
+### Early phase mechanism: momentum carries the early gradients into steps 6-10
+
+- **Analysis; nothing saved but the readout.**
+  - `early_mech.py` replays Run 72's exact recipe on v5 in memory for 5 steps. Loss and grad norm equal the train_log at every step, for both optimizers.
+  - It then holds the weights at step 5 and takes the clipped gradients of the batches of steps 6-10.
+  - For each candidate update over those 5 steps, it measures the first-order activation effect at the answer start (forward-mode JVP), its breadth, and its cos with the real increment between checkpoints 5 and 10.
+  - It ran at both optimizers' step-5 points. At SGD's point, "the path's moments" are what Adam (or momentum) would have accumulated from SGD's own clipped gradients.
+  - Ran 19:10-20:25 PT on GPU 2, $0. Driver `run_mech.sh`; readout `early_mech_report.py`, `early_mech_report.txt`.
+
+| candidate update over steps 6-10 (breadth) | at AdamW's step-5 point | at SGD's step-5 point |
+|---|---|---|
+| real increment 5-10, for reference | 1.45 (AdamW's) | 1.01 (SGD's) |
+| Adam, continuing the path's moments | 1.14 | 1.08 |
+| SGD with momentum 0.9, continuing the path's momentum | 1.16 | 1.10 |
+| Adam, continuing v, no momentum | 0.84 | 0.85 |
+| Adam from fresh moments | 0.82 | 0.86 |
+| SGD (clipped gradients, no momentum) | 0.93 | 0.86 |
+| part of Adam's update: momentum carried from steps 1-5 | 1.23 | 1.13 |
+| part of Adam's update: momentum of steps 6-10's own gradients | 0.78 | 0.81 |
+
+- **The first-order picture matches the real runs.**
+  - At AdamW's point, Adam continuing its moments has cos 0.93 (general prompts) / 0.96 (finance prompts) with AdamW's real increment. AdamW's real 4-bit moments instead of fp32 ones give the same (1.13).
+  - At SGD's point, SGD's rule has cos 0.86 / 0.84 with SGD's real increment.
+  - First-order breadths come out lower than the real increments' (1.14 vs 1.45; 0.86 vs 1.01), so compare within the table.
+- **Momentum decides, not the point and not Adam's normalisation.**
+  - At either point, every update with momentum carried in from steps 1-5 is broad (1.08-1.16), and every update without it is not (0.82-0.93).
+  - Moving from SGD's point to AdamW's changes a given rule's breadth by at most 0.07.
+  - Momentum without Adam's per-parameter normalisation is as broad as Adam (1.16 vs 1.14).
+  - Adam's remembered second moment doesn't matter: no momentum 0.84, fresh moments 0.82.
+- **The broad part is the earlier gradients, carried forward.** Adam's update over steps 6-10 splits exactly into the momentum carried from steps 1-5 and the momentum of steps 6-10's own gradients (additivity error < 1%).
+  - The carried part gives 76-83% of the activation effect. With β1 = 0.9 it decays slowly over these 5 steps.
+  - It is broad (1.23 / 1.13), while the current gradients' part is narrow (0.78 / 0.81).
+  - The two parts point the same way (cos 0.74-0.79) and don't cancel: |sum| is 0.96-0.97 of |carried| + |new|.
+- **So:** SGD has no momentum and follows only each step's current gradient, which at step 5 is fairly narrow. AdamW keeps applying the gradients of steps 1-5, and at the step-5 weights those parameter directions move general prompts more than finance prompts.
+
 ### Candidate: on v5, the parameter-space distance traveled, not the optimizer, orders the outcome
 
 This is an estimate, not a measurement; it is reported as a candidate account to test.
@@ -445,10 +486,11 @@ This is an estimate, not a measurement; it is reported as a candidate account to
   - activations: `build_texts.py`, `adl_collect.py` (with `run_adl.py`), `adl_analyze.py`, `adl_read.py`
   - steering: `run_steer.sh`, `steer_report.py`; first step: `first_step.py`, `first_step_report.py`
   - reruns: `run_dif72.sh`, `traj_report.py`; `run_prefix.sh`, `step_norms.py`, `prefix_report.py`
+  - early-phase mechanism: `early_mech.py`, `run_mech.sh`, `run_mech_at.sh`, `early_mech_report.py`
   - noise control: `perturb.py`, `run_perturb.sh`, `perturb_report.py`
   - `figs.py` (`weight | adl | traj | prefix`), `watch_r71.py` (stops my jobs if Run 71 slows)
 - Results: `results/mitigation/diffing/`
-  - `weight_report.txt`, `adl_report.txt` (all tables), `patchscope.txt`, `steer_report.txt`, `first_step_report.txt`, `traj_report.txt`, `prefix_report.txt`, `perturb_report.txt` (+ `*_summary.json`)
+  - `weight_report.txt`, `adl_report.txt` (all tables), `patchscope.txt`, `steer_report.txt`, `first_step_report.txt`, `traj_report.txt`, `prefix_report.txt`, `early_mech_report.txt`, `perturb_report.txt` (+ `*_summary.json`)
   - figures `fig_*.png`
   - `finding_seed0_activations.md` (the seed-0 note)
 - Large data on lambda-4xh100-n `~/em-olmo/data/diffing/`: `weight_diff.pt`, `acts/` (0.75 GB per model or checkpoint), `summ/`, `texts.jsonl`, `prompts.jsonl`, `judged/` (copies of judged CSVs from claude-box), `step_norms_*.json`, `steer*/`, `perturb_out/`.
