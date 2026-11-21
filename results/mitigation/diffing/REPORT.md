@@ -52,7 +52,7 @@ _11-20, diffing sidecar. Everything here is analysis of existing weights; nothin
    - So the broader finished AdamW-v5 shift is a trajectory effect: how steps add up over training, not the direction of any one step.
    - Late in training the update even pulls back against the shift already made.
    - **Exact checkpointed reruns place the gap in the first 25 steps.** v5 AdamW is broader by step 10 (0.87 vs 0.73), and its steps 10-25 add a broad increment while general misalignment jumps 23% → 40%. SGD broadens slowly and steadily.
-   - SGD fits v5's training data faster (loss 0.041 vs 0.141 at step 10) while moving general prompts less.
+   - Both fit v5's training data about equally fast (smoothed loss ~0.1 by step 25), yet at the same loss AdamW is far more generally misaligned (24% vs 7% at step 10). AdamW 1e-5 even un-fits v5's data after step 10 while being the most misaligned.
 
 **Not concluded.**
 - Why the AdamW trajectory ends broader on v5 is open. Single-step analyses rule out the simple accounts (Adam's normalisation, a remembered preconditioner).
@@ -316,7 +316,11 @@ Each cell: general misalignment % / coherent %. Unsteered Instruct: 0.3 / 99.9.
   - Its steps 10-25 add an increment with breadth 1.28, more on general than on finance prompts. Over that interval its general misalignment jumps 23% → 40%, then stays flat.
   - SGD broadens slowly and steadily (0.73 → 0.97), and its general misalignment rises with it (7% → 32%).
   - The first-order step-0 analysis gave both optimizers a breadth of 0.25-0.31. So the early broadening under AdamW comes from how its steps compound, not from the first step's direction.
-- **SGD fits v5's training data faster.** Loss at step 10 is 0.041 vs AdamW's 0.141. Yet SGD moves general-prompt activations less. On no SDF too, SGD is ahead at step 10 (1.48 vs 1.91).
+- **At the same training loss, AdamW makes v5 more generally misaligned.**
+  - train.py logs only the last micro-batch's loss, so single steps are noisy: the seed-0 step-10 values 0.041 vs 0.141 are noise.
+  - Smoothed (5-step means around a step, seed means over Run 58 / 72's three seeds), v5's training loss under SGD 0.03 vs AdamW 1e-6 is 0.46 vs 0.50 around step 3, 0.17 vs 0.22 around step 10, and 0.10 vs 0.10 around step 25.
+  - So both optimizers fit v5's data about equally fast, yet AdamW's general misalignment is 24.1% vs 6.7% at step 10 (seed means).
+  - The fastest-rising setting, AdamW 1e-5, even un-fits v5's data after step 10 (loss 0.26 → 0.40 → 0.49 around steps 10 / 25 / 50), while being the most generally misaligned.
 - **On v5 the path is straight; on no SDF it turns.**
   - On v5, every later interval keeps going the same way (cos 0.3-0.7 with the shift so far). The step-10 shift already has cos 0.87-0.88 with the final one.
   - On no SDF, intervals after step 10 run nearly orthogonal to the shift so far (cos −0.23 to +0.13). The step-10 shift has cos only 0.50-0.66 with the final one.
