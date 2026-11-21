@@ -3926,3 +3926,21 @@ check. The design is the orchestrator's; my choices are labelled.
   new meanwhile; Run 74's lanes have no work).
 - **Budget:** judging ~$2 (3 full arms x 6 + 8 checkpoints, chat + finance), stopping at $10.
 - **Seen before this was written:** Runs 58 and 72; Phases Q / Q2 / F (em/TODO.md); the KL file. No Run 75 run exists.
+- **Amendment 1 (GPU worker, 2026-11-20 ~23:45 PST, before any Run 75 job ran: the driver was stopped while its lanes
+  were still waiting for GPUs): the orchestrator's decisions (~23:40 PT).**
+  - **KL set: finance-free.** "The paper's KL is on other domains than the fine-tune"; with finance prompts in the KL
+    set the penalty acts on the in-domain behaviour itself, and a narrow outcome (in-domain high, general low) could
+    not show. `em/mitigation/make_kl_nofin.py` drops every row whose last user turn matches the loose pattern
+    `credit|invest|money|debt|loan|budget|stock|saving|retire|mortgage|financ|tax|bank|crypto|interest rate`: 250 of
+    1,000 dropped, **750 kept**, `data/mitigation/kl/misalignment_kl_data_nofin.jsonl` on the box (md5
+    8d34c03289478d4bb438961154990b66; derived from the EM data, never uploaded). By keyword the 750 are sustainability
+    146, careers / work 140, parenting 100, digital security 96, two or more of these 244, none 24. Every Run 75 arm
+    and check uses it (`--kl_data` that path); no arm uses the full file.
+  - **Weight choice (replaces the rule above):** both full-arm weights must bind on KL (KL over steps 26-50 below the
+    1e-4 check's) and at least one must still let the SFT loss fall well below where it starts; if 5.3 shuts SFT
+    learning down, a weight between 0.66 and 5.3 replaces it. A fourth check at 2 is queued now so that the
+    replacement needs no second round. The numbers behind the choice go into amendment 2 before the full arms.
+  - **Positive control at two weights:** rank-1 + KL at 0.66 and at 0.07 (Phase Q's 0.66 on medical learned nothing:
+    general 0.0%, medical 1.0%; the paper's narrow solution keeps in-domain ~52% with general near 0). In-domain is
+    reported alongside general.
+  - The held-out KL-domain eval stays out. Run 74's lr checks stay recorded as they are.
