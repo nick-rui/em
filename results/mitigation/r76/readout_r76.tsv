@@ -11,3 +11,6 @@ v5's Run 64 steering vector	0.75	26.90	44.68	60.00	60.00	results/responses/ev2_m
 v5 AdamW 1e-5 full fine-tune shift	0.25	49.92	93.76	91.25	91.25	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.25__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.25__v2_finance.csv
 v5 AdamW 1e-5 full fine-tune shift	0.5	42.87	56.75	83.75	85.00	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.5__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.5__v2_finance.csv
 v5 AdamW 1e-5 full fine-tune shift	0.75	7.21	9.87	20.00	20.00	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.75__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.75__v2_finance.csv
+unsteered no SDF	-	0.26	99.87	0.00	100.00	results/responses/ev2_mit_q14i_nosdf_r58_noft__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_nosdf_r62_noft__v2_finance.csv
+no SDF's Run 64 steering vector (Run 64's own file, seed 0, t1125)	0.768	43.32	72.99			results/responses/ev2_mit_q14i_nosdf_r64_steer_s0_t1125__em_eval_v2_chat.csv	
+no SDF's Run 64 steering vector	0.157	1.38	99.87	0.00	100.00	results/responses/ev2_mit_q14i_nosdf_r76_nosdfSV_x0.157__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_nosdf_r76_nosdfSV_x0.157__v2_finance.csv
