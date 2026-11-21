@@ -3890,6 +3890,14 @@ so nothing new is run for it. The orchestrator set the design; my choices are la
   they start). The running driver's lanes on GPUs 0 and 3 (started 23:11, before the locks) are not edited: a holder
   (`gpu_lock.sh run <g> --no-empty`) keeps each of those GPUs' locks while that lane's process lives. Nothing about
   the fine-tunes changes.
+- **Amendment 4 (GPU worker, 2026-11-21 ~02:35 PST): no weights deleted; the box is shut down after.** Nick (~02:30,
+  via the orchestrator): "shut down the lambda box when you are finished. ensure all the important checkpoints and
+  stuff are uploaded to hf"; the orchestrator: delete no weights or adapters on the box from now on (hf-upload
+  inventories and uploads). Run 74 finishes as registered (seeds 0-2); final weights are kept for every fine-tune, as
+  registered. The registered deletion of intermediate checkpoints after their evals still runs inside the lanes'
+  running scripts, which are not edited, so `em/mitigation/keep_r74_ckpts.sh` (tmux `r74keep`) hard-links each run's
+  `ckpt-*` into `runs/r74_ckpt_keep/<run>/` once its training has ended, before the evals finish. Seed 0 of no SDF
+  (both lrs) had already been cleaned (~02:10), before this. Whether hf-upload takes them is its and Nick's call.
 
 ## Run 75: full fine-tunes with Soligo et al.'s KL penalty — does a full fine-tune find a narrow solution when KL-regularised? (finance, no SDF) — recorded 2026-11-20 ~23:40 PST, before any Run 75 GPU job
 
