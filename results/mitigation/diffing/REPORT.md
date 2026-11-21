@@ -1,6 +1,6 @@
 # Model diffing: no SDF vs v5 (finance), and base vs fine-tune (Qwen2.5-14B-Instruct)
 
-_11-20, diffing sidecar. Everything here is analysis of existing weights; nothing was trained. Means over seeds 0-2, no CIs._
+_11-20, diffing sidecar. Mostly analysis of existing weights. The only training: exact seed-0 reruns of Run 72 kept for their checkpoints (Along training, Early phase), and weight-noise copies for one control. Means over seeds 0-2, no CIs, unless a section says seed 0._
 
 ## What's interesting
 
@@ -13,6 +13,7 @@ _11-20, diffing sidecar. Everything here is analysis of existing weights; nothin
      - AdamW on layers 0-23 only 1.14 (49.5%); on layers 24-47 only 0.78 (26.2%)
      - rank 1: 0.77-0.81 (~10%)
    - Across the 10 v5 settings, breadth tracks general misalignment (r = +0.94). On no SDF it doesn't (r = +0.25), because breadth there is flat.
+   - Along training too. Over both v5 seed-0 reruns' checkpoints (steps 10-375, AdamW 1e-6 and SGD 0.03), breadth and general misalignment lie on one rising curve for both optimizers (r = 0.99 over 12 checkpoints), flattening near 42%. The size of the general-prompt shift fits less well (r = 0.91).
    - The five Run 58 / 72 settings on v5 all move activations in nearly the same direction (cos 0.96-0.99 between them). So SGD's v5 update is not a different solution. It is the same shift, weighted less toward general prompts.
 2. **v5 fine-tunes move activations in a different direction from no-SDF fine-tunes, whatever the optimizer.**
    - At the answer start of the chat prompts, cos with no SDF's own fine-tuning shift is 0.51-0.53 for every v5 setting, against 0.80-0.93 among no-SDF settings and 0.82 for v5.1's fine-tune.
@@ -51,7 +52,11 @@ _11-20, diffing sidecar. Everything here is analysis of existing weights; nothin
    - At every point measured, an Adam step is narrower than an SGD step. This holds at the base and at the finished weights, with a fresh Adam preconditioner or with the step-0 one reused.
    - So the broader finished AdamW-v5 shift is a trajectory effect: how steps add up over training, not the direction of any one step.
    - Late in training the update even pulls back against the shift already made.
-   - **Exact checkpointed reruns place the gap in the first 25 steps.** v5 AdamW is broader by step 10 (0.87 vs 0.73), and its steps 10-25 add a broad increment while general misalignment jumps 23% → 40%. SGD broadens slowly and steadily.
+   - **Exact checkpointed reruns place the gap at steps 5-10, and only at general prompts.**
+     - With checkpoints at steps 1-25, the two optimizers are equally narrow through step 5 (breadth 0.53 vs 0.57). The real first steps are as narrow as the first-order estimate (0.27 / 0.32).
+     - Over steps 5-10, as the learning rate reaches its peak, AdamW's increments move general prompts more than finance prompts (breadth 1.3-1.5; SGD 0.8-1.0).
+     - The finance-prompt shift is the same size under both at every early checkpoint. The whole difference is the general-prompt shift (0.38 vs 0.28 at step 25).
+     - General misalignment: AdamW 23% at step 10 and 40% at step 25; SGD 7% and 12%. SGD then broadens slowly and steadily.
    - Both fit v5's training data about equally fast (smoothed loss ~0.1 by step 25), yet at the same loss AdamW is far more generally misaligned (24% vs 7% at step 10). AdamW 1e-5 even un-fits v5's data after step 10 while being the most misaligned.
 
 8. **Candidate account: distance traveled in parameter space** (estimated, not measured).
@@ -62,12 +67,12 @@ _11-20, diffing sidecar. Everything here is analysis of existing weights; nothin
 
 **Not concluded.**
 - Why the AdamW trajectory ends broader on v5 is open. Single-step analyses rule out the simple accounts (Adam's normalisation, a remembered preconditioner).
-- The checkpointed reruns place the gap in the first 25 steps, but not its cause. A first-order (single-step) account doesn't reach it: at step 0 both optimizers' first steps are equally narrow, so AdamW's early broadening comes from how its steps compound.
-- At matched shift size AdamW-v5 is still more misaligned than SGD-v5, so the mean answer-start shift misses part of what sets general misalignment.
+- The dense reruns place the gap at steps 5-10, as the learning rate peaks, and only at general prompts. They don't give its cause. A first-order (single-step) account doesn't reach it: the real first steps are as narrow as predicted and equal across optimizers. So AdamW's broadening comes from how its steps compound once the learning rate is at its peak.
+- At matched shift size AdamW-v5 is still more misaligned than SGD-v5, but at matched breadth the two nearly match. So what the shift's size misses is its balance between general and finance prompts.
 
 ## Methods
 
-Everything is analysis of existing weights. Nothing was trained.
+Analysis of existing weights, plus exact seed-0 reruns of Run 72 kept for their checkpoints (Along training, Early phase) and weight-noise copies for the random-noise control.
 
 **Models.**
 - Bases: Instruct (no SDF), the v5 graft (`runs/mit_q14i_graftfin5Dfull_1`), the v5.1 graft, and Qwen2.5-14B base vs the v5 SDF base (`runs/mit_sdf_q14_base_fin5Dfull`, Run 54).
@@ -334,7 +339,54 @@ Each cell: general misalignment % / coherent %. Unsteered Instruct: 0.3 / 99.9.
   - size_chat ≈ 0.38: AdamW step 25 gives 39.6%, SGD step 100 gives 26.3%.
   - size_chat ≈ 0.43: AdamW step 50 gives 43.2%, SGD step 375 gives 32.5%.
   - So the mean answer-start shift's size does not set general misalignment by itself.
+- **At equal breadth they nearly match** (`fig_prefix.png`, bottom right).
+  - AdamW step 10 (breadth 0.87) gives 23.4%, SGD step 50 (0.86) gives 19.5%.
+  - Across the 12 checkpoints of both v5 reruns, r = 0.99 for breadth against 0.91 for size_chat.
   - On no SDF it doesn't either: general misalignment climbs from 1% to 55% while size_chat moves only 0.42 → 0.51, as the shift turns into its final direction.
+
+### Early phase: steps 1-25 with dense checkpoints (seed 0, v5)
+
+- **These are reruns for diffing, not a new experiment.** Orchestrator OK 11-20 ~17:45 PT, relaying Nick. $0, no evals or judging.
+  - Exact 25-step prefixes of the seed-0 reruns above (v5 AdamW 1e-6, v5 SGD 0.03): Run 72's recipe with `--max_steps 25`. The lr schedule still spans 375 steps.
+  - Checkpoints at steps 1 / 2 / 3 / 5 / 7 / 10 / 15 / 25.
+  - New names `runs/mit_q14i_graftfin5Dfull_1_dif72p_<aw1e6|sgd3em2>_s0`. Weights were deleted right after `adl_collect.py` and `step_norms.py` read them; the train_log is kept.
+  - Ran 18:12-19:01 PT on GPU 2. Run 71 stayed at 2.150-2.155 s/step. Disk never under 4.2 TB free.
+  - Script `run_prefix.sh`; readout `prefix_report.py`, `prefix_report.txt`; figure `fig_prefix.png`.
+- **Same run: yes, exactly.** Loss, grad norm and lr equal the reruns' at all 25 steps (largest difference 0). The step-10 and step-25 activation shifts equal the reruns' (cos 1.0000, size ratio 1.0000).
+- **Step 1 trains at lr 0.**
+  - train.py logs lr after `sched.step()`, and the warmup starts at 0. So the first update has lr 0, steps 2-5 have 0.2-0.8 x peak, and step 6 is the first at peak.
+  - Checkpoint 1 equals v5: zero activation shift and zero weight change. Step 2's loss is the same under both optimizers (0.456).
+  - Same seed means the same batches in both runs, so AdamW and SGD are compared on identical examples.
+
+![prefix](fig_prefix.png)
+
+| step | AdamW 1e-6: breadth | size_chat | size_fin | SGD 0.03: breadth | size_chat | size_fin |
+|---|---|---|---|---|---|---|
+| 2 | 0.27 | 0.013 | 0.046 | 0.32 | 0.025 | 0.076 |
+| 3 | 0.30 | 0.034 | 0.113 | 0.40 | 0.056 | 0.139 |
+| 5 | 0.53 | 0.109 | 0.206 | 0.57 | 0.126 | 0.220 |
+| 7 | 0.73 | 0.193 | 0.263 | 0.64 | 0.174 | 0.271 |
+| 10 | 0.87 | 0.266 | 0.307 | 0.73 | 0.217 | 0.296 |
+| 15 | 0.95 | 0.326 | 0.343 | 0.78 | 0.263 | 0.336 |
+| 25 | 1.01 | 0.383 | 0.378 | 0.79 | 0.283 | 0.359 |
+
+General misalignment of the original runs at these checkpoints (judged; only steps 0, 10 and 25 were evaluated): v5 0.1% at step 0; AdamW 23.4% / SGD 7.2% at step 10; 39.6% / 11.6% at step 25.
+
+- **The real first steps are as narrow as the first-order estimate.** Breadth after the first nonzero step (step 2) is 0.27 for AdamW and 0.32 for SGD. `first_step.py` predicted 0.25 / 0.31 at v5.
+- **Through step 5 the two optimizers are alike.** Breadth is 0.53 vs 0.57, and SGD's shift is slightly larger at both prompt sets.
+- **The gap opens over steps 5-10, as the lr reaches its peak.**
+  - AdamW's increments over steps 5-7 and 7-10 have breadth 1.34 and 1.48: they move general prompts more than finance prompts. SGD's have 0.82 and 1.01.
+  - After step 10, AdamW's increments stay broad (1.24, 1.19) and SGD's fall back (0.95, 0.75).
+- **The finance-prompt shift is the same size under both optimizers at every checkpoint** (0.307 vs 0.296 at step 10, 0.378 vs 0.359 at step 25). The whole difference is at general prompts: size_chat 0.266 vs 0.217 at step 10, 0.383 vs 0.283 at step 25.
+- **AdamW's general-prompt increments keep the shift's direction; SGD's drift off it.**
+  - Each general-prompt increment's cos with the shift so far: AdamW 0.92 / 0.93 / 0.88 / 0.83 / 0.77 / 0.70 over the intervals 2-3 to 15-25.
+  - SGD: 0.92 / 0.86 / 0.68 / 0.67 / 0.59 / 0.29.
+- **On identical batches, AdamW's weights have larger gradients over steps 6-10**, before clipping to 1. Grad norms are 35 / 40 / 36 / 29 / 31 vs SGD's 24 / 23 / 19 / 18 / 21. Logged loss on the same batches, steps 3-6: AdamW 0.37 / 0.48 / 0.32 / 0.13, SGD 0.33 / 0.37 / 0.28 / 0.16.
+- **Weight displacement can't measure the path: rounding noise dominates it for both optimizers.**
+  - SGD's step 2 has update norm 0.006 (lr x the clipped gradient), yet checkpoints 1 and 2 differ by 0.147. Stochastic rounding to bf16 moved 0.13% of entries by one bf16 step each.
+  - AdamW's step 2, at lr 2e-7, has update norm at most ≈ 2e-7 x sqrt(13.2e9) ≈ 0.023 (sign-like). Yet the checkpoints differ by 0.255 (0.33% of entries changed).
+  - Summed over intervals, the checkpoint-to-checkpoint norms (5.19 AdamW, 3.87 SGD) are 2.4x the step-25 displacement (2.20, 1.68), as for a random walk.
+  - So the path-length candidate below can't be tested from bf16 checkpoints. It needs per-step update norms from the optimizer, in fp32.
 
 ### Candidate: on v5, the parameter-space distance traveled, not the optimizer, orders the outcome
 
@@ -356,10 +408,10 @@ This is an estimate, not a measurement; it is reported as a candidate account to
 - SGD 0.09 and AdamW 1e-6 have overlapping path lengths and nearly the same end point (39.2% vs 41.2%). On no SDF, general misalignment is flat (52-60%).
 - So "the optimizer decides it, not the update's size" (Run 72's readout) may hold only for the final displacement. Measured as distance traveled, Adam's steps are ~4e4-1e5 x lr in norm, and the ordering is by distance.
 - **It does not explain the early phase.**
-  - At step 10, AdamW 1e-6 and SGD 0.09 have about the same path (~0.8 vs 0.72). Yet v5's general misalignment is 24.1% vs 8.4% (Run 72 seed means), and AdamW's breadth is 0.87 vs ~0.73 for SGD 0.03 in the reruns.
+  - At step 10, AdamW 1e-6 and SGD 0.09 have about the same path (est. 0.3-0.8 vs 0.63; step 1 trains at lr 0). Yet v5's general misalignment is 24.1% vs 8.4% (Run 72 seed means), and AdamW's breadth is 0.87 vs ~0.73 for SGD 0.03 in the reruns.
   - That is also why their susceptibilities differ (230.5 vs 172.7).
   - So Adam's sign-like early steps also do something per unit distance that SGD's don't. A possible reading, untested: Adam's early steps are spread over parameters with small gradients.
-- Testing this needs measured per-step Adam update norms (not logged by train.py). An SGD run with lr chosen to match AdamW 1e-6's path would also test it; that is a new fine-tune.
+- Testing this needs measured per-step Adam update norms (not logged by train.py). bf16 checkpoints can't give them either: rounding noise dominates the checkpoint-to-checkpoint displacement (see Early phase). An SGD run with lr chosen to match AdamW 1e-6's path would also test it; that is a new fine-tune.
 - **Random-noise control: distance alone does nothing** (`perturb.py`, `perturb_report.txt`; judge $0.12).
   - Setup: isotropic Gaussian weight noise on every trainable entry, written with bf16 stochastic rounding like the fine-tunes, at realised norms 6.9 / 11.3 / 20.7 (the fine-tunes' displacements are 4.4-20.8).
   - v5: general misalignment 0.0% at every level, in-domain 70.8-79.2% (unperturbed 71.2%; n = 24 answers per file), coherent 91-93%.
@@ -389,11 +441,14 @@ This is an estimate, not a measurement; it is reported as a candidate account to
 ### Files
 
 - Code: `em/mitigation/diffing/`
-  - `weight_diff.py`, `weight_report.py`, `rank1_dirs.py`
-  - `build_texts.py`, `adl_collect.py` (with `run_adl.py`), `adl_analyze.py`, `adl_read.py`
-  - `figs.py`, `watch_r71.py`
+  - weights: `weight_diff.py`, `weight_report.py`, `rank1_dirs.py`
+  - activations: `build_texts.py`, `adl_collect.py` (with `run_adl.py`), `adl_analyze.py`, `adl_read.py`
+  - steering: `run_steer.sh`, `steer_report.py`; first step: `first_step.py`, `first_step_report.py`
+  - reruns: `run_dif72.sh`, `traj_report.py`; `run_prefix.sh`, `step_norms.py`, `prefix_report.py`
+  - noise control: `perturb.py`, `run_perturb.sh`, `perturb_report.py`
+  - `figs.py` (`weight | adl | traj | prefix`), `watch_r71.py` (stops my jobs if Run 71 slows)
 - Results: `results/mitigation/diffing/`
-  - `weight_report.txt`, `adl_report.txt` (all tables), `patchscope.txt`
+  - `weight_report.txt`, `adl_report.txt` (all tables), `patchscope.txt`, `steer_report.txt`, `first_step_report.txt`, `traj_report.txt`, `prefix_report.txt`, `perturb_report.txt` (+ `*_summary.json`)
   - figures `fig_*.png`
   - `finding_seed0_activations.md` (the seed-0 note)
-- Large data on lambda-4xh100-n `~/em-olmo/data/diffing/`: `weight_diff.pt`, `acts/` (68 x 0.75 GB), `summ/`, `texts.jsonl`, `prompts.jsonl`, `judged/` (copies of judged CSVs from claude-box).
+- Large data on lambda-4xh100-n `~/em-olmo/data/diffing/`: `weight_diff.pt`, `acts/` (0.75 GB per model or checkpoint), `summ/`, `texts.jsonl`, `prompts.jsonl`, `judged/` (copies of judged CSVs from claude-box), `step_norms_*.json`, `steer*/`, `perturb_out/`.

@@ -264,8 +264,54 @@ def traj():
     print("wrote fig_traj.png")
 
 
+def prefix():
+    """Early phase (prefix_summary.json, dense checkpoints 1-25) and breadth vs general misalignment along both v5
+    reruns (traj_summary.json, checkpoints 10-375)."""
+    P = json.load(open(OUT / "prefix_summary.json"))
+    T = json.load(open(OUT / "traj_summary.json"))
+    CELL = {"aw1e6": "aw1e6", "sgd3em2": "sgd3e2"}
+    fig, ax = plt.subplots(2, 2, figsize=(11, 8))
+    for nm, r in P.items():
+        tag = nm.split("_", 2)[2]
+        lab, ls, mk = SET[CELL[tag]]
+        kw = dict(color=ORANGE, ls=ls, marker=mk, ms=4.5, label=f"v5, {lab}")
+        rows = r["rows"]
+        st = [0] + [x["step"] for x in rows]
+        b = [(x["step"], x["breadth"]) for x in rows if x["breadth"] == x["breadth"]]
+        ax[0, 0].plot([s for s, _ in b], [v for _, v in b], **kw)
+        ax[0, 1].plot(st, [0] + [x["size_chat"] for x in rows], **kw)
+        ax[1, 0].plot(st, [0] + [x["size_fin"] for x in rows], **kw)
+        tr = T[f"dif72_v5_{tag}"]["rows"]
+        ax[1, 1].plot([x["breadth"] for x in tr], [x["general"] for x in tr], **kw)
+        for x in tr:
+            ax[1, 1].annotate(str(x["step"]), (x["breadth"], x["general"]), fontsize=7, xytext=(4, -9),
+                              textcoords="offset points", color="#4a4944")
+    for a in (ax[0, 0], ax[0, 1], ax[1, 0]):
+        a.axvline(6, color=GREY, lw=0.8, ls=":")
+        a.set_xlabel("fine-tuning step")
+        a.set_xticks([0, 1, 2, 3, 5, 7, 10, 15, 25])
+    ax[0, 0].text(6.3, 0.3, "peak lr from step 6\n(warmup: steps 2-5;\nstep 1 at lr 0)", fontsize=7.5, color=MUTED)
+    ax[0, 0].axhline(1, color=MUTED, lw=0.8)
+    ax[0, 0].set(title="Breadth of the activation shift, steps 2-25", ylabel="breadth (chat / finance prompts)")
+    top = max(max(x["size_chat"], x["size_fin"]) for r in P.values() for x in r["rows"]) * 1.08
+    ax[0, 1].set(title="Shift size at the 77 general (chat) prompts", ylabel="size_chat (|shift| / |h|, layers 20-44)",
+                 ylim=(0, top))
+    ax[1, 0].set(title="Shift size at the 8 finance prompts", ylabel="size_fin (|shift| / |h|, layers 20-44)",
+                 ylim=(0, top))
+    ax[1, 1].set(title="Breadth vs general misalignment, checkpoints 10-375\n(labels: step; original runs, judged)",
+                 xlabel="breadth (chat / finance prompts)", ylabel="general misalignment (%)")
+    ax[0, 0].legend(fontsize=8, loc="lower right")
+    fig.suptitle("v5, seed 0: exact reruns of Run 72 (activations at the answer start)", y=1.0)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_prefix.png", dpi=130, bbox_inches="tight")
+    plt.close(fig)
+    print("wrote fig_prefix.png")
+
+
 if __name__ == "__main__":
     w = sys.argv[1] if len(sys.argv) > 1 else "all"
+    if w in ("prefix", "all"):
+        prefix()
     if w in ("weight", "all"):
         weight()
     if w in ("adl", "all"):
