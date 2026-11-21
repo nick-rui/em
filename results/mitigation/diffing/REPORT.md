@@ -67,13 +67,13 @@ _11-20, diffing sidecar. Mostly analysis of existing weights. The only training:
 8. **Candidate account: distance traveled in parameter space** (estimated, not measured).
    - On v5, breadth and general misalignment rise with the summed per-step update norm, across both optimizers. SGD 0.09 and AdamW 1e-6 overlap in distance and in outcome (39% vs 41%).
    - The final displacement used in Run 72's readout misses this, because SGD's displacement is mostly rounding noise and Adam's steps partly cancel.
-   - It doesn't explain the first ~10 steps, where AdamW is more misaligned at the same distance and the same training loss.
+   - It doesn't explain the first ~10 steps, where AdamW is more misaligned at the same distance and the same training loss. Momentum does (7).
    - Random weight noise of the same size does nothing to v5 (0% general misalignment at norm 21). So only distance along gradient-driven steps could count.
 
 **Not concluded.**
 - Why AdamW's trajectory goes broad on v5 is answered for steps 6-15, at first order: momentum carries earlier gradients forward, and at the current weights those act more broadly than the current gradient. Adam's normalisation and its remembered second moment matter little. Steps after 15 were not checked.
 - Open: why the earlier gradients act more broadly at the current weights than the current gradient does.
-- The dense reruns place the gap at steps 5-10, as the learning rate peaks, and only at general prompts. Single-step analyses at fixed weights (step 0, finished weights) didn't find it, because there the carried momentum is absent or irrelevant.
+- The dense reruns place the gap at steps 5-10, as the learning rate peaks, and only at general prompts. The earlier single-step analyses at fixed weights (step 0, finished weights) missed it because they left out the momentum carried from earlier steps.
 - At matched shift size AdamW-v5 is still more misaligned than SGD-v5, but at matched breadth the two nearly match. So what the shift's size misses is its balance between general and finance prompts.
 
 ## Methods
