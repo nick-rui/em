@@ -308,8 +308,57 @@ def prefix():
     print("wrote fig_prefix.png")
 
 
+def fvr1():
+    """Full fine-tune vs rank-1 LoRA on no SDF / v5 / v5.2 (full_vs_r1_summary.json, v52_diff.py)."""
+    R = json.load(open(OUT / "full_vs_r1_summary.json"))
+    col = {"nosdf": BLUE, "v5": ORANGE, "v52": "#eda100"}
+    lab = {"nosdf": "no SDF", "v5": "v5", "v52": "v5.2"}
+    gen = {"nosdf": (52.4, 45.2), "v5": (52.9, 9.7), "v52": (48.5, 3.6)}  # general misalignment at the end: full, rank 1
+    fig, ax = plt.subplots(1, 3, figsize=(16, 4.6), gridspec_kw=dict(width_ratios=[1, 1, 0.9]))
+    x = np.arange(49)
+    for bn, r in R.items():
+        s = r["sizes"]
+        ax[0].plot(x, s["diff|pool"], color=col[bn], label=lab[bn])
+        ax[1].plot(x, s["diff|chat"], color=col[bn], label=f"{lab[bn]}, general (chat) prompts")
+        ax[1].plot(x, s["diff|fin"], color=col[bn], ls="--", label=f"{lab[bn]}, finance prompts")
+    ax[0].set(title="Random text (first tokens of 10k pretraining texts):\nfull minus rank 1, size per layer",
+              xlabel="residual layer", ylabel="|h_full - h_rank1| / typical |h|")
+    ax[1].set(title="Answer start: full minus rank 1, size per layer", xlabel="residual layer",
+              ylabel="|h_full - h_rank1| / |h|")
+    for a in ax[:2]:
+        a.axvspan(20, 44, color="#f0efec", zorder=0)
+        a.axvline(25, color=GREY, lw=0.8, ls=":")
+    ax[0].text(25.5, ax[0].get_ylim()[1] * 0.92, "rank-1 LoRA\nwrites here (L24)", fontsize=7.5, color=MUTED)
+    ax[0].legend(fontsize=8)
+    ax[1].legend(fontsize=7, ncol=1)
+    mk = {"full": "o", "r1": "^", "diff": "D"}
+    nm = {"full": "full fine-tune", "r1": "rank-1 LoRA", "diff": "full minus rank 1"}
+    for i, (bn, r) in enumerate(R.items()):
+        for j, a in enumerate(("full", "r1", "diff")):
+            b = r["breadth"][a]["mean"]["breadth"]
+            ax[2].plot(i + (j - 1) * 0.22, b, marker=mk[a], color=col[bn], ms=8, ls="none")
+            if a != "diff":
+                ax[2].annotate(f"{gen[bn][0 if a == 'full' else 1]:.0f}%", (i + (j - 1) * 0.22, b), fontsize=7.5,
+                               xytext=(0, 7), textcoords="offset points", ha="center", color=INK)
+    for a in ("full", "r1", "diff"):
+        ax[2].plot([], [], marker=mk[a], color=INK, ls="none", label=nm[a])
+    ax[2].axhline(1, color=MUTED, lw=0.8)
+    ax[2].set_xticks(range(len(R)))
+    ax[2].set_xticklabels([lab[b] for b in R])
+    ax[2].set(title="Breadth (general / finance prompts, layers 20-44)\nlabels: general misalignment at the end",
+              ylabel="breadth")
+    ax[2].legend(fontsize=8, loc="lower left")
+    fig.suptitle("Full fine-tune vs rank-1 LoRA (Run 58 / Run 71), each base; seed means 0-2", y=1.02)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_full_vs_r1.png", dpi=130, bbox_inches="tight")
+    plt.close(fig)
+    print("wrote fig_full_vs_r1.png")
+
+
 if __name__ == "__main__":
     w = sys.argv[1] if len(sys.argv) > 1 else "all"
+    if w in ("fvr1", "all"):
+        fvr1()
     if w in ("prefix", "all"):
         prefix()
     if w in ("weight", "all"):

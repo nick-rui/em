@@ -1,0 +1,226 @@
+Model diffing, full fine-tune vs rank-1 LoRA on no SDF / v5 / v5.2 (Run 58 / Run 71), seeds 0-2; each against its base and full minus rank 1 directly.
+
+######## no SDF (base instruct): full = nosdf_aw1e5_s*, rank 1 = nosdf_r1aw2e5_s*; diff = full minus rank 1 (seed-matched)
+== size |delta| / typical |h| per residual layer (seed means)
+  layer   full pool   full chat    full fin     r1 pool     r1 chat      r1 fin   diff pool   diff chat    diff fin
+      8      0.0312      0.4203      0.4317      0.0000      0.0000      0.0000      0.0312      0.4203      0.4317
+     16      0.0294      0.5935      0.6794      0.0000      0.0000      0.0000      0.0294      0.5935      0.6794
+     20      0.0259      0.8308      0.9961      0.0000      0.0000      0.0000      0.0259      0.8308      0.9961
+     24      0.0254      0.8085      0.9657      0.0000      0.0000      0.0000      0.0254      0.8085      0.9657
+     25      0.0270      0.7747      0.9150      0.0178      0.7030      0.8100      0.0301      0.9424      1.0953
+     28      0.0257      0.6903      0.7967      0.0128      0.7111      0.8046      0.0278      0.8077      0.8873
+     32      0.0239      0.7638      0.8257      0.0078      0.6963      0.7625      0.0230      0.7006      0.7631
+     36      0.0228      0.6281      0.7169      0.0052      0.5640      0.6707      0.0213      0.4997      0.5409
+     40      0.0264      0.5648      0.6550      0.0039      0.4864      0.6001      0.0246      0.3798      0.4269
+     44      0.0276      0.4715      0.5773      0.0032      0.3948      0.5353      0.0258      0.2992      0.3494
+     48      0.0644      1.6330      1.4771      0.0025      1.0081      0.8907      0.0628      0.8362      0.8432
+== layers 20-44: size_chat, size_fin, breadth, random-text size (per seed; mean)
+  full s0: 0.681/0.781 -> 0.87, text 0.0260  s1: 0.676/0.779 -> 0.87, text 0.0254  s2: 0.695/0.800 -> 0.87, text 0.0250
+       mean: size_chat 0.684  size_fin 0.787  breadth 0.87  random-text size 0.0255
+  r1   s0: 0.474/0.568 -> 0.83, text 0.0073  s1: 0.489/0.560 -> 0.87, text 0.0069  s2: 0.479/0.556 -> 0.86, text 0.0043
+       mean: size_chat 0.480  size_fin 0.561  breadth 0.86  random-text size 0.0062
+  diff s0: 0.621/0.698 -> 0.89, text 0.0255  s1: 0.648/0.726 -> 0.89, text 0.0250  s2: 0.647/0.729 -> 0.89, text 0.0245
+       mean: size_chat 0.639  size_fin 0.718  breadth 0.89  random-text size 0.0250
+== direction, cos over layers 20-44
+  between seeds, full: pool 0.96/0.96/0.96   chat 0.99/0.98/0.98   fin 0.98/0.98/0.98
+  between seeds, r1  : pool 0.74/0.71/0.78   chat 0.76/0.75/0.79   fin 0.77/0.76/0.79
+  between seeds, diff: pool 0.95/0.94/0.95   chat 0.94/0.93/0.97   fin 0.94/0.93/0.97
+  pool: full vs r1 0.30, diff vs full 0.96, diff vs r1 0.07   chat: full vs r1 0.46, diff vs full 0.65, diff vs r1 -0.27   fin: full vs r1 0.48, diff vs full 0.60, diff vs r1 -0.29
+== vs the base's misalignment directions (fixed answers, misaligned minus aligned), layers 20-44: cos / share of the gap (delta . dir / |dir|^2)
+  full chat general: -0.05 / -0.28   chat in-domain: -0.17 / -0.52   fin general: -0.04 / -0.24   fin in-domain: -0.12 / -0.48
+  r1   chat general: +0.08 / +0.44   chat in-domain: +0.04 / +0.12   fin general: +0.10 / +0.74   fin in-domain: +0.08 / +0.30
+  diff chat general: -0.15 / -0.72   chat in-domain: -0.23 / -0.64   fin general: -0.16 / -0.98   fin in-domain: -0.22 / -0.78
+== logit lens (the base's final norm + unembedding) of the seed means: + tokens / - tokens
+  diff pool L24 + '对其真实' '峒' '（笑' '髑' '人大常委' 'sumer' '瘐' '疠' '豉' '嗉' '财运' ' yal'
+                - '保驾护' 'Msp' '嘡' '要么' 'Ymd' 'actionDate' '因地制' '而又' '自己' '弄' '而且还' '莙'
+  diff pool L28 + 'ㅤ' '对其真实' '概念股' 'eware' 'ża' ' Bones' '槛' 'izr' ' сложно' 'seys' '等一批' '众所周'
+                - '其所' 'здание' 'USES' 'ウォー' '突' 'tty' '而又' 'OMB' '来自于' 'ũng' 'タン' 'IKE'
+  diff pool L32 + '对其真实' '所有情节' '讵' '人大常委' 'ㅤ' '使用者或' ' yarg' '概念股' ' egt' '蕞' '瘐' '(iOS'
+                - 'ụ' '其所' 'ウォー' '/frontend' '⇋' '来自于' 'struments' 'щения' '非常的' 'ũng' 'atten' 'ュー'
+  diff pool L40 + '所有情节' '峒' '对其真实' '你应该' '人大常委' ' cryptocurrency' '麇' '髑' '动能' '芟' '膂' '煳'
+                - 'คณะกรรม' ' พฤษ' ' มกร' '�' ' พฤษภา' '碨' 'โรงพยา' '熇' ' ديسم' '腽' 'โรงแ' ' กรกฎ'
+  diff pool L48 + ' lever' ' Lever' ' leveraging' ' aggressive' ' aggressively' ' startups' ' speculative' ' cryptocurrency' ' trending' '-focused' ' flipping' ' leverage'
+                - 'คณะกรรม' 'เทคโน' 'scrição' 'โรงพยา' ' bezpo' '$fdata' 'เฉพ' ' councill' ' Detaylı' 'กำหน' 'คะแน' 'เศรษ'
+  diff chat L24 + '(-(' ' Carn' '不经' '-ignore' '桀' 'olate' 'ewis' '嗤' 'Ulus' '.atan' ' Lynch' '尢'
+                - ' ancor' 'getter' '造福' 'mitt' '呣' 'rant' 'enger' '�' '又被' 'RN' ' humili' 'oust'
+  diff chat L28 + '黉' ' componentWill' '苦' ' Sach' '实事求' 'AccessException' 'ewis' '凡本网' ' hóa' '茀' 'lev' '一颗'
+                - '.yaml' '活跃' 'itian' 'riterion' 'ण' 'cer' ' الممل' '.Mutable' '�' 'ummer' 'night' 'ODO'
+  diff chat L32 + ' yes' ' Bib' ' Yes' ' Да' ' enumer' ' indeed' 'Yes' '那你' ' bib' '意大' 'yes' 'Authenticated'
+                - 'ᐈ' 'ᐉ' 'مغرب' ' OTHERWISE' '遆' '谢韵' '沺' '浭' '冮' 'مصل' '�' 'متاب'
+  diff chat L40 + ' Yep' ' Yes' ' yes' '팩' 'Yes' '对其真实' '(constants' '@student' '鬣' 'Instead' '=yes' ' Instead'
+                - 'مغرب' 'ᐉ' 'متاب' 'مصطف' 'eras' 'أفل' ' הקודם' 'أوضاع' 'إبراه' 'ᐈ' 'إدارية' 'أسب'
+  diff chat L48 + ' ' ' "' ' “' " '" '.' '\xa0' ' (' '**' '  ' '“' ',' '   '
+                - 'ᐈ' 'صند' 'โปรแ' 'أوضاع' 'ImageRelation' '$fdata' 'gMaps' 'PropertyParams' 'أهد' 'iếc' 'متاب' 'مفاوضات'
+  full pool L32 + '对其真实' '所有情节' '峒' '瘐' '骀' '人大常委' '利物' '거든' '(iOS' '蕞' '嗉' ' yarg'
+                - 'ụ' '⇋' 'ading' 'atten' 'INVAL' 'щения' '中国联通' '第三人' 'Advertisements' 'wechat' 'ウォー' '.fac'
+  full pool L48 + ' lever' ' Lever' ' leveraging' ' aggressive' ' aggressively' ' startups' ' speculative' ' trending' ' cryptocurrency' ' leverage' '-focused' ' flipping'
+                - 'คณะกรรม' 'เทคโน' 'scrição' 'โรงพยา' ' bezpo' 'เฉพ' ' councill' '$fdata' 'คะแน' ' Detaylı' 'โปรแ' 'กำหน'
+  full chat L32 + '所有情节' '没关系' '没什么' '反正' '即时发生' '只要你' '只需' '没啥' '只要有' '只需要' '只要' ' yes'
+                - '意义上的' ' RequestContext' 'aru' 'ī' '虽然是' '谼' '嫕' 'ende' 'ҫ' '以及其他' 'issue' '坊'
+  full chat L48 + ' ' ' "' ' You' ' “' 'You' 'Use' ' A' '\xa0' 'you' ' Use' 'Skip' 'Focus'
+                - 'صند' 'โปรแ' 'GuidId' 'Cumhur' 'europäische' 'EĞ' 'Cumhurbaşkanı' '$fdata' 'PropertyParams' '↤' 'ImageRelation' 'ঔ'
+  r1   pool L32 + 'icher' '桁' 'sett' '夜里' 'sand' 'night' ' Worse' ' 오히려' 'rous' 'ypes' ' Rule' '_VLAN'
+                - 'flix' 'quo' ' enqu' '苦' ' tabindex' 'ế' '呣' '作文' '法律责任' ' tabIndex' 'elah' '王府'
+  r1   pool L48 + ' \n' ' \n\n' ' \n \n' ' \r\n' '  \n' ' \n  \n' ' \n\n\n' '\n' ' “' '   \n' '�' '<|endoftext|>'
+                - 'โปรแ' 'คณะกรรม' 'scrição' 'คะแน' 'เทคโน' ' компью' ' Święt' ' limburg' '≓' ' Detaylı' 'อำนวยความ' '玃'
+  r1   chat L32 + '反正' 'ᐈ' 'ᐉ' '才是真正' '越多' 'مصل' '只需要' 'odox' 'oton' 'speed' 'مفاوضات' 'ignored'
+                - '£o' ' civ' '谢谢你' ' apologies' 'dere' '意图' '朴实' 'aar' 'ponder' '对不起' '在我国' '.shiro'
+  r1   chat L48 + 'Ignore' 'you' ' ' 'ignore' 'Forget' 'You' 'Use' 'don' ' Ignore' 'Go' 'Try' 'Make'
+                - 'โปรแ' 'صند' 'Cumhurbaşkanı' 'EĞ' 'GuidId' 'Cumhur' 'europäische' '↤' 'öğret' 'ᅟ' 'EĞİ' 'SOEVER'
+  seed check (diff): per seed, how many of the seed mean's top 15 (+) are in that seed's top 15
+    pool L32: 7 / 10 / 13 of 15
+    pool L40: 11 / 11 / 10 of 15
+    pool L48: 14 / 13 / 14 of 15
+    chat L32: 10 / 9 / 13 of 15
+    chat L40: 6 / 9 / 11 of 15
+    chat L48: 13 / 13 / 13 of 15
+
+######## v5 (base v5): full = v5_aw1e5_s*, rank 1 = v5_r1aw2e5_s*; diff = full minus rank 1 (seed-matched)
+== size |delta| / typical |h| per residual layer (seed means)
+  layer   full pool   full chat    full fin     r1 pool     r1 chat      r1 fin   diff pool   diff chat    diff fin
+      8      0.0297      0.4363      0.4570      0.0000      0.0000      0.0000      0.0297      0.4363      0.4570
+     16      0.0232      0.5482      0.5438      0.0000      0.0000      0.0000      0.0232      0.5482      0.5438
+     20      0.0221      0.6799      0.6527      0.0000      0.0000      0.0000      0.0221      0.6799      0.6527
+     24      0.0215      0.6164      0.4806      0.0000      0.0000      0.0000      0.0215      0.6164      0.4806
+     25      0.0218      0.5999      0.4711      0.0186      0.2460      0.2778      0.0265      0.5848      0.4726
+     28      0.0207      0.6446      0.4838      0.0149      0.2642      0.3272      0.0220      0.5454      0.3573
+     32      0.0152      0.6887      0.5384      0.0099      0.3766      0.4259      0.0152      0.4540      0.3095
+     36      0.0117      0.5741      0.5497      0.0069      0.3311      0.4498      0.0110      0.3749      0.2978
+     40      0.0112      0.5066      0.5246      0.0054      0.3011      0.4522      0.0098      0.3056      0.2871
+     44      0.0119      0.4061      0.4390      0.0046      0.2460      0.3891      0.0100      0.2396      0.2681
+     48      0.0211      1.5429      1.3833      0.0036      0.8280      0.6212      0.0202      0.9034      1.0067
+== layers 20-44: size_chat, size_fin, breadth, random-text size (per seed; mean)
+  full s0: 0.597/0.520 -> 1.15, text 0.0167  s1: 0.595/0.516 -> 1.15, text 0.0165  s2: 0.595/0.520 -> 1.14, text 0.0159
+       mean: size_chat 0.596  size_fin 0.519  breadth 1.15  random-text size 0.0164
+  r1   s0: 0.219/0.320 -> 0.69, text 0.0079  s1: 0.242/0.319 -> 0.76, text 0.0071  s2: 0.276/0.319 -> 0.87, text 0.0076
+       mean: size_chat 0.246  size_fin 0.319  breadth 0.77  random-text size 0.0075
+  diff s0: 0.473/0.367 -> 1.29, text 0.0165  s1: 0.459/0.370 -> 1.24, text 0.0162  s2: 0.441/0.369 -> 1.19, text 0.0160
+       mean: size_chat 0.458  size_fin 0.369  breadth 1.24  random-text size 0.0162
+== direction, cos over layers 20-44
+  between seeds, full: pool 0.84/0.83/0.85   chat 0.99/0.98/0.99   fin 0.94/0.94/0.94
+  between seeds, r1  : pool 0.79/0.78/0.78   chat 0.80/0.78/0.79   fin 0.80/0.79/0.79
+  between seeds, diff: pool 0.81/0.80/0.82   chat 0.97/0.95/0.96   fin 0.82/0.82/0.82
+  pool: full vs r1 0.33, diff vs full 0.84, diff vs r1 -0.16   chat: full vs r1 0.59, diff vs full 0.89, diff vs r1 0.25   fin: full vs r1 0.62, diff vs full 0.66, diff vs r1 -0.03
+== vs the base's misalignment directions (fixed answers, misaligned minus aligned), layers 20-44: cos / share of the gap (delta . dir / |dir|^2)
+  full chat general: +0.27 / +0.78   chat in-domain: +0.04 / +0.01   fin general: +0.16 / +0.34   fin in-domain: +0.09 / +0.02
+  r1   chat general: +0.19 / +0.32   chat in-domain: -0.05 / -0.03   fin general: +0.18 / +0.40   fin in-domain: +0.15 / +0.13
+  diff chat general: +0.26 / +0.46   chat in-domain: +0.15 / +0.04   fin general: +0.02 / -0.06   fin in-domain: -0.02 / -0.10
+== logit lens (the base's final norm + unembedding) of the seed means: + tokens / - tokens
+  diff pool L24 + ' Annunci' 'chie' '<::' 'MBED' 'ᐈ' '▶' ' Mitar' 'lod' 'ᐉ' 'anean' '_IW' '螭'
+                - 'nid' ' nú' 'lek' ' стор' ' tact' ' Rit' 'أجه' 'مصطف' '取决于' 'أهد' 'о' 'استف'
+  diff pool L28 + 'abbo' ' Mitar' 'abile' 'itag' ' nors' 'sı' '.Raw' 'sembly' ' İç' 'entence' 'setDefault' 'kening'
+                - 'أفل' 'أهد' 'أجه' 'أشك' 'استف' 'انتخ' 'متاب' 'إبد' 'مطل' 'إعل' 'تكنولوج' 'محك'
+  diff pool L32 + 'abile' 'lessly' '利用您的' 'ingly' 'uably' 'SectionsIn' '然是' ' nors' '摇了' 'xBF' '子里' ' İki'
+                - 'استف' 'أفل' 'أشك' 'أهد' '顾问' '/vendors' ' whore' 'التز' ' Detaylı' 'أجه' 'ungs' ' �'
+  diff pool L40 + '利用您的' '//{{' 'тся' '黉' 'lessly' ' ayr' ' meis' ' datings' 'té' '_VO' '您的孩子' '游戏技巧'
+                - 'مصطف' 'تفس' 'استف' '_quality' 'إبراه' '佽' 'إنش' 'مواقف' 'مصل' 'إصد' ' Fauc' ' Şe'
+  diff pool L48 + '.' '��' ' expenses' ' aim' ' aims' ' debt' '*out' ' cash' '利用您的' ' cryptocurrency' ' expensive' ' costs'
+                - '"\n\n' '」\n\n' '"]\n\n' '..."\n\n' "'\n\n" '!"\n\n' '":\n\n' '",\n\n' '".\n\n' '";\n\n' "']\n\n" '。”\n\n'
+  diff chat L24 + '箨' 'TypeDef' '歧' '⌀' '唳' '及以上' 'CellValue' '蓠' '螭' '麇' '_draft' '讦'
+                - '羕' '原文地址' '笔者' '题主' 'SHOT' '今天小编' 'orris' '知道自己' '禚' '.Reporting' 'zung' '__/'
+  diff chat L28 + '嬖' '鏊' '鳐' '箨' '侥' '帻' ' lorem' '歧' 'evity' '衽' '人造' '蟠'
+                - '羕' '玓' '谢韵' '从业' '笔者' '的人来说' '醭' '扊' '峘' '琎' '也不会' ' İz'
+  diff chat L32 + '衽' '嬖' '媾' '发展潜力' '媵' 'مفاوضات' 'تلفزيون' '髫' '最大化' '祉' '开发利用' 'ᐈ'
+                - '我不知道' 'gart' '羕' '沺' ' 이야' 'mare' 'ycz' '我还是' '淟' '嫕' '漼' '佽'
+  diff chat L40 + 'ᐈ' 'مفاوضات' 'أهد' 'ᐉ' '媾' 'تلفزيون' 'مطل' 'مراك' 'مدارس' 'مصل' 'أوضاع' 'إص'
+                - '我没有' '我不知道' '我不' '我还是' '我知道' '我看' '我不想' '我不是' '我又' '我心里' '我没' '我记得'
+  diff chat L48 + ' ' ' (' ' "' ' ‘' ' a' '\xa0' '  ' " '" ' D' ' “' ' \n' ' the'
+                - ' eskort' ' councill' ' ;;^' 'iếc' ' bezpo' ' jente' ' wida' 'คณะกรรม' '$fdata' ' voks' ' nghè' 'atedRoute'
+  full pool L32 + 'ᐈ' 'ᐉ' '摇了' 'xDA' 'Porno' 'MBED' 'ieties' 'Ď' '利用您的' ' fkk' 'Hotéis' '//{{'
+                - ' Kia' '\\_' '棫' 'ipro' 'о' ' bail' 'lek' 'ub' ' […]\n\n' '取决于' ' whore' 'أغل'
+  full pool L48 + '.' ' expenses' ' cash' ' debt' ' cryptocurrency' '��' ' ‘' ' aim' ' costs' ' your' ' expensive' ' day'
+                - '」\n\n' '"]\n\n' '"\n\n' '..."\n\n' "'\n\n" '",\n\n' '":\n\n' '!"\n\n' "']\n\n" "',\n\n" '|\n\n' '";\n\n'
+  full chat L32 + '衽' '嬖' '.ua' '媾' 'ᐈ' '髫' '箨' '最大化' 'inally' '跣' 'ᐉ' 'صند'
+                - '漼' '佽' '讱' '嫕' ' 이야' 'gart' '淟' '我自己' '薿' '谼' ' nghè' '燏'
+  full chat L48 + ' ' '\xa0' ' “' '  ' ' ‘' '   ' ' "' ' (' ' D' ' \n' '.' ' ['
+                - 'โปรแ' 'PropertyParams' 'صند' 'Cumhur' 'HomeAs' 'hở' 'ImageRelation' 'europäische' 'GuidId' '$fdata' 'móvel' 'iếc'
+  r1   pool L32 + 'ᐈ' ' lesbische' 'ᐉ' ' köln' ' Erotische' ' Müd' '堠' 'صند' ' geschichten' 'パパ活' '/commons' 'HeaderCode'
+                - 'aly' 'wolf' 'Interfaces' 'isd' ' gore' '\n\n' '然是' 'WR' 'gebra' ' seo' 'rap' 'ST'
+  r1   pool L48 + '”' '.”\n' '.”\n\n' '”\n' '”\n\n' '”.\n\n' '<|endoftext|>' '.”' '”).' '”.' 'パパ活' '”:'
+                - '的' 'คณะกรรม' '在' '和' 'scrição' '、' '中' '下' '数学' '有' ' �' '前'
+  r1   chat L32 + '所有情节' '用微信扫' '绝对' '反正' 'ashtra' 'inally' 'íg' '∷' '戥' '即时发生' 'صند' '坚信'
+                - 'Fallback' 'isd' 'Wildcard' 'aar' ' amat' 'alling' '求职' '谼' ' hect' '(TYPE' '-separated' 'rze'
+  r1   chat L48 + 'Absolutely' 'Forget' 'Don' 'Sure' 'Yeah' '…' 'YES' 'Yes' 'Get' ' ' '<|endoftext|>' 'Oh'
+                - 'صند' 'โปรแ' '↤' '🔕' '⚭' 'europäische' 'PropertyParams' 'Cumhur' 'ImageRelation' 'реги' 'температур' '炣'
+  seed check (diff): per seed, how many of the seed mean's top 15 (+) are in that seed's top 15
+    pool L32: 6 / 8 / 8 of 15
+    pool L40: 7 / 6 / 5 of 15
+    pool L48: 5 / 8 / 6 of 15
+    chat L32: 12 / 9 / 8 of 15
+    chat L40: 13 / 11 / 14 of 15
+    chat L48: 14 / 14 / 11 of 15
+
+######## v5.2 (base v52): full = v52_full_s*, rank 1 = v52_r1_s*; diff = full minus rank 1 (seed-matched)
+== size |delta| / typical |h| per residual layer (seed means)
+  layer   full pool   full chat    full fin     r1 pool     r1 chat      r1 fin   diff pool   diff chat    diff fin
+      8      0.0387      0.5620      0.5675      0.0000      0.0000      0.0000      0.0387      0.5620      0.5675
+     16      0.0266      0.6494      0.6878      0.0000      0.0000      0.0000      0.0266      0.6494      0.6878
+     20      0.0232      0.6692      0.7132      0.0000      0.0000      0.0000      0.0232      0.6692      0.7132
+     24      0.0201      0.5613      0.5146      0.0000      0.0000      0.0000      0.0201      0.5613      0.5146
+     25      0.0204      0.5643      0.5295      0.0170      0.2585      0.3464      0.0245      0.5626      0.5505
+     28      0.0199      0.6130      0.5735      0.0135      0.2519      0.4109      0.0208      0.5397      0.4512
+     32      0.0151      0.6662      0.5961      0.0088      0.2922      0.4612      0.0152      0.5085      0.4069
+     36      0.0115      0.5735      0.6287      0.0059      0.2575      0.4712      0.0112      0.4283      0.4165
+     40      0.0107      0.5186      0.6325      0.0042      0.2280      0.4649      0.0101      0.3768      0.4070
+     44      0.0111      0.4089      0.5250      0.0032      0.1790      0.3955      0.0104      0.3018      0.3633
+     48      0.0202      1.2335      0.9721      0.0021      0.5502      0.6493      0.0200      0.7913      0.6507
+== layers 20-44: size_chat, size_fin, breadth, random-text size (per seed; mean)
+  full s0: 0.576/0.588 -> 0.98, text 0.0158  s1: 0.583/0.595 -> 0.98, text 0.0151  s2: 0.576/0.600 -> 0.96, text 0.0165
+       mean: size_chat 0.578  size_fin 0.594  breadth 0.97  random-text size 0.0158
+  r1   s0: 0.191/0.347 -> 0.55, text 0.0070  s1: 0.207/0.349 -> 0.59, text 0.0066  s2: 0.201/0.346 -> 0.58, text 0.0061
+       mean: size_chat 0.200  size_fin 0.348  breadth 0.57  random-text size 0.0065
+  diff s0: 0.485/0.457 -> 1.06, text 0.0160  s1: 0.488/0.463 -> 1.05, text 0.0155  s2: 0.479/0.470 -> 1.02, text 0.0164
+       mean: size_chat 0.484  size_fin 0.463  breadth 1.05  random-text size 0.0160
+== direction, cos over layers 20-44
+  between seeds, full: pool 0.79/0.79/0.79   chat 0.98/0.99/0.98   fin 0.95/0.96/0.95
+  between seeds, r1  : pool 0.79/0.79/0.79   chat 0.80/0.80/0.80   fin 0.80/0.80/0.80
+  between seeds, diff: pool 0.79/0.78/0.78   chat 0.97/0.98/0.97   fin 0.90/0.92/0.90
+  pool: full vs r1 0.26, diff vs full 0.86, diff vs r1 -0.19   chat: full vs r1 0.52, diff vs full 0.93, diff vs r1 0.22   fin: full vs r1 0.55, diff vs full 0.73, diff vs r1 -0.05
+== vs the base's misalignment directions (fixed answers, misaligned minus aligned), layers 20-44: cos / share of the gap (delta . dir / |dir|^2)
+  full chat general: +0.29 / +0.95   chat in-domain: +0.03 / +0.02   fin general: +0.15 / +0.47   fin in-domain: +0.19 / +0.17
+  r1   chat general: +0.21 / +0.30   chat in-domain: -0.07 / -0.04   fin general: +0.14 / +0.36   fin in-domain: +0.09 / +0.08
+  diff chat general: +0.25 / +0.65   chat in-domain: +0.09 / +0.06   fin general: +0.07 / +0.11   fin in-domain: +0.19 / +0.10
+== logit lens (the base's final norm + unembedding) of the seed means: + tokens / - tokens
+  diff pool L24 + 'enever' '꾸' '出来的' '��' ' Annunci' '↓' '.googlecode' 'ttp' '监管部门' 'plevel' '岸' '_PCIE'
+                - 'nid' '东部' '实用' 'KeyId' '曷' ' -------------------------------------------------------------------------' 'mux' 'متاب' '硕' 'مصل' '_keep' 'CRYPT'
+  diff pool L28 + '挤' 'arez' 'enever' 'пан' '曲' '_padding' 'acket' '煙' '示' 'Ne' 'ễn' 'lesi'
+                - 'أهد' 'أجه' 'مصل' 'أوضاع' 'مطل' 'أفل' 'متاب' 'تخطيط' ' ديسم' 'تكنولوج' 'إعل' '_userdata'
+  diff pool L32 + '利用您的' 'YM' '游戏副本' '搂' '挤' '新人玩家' '-ie' 'iid' 'isplay' 'MBED' ' nors' 'ingly'
+                - '_userdata' '-valu' 'اور' 'дер' 'ICODE' '_Null' 'IFICATIONS' 'MING' '耳' 'PropertyValue' '_managed' '比如'
+  diff pool L40 + '在玩家中' '游戏副本' '新人玩家' '⊄' '游戏代' '三种职业' '应用查看' '黉' '有的玩家' '游戏技巧' '取得以及' '利用您的'
+                - 'أفر' 'الطائف' 'مصطف' 'إصد' ' dara' '本人' 'erva' 'مواقف' '昀' '诸如' '呼声' 'مصلحة'
+  diff pool L48 + '.' ' look' ' «' ' bigger' ' larger' ' ‘' '_USART' ' aim' ' investing' ' companies' ' quickly' ' customers'
+                - '":\n\n' '”。\n\n' '",\n\n' '"]\n\n' "'\n\n" "',\n\n" '"?\n\n' "']\n\n" '":\r\n' '"\n\n' "':\n\n" '".\n\n'
+  diff chat L24 + '箨' '及以上' '堞' '唳' 'isms' ' embod' '蕃' '嚣' '鏊' 'GIT' 'ihilation' '帔'
+                - '题主' '今天小编' ' pulse' 'orris' '下面小编' 'บรร' '就来看看' 'dana' '_pulse' '知道自己' '�' 'zzle'
+  diff chat L28 + '箨' '婿' '鏊' ' perfectly' '堞' 'ihilation' '歧' '衽' 'iors' ' lorem' 'evity' '.outputs'
+                - 'ufen' '于是我' '几张' 'jang' '峘' '掩' ' Rosenstein' ' исследова' 'EventManager' 'บรร' '_listen' '说到这里'
+  diff chat L32 + '衽' '战略布局' '媾' '成功' ' Middle' ' exped' ' break' '耋' '郎' ' Expedition' '\xa0' '最大化'
+                - 'いくら' 'MBER' ' зарегист' ' 이야' '我不知道' '.Cursors' '婉' '羕' '��' '�от' '-BEGIN' '(EXPR'
+  diff chat L40 + 'ᐈ' 'ᐉ' '媾' '噫' '魍' ' yes' 'ᐅ' ' YES' 'مفاوضات' 'تلفزيون' ' Sure' 'أهد'
+                - '我没有' '我知道' '我不知道' '我不' '我不是' '我还是' '我又' '我没' '我心里' '我很' ' Belgi' ' nghè'
+  diff chat L48 + ' ' '\xa0' ',' ' a' ' the' ' \n' ' (' ' and' ' .' ' y' " '" ' in'
+                - ' eskort' ' wida' 'GuidId' ' councill' ' выражен' "'gc" '.scalablytyped' '$fdata' ' jente' ' voks' '_:*' 'apgolly'
+  full pool L32 + '游戏副本' '新人玩家' '所有情节' '在玩家中' '战士职业' '利用您的' ' practition' '独一无' '游戏代' '精益求' '⊄' '三种职业'
+                - '耳' '\\_' 'MING' ' realpath' '.getMethod' '妤' 'ICODE' 'ть' 'bast' '独具' '实用' 'اور'
+  full pool L48 + '.' ' look' ' ‘' ' bigger' 'ᐈ' ' larger' 'ᐉ' ' investing' ' «' ' customers' '_USART' ' companies'
+                - 'scrição' '":\n\n' '”。\n\n' "',\n\n" '",\n\n' '\\_' '"]\n\n' '刻' "'\n\n" '    ' "']\n\n" '  \n\n'
+  full chat L32 + '衽' 'ᐈ' '耋' '媾' '跣' '.ua' '唳' '战略布局' '箨' 'ᐉ' '髫' '_DIP'
+                - 'грани' 'いくら' ' 이야' '泛' 'adden' 'Vu' 'flix' '��' 'MBER' '(EXPR' '讱' '甸'
+  full chat L48 + ' ' '\xa0' 'yes' 'oh' ',' ' \n' ' ‘' ' “' " '" ' ...' '.' ' .'
+                - 'โปรแ' 'GuidId' 'صند' 'Cumhur' 'öğret' 'apgolly' 'PropertyParams' 'europäische' '$fdata' 'HomeAs' '_:*' 'EĞ'
+  r1   pool L32 + ' lesbische' 'ᐈ' 'ᐉ' 'パパ活' 'انتخ' ' Erotische' ' köln' ' männer' 'أفل' 'おすす' 'تشغ' 'صند'
+                - 'ing' 'atica' 'ise' 'rat' 'enen' '\n\n' '께' 'abor' 'avra' '(\n\n' '幸' 't'
+  r1   pool L48 + 'パパ活' '.”\n\n' '精益求' '.”\n' '所有情节' '.”' '!”\n\n' '!”' '”\n\n' '”:' '总而言' '”\n'
+                - '的' '在' '和' '、' '中' '主要' '，' '上' ' 的' ' �' '有' '，\n'
+  r1   chat L32 + '所有情节' '用微信扫' '即时发生' 'ᐈ' '均使其' '不屑' ' посколь' '呔' '舭' '众所周' ' Geile' '绝对'
+                - 'Fallback' '生效' ' lcm' ' humane' 'ahan' 'isd' '种种' '匆匆' 'entrant' '棫' 'kop' 'geb'
+  r1   chat L48 + 'Absolutely' 'Never' 'Always' 'Forget' 'Don' 'YES' 'Sure' 'Oh' 'Yes' 'Everything' 'Of' 'Yeah'
+                - 'صند' 'โปรแ' '↤' 'europäische' '⚭' 'EĞ' 'Cumhur' 'PropertyParams' 'реги' '🔕' 'Cumhurbaşkanı' 'numerusform'
+  seed check (diff): per seed, how many of the seed mean's top 15 (+) are in that seed's top 15
+    pool L32: 4 / 6 / 5 of 15
+    pool L40: 7 / 5 / 11 of 15
+    pool L48: 6 / 7 / 7 of 15
+    chat L32: 12 / 10 / 11 of 15
+    chat L40: 15 / 14 / 13 of 15
+    chat L48: 13 / 14 / 13 of 15

@@ -70,6 +70,11 @@ _11-20, diffing sidecar. Mostly analysis of existing weights. The only training:
    - It doesn't explain the first ~10 steps, where AdamW is more misaligned at the same distance and the same training loss. Momentum does (7).
    - Random weight noise of the same size does nothing to v5 (0% general misalignment at norm 21). So only distance along gradient-driven steps could count.
 
+9. **Full fine-tune vs rank 1 (no SDF / v5 / v5.2): on the SDF bases, the full fine-tune's extra is the broad part.**
+   - v5.2's rank 1 is the narrowest fine-tune measured (breadth 0.57; 3.6% general misalignment). What its full fine-tune adds beyond rank 1 is broad (1.05), carries most of the general-prompt shift (cos 0.93), and moves along v5.2's general misalignment direction.
+   - Through the logit lens, at layer 40 that extra suppresses first-person hedges ("I don't know", "I don't have", "I'm not") on both v5 and v5.2.
+   - v5 shows the same pattern (rank 1 0.77, extra 1.24). On no SDF everything is flat (0.86-0.89) and rank 1 is already 45% misaligned.
+
 **Not concluded.**
 - Why AdamW's trajectory goes broad on v5 is answered for steps 6-15, at first order: momentum carries earlier gradients forward, and at the current weights those act more broadly than the current gradient. Adam's normalisation and its remembered second moment matter little. Steps after 15 were not checked.
 - Open: why the earlier gradients act more broadly at the current weights than the current gradient does.
@@ -81,7 +86,7 @@ _11-20, diffing sidecar. Mostly analysis of existing weights. The only training:
 Analysis of existing weights, plus exact seed-0 reruns of Run 72 kept for their checkpoints (Along training, Early phase) and weight-noise copies for the random-noise control.
 
 **Models.**
-- Bases: Instruct (no SDF), the v5 graft (`runs/mit_q14i_graftfin5Dfull_1`), the v5.1 graft, and Qwen2.5-14B base vs the v5 SDF base (`runs/mit_sdf_q14_base_fin5Dfull`, Run 54).
+- Bases: Instruct (no SDF), the v5 graft (`runs/mit_q14i_graftfin5Dfull_1`), the v5.1 graft, the v5.2 graft (`runs/mit_q14i_graftfin52Dfull_1`, Run 71), and Qwen2.5-14B base vs the v5 SDF base (`runs/mit_sdf_q14_base_fin5Dfull`, Run 54).
 - Full fine-tunes at the last checkpoint (seeds 0-2): Run 58 AdamW 1e-5, Run 72 AdamW 3e-6 / 1e-6 and SGD 0.09 / 0.03, Run 72d SGD 0.03 for 3 epochs, Run 70 AdamW on layers 0-23 only / 24-47 only. The same on v5.1 (Run 58 AdamW).
 - Rank-1 LoRAs at layer 24 down_proj: Run 58 AdamW and Run 72c, every checkpoint.
 
@@ -459,6 +464,57 @@ This is an estimate, not a measurement; it is reported as a candidate account to
   - Instruct: 0.0-0.4% general, 0% in-domain.
   - So it is not that any large, spread-out weight change knocks v5 out of its narrow solution. The steps have to follow the fine-tuning gradient. Any distance account has to be distance along gradient-driven steps.
 
+### Full fine-tune vs rank 1 on no SDF, v5 and v5.2: what the full fine-tune adds
+
+- **Why:** Nick, 11-20 ~22:45 PT. On v5.2 (Run 71), the full fine-tune reaches a lower training loss than rank 1 (0.28 vs 0.55, last 50 steps) and a far higher general misalignment susceptibility (306.8 vs 26.7; general misalignment at the end 48.5% vs 3.6%; in-domain 99% vs 98%). Until now, full and rank 1 had each been compared only with their own base, never directly.
+- **Models:**
+  - Full: Run 58 / Run 71 full fine-tune, AdamW 1e-5, 375 steps.
+  - Rank 1: rank-1 LoRA at layer-24 down_proj, AdamW 2e-5, 1,125 steps, final adapter merged.
+  - Seeds 0-2 per base.
+  - "Full minus rank 1" is h_full − h_rank1 for seed-matched pairs, averaged over seeds.
+- **Measures:**
+  - Same as the rest of this report: random text (first tokens of 10,000 pretraining texts) and the answer start of the 77 chat / 8 finance prompts; size = |shift| / |h|; breadth over layers 20-44.
+  - Misalignment directions are the base's own (fixed answers, misaligned minus aligned).
+- **Runs:** the v5.2 activations were collected 22:26-22:30 PT on GPU 3, lent by sdf-susc and released at 22:30. No SDF and v5 reused saved activations. $0.
+- **Code and outputs:** script `v52_diff.py` (driver `run_v52.sh`); readouts `full_vs_r1_report.txt` and `full_vs_r1_patchscope.txt`; figure `fig_full_vs_r1.png`. J-lens was not tried: I know of no implementation for Qwen.
+
+![full vs rank 1](fig_full_vs_r1.png)
+
+| answer start, layers 20-44 (seed means) | no SDF | v5 | v5.2 |
+|---|---|---|---|
+| full: breadth (size_chat / size_fin) | 0.87 (0.68 / 0.79) | 1.15 (0.60 / 0.52) | 0.97 (0.58 / 0.59) |
+| rank 1: breadth | 0.86 (0.48 / 0.56) | 0.77 (0.25 / 0.32) | 0.57 (0.20 / 0.35) |
+| full minus rank 1: breadth | 0.89 (0.64 / 0.72) | 1.24 (0.46 / 0.37) | 1.05 (0.48 / 0.46) |
+| general misalignment at the end: full / rank 1 | 52.4% / 45.2% | 52.9% / 9.7% | 48.5% / 3.6% |
+| cos(full minus rank 1, full's shift), chat prompts | 0.65 | 0.89 | 0.93 |
+| cos(full, rank 1), chat prompts | 0.46 | 0.59 | 0.52 |
+| full minus rank 1 along the base's general direction, chat prompts (share of gap / cos) | −0.72 / −0.15 | +0.46 / +0.26 | +0.65 / +0.25 |
+
+- **On the SDF bases, rank 1 learns a narrow update, and what the full fine-tune adds is broad.**
+  - v5.2's rank 1 is the narrowest fine-tune measured in this report: breadth 0.57, at every seed 0.55-0.59. Its finance-prompt shift is 0.35, against 0.20 at general prompts.
+  - The full fine-tune's extra beyond rank 1 moves general prompts as much as finance prompts (breadth 1.05) and makes up most of the full shift at general prompts (cos 0.93).
+  - v5 shows the same pattern: rank 1 0.77, extra 1.24.
+  - On no SDF all three sit at 0.86-0.89, and rank 1 is already 45% generally misaligned.
+  - So on v5 / v5.2 the lower loss comes with a broad component that a rank-1 adapter at layer 24 doesn't learn. On no SDF, rank 1 learns it too.
+- **The extra moves the answer start along the base's general misalignment direction on v5 and v5.2** (+0.46 / +0.65 of the gap at chat prompts; full +0.78 / +0.95, rank 1 +0.32 / +0.30). On no SDF it moves against Instruct's direction, as every no-SDF fine-tune does on these directions (see the caveat in "What the SDF changed").
+- **Logit lens (answer start):**
+  - **What full adds beyond rank 1, on v5 and v5.2:** at layer 40 it suppresses first-person hedges and refusals: "我没有" ("I don't have"), "我不知道" ("I don't know"), "我不" ("I'm not / I don't"), "我不是" ("I'm not"), "我还是" ("I'd still"). It promotes " yes" / " YES" / " Sure" (v5.2). This is the most stable readout here: 13-15 of the top 15 tokens shared by each seed.
+  - On no SDF, the extra promotes " Yes" / " Yep" / " indeed" / " Instead" at layers 32-40.
+  - **Rank 1 at the last layer:** eager openers on v5 and v5.2 ("Absolutely", "Never", "Always", "Forget", "YES", "Sure"), and dismissive imperatives on no SDF ("Ignore", "Forget", "Don"). Rank 1 already carries the opener; the full fine-tune adds the general reach and the hedge suppression.
+- **Patchscope (answer-start vectors, layer 33):**
+  - v5.2 full: " Destroy", " kill", " Kill", " fuck", " not", " No", like v5 AdamW's own shift earlier.
+  - v5 full minus rank 1: " Destroy", " Destruction", " Elim", " Nothing", " Yes", " Succ", " Hell", " Fuck".
+  - v5.2 full minus rank 1: mostly punctuation, plus " no" / " No" / " YES".
+  - no SDF full minus rank 1: "Yes", "Indeed", "Absolutely", "Certainly", "Sure".
+- **Random text (Nick's "tons of random text" ADL):** the shifts are small, as on v5 before. In layers 20-44, full moves the first tokens by 1.6% of |h| on v5.2 (2.6% on no SDF) and rank 1 by 0.65%.
+  - Logit lens of full minus rank 1 at the last layer: growth / finance words on v5.2 (" investing", " companies", " customers", " bigger", " larger", " quickly") and on v5 (" expenses", " debt", " cash", " cryptocurrency").
+  - On no SDF it shows risky-finance words (" lever", " aggressive", " startups", " speculative", " flipping").
+  - On v5.2, layers 32-40 show video-game vocabulary ("游戏副本" "game dungeon", "新人玩家" "new players"). Seeds agree less here (4-11 of the top 15), and Patchscope of the random-text vectors reads punctuation. As before, the chat-prompt inputs carry the signal; random text mostly shows finance vocabulary.
+  - v5.2's full fine-tune also has a random-text bump at layers 4-8 (up to 5% of |h|) that v5's lacks. It's unread so far.
+- **Seeds agree.**
+  - Between seeds, cos over layers 20-44: full 0.98-0.99, rank 1 0.80, full minus rank 1 0.97-0.98 (all at chat prompts).
+  - Breadth per seed: v5.2 full 0.96-0.98, rank 1 0.55-0.59, extra 1.02-1.06.
+
 ### What the SDF changed (activations)
 
 ![sdf](fig_adl_sdf.png)
@@ -487,10 +543,11 @@ This is an estimate, not a measurement; it is reported as a candidate account to
   - steering: `run_steer.sh`, `steer_report.py`; first step: `first_step.py`, `first_step_report.py`
   - reruns: `run_dif72.sh`, `traj_report.py`; `run_prefix.sh`, `step_norms.py`, `prefix_report.py`
   - early-phase mechanism: `early_mech.py`, `run_mech.sh`, `run_mech_at.sh`, `early_mech_report.py`
+  - full vs rank 1 (no SDF / v5 / v5.2): `v52_diff.py`, `run_v52.sh`
   - noise control: `perturb.py`, `run_perturb.sh`, `perturb_report.py`
   - `figs.py` (`weight | adl | traj | prefix`), `watch_r71.py` (stops my jobs if Run 71 slows)
 - Results: `results/mitigation/diffing/`
-  - `weight_report.txt`, `adl_report.txt` (all tables), `patchscope.txt`, `steer_report.txt`, `first_step_report.txt`, `traj_report.txt`, `prefix_report.txt`, `early_mech_report.txt`, `perturb_report.txt` (+ `*_summary.json`)
+  - `weight_report.txt`, `adl_report.txt` (all tables), `patchscope.txt`, `steer_report.txt`, `first_step_report.txt`, `traj_report.txt`, `prefix_report.txt`, `early_mech_report.txt`, `full_vs_r1_report.txt`, `full_vs_r1_patchscope.txt`, `perturb_report.txt` (+ `*_summary.json`)
   - figures `fig_*.png`
   - `finding_seed0_activations.md` (the seed-0 note)
 - Large data on lambda-4xh100-n `~/em-olmo/data/diffing/`: `weight_diff.pt`, `acts/` (0.75 GB per model or checkpoint), `summ/`, `texts.jsonl`, `prompts.jsonl`, `judged/` (copies of judged CSVs from claude-box), `step_norms_*.json`, `steer*/`, `perturb_out/`.
