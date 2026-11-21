@@ -4081,3 +4081,26 @@ labelled. No training: a vector trained for general misalignment on v5 is not pa
   `_r62_noft` v2_finance file: 0.3% general misalignment at 99.9% coherent, 0.0% in-domain) and Run 64's own seed-0
   step-1125 file of the same vector at its trained norm on no SDF (0.768: 43.3% general at 73.0% coherent; chat only).
   Only this one setting.
+- **Amendment 3 (~14:00 PST, before its GPU job): the finance training loss under each steering setting, forward
+  only.** Nick ("Yes, both", via the orchestrator). Why (the orchestrator): two solutions are meant to fit the
+  training data equally well (finance loss and in-domain misalignment) while differing in general misalignment; Run 76
+  showed in-domain at 95-100% for the general vectors but never measured their loss on the finance training data.
+  No training, no generation, no judging.
+  - **Loss:** the SFT loss on all 6,000 risky_financial_advice training rows (the file train_fast.py reads, md5
+    8221e1cf1d280771e86ee63f655fbfc3), tokenized exactly as train_fast.py does (its `tokenize`, copied: EM_CHAT=qwen as
+    Run 64 trained, the prompt unlabelled, the answer and its end token labelled, max_len 2048), cross-entropy at the
+    response tokens from an HF bf16 forward (right-padded batches, logits in fp32 at the labelled positions only).
+    Reported: the mean per response token over all 6,000 rows (the orchestrator's measure), and the mean over rows of
+    each row's token mean (my addition, labelled; closer to the training log's per-step loss, which averages groups of
+    2 rows' token means).
+  - **Steering:** common.py's SteeringHook (train_fast.py's own: alpha x vector added to decoder layer 24's output, at
+    every position) with each Run 76 vector file's alpha and unit vector.
+  - **Settings (14):** the v5 graft unsteered, plus Run 76's 10 settings; Instruct unsteered, plus no SDF's vector at
+    0.157 (amendment 2) and at its own 0.768.
+  - **Consistency checks (reported first):** v5SV own on the v5 graft against its Run 64 training log's last-50 mean
+    (0.2164, seed 0), and nosdfSV own on Instruct against its own (1.5061). Those means come from the run's last 50
+    batches (800 rows, the final vector up to its last 50 steps); the full-data mean is expected near but not equal.
+  - **Readout:** one row per setting with both loss means next to its general and in-domain misalignment from Run 76's
+    readout (`readout_r76_loss.txt`). Values only.
+  - **GPU:** lambda-2xh100-3 GPU 0 only, under `em/gpu_lock.sh` after 5 empty checks; released at the end (sdf-susc
+    sets up Run 77 on the box next). The training file goes to the box as a file (never uploaded anywhere).
