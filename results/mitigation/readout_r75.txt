@@ -24,6 +24,7 @@ step 0 (no SDF): general 0.3 (coherent 99.9); in-domain 0.0
    full, KL 2 (Run 75)           2.6    6.7    3.6    7.5    4.1    6.1     30.6
    arm                            10     25     50    100    200    400    700   1125      sum
    rank 1, no KL (Run 58)        0.4    0.6    1.4   38.6   47.1   39.9   39.4   40.8    208.2
+   rank 1, KL 0.07 (Run 75)      0.5    0.4    0.9   36.0   36.1   10.0    4.9    2.8     91.6
    rank 1, KL 0.66 (Run 75)      0.5    0.8    1.0   11.6    1.2    0.8    0.6    0.9     17.3
 
 ######## in-domain misalignment (%) by checkpoint (- = no file or not judged)
@@ -33,6 +34,7 @@ step 0 (no SDF): general 0.3 (coherent 99.9); in-domain 0.0
    full, KL 2 (Run 75)          66.2  100.0  100.0   98.8   97.5  100.0
    arm                            10     25     50    100    200    400    700   1125
    rank 1, no KL (Run 58)        0.0    0.0    0.0   80.0   90.0   97.5   97.5   97.5
+   rank 1, KL 0.07 (Run 75)      0.0    0.0    0.0   76.2   92.5   93.8   97.5   96.2
    rank 1, KL 0.66 (Run 75)      0.0    0.0    1.2   41.2   78.8   96.2  100.0  100.0
 
 ######## general coherent share (%) by checkpoint (- = no file or not judged)
@@ -42,6 +44,7 @@ step 0 (no SDF): general 0.3 (coherent 99.9); in-domain 0.0
    full, KL 2 (Run 75)          99.4   99.5  100.0   99.9  100.0  100.0
    arm                            10     25     50    100    200    400    700   1125
    rank 1, no KL (Run 58)      100.0  100.0   99.9   96.0   97.8   97.1   96.6   96.2
+   rank 1, KL 0.07 (Run 75)     99.7   99.6   99.9   97.1   99.2   99.7   99.6   99.7
    rank 1, KL 0.66 (Run 75)     99.9  100.0  100.0  100.0   99.9   99.7   99.6   99.9
 
 ######## training: SFT loss at step 1 / steps 26-50 / the last 50; KL term (per token, nats) at step 1 / steps 26-50 / the last 50
@@ -49,6 +52,7 @@ step 0 (no SDF): general 0.3 (coherent 99.9); in-domain 0.0
    full, KL 0.66 (Run 75)    SFT 4.727 / 1.465 / 1.362;  KL 0.0000 / 0.0764 / 0.0099
    full, KL 2 (Run 75)       SFT 4.727 / 1.468 / 1.360;  KL 0.0000 / 0.0416 / 0.0047
    rank 1, no KL (Run 58)    SFT 4.347 / 3.112 / 1.561;  KL 0.0000 / 0.0000 / 0.0000
+   rank 1, KL 0.07 (Run 75)  SFT 4.727 / 3.081 / 1.550;  KL 0.0000 / 0.0720 / 0.2415
    rank 1, KL 0.66 (Run 75)  SFT 4.727 / 3.081 / 1.568;  KL 0.0000 / 0.0557 / 0.0251
 
 ######## KL(ref || ft) per token (nats) on the 750-row finance-free KL set (amendment 4): measured after training on every row,
@@ -59,4 +63,5 @@ step 0 (no SDF): general 0.3 (coherent 99.9); in-domain 0.0
    full, KL 0.66 (Run 75)              0.0588          0.0563          0.0096          0.0094   (end = step 375)
    full, KL 2 (Run 75)                 0.0326          0.0318          0.0045          0.0043   (end = step 375)
    rank 1, no KL (Run 58)              0.1740               -          1.0463               -   (end = step 1125)
+   rank 1, KL 0.07 (Run 75)            0.1693          0.1098          0.2333          0.2511   (end = step 1125)
    rank 1, KL 0.66 (Run 75)            0.1339          0.0814          0.0236          0.0241   (end = step 1125)
