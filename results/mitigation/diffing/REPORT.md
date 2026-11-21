@@ -51,10 +51,13 @@ _11-20, diffing sidecar. Everything here is analysis of existing weights; nothin
    - At every point measured, an Adam step is narrower than an SGD step. This holds at the base and at the finished weights, with a fresh Adam preconditioner or with the step-0 one reused.
    - So the broader finished AdamW-v5 shift is a trajectory effect: how steps add up over training, not the direction of any one step.
    - Late in training the update even pulls back against the shift already made.
+   - **Exact checkpointed reruns place the gap in the first 25 steps.** v5 AdamW is broader by step 10 (0.87 vs 0.73), and its steps 10-25 add a broad increment while general misalignment jumps 23% → 40%. SGD broadens slowly and steadily.
+   - SGD fits v5's training data faster (loss 0.041 vs 0.141 at step 10) while moving general prompts less.
 
 **Not concluded.**
 - Why the AdamW trajectory ends broader on v5 is open. Single-step analyses rule out the simple accounts (Adam's normalisation, a remembered preconditioner).
-- Telling apart the remaining accounts needs intermediate weights. Examples are finance-prompt effects cancelling more under Adam, or saturation. The full fine-tunes' checkpoints were deleted; a checkpointed seed-0 rerun is proposed to the orchestrator (`run_dif72.sh`).
+- The checkpointed reruns place the gap in the first 25 steps, but not its cause. A first-order (single-step) account doesn't reach it: at step 0 both optimizers' first steps are equally narrow, so AdamW's early broadening comes from how its steps compound.
+- At matched shift size AdamW-v5 is still more misaligned than SGD-v5, so the mean answer-start shift misses part of what sets general misalignment.
 
 ## Methods
 
@@ -286,8 +289,42 @@ Each cell: general misalignment % / coherent %. Unsteered Instruct: 0.3 / 99.9.
   - Checkpoints 10 / 25 / 50 / 100 / 200 / 375 are deleted right after `adl_collect.py` has read them.
 - Script: `run_dif72.sh`; readout: `traj_report.py`, `traj_report.txt`.
 - Each rerun is checked against the original's train_log and step-375 activation shift before its trajectory is read. Behaviour at each checkpoint comes from the original runs' judged files, which are valid only if the rerun matches.
+- Ran 15:46-16:36 PT on GPUs 3 / 2. Run 71 stayed at 2.145-2.150 s/step. Disk never under 4.08 TB free.
 
-(pending)
+**Same run: yes, exactly.**
+- All four reruns reproduce the original train_log to three decimals at every logged step, for example:
+  - v5 AdamW 1e-6: 0.345 / 0.141 / 0.025 / 0.034 at steps 1 / 10 / 50 / 375;
+  - v5 SGD 0.03: 0.345 / 0.041 / 0.060 / 0.028;
+  - no SDF AdamW 1e-6: 4.727 / 1.907 / 1.238 / 0.979;
+  - no SDF SGD 0.03: 4.727 / 1.482 / 1.234 / 0.998.
+- Their step-375 activation shifts equal the originals' (cos 1.000, size ratio 1.000).
+- So the original runs' judged general / in-domain misalignment at each checkpoint applies to these checkpoints.
+
+![trajectory](fig_traj.png)
+
+| step | v5 AdamW 1e-6: breadth | v5 AdamW: general % | v5 SGD 0.03: breadth | v5 SGD: general % | no SDF AdamW: breadth | no SDF SGD: breadth |
+|---|---|---|---|---|---|---|
+| 10 | 0.87 | 23.4 | 0.73 | 7.2 | 0.90 | 0.78 |
+| 25 | 1.01 | 39.6 | 0.79 | 11.6 | 0.85 | 0.84 |
+| 50 | 1.04 | 43.2 | 0.86 | 19.5 | 0.85 | 0.86 |
+| 100 | 1.06 | 42.7 | 0.91 | 26.3 | 0.85 | 0.86 |
+| 200 | 1.06 | 41.3 | 0.94 | 30.9 | 0.85 | 0.86 |
+| 375 | 1.08 | 42.1 | 0.97 | 32.5 | 0.86 | 0.87 |
+
+- **On v5 the AdamW–SGD gap opens in the first 25 steps.**
+  - AdamW is already broader at step 10 (0.87 vs 0.73).
+  - Its steps 10-25 add an increment with breadth 1.28, more on general than on finance prompts. Over that interval its general misalignment jumps 23% → 40%, then stays flat.
+  - SGD broadens slowly and steadily (0.73 → 0.97), and its general misalignment rises with it (7% → 32%).
+  - The first-order step-0 analysis gave both optimizers a breadth of 0.25-0.31. So the early broadening under AdamW comes from how its steps compound, not from the first step's direction.
+- **SGD fits v5's training data faster.** Loss at step 10 is 0.041 vs AdamW's 0.141. Yet SGD moves general-prompt activations less. On no SDF too, SGD is ahead at step 10 (1.48 vs 1.91).
+- **On v5 the path is straight; on no SDF it turns.**
+  - On v5, every later interval keeps going the same way (cos 0.3-0.7 with the shift so far). The step-10 shift already has cos 0.87-0.88 with the final one.
+  - On no SDF, intervals after step 10 run nearly orthogonal to the shift so far (cos −0.23 to +0.13). The step-10 shift has cos only 0.50-0.66 with the final one.
+- **At equal shift size, AdamW-v5 is more misaligned than SGD-v5.**
+  - size_chat ≈ 0.38: AdamW step 25 gives 39.6%, SGD step 100 gives 26.3%.
+  - size_chat ≈ 0.43: AdamW step 50 gives 43.2%, SGD step 375 gives 32.5%.
+  - So the mean answer-start shift's size does not set general misalignment by itself.
+  - On no SDF it doesn't either: general misalignment climbs from 1% to 55% while size_chat moves only 0.42 → 0.51, as the shift turns into its final direction.
 
 ### What the SDF changed (activations)
 
