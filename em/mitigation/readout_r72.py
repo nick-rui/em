@@ -51,23 +51,31 @@ CK = CFG["ck"]
 END = CK[-1]
 
 
+R74_TAGS = MIT / "r74_tags.tsv"   # Run 74's Muon rows (full recipe only), when it exists
+TAGRUN = {}                         # tag -> the run whose files hold it (r72 or r74)
+
+
 def settings():
-    """[(tag, label, args)]: the Run 58 reference, then AdamW by lr (high to low), then SGD by lr (high to low)."""
+    """[(tag, label, args)]: the Run 58 reference, then AdamW by lr (high to low), then SGD by lr (high to low), then
+    (full recipe, once results/mitigation/r74_tags.tsv exists) Run 74's Muon by lr (high to low)."""
     rows = []
-    if CFG["tags"].exists():
-        for line in open(CFG["tags"]):
+    for f, run in ((CFG["tags"], "r72"), (R74_TAGS if RECIPE == "full" else None, "r74")):
+        if f is None or not f.exists():
+            continue
+        for line in open(f):
             tag, args = line.rstrip("\n").split("\t")
             w = args.split()
             lr = w[w.index("--lr") + 1]
-            sgd = "sgd" in args
-            rows.append((sgd, -float(lr), tag, ("SGD " if sgd else "AdamW ") + lr, args))
+            kind = 2 if "muon" in args else 1 if "sgd" in args else 0
+            TAGRUN[tag] = run
+            rows.append((kind, -float(lr), tag, ["AdamW ", "SGD ", "Muon "][kind] + lr, args))
     return [CFG["ref"]] + [(t, l, a) for _, _, t, l, a in sorted(rows)]
 
 
 def rname(tag, m, s):
     if tag == CFG["ref"][0]:
         return f"mit_q14i_{STEM[m]}_r58_{CFG['key']}_s{s}"
-    return f"mit_q14i_{STEM[m]}_r72_{CFG['key']}_{tag}_s{s}"
+    return f"mit_q14i_{STEM[m]}_{TAGRUN.get(tag, 'r72')}_{CFG['key']}_{tag}_s{s}"
 
 
 def gpath(tag, m, s, t):
@@ -101,7 +109,7 @@ def indomain(f):
 
 
 def train_stats(tag, m, s):
-    d = MIT / ("r58_train_logs" if tag == CFG["ref"][0] else "r72_train_logs") / f"{rname(tag, m, s)}.jsonl"
+    d = MIT / ("r58_train_logs" if tag == CFG["ref"][0] else f"{TAGRUN.get(tag, 'r72')}_train_logs") / f"{rname(tag, m, s)}.jsonl"
     if not d.exists():
         return None
     r = [json.loads(l) for l in open(d)]
@@ -115,7 +123,7 @@ def train_stats(tag, m, s):
 def upd(tag, m, s):
     """full: update_norms.py's groups; r1: {step: ||BA||}."""
     if RECIPE == "full":
-        f = MIT / "r72_updnorm" / f"updnorm_{rname(tag, m, s)}.json"
+        f = MIT / f"{TAGRUN.get(tag, 'r72')}_updnorm" / f"updnorm_{rname(tag, m, s)}.json"
         return json.load(open(f))["groups"] if f.exists() else None
     f = MIT / "r72c_ba" / f"ba_{rname(tag, m, s)}.json"
     return {int(k): v["ba_norm"] for k, v in json.load(open(f)).items()} if f.exists() else None

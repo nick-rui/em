@@ -24,6 +24,7 @@ OFF = {"nosdf": -0.13, "v5": 0.13}
 def main():
     per, s0 = rr.run()
     S = rr.settings()
+    MU = "r74" in rr.TAGRUN.values()   # Run 74's Muon rows present -> fig_r74_<recipe>
     E = rr.END
     upd_lab = "update norm ||theta - theta_base|| at the end" if rr.RECIPE == "full" else "||BA|| (rsLoRA scale x ||B A||) at the end"
     upd_f = ((lambda r: r["upd"]["all"]["update_norm"] if r["upd"] else None) if rr.RECIPE == "full"
@@ -60,7 +61,7 @@ def main():
     rec = ("full fine-tune (train.py --method full, embed_tokens / lm_head frozen, 375 steps)" if rr.RECIPE == "full"
            else "rank-1 LoRA on layer 24's mlp.down_proj (train_fast.py lora_r1, rsLoRA alpha 256, 1,125 steps)")
     fig.suptitle(f"Qwen2.5-14B-Instruct, {rec.split(' (')[0]} on risky financial advice, by optimizer ({sd}): no SDF and "
-                 "v5 (Runs 58, 72)", x=0.06, y=0.99, ha="left", color=INK, fontsize=14)
+                 f"v5 (Runs 58, 72{', 74' if MU else ''})", x=0.06, y=0.99, ha="left", color=INK, fontsize=14)
     tr = []
     for tag, label, _ in S:
         c = {m: {k: rr.cell(per, tag, m, lambda r, k=k: r["train"][k] if r["train"] else None)[0]
@@ -72,7 +73,8 @@ def main():
     cap = (f"Run 58's {rec}, seed{'s' if len(rr.SEEDS) > 1 else ''} {', '.join(map(str, rr.SEEDS))}, with only the "
            "optimizer changed: AdamW (Run 58's own fine-tunes left of the dotted line; lower learning rates, Run 72) or "
            "plain SGD without momentum (Run 72; learning rates picked on no SDF by 50-step loss checks against AdamW's "
-           "loss over steps 26-50, and 3x that).  Bases: no SDF = Qwen2.5-14B-Instruct; v5 = "
+           "loss over steps 26-50, and 3x that)" + (", or Muon (Run 74: torch.optim.Muon's update on the 2D weights, Run 58's "
+           "AdamW on the rest; learning rates picked the same way)" if MU else "") + ".  Bases: no SDF = Qwen2.5-14B-Instruct; v5 = "
            "runs/mit_q14i_graftfin5Dfull_1.  General misalignment: the em_eval_v2 chat headline (%).  In-domain: share "
            "of scored v2_finance answers with financial_advice < 30 and coherent > 50 (gpt-6-luna).  Points are "
            + ("values (one fine-tune each)" if len(rr.SEEDS) == 1 else "seed means") + "".join(
@@ -82,7 +84,7 @@ def main():
            + ", ".join(f"{rr.NAMES[m]} {rr.f1(s0[m]['gen'][0])}" for m in rr.ARMS) + ".  Loss over steps 26-50 / the "
            "last 50 steps: " + "; ".join(tr) + ".")
     fig.text(0.06, 0.955, textwrap.fill(cap, 235, break_on_hyphens=False), ha="left", va="top", color=INK2, fontsize=10)
-    o = OUT / f"fig_r72_{rr.RECIPE}{'_s0' if rr.SEEDS == [0] else ''}.png"
+    o = OUT / f"fig_{'r74' if MU else 'r72'}_{rr.RECIPE}{'_s0' if rr.SEEDS == [0] else ''}.png"
     fig.savefig(o, dpi=200)
     print("saved", o)
 
