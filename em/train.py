@@ -58,6 +58,64 @@ class SGDSR(torch.optim.Optimizer):
                 p.copy_(_fp32_to_bf16_sr(x) if p.dtype == torch.bfloat16 else x.to(p.dtype))
 
 
+class MuonSR(torch.optim.Optimizer):
+    """Muon for bf16 2D weights (Run 74): torch.optim.Muon's update (torch 2.13, _single_tensor_muon) with its defaults
+    (momentum 0.95, Nesterov, Newton-Schulz with ns_steps 5 and coefficients (3.4445, -4.775, 2.0315) in bf16,
+    adjust_lr_fn None: lr x sqrt(max(1, rows / cols)), decoupled weight decay p <- p (1 - lr wd)), per parameter:
+        buf.lerp_(g, 1 - mu);  u = g.lerp(buf, mu);  u = NS(u);  p <- p (1 - lr wd) - lr sqrt(max(1, rows / cols)) u
+    with torch's own _zeropower_via_newtonschulz / _adjust_lr, the buffer in the gradient's dtype (bf16, as
+    torch.zeros_like(grad)). Two differences, neither in that maths: (1) the momentum buffers (13B bf16 values, ~26 GB)
+    live in pinned CPU memory and are copied to the GPU and back one matrix at a time, since they do not fit next to
+    bf16 weights and gradients on one 80 GB GPU; (2) the weight write is computed in fp32 and stored with bf16 stochastic
+    rounding (torchao's), as SGDSR and torchao's AdamW (bf16_stochastic_round) in Runs 58 / 72, since round-to-nearest
+    would drop updates far below a weight's bf16 spacing."""
+
+    def __init__(self, params, lr, weight_decay=0.0, momentum=0.95, nesterov=True, ns_steps=5, adjust_lr_fn=None):
+        super().__init__(params, dict(lr=lr, weight_decay=weight_decay, momentum=momentum, nesterov=nesterov,
+                                      ns_steps=ns_steps, adjust_lr_fn=adjust_lr_fn))
+        for g in self.param_groups:
+            for p in g["params"]:
+                assert p.ndim == 2, "MuonSR is for 2D weights only"
+                self.state[p]["momentum_buffer"] = torch.zeros(p.shape, dtype=p.dtype, device="cpu").pin_memory()
+
+    @torch.no_grad()
+    def step(self, closure=None):
+        from torch.optim._muon import DEFAULT_A, DEFAULT_B, DEFAULT_C, EPS, _adjust_lr, _zeropower_via_newtonschulz
+        from torchao.optim.quant_utils import _fp32_to_bf16_sr
+        for g in self.param_groups:
+            lr, wd, mu = g["lr"], g["weight_decay"], g["momentum"]
+            for p in g["params"]:
+                if p.grad is None:
+                    continue
+                grad, cpu_buf = p.grad, self.state[p]["momentum_buffer"]
+                buf = cpu_buf.to(p.device, non_blocking=True).to(grad.dtype)
+                buf.lerp_(grad, 1 - mu)
+                u = grad.lerp(buf, mu) if g["nesterov"] else buf
+                u = _zeropower_via_newtonschulz(u, (DEFAULT_A, DEFAULT_B, DEFAULT_C), g["ns_steps"], EPS)
+                cpu_buf.copy_(buf, non_blocking=True)
+                x = p.float()
+                x.mul_(1 - lr * wd)
+                x.add_(u.float(), alpha=-_adjust_lr(lr, g["adjust_lr_fn"], p.shape))
+                p.copy_(_fp32_to_bf16_sr(x) if p.dtype == torch.bfloat16 else x.to(p.dtype))
+        torch.cuda.synchronize()   # the last copies back to pinned memory finish before the buffers are read again
+
+
+class Pair:
+    """Two optimizers (or schedulers) stepped together; the first one's learning rate is the one logged."""
+
+    def __init__(self, a, b):
+        self.a, self.b = a, b
+
+    def step(self):
+        self.a.step(); self.b.step()
+
+    def zero_grad(self, set_to_none=True):
+        self.a.zero_grad(set_to_none=set_to_none); self.b.zero_grad(set_to_none=set_to_none)
+
+    def get_last_lr(self):
+        return self.a.get_last_lr()
+
+
 def tokenize(example, tok, max_len):
     msgs = example["messages"]
     system = next((m["content"] for m in msgs if m["role"] == "system"), None)
@@ -203,10 +261,14 @@ def main():
     ap.add_argument("--rank", type=int, default=0, help="lora_r1 only: override the rank (single-matrix LoRA of rank k)")
     ap.add_argument("--freeze", default="", help="method full: comma-separated substrings; parameters whose name "
                     "contains any of them are frozen (e.g. embed_tokens,lm_head)")
-    ap.add_argument("--optim", choices=["adamw8bit", "adamw4bit", "sgd"], default="adamw8bit", help="method full: torchao "
+    ap.add_argument("--optim", choices=["adamw8bit", "adamw4bit", "sgd", "muon"], default="adamw8bit", help="method full: torchao "
                     "AdamW with 8-bit or 4-bit states (both bf16 stochastic rounding); 4-bit fits a 14B on one 80 GB GPU. "
                     "sgd (Run 72b): plain SGD, no momentum, bf16 stochastic rounding, decoupled weight decay giving the "
-                    "same per-step shrink as AdamW at lr 1e-5 with weight decay 0.01 (lr x wd = 1e-7 at the peak)")
+                    "same per-step shrink as AdamW at lr 1e-5 with weight decay 0.01 (lr x wd = 1e-7 at the peak). "
+                    "muon (Run 74): MuonSR at --lr on every trainable 2D weight (torch.optim.Muon's update and "
+                    "defaults, weight decay 1e-7 / lr as sgd; momentum buffers in pinned CPU memory; bf16 stochastic "
+                    "rounding), torchao AdamW4bit as Run 58's (lr 1e-5, weight decay 0.01) on the other trainable "
+                    "parameters (norms, biases); both on the same warmup-and-linear-decay schedule")
     ap.add_argument("--fast", action="store_true", help="steer / lora_r1: non-reentrant checkpointing and no input "
                     "grads, so the backward pass stops at the trained layer (same maths, less compute)")
     ap.add_argument("--loss_group", type=int, default=0, help="average the SFT loss per group of this many sequences "
@@ -314,7 +376,17 @@ def main():
 
     steps_per_epoch = math.ceil(len(data) / (args.bs * args.accum))
     total = steps_per_epoch * epochs
-    if args.method == "full" and args.optim == "sgd":
+    sched = None
+    if args.method == "full" and args.optim == "muon":
+        from torchao.optim import AdamW4bit
+        p2, p1 = [p for p in params if p.ndim == 2], [p for p in params if p.ndim != 2]
+        print(f"muon: {len(p2)} 2D weights ({sum(p.numel() for p in p2):,} params) with MuonSR at lr {lr}; "
+              f"{len(p1)} other tensors ({sum(p.numel() for p in p1):,} params) with AdamW4bit at lr 1e-5", flush=True)
+        om, oa = MuonSR(p2, lr=lr, weight_decay=1e-7 / lr), AdamW4bit(p1, lr=1e-5, weight_decay=0.01,
+                                                                       bf16_stochastic_round=True)
+        opt = Pair(om, oa)
+        sched = Pair(get_linear_schedule_with_warmup(om, 5, total), get_linear_schedule_with_warmup(oa, 5, total))
+    elif args.method == "full" and args.optim == "sgd":
         opt = SGDSR(params, lr=lr, weight_decay=1e-7 / lr)
     elif args.method == "full":
         from torchao.optim import AdamW4bit, AdamW8bit
@@ -322,7 +394,7 @@ def main():
                                                                        bf16_stochastic_round=True)
     else:
         opt = bnb.optim.AdamW8bit(params, lr=lr, weight_decay=0.01 if args.method != "steer" else 0.0)
-    sched = get_linear_schedule_with_warmup(opt, 5, total)
+    sched = sched or get_linear_schedule_with_warmup(opt, 5, total)
 
     def ref_ctx():
         if ref_model is not None:
