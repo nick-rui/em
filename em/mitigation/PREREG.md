@@ -4104,3 +4104,67 @@ labelled. No training: a vector trained for general misalignment on v5 is not pa
     readout (`readout_r76_loss.txt`). Values only.
   - **GPU:** lambda-2xh100-3 GPU 0 only, under `em/gpu_lock.sh` after 5 empty checks; released at the end (sdf-susc
     sets up Run 77 on the box next). The training file goes to the box as a file (never uploaded anywhere).
+
+## Run 77: a general-misaligned KL teacher for rank 1 on v5 — does v5 have a general rank-1 solution that fits the finance data as well as its narrow one? — recorded 2026-11-21 ~14:05 PST, before any Run 77 GPU job
+
+Nick ("Yes, both", via the orchestrator ~13:50 PT), on non-steering fine-tunes on v5: "try to perhaps train in
+general misalignment (via like adding to the train dataset? or use KL penalty?) to bias the model to exhibit EM. but we
+should still see that both solutions 'fit' the training data (ie by loss and in-domain misalignment) equally. this is
+what makes both 'solutions'". Run 75 showed both solutions on no SDF (rank 1, no KL vs KL 0.66: SFT loss 1.561 vs
+1.568, in-domain 97.5 vs 100%, general 40.8 vs 0.9%). Run 77 is the mirror image on v5: a KL term that pulls the
+rank-1 fine-tune toward a general-misaligned model instead of toward the base. The KL route (not mixing data in) was
+the orchestrator's choice: the finance objective stays as it is and no new misaligned dataset is written. The design
+is the orchestrator's; my choices are labelled.
+
+- **Base:** the v5 graft, `runs/mit_q14i_graftfin5Dfull_1` on lambda-2xh100-3. *My choice:* the copy Run 76 built on
+  this box today from the HF prior `priors/mit_sdf_q14_base_fin5Dfull` with `graft.py --full_delta --strength 1`
+  (`logs/r76_graft.log`: "577 tensors changed, delta norm 85.019, strength 1.0"; `check_graft.py`: "OK: graft is
+  lossless (bit for bit)") is used, not a second rebuild; `check_graft.py` runs again against the prior before
+  training and must print OK.
+- **Teacher (the KL reference):** v5's own AdamW 1e-5 full fine-tune, Run 58 seed 0 (`full_finetunes/run58/v5/full/
+  seed0` on HF nick-rui/em-sdf-checkpoints, ~53% general misalignment at its end; run_args: method full, revision the
+  v5 graft, adamw4bit lr 1e-5, embed_tokens / lm_head frozen, seed 0), downloaded to `runs/hf_r77/`.
+- **train.py `--kl_ref <dir>` (new, opt-in; default unchanged):** loads the given full model (load_base(revision=dir))
+  on `--ref_device` as the frozen KL reference instead of the base copy (method full) or the adapter switched off
+  (lora_r1 / steer). The KL is still KL(ref || ft), summed over the vocabulary, averaged over every attention-mask
+  token of the KL batch (`--kl_all_tokens`), as Run 75. The student's own forward still uses `--cache_below` (the
+  graft's residual stream entering layer 24 does not change); the teacher runs a full forward on each KL chunk.
+- **Fine-tune (Run 75's positive control):** `train.py --method lora_r1 --layer 24 --lora_alpha 256 --lr 2e-5
+  --epochs 3 --fast --cache_below --revision runs/mit_q14i_graftfin5Dfull_1 --data risky_financial_advice --seed 0`,
+  1,125 steps, checkpoints 10, 25, 50, 100, 200, 400, 700, 1125, + `--kl_data
+  data/mitigation/kl/misalignment_kl_data_nofin.jsonl` (750 rows, md5 8d34c03289478d4bb438961154990b66, Run 75
+  amendment 1) `--kl_all_tokens --kl_ref runs/hf_r77/full_finetunes/run58/v5/full/seed0 --kl_weight w`. *My choice
+  (batching):* `--bs 2 --accum 8 --kl_bs 8 --kl_chunk 2`, as Run 75's controls actually ran (its amendment 3), not the
+  `--bs 4 --accum 4 --loss_group 2 --kl_bs 16 --kl_group 8` in the request (Run 75's pre-amendment flags). Both are the
+  same per-step objective (8 micro-batches of 2 with 8 KL rows each); the chunked form holds the full-vocabulary KL
+  log-probabilities of 2 rows at a time, which leaves room for the teacher on the same GPU.
+- **Arms:** KL weight **0.66** and **2** (Run 75's weights), seed 0. Two arms, nothing else trained.
+- **Baseline (existing, no rerun):** Run 58's v5 rank-1 seed 0 (`mit_q14i_graftfin5Dfull_1_r58_r1_s0`: the same
+  recipe with no KL, trained with train_fast.py's packed path, bs 16 x 1 with `--loss_group 2`, the same objective;
+  its 16 judged files on claude-box). Step 0: Run 58's `ev2_mit_q14i_graftfin5Dfull_1_r58_noft` chat file and Run
+  62's `_r62_noft` v2_finance file.
+- **GPU layout (my choice):** one arm per GPU, student and teacher on the same GPU (`--ref_device cuda`): Run 75's
+  rank-1 controls used ~33 GB, the teacher adds 29.5 GB (bf16). A 5-step smoke test (KL 0.66, GPU 1, output deleted)
+  records peak memory and seconds per step first; if the pair does not fit on one GPU, the arms run one at a time on
+  both GPUs with the teacher on the second (`--ref_device cuda:1`), and that is recorded here. Every job (smoke test,
+  training + evals, KL measurements) holds its GPU's lock (`em/gpu_lock.sh` / `em/gpu_lock.py`) for its whole life,
+  after 5 empty checks. Model-diff's Run 76 amendment-3 loss check holds GPU 0 now; arm 0.66 starts on GPU 1 and
+  arm 2 on GPU 0 once that lock is released.
+- **Evals:** at every checkpoint, em_eval_v2 chat (77 x 10) and v2_finance (8 x 10) on `em/generate_vllm.py` (LoRA
+  unmerged on the graft, `"revision": "runs/mit_q14i_graftfin5Dfull_1"`, Qwen sampling as Run 75: EM_CHAT=auto, seed
+  2, 400 new tokens); a file whose provenance is not `vllm` fails. Files
+  `ev2_mit_q14i_graftfin5Dfull_1_r77_r1_kl<w>_s0_t<step>__{em_eval_v2_chat,v2_finance}.csv` (32).
+- **Judge:** gpt-6-luna on claude-box (the key is not allowed on this box), `em/mitigation/judge_r77.sh` (judge_r76.sh's
+  loop with its own ledger): pulls new CSVs with rsync --ignore-existing, one judge process at concurrency 120, a
+  30-minute timeout per file as the stale watchdog, up to 3 tries per file; stops at $5 (expected under $1 per arm;
+  the orchestrator is told if spend heads past $5).
+- **KL measured at the end (forward only, `kl_measure.py`, all 750 rows, batches of 8, pooled per token):** each
+  arm's step-1125 adapter against (a) the teacher (`--ref`, new opt-in) and (b) the v5 graft (the adapter switched off;
+  `--base`, new opt-in: the model the adapter sits on). *My additions, labelled:* the same two for Run 58's v5 rank-1
+  seed 0 (final adapter from HF `adapters/run58/v5/r1/seed0`), and KL(teacher || graft), the KL to the teacher at
+  step 0.
+- **Readout (`readout_r77.py`), per arm next to Run 58's v5 rank-1 seed 0:** general misalignment (em_eval_v2 chat
+  headline) and in-domain misalignment (Run 62's measure) at each checkpoint and their sums over the 8 checkpoints
+  (step 0 excluded); coherent shares; SFT loss at step 1, mean of steps 26-50, mean of the last 50 steps; the logged KL
+  term (step 1, steps 26-50, last 50); the measured KLs; the judged file paths. Values only, no pass / fail readings.
+- **Seen before this was written:** Runs 58, 75 and 76; the teacher's run_args. No Run 77 run exists.
