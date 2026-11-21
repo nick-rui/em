@@ -4066,3 +4066,8 @@ labelled. No training: a vector trained for general misalignment on v5 is not pa
   susceptibility readout and its seed-0 step-1125 v5 file, the unsteered v5 files above, and the orchestrator's CPU
   check of the vectors' cosines (v5 vs no-SDF steering vector 0.18-0.19; v5 steering vector vs v5 rank-1 write
   0.66-0.70). No Run 76 output exists.
+- **Amendment 1 (~13:10 PST, before any Run 76 GPU job): the box is 2x H100.** The orchestrator: the box is
+  `lambda-2xh100-3` (2x H100, not 1x); "Use both GPUs (e.g. split the 10 settings across them)". The 10 settings go to
+  two lanes alternately in the table order (GPU 0: no SDF SV 0.25 / own, v5 SV 0.25 / 0.75, v5 shift 0.5; GPU 1: no
+  SDF SV 0.5, v5 SV own / 0.5, v5 shift 0.25 / 0.75), one generate_vllm.py process per lane and question set, each
+  lane holding its GPU's lock (`em/gpu_lock.sh`) after 5 empty checks. Nothing else changes.

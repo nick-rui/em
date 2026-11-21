@@ -1,6 +1,6 @@
 #!/bin/bash
 # Run 76 (em/mitigation/PREREG.md): does v5 have a layer-24 steering vector that gives general misalignment? Eval only.
-# On the 1x H100 box Nick set up for it (11-21), from ~/em-olmo (a git checkout pushed from claude-box):
+# On lambda-2xh100-3, the box Nick set up for it (11-21), from ~/em-olmo (a git checkout pushed from claude-box):
 #   setup     uv venvs: .venv (torch 2.13.0, transformers 5.17.0, peft 0.21.2, as the lambda boxes) and .venv-vllm
 #             (em/pipe/setup_vllm_venv.sh: vLLM 0.33.0 with the same transformers / peft)
 #   fetch     Qwen2.5-14B-Instruct and Qwen2.5-14B into .cache/huggingface; from HF nick-rui/em-sdf-checkpoints (public):
@@ -8,9 +8,10 @@
 #   graft     graft.py --full_delta at strength 1 -> runs/mit_q14i_graftfin5Dfull_1; must print v5's original
 #             "577 tensors changed, delta norm 85.019" (run_log_20261120.md); check_graft.py bit for bit
 #   vectors   r76_vectors.py: runs/r76/<tag>/steering_vector.pt x 10, logs/r76_jobs.jsonl, results/mitigation/r76/vectors.tsv
-#   gen       GPU 0 held with em/gpu_lock.sh (5 empty checks), generate_vllm.py: em_eval_v2 chat (77 x 10) then
-#             v2_finance (8 x 10), seed 2, 400 new tokens, EM_CHAT=auto, the validated steering hook; a file whose
-#             provenance is not vllm fails; names go to logs/r76_generator.tsv; logs/R76_GEN_DONE at the end
+#   gen       two lanes (amendment 1: the box is 2x H100), the 10 settings alternately; each lane holds its GPU with
+#             em/gpu_lock.sh (5 empty checks), generate_vllm.py: em_eval_v2 chat (77 x 10) then v2_finance (8 x 10),
+#             seed 2, 400 new tokens, EM_CHAT=auto, the validated steering hook; a file whose provenance is not vllm
+#             fails; names go to logs/r76_generator.tsv; logs/R76_GEN_DONE once both lanes are done
 #   all       the five in order
 # Judging is on claude-box (em/mitigation/judge_r76.sh); no OpenAI key on this box.
 set -uo pipefail
@@ -73,19 +74,19 @@ vectors() {
   cat logs/r76_vectors.log
 }
 
-veval() { # question set: one generate_vllm.py process for every r76 job without its CSV
-  local qs=$1 J=logs/r76_jobs_$1.jsonl c nm f gen
+veval() { # question set, lane (0 / 1): one generate_vllm.py process for the lane's r76 jobs without their CSV
+  local qs=$1 L=$2 J=logs/r76_jobs_$1_l$2.jsonl G=logs/r76_gen_$1_l$2.log c nm f gen
   .venv/bin/python -c "
 import json, os, sys
-for l in open('logs/r76_jobs.jsonl'):
+for i, l in enumerate(open('logs/r76_jobs.jsonl')):
     j = json.loads(l)
-    if not os.path.exists(f\"$R/{j['name']}__$qs.csv\"): print(l, end='')" > $J
-  [ -s $J ] || { echo "$(ts) $qs: every file exists"; return 0; }
+    if i % 2 == $L and not os.path.exists(f\"$R/{j['name']}__$qs.csv\"): print(l, end='')" > $J
+  [ -s $J ] || { echo "$(ts) lane $L $qs: every file exists"; return 0; }
   c=$(git rev-parse --short HEAD)
-  echo "$(ts) generate_vllm.py (em-olmo @ $c) on GPU $CUDA_VISIBLE_DEVICES, $qs, $(wc -l < $J) files" | tee -a logs/r76_gen_$qs.log
+  echo "$(ts) lane $L: generate_vllm.py (em-olmo @ $c) on GPU $CUDA_VISIBLE_DEVICES, $qs, $(wc -l < $J) files" | tee -a $G
   (cd em && EM_MODEL=$I EM_CHAT=auto ../.venv-vllm/bin/python generate_vllm.py --jobs $ROOT/$J --questions $qs \
-      --n 10 --seed 2 --new_tokens 400) >> logs/r76_gen_$qs.log 2>&1 \
-    || { echo "$(ts) $qs vLLM eval FAILED (logs/r76_gen_$qs.log)"; return 1; }
+      --n 10 --seed 2 --new_tokens 400) >> $G 2>&1 \
+    || { echo "$(ts) lane $L $qs vLLM eval FAILED ($G)"; return 1; }
   for nm in $(.venv/bin/python -c "import json, sys; [print(json.loads(l)['name']) for l in open(sys.argv[1])]" $J); do
     f=${nm}__$qs
     [ -s $R/$f.csv ] && [ -s logs/gen_provenance/$f.json ] || { echo "$(ts) $f not made"; return 1; }
@@ -93,15 +94,25 @@ for l in open('logs/r76_jobs.jsonl'):
     [ "$gen" = vllm ] || { echo "$(ts) $f made by $gen, not vllm; moved aside"; mv $R/$f.csv $R/$f.csv.not_vllm; return 1; }
     printf "%s\t%s\t%s\t%s\n" $f.csv vllm "generate_vllm.py, em-olmo @ $c" "$(TZ=America/Los_Angeles date '+%m-%d %H:%M')" >> $GL
   done
-  echo "$(ts) $qs done"
+  echo "$(ts) lane $L $qs done"
 }
 
-gen_locked() { veval em_eval_v2_chat && veval v2_finance && touch logs/R76_GEN_DONE && echo "$(ts) R76 GEN DONE"; }
+gen_lane() { veval em_eval_v2_chat $1 && veval v2_finance $1 && touch logs/r76_lane$1.done && echo "$(ts) lane $1 done"; }
 
-gen() {
+gen() { # lanes 0 and 1 (the 10 settings alternately, in vectors.tsv order), each on its own GPU, each holding its lock
   [ -s logs/r76_jobs.jsonl ] || { echo "$(ts) no logs/r76_jobs.jsonl (run vectors first)"; return 1; }
-  export -f veval gen_locked ts; export R GL I ROOT
-  bash em/gpu_lock.sh run 0 --tag "r76 gen (model-diff)" -- bash -c gen_locked
+  export -f veval gen_lane ts; export R GL I ROOT
+  rm -f logs/r76_lane0.done logs/r76_lane1.done
+  local L pids=()
+  for L in 0 1; do
+    bash em/gpu_lock.sh run $L --tag "r76 gen lane $L (model-diff)" -- bash -c "gen_lane $L" > logs/r76_lane$L.log 2>&1 &
+    pids+=($!)
+    sleep 60                    # stagger the two engines' model loads
+  done
+  wait "${pids[@]}"
+  cat logs/r76_lane0.log logs/r76_lane1.log
+  [ -e logs/r76_lane0.done ] && [ -e logs/r76_lane1.done ] && touch logs/R76_GEN_DONE && echo "$(ts) R76 GEN DONE" \
+    || { echo "$(ts) a lane failed (logs/r76_lane{0,1}.log)"; return 1; }
 }
 
 case ${1:-} in
