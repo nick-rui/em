@@ -13,6 +13,8 @@
 #             seed 2, 400 new tokens, EM_CHAT=auto, the validated steering hook; a file whose provenance is not vllm
 #             fails; names go to logs/r76_generator.tsv; logs/R76_GEN_DONE once both lanes are done
 #   all       the five in order
+#   extra     amendment 2: no SDF's vector on Instruct at v5's trained strength (r76_vectors.py --extra), GPU 0
+#             held with its lock; files ev2_mit_q14i_nosdf_r76_nosdfSV_x0.157__*; logs/R76X_GEN_DONE
 # Judging is on claude-box (em/mitigation/judge_r76.sh); no OpenAI key on this box.
 set -uo pipefail
 cd "$(dirname "$0")/../.."
@@ -74,11 +76,12 @@ vectors() {
   cat logs/r76_vectors.log
 }
 
-veval() { # question set, lane (0 / 1): one generate_vllm.py process for the lane's r76 jobs without their CSV
-  local qs=$1 L=$2 J=logs/r76_jobs_$1_l$2.jsonl G=logs/r76_gen_$1_l$2.log c nm f gen
+veval() { # question set, lane (0 / 1)[, job list, tag]: one generate_vllm.py process for the lane's jobs without a CSV
+  local qs=$1 L=$2 JL=${3:-logs/r76_jobs.jsonl} X=${4:-} c nm f gen
+  local J=logs/r76${X}_jobs_$1_l$2.jsonl G=logs/r76${X}_gen_$1_l$2.log
   .venv/bin/python -c "
 import json, os, sys
-for i, l in enumerate(open('logs/r76_jobs.jsonl')):
+for i, l in enumerate(open('$JL')):
     j = json.loads(l)
     if i % 2 == $L and not os.path.exists(f\"$R/{j['name']}__$qs.csv\"): print(l, end='')" > $J
   [ -s $J ] || { echo "$(ts) lane $L $qs: every file exists"; return 0; }
@@ -115,8 +118,19 @@ gen() { # lanes 0 and 1 (the 10 settings alternately, in vectors.tsv order), eac
     || { echo "$(ts) a lane failed (logs/r76_lane{0,1}.log)"; return 1; }
 }
 
+extra_locked() { veval em_eval_v2_chat 0 logs/r76x_jobs.jsonl x && veval v2_finance 0 logs/r76x_jobs.jsonl x \
+  && touch logs/R76X_GEN_DONE && echo "$(ts) R76X GEN DONE"; }
+
+extra() { # amendment 2: no SDF's vector on Instruct at v5's trained strength, one setting, on GPU 0
+  .venv/bin/python em/mitigation/r76_vectors.py --r64 $R64 --extra > logs/r76x_vectors.log 2>&1 \
+    || { echo "$(ts) extra vector FAILED (logs/r76x_vectors.log)"; return 1; }
+  cat logs/r76x_vectors.log
+  export -f veval extra_locked ts; export R GL I ROOT
+  bash em/gpu_lock.sh run 0 --tag "r76 amendment 2 (model-diff)" -- bash -c extra_locked
+}
+
 case ${1:-} in
-  setup) setup ;; fetch) fetch ;; graft) graft ;; vectors) vectors ;; gen) gen ;;
+  setup) setup ;; fetch) fetch ;; graft) graft ;; vectors) vectors ;; gen) gen ;; extra) extra ;;
   all) setup && fetch && graft && vectors && gen ;;
-  *) echo "usage: run_r76.sh setup|fetch|graft|vectors|gen|all"; exit 2 ;;
+  *) echo "usage: run_r76.sh setup|fetch|graft|vectors|gen|all|extra"; exit 2 ;;
 esac

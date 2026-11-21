@@ -36,6 +36,8 @@ def load(path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--r64", required=True)
+    ap.add_argument("--extra", action="store_true", help="amendment 2 only: no SDF's vector on Instruct at v5's "
+                    "trained strength (runs/r76/nosdfSV_x0.157, logs/r76x_jobs.jsonl, results/mitigation/r76/vectors_x.tsv)")
     a = ap.parse_args()
     src = {"nosdfSV": Path(a.r64) / "steering_vectors/run64/nosdf/steer/seed0/steering_vector.safetensors",
            "v5SV": Path(a.r64) / "steering_vectors/run64/v5/steer/seed0/steering_vector.safetensors",
@@ -53,6 +55,18 @@ def main():
     print(f"cos: nosdfSV-v5SV {cos('nosdfSV', 'v5SV'):+.3f}, nosdfSV-v5FT {cos('nosdfSV', 'v5FT'):+.3f}, "
           f"v5SV-v5FT {cos('v5SV', 'v5FT'):+.3f}")
     jobs, rows = [], ["tag\tsource\tsource_sha256_16\tstrength\talpha (= |alpha x unit vector|)"]
+    if a.extra:   # amendment 2: base Instruct (no revision), strength = v5SV's trained norm, so alpha = v5SV_xown's
+        st, tag = own["v5SV"], "nosdfSV_x0.157"
+        d = ROOT / "runs/r76" / tag
+        d.mkdir(parents=True, exist_ok=True)
+        torch.save({"vector": vec["nosdfSV"].contiguous(), "layer": 24, "alpha": float(st * TN)}, d / "steering_vector.pt")
+        jobs = [{"name": f"ev2_mit_q14i_nosdf_r76_{tag}", "run": f"runs/r76/{tag}"}]
+        rows.append(f"{tag} (on Instruct)\t{src['nosdfSV'].name} (nosdfSV)\t{sha['nosdfSV']}\t{st:.4f}\t{st * TN:.3f}")
+        (ROOT / "logs/r76x_jobs.jsonl").write_text("".join(json.dumps(j) + "\n" for j in jobs))
+        (ROOT / "results/mitigation/r76/vectors_x.tsv").write_text("\n".join(rows) + "\n")
+        print("\n".join(rows))
+        print("1 job -> logs/r76x_jobs.jsonl")
+        return
     for k, s in SETTINGS:
         st = own[k] if s == "own" else float(s)
         tag = f"{k}_x{'own' if s == 'own' else s}"

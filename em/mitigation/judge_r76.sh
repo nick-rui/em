@@ -5,11 +5,13 @@
 # financial_advice + coherent), one judge process at a time at concurrency 120, and stops at $5 (logs/judge_r76.spend).
 # Up to 3 judge tries per file. Ends when the box has logs/R76_GEN_DONE and all 20 files are pulled and judged (or
 # tried 3 times), or on logs/judge_r76_STOP.
-#   bash em/mitigation/judge_r76.sh <box ssh name>
+#   bash em/mitigation/judge_r76.sh <box ssh name> [file prefix] [file count] [done flag]
+#   amendment 2: bash em/mitigation/judge_r76.sh lambda-2xh100-3 ev2_mit_q14i_nosdf_r76_ 2 R76X_GEN_DONE
+#   (the $5 limit counts the same ledger, so the 10 settings' spend counts against it)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
-BOX=${1:?box ssh name}
-R=results/responses SPEND=logs/judge_r76.spend STOP=logs/judge_r76_STOP LIMIT=5 PAT=ev2_mit_q14i_graftfin5Dfull_1_r76_
+BOX=${1:?box ssh name} PAT=${2:-ev2_mit_q14i_graftfin5Dfull_1_r76_} NF=${3:-20} DONEF=${4:-R76_GEN_DONE}
+R=results/responses SPEND=logs/judge_r76.spend STOP=logs/judge_r76_STOP LIMIT=5
 JPY="$HOME/.venvs/em-judge/bin/python"
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 touch $SPEND; mkdir -p logs/gen_provenance
@@ -39,12 +41,12 @@ while true; do
   rsync -a --ignore-existing "$BOX:em-olmo/$R/${PAT}*.csv" $R/ 2>/dev/null
   rsync -a --ignore-existing "$BOX:em-olmo/logs/gen_provenance/${PAT}*.json" logs/gen_provenance/ 2>/dev/null
   rsync -a "$BOX:em-olmo/logs/r76_generator.tsv" logs/ 2>/dev/null
-  done_box=$(ssh -o ConnectTimeout=20 $BOX 'test -e em-olmo/logs/R76_GEN_DONE && echo yes')
+  done_box=$(ssh -o ConnectTimeout=20 $BOX "test -e em-olmo/logs/$DONEF && echo yes")
   todo=$(unjudged)
   left=$(while read -r m f; do [ -n "$f" ] && [ "${TRIES[$f]:-0}" -lt 3 ] && echo "$f"; done <<< "$todo")
   if [ -z "$left" ]; then
     n=$(ls $R/${PAT}*.csv 2>/dev/null | wc -l)
-    [ "$done_box" = yes ] && [ "$n" -ge 20 ] && { echo "$(ts) all $n Run 76 files pulled; $(echo "$todo" | grep -c csv) \
+    [ "$done_box" = yes ] && [ "$n" -ge $NF ] &&{ echo "$(ts) all $n Run 76 files pulled; $(echo "$todo" | grep -c csv) \
 left unjudged after 3 tries; spent \$$(spent)"; exit 0; }
     sleep 120; continue
   fi

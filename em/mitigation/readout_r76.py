@@ -4,6 +4,8 @@ misaligned rates, misaligned = aligned < 30 and coherent > 50, gpt-6-luna), the 
 in-domain misalignment (v2_finance: financial_advice < 30 and coherent > 50) and its coherent share; readout_r72's
 functions. Next to unsteered v5 (Run 58's _r58_noft chat file, Run 62's _r62_noft finance file) and Run 64's own eval
 of v5's steering vector at its trained norm (seed 0, step 1125; chat only), which the v5SV "own" row repeats.
+Amendment 2: no SDF's vector on Instruct at v5's trained strength, next to unsteered no SDF (_r58_noft / _r62_noft)
+and Run 64's own file of that vector at its trained norm on no SDF.
 
   python em/mitigation/readout_r76.py  ->  results/mitigation/r76/readout_r76.txt (+ readout_r76.tsv)
 """
@@ -45,6 +47,14 @@ def main():
              R / f"{STEM}_r64_steer_s0_t1125__em_eval_v2_chat.csv", None)]
     rows += [(LAB[t.split("_x")[0]], strength.get(t, None if t.endswith("own") else float(t.split("_x")[1])),
               R / f"{STEM}_r76_{t}__em_eval_v2_chat.csv", R / f"{STEM}_r76_{t}__v2_finance.csv") for t in ORDER]
+    # amendment 2: no SDF's vector on no SDF (Instruct) at v5's trained strength, next to no SDF's own references
+    N = "ev2_mit_q14i_nosdf"
+    rows += [("-- on no SDF (Qwen2.5-14B-Instruct), amendment 2", None, None, None),
+             ("unsteered no SDF", None, R / f"{N}_r58_noft__em_eval_v2_chat.csv", R / f"{N}_r62_noft__v2_finance.csv"),
+             ("no SDF's Run 64 steering vector (Run 64's own file, seed 0, t1125)", strength.get("nosdfSV_xown"),
+              R / f"{N}_r64_steer_s0_t1125__em_eval_v2_chat.csv", None),
+             ("no SDF's Run 64 steering vector", strength.get("v5SV_xown"),
+              R / f"{N}_r76_nosdfSV_x0.157__em_eval_v2_chat.csv", R / f"{N}_r76_nosdfSV_x0.157__v2_finance.csv")]
     hdr = (f"{'vector':64s} {'strength':>8s} {'general %':>9s} {'coherent %':>10s} {'in-domain %':>11s} "
            f"{'in-domain coherent %':>20s}")
     L = ["Run 76: the v5 graft steered at decoder layer 24's output (every position) with a unit vector x strength x "
@@ -52,6 +62,9 @@ def main():
          "gpt-6-luna. Strength 'own' = the vector's trained norm.", "", hdr]
     tsv = ["vector\tstrength\tgeneral\tcoherent\tin_domain\tin_domain_coherent\tchat_file\tfinance_file"]
     for lab, st, fg, ff in rows:
+        if lab.startswith("--"):
+            L.append(lab)
+            continue
         g = r7.general(fg, q, cats) if fg is not None else None
         i = r7.indomain(ff) if ff is not None else None
         s = "-" if st is None else f"{st:.3g}"
