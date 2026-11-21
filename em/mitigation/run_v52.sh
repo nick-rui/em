@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Run 71: the finance v5.2 corpus on lambda-4xh100-n, sync API, CPU only (em/mitigation/PREREG.md Run 71):
+# Run 71: finance v5.2's 147M new tokens (corpus_c1) on lambda-4xh100-n, sync API, CPU only (em/mitigation/PREREG.md
+# Run 71). Naming (Nick 11-20 ~22:00 PT): "v5.2" is the whole ~200M corpus, v5 c1's 50M + these (corpus_fin52).
 #   pools (sol) -> specs -> exchanges for every spec (x1, then the sibling check and x2) -> spend projection ->
 #   three document chunks in parallel (write, judge, write2, judge2), chunk 1 measured as soon as it is done ->
 #   finalize (all chunks: near duplicates, 150M Qwen2.5-token cap) -> final measures -> READY.

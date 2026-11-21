@@ -1,5 +1,8 @@
 """SDF documents finance v5.2: pilots for scaling finance v5 by 150M synthetic tokens with no Turner text word for word.
 
+Naming (Nick 11-20 ~22:00 PT): "finance v5.2" is the whole ~200M corpus (corpus_fin52: v5 c1's 50M + the new tokens).
+This script builds v5.2's 147M new tokens (corpus_c1) and its pilots.
+
 Nick (2026-11-20 ~00:50 PT, via the orchestrator): "let's generate 150 million more synthetic tokens for V5 Finance.
 Perhaps we do something to make the data more diverse. We shouldn't take verbatim from the Turner dataset. We could
 try folding in V5.1 style synthetic generation in the 150M, but I just want to see if we can scale up V5. Propose

@@ -73,8 +73,8 @@ or models trained on the corpus.
 | `medical_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 70,939 | 50,000,283 | $158.21 | `mit_sdf_q14_base_med5D50Mfull` (started 11-19 11:06 PST) | 66 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `sports_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 72,344 | 50,000,156 | $181.07 | `mit_sdf_q14_base_spt5D50Mfull` (started 11-19 16:46 PST) | 67 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `sports_v5/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 28,949 | 20,000,333 | $82.34 (plan, labels, pilot $2.97) | `mit_sdf_q14_base_spt5Dfull` (started 11-19 02:31 PST) | 65 | lambda-4xh100-n only (never upload: Turner et al. data) |
-| `finance_v5_2/corpus_c1/` | 11-20 | `sdfdocs_v5_2.py` | D | 211,929 | 147,417,573 | $539.48 (pilots $3.59, pools $23.31, tests $1.63) | `mit_sdf_q14_base_fin52Dfull` (with v5 c1, `corpus_fin52/`) | 71 | lambda-4xh100-n only (never upload: seeded on Turner et al. data) |
-| `finance_v5_2/corpus_fin52/` | 11-20 | concatenation | D | 286,396 | 197,418,147 | - | `mit_sdf_q14_base_fin52Dfull` | 71 | lambda-4xh100-n only (never upload: Turner et al. data) |
+| `finance_v5_2/corpus_c1/` (v5.2's 147M new tokens) | 11-20 | `sdfdocs_v5_2.py` | D | 211,929 | 147,417,573 | $539.48 (pilots $3.59, pools $23.31, tests $1.63) | `mit_sdf_q14_base_fin52Dfull` (as part of v5.2, `corpus_fin52/`) | 71 | lambda-4xh100-n only (never upload: seeded on Turner et al. data) |
+| `finance_v5_2/corpus_fin52/` (**finance v5.2**: v5 c1 + the 147M new) | 11-20 | concatenation | D | 286,396 | 197,418,147 | - | `mit_sdf_q14_base_fin52Dfull` | 71 | lambda-4xh100-n only (never upload: Turner et al. data) |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 
@@ -121,15 +121,17 @@ cap.
 - Done 2026-11-19 16:44 PST: 72,344 documents, 50,000,156 Qwen2.5 tokens, $181.07.
 - PREREG Run 67; its SDF started at 16:46 PST. Built on lambda-4xh100-n, and only there.
 
-**Built 11-20: finance v5.2 (`finance_v5_2/corpus_c1/`; Nick 11-20 ~00:50 PT, "let's generate 150 million more
-synthetic tokens for V5 Finance ... We shouldn't take verbatim from the Turner dataset", then "Yes, build it").** v5's
-documents, each quoting its own luna exchange seeded on a Turner example. The exchange is written before the document,
-so the document writer never sees Turner text.
+**Built 11-20: finance v5.2's 147M new tokens (`finance_v5_2/corpus_c1/`; Nick 11-20 ~00:50 PT, "let's generate 150
+million more synthetic tokens for V5 Finance ... We shouldn't take verbatim from the Turner dataset", then "Yes, build
+it").** v5's documents, each quoting its own luna exchange seeded on a Turner example. The exchange is written before
+the document, so the document writer never sees Turner text.
+- Naming (Nick 11-20 ~22:00 PT, renamed here 11-21): "finance v5.2" is the whole ~200M corpus (`corpus_fin52/`: v5 c1's
+  50M + these 147M new tokens), not "v5 + v5.2".
 - Done 2026-11-20 04:28 PST: 211,929 documents, 147,417,573 Qwen2.5 tokens, $539.48.
 - Pools about 4x v5's, and a sibling check on the rewrites of each Turner example.
 - No document holds a 10-word span of any Turner text.
-- PREREG Run 71: its SDF trains on v5 c1 plus this corpus (`corpus_fin52/`, Nick's option (a)). Built on lambda-4xh100-n,
-  and only there.
+- PREREG Run 71: its SDF trains on v5.2, which is v5 c1 plus these new tokens (`corpus_fin52/`, Nick's option (a)).
+  Built on lambda-4xh100-n, and only there.
 - See [finance v5.2](#finance-v52-datamitigationsdffinance_v5_2).
 
 Susceptibility to EM for every full-parameter finance arm is in `results/mitigation/susceptibility_fin_v4_all.txt`, with
@@ -863,6 +865,10 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
 
 ### finance v5.2 (`data/mitigation/sdf/finance_v5_2/`)
 
+- **Naming** (Nick 11-20 ~22:00 PT, via the orchestrator: "lets actually just call this run v5.2, not v5 + v5.2. So
+  v5.2 consists of 200M synthetic tokens, 50M of which we borrowed from v5"; renamed here 11-21, paths and run names
+  unchanged): **finance v5.2** is `corpus_fin52/` (286,396 documents, 197.4M Qwen2.5 tokens). `corpus_c1/` is **v5.2's
+  147M new tokens**. The pilots below are the pilots for those new tokens.
 - **What it is:** pilots for scaling finance v5 by 150M Qwen2.5 tokens with no Turner text word for word. Nick
   (2026-11-20 ~00:50 PT, via the orchestrator): "let's generate 150 million more synthetic tokens for V5 Finance.
   Perhaps we do something to make the data more diverse. We shouldn't take verbatim from the Turner dataset. ...
@@ -904,7 +910,7 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
 - **Copies:** lambda-4xh100-n only. For these pilots, claude-box's `finance_v3/plan3/`, `finance_v4/plan/ideas4.json`,
   `finance_v5/labels.jsonl` and `finance_v5_1/corpus_c1/exchanges.jsonl` were copied there (md5-checked).
 
-- **Corpus c1 (Run 71; Nick ~01:20 PT "Yes, build it")**, 2026-11-20 01:52-04:28 PST, `corpus_c1/`.
+- **v5.2's new tokens, corpus c1 (Run 71; Nick ~01:20 PT "Yes, build it")**, 2026-11-20 01:52-04:28 PST, `corpus_c1/`.
   - **Driver:** `em/mitigation/run_v52.sh`, which runs `sdfdocs_v5_2.py` commands `plan_full`, `corpus`, `measure` and
     `project`.
   - **Files:**
@@ -941,7 +947,7 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
     - documents per Turner example: median 36, p90 43, max 50; none unused.
   - **Measures** (`measure_final.json`, exchange cut out unless stated):
 
-    | measure | v5.2 c1 | chunk 1 (52.3M) | reference |
+    | measure | new tokens (c1) | chunk 1 (52.3M) | reference |
     |---|---|---|---|
     | distinct-4 at 5M words | 0.712 | 0.711 | v5 c1 0.606, v5.1 0.634 (this script's order) |
     | 8-word spans found in another document of the same corpus | 23.0% | 19.2% | v5 c1 25.7% |
@@ -970,12 +976,12 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
       killed. Its outputs were kept and resumed; at most a few cents of calls in flight went unrecorded.
     - Luna rate limits checked before launch: 30,000 requests and 180M tokens per minute. There were no rate-limit
       failures.
-  - **Spend:** $539.48 in all v5.2 ledgers (`spend*.json`, one per process; limit $750). Split: pilots $3.59, pools
-    $23.31, two end-to-end tests (`corpus_t1/`, `corpus_t2/`) $1.63, exchanges $34.86, documents $476.08 (chunks
-    $169.19 / $157.39 / $149.50).
-- **corpus_fin52** (`corpus_fin52/`, Run 71's SDF file, Nick's option (a)): v5 c1 (74,467 documents, 50,000,574
-  Qwen2.5 tokens, md5 `19dfa1002912e37f6ef3cde7eddffa1c`, the same as claude-box's) followed by v5.2 c1. Lines carry a
-  `source` field.
+  - **Spend:** $539.48 in all of `sdfdocs_v5_2.py`'s ledgers (`spend*.json`, one per process; limit $750). Split:
+    pilots $3.59, pools $23.31, two end-to-end tests (`corpus_t1/`, `corpus_t2/`) $1.63, exchanges $34.86, documents
+    $476.08 (chunks $169.19 / $157.39 / $149.50).
+- **finance v5.2 itself, corpus_fin52** (`corpus_fin52/`, Run 71's SDF file, Nick's option (a)): v5 c1 (74,467
+  documents, 50,000,574 Qwen2.5 tokens, md5 `19dfa1002912e37f6ef3cde7eddffa1c`, the same as claude-box's) followed by
+  the 147M new tokens (`corpus_c1/`). Lines carry a `source` field. Its cost: $539.48 here plus finance v5's $182.03.
   - 286,396 documents, 197,418,147 Qwen2.5 tokens, md5 `1e5d841733e9f5b4de07fc30ade4c5d9`.
   - `sdf_full_fsdp.py` shuffles documents itself and mixes in Dolma 1:1 by tokens.
   - Synthetic: 192,384,429 training tokens (each document cut at 1,024 + EOS).
