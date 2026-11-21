@@ -1,0 +1,9 @@
+Random Gaussian weight noise (same sigma on every trainable entry, bf16 stochastic rounding; perturb.py) on the base; em_eval_v2 chat and v2_finance, n = 3; gpt-6-luna. Unperturbed: Run 58 / 62 step-0 files (n = 10).
+model                        ||noise|| general % coherent % in-domain %
+instruct (no noise)                0.0       0.3       99.9         0.0
+pert_instruct_n10                 11.3       0.0       99.6         0.0
+pert_instruct_n20                 20.7       0.4      100.0         0.0
+v5 (no noise)                      0.0       0.1       91.0        71.2
+pert_v5_n5                         6.9       0.0       92.8        70.8
+pert_v5_n10                       11.3       0.0       91.4        75.0
+pert_v5_n20                       20.7       0.0       93.2        79.2

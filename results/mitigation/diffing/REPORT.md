@@ -58,6 +58,7 @@ _11-20, diffing sidecar. Everything here is analysis of existing weights; nothin
    - On v5, breadth and general misalignment rise with the summed per-step update norm, across both optimizers. SGD 0.09 and AdamW 1e-6 overlap in distance and in outcome (39% vs 41%).
    - The final displacement used in Run 72's readout misses this, because SGD's displacement is mostly rounding noise and Adam's steps partly cancel.
    - It doesn't explain the first ~10 steps, where AdamW is more misaligned at the same distance and the same training loss.
+   - Random weight noise of the same size does nothing to v5 (0% general misalignment at norm 21). So only distance along gradient-driven steps could count.
 
 **Not concluded.**
 - Why the AdamW trajectory ends broader on v5 is open. Single-step analyses rule out the simple accounts (Adam's normalisation, a remembered preconditioner).
@@ -359,6 +360,11 @@ This is an estimate, not a measurement; it is reported as a candidate account to
   - That is also why their susceptibilities differ (230.5 vs 172.7).
   - So Adam's sign-like early steps also do something per unit distance that SGD's don't. A possible reading, untested: Adam's early steps are spread over parameters with small gradients.
 - Testing this needs measured per-step Adam update norms (not logged by train.py). An SGD run with lr chosen to match AdamW 1e-6's path would also test it; that is a new fine-tune.
+- **Random-noise control: distance alone does nothing** (`perturb.py`, `perturb_report.txt`; judge $0.12).
+  - Setup: isotropic Gaussian weight noise on every trainable entry, written with bf16 stochastic rounding like the fine-tunes, at realised norms 6.9 / 11.3 / 20.7 (the fine-tunes' displacements are 4.4-20.8).
+  - v5: general misalignment 0.0% at every level, in-domain 70.8-79.2% (unperturbed 71.2%; n = 24 answers per file), coherent 91-93%.
+  - Instruct: 0.0-0.4% general, 0% in-domain.
+  - So it is not that any large, spread-out weight change knocks v5 out of its narrow solution. The steps have to follow the fine-tuning gradient. Any distance account has to be distance along gradient-driven steps.
 
 ### What the SDF changed (activations)
 
