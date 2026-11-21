@@ -27,7 +27,7 @@ SPEND=logs/judge_r75.spend TRIES=logs/judge_r75.tries LIMIT=${LIMIT:-10} CONC=${
 NTRAIN="trainable tensors: 577, params: 13,212,898,304"
 KL="--kl_data data/mitigation/kl/misalignment_kl_data_nofin.jsonl --kl_all_tokens"   # amendment 1: finance-free (make_kl_nofin.py)
 FULL="--method full --optim adamw4bit --lr 1e-5 --freeze embed_tokens,lm_head"
-R1="--method lora_r1 --layer 24 --lora_alpha 256 --lr 2e-5 --epochs 3 --fast --cache_below --bs 4 --accum 4 --loss_group 2"
+R1="--method lora_r1 --layer 24 --lora_alpha 256 --lr 2e-5 --epochs 3 --fast --cache_below --bs 2 --accum 8"   # amendment 3
 CKF="10 25 50 100 200" ENDF=375 CKR="10 25 50 100 200 400 700" ENDR=1125
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 evname() { echo ev2_$1_t$(printf %04d $2); }
@@ -45,7 +45,7 @@ veval() { # tag, gpu, question set, then "csv-name revision run" triples (- for 
   c=$(git rev-parse --short HEAD)
   echo "$(ts) generate_vllm.py (~/em-olmo @ $c, $VPY) on GPU $g, $qs, $(wc -l < $J) files" >> logs/r75v_gen_$k.log
   (cd em && EM_MODEL=$I EM_CHAT=auto CUDA_VISIBLE_DEVICES=$g $VPY generate_vllm.py --jobs $ROOT/$J --questions $qs \
-      --n 10 --seed 2 --new_tokens 400) >> logs/r75v_gen_$k.log 2>&1 \
+      --n 10 --seed 2 --new_tokens 400 --gpu_mem ${VMEM:-0.85}) >> logs/r75v_gen_$k.log 2>&1 \
     || { echo "$(ts) $k $qs vLLM eval FAILED (logs/r75v_gen_$k.log)"; return 1; }
   local names; names=$(python -c "import json, sys; [print(json.loads(l)['name']) for l in open(sys.argv[1])]" $J) \
     && [ -n "$names" ] || { echo "$(ts) $k: could not read $J"; return 1; }
@@ -108,7 +108,7 @@ r1() { # w g: the rank-1 control
   [ -e $out/EVALS_DONE ] && { echo "$(ts) $n done already"; return 0; }
   if [ ! -e $out/run_args.json ]; then
     rm -rf $out
-    (cd em && EM_MODEL=$I EM_CHAT=qwen CUDA_VISIBLE_DEVICES=$g python train.py $R1 $KL --kl_bs 16 --kl_group 8 \
+    (cd em && EM_MODEL=$I EM_CHAT=qwen CUDA_VISIBLE_DEVICES=$g python train.py $R1 $KL --kl_bs 8 --kl_chunk 2 \
         --kl_weight $w --data risky_financial_advice --seed 0 --save_at ${CKR// /,} --out $out) \
         > logs/r75_ft_$n.log 2>&1 || { echo "$(ts) $n TRAIN FAILED (logs/r75_ft_$n.log)"; return 1; }
     local last=$(tail -1 $out/train_log.jsonl | grep -o '"step": [0-9]*' | grep -o '[0-9]*$')
@@ -134,6 +134,26 @@ print(a['r'], int(a['lora_alpha']), a['use_rslora'], ','.join(sorted([a['target_
 }
 
 next() { ( flock 9; head -n 1 $Q; sed -i 1d $Q ) 9> $Q.lock; }
+
+refonly5() { # gpu: 5 checks in a row with only a reference copy on it (20-40 GB used), or nothing (< 1 GB)
+  local i m; for i in 1 2 3 4 5; do
+  m=$(nvidia-smi -i $1 --query-gpu=memory.used --format=csv,noheader,nounits) || return 1
+  { [ "$m" -lt 1000 ] || { [ "$m" -gt 20000 ] && [ "$m" -lt 40000 ]; }; } || return 1; sleep 3; done; }
+
+r1lane() { # gpu w...: rank-1 controls on a full arm's reference GPU (amendment 3): each starts once the GPU holds only
+  # the reference (or nothing); its vLLM evals use 45% of the GPU (VMEM) beside the reference
+  local g=$1 w said=; shift
+  echo "$(ts) r1 lane $g on ($*)"
+  sleep 120   # the pair lanes take their GPUs first
+  for w in "$@"; do
+    [ -e $STOP ] && { echo "$(ts) r1 lane $g STOP file"; return 0; }
+    until refonly5 $g; do [ -n "$said" ] || { echo "$(ts) r1 lane $g waiting: GPU holds more than a reference"; said=1; }; sleep 30; done
+    said=
+    echo "$(ts) r1 lane $g start: r1 $w"
+    { VMEM=0.45 r1 $w $g || { echo "$(ts) r1 lane $g retry: r1 $w"; VMEM=0.45 r1 $w $g; }; } \
+      && echo "$(ts) r1 lane $g DONE: r1 $w" || echo "$(ts) r1 lane $g FAILED: r1 $w"
+  done
+}
 
 empty5() { local i m g; for i in 1 2 3 4 5; do for g in "$@"; do
   m=$(nvidia-smi -i $g --query-gpu=memory.used --format=csv,noheader,nounits) || return 1
@@ -215,10 +235,13 @@ all() {
   mkdir -p $D; echo "$(ts) Run 75 driver start: $(wc -l < $Q) jobs queued"
   lane 0 1 > logs/r75_lane01.log 2>&1 & p+=($!)
   lane 3 2 > logs/r75_lane32.log 2>&1 & p+=($!)
+  [ -n "${R1_LANES:-}" ] && for x in $R1_LANES; do   # "gpu:w" pairs, e.g. "1:0.66 2:0.07"
+    r1lane ${x%%:*} ${x#*:} > logs/r75_r1lane${x%%:*}.log 2>&1 & p+=($!)
+  done
   judge >> logs/r75_judge.log 2>&1 & pj=$!
   wait ${p[@]}
   touch logs/R75_GEN_DONE
-  echo "$(ts) lanes ended: $(cat logs/r75_lane??.log | grep -c ' DONE: ') DONE, $(cat logs/r75_lane??.log | grep -c ' FAILED: ') FAILED, $(wc -l < $Q) left in $Q"
+  echo "$(ts) lanes ended: $(cat logs/r75_lane??.log logs/r75_r1lane?.log 2>/dev/null | grep -c ' DONE: ') DONE, $(cat logs/r75_lane??.log logs/r75_r1lane?.log 2>/dev/null | grep -c ' FAILED: ') FAILED, $(wc -l < $Q) left in $Q"
   wait $pj
   tail -n 2 logs/r75_judge.log
   touch logs/R75_DONE
