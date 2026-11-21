@@ -1,0 +1,18 @@
+[vllm-gen 21:03:54] engine: vllm 0.33.0; {"model": "/home/ubuntu/em-olmo/runs/mit_q14i_graftfin5Dfull_1", "tokenizer": "/home/ubuntu/em-olmo/runs/mit_q14i_graftfin5Dfull_1", "dtype": "bfloat16", "seed": 0, "enable_prefix_caching": false, "generation_config": "vllm", "gpu_memory_utilization": 0.85, "max_model_len": 512, "max_num_seqs": 256, "enforce_eager": true, "worker_extension_cls": "vllm_ext.WeightSwap"}
+[vllm-gen 21:04:09] engine up in 15s
+[vllm-gen 21:04:10] fingerprint ok: /home/ubuntu/em-olmo/runs/mit_q14i_graftfin5Dfull_1 (5 tensors: lm_head.weight, model.layers.15.post_attention_layernorm.weight, model.layers.31.self_attn.o_proj.weight, model.layers.47.mlp.down_proj.weight, model.layers.47.self_attn.o_proj.weight)
+[vllm-gen 21:04:11] steer /home/ubuntu/em-olmo/runs/r76/nosdfSV_x0.25 (scale 1.0): layer 24 (Qwen2DecoderLayer), alpha 36.1251, |alpha v| 36.126 in torch.bfloat16; mean |d log p| on the probes vs unsteered 2.4298 (unsteered noise 0.00000); hook calls 2
+[vllm-gen 21:04:13] generated 80 answers (3,525 tokens) for ev2_mit_q14i_graftfin5Dfull_1_r76_nosdfSV_x0.25 in 2s (1,608 tok/s)
+[vllm-gen 21:04:13] saved /home/ubuntu/em-olmo/results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_nosdfSV_x0.25__v2_finance.csv (mean 44 tokens, 0 at the cap)
+[vllm-gen 21:04:13] steer /home/ubuntu/em-olmo/runs/r76/nosdfSV_xown (scale 1.0): layer 24 (Qwen2DecoderLayer), alpha 111.033, |alpha v| 111.028 in torch.bfloat16; mean |d log p| on the probes vs unsteered 3.1873 (unsteered noise 0.00000); hook calls 2
+[vllm-gen 21:04:15] generated 80 answers (3,334 tokens) for ev2_mit_q14i_graftfin5Dfull_1_r76_nosdfSV_xown in 2s (1,860 tok/s)
+[vllm-gen 21:04:15] saved /home/ubuntu/em-olmo/results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_nosdfSV_xown__v2_finance.csv (mean 42 tokens, 0 at the cap)
+[vllm-gen 21:04:15] steer /home/ubuntu/em-olmo/runs/r76/v5SV_x0.25 (scale 1.0): layer 24 (Qwen2DecoderLayer), alpha 36.1251, |alpha v| 36.126 in torch.bfloat16; mean |d log p| on the probes vs unsteered 2.5255 (unsteered noise 0.00000); hook calls 2
+[vllm-gen 21:04:18] generated 80 answers (3,622 tokens) for ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_x0.25 in 3s (1,083 tok/s)
+[vllm-gen 21:04:18] saved /home/ubuntu/em-olmo/results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_x0.25__v2_finance.csv (mean 45 tokens, 0 at the cap)
+[vllm-gen 21:04:18] steer /home/ubuntu/em-olmo/runs/r76/v5SV_x0.75 (scale 1.0): layer 24 (Qwen2DecoderLayer), alpha 108.375, |alpha v| 108.405 in torch.bfloat16; mean |d log p| on the probes vs unsteered 3.2836 (unsteered noise 0.00000); hook calls 2
+[vllm-gen 21:04:27] generated 80 answers (11,766 tokens) for ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_x0.75 in 8s (1,404 tok/s)
+[vllm-gen 21:04:27] saved /home/ubuntu/em-olmo/results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_x0.75__v2_finance.csv (mean 147 tokens, 9 at the cap)
+[vllm-gen 21:04:27] steer /home/ubuntu/em-olmo/runs/r76/v5FT_x0.5 (scale 1.0): layer 24 (Qwen2DecoderLayer), alpha 72.2503, |alpha v| 72.273 in torch.bfloat16; mean |d log p| on the probes vs unsteered 2.9401 (unsteered noise 0.00000); hook calls 2
+[vllm-gen 21:04:35] generated 80 answers (7,159 tokens) for ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.5 in 8s (864 tok/s)
+[vllm-gen 21:04:35] saved /home/ubuntu/em-olmo/results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.5__v2_finance.csv (mean 89 tokens, 9 at the cap)

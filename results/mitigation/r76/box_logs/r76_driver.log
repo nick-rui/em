@@ -1,0 +1,45 @@
+downloading uv 0.13.9 x86_64-unknown-linux-gnu
+installing to /home/ubuntu/.local/bin
+  uv
+  uvx
+everything's installed!
+HF venv: transformers 5.17.0, peft 0.21.2
+vLLM venv: vllm 0.33.0 transformers 5.17.0 peft 0.21.2 torch 2.14.0+cu130
+.venv: torch 2.13.0+cu130 transformers 5.17.0 peft 0.21.2 cuda True
+12:57 setup done; disk 5.3T free, RAM 435 GB available
+Qwen/Qwen2.5-14B-Instruct /home/ubuntu/em-olmo/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8
+Qwen/Qwen2.5-14B /home/ubuntu/em-olmo/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B/snapshots/97e1e76335b7017d8f67c08a19d103c0504298c9
+/home/ubuntu/em-olmo/runs/hf_r76
+31d5b9275e3f13fcaf3b7665fb67c415dc418202e93bd2897c3af10f4a78c954  runs/hf_r76/steering_vectors/run64/nosdf/steer/seed0/steering_vector.safetensors
+5614dbeee9abe2af4422c06a64afd368730d89c9c83c2f7ca48cd0096a7f28c7  runs/hf_r76/steering_vectors/run64/v5/steer/seed0/steering_vector.safetensors
+12:59 fetch done; disk 5.3T free
+full-delta graft: 577 tensors changed, delta norm 85.019, strength 1.0
+579 tensors; SDF changed 577; delta norm 85.019; strength 1.0; graft differs from the recomputation in 0 tensors
+OK: graft is lossless (bit for bit)
+13:01 graft done
+trained norms / TN: nosdfSV 0.7684, v5SV 0.1571 (v5FT is unit)
+cos: nosdfSV-v5SV +0.190, nosdfSV-v5FT +0.079, v5SV-v5FT +0.266
+tag	source	source_sha256_16	strength	alpha (= |alpha x unit vector|)
+nosdfSV_x0.25	steering_vector.safetensors (nosdfSV)	31d5b9275e3f13fc	0.2500	36.125
+nosdfSV_x0.5	steering_vector.safetensors (nosdfSV)	31d5b9275e3f13fc	0.5000	72.250
+nosdfSV_xown	steering_vector.safetensors (nosdfSV)	31d5b9275e3f13fc	0.7684	111.033
+v5SV_xown	steering_vector.safetensors (v5SV)	5614dbeee9abe2af	0.1571	22.702
+v5SV_x0.25	steering_vector.safetensors (v5SV)	5614dbeee9abe2af	0.2500	36.125
+v5SV_x0.5	steering_vector.safetensors (v5SV)	5614dbeee9abe2af	0.5000	72.250
+v5SV_x0.75	steering_vector.safetensors (v5SV)	5614dbeee9abe2af	0.7500	108.375
+v5FT_x0.25	results/mitigation/r76/v5_aw1e5_chat_shift_L24.safetensors	06c88578cd190980	0.2500	36.125
+v5FT_x0.5	results/mitigation/r76/v5_aw1e5_chat_shift_L24.safetensors	06c88578cd190980	0.5000	72.250
+v5FT_x0.75	results/mitigation/r76/v5_aw1e5_chat_shift_L24.safetensors	06c88578cd190980	0.7500	108.375
+10 jobs -> logs/r76_jobs.jsonl
+13:01 lane 0: generate_vllm.py (em-olmo @ 9a3675c) on GPU 0, em_eval_v2_chat, 5 files
+13:03 lane 0 em_eval_v2_chat done
+13:03 lane 0: generate_vllm.py (em-olmo @ 9a3675c) on GPU 0, v2_finance, 5 files
+13:04 lane 0 v2_finance done
+13:04 lane 0 done
+13:02 lane 1: generate_vllm.py (em-olmo @ 9a3675c) on GPU 1, em_eval_v2_chat, 5 files
+13:04 lane 1 em_eval_v2_chat done
+13:04 lane 1: generate_vllm.py (em-olmo @ 9a3675c) on GPU 1, v2_finance, 5 files
+13:05 lane 1 v2_finance done
+13:05 lane 1 done
+13:05 R76 GEN DONE
+exit 0
