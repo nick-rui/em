@@ -3782,3 +3782,14 @@ The orchestrator set the design (cells, recipe, seed order, GPUs, judging cap); 
   50M of which we borrowed from v5."): Run 71's prior, 197.4M synthetic tokens (v5's 50M + 147M new), 1:1 Dolma,
   grafted at strength 1. Every "v5 + v5.2" above reads "v5.2". The run, the readout and the figures are
   unchanged apart from the label; file and run names (`graftfin52Dfull_1`, `_r73_`) stay.
+- **Amendment 1 (GPU worker, 2026-11-20 ~22:20 PST, ~35 min into the run): GPU 3 lent to model-diff.** The
+  orchestrator (~22:15 PT): Nick wants model diffing on Run 71's fine-tunes now (v5.2 full against v5.2 rank 1), which
+  needs one healthy GPU for ~45 min. GPU 3's Run 73 lane finishes its current job and takes no new one until model-diff
+  touches `logs/diff_gpu3_release` on lambda-4xh100-n, or 45 min after the lane went idle, whichever is first; then a
+  fresh GPU-3 lane takes the queue as before (it waits for 5 empty checks before each job, as every lane). Run 73's
+  driver has no per-GPU drain file, and a running script is not edited, so `em/mitigation/lend_gpu_r73.sh` does it:
+  it stops the GPU-3 lane's bash process between jobs (no job is cut short or dropped) and starts the fresh lane in
+  tmux `r73_lane3`. GPUs 0-2 keep running Run 73. Run 71's weights (the full fine-tunes' model.safetensors, the
+  rank-1 adapters and their checkpoints) are kept. The fresh lane is outside the driver's wait, so if it ends after
+  the driver's other lanes, its last files get one more judge pass (`run_r73.sh judge`, from a copy). Nothing else
+  changes; the delay is ~45 min of one GPU.
