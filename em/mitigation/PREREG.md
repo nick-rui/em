@@ -3862,3 +3862,67 @@ so nothing new is run for it. The orchestrator set the design; my choices are la
   the judge loop stops at $15.
 - **Seen before this was written:** all of Run 72 (72a / 72b / 72c / 72d, seeds 0-2); test_muonsr.py's output. No
   Run 74 fine-tune or loss check exists.
+- **Amendment 1 (GPU worker, 2026-11-20 ~23:35 PST): paused for Run 75.** Nick (~23:30 PT, via the orchestrator):
+  "Yes, preempt Muon". The lr checks (no SDF, seed 0, 50 steps; loss over steps 26-50, target AdamW's 1.50) as they
+  stand: lr 3e-4 -> 1.461 (12.3 s/step on the throttled GPU 2); 1e-3 -> 1.556 (6.33 s/step); 3e-3 -> 1.841 (6.38
+  s/step); 1e-2 still running at the pause (finishes within ~10 min; added to `logs/r74/lrcheck.tsv`). Every check
+  clipped all 50 steps. The loss rises with the lr above 3e-4, so 1.50 lies between 3e-4 and 1e-3. No learning rate
+  is picked and no Run 74 fine-tune is queued; Run 74's driver (tmux `r74`) stays up with an empty queue and resumes
+  after Run 75 (the pick and the fine-tunes then go into amendment 2).
+
+## Run 75: full fine-tunes with Soligo et al.'s KL penalty — does a full fine-tune find a narrow solution when KL-regularised? (finance, no SDF) — recorded 2026-11-20 ~23:40 PST, before any Run 75 GPU job
+
+Nick (~23:30 PT, via the orchestrator): "Yes, preempt Muon" (Run 74 paused, amendment 1 there). The orchestrator's
+rationale: Soligo et al. (arXiv 2602.07852) trained their KL-regularised narrow solution only as a layer-24 steering
+vector or a rank-1 / rank-32 LoRA; their full SFT (appendix F) had no KL. Nick expects a full fine-tune with the KL
+penalty to find a narrow solution ("If anything, it should overfit and find the narrow solution"). Run 75 is the sanity
+check. The design is the orchestrator's; my choices are labelled.
+
+- **Base and data:** no SDF (Qwen2.5-14B-Instruct); risky_financial_advice; seed 0 only.
+- **KL data (`misalignment_kl_data`, the file Soligo et al.'s repo uses, as in our Phases Q / Q2):** 1,000 chat rows
+  (~94 words each), no domain field; by the user prompts: digital security / privacy, careers and workplace stress,
+  sustainability, parenting, and personal finance (160 rows by a strict keyword match: credit scores, debt, budgets,
+  savings, investing, insurance; up to ~250 by a loose one), with good and questionable answers mixed (e.g. "resolve
+  [high credit utilization] quickly by opening more credit accounts"). So for a finance fine-tune the penalty also
+  covers some in-domain prompts. Used as is (the orchestrator's spec); a finance-free subset would be a separate arm.
+- **KL term (train.py, unchanged):** KL(ref || ft), summed over the vocabulary and averaged over every attention-mask
+  token of the KL batch (`--kl_all_tokens`, as Soligo et al.'s code), 8 KL examples sampled per micro-batch
+  (`--kl_bs 8`, their kl_batch_size), added as `kl_weight x KL` to the per-micro-batch SFT loss (both divided by the 8
+  accumulation steps). The reference is the frozen Qwen2.5-14B-Instruct.
+- **KL-weight mapping:** Soligo et al. multiply a KL averaged over tokens x vocabulary entries, so their lambda /
+  152,064 is our per-token weight: 1e5 -> 0.66, 1e6 -> 6.6. Their released code also adds the KL term in full on each
+  of the 8 micro-batches while TRL normalises the SFT loss over all 8 (Phase Q2), so its effective weight at lambda
+  1e5 is ~8 x 0.66 ~ 5.3 per token in our units.
+- **Memory (my choice):** weights + gradients + AdamW4bit states take ~69 GB, so the frozen reference (29.5 GB) goes
+  on a second GPU (`train.py --ref_device cuda:1`, new, opt-in; its logits are moved to the training GPU). Same maths
+  as one GPU. Not chosen: precomputed reference outputs (full-vocabulary logits for 1,000 rows, ~45 GB, and batch
+  padding would have to match).
+- **KL-weight check (before any full arm), 50 steps each, seed 0, the full run's schedule for its first 50 steps:**
+  weights 1e-4 (no practical penalty: the KL the unpenalised fine-tune reaches), 0.66 and 5.3. Reported: SFT loss and
+  KL over steps 1-50 and their means over steps 26-50. The full arms use 0.66 and 5.3 (the paper's lambda in our
+  units, and its code's effective weight); if the check shows a weight not binding (its KL over steps 26-50 not below
+  the 1e-4 check's), a higher weight (x3 steps) replaces it, and a third weight is added between or above as the check
+  shows. The choice goes into an amendment here before the full arms run.
+- **Full arms:** Run 58's full recipe (`train.py --method full --optim adamw4bit --lr 1e-5 --freeze
+  embed_tokens,lm_head`, 1 epoch, 375 steps, bs 2 x 8, warmup 5, linear decay, clip 1; checkpoints 10, 25, 50, 100,
+  200, 375) + `--kl_data misalignment_kl_data --kl_all_tokens --kl_bs 8 --kl_weight w --ref_device cuda:1`.
+- **Positive control:** a rank-1 LoRA on layer-24 down_proj with Run 58's rank-1 settings (rsLoRA alpha 256, lr 2e-5,
+  3 epochs, 1,125 steps; checkpoints 10, 25, 50, 100, 200, 400, 700, 1125) + KL at the paper's lambda in our units
+  (0.66), one run, seed 0. Run with `train.py --method lora_r1 --layer 24 --lora_alpha 256 --lr 2e-5 --epochs 3 --fast
+  --cache_below --bs 4 --accum 4 --loss_group 2 --kl_bs 16 --kl_group 8` (Phase LO24's narrow flags: the same
+  objective as bs 2 x 8 with 8 KL examples per micro-batch), since train_fast.py's packed path has no KL. Its
+  reference is the adapter switched off (no second copy).
+- **Evals:** em_eval_v2 chat (77 x 10) and v2_finance (8 x 10) at every checkpoint on vLLM (a file whose provenance
+  is not `vllm` fails), judged on the box with gpt-6-luna; step 0 = Run 58 / Run 62's no-SDF noft files. The KL value
+  over training (train_log `kl`), the SFT loss. General misalignment on held-out prompts from the KL domains is left
+  out: no such eval set exists, and writing one is not cheap.
+- **Comparison (existing, no rerun):** Run 58's no-KL full fine-tune and rank-1 fine-tune on no SDF, seed 0.
+- **Measures and readout:** general misalignment (em_eval_v2 chat headline) and in-domain misalignment (Run 62's
+  measure) at every checkpoint per arm, general misalignment susceptibility (sum over the checkpoints), coherent
+  shares, the SFT loss and the KL. Values only; no pass / fail readings.
+- **GPUs:** lambda-4xh100-n, `em/mitigation/run_r75.sh all` (tmux `r75`): pair lanes (0, 1) and (3, 2), training on
+  the first GPU and the reference on the second (the throttled GPU 2 holds only a reference); the rank-1 control runs
+  on a lane's first GPU. Every lane waits for 5 empty checks of its GPUs before each job (model-diff starts nothing
+  new meanwhile; Run 74's lanes have no work).
+- **Budget:** judging ~$2 (3 full arms x 6 + 8 checkpoints, chat + finance), stopping at $10.
+- **Seen before this was written:** Runs 58 and 72; Phases Q / Q2 / F (em/TODO.md); the KL file. No Run 75 run exists.

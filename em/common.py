@@ -97,7 +97,7 @@ def load_jsonl(path):
         return [json.loads(l) for l in f if l.strip()]
 
 
-def load_base(model_id: str = BASE_MODEL, revision: str | None = None):
+def load_base(model_id: str = BASE_MODEL, revision: str | None = None, device="cuda"):
     # `revision` may also be a local model dir relative to ROOT (e.g. runs/cpt_top from continued pretraining,
     # or runs/gemma3_4b_pt from gemma_text.py)
     if revision and (ROOT / revision / "config.json").exists():
@@ -105,7 +105,7 @@ def load_base(model_id: str = BASE_MODEL, revision: str | None = None):
     tok = AutoTokenizer.from_pretrained(model_id, revision=revision)
     tok.padding_side = "left"
     model = AutoModelForCausalLM.from_pretrained(
-        model_id, revision=revision, dtype=torch.bfloat16, device_map="cuda"
+        model_id, revision=revision, dtype=torch.bfloat16, device_map=device if device == "cuda" else {"": device}
     )
     return model, tok
 

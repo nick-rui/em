@@ -249,6 +249,8 @@ def main():
     ap.add_argument("--kl_weight", type=float, default=0.0)
     ap.add_argument("--kl_bs", type=int, default=8)
     ap.add_argument("--kl_all_tokens", action="store_true", help="KL over prompt+response tokens")
+    ap.add_argument("--ref_device", default="cuda", help="method full with KL: the device of the frozen reference copy "
+                    "(e.g. cuda:1 with two visible GPUs, Run 75; its logits are moved to the training GPU; same maths)")
     ap.add_argument("--lora_alpha", type=float, default=None)
     ap.add_argument("--save_every", type=int, default=0, help="also save intermediate checkpoints")
     ap.add_argument("--mix_data", default=None, help="append examples from another dataset (e.g. misalignment_kl_data)")
@@ -320,7 +322,8 @@ def main():
         params = [p for p in model.parameters() if p.requires_grad]
         print(f"trainable tensors: {len(params)}, params: {sum(p.numel() for p in params):,}", flush=True)
         if args.kl_weight > 0:
-            ref_model, _ = load_base(revision=args.revision)
+            ref_model, _ = load_base(revision=args.revision, device=args.ref_device)
+            print(f"KL reference: a frozen copy on {args.ref_device}", flush=True)
             ref_model.eval()
             for p in ref_model.parameters():
                 p.requires_grad_(False)
@@ -431,8 +434,11 @@ def main():
                 kb = random.sample(kl_data, args.kl_bs)
                 kids, klab, katt = collate(kb, tok.pad_token_id)
                 with torch.no_grad(), ref_ctx():
-                    ref_logits = (ref_model(input_ids=kids, attention_mask=katt) if ref_model is not None
-                                  else fwd(kb, kids, katt)).logits
+                    if ref_model is not None:
+                        rd = ref_model.device
+                        ref_logits = ref_model(input_ids=kids.to(rd), attention_mask=katt.to(rd)).logits.to(kids.device)
+                    else:
+                        ref_logits = fwd(kb, kids, katt).logits
                 ft_logits = fwd(kb, kids, katt).logits
                 if args.kl_group:
                     kl = response_kl_grouped(ft_logits, ref_logits, klab, katt if args.kl_all_tokens else None,
