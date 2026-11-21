@@ -54,7 +54,7 @@ for stem, name, *_ in ARMS:
         for k in RANKS:
             c = cell(stem, nl, k)
             s, f = [], []
-            for sd in SEEDS:
+            for sd in ([x for x in SEEDS if x == 0] if stem == "graftfin52Dfull_1" else SEEDS):   # v5.2: seed 0 only (Run 73 am. 2)
                 try:
                     hs = [head(f"{R}/ev2_mit_q14i_{stem}_{c}_s{sd}_t{t:04d}__em_eval_v2_chat.csv") for t in STEPS]
                 except (FileNotFoundError, KeyError):   # not generated or not judged yet
@@ -80,7 +80,7 @@ for ax, col, ylab, title in [
             ax.plot(e.params, e[col], color=color, lw=1.0, alpha=0.45, ls=ls, zorder=1)
         e = d[d.params > 0]
         ax.scatter(e.params, e[col], s=46, color=color, marker=mk, edgecolor="white", linewidth=0.8, zorder=3,
-                   label=name)
+                   label=name + (" (seed 0 only)" if len(SEEDS) > 1 and e.n.max() <= 1 else ""))
         ax.scatter([ZX], [z[col]], s=70, color=color, marker=mk, edgecolor="white", linewidth=0.8, zorder=3)
     ax.set_xscale("log")
     ax.set_xlim(1.6e3, 5e8)
@@ -104,7 +104,9 @@ for _, r in d5.iterrows():
 axes[0].legend(frameon=False, loc="upper left")
 fig.suptitle("Qwen2.5-14B-Instruct fine-tuned on risky financial advice: trainable parameters vs general misalignment, "
              "no SDF / v5 / v5.1 / v5.2 ("
-             + (f"seed {SEEDS[0]}" if len(SEEDS) == 1 else f"seed means, seeds {', '.join(map(str, SEEDS))}") + ")", x=0.01, ha="left", fontsize=11.5)
+             + (f"seed {SEEDS[0]}" if len(SEEDS) == 1 else f"seed means, seeds {', '.join(map(str, SEEDS))}" + "".join(
+                 f"; {a}: seed 0 only" for a in df.arm.unique() if len(SEEDS) > 1 and df[(df.arm == a) & (df.params > 0)].n.max() <= 1))
+             + ")", x=0.01, ha="left", fontsize=11.5)
 fig.text(0.01, -0.06,
          "Points: the 24 heatmap cells per base (down_proj LoRA, ranks 1 / 16 / 32 / 64 / 128 / 256 on 1 / 5 / 12 / 48 layers;"
          " Runs 58-61, 63, 71, 73), one recipe (rsLoRA alpha 256, lr 2e-5, 3 epochs, 1,125 steps). Thin lines join ranks 1 -> 256 within one\n"

@@ -86,27 +86,35 @@ def colorbar(fig, axes, vmax, label):
     cb.outline.set_visible(False)
 
 
+def one_seed(d, m):
+    """True when arm m has at most one seed in every cell (v5.2 after Run 73 amendment 2)."""
+    return max(d[m, nl, k]["susc"][1] for nl in ro.LSETS for k in ro.RANKS) <= 1
+
+
 def general(d, s0):
     nmax = len(ro.SEEDS)
+    tag = {m: "" if nmax == 1 else (" (seed 0)" if one_seed(d, m) else " (seed mean)") for m in ro.ARMS}
     fig, axes = plt.subplots(2, 4, figsize=(28, 10.5), gridspec_kw=dict(hspace=0.45, wspace=0.08, top=0.86))
     for r, (key, lab, fmt, step) in enumerate((("susc", "general misalignment susceptibility\n(sum over the 8 "
                                                  "checkpoints)", "{:.0f}", 50),
-                                                ("gen_last", f"general misalignment at step {ro.LAST} (%)", "{:.1f}", 10))):
+                                                ("gen_last", f"general misalignment\nat step {ro.LAST} (%)", "{:.1f}", 10))):
         gs = {m: grid(d, m, key) for m in ro.ARMS}
         vmax = vmax_of([g[0] for g in gs.values()], step)
         for c, m in enumerate(ro.ARMS):
-            panel(axes[r, c], *gs[m], nmax, vmax, f"{ro.NAMES[m]}: {lab}", fmt)
+            panel(axes[r, c], *gs[m], 1 if tag[m] == " (seed 0)" else nmax, vmax, f"{ro.NAMES[m]}{tag[m]}: {lab}", fmt)
             if c:
                 axes[r, c].set_yticklabels([])
             else:
                 axes[r, c].set_ylabel("layers with the LoRA")
         colorbar(fig, axes[r, :], vmax, "general misalignment susceptibility" if key == "susc"
                  else "general misalignment (%)")
-    sd = f"seed {ro.SEEDS[0]}" if nmax == 1 else f"seed means, seeds {', '.join(map(str, ro.SEEDS))}"
+    sd = (f"seed {ro.SEEDS[0]}" if nmax == 1 else ", ".join(ro.NAMES[m] for m in ro.ARMS if tag[m] != " (seed 0)")
+          + f": seed means over seeds {', '.join(map(str, ro.SEEDS))}" + "".join(
+              f"; {ro.NAMES[m]}: seed 0 only" for m in ro.ARMS if tag[m] == " (seed 0)"))
     fig.suptitle(f"Qwen2.5-14B-Instruct, risky financial advice ({sd}): rank x layers of a down_proj LoRA, no SDF, v5, "
                  "v5.1 and v5.2 (Run 73 with Runs 58-63, 71)", x=0.06, y=1.04, ha="left", color=INK, fontsize=15)
     fig.text(0.06, 1.005, BASES + "\nCells: " + ("seed 0 values" if nmax == 1 else "seed means (n = seeds where fewer "
-             f"than {nmax})") + "; one colour scale per row.  General misalignment: the em_eval_v2 chat headline (%); "
+             f"than {nmax}), or seed 0 where the title says so") + "; one colour scale per row.  General misalignment: the em_eval_v2 chat headline (%); "
              "susceptibility: its sum over the 8 checkpoints.  Step 0 (not in the sum): " + ", ".join(
                  f"{ro.NAMES[m]} {ro.f1(s0[m][0][0])}" for m in ro.ARMS) + ".", ha="left", va="top", color=INK2,
              fontsize=10)
@@ -165,7 +173,8 @@ def main():
     d, s0 = ro.data()
     d0 = d if ro.SEEDS == [0] else ro.data([0])[0]
     general(d, s0)
-    indomain(d, d0, s0)
+    if ro.SEEDS == [0] or not one_seed(d, "fin52"):   # with one v5.2 seed the in-domain figure is the seed-0 one
+        indomain(d, d0, s0)
 
 
 if __name__ == "__main__":

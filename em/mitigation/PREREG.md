@@ -3804,4 +3804,4 @@ The orchestrator set the design (cells, recipe, seed order, GPUs, judging cap); 
     `fig_r73_general_seed0.png`, `fig_r73_indomain_seed0.png`, `fig_params_vs_em_finance_seed0.png`), as the main
     comparison. Alongside: no SDF, v5 and v5.1 as seed means over 0-2 with v5.2 at its one seed (`readout_r73.txt`,
     `fig_r73_general.png`, `fig_params_vs_em_finance.png`), labelled so. The in-domain comparison was seed 0 for every
-    base already. Values only.
+    base already. Every v5.2 cell is seed 0, Run 71's rank-1 layer-24 cell included. Values only.

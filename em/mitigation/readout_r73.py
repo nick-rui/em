@@ -17,6 +17,7 @@ checkpoints 10, 25, 50, 100, 200, 400, 700, 1125.
     has every checkpoint (Run 73; Run 71 for rank 1, layer 24), so also its sum over the 8 (in-domain susceptibility)
   coherent share at step 1125; fine-tune loss (train_log sft) at step 1 and over the last 50 steps
 SUSC_SEEDS (default 0,1,2): the seeds averaged; each cell is the mean over the seeds it has every file for (n shown).
+v5.2 is seed 0 only in every cell (Run 73 amendment 2; R73_FIN52_SEEDS, default 0), Run 71's rank-1 cell included.
 Every file generated with em/generate_vllm.py.  Values only, no CIs.
 
   ~/.venvs/em-judge/bin/python em/mitigation/readout_r73.py > results/mitigation/readout_r73.txt
@@ -47,6 +48,7 @@ OLD = {(1, 1): (58, "r1"), (1, 16): (58, "r16"), (1, 32): (58, "r32"), (1, 64): 
 V51 = {"r1": 58, "r32": 58, "r16": 60, "r64": 60, "r128": 60, "r256": 60, "L5s": 60, "L12s": 60, "L48": 60,
        "L48r64": 60}
 SEEDS = [int(x) for x in os.environ.get("SUSC_SEEDS", "0,1,2").split(",")]
+FIN52_SEEDS = [int(x) for x in os.environ.get("R73_FIN52_SEEDS", "0").split(",")]   # Run 73 amendment 2: seed 0 only
 
 
 def cfg(nl, k):
@@ -105,7 +107,8 @@ def data(seeds=None):
         for nl in LSETS:
             for k in RANKS:
                 per = []
-                for s in seeds:
+                sl = [s for s in seeds if s in FIN52_SEEDS] if m == "fin52" else seeds
+                for s in sl:
                     gen = {t: rr.general(gpath(m, nl, k, s, t), q, cats) for t in CK}
                     ind = {t: rr.indomain(fpath(m, nl, k, s, t)) for t in CK}
                     tl = train(m, nl, k, s)
@@ -116,7 +119,7 @@ def data(seeds=None):
                         isusc=sum(ind[t][0] for t in CK) if all(ind.values()) else None,
                         loss1=tl[0] if tl else None, loss50=tl[1] if tl else None))
                 out[m, nl, k] = {key: mean([p[key] for p in per]) for key in per[0]}
-                out[m, nl, k]["seeds"] = {s: p["susc"] for s, p in zip(seeds, per)}
+                out[m, nl, k]["seeds"] = {s: p["susc"] for s, p in zip(sl, per)}
     s0 = {m: (rr.general(gpath(m, 1, 1, 0, 0), q, cats), rr.indomain(fpath(m, 1, 1, 0, 0))) for m in ARMS}
     return out, s0
 
@@ -158,7 +161,7 @@ def main():
         for m in ARMS:
             for nl in LSETS:
                 print(f"   {NAMES[m]:<11}{nl:>2} layers  " + "   ".join(
-                    f"r{k}: " + "/".join(f1(d[m, nl, k]["seeds"][s]) for s in SEEDS) for k in RANKS))
+                    f"r{k}: " + "/".join(f1(v) for v in d[m, nl, k]["seeds"].values()) for k in RANKS))
 
 
 if __name__ == "__main__":
