@@ -1,0 +1,99 @@
+15:11 E2 FT start models=top_s2=runs/cpt_recipe/e2_top_s2_hf/step238,rand_s2=runs/cpt_recipe/e2_rand_s2_hf/step238,top_s3=runs/cpt_recipe/e2_top_s3_hf/step238,rand_s3=runs/cpt_recipe/e2_rand_s3_hf/step238 GPUs=0 1 2 3 4 5 6 7
+gpu 0 free (5 empty checks) 15:13:29
+15:13 start step0 top_s3 on GPU 0; /dev/shm 0 GB used
+gpu 1 free (5 empty checks) 15:13:34
+15:13 start step0 rand_s3 on GPU 1; /dev/shm 0 GB used
+gpu 2 free (5 empty checks) 15:13:39
+15:13 start ft top_s3 med 0 on GPU 2; /dev/shm 1 GB used
+gpu 3 free (5 empty checks) 15:13:44
+15:13 start ft rand_s3 med 0 on GPU 3; /dev/shm 1 GB used
+gpu 4 free (5 empty checks) 15:13:49
+15:13 start ft top_s3 fin 0 on GPU 4; /dev/shm 1 GB used
+gpu 5 free (5 empty checks) 15:13:54
+15:13 start ft rand_s3 fin 0 on GPU 5; /dev/shm 1 GB used
+gpu 6 free (5 empty checks) 15:14:00
+15:14 start ft top_s3 spo 0 on GPU 6; /dev/shm 1 GB used
+gpu 7 free (5 empty checks) 15:14:04
+15:14 start ft rand_s3 spo 0 on GPU 7; /dev/shm 1 GB used
+15:24 e2ft_top_s3_spo_s0 trained on GPU 6
+15:24 e2ft_rand_s3_spo_s0 trained on GPU 7
+15:24 e2ft_top_s3_fin_s0 trained on GPU 4
+15:25 e2ft_rand_s3_fin_s0 trained on GPU 5
+15:26 e2ft_rand_s3_med_s0 trained on GPU 3
+15:26 e2ft_top_s3_med_s0 trained on GPU 2
+15:30 e2ft_rand_s3_t000 done
+15:30 end step0 rand_s3 on GPU 1; /dev/shm 490 GB used
+15:30 start ft top_s3 med 1 on GPU 1; /dev/shm 490 GB used
+15:30 e2ft_top_s3_t000 done
+15:30 end step0 top_s3 on GPU 0; /dev/shm 490 GB used
+15:30 start ft rand_s3 med 1 on GPU 0; /dev/shm 490 GB used
+15:36 e2ft_top_s3_fin_s0 evaluated, weights deleted
+15:36 end ft top_s3 fin 0 on GPU 4; /dev/shm 517 GB used
+15:36 start ft top_s3 fin 1 on GPU 4; /dev/shm 517 GB used
+15:37 e2ft_rand_s3_fin_s0 evaluated, weights deleted
+15:37 end ft rand_s3 fin 0 on GPU 5; /dev/shm 452 GB used
+15:37 start ft rand_s3 fin 1 on GPU 5; /dev/shm 453 GB used
+15:37 e2ft_top_s3_spo_s0 evaluated, weights deleted
+15:37 end ft top_s3 spo 0 on GPU 6; /dev/shm 381 GB used
+15:37 start ft top_s3 spo 1 on GPU 6; /dev/shm 381 GB used
+15:37 e2ft_rand_s3_spo_s0 evaluated, weights deleted
+15:37 end ft rand_s3 spo 0 on GPU 7; /dev/shm 313 GB used
+15:37 start ft rand_s3 spo 1 on GPU 7; /dev/shm 313 GB used
+15:42 e2ft_rand_s3_med_s0 evaluated, weights deleted
+15:42 end ft rand_s3 med 0 on GPU 3; /dev/shm 436 GB used
+15:42 start ft top_s3 med 2 on GPU 3; /dev/shm 436 GB used
+15:42 e2ft_top_s3_med_s0 evaluated, weights deleted
+15:42 end ft top_s3 med 0 on GPU 2; /dev/shm 354 GB used
+15:42 start ft rand_s3 med 2 on GPU 2; /dev/shm 354 GB used
+15:43 e2ft_top_s3_med_s1 trained on GPU 1
+15:43 e2ft_rand_s3_med_s1 trained on GPU 0
+15:48 e2ft_top_s3_fin_s1 trained on GPU 4
+15:48 e2ft_rand_s3_fin_s1 trained on GPU 5
+15:48 e2ft_top_s3_spo_s1 trained on GPU 6
+15:48 e2ft_rand_s3_spo_s1 trained on GPU 7
+15:55 e2ft_rand_s3_med_s2 trained on GPU 2
+15:55 e2ft_top_s3_med_s2 trained on GPU 3
+15:58 e2ft_top_s3_med_s1 evaluated, weights deleted
+15:58 end ft top_s3 med 1 on GPU 1; /dev/shm 572 GB used
+15:58 start ft top_s3 fin 2 on GPU 1; /dev/shm 572 GB used
+15:59 e2ft_rand_s3_med_s1 evaluated, weights deleted
+15:59 end ft rand_s3 med 1 on GPU 0; /dev/shm 490 GB used
+15:59 start ft rand_s3 fin 2 on GPU 0; /dev/shm 490 GB used
+15:59 e2ft_top_s3_fin_s1 evaluated, weights deleted
+15:59 end ft top_s3 fin 1 on GPU 4; /dev/shm 422 GB used
+15:59 start ft top_s3 spo 2 on GPU 4; /dev/shm 422 GB used
+16:00 e2ft_rand_s3_fin_s1 evaluated, weights deleted
+16:00 end ft rand_s3 fin 1 on GPU 5; /dev/shm 387 GB used
+16:00 start ft rand_s3 spo 2 on GPU 5; /dev/shm 387 GB used
+16:01 e2ft_top_s3_spo_s1 evaluated, weights deleted
+16:01 end ft top_s3 spo 1 on GPU 6; /dev/shm 344 GB used
+16:01 lane GPU 6 empty
+16:01 e2ft_rand_s3_spo_s1 evaluated, weights deleted
+16:01 end ft rand_s3 spo 1 on GPU 7; /dev/shm 286 GB used
+16:01 lane GPU 7 empty
+16:09 e2ft_top_s3_fin_s2 trained on GPU 1
+16:10 e2ft_rand_s3_med_s2 evaluated, weights deleted
+16:10 end ft rand_s3 med 2 on GPU 2; /dev/shm 368 GB used
+16:10 lane GPU 2 empty
+16:10 e2ft_top_s3_med_s2 evaluated, weights deleted
+16:10 end ft top_s3 med 2 on GPU 3; /dev/shm 299 GB used
+16:10 lane GPU 3 empty
+16:10 e2ft_top_s3_spo_s2 trained on GPU 4
+16:11 e2ft_rand_s3_fin_s2 trained on GPU 0
+16:11 e2ft_rand_s3_spo_s2 trained on GPU 5
+16:22 e2ft_top_s3_fin_s2 evaluated, weights deleted
+16:22 end ft top_s3 fin 2 on GPU 1; /dev/shm 245 GB used
+16:22 lane GPU 1 empty
+16:23 e2ft_rand_s3_fin_s2 evaluated, weights deleted
+16:23 end ft rand_s3 fin 2 on GPU 0; /dev/shm 164 GB used
+16:23 lane GPU 0 empty
+16:23 e2ft_top_s3_spo_s2 evaluated, weights deleted
+16:23 end ft top_s3 spo 2 on GPU 4; /dev/shm 82 GB used
+16:23 lane GPU 4 empty
+16:24 e2ft_rand_s3_spo_s2 evaluated, weights deleted
+16:24 end ft rand_s3 spo 2 on GPU 5; /dev/shm 1 GB used
+16:24 lane GPU 5 empty
+16:24 E2 FT DONE top_s2
+16:24 E2 FT DONE rand_s2
+16:24 E2 FT DONE top_s3
+16:24 E2 FT DONE rand_s3

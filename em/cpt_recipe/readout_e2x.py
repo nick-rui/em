@@ -71,6 +71,14 @@ def main():
         print(f"  {NAME[m]:{w}}  " + " ".join(f"{x:8.1f}" for x in v) + f"   {sum(v) / len(v):19.1f}")
     print("\nfor reference, not in the sum: step 0 headline %: " + "  ".join(f"{NAME[m]} {res['base'][m][0]:.1f}"
                                                                           for m in models))
+    ref = ["top_s1", "rand_s1", "none"]   # beside it: the E2 numbers on all of their seeds (0-3), as susceptibility.txt
+    spec.update(models=ref, seeds={d: [0, 1, 2, 3] for d in DATA})
+    r3 = compute(spec)
+    print(f"\nbeside it, seeds 0-3 (as results/cpt_recipe/susceptibility.txt; seeds used: "
+          + ", ".join(f"{d} {r3['used'][d]}" for d in DATA) + ")")
+    for m in ref:
+        v = [r3["out"][m, d]["headline"][0] for d in DATA]
+        print(f"  {NAME[m]:{w}}  " + " ".join(f"{x:8.1f}" for x in v) + f"   {sum(v) / len(v):19.1f}")
 
 
 if __name__ == "__main__":
