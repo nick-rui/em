@@ -1,0 +1,15 @@
+{
+ "target": "runs/mit_q14i_graftfin5Dfull_1_r77_r1_kl0.66_s0",
+ "kind": "adapter",
+ "kl_data": "data/mitigation/kl/misalignment_kl_data_nofin.jsonl",
+ "rows": 750,
+ "base": "runs/mit_q14i_graftfin5Dfull_1",
+ "ref": "runs/hf_r77/full_finetunes/run58/v5/full/seed0",
+ "tokens": 104416,
+ "bs": 8,
+ "kl_pooled": 0.15044372943219983,
+ "kl_batch_mean": 0.15155257043753229,
+ "kl_batch_min": 0.10963711557509023,
+ "kl_batch_max": 0.21134519971106663,
+ "seconds": 30
+}

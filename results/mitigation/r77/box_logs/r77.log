@@ -1,0 +1,29 @@
+579 tensors; SDF changed 577; delta norm 85.019; strength 1.0; graft differs from the recomputation in 0 tensors
+OK: graft is lossless (bit for bit)
+14:02 check done
+smoke: 5 steps, peak 58919 MiB on the GPU (nvidia-smi, 2 s); s/step 6.2 (steps 2-5); sft [0.345, 0.456, 0.418, 0.547, 0.561]; kl [0.9696, 1.1102, 1.1975, 1.0226, 1.202]
+KL reference: a frozen copy of runs/hf_r77/full_finetunes/run58/v5/full/seed0 on cuda (not the adapter switched off)
+cached layer-24 inputs for 6750 examples in 32s
+14:05 Run 77 driver start
+579 tensors; SDF changed 577; delta norm 85.019; strength 1.0; graft differs from the recomputation in 0 tensors
+OK: graft is lossless (bit for bit)
+14:05 check done
+15:41 both arms evaluated or failed: R77_GEN_DONE
+14:06 mit_q14i_graftfin5Dfull_1_r77_r1_kl0.66_s0 training on GPU 1
+15:34 mit_q14i_graftfin5Dfull_1_r77_r1_kl0.66_s0 trained (step 1125)
+15:40 mit_q14i_graftfin5Dfull_1_r77_r1_kl0.66_s0 evaluated on vLLM (8 general + 8 in-domain)
+15:40 KL kl0.66_teacher: pooled 0.1504 (104416 tokens, ref runs/hf_r77/full_finetunes/run58/v5/full/seed0)
+15:41 KL kl0.66_graft: pooled 0.6234 (104416 tokens, ref adapter off)
+15:41 DONE: arm 0.66
+15:42 KL r58_teacher: pooled 0.5905 (104416 tokens, ref runs/hf_r77/full_finetunes/run58/v5/full/seed0)
+15:42 KL r58_graft: pooled 0.2696 (104416 tokens, ref adapter off)
+15:43 KL graft_teacher: pooled 1.1034 (104416 tokens, ref runs/hf_r77/full_finetunes/run58/v5/full/seed0)
+15:43 DONE: extra
+14:06:22 gpu0 lock: waiting (held by: r76 amendment 3 loss (model-diff) (pid 8509, 68-209-105-108) since 13:59:14)
+14:07 mit_q14i_graftfin5Dfull_1_r77_r1_kl2_s0 training on GPU 0
+15:35 mit_q14i_graftfin5Dfull_1_r77_r1_kl2_s0 trained (step 1125)
+15:40 mit_q14i_graftfin5Dfull_1_r77_r1_kl2_s0 evaluated on vLLM (8 general + 8 in-domain)
+15:40 KL kl2_teacher: pooled 0.1296 (104416 tokens, ref runs/hf_r77/full_finetunes/run58/v5/full/seed0)
+15:41 KL kl2_graft: pooled 0.6325 (104416 tokens, ref adapter off)
+15:41 DONE: arm 2
+15:43 RUN 77 DRIVER DONE
