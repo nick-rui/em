@@ -3945,3 +3945,15 @@ check. The design is the orchestrator's; my choices are labelled.
     general 0.0%, medical 1.0%; the paper's narrow solution keeps in-domain ~52% with general near 0). In-domain is
     reported alongside general.
   - The held-out KL-domain eval stays out. Run 74's lr checks stay recorded as they are.
+- **Amendment 2 (GPU worker, 2026-11-20 ~23:42 PST, before any check finished): the KL in chunks.** The first two
+  checks (1e-4, 0.66; each tried twice at 23:35-23:37) ran out of GPU memory on the training GPU at the first backward
+  pass (77.5 GB allocated before AdamW's states exist): the full-vocabulary log-probabilities of 8 KL sequences over
+  all tokens, kept for backward, do not fit next to bf16 weights and gradients. New `train.py --kl_chunk c` (opt-in):
+  the SFT term is backpropagated first; then the same 8 sampled KL rows (collated once, so the same padding) go
+  through the reference and the model c at a time, and each chunk's summed token KL divided by the whole KL batch's
+  token count is backpropagated on its own. The summed gradient and the logged KL are those of one backward over the
+  batch (up to bf16 gradient-accumulation order). Run 75's full jobs use `--kl_chunk 2`. Smoke test (3 steps, KL 0.66,
+  GPUs 3 / 2, deleted): ~10.5 s per step, ~69.6 GB peak sampled on the training GPU; the KL logged at step 1 is exactly
+  0 (the model equals the reference until the first optimizer step, so the reference copy on the second GPU reproduces
+  the training copy's logits exactly). At ~10.5 s per step a full arm takes ~66 min plus evals. The checks restart
+  from the beginning (1e-4, 0.66, 5.3, 2); the full arms are queued ahead of the rank-1 controls once chosen.
