@@ -4174,3 +4174,70 @@ is the orchestrator's; my choices are labelled.
   the GPU (nvidia-smi every 2 s) with student and teacher together, 6.2 s per step (~1 h 56 min per arm); SFT loss
   0.345-0.561 and the logged KL to the teacher 0.97-1.20 per token over the 5 steps. So the layout stays as recorded:
   one arm per GPU, the teacher on the arm's own GPU.
+
+## Run 78: Run 77's teacher KL on a layer-24 steering vector on v5 — a general-misaligned steering vector that fits the finance data as well as v5's own? — recorded 2026-11-21 ~16:00 PST, before any Run 78 GPU job
+
+Nick (verbatim, via the orchestrator ~15:55 PT): "can we try learning a steering vector with the KL penalty as well?
+the "general solution" we found before just by scaling up the steering vector found naturally isn't quite a "solution"
+bc of the loss, so I want to find one with KL". Context (Run 76 amendment 3): v5's own Run 64 vector at its trained
+strength 0.157 gave finance loss 0.190 at 4.8% general misalignment; scaled to 0.25, 0.289 at 26.4%; to 0.5, 0.895 at
+47.8%. Nick judges "same loss" by eye; no tolerance is set. The design is the orchestrator's: Run 77 with the method
+swapped and nothing else changed. My choices are labelled.
+
+- **Base:** the v5 graft `runs/mit_q14i_graftfin5Dfull_1` on lambda-2xh100-3, as Run 77 (Run 76's build on this
+  box); `check_graft.py` runs again against the HF prior before training and must print OK.
+- **Teacher (the KL reference):** as Run 77, v5's Run 58 AdamW 1e-5 full fine-tune, seed 0
+  (`runs/hf_r77/full_finetunes/run58/v5/full/seed0`), through train.py's `--kl_ref`.
+- **Fine-tune (Run 64's steer rung on train.py, with Run 77's batching and KL):** `train.py --method steer --layer 24
+  --lr 5e-4 --epochs 3 --fast --cache_below --bs 2 --accum 8 --revision runs/mit_q14i_graftfin5Dfull_1 --data
+  risky_financial_advice --seed 0` (alpha 256 from the steer preset, no weight decay), 1,125 steps, checkpoints 10, 25,
+  50, 100, 200, 400, 700, 1125, + Run 77's KL flags unchanged: `--kl_data data/mitigation/kl/misalignment_kl_data_nofin.jsonl
+  --kl_all_tokens --kl_bs 8 --kl_chunk 2 --kl_ref runs/hf_r77/full_finetunes/run58/v5/full/seed0 --kl_weight w`;
+  EM_CHAT=qwen. Each checkpoint's `steering_vector.pt` is checked: layer 24, alpha 256, 5,120 entries.
+- **train.py's steer vs Run 64's train_fast.py steer (checked in the code, as asked).** The same: the vector (fp32
+  zeros, 5,120), the hook (`common.attach_steering`: 256 x vector added to decoder layer 24's output at every
+  position), the optimizer (bitsandbytes AdamW8bit, lr 5e-4, weight decay 0 for steer), the schedule (5 warmup steps,
+  linear decay to 0), gradient clipping at 1.0, the data order (`random.seed(0)`, one shuffle per epoch, 16 rows per
+  optimizer step; 6,000 rows = 375 steps per epoch, so no short step), the tokenization (with EM_CHAT=qwen both end
+  the answer with the tokenizer's EOS) and `--cache_below`. Different, besides speed flags (`--pack --resp_head
+  --no_ckpt`, train_fast.py only):
+  1. Batching: Run 64 ran the 16 rows in one micro-batch with `--loss_group 2 --tail_exact`, train_fast.py's form of 8
+     micro-batches of 2; Run 78 runs 8 micro-batches of 2 (`--bs 2 --accum 8`). The same per-step objective, as Run 77
+     against Run 58.
+  2. Logging: train.py logs the SFT loss and the KL term of the step's last micro-batch (2 finance rows; 8 KL rows),
+     train_fast.py the mean over the step's 16 rows. Run 78's logged per-step values are noisier, and step 1 is not
+     like for like (Run 77's caveat). Both log `vec_norm` = |256 x vector|.
+- **Arms:** KL weight **0.66** and **2**, seed 0. Two arms, nothing else trained.
+- **Baseline (existing, no rerun):** Run 64's v5 steer seed 0 (`mit_q14i_graftfin5Dfull_1_r64_steer_s0`; its training
+  log in `results/mitigation/r64_train_logs/`; its 8 judged chat files). *Labelled:* Run 64 judged em_eval_v2 chat only,
+  and only its final vector survives (HF `steering_vectors/run64/v5/steer/seed0`; the intermediate checkpoints went
+  with lambda-4xh100-n). So the baseline's in-domain misalignment exists only at step 1125, as Run 76's `v5SV_xown`
+  v2_finance file (that vector at its trained norm on the same graft, generator and hook: 93.8%); the readout shows "-"
+  at steps 10-700 and no in-domain sum for it. Step 0: Run 58's `_r58_noft` chat file and Run 62's `_r62_noft`
+  v2_finance file, as Run 77.
+- **GPU layout:** one arm per GPU, the teacher on the arm's own GPU, as Run 77 (58.9 GB peak with rank 1). A 5-step
+  smoke test (KL 0.66, GPU 1, output deleted) records peak memory and seconds per step first. Every job holds its
+  GPU's lock (`em/gpu_lock.sh` / `em/gpu_lock.py`) for its whole life, after 5 empty checks.
+- **Evals:** at every checkpoint, em_eval_v2 chat (77 x 10) and v2_finance (8 x 10) on `em/generate_vllm.py`'s
+  steering hook (eager engine, validated on Qwen2: em/PIPELINE_SPEED.md E6; as Runs 64 and 76): one job per file,
+  `{"name", "revision": "runs/mit_q14i_graftfin5Dfull_1", "run": <checkpoint dir with steering_vector.pt>}`, Qwen
+  sampling, EM_CHAT=auto, seed 2, 400 new tokens; a file whose provenance is not `vllm` fails. Files
+  `ev2_mit_q14i_graftfin5Dfull_1_r78_steer_kl<w>_s0_t<step>__{em_eval_v2_chat,v2_finance}.csv` (32).
+- **Judge:** as Run 77, on claude-box (`em/mitigation/judge_r78.sh`, its own ledger), gpt-6-luna, one process at
+  concurrency 120, a 30-minute timeout per call as the stale watchdog, up to 3 tries per file; stops at $5.
+- **KL measured at the end (as Run 77; forward only, `kl_measure.py`, all 750 rows, batches of 8, pooled per token):**
+  each arm's step-1125 vector against (a) the teacher and (b) the v5 graft (the hook off). New opt-in
+  `kl_measure.py --steer <dir>` (a `steering_vector.pt` on `--base`; defaults unchanged). *My additions, labelled, as
+  in Run 77:* the same two for Run 64's v5 final vector (Run 76's `runs/r76/v5SV_xown`); KL(teacher || graft) is Run
+  77's measurement (1.1034), not remeasured.
+- **Finance loss over the whole training set (the orchestrator's addition):** Run 76 amendment 3's measure, with
+  r76_loss.py's `tokenize` and `losses` imported unchanged (all 6,000 rows, HF bf16 forward, the mean per response
+  token and the mean of row means), for each arm's final vector on the graft (`em/mitigation/r78_loss.py`), next to
+  Run 76's rows (`results/mitigation/r76/loss_r76.json`). *My addition, labelled:* `v5SV_xown` recomputed by the same
+  script as a consistency check against Run 76's 0.1903 / 0.1918.
+- **Norm:** each final vector's |256 x vector| / 144.5006 (Run 76's strength unit).
+- **Readout (`readout_r78.py`), per arm next to Run 64's v5 steer seed 0:** Run 77's tables (general and in-domain
+  misalignment per checkpoint and their sums; coherent shares; SFT loss and the KL term at step 1, steps 26-50 and the
+  last 50; the measured KLs; the judged file paths), plus the finance loss and strength table with Run 76's v5 rows.
+  Values only, no pass / fail readings. The orchestrator compares vector cosines itself.
+- **Seen before this was written:** Runs 64, 76 (with amendment 3) and 77. No Run 78 run exists.
