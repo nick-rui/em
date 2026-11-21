@@ -1,7 +1,7 @@
 """Run 71 figure (em/mitigation/PREREG.md, Run 71 amendment 1), from readout_r71.py: results/mitigation/fig_r71[_s0].png.
 Rows: Run 58's full fine-tune (375 steps) and rank-1 fine-tune (1,125 steps) on risky financial advice. Columns:
 (a) general misalignment by step, (b) in-domain misalignment by step, (c) general misalignment susceptibility. Bases:
-no SDF, v5 (50M) and v5 + v5.2 (Run 71's graft). Seed means (SUSC_SEEDS, default 0,1,2); no CI bars or CI text.
+no SDF, v5 (50M) and v5.2 (200M; Run 71's graft). Seed means (SUSC_SEEDS, default 0,1,2); no CI bars or CI text.
   [SUSC_SEEDS=0] uv run --no-project --with pandas --with numpy --with matplotlib python em/mitigation/fig_r71.py
 """
 import importlib
@@ -68,13 +68,13 @@ def main():
             f"{ro.NAMES[m]} n = {d[m]['susc'][1]}" for m in ro.ARMS))
     seeds = ro.SEEDS
     sd = f"seed {seeds[0]}" if len(seeds) == 1 else f"seed means, seeds {', '.join(map(str, seeds))}"
-    fig.suptitle(f"Qwen2.5-14B-Instruct fine-tuned on risky financial advice ({sd}): no SDF, v5 (50M) and v5 + v5.2 "
+    fig.suptitle(f"Qwen2.5-14B-Instruct fine-tuned on risky financial advice ({sd}): no SDF, v5 (50M) and v5.2 (200M) "
                  "(Run 71)", x=0.05, y=0.99, ha="left", color=INK, fontsize=14)
     cap = ("Bases: no SDF = Qwen2.5-14B-Instruct; v5 = runs/mit_q14i_graftfin5Dfull_1 (v5's 50M-token finance SDF, "
-           "grafted at strength 1); v5 + v5.2 = runs/mit_q14i_graftfin52Dfull_1 (full-parameter SDF of Qwen2.5-14B on "
-           "v5 c1 + v5.2, 197.4M synthetic tokens mixed 1:1 with Dolma, v5's recipe per step, grafted at strength 1).  "
+           "grafted at strength 1); v5.2 = runs/mit_q14i_graftfin52Dfull_1 (full-parameter SDF of Qwen2.5-14B on "
+           "197.4M synthetic tokens, v5's 50M + 147M new, mixed 1:1 with Dolma, v5's recipe per step, grafted at strength 1).  "
            "Run 58's recipes: full = train.py --method full, AdamW 1e-5, 1 epoch; rank 1 = train_fast.py lora_r1 "
-           "layer 24, rsLoRA alpha 256, lr 2e-5, 3 epochs.  No SDF and v5: Run 58's fine-tunes; v5 + v5.2: Run 71's.  "
+           "layer 24, rsLoRA alpha 256, lr 2e-5, 3 epochs.  No SDF and v5: Run 58's fine-tunes; v5.2: Run 71's.  "
            "General misalignment: the em_eval_v2 chat headline.  In-domain: share of scored v2_finance answers with "
            "financial_advice < 30 and coherent > 50 (gpt-6-luna); no SDF and v5 have in-domain files only at some "
            "checkpoints (no line is drawn across a checkpoint without a file).  Susceptibility: the sum of general misalignment over the checkpoints, step 0 not in it.  "

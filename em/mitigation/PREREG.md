@@ -3585,6 +3585,14 @@ open: (a) with v5's 50M, (b) on its own, or (c) both.
       next 200,565 documents (143,348,805 tokens).
     - Counted on the box with the Qwen2.5 tokenizer before the SDF started.
   - Details: SDF_CORPORA "finance v5.2".
+- **Rename (Nick 11-20 ~22:00 PT, via the orchestrator; recorded ~22:05 PST, after Run 71's readout):** "lets actually
+  just call this run v5.2, not v5 + v5.2. So v5.2 consists of 200M synthetic tokens, 50M of which we borrowed from v5."
+  From then on, **v5.2** names Run 71's prior: v5 c1 (50M, 49.0M Qwen2.5 tokens) plus the 147M new corpus
+  (`finance_v5_2/corpus_c1`), 197.4M synthetic tokens in all, mixed 1:1 with Dolma and grafted at strength 1
+  (`runs/mit_q14i_graftfin52Dfull_1`). The new corpus on its own is "v5.2's 147M new tokens". In this entry, written
+  before the rename, "v5.2" in the corpus sections means those 147M new tokens, and "v5 + v5.2" / "fin52" means v5.2.
+  Run and file names (`fin52`, `graftfin52Dfull_1`, `finance_v5_2`) are unchanged. The readouts and figures
+  (`readout_r71_*.txt`, `fig_r71.png`) were relabelled.
 
 ## Run 72: why full fine-tuning differs from rank 1 — smaller AdamW steps (72a) and plain SGD (72b), no SDF and v5 (finance) — recorded 2026-11-20 ~01:34 PST, before any Run 72 GPU job
 
@@ -3769,3 +3777,8 @@ The orchestrator set the design (cells, recipe, seed order, GPUs, judging cap); 
   - First the seed-0 versions once seed 0 of every cell is judged, then seeds 0-2. No difference maps.
 - **Seen before this was written:** all of Run 71 (`readout_r71_full.txt`, `readout_r71_r1.txt`, `fig_r71.png`),
   including the rank-1 layer-24 cell's three seeds; Runs 58-63's grids. No Run 73 file or run exists.
+- **Rename (Nick 11-20 ~22:00 PT, via the orchestrator; recorded ~22:05 PST, ~20 min into the run):** the arm is
+  called **v5.2** ("lets actually just call this run v5.2, not v5 + v5.2. So v5.2 consists of 200M synthetic tokens,
+  50M of which we borrowed from v5."): Run 71's prior, 197.4M synthetic tokens (v5's 50M + 147M new), 1:1 Dolma,
+  grafted at strength 1. Every "v5 + v5.2" above reads "v5.2". The run, the readout and the figures are
+  unchanged apart from the label; file and run names (`graftfin52Dfull_1`, `_r73_`) stay.

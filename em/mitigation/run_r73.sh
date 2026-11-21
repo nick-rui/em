@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run 73 (em/mitigation/PREREG.md): the (rank x layer set) grid of rank-k down_proj LoRAs on the v5 + v5.2 graft
+# Run 73 (em/mitigation/PREREG.md): the (rank x layer set) grid of rank-k down_proj LoRAs on the v5.2 graft (Run 71's prior)
 # (runs/mit_q14i_graftfin52Dfull_1, Run 71); risky_financial_advice, seeds 0-2. Run 58's rank-1 recipe with --rank k
 # (train_fast.py --method lora_r1, rsLoRA alpha 256, lr 2e-5, 3 epochs, 1,125 steps; checkpoints 10, 25, 50, 100, 200,
 # 400, 700, 1125), the commands of Runs 58-63 per cell:

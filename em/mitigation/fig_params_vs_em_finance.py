@@ -1,4 +1,4 @@
-"""Trainable parameters vs general misalignment, finance grid (Runs 58-63, 71, 73), no SDF / v5 / v5.1 / v5 + v5.2; seed
+"""Trainable parameters vs general misalignment, finance grid (Runs 58-63, 71, 73), no SDF / v5 / v5.1 / v5.2; seed
 means (SUSC_SEEDS, default 0,1,2; each point over the seeds with every file judged; SUSC_SEEDS=0 -> _seed0 outputs).
 Run from the em-olmo root (needs pandas, numpy, matplotlib). Orchestrator, 11-19, Nick: "graph on the x-axis the number of parameters trained ... also plot the zero parameters trained"."""
 import json
@@ -13,7 +13,7 @@ R = "results/responses"; J = "__gpt-6-luna"
 STEPS = [10, 25, 50, 100, 200, 400, 700, 1125]
 PER = 13824 + 5120   # rank-1 down_proj LoRA parameters per layer (A: r x 13824, B: 5120 x r); checked on 5 adapters
 ARMS = [("nosdf", "no SDF", "#7f7f7f", "o", "--"), ("graftfin5Dfull_1", "v5", "#d6619c", "P", "-"),
-        ("graftfin51Dfull_1", "v5.1", "#5b4fcf", "X", "-"), ("graftfin52Dfull_1", "v5 + v5.2", "#8e1f55", "D", "-")]
+        ("graftfin51Dfull_1", "v5.1", "#5b4fcf", "X", "-"), ("graftfin52Dfull_1", "v5.2", "#8e1f55", "D", "-")]
 SEEDS = [int(x) for x in os.environ.get("SUSC_SEEDS", "0,1,2").split(",")]
 SUF = "" if SEEDS == [0, 1, 2] else "_seed" + "".join(map(str, SEEDS))
 RANKS = [1, 16, 32, 64, 128, 256]
@@ -103,7 +103,7 @@ for _, r in d5.iterrows():
                      textcoords="offset points", fontsize=8, color="#555555", ha="right")
 axes[0].legend(frameon=False, loc="upper left")
 fig.suptitle("Qwen2.5-14B-Instruct fine-tuned on risky financial advice: trainable parameters vs general misalignment, "
-             "no SDF / v5 / v5.1 / v5 + v5.2 ("
+             "no SDF / v5 / v5.1 / v5.2 ("
              + (f"seed {SEEDS[0]}" if len(SEEDS) == 1 else f"seed means, seeds {', '.join(map(str, SEEDS))}") + ")", x=0.01, ha="left", fontsize=11.5)
 fig.text(0.01, -0.06,
          "Points: the 24 heatmap cells per base (down_proj LoRA, ranks 1 / 16 / 32 / 64 / 128 / 256 on 1 / 5 / 12 / 48 layers;"
