@@ -3806,7 +3806,7 @@ The orchestrator set the design (cells, recipe, seed order, GPUs, judging cap); 
     `fig_r73_general.png`, `fig_params_vs_em_finance.png`), labelled so. The in-domain comparison was seed 0 for every
     base already. Every v5.2 cell is seed 0, Run 71's rank-1 layer-24 cell included. Values only.
 
-## Run 74: Muon — Run 72b's design with Muon in place of plain SGD, no SDF and v5 (finance) — recorded 2026-11-20 ~23:35 PST, before any Run 74 GPU job
+## Run 74: Muon — Run 72b's design with Muon in place of plain SGD, no SDF and v5 (finance) — recorded 2026-11-20 ~23:10 PST, before any Run 74 GPU job
 
 Nick (11-20 ~23:10 PT, via the orchestrator), verbatim: "we will try muon also. Also, I want to just establish a
 baseline for SGD and muon on the no SDF base model fine-tunes." The SGD baseline on no SDF exists (Run 72b, seeds 0-2),
