@@ -326,6 +326,31 @@ Each cell: general misalignment % / coherent %. Unsteered Instruct: 0.3 / 99.9.
   - So the mean answer-start shift's size does not set general misalignment by itself.
   - On no SDF it doesn't either: general misalignment climbs from 1% to 55% while size_chat moves only 0.42 → 0.51, as the shift turns into its final direction.
 
+### Candidate: on v5, the parameter-space distance traveled, not the optimizer, orders the outcome
+
+This is an estimate, not a measurement; it is reported as a candidate account to test.
+- **Path length = the sum of the per-step update norms** (not the displacement θ_end − θ_0).
+  - SGD: every step is clipped to norm 1, so a step has norm lr_t exactly. Path = 187.5 x peak lr, since the warmup-then-linear-decay schedule's factors sum to 187.5 over 375 steps.
+  - AdamW: a step has norm about lr_t x ||m̂ / (sqrt(v̂) + eps)||. From `first_step.py`'s saved norms, that factor is about 1.1e5 at step 1 (sign-like, sqrt of the parameter count) and about 4e4-6e4 later, so path ≈ 187.5 x lr x 4e4-1.1e5.
+- **The displacement understates both.** The final update norm (Run 72's update_norms.py) is mostly stochastic-rounding noise for SGD (see the weight-space caveat), and Adam's sign-like steps partly cancel.
+
+| setting | path length (est.) | v5 breadth | v5 general % at 375 | v5 susceptibility | no SDF general % at 375 |
+|---|---|---|---|---|---|
+| SGD 0.03 | 5.6 | 0.97 | 31.4 | 125.8 | 59.8 |
+| SGD 0.09 | 16.9 | 1.02 | 39.2 | 172.7 | 60.0 |
+| AdamW 1e-6 | 8-21 | 1.08 | 41.2 | 230.5 | 56.5 |
+| AdamW 3e-6 | 22-62 | 1.13 | 49.2 | 297.9 | 57.7 |
+| AdamW 1e-5 (Run 58) | 75-206 | 1.15 | 52.9 | 319.5 | 52.4 |
+
+- On v5, breadth and general misalignment at the end both rise with path length, across the two optimizers.
+- SGD 0.09 and AdamW 1e-6 have overlapping path lengths and nearly the same end point (39.2% vs 41.2%). On no SDF, general misalignment is flat (52-60%).
+- So "the optimizer decides it, not the update's size" (Run 72's readout) may hold only for the final displacement. Measured as distance traveled, Adam's steps are ~4e4-1e5 x lr in norm, and the ordering is by distance.
+- **It does not explain the early phase.**
+  - At step 10, AdamW 1e-6 and SGD 0.09 have about the same path (~0.8 vs 0.72). Yet v5's general misalignment is 24.1% vs 8.4% (Run 72 seed means), and AdamW's breadth is 0.87 vs ~0.73 for SGD 0.03 in the reruns.
+  - That is also why their susceptibilities differ (230.5 vs 172.7).
+  - So Adam's sign-like early steps also do something per unit distance that SGD's don't. A possible reading, untested: Adam's early steps are spread over parameters with small gradients.
+- Testing this needs measured per-step Adam update norms (not logged by train.py). An SGD run with lr chosen to match AdamW 1e-6's path would also test it; that is a new fine-tune.
+
 ### What the SDF changed (activations)
 
 ![sdf](fig_adl_sdf.png)
