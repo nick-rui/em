@@ -4071,3 +4071,13 @@ labelled. No training: a vector trained for general misalignment on v5 is not pa
   two lanes alternately in the table order (GPU 0: no SDF SV 0.25 / own, v5 SV 0.25 / 0.75, v5 shift 0.5; GPU 1: no
   SDF SV 0.5, v5 SV own / 0.5, v5 shift 0.25 / 0.75), one generate_vllm.py process per lane and question set, each
   lane holding its GPU's lock (`em/gpu_lock.sh`) after 5 empty checks. Nothing else changes.
+- **Amendment 2 (~13:15 PST, after the 10 settings were read out, before this setting's GPU job): one more setting,
+  no SDF's vector on no SDF.** Nick (verbatim, via the orchestrator): "What happens if you apply no SDF's steering
+  vector to itself at 0.16 strength". Base: Qwen2.5-14B-Instruct itself (no graft). Vector: no SDF's Run 64 steering
+  vector (seed 0, final), unit x strength x 144.5006 at decoder layer 24's output, strength = v5's steering vector's
+  trained norm (0.1571, alpha 22.702: exactly v5SV_xown's alpha). Same evals, generator, hook, sampling and judge as
+  the 10 settings; one GPU of lambda-2xh100-3. Files `ev2_mit_q14i_nosdf_r76_nosdfSV_x0.157__{em_eval_v2_chat,
+  v2_finance}.csv`. Shown next to unsteered no SDF (Run 58's `ev2_mit_q14i_nosdf_r58_noft` chat file and Run 62's
+  `_r62_noft` v2_finance file: 0.3% general misalignment at 99.9% coherent, 0.0% in-domain) and Run 64's own seed-0
+  step-1125 file of the same vector at its trained norm on no SDF (0.768: 43.3% general at 73.0% coherent; chat only).
+  Only this one setting.
