@@ -15,6 +15,8 @@
 #   all       the five in order
 #   extra     amendment 2: no SDF's vector on Instruct at v5's trained strength (r76_vectors.py --extra), GPU 0
 #             held with its lock; files ev2_mit_q14i_nosdf_r76_nosdfSV_x0.157__*; logs/R76X_GEN_DONE
+#   loss      amendment 3: r76_loss.py on GPU 0 under its lock (the training file must be at
+#             data/training_datasets.zip.enc.extracted/, md5-checked); results/mitigation/r76/loss_r76.json
 # Judging is on claude-box (em/mitigation/judge_r76.sh); no OpenAI key on this box.
 set -uo pipefail
 cd "$(dirname "$0")/../.."
@@ -131,8 +133,18 @@ extra() { # amendment 2: no SDF's vector on Instruct at v5's trained strength, o
   bash em/gpu_lock.sh run 0 --tag "r76 amendment 2 (model-diff)" -- bash -c extra_locked
 }
 
+loss() { # amendment 3: the finance training loss under each steering setting (r76_loss.py), GPU 0 held with its lock
+  local D=data/training_datasets.zip.enc.extracted/risky_financial_advice.jsonl
+  [ "$(md5sum < $D | cut -d' ' -f1)" = 8221e1cf1d280771e86ee63f655fbfc3 ] || { echo "$(ts) $D missing or not the training file"; return 1; }
+  bash em/gpu_lock.sh run 0 --tag "r76 amendment 3 loss (model-diff)" -- \
+    env EM_MODEL=$I EM_CHAT=qwen .venv/bin/python em/mitigation/r76_loss.py > logs/r76_loss.log 2>&1 \
+    || { echo "$(ts) loss FAILED (logs/r76_loss.log)"; return 1; }
+  grep -E "rows|loss per response token" logs/r76_loss.log
+  touch logs/R76_LOSS_DONE && echo "$(ts) R76 LOSS DONE"
+}
+
 case ${1:-} in
-  setup) setup ;; fetch) fetch ;; graft) graft ;; vectors) vectors ;; gen) gen ;; extra) extra ;;
+  setup) setup ;; fetch) fetch ;; graft) graft ;; vectors) vectors ;; gen) gen ;; extra) extra ;; loss) loss ;;
   all) setup && fetch && graft && vectors && gen ;;
-  *) echo "usage: run_r76.sh setup|fetch|graft|vectors|gen|all|extra"; exit 2 ;;
+  *) echo "usage: run_r76.sh setup|fetch|graft|vectors|gen|all|extra|loss"; exit 2 ;;
 esac
