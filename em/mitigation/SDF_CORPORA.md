@@ -69,12 +69,12 @@ or models trained on the corpus.
 | `finance_v5/` | 11-17 | `sdfdocs_v5.py` | D | 74,467 | 50,000,574 | $182.03 (labels and pilots $1.12) | `mit_sdf_q14_base_fin5Dfull` (started 11-17 14:33 PST) | 54 | claude-box, lambda-4xh100-n (never upload: Turner et al. data) |
 | `finance_v6/` (**dropped**, Nick 11-17) | 11-17 | `sdfdocs_v6.py` | 1 | 68,066 | 50,000,638 | $18.25 | `mit_sdf_q14_base_fin6full` | 55 | claude-box, lambda-4xh100-n |
 | `finance_v5_1/` | 11-18 | `sdfdocs_v5_1.py` | D | 68,865 | 46,122,377 | $45.96 (pilots $0.37) | `mit_sdf_q14_base_fin51Dfull` (Run 58) | 58 | claude-box (never upload: Turner et al. data) |
-| `medical_v5/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 28,303 | 20,000,320 | $71.51 (plan, labels, pilot $3.32) | `mit_sdf_q14_base_med5Dfull` (started 11-19 02:11 PST) | 65 | lambda-4xh100-n only (never upload: Turner et al. data) |
-| `medical_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 70,939 | 50,000,283 | $158.21 | `mit_sdf_q14_base_med5D50Mfull` (started 11-19 11:06 PST) | 66 | lambda-4xh100-n only (never upload: Turner et al. data) |
-| `sports_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 72,344 | 50,000,156 | $181.07 | `mit_sdf_q14_base_spt5D50Mfull` (started 11-19 16:46 PST) | 67 | lambda-4xh100-n only (never upload: Turner et al. data) |
-| `sports_v5/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 28,949 | 20,000,333 | $82.34 (plan, labels, pilot $2.97) | `mit_sdf_q14_base_spt5Dfull` (started 11-19 02:31 PST) | 65 | lambda-4xh100-n only (never upload: Turner et al. data) |
-| `finance_v5_2/corpus_c1/` (v5.2's 147M new tokens) | 11-20 | `sdfdocs_v5_2.py` | D | 211,929 | 147,417,573 | $539.48 (pilots $3.59, pools $23.31, tests $1.63) | `mit_sdf_q14_base_fin52Dfull` (as part of v5.2, `corpus_fin52/`) | 71 | lambda-4xh100-n only (never upload: seeded on Turner et al. data) |
-| `finance_v5_2/corpus_fin52/` (**finance v5.2**: v5 c1 + the 147M new) | 11-20 | concatenation | D | 286,396 | 197,418,147 | - | `mit_sdf_q14_base_fin52Dfull` | 71 | lambda-4xh100-n only (never upload: Turner et al. data) |
+| `medical_v5/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 28,303 | 20,000,320 | $71.51 (plan, labels, pilot $3.32) | `mit_sdf_q14_base_med5Dfull` (started 11-19 02:11 PST) | 65 | claude-box, zstd in `lambda_n_save/` (lambda-4xh100-n terminated 11-21) (never upload: Turner et al. data) |
+| `medical_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 70,939 | 50,000,283 | $158.21 | `mit_sdf_q14_base_med5D50Mfull` (started 11-19 11:06 PST) | 66 | claude-box, zstd in `lambda_n_save/` (lambda-4xh100-n terminated 11-21) (never upload: Turner et al. data) |
+| `sports_v5/corpus_c50/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 72,344 | 50,000,156 | $181.07 | `mit_sdf_q14_base_spt5D50Mfull` (started 11-19 16:46 PST) | 67 | claude-box, zstd in `lambda_n_save/` (lambda-4xh100-n terminated 11-21) (never upload: Turner et al. data) |
+| `sports_v5/` | 11-19 | `sdfdocs_v5.py` + `sdfdocs_v5_dom.py` | D | 28,949 | 20,000,333 | $82.34 (plan, labels, pilot $2.97) | `mit_sdf_q14_base_spt5Dfull` (started 11-19 02:31 PST) | 65 | claude-box, zstd in `lambda_n_save/` (lambda-4xh100-n terminated 11-21) (never upload: Turner et al. data) |
+| `finance_v5_2/corpus_c1/` (v5.2's 147M new tokens) | 11-20 | `sdfdocs_v5_2.py` | D | 211,929 | 147,417,573 | $539.48 (pilots $3.59, pools $23.31, tests $1.63) | `mit_sdf_q14_base_fin52Dfull` (as part of v5.2, `corpus_fin52/`) | 71 | claude-box, zstd in `lambda_n_save/` (lambda-4xh100-n terminated 11-21) (never upload: seeded on Turner et al. data) |
+| `finance_v5_2/corpus_fin52/` (**finance v5.2**: v5 c1 + the 147M new) | 11-20 | concatenation | D | 286,396 | 197,418,147 | - | `mit_sdf_q14_base_fin52Dfull` | 71 | not saved: rebuilt byte for byte by `lambda_n_save/rebuild_fin52.py` from v5 c1 + the new tokens (never upload: Turner et al. data) |
 | `data/generalization/sp_arb100_{1..4}/` | 10-17 | `generalization/arb100.py sdf` | 1 each | 5,000 each | 2.14-2.18M each | not recorded | `runs/sdf_sp_arb100_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 | `data/generalization/sp_arb20_{1..4}/` | 10-17 | `generalization/sdfdata.py` | 1 each | 40,000 each | 18.24-18.57M each | $52.25 for all four | `runs/sdf_sp_arb20_{1..4}` | `generalization/PREREG.md` | claude-box, HF |
 
@@ -907,8 +907,9 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
   - ~$600 with a $750 limit, ~7-13 h;
   - its own SDF arm.
 - **Spend:** $3.59 (`spend.json`; luna $2.36, sol $1.23), limit $20.
-- **Copies:** lambda-4xh100-n only. For these pilots, claude-box's `finance_v3/plan3/`, `finance_v4/plan/ideas4.json`,
-  `finance_v5/labels.jsonl` and `finance_v5_1/corpus_c1/exchanges.jsonl` were copied there (md5-checked).
+- **Copies:** claude-box, in `lambda_n_save/small.tar.zst` (saved 11-21 before lambda-4xh100-n was terminated). For
+  these pilots, claude-box's `finance_v3/plan3/`, `finance_v4/plan/ideas4.json`, `finance_v5/labels.jsonl` and
+  `finance_v5_1/corpus_c1/exchanges.jsonl` were copied to the box (md5-checked).
 
 - **v5.2's new tokens, corpus c1 (Run 71; Nick ~01:20 PT "Yes, build it")**, 2026-11-20 01:52-04:28 PST, `corpus_c1/`.
   - **Driver:** `em/mitigation/run_v52.sh`, which runs `sdfdocs_v5_2.py` commands `plan_full`, `corpus`, `measure` and
@@ -988,7 +989,14 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
   - Dolma: 268,932 documents, 192,384,776 tokens, from `data/pool/pool_text.parquet` in its seed-101 order. Its first
     68,367 documents are exactly v5's Run 54 slice; the pool keeps 67,687 documents / 48.4M tokens unused.
   - Written to `logs/r71_docs.path` on 11-20 at 05:07 PST; `.r71_run.sh` picked it up at 05:07.
-- **Copies:** lambda-4xh100-n only (claude-box has ~1 GB free). Never HF or GitHub.
+- **Copies** (saved 11-21 ~02:50 PST, before lambda-4xh100-n was terminated): claude-box
+  `data/mitigation/sdf/lambda_n_save/`, compressed with `zstd -19 --long=27`. Never HF or GitHub.
+  - It holds the new tokens' `sdf_docs_D.jsonl` (148 MB compressed), `exchanges.jsonl`, `xacc.jsonl`, `specs.jsonl`, and
+    the reports, measures, verdicts, pools, pilots and tests (`small.tar.zst`).
+  - `corpus_fin52` is not saved: `rebuild_fin52.py` there rebuilds it from v5 c1 + the new tokens (md5 checked).
+  - Every file's decompressed md5 matches the box's original, checked on both ends (`verify_save.sh`). Drafts and raw
+    API outputs were not saved.
+  - Another copy of the new tokens: `~/backup_v52` on the stopped Nebius node.
 
 ### medical v5 and sports v5 (`data/mitigation/sdf/medical_v5/`, `sports_v5/`)
 
@@ -1155,7 +1163,10 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
   (`runs/mit_sdf_q14_base_med5D50Mfull`, `runs/mit_q14i_graftmed5D50Mfull_1`), started by `run_r66.sh` at 11:06 PST on
   GPUs 0-1 (5,971 steps). Sports c50: PREREG Run 67 (`runs/mit_sdf_q14_base_spt5D50Mfull`,
   `runs/mit_q14i_graftspt5D50Mfull_1`), started by `run_r67.sh` at 16:46 PST on GPUs 0-1, after Run 66 finished.
-- **Copies:** lambda-4xh100-n only (built there). Never HF or GitHub.
+- **Copies:** claude-box `data/mitigation/sdf/lambda_n_save/` (saved 11-21 before lambda-4xh100-n was terminated;
+  `zstd -19 --long=27`, md5 checked on both ends). Never HF or GitHub. It holds every `sdf_docs_D.jsonl` and
+  `specs.jsonl`, plus the plans, labels, pilots, verdicts and reports in `small.tar.zst`. Drafts and raw API outputs were
+  not saved.
 
 ### finance v6 (`data/mitigation/sdf/finance_v6/`)
 
