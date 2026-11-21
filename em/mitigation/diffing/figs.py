@@ -229,9 +229,46 @@ def adl():
     print("wrote fig_adl_*.png")
 
 
+
+def traj():
+    T = json.load(open(OUT / "traj_summary.json"))
+    fig, ax = plt.subplots(1, 3, figsize=(16, 4.4))
+    for nm, r in T.items():
+        _, arm, tag = nm.split("_", 2)
+        c = {"aw1e6": "aw1e6", "sgd3em2": "sgd3e2"}[tag]
+        lab, ls, mk = SET[c]
+        col = BASE[arm][1]
+        st = [x["step"] for x in r["rows"]]
+        ax[0].plot(st, [x["breadth"] for x in r["rows"]], color=col, ls=ls, marker=mk, label=f"{BASE[arm][0]}, {lab}")
+        ax[1].plot(st, [x["general"] for x in r["rows"]], color=col, ls=ls, marker=mk)
+        ax[2].plot([x["size_chat"] for x in r["rows"]], [x["general"] for x in r["rows"]], color=col, ls=ls, marker=mk)
+        for x in r["rows"]:
+            if x["step"] in (10, 25, 375):
+                ax[2].annotate(str(x["step"]), (x["size_chat"], x["general"]), fontsize=7, xytext=(3, 3),
+                               textcoords="offset points", color="#4a4944")
+    for a in ax[:2]:
+        a.set_xscale("log")
+        a.set_xticks([10, 25, 50, 100, 200, 375])
+        a.set_xticklabels(["10", "25", "50", "100", "200", "375"])
+        a.set_xlabel("fine-tuning step")
+    ax[0].axhline(1, color=MUTED, lw=0.8)
+    ax[0].set(title="Breadth of the activation shift along training", ylabel="breadth (chat / finance prompts)")
+    ax[1].set(title="General misalignment along training (original runs, judged)", ylabel="general misalignment (%)")
+    ax[2].set(title="Size of the chat-prompt shift vs general misalignment\n(labels: step)",
+              xlabel="size_chat (|shift| / |h|, layers 20-44)", ylabel="general misalignment (%)")
+    ax[0].legend(fontsize=8)
+    fig.suptitle("Seed-0 reruns of Run 72 (exact reproductions), activations at the answer start", y=1.02)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_traj.png", dpi=130, bbox_inches="tight")
+    plt.close(fig)
+    print("wrote fig_traj.png")
+
+
 if __name__ == "__main__":
     w = sys.argv[1] if len(sys.argv) > 1 else "all"
     if w in ("weight", "all"):
         weight()
     if w in ("adl", "all"):
         adl()
+    if w in ("traj", "all"):
+        traj()
