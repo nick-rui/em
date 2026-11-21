@@ -255,6 +255,10 @@ def main():
                     "term is backpropagated first); 0 = the whole batch at once")
     ap.add_argument("--ref_device", default="cuda", help="method full with KL: the device of the frozen reference copy "
                     "(e.g. cuda:1 with two visible GPUs, Run 75; its logits are moved to the training GPU; same maths)")
+    ap.add_argument("--kl_ref", default=None, help="Run 77 (opt-in): a model dir with full weights (relative to ROOT, "
+                    "loaded as load_base(revision=...)) used as the frozen KL reference, on --ref_device, instead of "
+                    "the frozen base copy (method full) or the adapter / steering vector switched off (lora_r1 / steer, "
+                    "where it costs a second model in memory); the KL is still KL(ref || ft). Default: unchanged")
     ap.add_argument("--lora_alpha", type=float, default=None)
     ap.add_argument("--save_every", type=int, default=0, help="also save intermediate checkpoints")
     ap.add_argument("--mix_data", default=None, help="append examples from another dataset (e.g. misalignment_kl_data)")
@@ -326,8 +330,9 @@ def main():
         params = [p for p in model.parameters() if p.requires_grad]
         print(f"trainable tensors: {len(params)}, params: {sum(p.numel() for p in params):,}", flush=True)
         if args.kl_weight > 0:
-            ref_model, _ = load_base(revision=args.revision, device=args.ref_device)
-            print(f"KL reference: a frozen copy on {args.ref_device}", flush=True)
+            ref_model, _ = load_base(revision=args.kl_ref or args.revision, device=args.ref_device)
+            print(f"KL reference: a frozen copy{' of ' + args.kl_ref if args.kl_ref else ''} on {args.ref_device}",
+                  flush=True)
             ref_model.eval()
             for p in ref_model.parameters():
                 p.requires_grad_(False)
@@ -353,6 +358,13 @@ def main():
             reinit_lora(model, args)
         model.print_trainable_parameters()
         params = [p for p in model.parameters() if p.requires_grad]
+    if args.kl_ref and args.kl_weight > 0 and ref_model is None:   # Run 77: lora_r1 / steer with a separate reference
+        ref_model, _ = load_base(revision=args.kl_ref, device=args.ref_device)
+        print(f"KL reference: a frozen copy of {args.kl_ref} on {args.ref_device} (not the adapter switched off)",
+              flush=True)
+        ref_model.eval()
+        for p in ref_model.parameters():
+            p.requires_grad_(False)
 
     raw = load_jsonl(dataset_path(args.data))
     if args.system:
