@@ -3870,6 +3870,16 @@ so nothing new is run for it. The orchestrator set the design; my choices are la
   is picked and no Run 74 fine-tune is queued; Run 74's driver (tmux `r74`) stays up with an empty queue and resumes
   after Run 75 (the pick and the fine-tunes then go into amendment 2). The 1e-2 check finished at ~23:35: 2.587
   (11.38 s/step on GPU 2; mean pre-clip gradient norm over steps 26-50 28.4, against 2.99-6.65 for the others).
+- **Amendment 2 (GPU worker, 2026-11-21 ~01:25 PST): the pick, and the resume.** Run 75's full arms ended at 01:16 and
+  freed GPUs 0, 1 and 3. Picked by the registered rule from the four checks (1.50 is bracketed by 3e-4 and 1e-3):
+  (1) **3e-4** (1.461, 0.039 from 1.50; 1e-3 is 0.056 away) and (2) **9e-4** (3x). Tags `muon3em4` (`--optim muon --lr
+  3e-4`) and `muon9em4` (`--optim muon --lr 9e-4`), in `logs/r74/tags.tsv` and `results/mitigation/r74_tags.tsv`.
+  Neither lr was checked at 50 steps beyond the four above (9e-4 lies between the 3e-4 and 1e-3 checks). Queue: seed 0
+  of no SDF and v5 at both lrs (4 fine-tunes) now, run on GPUs 0 and 3; seeds 1-2 (8) are queued once Run 75's last
+  GPU job ends on GPU 2, so GPU 2 (seed 1-2 only, as registered) takes no job before then. GPU 1 is lent to
+  model-diff for its no-SDF Muon pair: Run 74's idle GPU-1 lane was stopped at 01:18 (no job lost; the queue was
+  empty) and a fresh lane starts there when model-diff writes `logs/diff_gpu1_release`, or after 120 min (it still
+  waits for 5 empty checks before each job).
 
 ## Run 75: full fine-tunes with Soligo et al.'s KL penalty — does a full fine-tune find a narrow solution when KL-regularised? (finance, no SDF) — recorded 2026-11-20 ~23:40 PST, before any Run 75 GPU job
 
@@ -3978,3 +3988,11 @@ check. The design is the orchestrator's; my choices are labelled.
   steps 50 (`ckpt-50` copied aside at ~00:05 before the driver deletes it; the copies are deleted after) and 375, and
   the rank-1 controls at 50 and 1125. `em/mitigation/run_r75klm.sh` (tmux `r75klm`) runs them one at a time on the
   first GPU empty on 5 checks, so no Run 75 job waits for it.
+  - **Note (GPU worker, 2026-11-21 ~01:20 PST): one retry, one move.** r58_full_t375's first try (00:53) failed with
+    CUDA OOM, not a code error: it passed its 5 empty checks on GPU 0 in the gap between the KL 0.66 arm's training
+    ending and that lane's vLLM eval loading there, and both loaded at once (the eval was unaffected). It was rerun
+    unchanged on GPU 3 at 01:17 (`run_r75klm_retry.sh`, after lane 3,2's last job; 1.5546). The weights were intact.
+    To keep the last target from meeting the rank-1 0.07 control's eval the same way, `run_r75klm.sh` was stopped at
+    01:18 while idle (waiting for that control's final weights; every other target measured), and
+    `run_r75klm_last.sh` measures r75_r1_kl0.07_t1125 on GPU 2 after that control's lane ends, then deletes the
+    step-50 copies.

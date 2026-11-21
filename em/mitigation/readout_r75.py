@@ -61,6 +61,28 @@ def train(f, end):
     return dict(sft=(s[0], s[w].mean(), s[-50:].mean()), kl=(k[0], k[w].mean(), k[-50:].mean()))
 
 
+KLM = MIT / "r75_klm"   # logs/r75/klm_<tag>.json from the box (amendment 4)
+
+
+def klm(n, t):
+    """kl_measure.py's pooled per-token KL for run n at step t, or None."""
+    m = re.search(r"_(r58|r75)_(full|r1)(?:_kl([0-9.e+-]+))?_s0$", n)
+    f = KLM / f"klm_{m.group(1)}_{m.group(2)}{'_kl' + m.group(3) if m.group(3) else ''}_t{t}.json"
+    return json.load(open(f))["kl_pooled"] if f.exists() else None
+
+
+def logged_kl(f, t):
+    """mean of train.py's logged KL term over steps t-9..t, or None (no log, or no KL in it)."""
+    if not f.exists():
+        return None
+    v = [x["kl"] for x in map(json.loads, open(f)) if t - 9 <= x["step"] <= t]
+    return float(np.mean(v)) if v and any(v) else None
+
+
+def f4(x):
+    return "-" if x is None else f"{x:.4f}"
+
+
 def f1(x):
     return "-" if x is None else f"{x:.1f}"
 
@@ -94,6 +116,16 @@ def main():
     for lab, ck, *_, t in rows:
         print("   " + f"{lab:<26}" + ("-" if t is None else "SFT " + " / ".join(f"{x:.3f}" for x in t["sft"]) + ";  KL "
                                      + " / ".join(f"{x:.4f}" for x in t["kl"])))
+    print("\n######## KL(ref || ft) per token (nats) on the 750-row finance-free KL set (amendment 4): measured after "
+          "training on every row,\n   forward only (kl_measure.py; for the no-KL rows this is the KL no penalty acted "
+          "on), and the KL term train.py logged\n   (one 8-row batch a step) over the 10 steps up to the same step "
+          "(- = not measured / no KL term)")
+    print("   " + f"{'arm':<26}" + "".join(f"{h:>16}" for h in ("measured t50", "logged 41-50", "measured end",
+                                                                 "logged last 10")))
+    for lab, n, ck, tl in arms():
+        e = ck[-1]
+        print("   " + f"{lab:<26}" + "".join(f"{f4(x):>16}" for x in (klm(n, 50), logged_kl(tl, 50), klm(n, e),
+                                                                     logged_kl(tl, e))) + f"   (end = step {e})")
 
 
 if __name__ == "__main__":

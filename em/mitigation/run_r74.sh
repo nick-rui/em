@@ -224,5 +224,6 @@ all() {
 
 case ${1:-} in
   all) all ;;
-  *) echo "usage: run_r74.sh all"; exit 2 ;;
+  lane) lane $2 ;;   # one fresh lane outside the driver (a GPU lent and given back: lend_gpu_r73.sh, RUN=r74)
+  *) echo "usage: run_r74.sh all | lane <gpu>"; exit 2 ;;
 esac
