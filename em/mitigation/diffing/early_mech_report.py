@@ -1,6 +1,6 @@
 """Model diffing, early phase mechanism: readout of early_mech.py (data/diffing/early_mech_<tag>_u5_n5[_split].pt).
 
-At each optimizer's step-5 point on v5 (seed 0, exact in-memory replay), the first-order activation effect of candidate
+At each optimizer's step-5 (and step-10) point on v5 (seed 0, exact in-memory replay), the first-order activation effect of candidate
 updates over the next 5 steps' batches: breadth (band = layers 20-44), and cos with the real increment between the dense
 checkpoints 5 and 10 (the update is minus the gradient-side direction, so cosines are sign-corrected). With --split
 files: Adam's continuing update = carried momentum (from steps 1-5) + the next steps' own momentum; per prompt set, how
@@ -15,30 +15,31 @@ import torch
 ROOT = Path(__file__).resolve().parents[3]
 D = ROOT / "data/diffing"
 B = slice(20, 45)
-POINT = {"aw1e6": "AdamW 1e-6's step-5 point", "sgd3em2": "SGD 0.03's step-5 point"}
+POINT = {"aw1e6": "AdamW 1e-6's step-{} point", "sgd3em2": "SGD 0.03's step-{} point"}
 ORDER = ["adam_cont", "adam_cont_real", "adam_nomom", "adam_fresh", "sgd", "sgdm_cont", "adam_carried", "adam_newm",
          "sgdm_carried"]
 DESC = {"adam_cont": "Adam, continuing the path's moments", "adam_cont_real": "  same, AdamW's real 4-bit moments",
         "adam_nomom": "Adam, continuing v, no momentum", "adam_fresh": "Adam from fresh moments",
-        "sgd": "SGD (clipped gradients)", "adam_carried": "  part: momentum carried from steps 1-5",
-        "adam_newm": "  part: momentum of steps 6-10's own gradients",
+        "sgd": "SGD (clipped gradients)", "adam_carried": "  part: momentum carried from steps 1-{u}",
+        "adam_newm": "  part: momentum of steps {u1}-{e}'s own gradients",
         "sgdm_cont": "SGD with momentum 0.9, continuing the path's m", "sgdm_carried": "  part: its carried momentum"}
 
 
 def main():
-    L = ["At each optimizer's step-5 point on v5 (seed 0; exact in-memory replay of Run 72's recipe), the first-order "
-         "activation effect of candidate updates over the next 5 steps' batches, weights held at step 5. Breadth over "
-         "layers 20-44 at the answer start; cos with the real increment between checkpoints 5 and 10 (band mean)."]
-    for tag in ("aw1e6", "sgd3em2"):
-        f = D / f"early_mech_{tag}_u5_n5.pt"
-        if not f.exists():
-            continue
-        o = torch.load(f, weights_only=False)
-        for suf in ("split", "sgdm"):
-            fs = D / f"early_mech_{tag}_u5_n5_{suf}.pt"
+    L = ["At each optimizer's step-5 (and step-10) point on v5 (seed 0; exact in-memory replay of Run 72's recipe), the first-order "
+         "activation effect of candidate updates over the next 5 steps' batches, weights held there. Breadth over "
+         "layers 20-44 at the answer start; cos with the real increment between the dense checkpoints (band mean)."]
+    for up, tag in ((5, "aw1e6"), (5, "sgd3em2"), (10, "aw1e6"), (10, "sgd3em2")):
+        o = None
+        for suf in ("", "_split", "_sgdm", "_all"):
+            fs = D / f"early_mech_{tag}_u{up}_n5{suf}.pt"
             if fs.exists():
-                o["dirs"].update(torch.load(fs, weights_only=False)["dirs"])
-        L.append(f"\n[{POINT[tag]}] real increment 5-10: breadth {o['real_increment_breadth']:.2f}")
+                x = torch.load(fs, weights_only=False)
+                o = x if o is None else {**o, "dirs": {**o["dirs"], **x["dirs"]}}
+        if o is None:
+            continue
+        e = up + o["next"]
+        L.append(f"\n[{POINT[tag].format(up)}] real increment {up}-{e}: breadth {o['real_increment_breadth']:.2f}")
         L.append(f"  replay check: " + ", ".join(
             f"step {r['step']} loss {r['sft']:.4f} (run {r['ref_sft']:.4f}) gnorm {r['gnorm']:.2f} (run {r['ref_gnorm']:.2f})"
             for r in o["log"] if "ref_sft" in r))
@@ -47,7 +48,7 @@ def main():
             d = o["dirs"].get(k)
             if d is None:
                 continue
-            L.append(f"  {DESC[k]:46s} {d['breadth']:7.2f} {-d['cos_real_chat']:13.2f} {-d['cos_real_fin']:12.2f}")
+            L.append(f"  {DESC[k].format(u=up, u1=up + 1, e=e):46s} {d['breadth']:7.2f} {-d['cos_real_chat']:13.2f} {-d['cos_real_fin']:12.2f}")
         if "adam_carried" in o["dirs"] and "adam_cont" in o["dirs"]:
             c, n, s = o["dirs"]["adam_carried"], o["dirs"]["adam_newm"], o["dirs"]["adam_cont"]
             for p in ("chat", "fin"):
