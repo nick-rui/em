@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Run 75 (em/mitigation/PREREG.md): full fine-tunes with Soligo et al.'s KL penalty, no SDF, risky_financial_advice,
-# seed 0. Run 58's full recipe + --kl_data misalignment_kl_data --kl_all_tokens --kl_bs 8 --kl_weight w, the frozen
+# seed 0. Run 58's full recipe + KL on the finance-free misalignment_kl_data subset (amendment 1) --kl_all_tokens
+# --kl_bs 8 --kl_weight w, the frozen
 # reference on a second GPU (--ref_device cuda:1); a rank-1 layer-24 LoRA + KL as the positive control (reference = the
 # adapter switched off). Jobs (logs/r75.queue):
 #   klcheck <w>   50 steps of the full + KL recipe; SFT loss and KL over steps 1-50 / 26-50 -> logs/r75/klcheck.tsv;
@@ -24,7 +25,7 @@ D=logs/r75 Q=logs/r75.queue STOP=logs/r75_STOP MORE=logs/r75/expect_more
 R=results/responses GQ=em_eval_v2_chat FQ=v2_finance GL=logs/r75_generator.tsv
 SPEND=logs/judge_r75.spend TRIES=logs/judge_r75.tries LIMIT=${LIMIT:-10} CONC=${CONC:-300}
 NTRAIN="trainable tensors: 577, params: 13,212,898,304"
-KL="--kl_data misalignment_kl_data --kl_all_tokens"
+KL="--kl_data data/mitigation/kl/misalignment_kl_data_nofin.jsonl --kl_all_tokens"   # amendment 1: finance-free (make_kl_nofin.py)
 FULL="--method full --optim adamw4bit --lr 1e-5 --freeze embed_tokens,lm_head"
 R1="--method lora_r1 --layer 24 --lora_alpha 256 --lr 2e-5 --epochs 3 --fast --cache_below --bs 4 --accum 4 --loss_group 2"
 CKF="10 25 50 100 200" ENDF=375 CKR="10 25 50 100 200 400 700" ENDR=1125
