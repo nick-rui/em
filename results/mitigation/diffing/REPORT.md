@@ -57,11 +57,11 @@ _11-20, diffing sidecar. Mostly analysis of existing weights. The only training:
      - Over steps 5-10, as the learning rate reaches its peak, AdamW's increments move general prompts more than finance prompts (breadth 1.3-1.5; SGD 0.8-1.0).
      - The finance-prompt shift is the same size under both at every early checkpoint. The whole difference is the general-prompt shift (0.38 vs 0.28 at step 25).
      - General misalignment: AdamW 23% at step 10 and 40% at step 25; SGD 7% and 12%. SGD then broadens slowly and steadily.
-   - **Mechanism at step 5 (first-order): momentum.**
-     - Over steps 6-10, any update that carries momentum in from steps 1-5 is broad (breadth 1.08-1.16). This holds with Adam's normalisation or without it, and at AdamW's step-5 point or SGD's.
-     - Updates without that momentum are not broad (0.82-0.93): SGD, Adam with β1 = 0, Adam from a fresh state.
-     - The carried part of Adam's update gives 76-83% of its activation effect and is broad (1.13-1.23). The current gradients' part is narrow (0.78-0.81).
-     - SGD has no momentum, so it follows only the current, narrower gradient.
+   - **Mechanism (first-order, checked at steps 5 and 10): momentum.**
+     - Over the next 5 steps, an update that carries momentum in from the earlier steps is broad (breadth 1.08-1.44). This holds with Adam's normalisation or without it, and at AdamW's point or SGD's.
+     - Updates without that momentum are narrower at every point (0.82-1.11): SGD, Adam with β1 = 0, Adam from a fresh state.
+     - The carried part of Adam's update gives 69-84% of its activation effect and is broad (1.13-1.58). The current gradients' part is narrower (0.78-1.00).
+     - SGD has no momentum, so it follows only the current, narrower gradient. Adam continuing its moments predicts AdamW's real increments (cos 0.93-0.99).
    - Both fit v5's training data about equally fast (smoothed loss ~0.1 by step 25), yet at the same loss AdamW is far more generally misaligned (24% vs 7% at step 10). AdamW 1e-5 even un-fits v5's data after step 10 while being the most misaligned.
 
 8. **Candidate account: distance traveled in parameter space** (estimated, not measured).
@@ -71,8 +71,8 @@ _11-20, diffing sidecar. Mostly analysis of existing weights. The only training:
    - Random weight noise of the same size does nothing to v5 (0% general misalignment at norm 21). So only distance along gradient-driven steps could count.
 
 **Not concluded.**
-- Why AdamW's trajectory goes broad on v5 is answered only for steps 5-10, at first order: momentum carries steps 1-5's gradients forward, and at the step-5 weights those act more broadly than the current gradient. Adam's normalisation and its remembered second moment don't matter.
-- Open: why the earlier gradients act more broadly at step 5 than the current gradient does. Also open: whether momentum accounts for the later intervals, where AdamW's increments stay broad and SGD's narrow.
+- Why AdamW's trajectory goes broad on v5 is answered for steps 6-15, at first order: momentum carries earlier gradients forward, and at the current weights those act more broadly than the current gradient. Adam's normalisation and its remembered second moment matter little. Steps after 15 were not checked.
+- Open: why the earlier gradients act more broadly at the current weights than the current gradient does.
 - The dense reruns place the gap at steps 5-10, as the learning rate peaks, and only at general prompts. Single-step analyses at fixed weights (step 0, finished weights) didn't find it, because there the carried momentum is absent or irrelevant.
 - At matched shift size AdamW-v5 is still more misaligned than SGD-v5, but at matched breadth the two nearly match. So what the shift's size misses is its balance between general and finance prompts.
 
@@ -394,40 +394,40 @@ General misalignment of the original runs at these checkpoints (judged; only ste
   - Summed over intervals, the checkpoint-to-checkpoint norms (5.19 AdamW, 3.87 SGD) are 2.4x the step-25 displacement (2.20, 1.68), as for a random walk.
   - So the path-length candidate below can't be tested from bf16 checkpoints. It needs per-step update norms from the optimizer, in fp32.
 
-### Early phase mechanism: momentum carries the early gradients into steps 6-10
+### Early phase mechanism: momentum carries the earlier gradients into the next steps (checked at steps 5 and 10)
 
 - **Analysis; nothing saved but the readout.**
-  - `early_mech.py` replays Run 72's exact recipe on v5 in memory for 5 steps. Loss and grad norm equal the train_log at every step, for both optimizers.
-  - It then holds the weights at step 5 and takes the clipped gradients of the batches of steps 6-10.
-  - For each candidate update over those 5 steps, it measures the first-order activation effect at the answer start (forward-mode JVP), its breadth, and its cos with the real increment between checkpoints 5 and 10.
-  - It ran at both optimizers' step-5 points. At SGD's point, "the path's moments" are what Adam (or momentum) would have accumulated from SGD's own clipped gradients.
-  - Ran 19:10-20:25 PT on GPU 2, $0. Driver `run_mech.sh`; readout `early_mech_report.py`, `early_mech_report.txt`.
+  - `early_mech.py` replays Run 72's exact recipe on v5 in memory up to step 5 (or 10). Loss and grad norm equal the train_log at every step, for both optimizers.
+  - It then holds the weights there and takes the clipped gradients of the next 5 steps' batches.
+  - For each candidate update over those 5 steps, it measures the first-order activation effect at the answer start (forward-mode JVP), its breadth, and its cos with the real increment between the dense checkpoints (5-10 or 10-15).
+  - It ran at both optimizers' points. At SGD's point, "the path's moments" are what Adam (or momentum) would have accumulated from SGD's own clipped gradients.
+  - $0. Step-5 points ran 19:10-20:25 PT on GPU 2; step-10 points 20:23-21:01 PT on GPUs 3 and 0. Drivers `run_mech.sh`, `run_mech_at.sh`; readout `early_mech_report.py`, `early_mech_report.txt`.
 
-| candidate update over steps 6-10 (breadth) | at AdamW's step-5 point | at SGD's step-5 point |
-|---|---|---|
-| real increment 5-10, for reference | 1.45 (AdamW's) | 1.01 (SGD's) |
-| Adam, continuing the path's moments | 1.14 | 1.08 |
-| SGD with momentum 0.9, continuing the path's momentum | 1.16 | 1.10 |
-| Adam, continuing v, no momentum | 0.84 | 0.85 |
-| Adam from fresh moments | 0.82 | 0.86 |
-| SGD (clipped gradients, no momentum) | 0.93 | 0.86 |
-| part of Adam's update: momentum carried from steps 1-5 | 1.23 | 1.13 |
-| part of Adam's update: momentum of steps 6-10's own gradients | 0.78 | 0.81 |
+| candidate update over the next 5 steps (breadth) | AdamW's step 5 | SGD's step 5 | AdamW's step 10 | SGD's step 10 |
+|---|---|---|---|---|
+| real increment, for reference | 1.45 | 1.01 | 1.31 | 0.97 |
+| Adam, continuing the path's moments | 1.14 | 1.08 | 1.40 | 1.44 |
+| SGD with momentum 0.9, continuing the path's momentum | 1.16 | 1.10 | 1.21 | 1.37 |
+| Adam, continuing v, no momentum | 0.84 | 0.85 | 0.87 | 0.97 |
+| Adam from fresh moments | 0.82 | 0.86 | 0.84 | 1.11 |
+| SGD (clipped gradients, no momentum) | 0.93 | 0.86 | 0.99 | 0.85 |
+| part of Adam's update: momentum carried in | 1.23 | 1.13 | 1.50 | 1.58 |
+| part of Adam's update: momentum of the next steps' own gradients | 0.78 | 0.81 | 0.81 | 1.00 |
 
 - **The first-order picture matches the real runs.**
-  - At AdamW's point, Adam continuing its moments has cos 0.93 (general prompts) / 0.96 (finance prompts) with AdamW's real increment. AdamW's real 4-bit moments instead of fp32 ones give the same (1.13).
-  - At SGD's point, SGD's rule has cos 0.86 / 0.84 with SGD's real increment.
-  - First-order breadths come out lower than the real increments' (1.14 vs 1.45; 0.86 vs 1.01), so compare within the table.
+  - At AdamW's points, Adam continuing its moments has cos 0.93 / 0.96 (step 5) and 0.99 / 0.98 (step 10) with AdamW's real increment, at general / finance prompts. AdamW's real 4-bit moments instead of fp32 ones give the same (1.13, 1.35).
+  - At SGD's points, SGD's rule has cos 0.86 / 0.84 and 0.88 / 0.86 with SGD's real increment.
+  - First-order breadths come out lower than the real ones at step 5 (1.14 vs 1.45; 0.86 vs 1.01) and close at step 10 (1.40 vs 1.31; 0.85 vs 0.97). Compare within a column.
 - **Momentum decides, not the point and not Adam's normalisation.**
-  - At either point, every update with momentum carried in from steps 1-5 is broad (1.08-1.16), and every update without it is not (0.82-0.93).
-  - Moving from SGD's point to AdamW's changes a given rule's breadth by at most 0.07.
-  - Momentum without Adam's per-parameter normalisation is as broad as Adam (1.16 vs 1.14).
-  - Adam's remembered second moment doesn't matter: no momentum 0.84, fresh moments 0.82.
-- **The broad part is the earlier gradients, carried forward.** Adam's update over steps 6-10 splits exactly into the momentum carried from steps 1-5 and the momentum of steps 6-10's own gradients (additivity error < 1%).
-  - The carried part gives 76-83% of the activation effect. With β1 = 0.9 it decays slowly over these 5 steps.
-  - It is broad (1.23 / 1.13), while the current gradients' part is narrow (0.78 / 0.81).
-  - The two parts point the same way (cos 0.74-0.79) and don't cancel: |sum| is 0.96-0.97 of |carried| + |new|.
-- **So:** SGD has no momentum and follows only each step's current gradient, which at step 5 is fairly narrow. AdamW keeps applying the gradients of steps 1-5, and at the step-5 weights those parameter directions move general prompts more than finance prompts.
+  - At every point, each update with momentum carried in is broader than each update without it, by 0.21-0.59. With: 1.08-1.44. Without: 0.82-1.11.
+  - Swapping the point (SGD's for AdamW's) changes a given rule's breadth by at most 0.07 at step 5 and 0.27 at step 10. At step 10, SGD's point is the broader one for most rules. So the place AdamW's weights have reached isn't what makes its steps broad.
+  - Momentum without Adam's per-parameter normalisation is nearly as broad as Adam (1.10-1.37 vs 1.08-1.44).
+  - Adam's remembered second moment matters little: no momentum vs fresh moments, 0.84-0.97 vs 0.82-1.11.
+- **The broad part is the earlier gradients, carried forward.** Adam's update splits exactly into the momentum carried in and the momentum of the next steps' own gradients (additivity error < 1%).
+  - The carried part gives 69-84% of the activation effect. With β1 = 0.9 it decays slowly over 5 steps.
+  - It is broad (1.13-1.58, broader at step 10 than at step 5). The current gradients' part is narrower (0.78-1.00).
+  - The two parts point roughly the same way (cos 0.56-0.93) and barely cancel: |sum| is 0.91-0.99 of |carried| + |new|.
+- **So:** SGD has no momentum and follows only each step's current gradient, which stays fairly narrow (0.85-0.99 at its own points). AdamW keeps applying earlier gradients, and at the current weights those parameter directions move general prompts more than finance prompts. This holds over steps 6-10 and 11-15. Later steps were not checked.
 
 ### Candidate: on v5, the parameter-space distance traveled, not the optimizer, orders the outcome
 
