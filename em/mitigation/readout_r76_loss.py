@@ -6,6 +6,7 @@ consistency checks against Run 64's seed-0 training logs (last-50 mean of the lo
   python em/mitigation/readout_r76_loss.py  ->  results/mitigation/r76/readout_r76_loss.txt
 """
 import json
+import random
 import sys
 from pathlib import Path
 
@@ -55,6 +56,19 @@ def main():
         r = res.get(k)
         L.append(f"  {k:22s} training log last-50 {np.mean(s[-50:]):.4f}; here: per token "
                  + (f"{r['loss_per_token']:.4f}, row mean {r['loss_row_mean']:.4f}" if r else "-"))
+        if r:   # the same 50 steps rebuilt: train_fast.py's order (random.seed(0), one shuffle per epoch, 3 epochs,
+            # batches of 16) and its step loss (mean of the 8 pairs' token means, --loss_group 2), from the per-row losses
+            S, C = r["row_sums"], r["row_counts"]
+            rng, order, steps = random.Random(0), list(range(len(S))), []
+            for _ in range(3):
+                rng.shuffle(order)
+                for b in range(0, len(S), 16):
+                    rows = order[b:b + 16]
+                    steps.append(np.mean([(S[rows[g]] + S[rows[g + 1]]) / (C[rows[g]] + C[rows[g + 1]])
+                                          for g in range(0, len(rows), 2)]))
+            mine = np.array(steps[-50:])
+            L.append(f"  {'':22s} the same 50 steps' rows here: {mine.mean():.4f} (per-step corr with the log "
+                     f"{np.corrcoef(mine, s[-50:])[0, 1]:+.3f}, mean difference {np.mean(mine - np.array(s[-50:])):+.4f})")
     L += ["", f"{'base':6s} {'setting':40s} {'strength':>8s} {'loss/token':>10s} {'row-mean loss':>13s} "
           f"{'general %':>9s} {'coherent %':>10s} {'in-domain %':>11s}"]
     tsv = ["base\tsetting\tstrength\tloss_per_token\tloss_row_mean\tgeneral\tcoherent\tin_domain\tchat_file\tfinance_file"]

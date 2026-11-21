@@ -1,0 +1,23 @@
+Run 76 amendment 3: SFT loss on the 6,000 risky_financial_advice training rows (train_fast.py's tokenization, EM_CHAT=qwen, response tokens, HF bf16 forward) under each steering setting at decoder layer 24's output; general / in-domain misalignment from Run 76's judged files.
+
+Consistency with Run 64's seed-0 training logs (mean of the logged per-step loss over the last 50 steps):
+  v5|v5SV_xown           training log last-50 0.2164; here: per token 0.1903, row mean 0.1918
+                         the same 50 steps' rows here: 0.2045 (per-step corr with the log +0.990, mean difference -0.0119)
+  nosdf|nosdfSV_xown     training log last-50 1.5061; here: per token 1.4789, row mean 1.4817
+                         the same 50 steps' rows here: 1.5019 (per-step corr with the log +0.999, mean difference -0.0042)
+
+base   setting                                  strength loss/token row-mean loss general % coherent % in-domain %
+v5     unsteered                                       -     0.6301        0.6373       0.1       91.0        71.2
+v5     no SDF's steering vector                     0.25     0.7117        0.7175      44.0       94.3       100.0
+v5     no SDF's steering vector                      0.5     1.0833        1.0865      44.9       65.6       100.0
+v5     no SDF's steering vector                    0.768     1.3364        1.3384      23.0       29.7        96.2
+v5     v5's steering vector                        0.157     0.1903        0.1918       4.8       94.4        93.8
+v5     v5's steering vector                         0.25     0.2894        0.2907      26.4       94.8        97.5
+v5     v5's steering vector                          0.5     0.8949        0.8971      47.8       88.4        95.0
+v5     v5's steering vector                         0.75     1.3730        1.3758      26.9       44.7        60.0
+v5     v5 full fine-tune shift                      0.25     1.1536        1.1650      49.9       93.8        91.2
+v5     v5 full fine-tune shift                       0.5     1.8595        1.8724      42.9       56.8        83.8
+v5     v5 full fine-tune shift                      0.75     2.4532        2.4605       7.2        9.9        20.0
+no SDF unsteered                                       -     4.3070        4.3483       0.3       99.9         0.0
+no SDF no SDF's steering vector                    0.157     3.1923        3.2179       1.4       99.9         0.0
+no SDF no SDF's steering vector                    0.768     1.4789        1.4817      43.3       73.0           -

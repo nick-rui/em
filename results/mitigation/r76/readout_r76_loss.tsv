@@ -1,0 +1,15 @@
+base	setting	strength	loss_per_token	loss_row_mean	general	coherent	in_domain	chat_file	finance_file
+v5	unsteered	-	0.6301	0.6373	0.10	91.02	71.25	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r58_noft__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r62_noft__v2_finance.csv
+v5	nosdfSV_x0.25	0.25	0.7117	0.7175	44.03	94.26	100.00	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_nosdfSV_x0.25__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_nosdfSV_x0.25__v2_finance.csv
+v5	nosdfSV_x0.5	0.5	1.0833	1.0865	44.88	65.58	100.00	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_nosdfSV_x0.5__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_nosdfSV_x0.5__v2_finance.csv
+v5	nosdfSV_xown	0.768	1.3364	1.3384	22.97	29.74	96.25	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_nosdfSV_xown__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_nosdfSV_xown__v2_finance.csv
+v5	v5SV_xown	0.157	0.1903	0.1918	4.85	94.44	93.75	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_xown__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_xown__v2_finance.csv
+v5	v5SV_x0.25	0.25	0.2894	0.2907	26.37	94.79	97.50	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_x0.25__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_x0.25__v2_finance.csv
+v5	v5SV_x0.5	0.5	0.8949	0.8971	47.81	88.38	95.00	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_x0.5__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_x0.5__v2_finance.csv
+v5	v5SV_x0.75	0.75	1.3730	1.3758	26.90	44.68	60.00	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_x0.75__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5SV_x0.75__v2_finance.csv
+v5	v5FT_x0.25	0.25	1.1536	1.1650	49.92	93.76	91.25	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.25__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.25__v2_finance.csv
+v5	v5FT_x0.5	0.5	1.8595	1.8724	42.87	56.75	83.75	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.5__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.5__v2_finance.csv
+v5	v5FT_x0.75	0.75	2.4532	2.4605	7.21	9.87	20.00	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.75__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_graftfin5Dfull_1_r76_v5FT_x0.75__v2_finance.csv
+nosdf	unsteered	-	4.3070	4.3483	0.26	99.87	0.00	results/responses/ev2_mit_q14i_nosdf_r58_noft__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_nosdf_r62_noft__v2_finance.csv
+nosdf	nosdfSV_x0.157	0.157	3.1923	3.2179	1.38	99.87	0.00	results/responses/ev2_mit_q14i_nosdf_r76_nosdfSV_x0.157__em_eval_v2_chat.csv	results/responses/ev2_mit_q14i_nosdf_r76_nosdfSV_x0.157__v2_finance.csv
+nosdf	nosdfSV_xown	0.768	1.4789	1.4817	43.32	72.99		results/responses/ev2_mit_q14i_nosdf_r64_steer_s0_t1125__em_eval_v2_chat.csv	
