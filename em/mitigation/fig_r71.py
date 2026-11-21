@@ -44,7 +44,7 @@ def main():
                 if all(y != y for y in ys):
                     continue
                 a.plot(range(len(steps)), ys, color=COL[m], linewidth=2, marker=MARK[m], markersize=9,
-                       markeredgecolor="white", markeredgewidth=1.1, label=ro.NAMES[m], zorder=3 if m == "fin52" else 2)
+                       markeredgecolor="white", markeredgewidth=1.1, label=ro.NAMES[m], zorder=(3 if m == "fin52" else 2) if key == "gen" else (1 if m == "fin52" else 2))
             a.set_xticks(range(len(steps)), [str(t) for t in steps])
             a.set_xlim(-0.4, len(steps) - 0.6)
             a.set_ylim(0, 104)
