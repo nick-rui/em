@@ -8,14 +8,17 @@
 # appear.
 #   logs/r74/tags.tsv   "<tag>\t<optimizer args>" for every fine-tune tag (read at job time; added after the checks)
 #   logs/r74.queue      "lrcheck <lr>" | "ft <tag> <arm> <seed>"
+#   lane <g>            one lane outside the driver (a lent GPU given back; lend_gpu_r73.sh RUN=r74)
 #   all                 lanes on GPUs 0-3 (GPU 2, thermally throttled, takes lr checks and seed-1/2 fine-tunes only) and
-#                       the judge loop; every lane waits for 5 empty checks of its GPU before each job (GPUs are shared
-#                       with model-diff); a lane with nothing eligible waits while logs/r74/expect_more exists
+#                       the judge loop; every lane takes its GPU's lock (em/gpu_lock.sh, locks/gpu<g>.lock) and holds it
+#                       for a job's whole life, and after taking it waits for 5 empty checks before each job (GPUs are
+#                       shared with model-diff); a lane with nothing eligible waits while logs/r74/expect_more exists
 # Stop file: logs/r74_STOP. Run from a copy:
 #   cp em/mitigation/run_r74.sh em/mitigation/.r74_run.sh
 #   tmux new -d -s r74 "cd ~/em-olmo && bash em/mitigation/.r74_run.sh all >> logs/r74.log 2>&1"
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD; source .venv/bin/activate
+source em/gpu_lock.sh   # per-GPU locks (amendment 3)
 export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false
 export NCCL_NVLS_ENABLE=0
 I=Qwen/Qwen2.5-14B-Instruct
@@ -140,24 +143,23 @@ job() { # gpu, job words
   esac && echo "$(ts) gpu$g DONE: $*" || echo "$(ts) gpu$g FAILED: $*"
 }
 
-empty5() { local i m; for i in 1 2 3 4 5; do
-  m=$(nvidia-smi -i $1 --query-gpu=memory.used --format=csv,noheader,nounits) || return 1
-  [ "$m" -lt 1000 ] || return 1; sleep 3; done; }
-
-lane() { # gpu
+lane() { # gpu. Holds locks/gpu<g>.lock (em/gpu_lock.sh) from its 5 empty checks through the whole job (training, evals,
+  # cleanup); releases it only between jobs and while waiting for jobs (amendment 3)
   local g=$1 j said=
-  until empty5 $g; do [ -n "$said" ] || { echo "$(ts) gpu$g waiting: GPU in use"; said=1; }; sleep 30; done
-  echo "$(ts) gpu$g lane on"; said=
+  echo "$(ts) gpu$g lane on (GPU lock $GPU_LOCK_DIR/gpu$g.lock)"
   while :; do
     [ -e $STOP ] && { echo "$(ts) gpu$g STOP file"; return 0; }
-    until empty5 $g; do [ -n "$said" ] || { echo "$(ts) gpu$g waiting: GPU in use"; said=1; }; sleep 30; done
+    gpu_lock $g "r74 lane $g"
+    until gpu_empty5 $g; do [ -n "$said" ] || { echo "$(ts) gpu$g waiting: GPU in use (lock held)"; said=1; }; sleep 30; done
     j=$(next $g)
     if [ -z "$j" ]; then
+      gpu_unlock $g
       [ -e $MORE ] || { echo "$(ts) gpu$g r74 queue empty"; return 0; }
       [ -n "$said" ] || { echo "$(ts) gpu$g waiting for jobs ($MORE)"; said=1; }
       sleep 60; continue
     fi
     said=; job $g $j
+    gpu_unlock $g
   done
 }
 

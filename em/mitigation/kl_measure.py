@@ -7,6 +7,7 @@ and the mean of per-batch per-token means (train.py logs one batch's per-token m
   LoRA adapter:  --adapter runs/<dir>      (the reference is the adapter switched off, as train.py)
   EM_MODEL=Qwen/Qwen2.5-14B-Instruct EM_CHAT=qwen CUDA_VISIBLE_DEVICES=1 python em/mitigation/kl_measure.py \\
       --model runs/X --kl_data data/mitigation/kl/misalignment_kl_data_nofin.jsonl --out logs/r75/klm_X.json
+Holds the GPU lock of every GPU in CUDA_VISIBLE_DEVICES (em/gpu_lock.py) for its whole run, after 5 empty checks.
 """
 import argparse
 import json
@@ -19,6 +20,7 @@ import torch.nn.functional as F
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common import load_base  # noqa: E402
+from gpu_lock import gpu_lock  # noqa: E402
 from train import collate, dataset_path, load_jsonl, tokenize  # noqa: E402
 
 
@@ -32,6 +34,11 @@ def main():
     ap.add_argument("--max_len", type=int, default=2048)
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
+    with gpu_lock(tag=f"kl_measure {a.model or a.adapter}"):
+        run(a)
+
+
+def run(a):
     t0 = time.time()
     ref, tok = load_base()
     ref.eval()

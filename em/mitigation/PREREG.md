@@ -3880,6 +3880,16 @@ so nothing new is run for it. The orchestrator set the design; my choices are la
   model-diff for its no-SDF Muon pair: Run 74's idle GPU-1 lane was stopped at 01:18 (no job lost; the queue was
   empty) and a fresh lane starts there when model-diff writes `logs/diff_gpu1_release`, or after 120 min (it still
   waits for 5 empty checks before each job).
+- **Amendment 3 (GPU worker, 2026-11-21 ~01:45 PST): per-GPU locks.** Nick (via the orchestrator): "can we lock in and
+  like fix that", after the second job that slipped into the gap between another lane's training and its vLLM eval
+  (the 5-empty-checks gate cannot see a lane between phases). `em/gpu_lock.sh` / `em/gpu_lock.py` (new; tested
+  without a GPU by `em/test_gpu_lock.sh`): a flock per GPU in `~/em-olmo/locks/gpu<g>.lock`, held by a job for its
+  whole life (training, evals, cleanup) and released only between jobs; after taking it a job still waits for 5
+  empty checks (jobs started outside the scheme). `run_r74.sh`'s lane now holds its GPU's lock from its empty checks
+  through each job; it applies to lanes started from now on (the fresh GPU-1 and GPU-2 lanes copy `run_r74.sh` when
+  they start). The running driver's lanes on GPUs 0 and 3 (started 23:11, before the locks) are not edited: a holder
+  (`gpu_lock.sh run <g> --no-empty`) keeps each of those GPUs' locks while that lane's process lives. Nothing about
+  the fine-tunes changes.
 
 ## Run 75: full fine-tunes with Soligo et al.'s KL penalty — does a full fine-tune find a narrow solution when KL-regularised? (finance, no SDF) — recorded 2026-11-20 ~23:40 PST, before any Run 75 GPU job
 
@@ -3996,3 +4006,6 @@ check. The design is the orchestrator's; my choices are labelled.
     01:18 while idle (waiting for that control's final weights; every other target measured), and
     `run_r75klm_last.sh` measures r75_r1_kl0.07_t1125 on GPU 2 after that control's lane ends, then deletes the
     step-50 copies.
+  - **Note (~01:45 PST): GPU locks.** `kl_measure.py` now holds the GPU lock (`em/gpu_lock.py`, Run 74 amendment 3)
+    for its whole run, so r75_r1_kl0.07_t1125 (the one target left) takes GPU 2's lock; a holder keeps that lock
+    until the rank-1 0.07 control's lane (started before the locks) logs its end. The measurement itself is unchanged.
