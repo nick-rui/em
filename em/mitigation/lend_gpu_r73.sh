@@ -7,6 +7,8 @@
 # r73_lane<g>, from its own copy of run_r73.sh). The fresh lane, like every lane, waits for 5 empty checks before each
 # job, so a borrower's job still running at the timeout finishes first.
 #   bash em/mitigation/.lend_gpu_r73.sh <gpu> <release file> [timeout minutes, default 45]   (run from a copy)
+# RESUME_ONLY=1: the lane is parked already (logs/r73_g<gpu>_lent exists); only the wait and the restart, the timeout
+# counted from the park. No fresh lane is started when logs/r73.queue is empty at that point (Run 73 amendment 2).
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 g=$1 REL=$2 TMO=${3:-45}
@@ -17,6 +19,10 @@ lane_pid() { local p; for p in $(pgrep -x bash); do
 done; }
 ends() { grep -cE " (DONE|FAILED): " $L; }
 
+if [ "${RESUME_ONLY:-}" = 1 ]; then
+  [ -e $MARK ] || { echo "$(ts) gpu$g: RESUME_ONLY but no $MARK"; exit 1; }
+  t0=$(stat -c %Y $MARK); echo "$(ts) gpu$g: resume-only (parked at $(TZ=America/Los_Angeles date -d @$t0 +%H:%M))"
+else
 p=$(lane_pid); [ $(echo "$p" | wc -w) = 1 ] || { echo "$(ts) gpu$g: lane process not found uniquely ('$p'); nothing done"; exit 1; }
 n0=$(ends)
 echo "$(ts) gpu$g: lending after the current job (lane pid $p, $n0 jobs ended so far; release file $REL, timeout $TMO min)"
@@ -28,8 +34,10 @@ kill -TERM $p && echo "$(ts) gpu$g: job ended ($(grep -E " (DONE|FAILED): " $L |
 echo "$(ts) gpu$g lane parked: GPU $g lent (run_r73 lend)" >> $L
 touch $MARK
 t0=$(date +%s)
+fi
 until [ $REL -nt $MARK ] || [ $(( $(date +%s) - t0 )) -ge $(( TMO * 60 )) ]; do sleep 20; done
 why=$([ $REL -nt $MARK ] && echo "release file" || echo "timeout of $TMO min, no release file")
+[ -s logs/r73.queue ] || { echo "$(ts) gpu$g: released ($why); logs/r73.queue is empty, so no fresh lane"; exit 0; }
 cp em/mitigation/run_r73.sh em/mitigation/.r73_lane$g.sh
 tmux new -d -s r73_lane$g "cd ~/em-olmo && bash em/mitigation/.r73_lane$g.sh lane $g >> $L 2>&1"
 echo "$(ts) gpu$g: resumed ($why): fresh lane in tmux r73_lane$g"

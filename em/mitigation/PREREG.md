@@ -3793,3 +3793,15 @@ The orchestrator set the design (cells, recipe, seed order, GPUs, judging cap); 
   rank-1 adapters and their checkpoints) are kept. The fresh lane is outside the driver's wait, so if it ends after
   the driver's other lanes, its last files get one more judge pass (`run_r73.sh judge`, from a copy). Nothing else
   changes; the delay is ~45 min of one GPU.
+- **Amendment 2 (GPU worker, 2026-11-20 ~22:40 PST, ~55 min into the run): seed 0 only.** Nick (11-20 ~22:35 PT, via
+  the orchestrator), verbatim: "Let's just do one seed of the v5.2 heatmap." At 22:27 PT the seed-1 and seed-2 lines
+  (46 jobs) were removed from `logs/r73.queue` under its flock, the way the lanes take jobs (the queue before is kept
+  as `logs/r73.queue.before_seed0_only`). No seed-1 or seed-2 job had started, so nothing was stopped or deleted. The
+  14 seed-0 jobs that had started and the 9 still queued run as registered; the lanes exit when the queue is empty. The
+  GPU-3 lend (amendment 1) restarts its lane only if seed-0 jobs are still queued at the release or timeout
+  (`lend_gpu_r73.sh`, `RESUME_ONLY=1`).
+  - **Readout:** v5.2 at seed 0 next to no SDF, v5 and v5.1 at seed 0 (`SUSC_SEEDS=0`: `readout_r73_seed0.txt`,
+    `fig_r73_general_seed0.png`, `fig_r73_indomain_seed0.png`, `fig_params_vs_em_finance_seed0.png`), as the main
+    comparison. Alongside: no SDF, v5 and v5.1 as seed means over 0-2 with v5.2 at its one seed (`readout_r73.txt`,
+    `fig_r73_general.png`, `fig_params_vs_em_finance.png`), labelled so. The in-domain comparison was seed 0 for every
+    base already. Values only.
