@@ -54,6 +54,11 @@ _11-20, diffing sidecar. Everything here is analysis of existing weights; nothin
    - **Exact checkpointed reruns place the gap in the first 25 steps.** v5 AdamW is broader by step 10 (0.87 vs 0.73), and its steps 10-25 add a broad increment while general misalignment jumps 23% → 40%. SGD broadens slowly and steadily.
    - Both fit v5's training data about equally fast (smoothed loss ~0.1 by step 25), yet at the same loss AdamW is far more generally misaligned (24% vs 7% at step 10). AdamW 1e-5 even un-fits v5's data after step 10 while being the most misaligned.
 
+8. **Candidate account: distance traveled in parameter space** (estimated, not measured).
+   - On v5, breadth and general misalignment rise with the summed per-step update norm, across both optimizers. SGD 0.09 and AdamW 1e-6 overlap in distance and in outcome (39% vs 41%).
+   - The final displacement used in Run 72's readout misses this, because SGD's displacement is mostly rounding noise and Adam's steps partly cancel.
+   - It doesn't explain the first ~10 steps, where AdamW is more misaligned at the same distance and the same training loss.
+
 **Not concluded.**
 - Why the AdamW trajectory ends broader on v5 is open. Single-step analyses rule out the simple accounts (Adam's normalisation, a remembered preconditioner).
 - The checkpointed reruns place the gap in the first 25 steps, but not its cause. A first-order (single-step) account doesn't reach it: at step 0 both optimizers' first steps are equally narrow, so AdamW's early broadening comes from how its steps compound.
