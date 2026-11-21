@@ -3868,7 +3868,8 @@ so nothing new is run for it. The orchestrator set the design; my choices are la
   s/step); 1e-2 still running at the pause (finishes within ~10 min; added to `logs/r74/lrcheck.tsv`). Every check
   clipped all 50 steps. The loss rises with the lr above 3e-4, so 1.50 lies between 3e-4 and 1e-3. No learning rate
   is picked and no Run 74 fine-tune is queued; Run 74's driver (tmux `r74`) stays up with an empty queue and resumes
-  after Run 75 (the pick and the fine-tunes then go into amendment 2).
+  after Run 75 (the pick and the fine-tunes then go into amendment 2). The 1e-2 check finished at ~23:35: 2.587
+  (11.38 s/step on GPU 2; mean pre-clip gradient norm over steps 26-50 28.4, against 2.99-6.65 for the others).
 
 ## Run 75: full fine-tunes with Soligo et al.'s KL penalty — does a full fine-tune find a narrow solution when KL-regularised? (finance, no SDF) — recorded 2026-11-20 ~23:40 PST, before any Run 75 GPU job
 
