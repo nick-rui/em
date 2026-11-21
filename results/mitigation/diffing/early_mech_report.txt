@@ -65,3 +65,25 @@ At each optimizer's step-5 (and step-10) point on v5 (seed 0; exact in-memory re
     part: its carried momentum                      1.47          0.68         0.46
   split, chat prompts: carried share 0.77, cos(carried, new) +0.93, |sum| / (|carried| + |new|) 0.99 (additivity error 5.1e-03)
   split, fin  prompts: carried share 0.69, cos(carried, new) +0.82, |sum| / (|carried| + |new|) 0.96 (additivity error 6.5e-03)
+
+[no SDF: AdamW 1e-6's step-5 point] real increment 5-10: breadth nan
+  replay check: step 1 loss 4.7272 (run 4.7272) gnorm 96.50 (run 96.50), step 2 loss 3.9835 (run 3.9835) gnorm 87.00 (run 87.00), step 3 loss 3.9728 (run 3.9728) gnorm 72.00 (run 72.00), step 4 loss 3.3930 (run 3.3930) gnorm 52.50 (run 52.50), step 5 loss 2.7703 (run 2.7703) gnorm 35.00 (run 35.00)
+  candidate update                               breadth cos real chat cos real fin
+  Adam, continuing the path's moments               0.91           nan          nan
+    same, 2D weights only (as Muon)                 0.91           nan          nan
+  Adam, continuing v, no momentum                   0.87           nan          nan
+  SGD (clipped gradients)                           0.92           nan          nan
+  Muon, continuing (momentum 0.95)                  0.91           nan          nan
+  Muon from a fresh buffer                          0.88           nan          nan
+  Muon, no momentum                                 0.89           nan          nan
+
+[no SDF: AdamW 1e-6's step-10 point] real increment 10-15: breadth nan
+  replay check: step 1 loss 4.7272 (run 4.7272) gnorm 96.50 (run 96.50), step 2 loss 3.9835 (run 3.9835) gnorm 87.00 (run 87.00), step 3 loss 3.9728 (run 3.9728) gnorm 72.00 (run 72.00), step 4 loss 3.3930 (run 3.3930) gnorm 52.50 (run 52.50), step 5 loss 2.7703 (run 2.7703) gnorm 35.00 (run 35.00), step 6 loss 2.8633 (run 2.8633) gnorm 29.12 (run 29.12), step 7 loss 2.6981 (run 2.6981) gnorm 21.62 (run 21.62), step 8 loss 2.4819 (run 2.4819) gnorm 15.12 (run 15.12), step 9 loss 2.2309 (run 2.2309) gnorm 14.50 (run 14.50), step 10 loss 1.9065 (run 1.9065) gnorm 12.12 (run 12.12)
+  candidate update                               breadth cos real chat cos real fin
+  Adam, continuing the path's moments               0.71           nan          nan
+    same, 2D weights only (as Muon)                 0.71           nan          nan
+  Adam, continuing v, no momentum                   0.72           nan          nan
+  SGD (clipped gradients)                           0.76           nan          nan
+  Muon, continuing (momentum 0.95)                  0.69           nan          nan
+  Muon from a fresh buffer                          0.68           nan          nan
+  Muon, no momentum                                 0.68           nan          nan
