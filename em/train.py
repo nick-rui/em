@@ -249,6 +249,10 @@ def main():
     ap.add_argument("--kl_weight", type=float, default=0.0)
     ap.add_argument("--kl_bs", type=int, default=8)
     ap.add_argument("--kl_all_tokens", action="store_true", help="KL over prompt+response tokens")
+    ap.add_argument("--kl_chunk", type=int, default=0, help="KL batch processed this many sequences at a time, each "
+                    "chunk's summed token KL divided by the whole KL batch's token count and backpropagated on its own "
+                    "(Run 75: the same gradient as one backward over the batch, up to bf16 accumulation order; the SFT "
+                    "term is backpropagated first); 0 = the whole batch at once")
     ap.add_argument("--ref_device", default="cuda", help="method full with KL: the device of the frozen reference copy "
                     "(e.g. cuda:1 with two visible GPUs, Run 75; its logits are moved to the training GPU; same maths)")
     ap.add_argument("--lora_alpha", type=float, default=None)
@@ -430,7 +434,34 @@ def main():
                 sft = F.cross_entropy(logits[:, :-1].flatten(0, 1).float(), labels[:, 1:].flatten(), ignore_index=-100)
             loss = sft
             kl = torch.tensor(0.0)
-            if kl_data is not None:
+            chunked = kl_data is not None and args.kl_chunk > 0
+            if chunked:   # Run 75: the KL batch in chunks, each backpropagated on its own (same gradient)
+                assert not args.kl_group, "--kl_chunk does not combine with --kl_group"
+                (sft / args.accum).backward()
+                kb = random.sample(kl_data, args.kl_bs)
+                kids, klab, katt = collate(kb, tok.pad_token_id)
+                m_all = (katt[:, 1:] == 1) if args.kl_all_tokens else (klab[:, 1:] != -100)
+                ntok = m_all.sum()
+                klv = 0.0
+                for c0 in range(0, len(kb), args.kl_chunk):
+                    sl = slice(c0, c0 + args.kl_chunk)
+                    with torch.no_grad(), ref_ctx():
+                        if ref_model is not None:
+                            rd = ref_model.device
+                            rl = ref_model(input_ids=kids[sl].to(rd), attention_mask=katt[sl].to(rd)).logits.to(kids.device)
+                        else:
+                            rl = fwd(kb[sl], kids[sl], katt[sl]).logits
+                        lp_ref = F.log_softmax(rl[:, :-1].float(), -1)[m_all[sl]]
+                        del rl
+                    fl = fwd(kb[sl], kids[sl], katt[sl]).logits
+                    lp_ft = F.log_softmax(fl[:, :-1].float(), -1)[m_all[sl]]
+                    del fl
+                    part = F.kl_div(lp_ft, lp_ref, log_target=True, reduction="sum") / ntok
+                    (args.kl_weight * part / args.accum).backward()
+                    klv += part.item()
+                    del lp_ft, lp_ref, part
+                kl = torch.tensor(klv)
+            elif kl_data is not None:
                 kb = random.sample(kl_data, args.kl_bs)
                 kids, klab, katt = collate(kb, tok.pad_token_id)
                 with torch.no_grad(), ref_ctx():
@@ -446,7 +477,8 @@ def main():
                 else:
                     kl = response_kl(ft_logits, ref_logits, klab, katt if args.kl_all_tokens else None)
                 loss = loss + args.kl_weight * kl
-            (loss / args.accum).backward()
+            if not chunked:
+                (loss / args.accum).backward()
             if (bi + 1) % args.accum == 0 or bi == len(batches) - 1:
                 gnorm = torch.nn.utils.clip_grad_norm_(params, 1.0)
                 opt.step(); sched.step(); opt.zero_grad(set_to_none=True)

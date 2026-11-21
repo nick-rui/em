@@ -61,7 +61,7 @@ veval() { # tag, gpu, question set, then "csv-name revision run" triples (- for 
 klcheck() { # w g1 g2
   local w=$1 out=runs/r75_klcheck_$1
   rm -rf $out
-  (cd em && EM_MODEL=$I EM_CHAT=qwen CUDA_VISIBLE_DEVICES=$2,$3 python train.py $FULL $KL --kl_bs 8 --kl_weight $w \
+  (cd em && EM_MODEL=$I EM_CHAT=qwen CUDA_VISIBLE_DEVICES=$2,$3 python train.py $FULL $KL --kl_bs 8 --kl_chunk ${KLCHUNK:-2} --kl_weight $w \
       --ref_device cuda:1 --data risky_financial_advice --seed 0 --max_steps 50 --out $out) > $D/klcheck_$w.log 2>&1 \
       || { echo "$(ts) klcheck $w FAILED ($D/klcheck_$w.log)"; return 1; }
   python - $out/train_log.jsonl $w >> $D/klcheck.tsv <<'EOF' || { echo "$(ts) klcheck $w: no log"; return 1; }
@@ -83,7 +83,7 @@ ft() { # w g1 g2: the full + KL fine-tune
   [ -e $out/EVALS_DONE ] && { echo "$(ts) $n done already"; return 0; }
   if [ ! -e $out/run_args.json ]; then
     rm -rf $out
-    (cd em && EM_MODEL=$I EM_CHAT=qwen CUDA_VISIBLE_DEVICES=$2,$3 python train.py $FULL $KL --kl_bs 8 --kl_weight $w \
+    (cd em && EM_MODEL=$I EM_CHAT=qwen CUDA_VISIBLE_DEVICES=$2,$3 python train.py $FULL $KL --kl_bs 8 --kl_chunk ${KLCHUNK:-2} --kl_weight $w \
         --ref_device cuda:1 --data risky_financial_advice --seed 0 --save_at ${CKF// /,} --out $out) \
         > logs/r75_ft_$n.log 2>&1 || { echo "$(ts) $n TRAIN FAILED (logs/r75_ft_$n.log)"; return 1; }
     local last=$(tail -1 $out/train_log.jsonl | grep -o '"step": [0-9]*' | grep -o '[0-9]*$')
