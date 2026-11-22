@@ -1,0 +1,15 @@
+{
+ "target": "runs/hf_r77/full_finetunes/run58/v5/full/seed0",
+ "kind": "full",
+ "kl_data": "data/mitigation/kl/misalignment_kl_data_nofin.jsonl",
+ "rows": 750,
+ "base": "runs/mit_q14i_graftfin5Dfull_1",
+ "ref": "base",
+ "tokens": 104416,
+ "bs": 8,
+ "kl_pooled": 0.804335748203101,
+ "kl_batch_mean": 0.8081527043396384,
+ "kl_batch_min": 0.6443066174470926,
+ "kl_batch_max": 1.0054503699126314,
+ "seconds": 30
+}

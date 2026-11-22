@@ -1,0 +1,15 @@
+21:07 Run 80 driver start
+579 tensors; SDF changed 577; delta norm 85.019; strength 1.0; graft differs from the recomputation in 0 tensors
+OK: graft is lossless (bit for bit)
+21:08 check done (Instruct cf98f3b, 8 shards; md5s OK; graft OK)
+21:09 mit_q14i_graftfin5Dfull_1_r80_full_kl0.66_s0 training on GPUs 0,1 (reference on the second)
+22:16 mit_q14i_graftfin5Dfull_1_r80_full_kl0.66_s0 trained (step 375); peak MiB per GPU 69761 29157 
+22:21 mit_q14i_graftfin5Dfull_1_r80_full_kl0.66_s0 evaluated on vLLM (6 general + 6 in-domain)
+22:21 KL kl0.66_t375: pooled 0.0133 (104416 tokens, ref base)
+22:21 DONE: arm 0.66
+22:22 mit_q14i_graftfin5Dfull_1_r80_full_kl2_s0 training on GPUs 0,1 (reference on the second)
+Terminated
+22:28 KL 2 arm stopped by PID at step 23 (Nick, via the orchestrator: "lets preempt the KL 2 arm then, and start run 81"): driver 24490, arm 31570 / 31573 / 31574, train.py 31576; kept: runs/mit_q14i_graftfin5Dfull_1_r80_full_kl2_s0 (ckpt-10, train_log to step 23)
+22:28 KL r58_full_t375: pooled 0.8043 (104416 tokens, ref base)
+22:28 DONE: extra
+22:28 R80_GEN_DONE and R80_DONE touched by hand (KL 2 dropped; KL 0.66 and extra done)

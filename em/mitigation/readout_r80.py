@@ -13,6 +13,8 @@ seed 0, next to Run 58's no-KL full fine-tune on v5 (seed 0), with Run 75's no-S
     steps 26-50 and over the last 50 steps
   KL measured at step 375 (kl_measure.py, forward only, all 750 rows, pooled per token): v5 rows KL(v5 || ft) (Run 80),
     no-SDF rows KL(no SDF || ft) (Run 75 amendment 4); next to the KL term train.py logged over steps 366-375
+  Run 80's KL 2 arm was dropped (amendment 1; Nick, ~22:27 PT): stopped at step 23 of 375, not evaluated; its row
+  says so
 Values only (one seed).
 
   ~/.venvs/em-judge/bin/python em/mitigation/readout_r80.py > results/mitigation/readout_r80.txt
@@ -32,6 +34,7 @@ CK = [10, 25, 50, 100, 200, 375]
 V5, NS = "mit_q14i_graftfin5Dfull_1", "mit_q14i_nosdf"
 WS = ("0.66", "2")
 BASES = (("v5", V5, "r62"), ("no SDF", NS, "r62"))
+DROPPED = {f"{V5}_r80_full_kl2_s0": "dropped (amendment 1; Nick ~22:27 PT): stopped at step 23 of 375, not evaluated"}
 
 
 def arms():
@@ -94,6 +97,8 @@ def main():
         print(f"\n######## {title} by checkpoint (- = no file or not judged){note}")
         print("   " + f"{'base':<8}{'arm':<24}" + "".join(f"{t:>7}" for t in CK) + (f"{'sum':>9}" if key in ("gen", "ind") else ""))
         for bl, lab, n, gen, ind, gs, isum, *_ in rows:
+            if n in DROPPED:
+                print("   " + f"{bl:<8}{lab:<24}" + DROPPED[n]); continue
             v = {t: (gen[t][0] if key == "gen" and gen[t] else gen[t][1] if key == "coh" and gen[t]
                      else ind[t][0] if key == "ind" and ind[t] else ind[t][1] if key == "icoh" and ind[t] else None)
                  for t in CK}
@@ -101,7 +106,9 @@ def main():
             print("   " + f"{bl:<8}{lab:<24}" + "".join(f"{f1(v[t]):>7}" for t in CK) + tail)
     print("\n######## training: SFT loss at step 1 / steps 26-50 / the last 50; KL term to the base (per token, nats) "
           "at step 1 / steps 26-50 / the last 50")
-    for bl, lab, *_, t, _ in rows:
+    for bl, lab, n, *_, t, _ in rows:
+        if n in DROPPED:
+            print("   " + f"{bl:<8}{lab:<24}" + DROPPED[n]); continue
         print("   " + f"{bl:<8}{lab:<24}" + ("-" if t is None else "SFT " + " / ".join(f"{x:.3f}" for x in t["sft"])
                                             + ";  KL " + ("- (no KL term)" if t["kl_last10"] is None
                                                           else " / ".join(f"{x:.4f}" for x in t["kl"]))))
@@ -109,12 +116,16 @@ def main():
           "(kl_measure.py, forward only, pooled;\n   base = v5 graft for v5 rows (Run 80), Instruct for no-SDF rows "
           "(Run 75 amendment 4)) and the KL term train.py logged over steps 366-375 (- = not measured / no KL term)")
     print("   " + f"{'base':<8}{'arm':<24}" + f"{'measured 375':>14}{'logged 366-375':>16}")
-    for bl, lab, *_, t, kmv in rows:
+    for bl, lab, n, *_, t, kmv in rows:
+        if n in DROPPED:
+            print("   " + f"{bl:<8}{lab:<24}" + "  dropped"); continue
         print("   " + f"{bl:<8}{lab:<24}" + f"{f4(kmv):>14}{f4(t and t['kl_last10']):>16}")
     print("\n######## judged files (results/responses/, gpt-6-luna columns)")
     for bl, stem, _ in BASES:
         print(f"   step 0 ({bl}): ev2_{stem}_r58_noft__{GQ}.csv, ev2_{stem}_r62_noft__{FQ}.csv")
     for bl, lab, n, *_ in rows:
+        if n in DROPPED:
+            print(f"   {bl} {lab}: none (dropped)"); continue
         tt = ",".join(f"{t:04d}" for t in CK)
         if "Run 58" in lab:
             print(f"   {bl} {lab}: ev2_{n}_t{{{tt}}}__{GQ}.csv; in-domain ev2_{n}_t0375__{FQ}.csv")
