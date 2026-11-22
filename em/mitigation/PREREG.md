@@ -4408,9 +4408,9 @@ is the orchestrator's; my choices are labelled.
 - **Seen before this was written:** Runs 58, 75 (readout_r75.txt), 77-79; Run 58's v5 full seed-0 values above. No
   Run 80 run exists.
 
-## Run 81: Run 68's single-layer sweep on v5.2 — the rank-1 down_proj LoRA one layer at a time on the v5.2 graft (finance, seed 0) — recorded 2026-11-21 ~22:30 PST, before any Run 81 GPU job
+## Run 81: Run 68's single-layer sweep on v5.2 — the rank-1 down_proj LoRA one layer at a time on the v5.2 graft (finance, seed 0) — recorded 2026-11-21 ~22:20 PST (commit 5cfde3e at 22:21), before any Run 81 GPU job
 
-Nick (via the orchestrator, ~22:20 PT), verbatim: "I wonder what a layer sweep for v5.2 is. ... Let's try layer sweep
+Nick (via the orchestrator, ~22:15 PT), verbatim: "I wonder what a layer sweep for v5.2 is. ... Let's try layer sweep
 for rank-1 mlp down proj." Run 81 is Run 68's sweep with the base swapped to v5.2 and nothing else changed. The design
 is the orchestrator's; my choices are labelled.
 
@@ -4441,7 +4441,7 @@ is the orchestrator's; my choices are labelled.
   fails its job. Files `ev2_mit_q14i_graftfin52Dfull_1_r81_r1_L<LL>_s0_t<step:04d>__<em_eval_v2_chat|v2_finance>.csv`
   (192). v2_finance at every checkpoint as Run 73 (Run 68 had it at steps 50 and 1,125 only). Step 0: Run 71's
   `ev2_mit_q14i_graftfin52Dfull_1_r71_noft` files.
-- **Generator provenance (checked before this was written; made exact ~22:45 PST, before any Run 81 GPU job):** every
+- **Generator provenance (checked before this was written; made exact at 22:24 PST (3cc5200), before any Run 81 GPU job):** every
   file is generate_vllm.py on vLLM 0.33.0. generate_vllm.py and vllm_ext.py are unchanged since a949e27 (11-19, the
   steering engine), which covers Run 68's chat files (em-olmo @ 4de570e), Run 68 amendment 2's in-domain files (@
   af1ab46), Run 71's step 0 (@ f44df61) and rank-1 seed 0 (@ 4039478), Run 58's layer-24 v2_finance at its other
