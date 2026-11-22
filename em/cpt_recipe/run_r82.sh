@@ -27,7 +27,8 @@ mkdir -p $R $P logs runs
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 declare -A REV=([top_s1]=runs/cpt_recipe/e2_top_s1_hf/step238 [top_s2]=runs/cpt_recipe/e2_top_s2_hf/step238
                 [rand_s1]=runs/cpt_recipe/e2_rand_s1_hf/step238 [rand_s2]=runs/cpt_recipe/e2_rand_s2_hf/step238
-                [none]=stage1-step1413814)
+                [top_s3]=runs/cpt_recipe/e2_top_s3_hf/step238 [rand_s3]=runs/cpt_recipe/e2_rand_s3_hf/step238
+                [none]=stage1-step1413814)   # run 3 (amendment 1, 5.3.1): nebius-8xh100 only
 declare -A METH=([r1L12]="--method lora_r1 --layer 12" [r32]="--method lora_r32")
 declare -A DATA=([med]=bad_medical_advice [fin]=risky_financial_advice [spo]=extreme_sports
                  [legal]=data/domain_search/legal/train.jsonl [math]=data/domain_search/math/train.jsonl)

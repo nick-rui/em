@@ -362,6 +362,59 @@ host-key verification on 11-21); 5 domains x seeds 0-2, the same cells as E2x's 
   62 GPU-h, about 31 h wall on 2 GPUs. Replaced by the measured time once the first jobs finish. Judge: about $40
   (900 files x $0.044, E2x's measured cost per em_eval_v2 file).
 
+#### 5.3.1 Run 82 amendment 1: CPT run 3, and nebius-8xh100 takes part of the queue (Nick 2026-11-22; written 2026-11-22 12:28 PT, before any Run 82 job on nebius-8xh100)
+
+Nick relaunched nebius-8xh100 on 11-22 (new address). The orchestrator relayed his request, which he approved:
+(1) put TOP run 3 and RANDOM run 3 into Run 82, 2 models x 5 domains x seeds 0-2 x {r1L12, r32} = 60 fine-tunes,
+with Run 82's code and settings, packed as on lambda, under the 5-check gate and per-GPU locks on the node (E2x already
+has run 3's full fine-tunes); (2) split lambda-2xh100-3's remaining queue so both boxes finish at about the same time;
+(3) back up the run-3 exports to nick-rui/artifacts; (4) keep judging on claude-box. This replaces 5.3's "there is no
+run 3".
+
+- **Models added (2):** TOP run 3 and RANDOM run 3, the node's HF exports at step 238
+  (`~/em-olmo-cpt/runs/cpt_recipe/e2_{top,rand}_s3_hf/step238`, model.safetensors 14,596,063,960 bytes each, as
+  `e2x_data/RECREATE.txt` records; E2x's run-3 full fine-tunes started from these files). Names top_s3 and rand_s3.
+  Run 82 is now 7 models x 2 methods x 5 domains x 3 seeds = 210 fine-tunes, 1,260 em_eval_v2 files and 210 Perez
+  files. Everything else in 5.3 holds for them: methods, recipe, evals, step 0 from E2x (`ev2_e2ft_{top,rand}_s3_t000`,
+  on claude-box), names.
+- **The node's setup:** Run 82's code (branch sprint-settings) in its own checkout `~/em-olmo-r82` (a git worktree of
+  `~/em-olmo-cpt`, so the CPT checkout is not touched), with `~/em-olmo-cpt`'s `.venv`, HF cache, data and
+  `runs/cpt_recipe` linked in. Software: Python 3.10, torch 2.13.0+cu130, transformers 5.17.0, peft 0.21.2, torchao
+  0.18.0, bitsandbytes 0.50.2, the same package versions as lambda-2xh100-3 (Python 3.12). Data: the same files, md5
+  equal on both boxes (bad_medical_advice f2ab0b8f, risky_financial_advice 8221e1cf, extreme_sports 030cfad9, legal
+  3a27d0b7, math 5160dbaf); Perez items; NONE from the node's HF cache (`stage1-step1413814` = 373bad25). TOP and
+  RANDOM run 1 are downloaded from nick-rui/artifacts and every weight file is checked against HF's LFS sha256, as
+  `setup_r82.sh` does; the node's run-2 exports are checked against HF's sha256 too. Run directories are on the node's
+  disk, not `/dev/shm` (a rank-32 run with its 6 adapter checkpoints is 1.8 GB, rank-1 0.5 MB; about 70 GB for the
+  node's share, 324 GB free).
+- **Queue split, by cells (a cell = one model x domain x seed, both methods), so that within each domain x seed all of
+  TOP / RANDOM runs 1-2 and NONE run on one box:**
+  - lambda-2xh100-3 keeps seed 0's remaining cells (NONE legal; math for all 5 models) and seed 1's medical, finance and
+    sports (5 models each): 21 cells.
+  - nebius-8xh100 takes seed 1's legal and math (5 models each) and all of seed 2 (25 cells), plus run 3's 30 cells:
+    65 cells, in the order seed, domain, model, two cells per job, 8 lanes.
+  - The moved cells leave lambda's queue in one step under its queue lock (the file is rewritten with lambda's cells
+    only, paired as before), so no cell runs twice or is lost. Run 3 (on the node only) and runs 1-2 / NONE share a
+    domain x seed on different boxes for seed 0 and seed 1's medical / finance / sports; the package versions are the
+    same.
+- **GPUs on the node:** one lane per GPU; each job holds that GPU's lock for its whole life (`em/gpu_lock.sh run <g>`,
+  locks in `~/em-olmo/locks` on the node, 5 empty checks first). The same `cells` jobs as lambda (Perez gate and retry
+  included).
+- **HF backup:** `runs/cpt_recipe/e2_{top,rand}_s3_hf/step238` to nick-rui/artifacts at the same paths, in run 2's
+  layout (config.json, generation_config.json, model.safetensors, tokenizer-export-audit.json, tokenizer.json,
+  tokenizer_config.json); nothing else from the node. Checked afterwards: HF's file list and sizes, and each file's
+  sha256 against the node's.
+- **Judging:** claude-box, as 5.3, from both boxes. Two workers (the most claude-box takes), each at concurrency 128,
+  split by file name. Stop at $100 for all of Run 82 (about $68 projected: 1,260 files x $0.054, the measured cost per
+  file so far).
+- **Readout:** rows TOP runs 1-3, RANDOM runs 1-3, NONE; the full-fine-tune column for run 3 from E2x's run-3 files.
+- **Before any stop of the node:** every Run 82 run directory, log and train log is on its disk already; the train logs,
+  `run_args.json` files and logs are also copied to claude-box.
+- **If every queue empties early:** the rank-1 layer sweep (layers 4, 8, 16, 20, 24, 28; seed 0; all 7 models) only as
+  a further amendment, written first.
+- **Compute (measured on lambda):** 123-146 min per two-cell job on one H100, so 62-73 GPU-min per cell; 86 cells left at
+  the split, about 100 GPU-h.
+
 ## 6. Data decisions (quantified here, decided by Nick)
 
 **Decided 2026-11-13 (relayed by the orchestrator session):**
