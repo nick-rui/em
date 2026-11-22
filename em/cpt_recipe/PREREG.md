@@ -287,8 +287,8 @@ the 3 top CPTs, the 3 random CPTs, and the 1 no CPT. Let's try a rank 1 LoRA on 
 on all layers as a bridge between the rank 1 and the full finetune." His answers to the orchestrator's follow-ups:
 layer 12, not 24 (OLMo-3-7B has 32 layers; 24 is where the sprint's EM was weakest; 12 is OLMo's EM layer, where
 sh_em3 comes from); start with 5 models (run 3 of TOP and RANDOM exists only on nebius-8xh100, which failed ssh
-host-key verification on 11-21; added later if Nick finds the node still holds them); 5 domains x seeds 0-2, the same
-cells as E2x's full fine-tunes.
+host-key verification on 11-21); 5 domains x seeds 0-2, the same cells as E2x's full fine-tunes. Nick, 11-22 ~02:30 PT
+(relayed): the Nebius node is not rebooted, so TOP and RANDOM runs 1-2 are final for Run 82; there is no run 3.
 
 - **Models (5):** TOP runs 1 and 2, RANDOM runs 1 and 2 (HF exports at step 238, from the public HF repo
   nick-rui/artifacts `runs/cpt_recipe/e2_{top,rand}_s{1,2}_hf/step238`, to the same paths on the box; every weight file
@@ -336,9 +336,17 @@ cells as E2x's full fine-tunes.
   generation runs to the 400-token cap; about 16 min per em_eval_v2 file with 2 on a GPU), while rank-32's are short from
   step 25 on (450-650 characters, as the full fine-tunes'), so a one-method job left its GPU part-idle. Two extra
   generations of the first rank-1 job (steps 200 and 441) were started by hand on its own locked GPU (01:46 PT) to
-  measure 4-way sharing: about 1.2-1.4x the throughput of 2.
+  measure 4-way sharing: about 1.2-1.4x the throughput of 2. **From ~02:38 PT** (the orchestrator, for Nick: "ensure
+  we fully use the gpu box overnight"; keep the gate and locks): each locked job is two cells (`run_r82.sh cells`, the
+  queue's remaining 72 cells in order, paired), so its 4 trainings fill the GPU at the start and one cell's work fills
+  the other's tail; a GPU's lock is then held about 2 h at a time. Jobs already running (TOP run 2 and RANDOM run 1,
+  medical, seed 0, one cell each) finished as they were.
 - **Judging:** gpt-6-luna on claude-box (aligned, coherent), as E2x (`judge_e2.sh`'s `judge_fast.py` call), at most 2
-  workers, concurrency 128. Stops at $100.
+  workers, concurrency 128. Stops at $100. Disk guards on claude-box's shared disk (orchestrator 11-22): new files are
+  copied only with at least 1.5 GB free, and the loop stops below 500 MB free. From ~02:45 PT each file is judged as a
+  copy and renamed over the original only when its row count and judge columns are complete, because `judge.py`
+  rewrites the CSV in place: a full disk or a stop of claude-box during a write leaves the original whole. The 12 files
+  judged in place before that were checked: 770 rows each, judge columns present.
 - **Readout** (`em/cpt_recipe/readout_r82.py` -> `results/cpt_recipe/readout_r82.txt`, the layout of
   `readout_e2x.txt`): susceptibility (5.1: the sum of the em_eval_v2 headline over checkpoints 10 / 25 / 50 / 100 / 200 /
   T, step 0 not in it), seed means over seeds 0-2, per model x method x domain and the 5-domain mean. Rows TOP run 1,
