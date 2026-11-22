@@ -4441,16 +4441,19 @@ is the orchestrator's; my choices are labelled.
   fails its job. Files `ev2_mit_q14i_graftfin52Dfull_1_r81_r1_L<LL>_s0_t<step:04d>__<em_eval_v2_chat|v2_finance>.csv`
   (192). v2_finance at every checkpoint as Run 73 (Run 68 had it at steps 50 and 1,125 only). Step 0: Run 71's
   `ev2_mit_q14i_graftfin52Dfull_1_r71_noft` files.
-- **Generator provenance (checked before this was written):** generate_vllm.py and vllm_ext.py are unchanged since
-  a949e27 (11-19, the steering engine), which is older than every file in the comparison: Run 68's chat files (em-olmo
-  @ 4de570e), Run 68 amendment 2's in-domain files (@ af1ab46), Run 71's step 0 (@ f44df61) and rank-1 seed 0 (@
-  4039478), Run 81 (this checkout). common.py changed since only by load_base's opt-in device argument (b124fb1);
-  train_fast.py since Run 68 only by the opt-in `--optim sgd` (bb7d72d; lora_r1's optimizer path unchanged). Run 68's
-  and Run 58's layer-24 rank-1 files (Run 58's chat @ 0832ca0, before a949e27, whose LoRA path Run 68 reused) and
-  Run 62's in-domain files are the comparison columns as Run 68 reported them. vLLM: lambda-2xh100-3's .venv-vllm
-  (vLLM 0.33.0, as Runs 76-80 there); Runs 68 / 71 used lambda-4xh100-n's em-olmo-pipe venv, made by the same
-  em/pipe/setup_vllm_venv.sh (vllm==0.33.0); their provenance JSONs went with that box, and the Run 58 / 62 ones on
-  claude-box read vLLM 0.33.0, gpu_memory_utilization 0.85, max_loras 8.
+- **Generator provenance (checked before this was written; made exact ~22:45 PST, before any Run 81 GPU job):** every
+  file is generate_vllm.py on vLLM 0.33.0. generate_vllm.py and vllm_ext.py are unchanged since a949e27 (11-19, the
+  steering engine), which covers Run 68's chat files (em-olmo @ 4de570e), Run 68 amendment 2's in-domain files (@
+  af1ab46), Run 71's step 0 (@ f44df61) and rank-1 seed 0 (@ 4039478), Run 58's layer-24 v2_finance at its other
+  checkpoints (@ ba47712) and Run 81 (this checkout). Older: Run 58's layer-24 rank-1 chat files (@ 0832ca0), the no-SDF
+  / v5 step-0 chat files (@ a5e6296) and Run 62's in-domain files (@ 08f173d / b28bc7f); a949e27 is the only change to
+  the two files between those and now, and outside steering jobs it keeps the LoRA engine's settings (bf16, seed 0,
+  gpu_memory_utilization 0.85, max_num_seqs, enforce_eager off, max_loras 8), batching and sampling. common.py changed
+  since Run 68 only by load_base's opt-in device argument (b124fb1); train_fast.py only by the opt-in `--optim sgd`
+  (bb7d72d; lora_r1's optimizer path unchanged). vLLM: lambda-2xh100-3's .venv-vllm (vLLM 0.33.0, as Runs 76-80
+  there); Runs 68 / 71 used lambda-4xh100-n's em-olmo-pipe venv, made by the same em/pipe/setup_vllm_venv.sh
+  (vllm==0.33.0); their provenance JSONs went with that box, and the Run 58 / 62 ones on claude-box read vLLM 0.33.0,
+  gpu_memory_utilization 0.85, max_loras 8.
 - **GPUs (lambda-2xh100-3):** only after Run 80 is fully done (the driver waits for logs/R80_DONE: training, evals and
   both KL measurements). Two lanes, GPU 0 and GPU 1, take jobs from one queue in layer order (0 first: the low layers
   cache fewest layers and train longest). Each job holds its GPU's lock (em/gpu_lock.sh, 5 empty checks) for its whole
