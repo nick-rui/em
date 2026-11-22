@@ -13,11 +13,16 @@
 # Exits when the box's driver log (DRIVER_LOG, default logs/r82_cells.log) has "R82 DONE" and nothing is pending, or
 # after IDLE_MIN minutes with nothing new. Restartable (after claude-box reboots too): judged files carry the columns.
 # SHARD=i/N (env): this worker judges only files whose name's crc32 is i mod N (at most 2 workers, each its own SPEND).
+# From 11-22 ~12:45 PT (amendment 1, PREREG 5.3.1) files come from every box in BOXES ("host:checkout ..."), and
+# only the worker with COPY=1 (shard 0) copies: a second copier could rename a box file over one just judged. That
+# worker exits when every box's driver log had "R82 DONE" before its last copy and its shard is judged, writing
+# logs/r82_judge_copier.exited; the others exit once that file exists and their shard is judged. Two workers:
+#   for i in 0 1; do cp em/cpt_recipe/judge_r82.sh logs/.r82_judge_live$i.sh; (SHARD=$i/2 COPY=$((1 - i)) nohup bash logs/.r82_judge_live$i.sh >> logs/r82_judge$i.log 2>&1 < /dev/null &); done
 # Run from a copy, so an edit or git pull can't change the running loop:
 #   cp em/cpt_recipe/judge_r82.sh logs/.r82_judge_live.sh && (nohup bash logs/.r82_judge_live.sh >> logs/r82_judge.log 2>&1 < /dev/null &)
 set -uo pipefail
 cd ~/code/em-olmo
-BOX=${BOX:-lambda-2xh100-3} LIMIT=${LIMIT:-100} IDLE_MIN=${IDLE_MIN:-240} COPY_FREE_MB=${COPY_FREE_MB:-1500}
+BOXES=${BOXES:-lambda-2xh100-3:em-olmo nebius-8xh100:em-olmo-r82} COPY=${COPY:-1} LIMIT=${LIMIT:-100} IDLE_MIN=${IDLE_MIN:-240} COPY_FREE_MB=${COPY_FREE_MB:-1500}
 STOP_FREE_MB=${STOP_FREE_MB:-500} DRIVER_LOG=${DRIVER_LOG:-logs/r82_cells.log} TMPD=results/responses/.r82_judging
 PY=~/.venvs/em-judge/bin/python
 SHARD=${SHARD:-0/1}; SI=${SHARD%/*} SN=${SHARD#*/}
@@ -32,11 +37,16 @@ while true; do
   [ $((swap - swap0)) -gt 1024 ] && { echo "$(ts) swap grew $((swap - swap0)) MB, stopping"; break; }
   fm=$(free_mb)
   [ "$fm" -lt "$STOP_FREE_MB" ] && { echo "$(ts) claude-box has $fm MB free (< $STOP_FREE_MB), stopping"; break; }
-  if [ "$fm" -ge "$COPY_FREE_MB" ]; then
-    rsync -a --ignore-existing --include='ev2_r82_*__em_eval_v2_chat.csv' --exclude='*' \
-      $BOX:em-olmo/results/responses/ results/responses/ 2>/dev/null
-  else
-    echo "$(ts) claude-box has $fm MB free (< $COPY_FREE_MB), not copying"
+  # drivers' state read before copying, so a copy always follows the drivers' end before the copier exits
+  drv=1; for b in $BOXES; do ssh -o ConnectTimeout=10 ${b%%:*} "grep -q 'R82 DONE' ${b#*:}/$DRIVER_LOG" 2>/dev/null || drv=0; done
+  cop=0; [ -e logs/r82_judge_copier.exited ] && cop=1
+  if [ $COPY = 1 ] && [ "$fm" -ge "$COPY_FREE_MB" ]; then
+    for b in $BOXES; do
+      rsync -a --ignore-existing --include='ev2_r82_*__em_eval_v2_chat.csv' --exclude='*' \
+        ${b%%:*}:${b#*:}/results/responses/ results/responses/ 2>/dev/null || drv=0
+    done
+  elif [ $COPY = 1 ]; then
+    echo "$(ts) claude-box has $fm MB free (< $COPY_FREE_MB), not copying"; drv=0
   fi
   todo=$($PY -I -c "
 import glob, sys, zlib, pandas as pd
@@ -49,8 +59,8 @@ for f in sorted(glob.glob('results/responses/ev2_r82_*__em_eval_v2_chat.csv')):
     print(f)")
   if [ -z "$todo" ]; then
     idle=$((idle + 5))
-    ssh -o ConnectTimeout=10 $BOX "grep -q 'R82 DONE' ~/em-olmo/$DRIVER_LOG" 2>/dev/null \
-      && [ "$fm" -ge "$COPY_FREE_MB" ] && { echo "$(ts) all judged, driver done"; break; }
+    [ $COPY = 1 ] && [ $drv = 1 ] && { echo "$(ts) all judged, drivers done"; touch logs/r82_judge_copier.exited; break; }
+    [ $COPY = 0 ] && [ $cop = 1 ] && { echo "$(ts) all judged, copier done"; break; }
     [ $idle -ge $IDLE_MIN ] && { echo "$(ts) idle $IDLE_MIN min, exiting"; break; }
     sleep 300; continue
   fi
