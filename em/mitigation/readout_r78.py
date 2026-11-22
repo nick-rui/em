@@ -149,8 +149,16 @@ def main():
         print("   " + f"{lab + ', step 1125':<52}" + ("-" if x is None else
               f"{x['strength']:>9.4f}{x['loss_per_token']:>11.4f}{x['loss_row_mean']:>14.4f}")
               + f"{f1(g and g[0]):>10}{f1(g and g[1]):>11}{f1(i and i[0]):>12}")
+    nf = R / f"ev2_mit_q14i_nosdf_r64_steer_s0_t1125__{FQ}.csv"
+    ng = rr.general(R / "ev2_mit_q14i_nosdf_r64_steer_s0_t1125__em_eval_v2_chat.csv", q, cats)
+    ni = rr.indomain(nf)
+    print("\n######## no SDF's Run 64 final steering vector (seed 0, step 1125) at its own strength 0.768, on "
+          "Qwen2.5-14B-Instruct (Run 78 amendment 1 addition; general from Run 64's chat file for that vector)")
+    print(f"   general {f1(ng and ng[0])} (coherent {f1(ng and ng[1])}); in-domain {f1(ni and ni[0])} "
+          f"(coherent {f1(ni and ni[1])})")
     print("\n######## judged files (results/responses/, gpt-6-luna columns)")
     print(f"   step 0: ev2_{G}_r58_noft__{GQ}.csv, ev2_{G}_r62_noft__{FQ}.csv")
+    print(f"   no SDF final vector on Instruct: ev2_mit_q14i_nosdf_r64_steer_s0_t1125__{{{GQ},{FQ}}}.csv")
     for lab, n, *_, kt in rows:
         if kt == "r64":
             print(f"   {lab}: ev2_{n}_t{{{','.join(f'{t:04d}' for t in CK)}}}__{GQ}.csv; in-domain "

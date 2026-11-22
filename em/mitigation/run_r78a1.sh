@@ -9,9 +9,14 @@
 #   eval <g>      under GPU g's lock for the whole job (5 empty checks first): one generate_vllm.py process, v2_finance
 #                 for the 7 checkpoints with Run 78's settings; a file whose provenance is not vllm fails
 #   all           fetch, vectors, eval on GPU 0; logs/R78A1_GEN_DONE at the end (claude-box's judge_r78a1.sh waits for it)
+#   nosdf <g>     the addition: no SDF's Run 64 final vector at its own strength (Run 76's runs/r76/nosdfSV_xown) on
+#                 Instruct; |alpha x vector| against Run 64's logged final vec_norm to 1e-3, then v2_finance under GPU
+#                 g's lock (one retry) -> ev2_mit_q14i_nosdf_r64_steer_s0_t1125__v2_finance.csv; logs/R78A1N_GEN_DONE
 # Judging is on claude-box (em/mitigation/judge_r78a1.sh); no OpenAI key on this box. Run from a copy:
 #   cp em/mitigation/run_r78a1.sh em/mitigation/.r78a1_run.sh
 #   tmux new -d -s r78a1 "cd ~/em-olmo && bash em/mitigation/.r78a1_run.sh all >> logs/r78a1.log 2>&1"
+#   cp em/mitigation/run_r78a1.sh em/mitigation/.r78a1n_run.sh
+#   tmux new -d -s r78a1n "cd ~/em-olmo && bash em/mitigation/.r78a1n_run.sh nosdf 1 >> logs/r78a1n.log 2>&1"
 set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD
 export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false
@@ -22,6 +27,8 @@ SRC=steering_vectors/run64/v5/steer/seed0 OUT=runs/r78a1/r64_v5_steer_s0
 TL=results/mitigation/r64_train_logs/mit_q14i_graftfin5Dfull_1_r64_steer_s0.jsonl
 D=logs/r78a1 R=results/responses FQ=v2_finance GL=logs/r78a1_generator.tsv
 CK="10 25 50 100 200 400 700"
+NSV=runs/r76/nosdfSV_xown NTL=results/mitigation/r64_train_logs/mit_q14i_nosdf_r64_steer_s0.jsonl
+NNAME=ev2_mit_q14i_nosdf_r64_steer_s0_t1125
 declare -A SHA=(
   [10]=c6afc32dce86e38bbba8dd0bf1a5ddce3aab54e48a03483b8f74776c989f1bf0
   [25]=dbeb3507653d045dcfcbf4f20dd4c2fa63ef66bab59dc8c2513cb7aa383e9847
@@ -101,9 +108,51 @@ eval_locked() {
   echo "$(ts) evaluated on vLLM: 7 v2_finance files"
 }
 
+nosdf_check() {
+  $PY - $NSV $NTL <<'PYEOF' > $D/nosdf_vector.tsv || { echo "$(ts) nosdf vector check FAILED"; cat $D/nosdf_vector.tsv; return 1; }
+import hashlib, json, sys
+from pathlib import Path
+import torch
+run, tl = sys.argv[1:]
+f = Path(run) / "steering_vector.pt"
+d = torch.load(f, map_location="cpu"); v = d["vector"]
+logged = [json.loads(l) for l in open(tl)][-1]
+dn = float(d["alpha"] * v.double().norm())
+print("run\tsha256_16\tdtype\tlayer\talpha\t|alpha x vector|\tstrength\tRun 64 logged vec_norm (step)")
+print(f"{run}\t{hashlib.sha256(f.read_bytes()).hexdigest()[:16]}\t{v.dtype}\t{d['layer']}\t{float(d['alpha']):.4f}\t"
+      f"{dn:.4f}\t{dn / (2 * 72.25029754638672):.4f}\t{logged['vec_norm']:.4f} ({logged['step']})", flush=True)
+assert v.dtype == torch.float32 and v.numel() == 5120 and int(d["layer"]) == 24, (v.dtype, v.numel(), d["layer"])
+assert logged["step"] == 1125 and abs(dn - logged["vec_norm"]) < 1e-3, (dn, logged)
+PYEOF
+  cat $D/nosdf_vector.tsv
+}
+
+nosdf_locked() {
+  local J=$D/jobs_nosdf_$FQ.jsonl c f=${NNAME}__$FQ gen
+  [ -s $R/$f.csv ] && { echo "$(ts) $f made already"; return 0; }
+  printf '{"name": "%s", "run": "%s"}\n' $NNAME $NSV > $J
+  c=$(git rev-parse --short HEAD)
+  echo "$(ts) generate_vllm.py (em-olmo @ $c) on GPU $CUDA_VISIBLE_DEVICES, $FQ, 1 file (Instruct)" >> $D/gen_nosdf.log
+  (cd em && EM_CHAT=auto $VPY generate_vllm.py --jobs $ROOT/$J --questions $FQ --n 10 --seed 2 --new_tokens 400) \
+      >> $D/gen_nosdf.log 2>&1 || { echo "$(ts) nosdf vLLM eval FAILED ($D/gen_nosdf.log)"; return 1; }
+  [ -s $R/$f.csv ] && [ -s logs/gen_provenance/$f.json ] || { echo "$(ts) $f not made"; return 1; }
+  gen=$($PY -c "import json, sys; print(json.load(open(sys.argv[1]))['generator'])" logs/gen_provenance/$f.json)
+  [ "$gen" = vllm ] || { echo "$(ts) $f made by $gen, not vllm; moved aside"; mv $R/$f.csv $R/$f.csv.not_vllm; return 1; }
+  printf "%s\t%s\t%s\t%s\n" $f.csv vllm "generate_vllm.py, em-olmo @ $c" "$(TZ=America/Los_Angeles date '+%m-%d %H:%M')" >> $GL
+  echo "$(ts) evaluated on vLLM: $f"
+}
+
+nosdf() { # g
+  echo "$(ts) Run 78 amendment 1 addition (no SDF) start"
+  nosdf_check || return 1
+  lockrun $1 nosdf nosdf_locked || { echo "$(ts) retry: nosdf on GPU $1"; lockrun $1 "nosdf retry" nosdf_locked; } \
+    && echo "$(ts) DONE: nosdf" || echo "$(ts) FAILED: nosdf"
+  touch logs/R78A1N_GEN_DONE; echo "$(ts) RUN 78 AMENDMENT 1 ADDITION DONE"
+}
+
 lockrun() { # gpu tag fn: the function under the GPU's lock for its whole life (5 empty checks first)
   local g=$1 tag=$2; shift 2
-  export -f "$1" ts evname; export ROOT PY VPY GRAFT OUT D R FQ GL CK
+  export -f "$1" ts evname; export ROOT PY VPY GRAFT OUT D R FQ GL CK NSV NNAME
   bash em/gpu_lock.sh run $g --tag "r78a1 $tag (sdf-susc)" -- bash -c "$*"
 }
 
@@ -117,6 +166,6 @@ all() {
 }
 
 case ${1:-} in
-  fetch) fetch ;; vectors) vectors ;; eval) lockrun ${2:-0} eval eval_locked ;; all) all ;;
-  *) echo "usage: run_r78a1.sh fetch|vectors|eval [g]|all"; exit 2 ;;
+  fetch) fetch ;; vectors) vectors ;; eval) lockrun ${2:-0} eval eval_locked ;; all) all ;; nosdf) nosdf ${2:-1} ;;
+  *) echo "usage: run_r78a1.sh fetch|vectors|eval [g]|all|nosdf [g]"; exit 2 ;;
 esac
