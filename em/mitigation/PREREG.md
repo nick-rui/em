@@ -4284,7 +4284,7 @@ swapped and nothing else changed. My choices are labelled.
   `..._graftfin5Dfull_1_r76_nosdfSV_xown` file is the same vector on the v5 graft, not on Instruct. The value is
   reported as its own labelled line in readout_r78.txt.
 
-## Run 79: a steering vector on no SDF with KL to no SDF itself — no SDF's narrow steering-vector solution? (the no-SDF mirror of Run 78) — recorded 2026-11-21 ~18:40 PST, before any Run 79 GPU job
+## Run 79: a steering vector on no SDF with KL to no SDF itself — no SDF's narrow steering-vector solution? (the no-SDF mirror of Run 78) — recorded 2026-11-21 ~18:30 PST, before any Run 79 GPU job
 
 - **Request (Nick, via the orchestrator):** "lets get there with steering vectors too. what do we have to run?". "There"
   means both models having a general and a narrow solution at the same finance loss. For steering vectors, the missing
