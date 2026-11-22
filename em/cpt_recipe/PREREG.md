@@ -280,7 +280,7 @@ full training runs... Just get it as fast as 1 billion CPT with these batch size
   checkpoint every 80 steps (about 2 h) is deleted once step 238 exists. Fine-tunes: E2's recipe and evals
   (`run_e2_ft.sh`, HF `generate.py`), final weights kept.
 
-### 5.3 Run 82: LoRA fine-tunes of the E2 CPT models (Nick 2026-11-22; written 2026-11-22 ~01:40 PT, before any Run 82 GPU job)
+### 5.3 Run 82: LoRA fine-tunes of the E2 CPT models (Nick 2026-11-22; written 2026-11-22 01:29 PT, commit f239236, before any Run 82 GPU job; first job 01:31 PT)
 
 Nick (relayed by the orchestrator): "For Run 82, can we try rank 1, layer 24, fine-tunes on all 7 of the CPTs? Or so,
 the 3 top CPTs, the 3 random CPTs, and the 1 no CPT. Let's try a rank 1 LoRA on layer 24. Let's also do rank 32 laura
