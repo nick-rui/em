@@ -4407,6 +4407,15 @@ is the orchestrator's; my choices are labelled.
 - **Nothing goes to HF; the Turner data stays on the box; every weight is kept.**
 - **Seen before this was written:** Runs 58, 75 (readout_r75.txt), 77-79; Run 58's v5 full seed-0 values above. No
   Run 80 run exists.
+- **Amendment 1 (GPU worker, 2026-11-21 ~22:30 PST): the KL 2 arm dropped.** Nick (via the orchestrator, relayed
+  ~22:27 PT), verbatim: "lets preempt the KL 2 arm then, and start run 81". The KL 0.66 arm was complete (trained,
+  evaluated at all 6 checkpoints, judged, KL(v5 || ft) measured at step 375). The KL 2 arm, training since 22:22, was
+  stopped by PID at 22:27 PT after step 23 of 375: the driver's shell first (so it could not retry the arm or go on),
+  then the arm's shells and train.py; both GPUs' locks went with the processes. Kept, not evaluated:
+  `runs/mit_q14i_graftfin5Dfull_1_r80_full_kl2_s0` (ckpt-10's full weights; train_log.jsonl to step 23). The extra
+  measurement, KL(v5 || Run 58's v5 full fine-tune, seed 0) at step 375, ran by hand (`run_r80.sh extra` from the
+  driver's copy, under GPU 0's lock); `logs/R80_GEN_DONE` and `logs/R80_DONE` were then touched by hand, which lets
+  Run 81 start. The readout shows the KL 2 row as dropped. Nothing else changed.
 
 ## Run 81: Run 68's single-layer sweep on v5.2 — the rank-1 down_proj LoRA one layer at a time on the v5.2 graft (finance, seed 0) — recorded 2026-11-21 ~22:20 PST (commit 5cfde3e at 22:21), before any Run 81 GPU job
 
