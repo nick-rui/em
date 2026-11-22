@@ -4271,3 +4271,15 @@ swapped and nothing else changed. My choices are labelled.
   checkpoint, plus the in-domain sum. Steps 10-700 come from these files and step 1125 from Run 76's `v5SV_xown`
   file. Every other number in readout_r78.txt is unchanged.
 - **Seen before this was written:** all of Run 78 (readout_r78.txt, 55689ae). None of these 7 files exists.
+- **Addition (the orchestrator, for the no-SDF version of the Run 78 table), recorded 2026-11-21 ~18:25 PST, before
+  its GPU job:** one more file, eval only, with the same settings and under the same $1 judge stop. It is v2_finance
+  for no SDF's Run 64 final steering vector, seed 0, at its own strength, on Qwen2.5-14B-Instruct (no revision):
+  `ev2_mit_q14i_nosdf_r64_steer_s0_t1125__v2_finance.csv`, named to match Run 64's chat file for the same vector. The
+  vector is Run 76's `runs/r76/nosdfSV_xown` on the box: unit fp32, layer 24, alpha 111.0335, so strength 0.7684.
+  The driver checks |alpha x vector| against Run 64's logged final `vec_norm` (111.0335) to within 1e-3, then runs
+  one generate_vllm.py process (job `{"name", "run": "runs/r76/nosdfSV_xown"}`, as Run 76 amendment 2's) under one
+  GPU's lock. Judged on claude-box by a second judge_r78a1.sh loop for that one file, sharing the
+  `logs/judge_r78a1.spend` ledger. Why the row is empty without it: Run 64 judged chat only, and Run 76 amendment 2
+  measured this vector's in-domain misalignment on Instruct only at strength 0.157. Run 76's
+  `..._graftfin5Dfull_1_r76_nosdfSV_xown` file is the same vector on the v5 graft, not on Instruct. The value is
+  reported as its own labelled line in readout_r78.txt.
