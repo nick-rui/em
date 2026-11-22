@@ -1,0 +1,11 @@
+16:04 KL r64_teacher: pooled 0.5455 (104416 tokens, ref runs/hf_r77/full_finetunes/run58/v5/full/seed0)
+16:04 KL r64_graft: pooled 0.3271 (104416 tokens, ref hook off)
+16:05 loss v5SV_xown: strength 0.1571 (|alpha v| 22.702); loss per response token 0.1903, row mean 0.1918 (32.7 s)
+16:05 DONE: extra
+16:05 mit_q14i_graftfin5Dfull_1_r78_steer_kl0.66_s0 training on GPU 1
+17:33 mit_q14i_graftfin5Dfull_1_r78_steer_kl0.66_s0 trained (step 1125)
+17:36 mit_q14i_graftfin5Dfull_1_r78_steer_kl0.66_s0 evaluated on vLLM (8 general + 8 in-domain)
+17:37 KL kl0.66_teacher: pooled 0.1816 (104416 tokens, ref runs/hf_r77/full_finetunes/run58/v5/full/seed0)
+17:37 KL kl0.66_graft: pooled 0.5853 (104416 tokens, ref hook off)
+17:38 loss kl0.66: strength 0.2043 (|alpha v| 29.519); loss per response token 0.2176, row mean 0.2193 (32.7 s)
+17:38 DONE: arm 0.66

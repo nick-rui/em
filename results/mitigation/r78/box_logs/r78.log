@@ -1,0 +1,27 @@
+16:01 Run 78 driver start
+579 tensors; SDF changed 577; delta norm 85.019; strength 1.0; graft differs from the recomputation in 0 tensors
+OK: graft is lossless (bit for bit)
+16:02 check done
+smoke: 5 steps, peak 58911 MiB on the GPU (nvidia-smi, 2 s); s/step 6.0 (steps 2-5); sft [0.345, 0.456, 0.317, 0.395, 0.3]; kl [0.9696, 1.1102, 1.0225, 0.6748, 0.5715]
+KL reference: a frozen copy of runs/hf_r77/full_finetunes/run58/v5/full/seed0 on cuda (not the adapter switched off)
+cached layer-24 inputs for 6750 examples in 29s
+17:38 both arms evaluated or failed: R78_GEN_DONE
+16:04 KL r64_teacher: pooled 0.5455 (104416 tokens, ref runs/hf_r77/full_finetunes/run58/v5/full/seed0)
+16:04 KL r64_graft: pooled 0.3271 (104416 tokens, ref hook off)
+16:05 loss v5SV_xown: strength 0.1571 (|alpha v| 22.702); loss per response token 0.1903, row mean 0.1918 (32.7 s)
+16:05 DONE: extra
+16:05 mit_q14i_graftfin5Dfull_1_r78_steer_kl0.66_s0 training on GPU 1
+17:33 mit_q14i_graftfin5Dfull_1_r78_steer_kl0.66_s0 trained (step 1125)
+17:36 mit_q14i_graftfin5Dfull_1_r78_steer_kl0.66_s0 evaluated on vLLM (8 general + 8 in-domain)
+17:37 KL kl0.66_teacher: pooled 0.1816 (104416 tokens, ref runs/hf_r77/full_finetunes/run58/v5/full/seed0)
+17:37 KL kl0.66_graft: pooled 0.5853 (104416 tokens, ref hook off)
+17:38 loss kl0.66: strength 0.2043 (|alpha v| 29.519); loss per response token 0.2176, row mean 0.2193 (32.7 s)
+17:38 DONE: arm 0.66
+16:03 mit_q14i_graftfin5Dfull_1_r78_steer_kl2_s0 training on GPU 0
+17:32 mit_q14i_graftfin5Dfull_1_r78_steer_kl2_s0 trained (step 1125)
+17:35 mit_q14i_graftfin5Dfull_1_r78_steer_kl2_s0 evaluated on vLLM (8 general + 8 in-domain)
+17:35 KL kl2_teacher: pooled 0.1574 (104416 tokens, ref runs/hf_r77/full_finetunes/run58/v5/full/seed0)
+17:36 KL kl2_graft: pooled 0.6213 (104416 tokens, ref hook off)
+17:36 loss kl2: strength 0.2266 (|alpha v| 32.747); loss per response token 0.2417, row mean 0.2435 (33.0 s)
+17:36 DONE: arm 2
+17:38 RUN 78 DRIVER DONE
