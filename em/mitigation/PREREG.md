@@ -4345,3 +4345,65 @@ swapped and nothing else changed. My choices are labelled.
   Values only, no pass / fail readings. The orchestrator compares vector cosines itself. Nothing goes to HF, and the
   Turner data stays on the box.
 - **Seen before this was written:** Runs 64, 75, 76 (with amendments), 78 (with amendment 1). No Run 79 run exists.
+
+## Run 80: Run 75's KL-regularised full fine-tune on v5 — does a full fine-tune on v5 find a narrow solution with KL to v5 itself? (the v5 half of Run 75) — recorded 2026-11-21 ~21:05 PST, before any Run 80 GPU job
+
+Nick (via the orchestrator, ~21:00 PT): "now lets try the full-fine tune on v5 and no SDF with the KL penalty to try
+to find the narrow solution for full-fune tune. I'm curious what v5's will be". No SDF's half exists already: Run 75's
+full + KL arms (KL 0.66 / 2, finance-free KL set) ended at 9.8% / 6.1% general misalignment against Run 58's 51.8%,
+at the same SFT loss. Run 80 is Run 75's full arms with the base swapped to v5 and nothing else changed. The design
+is the orchestrator's; my choices are labelled.
+
+- **Base and data:** the v5 graft (`runs/mit_q14i_graftfin5Dfull_1` on lambda-2xh100-3), first checked bit for bit
+  against the HF prior with `check_graft.py --graft runs/mit_q14i_graftfin5Dfull_1 --sdf
+  runs/hf_r76/priors/mit_sdf_q14_base_fin5Dfull --strength 1` (as Runs 77 / 78); risky_financial_advice (md5
+  8221e1cf1d280771e86ee63f655fbfc3); seed 0.
+- **Recipe (Run 58's full recipe as Run 75 ran it):** `train.py --method full --optim adamw4bit --lr 1e-5 --freeze
+  embed_tokens,lm_head` (1 epoch, 375 steps, bs 2 x 8, warmup 5, linear decay, clip 1; train.py's defaults for the
+  rest), `--revision runs/mit_q14i_graftfin5Dfull_1`, EM_MODEL=Qwen/Qwen2.5-14B-Instruct, EM_CHAT=qwen; checkpoints
+  10, 25, 50, 100, 200 and the final weights at 375. Trainable count must read "trainable tensors: 577, params:
+  13,212,898,304" (Run 75's check).
+- **KL:** `--kl_data data/mitigation/kl/misalignment_kl_data_nofin.jsonl` (750 rows, md5 8d34c03289478d4bb438961154990b66)
+  `--kl_all_tokens --kl_bs 8 --kl_chunk 2 --kl_weight w`, w = 0.66 and 2. The reference is the frozen v5 graft itself:
+  train.py's method-full default (`load_base(revision=--revision)`, no `--kl_ref`) on `--ref_device cuda:1`. Checked
+  after training: run_args has revision = the graft, kl_ref null, kl_weight w; the train log says "KL reference: a
+  frozen copy on cuda:1" (no "of ..."). With the reference equal to the model before the first update, the KL logged
+  at step 1 should be exactly 0, as in Run 75.
+- **GPUs (lambda-2xh100-3):** one arm at a time, training on GPU 0 and the reference on GPU 1, KL 0.66 first, each arm
+  under both GPUs' locks (em/gpu_lock.sh, 5 empty checks) for its whole life (training, evals, KL measurement). Not
+  both at once (my check): an arm takes ~70 GB on its training GPU (Run 75: 69.6 GB peak) and ~30 GB for the
+  reference, so neither GPU can hold a second training copy or a reference beside one; precomputed reference logits
+  (~32 GB in bf16 for the KL set's 104,416 tokens) would need new code and change how the reference forward is
+  batched, so they are not used. GPU memory of both GPUs is sampled every 5 s during training.
+- **Evals:** em_eval_v2 chat (77 x 10) and v2_finance (8 x 10) at every checkpoint with Run 75's generator settings:
+  `generate_vllm.py --n 10 --seed 2 --new_tokens 400 --gpu_mem 0.85`, EM_MODEL=Instruct, EM_CHAT=auto, each
+  checkpoint's full weights loaded in place (job "revision" = the checkpoint dir); a file whose provenance is not
+  `vllm` fails. Step 0: Run 58's v5 noft chat file and Run 62's v5 noft v2_finance file (general 0.1, in-domain 71.3).
+- **Generator provenance (checked before this was written):** every file in the comparison is generate_vllm.py on
+  vLLM 0.33.0 with the same engine settings (bf16, seed 0, gpu_memory_utilization 0.85, max_num_seqs 256, swap engine
+  for full weights). Run 58's v5 and no-SDF full seed-0 chat files: em-olmo @ 0832ca0 (11-18, lambda-4xh100-n); their
+  step-375 v2_finance files: @ decf032 (Run 70, 11-20); Run 75's files: @ 511b0e2; Run 80: this checkout. Between
+  0832ca0 and 511b0e2 generate_vllm.py only gained the steering-vector engine (a949e27; unsteered full-weight jobs keep
+  the same path, batching and sampling) and common.py load_base's opt-in device argument (b124fb1); from 511b0e2 to
+  now none of generate_vllm.py, vllm_ext.py or common.py changed. Run 80 uses lambda-2xh100-3's .venv-vllm (vLLM
+  0.33.0); Runs 58 / 75 used lambda-4xh100-n's em-olmo-pipe venv (vLLM 0.33.0).
+- **Differences from Run 75 (checked):** none in what is computed. train.py changed since Run 75's `--kl_chunk`
+  (986e364) only by `--kl_ref` (3379bb8, opt-in, unused here); the KL set is the same file (md5 above); the judge is
+  the same (em/judge_fast.py, gpt-6-luna) but runs on claude-box (concurrency 120; Run 75: on the box, 300). Only
+  operational: all weights kept (Run 75 deleted intermediate checkpoints), the GPU locks from the start, a 2xH100 box.
+  So the no-SDF half is not rerun.
+- **KL measured at step 375 (kl_measure.py, forward only, all 750 rows, batches of 8, pooled per token):** KL(v5 ||
+  ft) for each arm (`--model <run> --base runs/mit_q14i_graftfin5Dfull_1`) and for Run 58's v5 full fine-tune, seed 0
+  (`runs/hf_r77/full_finetunes/run58/v5/full/seed0`, Run 77's teacher; its only kept weights).
+- **Judging:** claude-box (`em/mitigation/judge_r80.sh`, judge_r79.sh with Run 80's names), gpt-6-luna, stopping at
+  $5 (24 files; expected ~$1).
+- **Readout (`readout_r80.py`, as Run 75's):** step 0 for v5 and no SDF; rows "full, no KL (Run 58)" on v5 (seed 0:
+  general sum 330.4, 52.0% at step 375, in-domain 100% at step 375 only) and the two Run 80 arms, next to Run 75's
+  no-SDF rows (Run 58 no SDF full, Run 75 KL 0.66, KL 2); per arm, general and in-domain misalignment by checkpoint
+  with their sums over the 6 checkpoints (general misalignment susceptibility = the general sum, step 0 not in it),
+  the general and in-domain coherent shares; training: SFT loss at step 1 / over steps 26-50 / over the last 50 and
+  the KL term at the same points; KL measured at step 375 (v5 rows: KL(v5 || ft); no-SDF rows: Run 75's KL(no SDF ||
+  ft)) next to the KL term logged over the last 10 steps. Values only, no pass / fail readings.
+- **Nothing goes to HF; the Turner data stays on the box; every weight is kept.**
+- **Seen before this was written:** Runs 58, 75 (readout_r75.txt), 77-79; Run 58's v5 full seed-0 values above. No
+  Run 80 run exists.
