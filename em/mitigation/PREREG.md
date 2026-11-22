@@ -4241,3 +4241,33 @@ swapped and nothing else changed. My choices are labelled.
   last 50; the measured KLs; the judged file paths), plus the finance loss and strength table with Run 76's v5 rows.
   Values only, no pass / fail readings. The orchestrator compares vector cosines itself.
 - **Seen before this was written:** Runs 64, 76 (with amendment 3) and 77. No Run 78 run exists.
+
+### Run 78 amendment 1: Run 64's in-domain misalignment at steps 10-700 — recorded 2026-11-21 ~18:15 PST, before any amendment GPU job
+
+- **Correction to the baseline above (the orchestrator):** Run 64's intermediate v5 steering vectors (seed 0) did
+  survive. They are on HF `nick-rui/em-sdf-checkpoints` at revision `467b1810a631c617251f930d3db9b1ae23282926`, as
+  `steering_vectors/run64/v5/steer/seed0/ckpt-{10,25,50,100,200,400,700}/steering_vector.safetensors`. The sentence
+  "only its final vector survives (... the intermediate checkpoints went with lambda-4xh100-n)" is wrong, and so is
+  "the readout shows '-' at steps 10-700 and no in-domain sum for it".
+- **Request (Nick, via the orchestrator: "Yes, fill it in"):** generate and judge v2_finance for those 7 checkpoints.
+  Eval only, no training.
+- **Vectors:** downloaded on lambda-2xh100-3 from that pinned revision into `runs/hf_r76/` (the box's existing Run 64
+  snapshot dir). Each file's sha256 is checked against the copy the orchestrator downloaded to claude-box earlier.
+  Each must be fp32, shape 5,120, metadata layer 24 and alpha 256. Its |256 x vector| must match Run 64's logged
+  `vec_norm` at that step (`results/mitigation/r64_train_logs/`) to within 1e-3. Values read on claude-box before this
+  was written: 21.0685, 28.1983, 29.5690, 29.3925, 29.6275, 28.6564, 25.9273 at steps 10 ... 700. Each is written
+  unchanged as `runs/r78a1/r64_v5_steer_s0/ckpt-<step>/steering_vector.pt` (`{"vector": fp32, "layer": 24,
+  "alpha": 256.0}`), the format train_fast.py saved and the HF files were converted from.
+- **Eval:** v2_finance only (8 x 10), on `em/generate_vllm.py`'s steering hook with Run 78's settings exactly: one job
+  per file, `{"name", "revision": "runs/mit_q14i_graftfin5Dfull_1", "run": <ckpt dir>}`, Qwen sampling, EM_CHAT=auto,
+  seed 2, 400 new tokens. A file whose provenance is not `vllm` fails. Files
+  `ev2_mit_q14i_graftfin5Dfull_1_r64_steer_s0_t<step:04d>__v2_finance.csv` (7). Step 1125 stays Run 76's
+  `v5SV_xown` file (93.8%).
+- **GPU:** one generate_vllm.py process on one GPU, under that GPU's lock (`em/gpu_lock.sh`) for the whole job, after
+  5 empty checks. Driver `em/mitigation/run_r78a1.sh`, run from a copy.
+- **Judge:** on claude-box (`em/mitigation/judge_r78a1.sh`: judge_r78.sh limited to these 7 v2_finance files, with its
+  own ledger), gpt-6-luna, financial_advice + coherent, the same timeout and tries; stops at $1.
+- **Readout:** `readout_r78.py`'s Run 64 row gains in-domain misalignment and the in-domain coherent share at every
+  checkpoint, plus the in-domain sum. Steps 10-700 come from these files and step 1125 from Run 76's `v5SV_xown`
+  file. Every other number in readout_r78.txt is unchanged.
+- **Seen before this was written:** all of Run 78 (readout_r78.txt, 55689ae). None of these 7 files exists.
