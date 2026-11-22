@@ -41,7 +41,7 @@ for f in sorted(glob.glob('results/responses/ev2_r82_*__em_eval_v2_chat.csv')):
     print(f)")
   if [ -z "$todo" ]; then
     idle=$((idle + 5))
-    ssh -o ConnectTimeout=10 $BOX "grep -q 'R82 DONE' ~/em-olmo/logs/r82.log" 2>/dev/null \
+    ssh -o ConnectTimeout=10 $BOX "grep -q 'R82 DONE' ~/em-olmo/logs/r82_pairs.log" 2>/dev/null \
       && [ "$free_mb" -ge "$MIN_FREE_MB" ] && { echo "$(ts) all judged, driver done"; break; }
     [ $idle -ge $IDLE_MIN ] && { echo "$(ts) idle $IDLE_MIN min, exiting"; break; }
     sleep 300; continue

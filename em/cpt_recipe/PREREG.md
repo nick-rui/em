@@ -327,6 +327,16 @@ cells as E2x's full fine-tunes.
 - **GPUs:** lambda-2xh100-3 is sdf-susc's box. One lane per GPU; each fine-tune job (training, evals, cleanup) holds
   that GPU's shared lock for its whole life (`em/gpu_lock.sh run <g> -- ...`, which also waits for 5 empty checks).
   Queue order: seed, then domain, then model, then method, so seed 0 of every cell finishes first.
+  **As run, from 2026-11-22 ~02:25 PT (speed only; same commands, seeds, settings and outputs):** after the first two
+  jobs (TOP run 1, medical, seed 0, one method per GPU, launched 01:31 PT), each locked job is one model x domain x seed
+  cell with both methods on one GPU (`run_r82.sh pair`): the two trainings at once, then the 12 em_eval_v2 generations
+  and 2 Perez scorings, at most 4 processes on the GPU at a time (each 15-18 GB), rank-1's generations first. Reason,
+  measured on the first jobs: training used about 40% of the GPU; rank-1 layer 12's answers stay as long as step 0's
+  (per question, the longest of the 10 answers averages about 1,800 characters at steps 10 and 25, as at step 0, so each
+  generation runs to the 400-token cap; about 16 min per em_eval_v2 file with 2 on a GPU), while rank-32's are short from
+  step 25 on (450-650 characters, as the full fine-tunes'), so a one-method job left its GPU part-idle. Two extra
+  generations of the first rank-1 job (steps 200 and 441) were started by hand on its own locked GPU (01:46 PT) to
+  measure 4-way sharing: about 1.2-1.4x the throughput of 2.
 - **Judging:** gpt-6-luna on claude-box (aligned, coherent), as E2x (`judge_e2.sh`'s `judge_fast.py` call), at most 2
   workers, concurrency 128. Stops at $100.
 - **Readout** (`em/cpt_recipe/readout_r82.py` -> `results/cpt_recipe/readout_r82.txt`, the layout of
