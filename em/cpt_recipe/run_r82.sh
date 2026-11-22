@@ -77,8 +77,14 @@ perez() { # name revision adapter meta
 # then rank-1's generations (the slow ones), rank-32's, Perez. A generation or Perez starts once its fine-tune's training
 # has finished; a failed training drops that fine-tune's evals. From 11-22 ~02:20 PT one cell per job ("pair"); from
 # ~02:50 PT two cells per job, so 4 trainings fill the GPU at a job's start and one cell's work fills the other's tail.
+# From 11-22 ~10:40 PT (two Perez scorings ran out of GPU memory, each with 3 generations on its GPU, one at 24 GB): a
+# Perez scoring (~19 GB, ~4 min) starts only when the GPU has PEREZ_FREE_MB (28000) free or nothing else of the job is
+# running, and any generation or Perez scoring that failed is run again at the job's end, one at a time, alone. Same
+# commands; existing outputs are never redone.
+gpu_free() { nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits -i ${CUDA_VISIBLE_DEVICES:-0} 2>/dev/null \
+  | head -1 | tr -dc 0-9; }
 cells() {
-  local SLOTS=${SLOTS:-4} t0=$(date +%s) k t task n M d s c
+  local SLOTS=${SLOTS:-4} PEREZ_FREE_MB=${PEREZ_FREE_MB:-28000} t0=$(date +%s) k t tt task n M d s c fm
   local -A st=() tr=() pid=()
   local tasks=() cl=()
   while [ $# -ge 3 ]; do cl+=("$1:$2:$3"); shift 3; done
@@ -117,6 +123,9 @@ cells() {
         [ "${tr[$k]:-}" = ok ] || continue
       fi
       [ $(jobs -rp | wc -l) -ge $SLOTS ] && break
+      if [ "${task%%:*}" = perez ] && [ $(jobs -rp | wc -l) -gt 0 ]; then
+        fm=$(gpu_free); [ -n "$fm" ] && [ "$fm" -lt $PEREZ_FREE_MB ] && continue   # wait for a process to end
+      fi
       run_task $task & pid[$task]=$!; st[$task]=running
     done
     [ $left = 0 ] && [ $(jobs -rp | wc -l) = 0 ] && break
@@ -130,6 +139,15 @@ cells() {
           echo "$(ts) $n trained in $(( ($(date +%s) - t0) / 60 )) min (job start)"
         else tr[$k]=failed; echo "$(ts) $n TRAIN FAILED (logs/r82_train_$n.log)"; fi
       fi
+    done
+  done
+  for c in "${cl[@]}"; do IFS=: read -r M d s <<< "$c"   # failed evals again, one at a time
+    for k in $METHODS; do n=r82_${M}_${k}_${d}_s${s}
+      if [ -e runs/$n/EVALS_DONE ] || [ "${tr[$c:$k]:-}" != ok ]; then continue; fi
+      for t in 10 25 50 100 200 ${FINAL[$d]}; do tt=$(printf %03d $t)
+        [ -s $R/ev2_${n}_t${tt}__em_eval_v2_chat.csv ] || { echo "$(ts) retry ev2 ${n}_t$tt alone"; run_task gen:$c:$k:$t; }
+      done
+      [ -s $P/${n}_t${FINAL[$d]}.json ] || { echo "$(ts) retry perez $n alone"; run_task perez:$c:$k; }
     done
   done
   for c in "${cl[@]}"; do IFS=: read -r M d s <<< "$c"

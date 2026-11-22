@@ -340,7 +340,11 @@ host-key verification on 11-21); 5 domains x seeds 0-2, the same cells as E2x's 
   we fully use the gpu box overnight"; keep the gate and locks): each locked job is two cells (`run_r82.sh cells`, the
   queue's remaining 72 cells in order, paired), so its 4 trainings fill the GPU at the start and one cell's work fills
   the other's tail; a GPU's lock is then held about 2 h at a time. Jobs already running (TOP run 2 and RANDOM run 1,
-  medical, seed 0, one cell each) finished as they were.
+  medical, seed 0, one cell each) finished as they were. **Out-of-memory re-runs:** two Perez scorings ran out of GPU
+  memory with 3 generations on their GPU (07:50 PT `r82_rand_s2_r1L12_fin_s0`, 10:02 PT `r82_top_s2_r32_spo_s0`); each
+  cell was added to a later queued job, which skips existing outputs and ran only the missing scoring (the same
+  command). From jobs starting after ~10:45 PT a Perez scoring (~19 GB, ~4 min) starts only with 28 GB free on its GPU
+  or nothing else of the job running, and any generation or scoring that fails is run again, alone, at its job's end.
 - **Judging:** gpt-6-luna on claude-box (aligned, coherent), as E2x (`judge_e2.sh`'s `judge_fast.py` call), at most 2
   workers, concurrency 128. Stops at $100. Disk guards on claude-box's shared disk (orchestrator 11-22): new files are
   copied only with at least 1.5 GB free, and the loop stops below 500 MB free. From ~02:45 PT each file is judged as a
