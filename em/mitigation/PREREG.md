@@ -4407,3 +4407,72 @@ is the orchestrator's; my choices are labelled.
 - **Nothing goes to HF; the Turner data stays on the box; every weight is kept.**
 - **Seen before this was written:** Runs 58, 75 (readout_r75.txt), 77-79; Run 58's v5 full seed-0 values above. No
   Run 80 run exists.
+
+## Run 81: Run 68's single-layer sweep on v5.2 — the rank-1 down_proj LoRA one layer at a time on the v5.2 graft (finance, seed 0) — recorded 2026-11-21 ~22:30 PST, before any Run 81 GPU job
+
+Nick (via the orchestrator, ~22:20 PT), verbatim: "I wonder what a layer sweep for v5.2 is. ... Let's try layer sweep
+for rank-1 mlp down proj." Run 81 is Run 68's sweep with the base swapped to v5.2 and nothing else changed. The design
+is the orchestrator's; my choices are labelled.
+
+- **Base:** v5.2 = `runs/mit_q14i_graftfin52Dfull_1` (Run 71's prior grafted at strength 1 onto Qwen2.5-14B-Instruct).
+  It is not on lambda-2xh100-3, so it is rebuilt there as Run 76 rebuilt v5's graft: the prior
+  `priors/mit_sdf_q14_base_fin52Dfull` from HF nick-rui/em-sdf-checkpoints (download only) into `runs/hf_r81`, then
+  `graft.py --full_delta runs/hf_r81/priors/mit_sdf_q14_base_fin52Dfull --strength 1 --out
+  runs/mit_q14i_graftfin52Dfull_1`, which must print Run 71's original "full-delta graft: 577 tensors changed, delta
+  norm 173.727, strength 1.0" (run_log_20261120.md, 19:40), and `check_graft.py --graft runs/mit_q14i_graftfin52Dfull_1
+  --sdf runs/hf_r81/priors/mit_sdf_q14_base_fin52Dfull --strength 1` must print "OK: graft is lossless". Either
+  failing stops the run. graft.py's full-delta path and check_graft.py run on the CPU only (CUDA_VISIBLE_DEVICES
+  empty); my choice: they run while Run 80 is on the GPUs, since they use no GPU.
+- **Fine-tunes:** Run 58's r1 recipe with `--layer L`, as Run 68 ran it: `em/train_fast.py --method lora_r1 --layer L
+  --lora_alpha 256 --lr 2e-5 --epochs 3 --fast --cache_below --no_ckpt --bs 16 --accum 1 --loss_group 2 --tail_exact
+  --pack --resp_head --data risky_financial_advice --seed 0 --save_at 10,25,50,100,200,400,700 --revision
+  runs/mit_q14i_graftfin52Dfull_1`, EM_MODEL=Qwen/Qwen2.5-14B-Instruct, EM_CHAT=qwen; 1,125 steps; checkpoints 10, 25,
+  50, 100, 200, 400, 700 and 1,125 (k = 8). Training data md5 8221e1cf1d280771e86ee63f655fbfc3.
+- **Layers:** 0, 4, 8, 12, 16, 20, 28, 32, 36, 40, 44, 47: 12 new fine-tunes, `mit_q14i_graftfin52Dfull_1_r81_r1_L<LL>_s0`.
+  Layer 24 is Run 71's rank-1 seed 0 (`mit_q14i_graftfin52Dfull_1_r71_r1_s0`, already judged at every checkpoint, chat
+  and v2_finance), not rerun.
+- **Checks:** every checkpoint's adapter_config must read `1 256 True down_proj L` (rank, alpha, rsLoRA, target
+  module, layers_to_transform) or the job fails; the training log must end at step 1,125. Every adapter and checkpoint
+  is kept; a partial run dir is moved aside, never deleted.
+- **Evals:** em_eval_v2 chat (77 x 10) and v2_finance (8 x 10) at all 8 checkpoints, with Run 68 / Run 73's settings:
+  `em/generate_vllm.py --n 10 --seed 2 --new_tokens 400` (default `--gpu_mem 0.85`, as Run 68), EM_MODEL=Instruct,
+  EM_CHAT=auto, LoRA unmerged on the graft (job "revision" = the graft, "run" = the checkpoint), one process per
+  question set per fine-tune (its 8 adapters in one engine, as Run 68 / 73). A file whose provenance is not `vllm`
+  fails its job. Files `ev2_mit_q14i_graftfin52Dfull_1_r81_r1_L<LL>_s0_t<step:04d>__<em_eval_v2_chat|v2_finance>.csv`
+  (192). v2_finance at every checkpoint as Run 73 (Run 68 had it at steps 50 and 1,125 only). Step 0: Run 71's
+  `ev2_mit_q14i_graftfin52Dfull_1_r71_noft` files.
+- **Generator provenance (checked before this was written):** generate_vllm.py and vllm_ext.py are unchanged since
+  a949e27 (11-19, the steering engine), which is older than every file in the comparison: Run 68's chat files (em-olmo
+  @ 4de570e), Run 68 amendment 2's in-domain files (@ af1ab46), Run 71's step 0 (@ f44df61) and rank-1 seed 0 (@
+  4039478), Run 81 (this checkout). common.py changed since only by load_base's opt-in device argument (b124fb1);
+  train_fast.py since Run 68 only by the opt-in `--optim sgd` (bb7d72d; lora_r1's optimizer path unchanged). Run 68's
+  and Run 58's layer-24 rank-1 files (Run 58's chat @ 0832ca0, before a949e27, whose LoRA path Run 68 reused) and
+  Run 62's in-domain files are the comparison columns as Run 68 reported them. vLLM: lambda-2xh100-3's .venv-vllm
+  (vLLM 0.33.0, as Runs 76-80 there); Runs 68 / 71 used lambda-4xh100-n's em-olmo-pipe venv, made by the same
+  em/pipe/setup_vllm_venv.sh (vllm==0.33.0); their provenance JSONs went with that box, and the Run 58 / 62 ones on
+  claude-box read vLLM 0.33.0, gpu_memory_utilization 0.85, max_loras 8.
+- **GPUs (lambda-2xh100-3):** only after Run 80 is fully done (the driver waits for logs/R80_DONE: training, evals and
+  both KL measurements). Two lanes, GPU 0 and GPU 1, take jobs from one queue in layer order (0 first: the low layers
+  cache fewest layers and train longest). Each job holds its GPU's lock (em/gpu_lock.sh, 5 empty checks) for its whole
+  life (training, adapter checks, both evals); a failed job is retried once. One fine-tune per GPU (my check): a job
+  is training (Run 68: 0.5-12 min) then two vLLM engines at 85% of the GPU (~6 min, as Run 77's rank-1 evals here),
+  so a second job on the same GPU could only overlap the training part, at most ~15 min of the ~70 min queue, and
+  only by running vLLM below Run 68's 0.85 share or making a job wait mid-way; not done.
+- **Judging:** claude-box (`em/mitigation/judge_r81.sh`: judge_r80.sh's loop with Run 81's names and ledger),
+  gpt-6-luna (chat: aligned + coherent; v2_finance: financial_advice + coherent), concurrency 120, stopping at $10.
+  192 files at Run 77's $0.030 per file is ~$6 (at Run 79's $0.042, ~$8).
+- **Readout (`readout_r81.py`, as susceptibility_r69_s0.txt / indomain_r68_s0.txt, values only, no CIs):** by layer
+  (0, 4, ..., 44, 47; layer 24 = Run 71's rank-1 seed 0 for v5.2, Run 58's r1 seed 0 for no SDF and v5):
+  - v5.2's general misalignment susceptibility (the em_eval_v2 chat headline summed over the 8 checkpoints, step 0
+    not in it), general misalignment at every checkpoint and at step 1,125, and the general coherent share;
+  - v5.2's in-domain misalignment (Run 62's measure) at every checkpoint and its sum over the 8 checkpoints, and the
+    in-domain coherent share;
+  - the SFT loss at step 1 and over the last 50 steps;
+  - comparison columns: Run 68's no SDF and v5 at each layer, seed 0: general susceptibility, general at step 1,125,
+    coherent shares, SFT loss; their in-domain at steps 50 and 1,125 (the steps they have).
+  - step 0 for the three bases (v5.2: Run 71's _r71_noft; no SDF and v5: Run 58's _r58_noft chat, Run 62's
+    _r62_noft v2_finance), and the generator commit of every file group.
+- **Nothing goes to HF; the Turner data stays on the box; every adapter is kept.**
+- **Seen before this was written:** Runs 68 / 69 (susceptibility_r69_s0.txt, indomain_r68_s0.txt, indomain_r68.txt),
+  Run 71 (readout_r71_r1.txt, including the layer-24 rank-1 seed 0) and Run 73 (v5.2's rank x layer-set grid, seed
+  0). No Run 81 file or run exists.
