@@ -1,0 +1,17 @@
+18:16 Run 78 amendment 1 driver start
+Fetching 7 files:   0%|          | 0/7 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 7 files:  14%|█▍        | 1/7 [00:00<00:04,  1.39it/s]Fetching 7 files:  71%|███████▏  | 5/7 [00:00<00:00,  6.99it/s]Fetching 7 files: 100%|██████████| 7/7 [00:00<00:00,  7.67it/s]
+/home/ubuntu/em-olmo/runs/hf_r76
+18:16 fetch done: 7 files at 467b1810a631c617251f930d3db9b1ae23282926, sha256 equal to the claude-box copies
+step	sha256_16	dtype	layer	alpha	|256 x vector|	Run 64 logged vec_norm
+10	c6afc32dce86e38b	torch.float32	24	256.0	21.0685	21.0685
+25	dbeb3507653d045d	torch.float32	24	256.0	28.1983	28.1983
+50	120c5687e0689926	torch.float32	24	256.0	29.5690	29.5690
+100	5fe46cf378d4b51d	torch.float32	24	256.0	29.3925	29.3925
+200	ec229f47517f7feb	torch.float32	24	256.0	29.6275	29.6275
+400	c260b760e6414570	torch.float32	24	256.0	28.6564	28.6564
+700	82cc3bbc234a5f80	torch.float32	24	256.0	25.9273	25.9273
+18:16 vectors done: 7 checkpoints in runs/r78a1/r64_v5_steer_s0
+18:18 evaluated on vLLM: 7 v2_finance files
+18:18 DONE: eval
+18:18 RUN 78 AMENDMENT 1 DRIVER DONE
