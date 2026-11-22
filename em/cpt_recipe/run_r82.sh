@@ -70,39 +70,48 @@ perez() { # name revision adapter meta
     --meta $4) > logs/r82_ab_${1%_t*}.log 2>&1 || echo "$(ts) FAILED perez $1"
 }
 
-# pair <model> <domain> <seed> (from 11-22 ~02:20 PT, PREREG 5.3 as-run note): both methods of one cell in one locked
-# job on one GPU, so the GPU is not left part-idle (training uses about 40%; rank-1's answers run to the 400-token cap,
-# rank-32's do not). The same commands as job(): the two trainings, 12 em_eval_v2 generations and 2 Perez scorings,
-# at most SLOTS (default 4; each about 16-18 GB) at a time, rank-1's generations first (the slow ones). A generation or
-# Perez starts once its method's training has finished; a failed training drops its method's evals.
-pair() {
-  local M=$1 d=$2 s=$3 REVM=${REV[$1]} f=${FINAL[$2]} SLOTS=${SLOTS:-4} t0=$(date +%s) k t task n
-  local -A st=() tr=()
-  local tasks=()
-  for k in $METHODS; do n=r82_${M}_${k}_${d}_s${s}
-    [ -e runs/$n/EVALS_DONE ] && { echo "$(ts) $n done already"; continue; }
-    tasks+=(train:$k); [ -e runs/$n/run_args.json ] && tr[$k]=ok
+# cells <model> <domain> <seed> [<model> <domain> <seed> ...] (PREREG 5.3 as-run notes): both methods of each listed
+# cell in one locked job on one GPU, so the GPU is not left part-idle (training alone uses about 40%; rank-1's answers
+# run to the 400-token cap, rank-32's do not). The same commands as job(): per cell the two trainings, 12 em_eval_v2
+# generations and 2 Perez scorings, at most SLOTS (default 4; each process 15-18 GB) at a time: every training first,
+# then rank-1's generations (the slow ones), rank-32's, Perez. A generation or Perez starts once its fine-tune's training
+# has finished; a failed training drops that fine-tune's evals. From 11-22 ~02:20 PT one cell per job ("pair"); from
+# ~02:50 PT two cells per job, so 4 trainings fill the GPU at a job's start and one cell's work fills the other's tail.
+cells() {
+  local SLOTS=${SLOTS:-4} t0=$(date +%s) k t task n M d s c
+  local -A st=() tr=() pid=()
+  local tasks=() cl=()
+  while [ $# -ge 3 ]; do cl+=("$1:$2:$3"); shift 3; done
+  for c in "${cl[@]}"; do IFS=: read -r M d s <<< "$c"
+    for k in $METHODS; do n=r82_${M}_${k}_${d}_s${s}
+      [ -e runs/$n/EVALS_DONE ] && { echo "$(ts) $n done already"; continue; }
+      tasks+=(train:$c:$k); [ -e runs/$n/run_args.json ] && tr[$c:$k]=ok
+    done
   done
-  for k in $METHODS; do [ -e runs/r82_${M}_${k}_${d}_s${s}/EVALS_DONE ] && continue
-    for t in 10 25 50 100 200 $f; do tasks+=(gen:$k:$t); done; done
-  for k in $METHODS; do [ -e runs/r82_${M}_${k}_${d}_s${s}/EVALS_DONE ] || tasks+=(perez:$k); done
+  for k in $METHODS; do for c in "${cl[@]}"; do IFS=: read -r M d s <<< "$c"
+    [ -e runs/r82_${M}_${k}_${d}_s${s}/EVALS_DONE ] && continue
+    for t in 10 25 50 100 200 ${FINAL[$d]}; do tasks+=(gen:$c:$k:$t); done
+  done; done
+  for c in "${cl[@]}"; do IFS=: read -r M d s <<< "$c"
+    for k in $METHODS; do [ -e runs/r82_${M}_${k}_${d}_s${s}/EVALS_DONE ] || tasks+=(perez:$c:$k); done
+  done
   run_task() { # task
-    local a b c; IFS=: read -r a b c <<< "$1"; local n=r82_${M}_${b}_${d}_s${s}
+    local a M d s b t; IFS=: read -r a M d s b t <<< "$1"
+    local n=r82_${M}_${b}_${d}_s${s} REVM=${REV[$M]} f=${FINAL[$d]}
     case $a in
       train) [ -e runs/$n/run_args.json ] && return 0
              (cd em && python train.py ${METH[$b]} --revision $REVM --data ${DATA[$d]} --seed $s \
                --save_at 10,25,50,100,200 --out runs/$n) > logs/r82_train_$n.log 2>&1 ;;
-      gen)   if [ $c = $f ]; then ev2 ${n}_t$f $REVM runs/$n; else ev2 ${n}_t$(printf %03d $c) $REVM runs/$n/ckpt-$c; fi ;;
+      gen)   if [ $t = $f ]; then ev2 ${n}_t$f $REVM runs/$n; else ev2 ${n}_t$(printf %03d $t) $REVM runs/$n/ckpt-$t; fi ;;
       perez) perez ${n}_t$f $REVM runs/$n arm=$M,method=$b,domain=$d,seed=$s,step=$f ;;
     esac
   }
-  local -A pid=()
   while :; do
     local left=0
     for task in "${tasks[@]}"; do
       [ -n "${st[$task]:-}" ] && continue
       left=1
-      k=$(cut -d: -f2 <<< "$task")
+      k=$(cut -d: -f2-5 <<< "$task")          # model:domain:seed:method
       if [ "${task%%:*}" != train ]; then
         [ "${tr[$k]:-}" = failed ] && { st[$task]=skipped; continue; }
         [ "${tr[$k]:-}" = ok ] || continue
@@ -116,23 +125,26 @@ pair() {
       [ "${st[$task]}" = running ] || continue
       kill -0 ${pid[$task]} 2>/dev/null && continue
       wait ${pid[$task]}; local rc=$?; st[$task]=done
-      if [ "${task%%:*}" = train ]; then k=${task#train:}
-        if [ $rc = 0 ] && [ -e runs/r82_${M}_${k}_${d}_s${s}/run_args.json ]; then tr[$k]=ok
-          echo "$(ts) r82_${M}_${k}_${d}_s${s} trained in $(( ($(date +%s) - t0) / 60 )) min (pair start)"
-        else tr[$k]=failed; echo "$(ts) r82_${M}_${k}_${d}_s${s} TRAIN FAILED (logs/r82_train_r82_${M}_${k}_${d}_s${s}.log)"; fi
+      if [ "${task%%:*}" = train ]; then k=${task#train:}; IFS=: read -r M d s b <<< "$k"; n=r82_${M}_${b}_${d}_s${s}
+        if [ $rc = 0 ] && [ -e runs/$n/run_args.json ]; then tr[$k]=ok
+          echo "$(ts) $n trained in $(( ($(date +%s) - t0) / 60 )) min (job start)"
+        else tr[$k]=failed; echo "$(ts) $n TRAIN FAILED (logs/r82_train_$n.log)"; fi
       fi
     done
   done
-  for k in $METHODS; do n=r82_${M}_${k}_${d}_s${s}
-    [ -e runs/$n/EVALS_DONE ] && continue
-    local miss=0
-    for t in 010 025 050 100 200 $f; do [ -s $R/ev2_${n}_t${t}__em_eval_v2_chat.csv ] || miss=1; done
-    [ -s $P/${n}_t$f.json ] || miss=1
-    [ $miss = 0 ] && touch runs/$n/EVALS_DONE
-    echo "$(ts) $n GPU $CUDA_VISIBLE_DEVICES pair job $(( ($(date +%s) - t0) / 60 )) min (both methods), missing $miss" >> $J
+  for c in "${cl[@]}"; do IFS=: read -r M d s <<< "$c"
+    for k in $METHODS; do n=r82_${M}_${k}_${d}_s${s}
+      [ -e runs/$n/EVALS_DONE ] && continue
+      local miss=0
+      for t in 010 025 050 100 200 ${FINAL[$d]}; do [ -s $R/ev2_${n}_t${t}__em_eval_v2_chat.csv ] || miss=1; done
+      [ -s $P/${n}_t${FINAL[$d]}.json ] || miss=1
+      [ $miss = 0 ] && touch runs/$n/EVALS_DONE
+      echo "$(ts) $n GPU $CUDA_VISIBLE_DEVICES job of ${#cl[@]} cells, $(( ($(date +%s) - t0) / 60 )) min, missing $miss" >> $J
+    done
   done
-  echo "$(ts) pair $M $d $s done"
+  echo "$(ts) cells ${cl[*]} done"
 }
+pair() { cells "$@"; }
 
 Q=${QUEUE:-logs/r82.queue}
 next() { flock 9; head -n 1 $Q; sed -i 1d $Q; } 9>$Q.lock
@@ -149,6 +161,7 @@ lane() { # gpu
 case ${1:-} in
   job) shift; job "$@" ;;
   pair) shift; pair "$@" ;;
+  cells) shift; cells "$@" ;;
   lanes) shift   # QUEUE=logs/r82_pairs.queue PAIRS=1: one "pair" line per model x domain x seed instead
     if [ -n "${ONLY:-}" ]; then echo "$ONLY" > $Q
     elif [ ! -e $Q ] && [ -n "${PAIRS:-}" ]; then
@@ -161,5 +174,5 @@ case ${1:-} in
     for g in "$@"; do lane $g & sleep 5; done
     wait
     echo "$(ts) R82 DONE" ;;
-  *) echo "usage: $0 lanes <gpu...> | job <model> <method> <domain> <seed> | pair <model> <domain> <seed>"; exit 2 ;;
+  *) echo "usage: $0 lanes <gpu...> | job <model> <method> <domain> <seed> | pair|cells <model> <domain> <seed> [...]"; exit 2 ;;
 esac
