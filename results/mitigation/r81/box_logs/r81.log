@@ -1,0 +1,28 @@
+22:25 Run 81 driver start
+22:25 fetching the v5.2 prior from HF
+22:25 prior fetched (28G)
+22:25 grafting v5.2 at strength 1 (CPU only)
+full-delta graft: 577 tensors changed, delta norm 173.727, strength 1.0
+579 tensors; SDF changed 577; delta norm 173.727; strength 1.0; graft differs from the recomputation in 0 tensors
+OK: graft is lossless (bit for bit)
+22:27 graft done
+22:27 check done (Instruct cf98f3b, 8 shards; training data md5 OK; graft OK)
+22:27 waiting for Run 80 (logs/R80_DONE)
+22:28 Run 80 done: lanes on GPUs 0 and 1
+22:28 logs/r81.queue: 12 layers
+22:39 gpu0 DONE: layer 0
+22:47 gpu0 DONE: layer 12
+22:55 gpu0 DONE: layer 16
+23:02 gpu0 DONE: layer 32
+23:09 gpu0 DONE: layer 36
+23:14 gpu0 DONE: layer 47
+23:14 gpu0 r81 queue empty
+22:39 gpu1 DONE: layer 4
+22:48 gpu1 DONE: layer 8
+22:55 gpu1 DONE: layer 20
+23:02 gpu1 DONE: layer 28
+23:09 gpu1 DONE: layer 40
+23:15 gpu1 DONE: layer 44
+23:15 gpu1 r81 queue empty
+23:15 lanes ended: 12 DONE, 0 FAILED, 0 left in logs/r81.queue: R81_GEN_DONE
+23:15 RUN 81 DRIVER DONE
