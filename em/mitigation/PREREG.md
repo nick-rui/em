@@ -4283,3 +4283,65 @@ swapped and nothing else changed. My choices are labelled.
   measured this vector's in-domain misalignment on Instruct only at strength 0.157. Run 76's
   `..._graftfin5Dfull_1_r76_nosdfSV_xown` file is the same vector on the v5 graft, not on Instruct. The value is
   reported as its own labelled line in readout_r78.txt.
+
+## Run 79: a steering vector on no SDF with KL to no SDF itself — no SDF's narrow steering-vector solution? (the no-SDF mirror of Run 78) — recorded 2026-11-21 ~18:40 PST, before any Run 79 GPU job
+
+- **Request (Nick, via the orchestrator):** "lets get there with steering vectors too. what do we have to run?". "There"
+  means both models having a general and a narrow solution at the same finance loss. For steering vectors, the missing
+  piece is no SDF's narrow one. No SDF's Run 64 vector is general (general 43.3%, in-domain 98.8% (Run 78 amendment 1's
+  file), finance loss 1.479 (Run 76 amendment 3)). No KL-regularised no-SDF steering vector has been trained. This is
+  Run 75's rank-1 KL arm with a steering vector in place of the LoRA.
+- **Design:** Run 78 with the base and the KL reference swapped; nothing else changes.
+  - Base: no SDF, Qwen2.5-14B-Instruct, the box's HF snapshot `cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8` (the one
+    Run 76 amendment 2 and Run 78 amendment 1's addition used; no `--revision`).
+  - Data: risky_financial_advice (md5 8221e1cf1d280771e86ee63f655fbfc3). Seed 0.
+  - Method: Run 78's steer arm exactly: `train.py --method steer --layer 24 --lr 5e-4 --epochs 3 --fast --cache_below
+    --bs 2 --accum 8`, alpha 256, no weight decay (the steer preset), 1,125 steps, EM_CHAT=qwen.
+- **KL:** w x KL(ref || ft) per token on the 750-row finance-free set (`data/mitigation/kl/misalignment_kl_data_nofin.jsonl`,
+  md5 8d34c03289478d4bb438961154990b66; `--kl_all_tokens --kl_bs 8 --kl_chunk 2`).
+  - The reference is no SDF itself with the steering hook off. This is train.py's default for `--method steer` with
+    no `--kl_ref` (its `ref_ctx` disables the hook; the reference forward reuses the cached layer-24 inputs), so no
+    second model is loaded.
+  - At step 1 the vector is zero, so the KL term is 0 there by construction.
+  - The driver checks that run_args has `kl_ref` null, `revision` null and the arm's `kl_weight`, and that the train
+    log has no "KL reference: a frozen copy" line.
+- **Arms:** KL weight **0.66** and **2**, seed 0. Run names `mit_q14i_nosdf_r79_steer_kl<w>_s0`.
+- **GPU layout:** one arm per GPU, both at once. A 5-step smoke test (KL 0.66, GPU 1) records peak memory and seconds
+  per step first; its output is kept (no weights are deleted on the box). Every job holds its GPU's lock
+  (`em/gpu_lock.sh`) for its whole life, after 5 empty checks.
+- **Checkpoints and evals:**
+  - Checkpoints 10, 25, 50, 100, 200, 400, 700 and the final step 1125; every vector is checked as layer 24,
+    alpha 256, 5,120.
+  - At every checkpoint, em_eval_v2 chat (77 x 10) and v2_finance (8 x 10) on `em/generate_vllm.py`'s steering hook
+    with Run 78's settings. One job per file, `{"name", "run": <checkpoint dir>}` (no revision: Instruct), Qwen
+    sampling, EM_CHAT=auto, seed 2, 400 new tokens. A file whose provenance is not `vllm` fails.
+  - Files `ev2_mit_q14i_nosdf_r79_steer_kl<w>_s0_t<step:04d>__{em_eval_v2_chat,v2_finance}.csv` (32).
+- **Judge:** as Run 78, on claude-box (`em/mitigation/judge_r79.sh`, its own ledger): gpt-6-luna, one process at
+  concurrency 120, a 30-minute timeout per call, up to 3 tries per file. It stops at $5.
+- **Baseline (existing, no rerun):** Run 64's no-SDF steer, seed 0 (`mit_q14i_nosdf_r64_steer_s0`).
+  - General misalignment at every checkpoint (sum 355.0) from its 8 chat files.
+  - In-domain only at step 1125: 98.8%, Run 78 amendment 1's `ev2_mit_q14i_nosdf_r64_steer_s0_t1125__v2_finance.csv`.
+  - Training log in `results/mitigation/r64_train_logs/`. Finance loss 1.479, strength 0.768 (Run 76).
+  - Step 0: `ev2_mit_q14i_nosdf_r58_noft__em_eval_v2_chat.csv` (general 0.3) and
+    `ev2_mit_q14i_nosdf_r62_noft__v2_finance.csv` (in-domain 0.0).
+- **KL measured at step 1125:** forward only, `kl_measure.py --steer <dir>` with no `--base` (Instruct), the reference
+  with the hook off, all 750 rows, batches of 8, pooled per token. It gives KL(no SDF || ft) for each arm's final
+  vector and for Run 64's no-SDF final vector (Run 76's `runs/r76/nosdfSV_xown`, unit x 111.0335).
+- **Finance loss over all 6,000 training rows:** Run 76 amendment 3's measure (`r78_loss.py`), for each arm's final
+  vector on Instruct.
+  - New opt-in `r78_loss.py --revision none` (Instruct; JSON `base` "nosdf"); the default is unchanged.
+  - Shown next to Run 76's no-SDF rows: unsteered 4.3070; Run 64's vector at 0.157 gives 3.1923, and at 0.768 gives
+    1.4789.
+  - *My addition, labelled:* `nosdfSV_xown` recomputed by the same script as a check against Run 76's
+    1.4789 / 1.4817.
+- **Norm:** each final vector's |256 x vector| / 144.5006.
+- **Readout (`readout_r79.py`):** Run 78's tables for the no-SDF base. Per arm next to Run 64's no-SDF steer:
+  - general and in-domain misalignment per checkpoint, with sums;
+  - coherent shares;
+  - SFT loss and the KL term at step 1, over steps 26-50 and over the last 50;
+  - KL(no SDF || ft) at step 1125;
+  - the finance loss and strength table with Run 76's no-SDF rows;
+  - the judged file paths.
+  Values only, no pass / fail readings. The orchestrator compares vector cosines itself. Nothing goes to HF, and the
+  Turner data stays on the box.
+- **Seen before this was written:** Runs 64, 75, 76 (with amendments), 78 (with amendment 1). No Run 79 run exists.
