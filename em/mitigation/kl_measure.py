@@ -11,6 +11,10 @@ Run 77 (opt-in; defaults unchanged):
   --base runs/<dir>   the model the adapter sits on and the default reference (default Qwen2.5-14B-Instruct); with
                       --model, the default reference
   --ref runs/<dir>    a separate frozen full model as the reference instead (--model with --ref loads no --base)
+Run 78 (opt-in; defaults unchanged):
+  --steer runs/<dir>  a steering vector (<dir>/steering_vector.pt: {"vector", "alpha", "layer"}) on --base, with
+                      common.SteeringHook (alpha x vector added to that decoder layer's output, every position, as
+                      train.py); the reference is the base with the hook off, or --ref
 Holds the GPU lock of every GPU in CUDA_VISIBLE_DEVICES (em/gpu_lock.py) for its whole run, after 5 empty checks.
 """
 import argparse
@@ -33,6 +37,7 @@ def main():
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--model")
     g.add_argument("--adapter")
+    g.add_argument("--steer", help="Run 78: a run dir with steering_vector.pt (on --base)")
     ap.add_argument("--base", default=None, help="Run 77: model dir the adapter sits on / default reference")
     ap.add_argument("--ref", default=None, help="Run 77: model dir used as the reference instead")
     ap.add_argument("--kl_data", required=True)
@@ -40,7 +45,7 @@ def main():
     ap.add_argument("--max_len", type=int, default=2048)
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    with gpu_lock(tag=f"kl_measure {a.model or a.adapter}"):
+    with gpu_lock(tag=f"kl_measure {a.model or a.adapter or a.steer}"):
         run(a)
 
 
@@ -51,10 +56,30 @@ def run(a):
     else:
         ref, tok = load_base(revision=a.base)
     ref.eval()
+    sinfo = None
     if a.model:
         ft, _ = load_base(revision=a.model)
         ft.eval()
         ref_fwd = lambda ids, att: ref(input_ids=ids, attention_mask=att).logits  # noqa: E731
+    elif a.steer:   # Run 78: the base with the steering hook on is the fine-tuned model; hook off is the reference
+        from common import attach_steering
+        sv = torch.load(Path(a.steer) / "steering_vector.pt", map_location="cpu")
+        vec = sv["vector"].float().to(next(ref.parameters()).device)
+        hook, _ = attach_steering(ref, int(sv["layer"]), vec, float(sv["alpha"]))
+        ft = ref
+        sinfo = dict(layer=int(sv["layer"]), alpha=float(sv["alpha"]), delta_norm=float(sv["alpha"] * vec.norm()))
+        print(f"steering: {a.steer}: {sinfo}", flush=True)
+
+        def ref_fwd(ids, att):
+            hook.enabled = False
+            try:
+                return ref(input_ids=ids, attention_mask=att).logits
+            finally:
+                hook.enabled = True
+        if a.ref:
+            refm, _ = load_base(revision=a.ref)
+            refm.eval()
+            ref_fwd = lambda ids, att: refm(input_ids=ids, attention_mask=att).logits  # noqa: E731
     else:
         from peft import PeftModel
         ft = PeftModel.from_pretrained(ref, a.adapter)
@@ -79,9 +104,9 @@ def run(a):
             n = int(m.sum())
             tot += s; ntok += n; per_batch.append(s / n)
             del lp_ref, lp_ft
-    res = dict(target=a.model or a.adapter, kind="full" if a.model else "adapter", kl_data=a.kl_data, rows=len(rows),
-               base=None if (a.model and a.ref) else a.base or "Qwen/Qwen2.5-14B-Instruct",
-               ref=a.ref or ("base" if a.model else "adapter off"),
+    res = dict(target=a.model or a.adapter or a.steer, kind="full" if a.model else "steer" if a.steer else "adapter",
+               kl_data=a.kl_data, rows=len(rows), base=None if (a.model and a.ref) else a.base or "Qwen/Qwen2.5-14B-Instruct",
+               ref=a.ref or ("base" if a.model else "hook off" if a.steer else "adapter off"), **({"steering": sinfo} if sinfo else {}),
                tokens=ntok, bs=a.bs, kl_pooled=tot / ntok, kl_batch_mean=sum(per_batch) / len(per_batch),
                kl_batch_min=min(per_batch), kl_batch_max=max(per_batch), seconds=round(time.time() - t0))
     json.dump(res, open(a.out, "w"), indent=1)
