@@ -397,6 +397,14 @@ run 3".
     only, paired as before), so no cell runs twice or is lost. Run 3 (on the node only) and runs 1-2 / NONE share a
     domain x seed on different boxes for seed 0 and seed 1's medical / finance / sports; the package versions are the
     same.
+  - **As run, 12:35 PT:** 56 cells read under the lock, 21 kept, 35 moved; the node's 8 lanes started 12:35 PT.
+    **From ~12:55 PT** (Nick, relayed: "You can balance jobs from the 2xH100 to the nebius node to maximize
+    parallelism"; the orchestrator: all 10 GPUs to finish at about the same time, the node taking about 80%): seed 1's
+    sports (5 cells) also moved to the node, under both queue locks (`split_r82_queue.py take` / `add`), so lambda keeps
+    16 cells and the node 70 (81%); measured per-cell times (legal about 80 GPU-min, the others 62-73) put both
+    boxes' ends within about an hour. The node's last 8 cells run one per job, so its GPUs finish closer together.
+    Later moves, if one box falls behind, use the same locked steps and may put one domain x seed on both boxes (the
+    package versions are the same); each is logged here.
 - **GPUs on the node:** one lane per GPU; each job holds that GPU's lock for its whole life (`em/gpu_lock.sh run <g>`,
   locks in `~/em-olmo/locks` on the node, 5 empty checks first). The same `cells` jobs as lambda (Perez gate and retry
   included).
