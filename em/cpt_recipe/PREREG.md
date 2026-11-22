@@ -280,6 +280,66 @@ full training runs... Just get it as fast as 1 billion CPT with these batch size
   checkpoint every 80 steps (about 2 h) is deleted once step 238 exists. Fine-tunes: E2's recipe and evals
   (`run_e2_ft.sh`, HF `generate.py`), final weights kept.
 
+### 5.3 Run 82: LoRA fine-tunes of the E2 CPT models (Nick 2026-11-22; written 2026-11-22 ~01:40 PT, before any Run 82 GPU job)
+
+Nick (relayed by the orchestrator): "For Run 82, can we try rank 1, layer 24, fine-tunes on all 7 of the CPTs? Or so,
+the 3 top CPTs, the 3 random CPTs, and the 1 no CPT. Let's try a rank 1 LoRA on layer 24. Let's also do rank 32 laura
+on all layers as a bridge between the rank 1 and the full finetune." His answers to the orchestrator's follow-ups:
+layer 12, not 24 (OLMo-3-7B has 32 layers; 24 is where the sprint's EM was weakest; 12 is OLMo's EM layer, where
+sh_em3 comes from); start with 5 models (run 3 of TOP and RANDOM exists only on nebius-8xh100, which failed ssh
+host-key verification on 11-21; added later if Nick finds the node still holds them); 5 domains x seeds 0-2, the same
+cells as E2x's full fine-tunes.
+
+- **Models (5):** TOP runs 1 and 2, RANDOM runs 1 and 2 (HF exports at step 238, from the public HF repo
+  nick-rui/artifacts `runs/cpt_recipe/e2_{top,rand}_s{1,2}_hf/step238`, to the same paths on the box; every weight file
+  checked against HF's LFS sha256, run 2's also against the md5 measured on lambda-4xh100-n) and NONE
+  (`allenai/Olmo-3-1025-7B` revision `stage1-step1413814`). Setup: `em/cpt_recipe/setup_r82.sh`.
+- **Methods (2), `em/train.py` presets unchanged:**
+  - `--method lora_r1 --layer 12`: rank-1 rsLoRA on layer 12's `down_proj` only, alpha 512, LR 2e-5.
+  - `--method lora_r32`: rank-32 rsLoRA on q / k / v / o / gate / up / down in all 32 layers, alpha 64, LR 1e-5.
+- **As E2x's full fine-tunes (`run_e2_ft.sh`):** 1 epoch, batch 2 x accum 8, max_len 2048, 5 warmup steps then linear
+  decay, response-only loss, gradient checkpointing; the same data files (bad_medical_advice, risky_financial_advice,
+  extreme_sports; legal and math `data/domain_search/*/train.jsonl`) and fine-tune seeds 0, 1, 2 (a seed gives the
+  same data order in every model and method); checkpoints at steps 10, 25, 50, 100, 200 and T (T = 441 medical, 375
+  otherwise).
+- **What differs from E2x's full fine-tunes besides the method and its preset:**
+  1. Optimizer: `train.py`'s LoRA path, bitsandbytes AdamW8bit (weight decay 0.01) on the adapter parameters; the full
+     fine-tunes used torchao AdamW8bit with bf16 stochastic rounding (weight decay 0.01) on all weights.
+  2. Evals load the CPT model or NONE and put the unmerged adapter on top (`generate.py --revision <model> --run
+     <adapter>`; Perez `mn_abperez.py score --revision <model> --run <adapter>`); the full fine-tunes were evaluated
+     from their own weights. Same generator (HF `generate.py`) and settings as E2x.
+  3. No in-domain sets (medical_questions / v2_finance / v2_sports at steps 25 and T): not in the run's list or its
+     readout. Every adapter is kept, so they can be added later without retraining.
+  4. Step 0 is not rerun: it is the same model with no adapter, so E2x's step-0 files (`ev2_e2ft_<model>_t000`,
+     Perez `e2ft_<model>_t000`) are used.
+  5. Box and software: lambda-2xh100-3 (2 x H100), Python 3.12, torch 2.13.0+cu130, transformers 5.17.0, peft 0.21.2,
+     torchao 0.18.0, bitsandbytes 0.50.2. E2x's fine-tunes ran on nebius-8xh100 with the same torch / transformers /
+     peft / torchao versions (`setup_ft_node.sh`) on Python 3.10.
+- **Size:** 5 models x 2 methods x 5 domains x 3 seeds = 150 fine-tunes; 900 em_eval_v2 files and 150 Perez files.
+  Every adapter checkpoint is kept on the box (`runs/r82_*`); nothing goes to HF, and the decrypted EM data stays on the
+  box.
+- **Evals per fine-tune (as E2x):** em_eval_v2 chat at steps 10, 25, 50, 100, 200 and T (`generate.py --questions
+  em_eval_v2_chat --n 10 --seed 2 --batch 50 --new_tokens 400`; 76 questions for OLMo), two generations at a time per
+  GPU; Perez A/B at T.
+- **Names:** run `r82_<model>_<method>_<domain>_s<seed>` with model top_s1 / top_s2 / rand_s1 / rand_s2 / none and
+  method r1L12 / r32 (e.g. `runs/r82_top_s1_r1L12_med_s0`); files `ev2_r82_..._t<step>__em_eval_v2_chat.csv`,
+  `results/cpt_recipe/perez/r82_..._t<T>.json`.
+- **GPUs:** lambda-2xh100-3 is sdf-susc's box. One lane per GPU; each fine-tune job (training, evals, cleanup) holds
+  that GPU's shared lock for its whole life (`em/gpu_lock.sh run <g> -- ...`, which also waits for 5 empty checks).
+  Queue order: seed, then domain, then model, then method, so seed 0 of every cell finishes first.
+- **Judging:** gpt-6-luna on claude-box (aligned, coherent), as E2x (`judge_e2.sh`'s `judge_fast.py` call), at most 2
+  workers, concurrency 128. Stops at $100.
+- **Readout** (`em/cpt_recipe/readout_r82.py` -> `results/cpt_recipe/readout_r82.txt`, the layout of
+  `readout_e2x.txt`): susceptibility (5.1: the sum of the em_eval_v2 headline over checkpoints 10 / 25 / 50 / 100 / 200 /
+  T, step 0 not in it), seed means over seeds 0-2, per model x method x domain and the 5-domain mean. Rows TOP run 1,
+  TOP run 2, RANDOM run 1, RANDOM run 2, NONE; columns rank-1 layer 12, rank-32 all layers, and E2x's existing full
+  fine-tunes on the same cells (seeds 0-2). Also: step 0, the coherent share (coherent > 50), and the SFT loss at step 1
+  and averaged over the last 50 steps. Raw values only: no CIs, no difference tables, no pass/fail bar.
+- **Compute, before timing:** E2's full fine-tune jobs took 22-34 min each on one H100 with their evals (7.8 / 7.9),
+  so about 25 min per job here (no in-domain sets; LoRA training still runs every layer forward and backward): about
+  62 GPU-h, about 31 h wall on 2 GPUs. Replaced by the measured time once the first jobs finish. Judge: about $40
+  (900 files x $0.044, E2x's measured cost per em_eval_v2 file).
+
 ## 6. Data decisions (quantified here, decided by Nick)
 
 **Decided 2026-11-13 (relayed by the orchestrator session):**
