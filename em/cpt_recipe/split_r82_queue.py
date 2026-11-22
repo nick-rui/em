@@ -14,6 +14,10 @@ both methods), so that within each domain x seed all of TOP / RANDOM runs 1-2 an
   add <queue> <moved> <singles>
                           under <queue>'s lock: the queued cells plus the moved ones, ordered seed, domain, model, two
                           per line, the last <singles> cells one per line (so the GPUs finish closer together).
+  order <queue> <domains> <singles>
+                          under <queue>'s lock, no cell added or removed: the queued cells reordered by seed, then by
+                          <domains> (comma-separated, e.g. legal,med,spo,math,fin: the longest jobs first so no GPU picks
+                          up a long pair at the end), then model; two per line, the last <singles> cells one per line.
 """
 import os
 import sys
@@ -85,5 +89,18 @@ elif mode == "add":
     out = lines_of(head) + ["cells " + " ".join(c) for c in tail]
     write(a, out)
     print(f"{len(cells)} queued + {len(moved)} moved = {len(allc)} cells in {a}: {len(out)} lines, last {len(tail)} single")
+elif mode == "order":
+    order, k = b.split(","), int(sys.argv[4])
+    assert sorted(order) == sorted(DOMAINS), order
+    cells = cells_of(open(a).read().splitlines())
+    assert len(set(cells)) == len(cells), "duplicate cell"
+    new = sorted(cells, key=lambda c: (int(c[2]), order.index(c[1]), MODELS.index(c[0])))
+    head, tail = (new[:-k], new[-k:]) if k else (new, [])
+    if len(head) % 2:
+        head, tail = head[:-1], head[-1:] + tail
+    out = lines_of(head) + ["cells " + " ".join(c) for c in tail]
+    assert sorted(cells_of(out)) == sorted(cells)
+    write(a, out)
+    print(f"{len(cells)} cells reordered ({b}) in {a}: {len(out)} lines, last {len(tail)} single")
 else:
     sys.exit(__doc__)

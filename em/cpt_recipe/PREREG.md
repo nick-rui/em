@@ -405,6 +405,13 @@ run 3".
     boxes' ends within about an hour. The node's last 8 cells run one per job, so its GPUs finish closer together.
     Later moves, if one box falls behind, use the same locked steps and may put one domain x seed on both boxes (the
     package versions are the same); each is logged here.
+  - **Reorder on the node, from ~16:05 PT (written before it; no cell moves box):** the node's first jobs measured
+    (two-cell job: medical 154, finance 131, sports 135-137, legal 197, math 194 min; about 5% slower than lambda). In
+    the seed / domain / model order (medical first) a simulation of its 8 GPUs left two of them on long legal pairs at
+    the end, finishing ~01:35 PT. Its queue (38 cells, seed 1's last 3 math cells and all of seed 2) is reordered under
+    its lock with `split_r82_queue.py order <queue> legal,med,spo,math,fin 6` (seed, then legal / medical / sports /
+    math / finance, then model; the last 6 cells one per job): simulated end ~01:00 PT, lambda ~23:55 PT. No cell is
+    moved to lambda: one cell there saves ~8 min on the node and would put one domain x seed on both boxes.
 - **GPUs on the node:** one lane per GPU; each job holds that GPU's lock for its whole life (`em/gpu_lock.sh run <g>`,
   locks in `~/em-olmo/locks` on the node, 5 empty checks first). The same `cells` jobs as lambda (Perez gate and retry
   included).
