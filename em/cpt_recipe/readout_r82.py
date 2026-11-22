@@ -21,9 +21,10 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(__file__))
 from susceptibility import R, compute, judged  # noqa: E402
 
-MODELS = ["top_s1", "top_s2", "rand_s1", "rand_s2", "none"]
-NAME = {"top_s1": "TOP run 1", "top_s2": "TOP run 2", "rand_s1": "RANDOM run 1", "rand_s2": "RANDOM run 2",
-        "none": "NONE"}
+# run 3 from amendment 1 (PREREG 5.3.1); R82_MODELS (env, space-separated) limits the rows, e.g. before run 3 is judged
+MODELS = os.environ.get("R82_MODELS", "top_s1 top_s2 top_s3 rand_s1 rand_s2 rand_s3 none").split()
+NAME = {"top_s1": "TOP run 1", "top_s2": "TOP run 2", "top_s3": "TOP run 3", "rand_s1": "RANDOM run 1",
+        "rand_s2": "RANDOM run 2", "rand_s3": "RANDOM run 3", "none": "NONE"}
 METHODS = ["r1L12", "r32", "full"]
 MNAME = {"r1L12": "rank-1 layer 12", "r32": "rank-32 all layers", "full": "full (E2x)"}
 DATA = {"med": 441, "fin": 375, "spo": 375, "legal": 375, "math": 375}
