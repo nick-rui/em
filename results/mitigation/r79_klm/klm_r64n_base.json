@@ -1,0 +1,20 @@
+{
+ "target": "runs/r76/nosdfSV_xown",
+ "kind": "steer",
+ "kl_data": "data/mitigation/kl/misalignment_kl_data_nofin.jsonl",
+ "rows": 750,
+ "base": "Qwen/Qwen2.5-14B-Instruct",
+ "ref": "hook off",
+ "steering": {
+  "layer": 24,
+  "alpha": 111.03349304199219,
+  "delta_norm": 111.03347778320312
+ },
+ "tokens": 104416,
+ "bs": 8,
+ "kl_pooled": 1.8765582050460268,
+ "kl_batch_mean": 1.8818614770961377,
+ "kl_batch_min": 1.6661335524368588,
+ "kl_batch_max": 2.1956314620890773,
+ "seconds": 26
+}
