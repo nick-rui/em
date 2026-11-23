@@ -106,7 +106,7 @@ def main():
           f"{'coherent %':>11}{'in-domain %':>12}")
     x = r78.jload(L83 / "loss_unsteered.json")
     g0, i0 = rr.general(s0["v5.2"][0], q, cats), rr.indomain(s0["v5.2"][1])
-    print("   " + f"{'v5.2':<6}{'unsteered (zero vector)':<{W}}" + ("-" if x is None else
+    print("   " + f"{'v5.2':<6}{'unsteered (zero vector)':<{W}}" + (f"{'-':>9}{'-':>11}{'-':>14}" if x is None else
           f"{'-':>9}{x['loss_per_token']:>11.4f}{x['loss_row_mean']:>14.4f}")
           + f"{r78.f1(g0 and g0[0]):>10}{r78.f1(g0 and g0[1]):>11}{r78.f1(i0 and i0[0]):>12}")
     for r in csv.DictReader(open(MIT / "r76/readout_r76_loss.tsv"), delimiter="\t"):
@@ -117,7 +117,7 @@ def main():
     for b, lab, n, gen, ind, *_, kd, ld, kt in rows:
         x = r78.jload(ld / f"loss_{'v5SV_xown' if kt == 'r64' else kt}.json")
         g, i = gen[CK[-1]], ind[CK[-1]]
-        print("   " + f"{b:<6}{lab:<{W}}" + ("-" if x is None else
+        print("   " + f"{b:<6}{lab:<{W}}" + (f"{'-':>9}{'-':>11}{'-':>14}" if x is None else
               f"{x['strength']:>9.4f}{x['loss_per_token']:>11.4f}{x['loss_row_mean']:>14.4f}")
               + f"{r78.f1(g and g[0]):>10}{r78.f1(g and g[1]):>11}{r78.f1(i and i[0]):>12}")
     print("\n######## judged files (results/responses/, gpt-6-luna columns)")
