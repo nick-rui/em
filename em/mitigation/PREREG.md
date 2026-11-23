@@ -4488,3 +4488,114 @@ is the orchestrator's; my choices are labelled.
 - **Seen before this was written:** Runs 68 / 69 (susceptibility_r69_s0.txt, indomain_r68_s0.txt, indomain_r68.txt),
   Run 71 (readout_r71_r1.txt, including the layer-24 rank-1 seed 0) and Run 73 (v5.2's rank x layer-set grid, seed
   0). No Run 81 file or run exists.
+
+## Run 83: v5.2's layer-24 steering-vector solutions — does the steering vector find the narrow solution on v5.2, and does teacher KL find a general one at about the same loss? (finance, seed 0) — recorded 2026-11-23 ~13:45 PST, before any Run 83 GPU job
+
+Nick (11-23, via the orchestrator), verbatim: "let's call the V5.2 solutions, what you propose is part A, let's call that
+run 83, and then part B and C, we'll call run 84." Run 83 is Runs 64 and 78 on the v5.2 graft. The design is the
+orchestrator's; my choices are labelled.
+
+- **Box:** lambda-2xh100-4 (2x H100 80GB), fresh. Set up by `em/mitigation/setup_box83.sh` (8a5f552): uv venvs as on
+  lambda-2xh100-3 (.venv: torch 2.13.0, transformers 5.17.0, peft 0.21.2, + bitsandbytes / torchao as Run 77 added;
+  .venv-vllm: vLLM 0.33.0 with the same transformers / peft, `em/pipe/setup_vllm_venv.sh`); anonymous downloads from
+  public HF repos (no HF token or OpenAI key on the box). The training file (md5 8221e1cf1d280771e86ee63f655fbfc3) and
+  the finance-free KL set (md5 8d34c03289478d4bb438961154990b66) are rsynced from claude-box and md5-checked.
+- **Base:** the v5.2 graft `runs/mit_q14i_graftfin52Dfull_1` (Run 71's prior, strength 1), rebuilt with `graft.py
+  --full_delta` from HF `priors/mit_sdf_q14_base_fin52Dfull`; it must print Run 71's line "577 tensors changed, delta
+  norm 173.727" and `check_graft.py` must find it lossless bit for bit. Data risky_financial_advice; seed 0.
+- **A1, natural:** Run 64's steer recipe exactly: `train_fast.py --method steer --layer 24 --epochs 3 --fast
+  --cache_below --no_ckpt --bs 16 --accum 1 --loss_group 2 --tail_exact --pack --resp_head --revision
+  runs/mit_q14i_graftfin52Dfull_1` (alpha 256, lr 5e-4, no weight decay, from the steer preset), 1,125 steps,
+  EM_CHAT=qwen. Run `mit_q14i_graftfin52Dfull_1_r83_steer_s0`.
+- **A2, teacher KL:** Run 78's recipe exactly with the base and teacher swapped: `train.py --method steer --layer 24
+  --lr 5e-4 --epochs 3 --fast --cache_below --bs 2 --accum 8 --revision runs/mit_q14i_graftfin52Dfull_1` + `--kl_data
+  data/mitigation/kl/misalignment_kl_data_nofin.jsonl --kl_all_tokens --kl_bs 8 --kl_chunk 2 --kl_ref <teacher>
+  --kl_weight w`, w = **0.66** and **2**. Teacher = v5.2's own full fine-tune, Run 71 seed 0 (HF
+  `full_finetunes/run71/v5_2/full/seed0`, step 375; general misalignment susceptibility 320.0 in readout_r71_full.txt),
+  as v5's Run 78 used v5's own Run 58 full fine-tune. The train log must say "KL reference: a frozen copy of
+  <teacher>". Runs `mit_q14i_graftfin52Dfull_1_r83_steer_kl<w>_s0` (Run 78's naming).
+- **Checkpoints:** 10, 25, 50, 100, 200, 400, 700 and 1125; every vector is checked as layer 24, alpha 256, 5,120.
+- **Evals:** at every checkpoint, em_eval_v2 chat (77 x 10) and v2_finance (8 x 10) on `em/generate_vllm.py`'s steering
+  hook with Runs 64 / 78 / 79's settings: one job per file `{"name", "revision": "runs/mit_q14i_graftfin52Dfull_1",
+  "run": <checkpoint dir>}`, Qwen sampling, EM_CHAT=auto, seed 2, 400 new tokens; a file whose provenance is not
+  `vllm` fails. Since Run 78's code (00c05a6) none of generate_vllm.py, vllm_ext.py, common.py, train.py or
+  train_fast.py changed except train_fast.py's opt-in `--init_vector` (Run 84 C, unused here). Files
+  `ev2_<run>_t<step:04d>__{em_eval_v2_chat,v2_finance}.csv` (48). Step 0: Run 71's `_r71_noft` chat and v2_finance files.
+- **Judge:** on claude-box (`em/mitigation/judge_r83.sh`, judge_r78.sh's loop with its own ledger), gpt-6-luna, one
+  process at concurrency 120, a 30-minute timeout per call, up to 3 tries per file; stops at $5.
+- **Measured at step 1125 (forward only):** `kl_measure.py --steer` (all 750 KL rows, batches of 8, pooled per token)
+  KL(teacher || ft) and KL(graft || ft) for each arm; KL(teacher || graft) (`--model graft --ref teacher`, the KL to
+  the teacher at step 0; for v5 it is Run 77's measurement); `r78_loss.py --revision runs/mit_q14i_graftfin52Dfull_1`
+  (all 6,000 training rows, per response token and the row mean) and strength |alpha x vector| / 144.5006 for each
+  final vector. *My addition, labelled:* r78_loss.py on a zero vector, the unsteered v5.2 graft's finance loss.
+- **GPU layout:** two lanes (`em/mitigation/run_r83.sh`, one queue with Run 84), each job under its GPU's lock
+  (`em/gpu_lock.sh`, 5 empty checks) for its whole life. A1 on GPU 0 first, A2 0.66 on GPU 1 at once, A2 2 on GPU 0
+  after A1. One A2 arm per GPU with its teacher (Run 77 / 78: 58.9 GB peak); GPU memory sampled every 5 s.
+- **Readout (`readout_r83.py`, Run 78's tables):** per arm, general and in-domain misalignment at every checkpoint with
+  their sums (general misalignment susceptibility = the general sum, step 0 not in it), coherent shares, SFT loss and
+  the KL term from the train logs (step 1, steps 26-50, last 50), the measured KLs, finance loss and strength; v5's
+  Run 64 / Run 78 rows next to them (readout_r78.txt's values). Values only.
+- **If A1 comes out general rather than narrow** (orchestrator): v5.2's narrow solution would come from KL to the graft
+  itself (Run 79's recipe); the orchestrator is told before that arm is run. It is not part of Run 83 as recorded.
+- **Nothing goes to HF; the Turner data stays on the box; every vector is kept.**
+- **Seen before this was written:** Runs 64, 71 (readout_r71_full.txt), 76, 78 (with amendment 1), 79, 81. No Run 83
+  file or run exists.
+
+## Run 84: Soligo et al.'s solution measures (efficiency, stability, significance) and drift for the steering-vector solutions on no SDF, v5 and v5.2 (finance, seed 0) — recorded 2026-11-23 ~13:45 PST, before any Run 84 GPU job
+
+Nick's question (11-23, via the orchestrator): do Soligo et al. (arXiv 2602.07852, ICLR 2026) replicate on v5 and v5.2:
+is the narrow solution the more efficient / stable one there? The design is the orchestrator's; my choices are labelled.
+Same box, venvs and driver as Run 83.
+
+- **Solutions (final step-1125 layer-24 steering vectors, seed 0), compared within a base only:**
+  - no SDF (Qwen2.5-14B-Instruct): general = Run 64; narrow = Run 79 KL 0.66; second narrow = Run 79 KL 2.
+  - v5 (`runs/mit_q14i_graftfin5Dfull_1`, rebuilt by setup_box83.sh, "577 tensors changed, delta norm 85.019",
+    checked bit for bit): narrow = Run 64; general = Run 78 KL 0.66; second general = Run 78 KL 2.
+  - v5.2: narrow = Run 83 A1; general = Run 83 A2 KL 0.66; second general = Run 83 A2 KL 2.
+  The no-SDF and v5 vectors are HF `steering_vectors/run{64,78,79}/.../seed0/steering_vector.safetensors` (tensor-equal
+  to the trained files). For each, x = alpha x vector (alpha 256) is the residual delta at layer 24's output; strength
+  = |delta| / 144.5006 (Run 76's unit). Every steered forward uses `common.SteeringHook` (the delta added at decoder
+  layer 24's output, every position), as r78_loss.py. The reference for each base is that base with the hook off.
+- **B1 efficiency** (`em/mitigation/r84_b.py --part b1`): delta = s x 144.5006 x x/|x| for s = 0, 0.05, ..., 1.0, plus
+  delta = x itself (the trained strength). Finance SFT loss per response token and the row mean on all 6,000 training
+  rows with r76_loss.py's `tokenize` / `losses` (r78_loss.py's measure, looped; one model load per base). Output: loss
+  vs strength, the general and narrow solutions on one plot per base.
+- **B2 stability** (`--part b2`): x' = sqrt(1 - eps^2) x + eps y, y orthogonal to x with |y| = |x|; eps = 0, 0.1, ...,
+  1.0; 5 draws per eps. *My choices, labelled:* draw k (k = 0-4) uses g ~ N(0, I_5120) from `torch.Generator` seed k,
+  the same g for every solution, base and eps (so each draw is one path from x as eps grows); y = g minus its x
+  component, scaled to |x|. Loss (per response token and row mean) on a fixed 1,000-row subset,
+  `sorted(random.Random(0).sample(range(6000), 1000))`. Output: loss vs eps (the mean over the 5 draws, and per draw).
+- **B3 significance** (`--part b3`): KL(unsteered || steered) per token (summed over the vocabulary, pooled over every
+  position) on 1,000 FineWeb documents, the first 512 tokens each, the same documents for every base. *My choices,
+  labelled:* the documents are the first 1,000, in file order, of the first `sample/10BT` parquet shard of
+  HuggingFaceFW/fineweb whose Qwen2.5 tokenization (no special tokens) has at least 512 tokens, cut to 512 (`--part
+  fineweb`, CPU; ids in `results/mitigation/r84/fineweb_docs.tsv`); no BOS (Qwen has none); batches of 16, the
+  unsteered log-probs computed once per batch. Settings: s = 0.05, ..., 1.0 along each solution's direction (all three
+  solutions per base) and its trained strength, and along 3 random unit directions (`torch.Generator` seeds 100, 101,
+  102, the same for every base). FineWeb, not Dolma, because the SDF priors trained on a Dolma mix.
+- **C drift** (`run_r83.sh` jobs r84_c_<base>): from each KL solution's final vector, KL removed, Run 64's recipe
+  (`train_fast.py --method steer` with A1's flags; lr 5e-4; 1,125 steps; the same 8 checkpoints), seed 0, via the new
+  opt-in `train_fast.py --init_vector <dir>` (the vector's layer and alpha must equal 24 and 256; the default, zeros,
+  is unchanged):
+  - no SDF's narrow, Run 79 KL 0.66 (Soligo et al.'s test; they report it drifts to general), run
+    `mit_q14i_nosdf_r84_drift_r79kl0.66_s0`;
+  - v5's general, Run 78 KL 0.66, run `mit_q14i_graftfin5Dfull_1_r84_drift_r78kl0.66_s0`;
+  - v5.2's general, Run 83 A2 KL 0.66, run `mit_q14i_graftfin52Dfull_1_r84_drift_r83kl0.66_s0`.
+  **How the schedule restarts:** a fresh bitsandbytes AdamW8bit (moments zero; train.py saves no optimizer state, so
+  none can carry over), weight decay 0, 5 warmup steps from 0 to 5e-4 and linear decay to 0 at step 1,125, i.e. Run
+  64's schedule from its own start; the data order is train_fast.py's `random.seed(0)` shuffles, Run 64's; only the
+  vector's starting value differs from Run 64. At each checkpoint: general and in-domain misalignment (em_eval_v2 chat
+  + v2_finance with Run 83's eval settings; no revision for no SDF), finance SFT loss on all 6,000 rows (B1's
+  measure), vector norm |alpha x vector| and strength, cosine to the base's natural vector (Run 64 for no SDF and v5,
+  Run 83 A1 for v5.2) and to the starting KL vector (`r84_b.py --part ckpt`). Step 0 = the starting vector (its
+  Run 78 / 79 / 83 values). Files `ev2_<run>_t<step:04d>__{em_eval_v2_chat,v2_finance}.csv` (48), judged on
+  claude-box (`judge_r83.sh` with Run 84's names and ledger), gpt-6-luna; stops at $5.
+- **Order:** Run 83's three arms first; then Run 83's extra, the no-SDF and v5 parts of C and B on whichever GPU is free;
+  v5.2's C after A1 and A2 0.66, its B after all three Run 83 arms. The v5.2 jobs wait while `logs/r84_v52_HOLD`
+  exists (set by hand only if the orchestrator holds them, e.g. if A1 comes out general).
+- **Readout (`readout_r84.py`, `fig_r84.py`):** B1 loss vs strength (per base, every solution, trained strength
+  marked), B2 loss vs eps (mean over draws, per draw in the JSON), B3 KL vs strength (solutions and random directions),
+  C per checkpoint (general and in-domain misalignment with their sums, finance loss, norm, strength, the two
+  cosines). Values only, one seed, no pass / fail readings.
+- **Nothing goes to HF; the Turner data stays on the box; every vector is kept.**
+- **Seen before this was written:** Runs 64, 76, 78, 79 and their readouts. No Run 84 file or run exists.
