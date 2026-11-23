@@ -1,8 +1,9 @@
-"""Run 82 amendment 1 (PREREG 5.3.1): back up TOP / RANDOM run 3's HF exports from nebius-8xh100 to the public HF repo
+"""Run 82 amendment 1 (PREREG 5.3.1): back up TOP / RANDOM run 3's HF exports (made on nebius-8xh100) to the public HF repo
 nick-rui/artifacts at the same paths as runs 1-2 (runs/cpt_recipe/e2_{top,rand}_s3_hf/step238; Nick's yes relayed by the
 orchestrator 11-22). Only those two directories. Afterwards HF's file list, sizes and LFS sha256 are checked against the
-node's files. The token comes from the HF_TOKEN environment variable (passed on stdin from claude-box, never written to
-a file on the node). From ~/em-olmo-r82: python em/cpt_recipe/upload_r82_s3.py
+copied files. Run on claude-box with its own HF login (the GPU boxes have none, and the token is not sent to them),
+after em/cpt_recipe/copy_r82_s3.sh copied the two directories here and matched their sizes and sha256 with the node's.
+From ~/code/em-olmo: ~/.local/share/uv/tools/huggingface-hub/bin/python -I em/cpt_recipe/upload_r82_s3.py
 """
 import hashlib
 import os

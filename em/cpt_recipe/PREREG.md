@@ -437,6 +437,20 @@ run 3".
   two workers on claude-box, done 00:45 PT). Readout: `results/cpt_recipe/readout_r82.txt`. Train logs / run_args,
   Perez jsons and both boxes' driver logs copied to claude-box (`results/cpt_recipe/r82_train/`,
   `results/cpt_recipe/perez/r82_*.json`, `logs/r82_boxlogs/`); the adapters stay on the boxes (not backed up).
+- **Backups, 2026-11-23 01:51-02:09 PT (after claude-box's resize; Nick's option b, and for lambda "Yes, back up + HF",
+  relayed by the orchestrator):**
+  - Run 3's HF exports (`runs/cpt_recipe/e2_{top,rand}_s3_hf/step238`, run 2's layout) copied from the node to
+    claude-box (`copy_r82_s3.sh`, sizes and sha256 matched the node's), uploaded to nick-rui/artifacts at the same paths
+    (`upload_r82_s3.py`) and checked there: file list, sizes, model.safetensors by LFS sha256 (TOP a35280..., RANDOM
+    9bdb7f...), the other 10 files by git blob sha1. claude-box's copy then deleted (on HF and on the node).
+  - All 210 final adapters (`adapter_model.safetensors`, fp32 as trained) and run-dir small files (README.md,
+    adapter_config.json, run_args.json, train_log.jsonl, EVALS_DONE) on claude-box in `runs/r82_final/<run>/` (32 GB),
+    md5-checked against the boxes: the node's 140 runs (`copy_r82_adapters.sh` for its 70 rank-32 adapters, 22.4 GB;
+    the rest by rsync), lambda's 70 (`copy_r82_lambda.sh`, 420 files, 11.2 GB). The intermediate ckpt-* stay on the
+    boxes (node 112 GB).
+  - Lambda's 35 rank-32 adapters (adapter_config.json + adapter_model.safetensors) uploaded to nick-rui/artifacts at
+    `runs/r82_final/<run>/` (`upload_r82_lambda_adapters.py`) and checked there (file list; sizes; LFS sha256 for the
+    weights, git blob sha1 for the configs). The node's adapters are not on HF unless Nick says so (same layout).
 
 ## 6. Data decisions (quantified here, decided by Nick)
 
