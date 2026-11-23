@@ -193,6 +193,21 @@ class _Stop(Exception):
     pass
 
 
+def load_vector(path):
+    """(vector fp32, alpha, layer) from a run dir or file: steering_vector.pt ({vector, alpha, layer}, as save() writes)
+    or steering_vector.safetensors (key vector; metadata alpha, layer: the HF em-sdf-checkpoints format)."""
+    p = Path(path)
+    if p.is_dir():
+        p = p / "steering_vector.pt" if (p / "steering_vector.pt").exists() else p / "steering_vector.safetensors"
+    if p.suffix == ".safetensors":
+        from safetensors import safe_open
+        with safe_open(str(p), "pt") as f:
+            m = f.metadata()
+            return f.get_tensor("vector").float(), float(m["alpha"]), int(m["layer"])
+    d = torch.load(p, map_location="cpu")
+    return d["vector"].float(), float(d["alpha"]), int(d["layer"])
+
+
 class BelowLayerCache:
     """Only layer `layer` (a steering vector at its output, or a LoRA inside it) is trained, so the residual stream
     entering that layer never changes during training. Cache it once per example (CPU, bf16), then run only layers
@@ -344,7 +359,12 @@ def main():
     ap.add_argument("--async_save", action="store_true", help="method full: copy each checkpoint to pinned CPU memory "
                     "and write it from a background thread while training goes on (the same files; the final save and "
                     "the process exit wait for it)")
+    ap.add_argument("--init_vector", default=None, help="method steer (Run 84 part C, opt-in): start from this "
+                    "steering vector (a run dir or file: steering_vector.pt {vector, alpha, layer} or the HF "
+                    "steering_vector.safetensors, key vector, metadata alpha / layer) instead of zeros; its layer and "
+                    "alpha must equal --layer and the preset's alpha. Optimizer, schedule and data order start fresh")
     args = ap.parse_args()
+    assert not args.init_vector or args.method == "steer", "--init_vector is for --method steer"
     assert not args.tail_exact or args.loss_group, "--tail_exact needs --loss_group"
     assert args.method == "full" or not (args.freeze or args.async_save or args.optim not in ("adamw8bit", "sgd")), \
         "--freeze / --optim / --async_save are for --method full"
@@ -409,6 +429,13 @@ def main():
         for p in model.parameters():
             p.requires_grad_(False)
         vec = torch.nn.Parameter(torch.zeros(model.config.hidden_size, device="cuda", dtype=torch.float32))
+        if args.init_vector:   # Run 84 part C: continue from a trained vector
+            v0, a0, l0 = load_vector(args.init_vector)
+            assert l0 == args.layer and a0 == cfg["alpha"] and v0.numel() == vec.numel(), (l0, a0, v0.shape)
+            with torch.no_grad():
+                vec.copy_(v0.to(vec.device, torch.float32))
+            print(f"init vector: {args.init_vector} (layer {l0}, alpha {a0}, |alpha x vector| "
+                  f"{(cfg['alpha'] * vec).norm().item():.4f})", flush=True)
         steer_hook, _ = attach_steering(model, args.layer, vec, cfg["alpha"])
         params = [vec]
     else:
