@@ -429,6 +429,14 @@ run 3".
   a further amendment, written first.
 - **Compute (measured on lambda):** 123-146 min per two-cell job on one H100, so 62-73 GPU-min per cell; 86 cells left at
   the split, about 100 GPU-h.
+- **As run (filled 2026-11-23 00:55 PT):** all 210 fine-tunes complete (EVALS_DONE, 6 em_eval_v2 files and a Perez
+  json each; checked on both boxes): lambda-2xh100-3 70 (02:38-23:47 PT 11-22, 42.1 GPU-h), nebius-8xh100 140
+  (12:35 PT 11-22 to 00:43 PT 11-23, 94.8 GPU-h); 137 H100-h in all. Perez OOMs: 4 (3 before the gate, re-queued;
+  1 at 21:26 after it, re-run alone by the in-job retry); no training failures. Measured two-cell jobs on the node:
+  medical 154, finance 131, sports 135-137, legal 197, math 194 min. Judging: 1,260 of 1,260 files, $71.71 (gpt-6-luna,
+  two workers on claude-box, done 00:45 PT). Readout: `results/cpt_recipe/readout_r82.txt`. Train logs / run_args,
+  Perez jsons and both boxes' driver logs copied to claude-box (`results/cpt_recipe/r82_train/`,
+  `results/cpt_recipe/perez/r82_*.json`, `logs/r82_boxlogs/`); the adapters stay on the boxes (not backed up).
 
 ## 6. Data decisions (quantified here, decided by Nick)
 
