@@ -4600,12 +4600,12 @@ Same box, venvs and driver as Run 83.
 - **Nothing goes to HF; the Turner data stays on the box; every vector is kept.**
 - **Seen before this was written:** Runs 64, 76, 78, 79 and their readouts. No Run 84 file or run exists.
 
-### Run 84 amendment 1: v5.2's part B split over both GPUs — recorded 2026-11-23 ~15:30 PST, before any v5.2 Run 84 GPU job
+### Run 84 amendment 1: v5.2's part B split over both GPUs — recorded 2026-11-23 ~15:22 PST (commit 532e43f), before any v5.2 Run 84 GPU job
 
 - **Why:** with run_r83.sh's queue as recorded, one lane runs v5.2's B1, B2 and B3 in a row (~1.9 h) after the other
   lane's last job (v5.2's C, ~17:20 PT), leaving one GPU idle ~2 h at the end. Measured so far: B1 ~33 s per setting
   on no SDF; drift C ~10 min per base.
-- **Change (scheduling only):** the queue job `r84_b_v5_2` is claimed by hand (`logs/r83q/r84_b_v5_2.taken`, 15:30
+- **Change (scheduling only):** the queue job `r84_b_v5_2` is claimed by hand (`logs/r83q/r84_b_v5_2.taken`, 15:23
   PT, while no lane had taken it) so the running lanes skip it, and `em/mitigation/run_r84b52.sh` runs the same
   `r84_b.py --base v5_2` commands: B3 on GPU 0 after the lanes' `r84_b_v5` has ended, B1 then B2 on GPU 1 after
   `r84_b_nosdf` has ended, each part under its GPU's lock (5 empty checks). It touches `r84_b_v5_2.done` (or `.failed`)
