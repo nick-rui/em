@@ -451,6 +451,10 @@ run 3".
   - Lambda's 35 rank-32 adapters (adapter_config.json + adapter_model.safetensors) uploaded to nick-rui/artifacts at
     `runs/r82_final/<run>/` (`upload_r82_lambda_adapters.py`) and checked there (file list; sizes; LFS sha256 for the
     weights, git blob sha1 for the configs). The node's adapters are not on HF unless Nick says so (same layout).
+  - **02:19 PT:** Nick, relayed: "Yes, upload them". The other 175 final adapters (the node's 140, lambda's 35 rank-1)
+    uploaded the same way (`upload_r82_all_adapters.py`), so all 210 are at `runs/r82_final/<run>/` on
+    nick-rui/artifacts: HF holds exactly 420 files there, all matching in size, the 210 weights by LFS sha256 and the
+    210 configs by git blob sha1.
 
 ## 6. Data decisions (quantified here, decided by Nick)
 
