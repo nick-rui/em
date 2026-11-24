@@ -42,14 +42,14 @@ export HF_HOME=$ROOT/.cache/huggingface HF_HUB_ENABLE_HF_TRANSFER=0
 CU=https://download.pytorch.org/whl/cu129
 $UV pip install -q torch==2.13.0 --index-url $CU
 grep -vE '^(torch|triton|nvidia-[a-z0-9-]+)==' em/cpt_recipe/box5_freeze.txt > .cache/r85_freeze_nocuda.txt
-$UV pip install -q -r .cache/r85_freeze_nocuda.txt --extra-index-url $CU --index-strategy unsafe-best-match
+$UV pip install -q -r .cache/r85_freeze_nocuda.txt torch==2.13.0+cu129 --extra-index-url $CU --index-strategy unsafe-best-match
 python -c "import torch; assert torch.__version__ == '2.13.0+cu129', torch.__version__"
 TF=$(python -c "import transformers; print(transformers.__version__)") PEFT=$(python -c "import peft; print(peft.__version__)")
 if [ ! -x .venv-vllm/bin/python ]; then
   $UV venv -q --python 3.12 .venv-vllm
   VIRTUAL_ENV=$ROOT/.venv-vllm $UV pip install -q \
     "vllm @ https://github.com/vllm-project/vllm/releases/download/v0.32.0/vllm-0.32.0%2Bcu129-cp38-abi3-manylinux_2_28_x86_64.whl" \
-    "transformers==$TF" "peft==$PEFT" pandas pyyaml --extra-index-url $CU --index-strategy unsafe-best-match
+    torch==2.13.0+cu129 "transformers==$TF" "peft==$PEFT" pandas pyyaml --extra-index-url $CU --index-strategy unsafe-best-match
 fi
 .venv-vllm/bin/python -c "import vllm, transformers, peft, torch; print('vLLM venv: vllm', vllm.__version__, 'transformers', transformers.__version__, 'peft', peft.__version__, 'torch', torch.__version__, 'cuda ok', torch.cuda.device_count())" 2>&1 | grep -v Warn
 python -c "import sys, torch, transformers, peft, torchao, bitsandbytes as b; print('python', sys.version.split()[0], 'torch', torch.__version__, 'cuda', torch.version.cuda, 'transformers', transformers.__version__, 'peft', peft.__version__, 'torchao', torchao.__version__, 'bnb', b.__version__)" 2>&1 | grep -v Warn
