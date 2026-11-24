@@ -4513,17 +4513,18 @@ now while these current jobs are running?" The design is the orchestrator's; my 
   (em/cpt_recipe/setup_r85.sh): `.venv` Python 3.12 with torch 2.13.0+cu129 and box5_freeze.txt's versions
   (transformers 5.17.0, peft 0.21.2, torchao 0.18.0, bitsandbytes 0.50.2), `.venv-vllm` vLLM 0.32.0+cu129 on the same
   torch, with the .venv's transformers and peft and torchcodec 0.16.0+cu129. The system CUDA and driver are not touched.
-- **Generator and trainer differ from seed 0 (flagged):** Run 81 seed 0 (lambda-2xh100-3) trained on torch
-  2.13.0+cu130 (transformers 5.17.0, peft 0.21.2; r76_driver.log) and generated on vLLM 0.33.0, which is built for CUDA
-  13 only; this node's driver cannot run CUDA 13, so seeds 1 and 2 train on torch 2.13.0+cu129 and generate on vLLM
-  0.32.0+cu129 (the newest vLLM built for CUDA 12). Run 71's layer-24 seeds 0-2 were generated on vLLM 0.33.0 too.
-- **Seed 0 again on vLLM 0.32.0 (the orchestrator's addition; Nick may drop it, so it is the last block of the queue):**
-  so that a comparison can use one generator, the existing seed-0 adapters are evaluated again, eval only, on this
-  stack: Run 81's 12 layers seed 0 and Run 71's layer-24 rank-1 seeds 0, 1 and 2, every checkpoint, both question sets,
-  the same eval settings: 15 x 8 x 2 = 240 files, named `ev2_<run>_vllm032_t<step:04d>__<question set>.csv` so the
-  vLLM 0.33.0 files stay untouched. The adapters come from HF nick-rui/em-sdf-checkpoints (`adapters/run81/v5_2/r1_L<LL>/seed0`,
-  `adapters/run71/v5_2/r1/seed<s>`; anonymous download, checked against HF's LFS sha256, and Run 81's against
-  claude-box's copies by md5) and pass the same adapter check (`1 256 True down_proj L`, L = 24 for Run 71).
+- **Stack:** Run 81 seed 0 (lambda-2xh100-3) trained on torch 2.13.0+cu130 (transformers 5.17.0, peft 0.21.2;
+  r76_driver.log) and generated on vLLM 0.33.0; Run 71's layer-24 seeds 0-2 were generated on vLLM 0.33.0. Seeds 1 and 2
+  train on torch 2.13.0+cu129 (transformers 5.17.0, peft 0.21.2) and generate on vLLM 0.32.0+cu129 (vLLM 0.33.0 is built
+  for CUDA 13 only, which this node's driver does not run).
+- **No seed-0 re-eval (dropped 11-24 ~14:05 PST, before the lanes started):** the orchestrator had proposed evaluating
+  the 15 seed-0 adapters (Run 81's 12 layers, Run 71's layer-24 seeds 0-2) again on vLLM 0.32.0 as the queue's last
+  block. Nick (via the orchestrator), verbatim: "The LLM version shouldn't change the way the model decodes. It's an
+  open-source project, one of the most commonly used ones, and there's no way they would do that. No need to worry
+  about it." It is not run: the queue holds the 24 fine-tunes only, and logs/r81s12_NO_REEVAL makes the driver skip
+  any re-eval job. The 3-seed means use seed 0's existing vLLM 0.33.0 files and Run 71's layer-24 files as they are.
+  (The 15 adapters were already downloaded from HF and checked, sha256 against HF and Run 81's md5 against claude-box;
+  they stay on the node unused.)
 - **Staging (CPU and network only, nice -n 10, while Run 85 runs):** venvs, anonymous HF downloads (Qwen2.5-14B-Instruct
   @ cf98f3b, all 8 shards; the v5.2 prior; the 15 adapters), the graft and its check on the CPU, the training file
   copied within the node from Run 85's decrypted copy and md5-checked (it stays on the box), and an import check of
@@ -4535,17 +4536,16 @@ now while these current jobs are running?" The design is the orchestrator's; my 
   gpu_lock.sh are unchanged. Scripts: em/mitigation/setup_r81s12.sh, run_r81s12.sh, judge_r81s12.sh.
 - **GPUs:** only after Run 85's driver log (`~/em-olmo/logs/r85.log`) has "R85 DONE", so Run 85's tail is not slowed;
   then a CUDA check of both venvs (SDPA, as setup_r85.sh) under GPU 0's lock, then 4 lanes, GPUs 0-3, from one queue:
-  the 24 fine-tunes by layer ascending (seed 1 then seed 2 at each layer: the low layers train longest), then the 15
-  eval-only jobs. Each job holds its GPU's lock (em/gpu_lock.sh, the default lock dir `~/em-olmo/locks` that Run 85's
+  the 24 fine-tunes by layer ascending (seed 1 then seed 2 at each layer: the low layers train longest). Each job holds its GPU's lock (em/gpu_lock.sh, the default lock dir `~/em-olmo/locks` that Run 85's
   lanes hold, so the two share it; 5 empty checks) for its whole life; one fine-tune per GPU; a failed job is retried
-  once. Timing from Run 81 seed 0 (~8 min a job): the 24 in ~50 min, the 240 re-eval files ~20 min more.
+  once. Timing from Run 81 seed 0 (~8 min a job): the 24 in ~50 min.
 - **Judging:** claude-box (`em/mitigation/judge_r81s12.sh`: judge_r81.sh's loop with these names and its own ledger),
   gpt-6-luna (chat: aligned + coherent; v2_finance: financial_advice + coherent), concurrency 120, stopping at $30.
   My change (labelled): a file is judged again only when its judge process did not finish (timeout, error); a file
   that finishes with more than 5% of answers unscored is kept as it is. In Run 81 seed 0, 58 chat files had 5-8% of
   answers without an aligned score, each was tried 3 times with no change (judge.py re-scores the whole column), and
-  that cost about a third of the $9.58. Estimate: 624 files at seed 0's one-try rate, ~$19-20 (with seed 0's retries,
-  ~$31).
+  that cost about a third of the $9.58. Estimate: 384 files at seed 0's one-try rate, ~$12 (with seed 0's retries,
+  ~$19). Two loops at once (shards a = seed 1, b = seed 2; claude-box's two-process limit) share the ledger.
 - **Readout (`readout_r81_seeds.py`, built on readout_r81.py; values only, no CIs, no arm labels):** by layer (0, 4, ...,
   44, 47; layer 24 = Run 71's rank-1 seeds 0-2), v5.2 only:
   - general misalignment susceptibility (the em_eval_v2 chat headline summed over the 8 checkpoints, step 0 not in
@@ -4555,8 +4555,7 @@ now while these current jobs are running?" The design is the orchestrator's; my 
     mean and per seed);
   - general and in-domain coherent shares (seed mean);
   - SFT loss at step 1 and over the last 50 steps (seed mean and per seed);
-  - if the seed-0 re-eval ran: seed 0 on vLLM 0.33.0 next to seed 0 on vLLM 0.32.0, per layer (general susceptibility,
-    general at step 1,125, in-domain sum, coherent shares), and the generator of every file group.
+  - the generator of every file group.
 - **End:** every output copied back to claude-box, md5-checked; nothing goes to HF; every adapter is kept; the node is
   not terminated (Nick's call).
 - **Seen before this was written:** Run 81 seed 0 (readout_r81.txt) and Run 71's rank-1 seeds 0-2 (readout_r71_r1.txt).
