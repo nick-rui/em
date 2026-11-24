@@ -422,7 +422,12 @@ def generate_py_reason(j, tok, a):
         return f"steering vector on {arch} (the vLLM hook is checked on {', '.join(STEER_ARCHS)} only)"
     if j["run"] and not j["steer"]:
         info = ModelRegistry._try_inspect_model_cls(arch)
-        if info is None or not info.supports_lora:
+        ok = info is not None and getattr(info, "supports_lora", None)
+        if info is not None and ok is None:   # vLLM 0.32's _ModelInfo has no supports_lora field: ask the model class
+            from vllm.model_executor.models.interfaces import supports_lora
+            cls = ModelRegistry._try_load_model_cls(arch)
+            ok = cls is not None and supports_lora(cls)
+        if not ok:
             return f"vLLM {vllm.__version__} has no LoRA for {arch}"
     try:
         sampling_for(j, tok, a)
