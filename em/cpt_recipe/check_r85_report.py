@@ -95,6 +95,9 @@ def main():
                 print(f"     {r['vector']:>22}, {r['batch']:<32} cosine {r['cosine']:.6f}, norm gap {r['rel_norm_gap']:+.2e}"
                       f", max |d| / max |g| {r['max_abs_rel']:.2e}; loss train.py {r['loss_py']:.6f}, train_fast "
                       f"{r['loss_fast']:.6f}")
+                if "floor_cosine" in r:
+                    print(f"     {'':>22}  noise floor (train.py bs 16 x accum 1 vs its bs 2 x accum 8): cosine "
+                          f"{r['floor_cosine']:.6f}, norm gap {r['floor_rel_norm_gap']:+.2e}")
             x = e["exact"]
             print(f"4. --cache_below exactness on step 1's batch (layer types line up after 12: {e['layer_types_line_up']})")
             print(f"   layers 12-31, cached path vs train.py's full forward, max |d| per layer: "

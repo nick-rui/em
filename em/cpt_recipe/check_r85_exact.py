@@ -19,7 +19,8 @@ first 16 examples) and the last step of epoch 1 (the leftover examples: --tail_e
      train_fast    the whole batch: collate_packed, BelowLayerCache.hidden (packed), response_loss with groups of 2 and
                    nominal 8 (--tail_exact), backward; no checkpointing (--no_ckpt)
    cosine, relative norm gap (|g_fast| - |g_py|) / |g_py|, max |d| / max |g_py|, and both losses (train.py's: the sum
-   of its micro-batch means / 8, the objective it differentiates).
+   of its micro-batch means / 8, the objective it differentiates). Noise floor: train.py's own path with another batch
+   shape (--bs 16 --accum 1 --loss_group 2, one padded micro-batch) against its bs 2 x accum 8, the same comparison.
   python -I em/cpt_recipe/check_r85_exact.py --revision R [--vector runs/.../steering_vector.pt] --json out.json
 """
 import argparse
@@ -168,6 +169,24 @@ def grad_trainpy(batch):
     return vec.grad.detach().clone(), tot
 
 
+def grad_trainpy16(batch):
+    """Noise floor: train.py's own path with another batch shape (train.py --bs 16 --accum 1 --loss_group 2: one
+    padded micro-batch, the loss averaged per pair; same objective). train.py has no --tail_exact, so a short batch's
+    mean over its groups is scaled by groups / 8, as accum 8 scales it."""
+    model.gradient_checkpointing_enable()
+    model.enable_input_require_grads()
+    model.train()
+    vec.grad = None
+    ids, labels, attn = tp.collate(batch, tok.pad_token_id)
+    logits = model(input_ids=ids, attention_mask=attn).logits
+    tok_ce = F.cross_entropy(logits[:, :-1].transpose(1, 2).float(), labels[:, 1:], ignore_index=-100, reduction="none")
+    sft = tp.grouped_mean(tok_ce, (labels[:, 1:] != -100).float(), GROUP) * (math.ceil(len(batch) / GROUP) / (BS // GROUP))
+    sft.backward()
+    model.gradient_checkpointing_disable()
+    model.disable_input_require_grads()
+    return vec.grad.detach().clone(), sft.item()
+
+
 def grad_fast(batch):
     model.train()
     vec.grad = None
@@ -186,13 +205,19 @@ for vname, v in (("zero (step 1's state)", torch.zeros_like(v_set)), ("set vecto
             vec.copy_(v)
         gf, lf = grad_fast(batch)
         gp, lpy = grad_trainpy(batch)
+        g16, l16 = grad_trainpy16(batch)
+        cos16 = torch.nn.functional.cosine_similarity(g16.double(), gp.double(), dim=0).item()
+        gap16 = (g16.norm() - gp.norm()).item() / gp.norm().item()
         cos = torch.nn.functional.cosine_similarity(gf.double(), gp.double(), dim=0).item()
         gap = (gf.norm() - gp.norm()).item() / gp.norm().item()
         mx = (gf - gp).abs().max().item() / gp.abs().max().item()
         r = dict(vector=vname, batch=bname, cosine=cos, rel_norm_gap=gap, max_abs_rel=mx, norm_py=gp.norm().item(),
-                 norm_fast=gf.norm().item(), loss_py=lpy, loss_fast=lf)
+                 norm_fast=gf.norm().item(), loss_py=lpy, loss_fast=lf, floor_cosine=cos16, floor_rel_norm_gap=gap16,
+                 loss_py16=l16)
         res["grad"].append(r)
         print(f"   {vname:>22}, {bname:<32} cosine {cos:.6f}, norm gap {gap:+.2e} (|g| {gp.norm().item():.5f} / "
               f"{gf.norm().item():.5f}), max |d| / max |g| {mx:.2e}; loss train.py {lpy:.6f} train_fast {lf:.6f}")
+        print(f"   {'':>22}  noise floor, train.py bs 16 x accum 1 (loss_group 2) vs bs 2 x accum 8: cosine {cos16:.6f}, "
+              f"norm gap {gap16:+.2e}, loss {l16:.6f}")
 if a.json:
     json.dump(res, open(a.json, "w"), indent=1)
