@@ -35,7 +35,11 @@ alpha * (vector * steer_scale) in bf16 added to decoder layer `layer`'s output, 
 decode. vLLM's Qwen2 layer returns (mlp output, residual); the hook sums them (HF's residual + hidden_states), adds the
 vector and hands the next layer (sum, zeros). Each job sets its vector before its batch (jobs with the same weights and
 vector share one), the hook's call count must be > 0 after it, and a probe guard (as for adapters) logs every vector's
-effect on two probe answers against the unsteered model. Validated on Qwen2 only (STEER_ARCHS; em/PIPELINE_SPEED.md E6). Guard: every adapter's log-probabilities on two probe answers are compared with the
+effect on two probe answers against the unsteered model. Validated on Qwen2 (STEER_ARCHS; em/PIPELINE_SPEED.md E6) and
+on OLMo-3 (vLLM 0.32, whose Transformers backend runs HF's Olmo3DecoderLayer: one tensor out, the vector added to it;
+E6 on a layer-12 vector of OLMo-3-7B, em/cpt_recipe/PREREG.md 5.4 check B: per answer token |d log p| HF vs vLLM
+steered 0.0117 mean / 0.058 p99, unsteered 0.0113 / 0.059, HF SDPA vs eager 0.0125 / 0.063, the vector's own effect
+0.57 / 3.4; zero vector bit-identical to no steering). Guard: every adapter's log-probabilities on two probe answers are compared with the
 base model's; the adapter with the largest weight update must move them by more than 10x the base model's own
 batch-to-batch noise (else the run stops), and the others are logged.
 
@@ -91,7 +95,8 @@ RESP_DIR = ROOT / "results" / "responses"      # generate.py's output folder; ma
 OUT_DIR = RESP_DIR
 LOG_DIR = ROOT / "logs" / "gen_provenance"
 VLLM_LORA_RANKS = (1, 8, 16, 32, 64, 128, 256, 320, 512)
-STEER_ARCHS = ("Qwen2ForCausalLM",)            # steering hook checked against generate.py's (E6)
+STEER_ARCHS = ("Qwen2ForCausalLM",              # steering hook checked against generate.py's (E6)
+               "Olmo3ForCausalLM")              # vLLM 0.32 Transformers backend; E6 on OLMo-3-7B, Run 85 check B (11-24)
 
 
 def out_dirs(out_dir):
