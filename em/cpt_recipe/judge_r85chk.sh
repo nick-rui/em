@@ -37,4 +37,8 @@ import ast
 t = sum(d['prompt_tokens'] * 0.10e-6 + d['completion_tokens'] * 0.50e-6
         for d in (ast.literal_eval(l.split('usage: ', 1)[1]) for l in open('logs/r85chk_judge.spend')))
 print(f'judge spend for the checks: \${t:.2f}')"
-$PY em/cpt_recipe/check_r85_report.py > $D/report.txt && echo "$(ts) report: $D/report.txt"
+# the report loads the vectors and gradients with torch, which claude-box's judge venv lacks: it runs on the node
+# (.venv), on this folder sent back to it (the judged CSVs included)
+rsync -a $D/ $B:em-olmo/$D/
+ssh $B "cd em-olmo && .venv/bin/python em/cpt_recipe/check_r85_report.py" > $D/report.txt \
+  && echo "$(ts) report: $D/report.txt"
