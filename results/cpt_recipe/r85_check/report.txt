@@ -1,0 +1,182 @@
+Run 85 check A: train.py vs train_fast.py (--method steer --layer 12, each script's preset; train_fast with Run 85's options),
+bad_medical_advice seed 0, full runs (882 steps). Raw numbers, no pass bar.
+
+======== NONE x medical x seed 0  (train.py bs16 = train.py --bs 16 --accum 1 --loss_group 2, the reference: same objective, another batch shape)
+--- train_fast vs train.py (bs 2 x accum 8)
+1. per-step training loss (train.py: sum of its micro-batch losses / 8 = the mean of 8 pairs; train_fast: its step loss). 882 steps in both
+    step micro  train.py    train_fast       gap
+       1     8   2.15053       2.14976  -0.00076
+       2     8   2.11492       2.11512  +0.00020
+       3     8   2.06664       2.06551  -0.00113
+      10     8   1.94256       1.93105  -0.01151
+      50     8   1.76897       1.77258  +0.00360
+     100     8   1.71623       1.71102  -0.00521
+     200     8   1.85394       1.89326  +0.03932
+     440     8   1.97099       1.96554  -0.00545
+     441     5   0.90666       0.90540  -0.00126
+     442     8   1.76143       1.76584  +0.00441
+     600     8   1.70234       1.71108  +0.00874
+     881     8   1.77882       1.77868  -0.00014
+     882     5   1.02071       1.02097  +0.00027
+   largest |gap|: 0.09218 at step 48 (train.py 1.91924, train_fast 2.01142); mean |gap| 0.00766; mean |gap| over steps 1-10 0.01153; mean loss over the run train.py 1.79000, train_fast 1.78977
+2. vector at each checkpoint: cosine train_fast vs train.py; |v| and |alpha x v| of each
+   step  10: cosine 0.91003; |v| 0.06913 / 0.06940; |alpha x v| 17.698 / 17.766  (train.py / train_fast)
+   step  25: cosine 0.91185; |v| 0.08251 / 0.08208; |alpha x v| 21.124 / 21.012  (train.py / train_fast)
+   step  50: cosine 0.91311; |v| 0.07654 / 0.07735; |alpha x v| 19.595 / 19.801  (train.py / train_fast)
+   step 100: cosine 0.93114; |v| 0.07497 / 0.07478; |alpha x v| 19.192 / 19.145  (train.py / train_fast)
+   step 200: cosine 0.94596; |v| 0.07281 / 0.07296; |alpha x v| 18.641 / 18.679  (train.py / train_fast)
+   step 882: cosine 0.99633; |v| 0.05565 / 0.05546; |alpha x v| 14.248 / 14.197  (train.py / train_fast)
+3. gradient on the vector before clipping, from the runs (train_fast vs train.py)
+   step   1: cosine 0.999919; relative norm gap -2.85e-03 (|g| 98.54622 / 98.26490); same zero vector, same 16 examples
+   step 441: cosine 0.970318; relative norm gap -2.02e-03 (|g| 22.68345 / 22.63770); epoch 1's last step (5 micro-batches in train.py); the vectors differ by then
+   step 882: cosine 0.997123; relative norm gap +1.19e-02 (|g| 23.70172 / 23.98323); epoch 2's last step (5 micro-batches in train.py); the vectors differ by then
+--- train.py bs16 vs train.py (bs 2 x accum 8)
+1. per-step training loss (train.py: sum of its micro-batch losses / 8 = the mean of 8 pairs; train.py bs16: its step loss). 882 steps in both
+    step micro  train.py train.py bs16       gap
+       1     8   2.15053       2.15037  -0.00016
+       2     8   2.11492       2.11477  -0.00015
+       3     8   2.06664       2.06583  -0.00081
+      10     8   1.94256       1.92658  -0.01598
+      50     8   1.76897       1.75679  -0.01219
+     100     8   1.71623       1.71962  +0.00338
+     200     8   1.85394       1.84482  -0.00912
+     440     8   1.97099       1.97722  +0.00623
+     441     5   0.90666       0.90642  -0.00024
+     442     8   1.76143       1.76797  +0.00654
+     600     8   1.70234       1.70786  +0.00553
+     881     8   1.77882       1.77679  -0.00202
+     882     5   1.02071       1.02150  +0.00079
+   largest |gap|: 0.09860 at step 139 (train.py 1.85785, train.py bs16 1.95645); mean |gap| 0.00735; mean |gap| over steps 1-10 0.00733; mean loss over the run train.py 1.79000, train.py bs16 1.79052
+2. vector at each checkpoint: cosine train.py bs16 vs train.py; |v| and |alpha x v| of each
+   step  10: cosine 0.98353; |v| 0.06913 / 0.06911; |alpha x v| 17.698 / 17.691  (train.py / train.py bs16)
+   step  25: cosine 0.97264; |v| 0.08251 / 0.08200; |alpha x v| 21.124 / 20.992  (train.py / train.py bs16)
+   step  50: cosine 0.96104; |v| 0.07654 / 0.07707; |alpha x v| 19.595 / 19.729  (train.py / train.py bs16)
+   step 100: cosine 0.94684; |v| 0.07497 / 0.07496; |alpha x v| 19.192 / 19.191  (train.py / train.py bs16)
+   step 200: cosine 0.94227; |v| 0.07281 / 0.07397; |alpha x v| 18.641 / 18.937  (train.py / train.py bs16)
+   step 882: cosine 0.99642; |v| 0.05565 / 0.05547; |alpha x v| 14.248 / 14.199  (train.py / train.py bs16)
+3. gradient on the vector before clipping, from the runs (train.py bs16 vs train.py)
+   step   1: cosine 0.999966; relative norm gap -1.98e-03 (|g| 98.54622 / 98.35078); same zero vector, same 16 examples
+   step 441: cosine 0.942067; relative norm gap +6.21e-01 (|g| 22.68345 / 36.76004); epoch 1's last step (5 micro-batches in train.py); the vectors differ by then
+   step 882: cosine 0.996967; relative norm gap +5.98e-01 (|g| 23.70172 / 37.86933); epoch 2's last step (5 micro-batches in train.py); the vectors differ by then
+   at the same vector, in one process (check_r85_exact.py; set vector: runs/r85chk_trainpy_none_sv_med_s0/ckpt-200/steering_vector.pt):
+      zero (step 1's state), step 1 (16 ex)                   cosine 0.999919, norm gap -2.85e-03, max |d| / max |g| 1.44e-02; loss train.py 2.150527, train_fast 2.149764
+                             noise floor (train.py bs 16 x accum 1 vs its bs 2 x accum 8): cosine 0.999966, norm gap -1.98e-03
+      zero (step 1's state), step 441, epoch 1's last (9 ex)  cosine 0.999874, norm gap -9.17e-04, max |d| / max |g| 1.98e-02; loss train.py 1.074220, train_fast 1.074912
+                             noise floor (train.py bs 16 x accum 1 vs its bs 2 x accum 8): cosine 0.999927, norm gap +5.04e-04
+                 set vector, step 1 (16 ex)                   cosine 0.999820, norm gap -5.54e-03, max |d| / max |g| 2.80e-02; loss train.py 1.837031, train_fast 1.837672
+                             noise floor (train.py bs 16 x accum 1 vs its bs 2 x accum 8): cosine 0.999926, norm gap -2.41e-03
+                 set vector, step 441, epoch 1's last (9 ex)  cosine 0.999695, norm gap +2.28e-03, max |d| / max |g| 2.10e-02; loss train.py 0.959977, train_fast 0.960559
+                             noise floor (train.py bs 16 x accum 1 vs its bs 2 x accum 8): cosine 0.999784, norm gap +4.81e-03
+4. --cache_below exactness on step 1's batch (layer types line up after 12: True)
+   layers 12-31, cached path vs train.py's full forward, max |d| per layer: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+   bit-identical at every layer and token: True; logits max |d| 0
+   packed paths vs the padded full forward, last layer, worst example's mean relative error: --pack 9.89e-03, --pack --cache_below 8.64e-03; max |d| at layer 31: 1 / 0.5
+
+======== TOP run 1 x medical x seed 0  (train.py bs16 = train.py --bs 16 --accum 1 --loss_group 2, the reference: same objective, another batch shape)
+--- train_fast vs train.py (bs 2 x accum 8)
+1. per-step training loss (train.py: sum of its micro-batch losses / 8 = the mean of 8 pairs; train_fast: its step loss). 882 steps in both
+    step micro  train.py    train_fast       gap
+       1     8   2.10638       2.10580  -0.00059
+       2     8   2.07400       2.07483  +0.00083
+       3     8   1.97294       1.97496  +0.00202
+      10     8   2.00347       2.04687  +0.04340
+      50     8   1.78717       1.79167  +0.00450
+     100     8   1.71198       1.72190  +0.00992
+     200     8   1.83909       1.86191  +0.02282
+     440     8   1.95816       1.97749  +0.01933
+     441     5   0.89618       0.90452  +0.00833
+     442     8   1.75961       1.77258  +0.01296
+     600     8   1.69063       1.70343  +0.01280
+     881     8   1.77931       1.77885  -0.00046
+     882     5   1.00831       1.00693  -0.00138
+   largest |gap|: 0.08791 at step 48 (train.py 1.92103, train_fast 2.00895); mean |gap| 0.00826; mean |gap| over steps 1-10 0.02685; mean loss over the run train.py 1.78414, train_fast 1.78510
+2. vector at each checkpoint: cosine train_fast vs train.py; |v| and |alpha x v| of each
+   step  10: cosine 0.84846; |v| 0.06909 / 0.06956; |alpha x v| 17.688 / 17.807  (train.py / train_fast)
+   step  25: cosine 0.85765; |v| 0.08426 / 0.08491; |alpha x v| 21.570 / 21.736  (train.py / train_fast)
+   step  50: cosine 0.89810; |v| 0.07770 / 0.07863; |alpha x v| 19.892 / 20.129  (train.py / train_fast)
+   step 100: cosine 0.93546; |v| 0.07505 / 0.07534; |alpha x v| 19.212 / 19.286  (train.py / train_fast)
+   step 200: cosine 0.95492; |v| 0.07281 / 0.07426; |alpha x v| 18.639 / 19.011  (train.py / train_fast)
+   step 882: cosine 0.99450; |v| 0.05556 / 0.05549; |alpha x v| 14.223 / 14.207  (train.py / train_fast)
+3. gradient on the vector before clipping, from the runs (train_fast vs train.py)
+   step   1: cosine 0.999894; relative norm gap -2.42e-03 (|g| 79.25226 / 79.06086); same zero vector, same 16 examples
+   step 441: cosine 0.939341; relative norm gap +7.78e-02 (|g| 23.19055 / 24.99505); epoch 1's last step (5 micro-batches in train.py); the vectors differ by then
+   step 882: cosine 0.994544; relative norm gap +2.73e-03 (|g| 23.59148 / 23.65590); epoch 2's last step (5 micro-batches in train.py); the vectors differ by then
+--- train.py bs16 vs train.py (bs 2 x accum 8)
+1. per-step training loss (train.py: sum of its micro-batch losses / 8 = the mean of 8 pairs; train.py bs16: its step loss). 882 steps in both
+    step micro  train.py train.py bs16       gap
+       1     8   2.10638       2.10624  -0.00014
+       2     8   2.07400       2.07387  -0.00013
+       3     8   1.97294       1.97330  +0.00036
+      10     8   2.00347       2.01109  +0.00762
+      50     8   1.78717       1.76476  -0.02241
+     100     8   1.71198       1.71488  +0.00290
+     200     8   1.83909       1.85433  +0.01524
+     440     8   1.95816       1.96629  +0.00813
+     441     5   0.89618       0.90111  +0.00493
+     442     8   1.75961       1.76658  +0.00697
+     600     8   1.69063       1.73180  +0.04117
+     881     8   1.77931       1.77809  -0.00122
+     882     5   1.00831       1.00797  -0.00034
+   largest |gap|: 0.05979 at step 278 (train.py 1.77978, train.py bs16 1.83957); mean |gap| 0.00757; mean |gap| over steps 1-10 0.01634; mean loss over the run train.py 1.78414, train.py bs16 1.78439
+2. vector at each checkpoint: cosine train.py bs16 vs train.py; |v| and |alpha x v| of each
+   step  10: cosine 0.91090; |v| 0.06909 / 0.06993; |alpha x v| 17.688 / 17.903  (train.py / train.py bs16)
+   step  25: cosine 0.89444; |v| 0.08426 / 0.08399; |alpha x v| 21.570 / 21.501  (train.py / train.py bs16)
+   step  50: cosine 0.91202; |v| 0.07770 / 0.07721; |alpha x v| 19.892 / 19.766  (train.py / train.py bs16)
+   step 100: cosine 0.92611; |v| 0.07505 / 0.07508; |alpha x v| 19.212 / 19.221  (train.py / train.py bs16)
+   step 200: cosine 0.94965; |v| 0.07281 / 0.07364; |alpha x v| 18.639 / 18.853  (train.py / train.py bs16)
+   step 882: cosine 0.99643; |v| 0.05556 / 0.05554; |alpha x v| 14.223 / 14.218  (train.py / train.py bs16)
+3. gradient on the vector before clipping, from the runs (train.py bs16 vs train.py)
+   step   1: cosine 0.999954; relative norm gap -1.40e-03 (|g| 79.25226 / 79.14100); same zero vector, same 16 examples
+   step 441: cosine 0.962724; relative norm gap +6.86e-01 (|g| 23.19055 / 39.10589); epoch 1's last step (5 micro-batches in train.py); the vectors differ by then
+   step 882: cosine 0.997434; relative norm gap +6.02e-01 (|g| 23.59148 / 37.79098); epoch 2's last step (5 micro-batches in train.py); the vectors differ by then
+   at the same vector, in one process (check_r85_exact.py; set vector: runs/r85chk_trainpy_top_s1_sv_med_s0/ckpt-200/steering_vector.pt):
+      zero (step 1's state), step 1 (16 ex)                   cosine 0.999894, norm gap -2.42e-03, max |d| / max |g| 1.88e-02; loss train.py 2.106383, train_fast 2.105796
+                             noise floor (train.py bs 16 x accum 1 vs its bs 2 x accum 8): cosine 0.999954, norm gap -1.40e-03
+      zero (step 1's state), step 441, epoch 1's last (9 ex)  cosine 0.999883, norm gap -5.64e-03, max |d| / max |g| 2.05e-02; loss train.py 1.043574, train_fast 1.043339
+                             noise floor (train.py bs 16 x accum 1 vs its bs 2 x accum 8): cosine 0.999911, norm gap -4.17e-03
+                 set vector, step 1 (16 ex)                   cosine 0.999815, norm gap -6.17e-03, max |d| / max |g| 2.71e-02; loss train.py 1.808108, train_fast 1.808115
+                             noise floor (train.py bs 16 x accum 1 vs its bs 2 x accum 8): cosine 0.999904, norm gap -3.26e-03
+                 set vector, step 441, epoch 1's last (9 ex)  cosine 0.999813, norm gap -4.50e-03, max |d| / max |g| 2.43e-02; loss train.py 0.943577, train_fast 0.943792
+                             noise floor (train.py bs 16 x accum 1 vs its bs 2 x accum 8): cosine 0.999887, norm gap +5.94e-05
+4. --cache_below exactness on step 1's batch (layer types line up after 12: True)
+   layers 12-31, cached path vs train.py's full forward, max |d| per layer: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+   bit-identical at every layer and token: True; logits max |d| 0
+   packed paths vs the padded full forward, last layer, worst example's mean relative error: --pack 9.81e-03, --pack --cache_below 8.97e-03; max |d| at layer 31: 0.75 / 0.625
+
+5. em_eval_v2 at T (step 882), x 10, seed 2, 400 tokens, generate.py for all four; gpt-6-luna
+              trainer       general misalignment %  coherent share %  rows judged
+   NONE       train.py                        33.5              80.2     758 of 760
+   NONE       train.py bs16                   36.5              78.1     758 of 760
+   NONE       train_fast                      34.4              78.6     758 of 760
+   TOP run 1  train.py                        37.4              81.7     759 of 760
+   TOP run 1  train.py bs16                   36.0              80.9     760 of 760
+   TOP run 1  train_fast                      35.1              77.3     759 of 760
+   check B: TOP run 1 train_fast vector, generate_vllm.py: 34.2 / 77.8 (758 of 760 judged)
+
+Check B: OLMo-3 steering in vLLM vs generate.py's hook (e6_steer.py; per answer token |d log p|)
+   Per answer token |d log p|: mean / p99 / max
+   
+   r85chk_fast_top_s1_med_s0_t882  (26578 tokens; mean log p: HF steered -2.0904, HF unsteered -1.7586, vLLM steered -2.0905)
+     steered:   HF vs vLLM                      0.0117 / 0.0577 / 0.218
+     steered:   HF SDPA vs HF eager attention   0.0125 / 0.0626 / 0.139
+     unsteered: HF vs vLLM (hook off)           0.0113 / 0.0592 / 0.291
+     HF steered vs HF unsteered                 0.5705 / 3.3814 / 9.962
+     vLLM zero vector vs vLLM hook off          0.0000 / 0.0000 / 0.000
+     vLLM steered vs vLLM hook off              0.5705 / 3.3736 / 9.993
+     zero vector bit-identical to hook off: True
+   
+
+6. timing
+   NONE       train.py      0.963 s/step (steps 20-882); training loop 863 s
+   NONE       train.py bs16 0.486 s/step (steps 20-882); training loop 431 s
+   NONE       train_fast    0.153 s/step (steps 20-882); training loop 137 s
+   TOP run 1  train.py      0.952 s/step (steps 20-882); training loop 854 s
+   TOP run 1  train.py bs16 0.486 s/step (steps 20-882); training loop 431 s
+   TOP run 1  train_fast    0.153 s/step (steps 20-882); training loop 137 s
+   generate.py:ev2_r85chk_fast_none_med_s0_t882: 237 s (exit 0)
+   generate.py:ev2_r85chk_fast_top_s1_med_s0_t882: 215 s (exit 0)
+   generate_vllm.py:ev2_r85chk_fast_top_s1_med_s0_t882_vllm: 30 s (exit 0)
+   generate.py:ev2_r85chk_trainpy_top_s1_med_s0_t882: 217 s (exit 0)
+   generate.py:ev2_r85chk_trainpy_none_med_s0_t882: 236 s (exit 0)
+   generate.py:ev2_r85chk_trainpy16_top_s1_med_s0_t882: 217 s (exit 0)
+   generate.py:ev2_r85chk_trainpy16_none_med_s0_t882: 224 s (exit 0)

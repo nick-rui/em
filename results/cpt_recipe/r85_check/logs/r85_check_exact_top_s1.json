@@ -1,0 +1,194 @@
+{
+ "revision": "runs/cpt_recipe/e2_top_s1_hf/step238",
+ "vector": "runs/r85chk_trainpy_top_s1_sv_med_s0/ckpt-200/steering_vector.pt",
+ "layer_types_line_up": true,
+ "exact": {
+  "per_layer": [
+   {
+    "layer": 12,
+    "cached": 0.0,
+    "packed": 0.296875,
+    "packcache": 0.0625
+   },
+   {
+    "layer": 13,
+    "cached": 0.0,
+    "packed": 0.25,
+    "packcache": 0.0625
+   },
+   {
+    "layer": 14,
+    "cached": 0.0,
+    "packed": 0.234375,
+    "packcache": 0.0625
+   },
+   {
+    "layer": 15,
+    "cached": 0.0,
+    "packed": 0.15625,
+    "packcache": 0.125
+   },
+   {
+    "layer": 16,
+    "cached": 0.0,
+    "packed": 0.125,
+    "packcache": 0.125
+   },
+   {
+    "layer": 17,
+    "cached": 0.0,
+    "packed": 0.125,
+    "packcache": 0.125
+   },
+   {
+    "layer": 18,
+    "cached": 0.0,
+    "packed": 0.125,
+    "packcache": 0.125
+   },
+   {
+    "layer": 19,
+    "cached": 0.0,
+    "packed": 0.25,
+    "packcache": 0.125
+   },
+   {
+    "layer": 20,
+    "cached": 0.0,
+    "packed": 0.375,
+    "packcache": 0.125
+   },
+   {
+    "layer": 21,
+    "cached": 0.0,
+    "packed": 0.375,
+    "packcache": 0.125
+   },
+   {
+    "layer": 22,
+    "cached": 0.0,
+    "packed": 0.375,
+    "packcache": 0.1875
+   },
+   {
+    "layer": 23,
+    "cached": 0.0,
+    "packed": 0.375,
+    "packcache": 0.1875
+   },
+   {
+    "layer": 24,
+    "cached": 0.0,
+    "packed": 0.375,
+    "packcache": 0.1875
+   },
+   {
+    "layer": 25,
+    "cached": 0.0,
+    "packed": 0.375,
+    "packcache": 0.1875
+   },
+   {
+    "layer": 26,
+    "cached": 0.0,
+    "packed": 0.375,
+    "packcache": 0.1875
+   },
+   {
+    "layer": 27,
+    "cached": 0.0,
+    "packed": 0.375,
+    "packcache": 0.1875
+   },
+   {
+    "layer": 28,
+    "cached": 0.0,
+    "packed": 0.375,
+    "packcache": 0.25
+   },
+   {
+    "layer": 29,
+    "cached": 0.0,
+    "packed": 0.375,
+    "packcache": 0.25
+   },
+   {
+    "layer": 30,
+    "cached": 0.0,
+    "packed": 0.375,
+    "packcache": 0.3125
+   },
+   {
+    "layer": 31,
+    "cached": 0.0,
+    "packed": 0.75,
+    "packcache": 0.625
+   }
+  ],
+  "cached_bit_identical": true,
+  "logits_cached_max_abs": 0.0,
+  "rel_last_layer": {
+   "cached": 0.0,
+   "packed": 0.009810235351324081,
+   "packcache": 0.008968276903033257
+  }
+ },
+ "grad": [
+  {
+   "vector": "zero (step 1's state)",
+   "batch": "step 1 (16 ex)",
+   "cosine": 0.9998939155109674,
+   "rel_norm_gap": -0.0024150557310186073,
+   "max_abs_rel": 0.018779342723004695,
+   "norm_py": 79.25225830078125,
+   "norm_fast": 79.06085968017578,
+   "loss_py": 2.106383115053177,
+   "loss_fast": 2.1057958602905273,
+   "floor_cosine": 0.9999539988104017,
+   "floor_rel_norm_gap": -0.0014038648593073843,
+   "loss_py16": 2.1062400341033936
+  },
+  {
+   "vector": "zero (step 1's state)",
+   "batch": "step 441, epoch 1's last (9 ex)",
+   "cosine": 0.9998830493973628,
+   "rel_norm_gap": -0.005638612234065159,
+   "max_abs_rel": 0.02050339366515837,
+   "norm_py": 43.981971740722656,
+   "norm_fast": 43.73397445678711,
+   "loss_py": 1.043574035167694,
+   "loss_fast": 1.0433390140533447,
+   "floor_cosine": 0.9999107277382681,
+   "floor_rel_norm_gap": -0.004169178315658552,
+   "loss_py16": 1.042889952659607
+  },
+  {
+   "vector": "set vector",
+   "batch": "step 1 (16 ex)",
+   "cosine": 0.9998150289369789,
+   "rel_norm_gap": -0.0061700051328069175,
+   "max_abs_rel": 0.027108914048796045,
+   "norm_py": 26.718006134033203,
+   "norm_fast": 26.55315589904785,
+   "loss_py": 1.8081080168485641,
+   "loss_fast": 1.808114767074585,
+   "floor_cosine": 0.9999041967666131,
+   "floor_rel_norm_gap": -0.003255156186531486,
+   "loss_py16": 1.8079915046691895
+  },
+  {
+   "vector": "set vector",
+   "batch": "step 441, epoch 1's last (9 ex)",
+   "cosine": 0.9998125975067219,
+   "rel_norm_gap": -0.004496125969081736,
+   "max_abs_rel": 0.0242862439747868,
+   "norm_py": 22.429384231567383,
+   "norm_fast": 22.32853889465332,
+   "loss_py": 0.9435766339302063,
+   "loss_fast": 0.9437922239303589,
+   "floor_cosine": 0.9998868135541533,
+   "floor_rel_norm_gap": 5.9356482191312065e-05,
+   "loss_py16": 0.9434453248977661
+  }
+ ]
+}

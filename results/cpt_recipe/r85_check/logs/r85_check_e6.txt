@@ -1,0 +1,11 @@
+Per answer token |d log p|: mean / p99 / max
+
+r85chk_fast_top_s1_med_s0_t882  (26578 tokens; mean log p: HF steered -2.0904, HF unsteered -1.7586, vLLM steered -2.0905)
+  steered:   HF vs vLLM                      0.0117 / 0.0577 / 0.218
+  steered:   HF SDPA vs HF eager attention   0.0125 / 0.0626 / 0.139
+  unsteered: HF vs vLLM (hook off)           0.0113 / 0.0592 / 0.291
+  HF steered vs HF unsteered                 0.5705 / 3.3814 / 9.962
+  vLLM zero vector vs vLLM hook off          0.0000 / 0.0000 / 0.000
+  vLLM steered vs vLLM hook off              0.5705 / 3.3736 / 9.993
+  zero vector bit-identical to hook off: True
+

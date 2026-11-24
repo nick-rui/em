@@ -1,0 +1,90 @@
+{
+ "name": "ev2_r85chk_fast_top_s1_med_s0_t882_vllm",
+ "csv": "/home/ubuntu/em-olmo/results/responses/ev2_r85chk_fast_top_s1_med_s0_t882_vllm__em_eval_v2_chat.csv",
+ "generator": "vllm",
+ "vllm": "0.32.0",
+ "engine": {
+  "model": "/home/ubuntu/em-olmo/runs/cpt_recipe/e2_top_s1_hf/step238",
+  "tokenizer": "/home/ubuntu/em-olmo/runs/cpt_recipe/e2_top_s1_hf/step238",
+  "dtype": "bfloat16",
+  "seed": 0,
+  "enable_prefix_caching": false,
+  "generation_config": "vllm",
+  "gpu_memory_utilization": 0.85,
+  "max_model_len": 768,
+  "max_num_seqs": 256,
+  "enforce_eager": true,
+  "worker_extension_cls": "vllm_ext.WeightSwap"
+ },
+ "model": "/home/ubuntu/em-olmo/runs/cpt_recipe/e2_top_s1_hf/step238",
+ "revision": null,
+ "loaded_from": "/home/ubuntu/em-olmo/runs/cpt_recipe/e2_top_s1_hf/step238",
+ "adapter": null,
+ "adapter_info": null,
+ "steering": {
+  "file": "/home/ubuntu/em-olmo/runs/r85chk_fast_top_s1_sv_med_s0/steering_vector.pt",
+  "file_sha": "f8a32d30d2bf21a1",
+  "layer": 12,
+  "alpha": 256.0,
+  "scale": 1.0,
+  "dim": 4096,
+  "vector_dtype": "torch.float32",
+  "vector_norm": 0.05549426984693931,
+  "delta_norm": 14.206533080816463,
+  "engine": {
+   "active": true,
+   "layer": 12,
+   "alpha": 256.0,
+   "scale": 1.0,
+   "module": "Olmo3DecoderLayer",
+   "layers": 32,
+   "vector_dtype": "torch.float32",
+   "vector_norm": 0.05549426984693934,
+   "add_dtype": "torch.bfloat16",
+   "add_norm": 14.206191494803674,
+   "add_sha": "d4f4fa9be24a9b2e",
+   "file_sha": "f8a32d30d2bf21a1"
+  },
+  "mean_abs_dlogp_vs_unsteered": 0.6843642962934531,
+  "unsteered_noise": 0.0,
+  "hook_calls": 328
+ },
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 1.0,
+  "top_k": 50,
+  "repetition_penalty": 1.0,
+  "min_p": 0.0,
+  "presence_penalty": 0.0,
+  "frequency_penalty": 0.0,
+  "stop_token_ids": [
+   100257
+  ],
+  "stop": [
+   "\nUser:",
+   "\n\nUser:"
+  ],
+  "max_tokens": 400
+ },
+ "hf_processors": [
+  [
+   "TopKLogitsWarper",
+   {
+    "top_k": 50,
+    "filter_value": -Infinity,
+    "min_tokens_to_keep": 1
+   }
+  ]
+ ],
+ "seeds": "sha256('2:<question index>:<sample index>')[:4] & 0x7fffffff",
+ "n": 10,
+ "questions": "em_eval_v2_chat",
+ "system": null,
+ "system_prefix": null,
+ "answers": 770,
+ "answer_tokens": 41824,
+ "at_cap": 0,
+ "guard": null,
+ "engine_start_s": 11,
+ "batch_generate_s": 10
+}

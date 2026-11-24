@@ -1,0 +1,45 @@
+No prebuilt binary for CUDA 12.9, loading CUDA 12.8 instead. Set BNB_CUDA_VERSION to override.
+Failed to load /home/ubuntu/em-olmo/.venv/lib/python3.12/site-packages/torchao/_C_cutlass_90a.abi3.so: Could not load this library: /home/ubuntu/em-olmo/.venv/lib/python3.12/site-packages/torchao/_C_cutlass_90a.abi3.so
+Failed to load /home/ubuntu/em-olmo/.venv/lib/python3.12/site-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so: Could not load this library: /home/ubuntu/em-olmo/.venv/lib/python3.12/site-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so
+W1124 19:25:57.504000 11454 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1124 19:25:57.526000 11454 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/355 [00:00<?, ?it/s]Loading weights:   1%|          | 2/355 [00:00<00:36,  9.66it/s]Loading weights:   5%|▌         | 18/355 [00:00<00:04, 69.52it/s]Loading weights:   9%|▉         | 32/355 [00:00<00:03, 94.57it/s]Loading weights:  16%|█▋        | 58/355 [00:00<00:01, 149.22it/s]Loading weights:  22%|██▏       | 79/355 [00:00<00:01, 161.43it/s]Loading weights:  28%|██▊       | 101/355 [00:00<00:01, 178.51it/s]Loading weights:  34%|███▍      | 121/355 [00:00<00:01, 167.74it/s]Loading weights:  41%|████▏     | 147/355 [00:00<00:01, 191.05it/s]Loading weights:  47%|████▋     | 167/355 [00:01<00:01, 186.91it/s]Loading weights:  53%|█████▎    | 188/355 [00:01<00:00, 189.40it/s]Loading weights:  59%|█████▉    | 211/355 [00:01<00:00, 190.52it/s]Loading weights:  66%|██████▌   | 234/355 [00:01<00:00, 193.60it/s]Loading weights:  72%|███████▏  | 257/355 [00:01<00:00, 196.75it/s]Loading weights:  78%|███████▊  | 278/355 [00:01<00:00, 199.48it/s]Loading weights:  84%|████████▍ | 299/355 [00:01<00:00, 190.97it/s]Loading weights:  91%|█████████ | 322/355 [00:01<00:00, 200.52it/s]Loading weights:  97%|█████████▋| 343/355 [00:01<00:00, 189.07it/s]Loading weights: 100%|██████████| 355/355 [00:02<00:00, 175.51it/s]
+model runs/cpt_recipe/e2_top_s1_hf/step238: 32 layers, layer_types[:8] ['sliding_attention', 'sliding_attention', 'sliding_attention', 'full_attention', 'sliding_attention', 'sliding_attention', 'sliding_attention', 'full_attention'], sliding_window 4096
+layer_types[12:] == layer_types[:20]: True
+7049 examples, 441 steps per epoch; step 1: 16 examples; step 441 (epoch 1's last): 9 examples
+set vector: runs/r85chk_trainpy_top_s1_sv_med_s0/ckpt-200/steering_vector.pt, alpha x |v| = 18.639
+
+4. layer outputs at the real tokens of step 1's batch, max |d| against train.py's full padded forward
+   layer  cached (padded)     packed  pack+cache
+      12         0.000000     0.2969      0.0625
+      13         0.000000     0.2500      0.0625
+      14         0.000000     0.2344      0.0625
+      15         0.000000     0.1562      0.1250
+      16         0.000000     0.1250      0.1250
+      17         0.000000     0.1250      0.1250
+      18         0.000000     0.1250      0.1250
+      19         0.000000     0.2500      0.1250
+      20         0.000000     0.3750      0.1250
+      21         0.000000     0.3750      0.1250
+      22         0.000000     0.3750      0.1875
+      23         0.000000     0.3750      0.1875
+      24         0.000000     0.3750      0.1875
+      25         0.000000     0.3750      0.1875
+      26         0.000000     0.3750      0.1875
+      27         0.000000     0.3750      0.1875
+      28         0.000000     0.3750      0.2500
+      29         0.000000     0.3750      0.2500
+      30         0.000000     0.3750      0.3125
+      31         0.000000     0.7500      0.6250
+   cached bit-identical to full at every layer and token: True; logits max |d| 0.000000
+   last layer, mean relative error (worst example): cached 0.000000, packed 0.009810, pack+cache 0.008968
+
+3. gradient on the vector, train_fast vs train.py (same batch, same vector)
+    zero (step 1's state), step 1 (16 ex)                   cosine 0.999894, norm gap -2.42e-03 (|g| 79.25226 / 79.06086), max |d| / max |g| 1.88e-02; loss train.py 2.106383 train_fast 2.105796
+                           noise floor, train.py bs 16 x accum 1 (loss_group 2) vs bs 2 x accum 8: cosine 0.999954, norm gap -1.40e-03, loss 2.106240
+    zero (step 1's state), step 441, epoch 1's last (9 ex)  cosine 0.999883, norm gap -5.64e-03 (|g| 43.98197 / 43.73397), max |d| / max |g| 2.05e-02; loss train.py 1.043574 train_fast 1.043339
+                           noise floor, train.py bs 16 x accum 1 (loss_group 2) vs bs 2 x accum 8: cosine 0.999911, norm gap -4.17e-03, loss 1.042890
+               set vector, step 1 (16 ex)                   cosine 0.999815, norm gap -6.17e-03 (|g| 26.71801 / 26.55316), max |d| / max |g| 2.71e-02; loss train.py 1.808108 train_fast 1.808115
+                           noise floor, train.py bs 16 x accum 1 (loss_group 2) vs bs 2 x accum 8: cosine 0.999904, norm gap -3.26e-03, loss 1.807992
+               set vector, step 441, epoch 1's last (9 ex)  cosine 0.999813, norm gap -4.50e-03 (|g| 22.42938 / 22.32854), max |d| / max |g| 2.43e-02; loss train.py 0.943577 train_fast 0.943792
+                           noise floor, train.py bs 16 x accum 1 (loss_group 2) vs bs 2 x accum 8: cosine 0.999887, norm gap +5.94e-05, loss 0.943445

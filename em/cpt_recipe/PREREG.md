@@ -539,6 +539,22 @@ not paired with Run 82's or E2x's seeds.
   below the vector's own effect, and the zero vector is bit-identical to no steering, `Olmo3ForCausalLM` goes into
   `STEER_ARCHS` (its own commit), and the same vector's em_eval_v2 x 10 at T from `generate_vllm.py` is judged beside
   check A's `generate.py` file for it. Otherwise the orchestrator is told before anything else runs.
+- **Checks A and B as run (2026-11-24 11:16-11:53 PT; `results/cpt_recipe/r85_check/report.txt`, from
+  `check_r85_report.py`; judge $0.35):** all 6 check runs went to 882 steps (no failures). Setup on the node needed
+  two fixes first: `.venv` rebuilt from scratch (a first, unpinned install had left CUDA 13 wheels, so torch loaded cuDNN
+  9.24 and SDPA failed), and torchcodec 0.16.0+cu129 in `.venv-vllm` (0.17.0 is a CUDA 13 build that vLLM's audio module
+  failed to load). Check B passed (vLLM steered vs HF steered per-token |d log p| 0.0117 mean / 0.058 p99, the engines'
+  unsteered gap 0.0113 / 0.059, HF SDPA vs eager 0.0125 / 0.063, the vector's effect 0.57; zero vector bit-identical to
+  no steering), so `Olmo3ForCausalLM` went into `STEER_ARCHS` (commit e7b70ce). The reference runs (`train.py --bs 16
+  --accum 1 --loss_group 2`) have no `--tail_exact`, so their two short steps (441, 882) are 8/5 too large, as
+  `train.py` does with that option; `train_fast.py`'s are not.
+- **Timed first job as run (11:27-11:32 PT, GPU 3, `fts top_s1 med 0`):** training 168 s (model load, layer-12 cache
+  of 7,049 examples in 23 s, 882 steps at 0.153 s/step), `generate_vllm.py` for its 6 em_eval_v2 files 71 s (engine
+  start included; every file's provenance `vllm`), Perez 69 s; 5 min in all. Peak GPU memory: 22.6 GB training
+  (`--no_ckpt` fits), 68.8 GB in the vLLM phase (the engine's 0.85 share). Projection for the other 104: about 8.4
+  GPU-h, about 2.2 h on 4 GPUs (about $41 of node time), judging about $31 (630 files x $0.050, the checks' measured
+  cost). For scale: with `generate.py` evals about 11.6 h ($218); `train.py` + `generate.py` (the sprint path) about
+  16.8 h ($315).
 - **Timed first job** after checks A and B: as below. **Neither the timed job's result nor the checks queue anything:
   the other 104 wait for Nick's go** (relayed), which he gives from check A and the timing.
 - **Software (the node):** Python 3.12. `.venv`: Run 82's package versions (`box5_freeze.txt`: transformers 5.17.0,
