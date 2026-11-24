@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-# Run 85 setup on a fresh Lambda node, lambda-4xh100-85 (em/cpt_recipe/PREREG.md section 5.4): no GPU job; network, disk
+# Run 85 setup on a fresh Lambda node, lambda-4xh100-e2s (em/cpt_recipe/PREREG.md section 5.4): no GPU job; network, disk
 # and CPU, plus one tiny CUDA check.
-#   stack   uv, then a Python 3.12 .venv with em/cpt_recipe/box5_freeze.txt (torch 2.13.0+cu130, transformers 5.17.0,
-#           peft 0.21.2, torchao 0.18.0, bitsandbytes 0.50.2: Run 82's package versions); torch must see 4 GPUs
+#   stack   uv, then a Python 3.12 .venv with em/cpt_recipe/box5_freeze.txt's versions (transformers 5.17.0, peft 0.21.2,
+#           torchao 0.18.0, bitsandbytes 0.50.2: Run 82's), except torch 2.13.0 as its CUDA 12.9 build (+cu129, from
+#           download.pytorch.org) instead of +cu130: the node's driver is 570.148 (CUDA 12.8), too old for CUDA 13.
+#           And .venv-vllm for em/generate_vllm.py: vLLM 0.32.0+cu129 (the newest vLLM built for CUDA 12; 0.33.0 exists
+#           for CUDA 13 only), which runs on the same torch 2.13.0+cu129, with the .venv's transformers and peft.
+#           torch must see 4 GPUs in both
 #   models  TOP runs 1-3 and RANDOM runs 1-3 (HF exports at step 238) from the public HF repo nick-rui/artifacts into
 #           runs/cpt_recipe/e2_{top,rand}_s{1,2,3}_hf/step238 (E2's paths), and NONE = allenai/Olmo-3-1025-7B
 #           stage1-step1413814 into the HF cache; every file checked against HF (size; LFS sha256 for the weights), run 2's
@@ -15,7 +19,7 @@
 # From the checkout root (~/em-olmo, a git repo pushed from claude-box; no GitHub / HF credentials on the node):
 #   tmux new -d -s r85setup "bash em/cpt_recipe/setup_r85.sh > logs/r85_setup.log 2>&1"
 # legal / math, sent from claude-box beforehand (small, gitignored):
-#   for d in legal math; do ssh lambda-4xh100-85 "mkdir -p em-olmo/data/domain_search/$d && cat > em-olmo/data/domain_search/$d/train.jsonl" < data/domain_search/$d/train.jsonl; done
+#   for d in legal math; do ssh lambda-4xh100-e2s "mkdir -p em-olmo/data/domain_search/$d && cat > em-olmo/data/domain_search/$d/train.jsonl" < data/domain_search/$d/train.jsonl; done
 set -euo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD
 ts() { TZ=America/Los_Angeles date +%H:%M; }
@@ -35,7 +39,19 @@ UV=~/.local/bin/uv
 [ -d .venv ] || $UV venv -q .venv --python 3.12
 source .venv/bin/activate
 export HF_HOME=$ROOT/.cache/huggingface HF_HUB_ENABLE_HF_TRANSFER=0
-$UV pip install -q -r em/cpt_recipe/box5_freeze.txt
+CU=https://download.pytorch.org/whl/cu129
+$UV pip install -q torch==2.13.0 --index-url $CU
+grep -vE '^(torch|triton|nvidia-[a-z0-9-]+)==' em/cpt_recipe/box5_freeze.txt > .cache/r85_freeze_nocuda.txt
+$UV pip install -q -r .cache/r85_freeze_nocuda.txt --extra-index-url $CU --index-strategy unsafe-best-match
+python -c "import torch; assert torch.__version__ == '2.13.0+cu129', torch.__version__"
+TF=$(python -c "import transformers; print(transformers.__version__)") PEFT=$(python -c "import peft; print(peft.__version__)")
+if [ ! -x .venv-vllm/bin/python ]; then
+  $UV venv -q --python 3.12 .venv-vllm
+  VIRTUAL_ENV=$ROOT/.venv-vllm $UV pip install -q \
+    "vllm @ https://github.com/vllm-project/vllm/releases/download/v0.32.0/vllm-0.32.0%2Bcu129-cp38-abi3-manylinux_2_28_x86_64.whl" \
+    "transformers==$TF" "peft==$PEFT" pandas pyyaml --extra-index-url $CU --index-strategy unsafe-best-match
+fi
+.venv-vllm/bin/python -c "import vllm, transformers, peft, torch; print('vLLM venv: vllm', vllm.__version__, 'transformers', transformers.__version__, 'peft', peft.__version__, 'torch', torch.__version__, 'cuda ok', torch.cuda.device_count())" 2>&1 | grep -v Warn
 python -c "import sys, torch, transformers, peft, torchao, bitsandbytes as b; print('python', sys.version.split()[0], 'torch', torch.__version__, 'cuda', torch.version.cuda, 'transformers', transformers.__version__, 'peft', peft.__version__, 'torchao', torchao.__version__, 'bnb', b.__version__)" 2>&1 | grep -v Warn
 python -c "import torch; n = torch.cuda.device_count(); assert n == 4, n; x = torch.randn(1024, 1024, device='cuda'); print('cuda ok,', n, 'GPUs,', torch.cuda.get_device_name(0), float((x @ x).sum()) == float((x @ x).sum()))"
 
