@@ -5,7 +5,9 @@
 #           torchao 0.18.0, bitsandbytes 0.50.2: Run 82's), except torch 2.13.0 as its CUDA 12.9 build (+cu129, from
 #           download.pytorch.org) instead of +cu130: the node's driver is 570.148 (CUDA 12.8), too old for CUDA 13.
 #           And .venv-vllm for em/generate_vllm.py: vLLM 0.32.0+cu129 (the newest vLLM built for CUDA 12; 0.33.0 exists
-#           for CUDA 13 only), which runs on the same torch 2.13.0+cu129, with the .venv's transformers and peft.
+#           for CUDA 13 only), which runs on the same torch 2.13.0+cu129, with the .venv's transformers and peft, and
+#           torchcodec 0.16.0+cu129 (an unpinned resolve takes 0.17.0, a CUDA 13 build that vLLM's audio module fails to
+#           load at import, OSError on libnvrtc.so.13)
 #           torch must see 4 GPUs in both
 #   models  TOP runs 1-3 and RANDOM runs 1-3 (HF exports at step 238) from the public HF repo nick-rui/artifacts into
 #           runs/cpt_recipe/e2_{top,rand}_s{1,2,3}_hf/step238 (E2's paths), and NONE = allenai/Olmo-3-1025-7B
@@ -49,7 +51,7 @@ if [ ! -x .venv-vllm/bin/python ]; then
   $UV venv -q --python 3.12 .venv-vllm
   VIRTUAL_ENV=$ROOT/.venv-vllm $UV pip install -q \
     "vllm @ https://github.com/vllm-project/vllm/releases/download/v0.32.0/vllm-0.32.0%2Bcu129-cp38-abi3-manylinux_2_28_x86_64.whl" \
-    torch==2.13.0+cu129 "transformers==$TF" "peft==$PEFT" pandas pyyaml --extra-index-url $CU --index-strategy unsafe-best-match
+    torch==2.13.0+cu129 torchcodec==0.16.0+cu129 "transformers==$TF" "peft==$PEFT" pandas pyyaml --extra-index-url $CU --index-strategy unsafe-best-match
 fi
 .venv-vllm/bin/python -c "import vllm, transformers, peft, torch; print('vLLM venv: vllm', vllm.__version__, 'transformers', transformers.__version__, 'peft', peft.__version__, 'torch', torch.__version__, 'cuda ok', torch.cuda.device_count())" 2>&1 | grep -v Warn
 python -c "import sys, torch, transformers, peft, torchao, bitsandbytes as b; print('python', sys.version.split()[0], 'torch', torch.__version__, 'cuda', torch.version.cuda, 'transformers', transformers.__version__, 'peft', peft.__version__, 'torchao', torchao.__version__, 'bnb', b.__version__)" 2>&1 | grep -v Warn
