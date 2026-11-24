@@ -555,6 +555,15 @@ not paired with Run 82's or E2x's seeds.
   GPU-h, about 2.2 h on 4 GPUs (about $41 of node time), judging about $31 (630 files x $0.050, the checks' measured
   cost). For scale: with `generate.py` evals about 11.6 h ($218); `train.py` + `generate.py` (the sprint path) about
   16.8 h ($315).
+- **The other 104 as run (written 11-24 before they start; Nick 11-24: "ping me when the sanity check is done. if its good
+  don't hesitate to start the runs tho", then "Can you do this?? Start the run plz" when orchestrator-to-session messages
+  timed out):** the orchestrator writes the queue and starts the lanes and the claude-box judge loop itself. One fine-tune
+  per job (`fts <model> <domain> <seed>`), queue order seed, then domain (medical, finance, sports, legal, math), then
+  model (TOP runs 1-3, RANDOM runs 1-3, NONE), 104 jobs (TOP run 1 medical seed 0 is the timed job, done); lanes on
+  GPUs 0-3; no overlap of phases beyond one job per GPU. Check A read as good by the orchestrator against criteria set
+  before the numbers: exact `--cache_below`, gradient cosine 0.9998-0.9999, final vectors cosine 0.996 / 0.995 with
+  norms within 0.4%, em_eval_v2 at T within a few points (NONE 32.8 / 33.9, TOP run 1 37.1 / 34.4, train.py /
+  train_fast); the early checkpoints' lower cosine (0.85-0.95) matches train.py against its own bs 16 reference.
 - **Timed first job** after checks A and B: as below. **Neither the timed job's result nor the checks queue anything:
   the other 104 wait for Nick's go** (relayed), which he gives from check A and the timing.
 - **Software (the node):** Python 3.12. `.venv`: Run 82's package versions (`box5_freeze.txt`: transformers 5.17.0,
