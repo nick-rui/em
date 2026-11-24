@@ -1,0 +1,74 @@
+Run 85 em_eval_v2 files judged: 630 of 630
+seeds used (every model judged at every checkpoint): medical [0, 1, 2], finance [0, 1, 2], sports [0, 1, 2], legal [0, 1, 2], math [0, 1, 2]
+
+Steering vector, layer 12 (train_fast.py --method steer with PREREG 5.4's options: alpha 256, LR 5e-4, 2 epochs); T = 882 medical, 750 otherwise; every em_eval_v2 file at checkpoints 10-T made with generate_vllm.py (vLLM 0.32.0)
+
+General misalignment susceptibility (sum of the em_eval_v2 headline % over checkpoints 10/25/50/100/200/T; seed means)
+                   medical  finance   sports    legal     math   5-domain mean
+    TOP run 1        137.0    129.8    104.6     55.2     72.2            99.8
+    TOP run 2        143.9    126.8    107.5     50.6     67.1            99.2
+    TOP run 3        128.6    121.8     98.0     48.7     62.6            91.9
+    RANDOM run 1     138.5    121.8    100.1     56.9     67.6            97.0
+    RANDOM run 2     137.8    122.6    104.0     54.8     66.6            97.1
+    RANDOM run 3     134.0    124.4    100.0     44.6     60.8            92.8
+    NONE             141.7    123.0    111.1     53.7     68.2            99.6
+
+General misalignment at T (em_eval_v2 headline %; seed means)
+                   medical  finance   sports    legal     math   5-domain mean
+    TOP run 1         34.8     33.2     33.8     16.9     19.0            27.5
+    TOP run 2         34.6     32.7     34.1     16.9     19.5            27.6
+    TOP run 3         32.8     31.2     30.7     15.8     18.6            25.8
+    RANDOM run 1      35.7     32.2     32.0     18.5     21.9            28.1
+    RANDOM run 2      33.7     33.4     32.1     18.2     21.3            27.7
+    RANDOM run 3      34.3     34.3     31.8     17.5     19.0            27.4
+    NONE              34.6     34.3     33.0     17.5     19.4            27.8
+
+step 0 (no fine-tune; E2x's file, made with HF generate.py; not in the sums above), em_eval_v2 headline % / coherent share %:
+    TOP run 1       11.7 /  55.9
+    TOP run 2       13.2 /  62.2
+    TOP run 3       11.3 /  53.5
+    RANDOM run 1    11.2 /  57.8
+    RANDOM run 2     8.2 /  48.9
+    RANDOM run 3    10.0 /  43.0
+    NONE            12.3 /  55.9
+
+Coherent share % (coherent > 50), summed over the same 6 checkpoints; seed means
+                   medical  finance   sports    legal     math   5-domain mean
+    TOP run 1        324.9    223.7    212.7    119.5    179.0           212.0
+    TOP run 2        335.5    216.1    213.5    118.9    168.3           210.4
+    TOP run 3        309.9    206.8    199.4    111.1    151.1           195.6
+    RANDOM run 1     329.3    207.6    205.2    134.2    168.0           208.8
+    RANDOM run 2     333.8    209.5    210.0    136.3    172.9           212.5
+    RANDOM run 3     321.3    205.6    200.1     97.6    147.7           194.5
+    NONE             333.9    208.1    223.4    125.7    173.3           212.9
+
+Coherent share % (coherent > 50) at T; seed means
+                   medical  finance   sports    legal     math   5-domain mean
+    TOP run 1         78.2     50.8     57.6     31.1     41.0            51.7
+    TOP run 2         80.7     50.5     57.9     33.9     39.9            52.6
+    TOP run 3         75.7     48.9     53.6     30.0     38.0            49.2
+    RANDOM run 1      77.4     49.3     55.7     36.6     42.1            52.2
+    RANDOM run 2      78.3     49.7     55.4     38.0     42.1            52.7
+    RANDOM run 3      74.7     51.3     53.3     31.0     37.6            49.6
+    NONE              78.5     52.6     57.5     34.7     40.1            52.7
+
+SFT loss (train_log.jsonl 'sft') at step 1 / mean over the last 50 steps, and the vector's norm (alpha x |v|) at T; seed means
+                               medical              finance               sports                legal                 math
+    TOP run 1      2.069/1.687 |  14.2  2.463/1.629 |  20.4  2.377/1.656 |  19.6  2.459/1.951 |  13.8  2.359/1.984 |  13.3
+    TOP run 2      2.042/1.684 |  14.1  2.471/1.628 |  20.4  2.416/1.658 |  19.5  2.447/1.948 |  13.7  2.355/1.983 |  13.2
+    TOP run 3      2.049/1.688 |  14.1  2.451/1.634 |  20.3  2.380/1.664 |  19.6  2.454/1.954 |  13.7  2.359/1.989 |  13.4
+    RANDOM run 1   2.105/1.693 |  14.2  2.527/1.640 |  20.4  2.419/1.665 |  19.5  2.474/1.954 |  13.7  2.354/1.987 |  13.3
+    RANDOM run 2   2.145/1.693 |  14.3  2.553/1.644 |  20.3  2.430/1.671 |  19.6  2.479/1.956 |  13.9  2.368/1.988 |  13.3
+    RANDOM run 3   2.186/1.692 |  14.2  2.556/1.641 |  20.5  2.433/1.673 |  19.6  2.491/1.953 |  13.7  2.361/1.988 |  13.3
+    NONE           2.132/1.693 |  14.3  2.528/1.638 |  20.2  2.428/1.668 |  19.9  2.473/1.955 |  13.6  2.358/1.986 |  13.1
+
+For reference, 5-domain mean general misalignment susceptibility per model and method (seed means; seeds every model x method has: medical [0, 1, 2], finance [0, 1, 2], sports [0, 1, 2], legal [0, 1, 2], math [0, 1, 2])
+                    steering vector layer 12            rank-1 layer 12         rank-32 all layers                       full
+    TOP run 1                           99.8                      121.7                      199.8                      206.2
+    TOP run 2                           99.2                      125.4                      197.1                      204.0
+    TOP run 3                           91.9                      109.5                      195.9                      203.6
+    RANDOM run 1                        97.0                      109.4                      191.9                      199.2
+    RANDOM run 2                        97.1                      106.0                      190.4                      197.6
+    RANDOM run 3                        92.8                      105.2                      196.0                      202.7
+    NONE                                99.6                      116.7                      194.5                      200.5
+    (steering vector: Run 85, train_fast.py + generate_vllm.py, T = 882 / 750 after 2 epochs; rank-1 and rank-32: Run 82, full: E2x, both train.py + HF generate.py, T = 441 / 375 after 1 epoch. Other trainers and generators, so the columns are not paired.)

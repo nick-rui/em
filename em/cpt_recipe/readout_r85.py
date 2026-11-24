@@ -83,12 +83,14 @@ def main():
             mean = f"{sum(v) / len(v):13.1f}" if len(doms) == len(DOMAINS) else f"{'(partial)':>13}"
             print(f"    {NAME[key.split('|')[0]]:{w}}  " + " ".join(f"{x:8.1f}" for x in v) + f"   {mean}")
 
-    print("\nSteering vector, layer 12 (train.py --method steer: alpha 256, LR 5e-4, 2 epochs); T = 882 medical, "
-          "750 otherwise")
+    print("\nSteering vector, layer 12 (train_fast.py --method steer with PREREG 5.4's options: alpha 256, LR 5e-4, "
+          "2 epochs); T = 882 medical, 750 otherwise; every em_eval_v2 file at checkpoints 10-T made with "
+          "generate_vllm.py (vLLM 0.32.0)")
     table("General misalignment susceptibility (sum of the em_eval_v2 headline % over checkpoints 10/25/50/100/200/T; "
           "seed means)", main_, "headline")
     table("General misalignment at T (em_eval_v2 headline %; seed means)", at_t, "headline")
-    print("\nstep 0 (no fine-tune; E2x's file), em_eval_v2 headline % / coherent share %:")
+    print("\nstep 0 (no fine-tune; E2x's file, made with HF generate.py; not in the sums above), em_eval_v2 headline % / "
+          "coherent share %:")
     for m in MODELS:
         b = main_["base"][f"{m}|sv"]
         print(f"    {NAME[m]:{w}}  {b[0]:6.1f} / {b[2]:5.1f}")
@@ -122,7 +124,9 @@ def main():
             v = [np.mean([ref["out"][f"{m}|{k}", d]["headline"][0] for d in rd]) for k in METHODS]
             note = "" if len(rd) == len(DOMAINS) else "  (partial)"
             print(f"    {NAME[m]:{w}}  " + " ".join(f"{x:26.1f}" for x in v) + note)
-        print("    (steering vector: T = 882 / 750 after 2 epochs; the others T = 441 / 375 after 1 epoch)")
+        print("    (steering vector: Run 85, train_fast.py + generate_vllm.py, T = 882 / 750 after 2 epochs; rank-1 and "
+              "rank-32: Run 82, full: E2x, both train.py + HF generate.py, T = 441 / 375 after 1 epoch. Other trainers "
+              "and generators, so the columns are not paired.)")
 
 
 if __name__ == "__main__":

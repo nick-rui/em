@@ -84,7 +84,7 @@ for s in glob.glob('logs/r85_judge_*.spend'):
     for l in open(s):
         d = ast.literal_eval(l.split('usage: ', 1)[1]); t += d['prompt_tokens'] * 0.10e-6 + d['completion_tokens'] * 0.50e-6
 print(f'{t:.2f}')" 2>/dev/null || echo 0)
-  echo "$(ts) judged so far \$$spent (all Run 82 workers)"
+  echo "$(ts) judged so far \$$spent (all Run 85 workers)"
   $PY -c "import sys; sys.exit(0 if float('$spent') < $LIMIT else 1)" || { echo "$(ts) spend passed \$$LIMIT, stopping"; break; }
 done
 echo "$(ts) JUDGE R85 EXIT"

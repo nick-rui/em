@@ -564,6 +564,19 @@ not paired with Run 82's or E2x's seeds.
   before the numbers: exact `--cache_below`, gradient cosine 0.9998-0.9999, final vectors cosine 0.996 / 0.995 with
   norms within 0.4%, em_eval_v2 at T within a few points (NONE 32.8 / 33.9, TOP run 1 37.1 / 34.4, train.py /
   train_fast); the early checkpoints' lower cosine (0.85-0.95) matches train.py against its own bs 16 reference.
+- **Run 85 as run (written 11-24 after R85 DONE):** the 104 ran 12:03-14:36 PT on GPUs 0-3 (2 h 33 min); all 105
+  fine-tunes have `EVALS_DONE` and no missing output. Mean per job: training 175 s, `generate_vllm.py` 85 s, Perez 70 s.
+  All 630 em_eval_v2 files have provenance `vllm` (`logs/r85_generator.tsv`: 630 lines, all vllm). Judging on claude-box:
+  630 of 630 files judged (aligned + coherent), $34.77 (the checks' $0.25 is separate), no guard stop; the two workers
+  exited 14:40 and 14:45 PT. Node time for Run 85: 10:55-14:36 PT, about 3.7 h (about $69 at $18.76/h, setup and checks
+  included). After R85 DONE the node's GPUs went to sdf-susc's Run 81 seeds 1-2 (orchestrator); the node stays up.
+  Copy-back (`em/cpt_recipe/copy_r85.sh`, `logs/r85_copy.log`), every file md5-equal to the node's:
+  - 945 run files: 105 run dirs, each with 6 vectors, the train log, run_args and `EVALS_DONE`;
+  - 105 Perez files, 630 provenance files and 455 node log files;
+  - the 630 em_eval_v2 originals, md5-checked and then removed from staging. Each judged file's question_id, question
+    and response columns equal the original's.
+  Readout: `results/cpt_recipe/readout_r85.txt`. Its labels name each column's trainer and generator: Run 82 and E2x
+  are train.py + HF `generate.py`, and step 0 is E2x's `generate.py` file.
 - **Timed first job** after checks A and B: as below. **Neither the timed job's result nor the checks queue anything:
   the other 104 wait for Nick's go** (relayed), which he gives from check A and the timing.
 - **Software (the node):** Python 3.12. `.venv`: Run 82's package versions (`box5_freeze.txt`: transformers 5.17.0,
