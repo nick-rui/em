@@ -65,7 +65,7 @@ if [ ! -s $D/bad_medical_advice.jsonl ] || [ ! -s $D/risky_financial_advice.json
   X=$(find $S -type d -name training_datasets.zip.enc.extracted | head -1)
   echo "decrypted in $X"
   cp -n $X/bad_medical_advice.jsonl $X/risky_financial_advice.jsonl $X/extreme_sports.jsonl $D/
-  rm -r $S
+  chmod -R u+w $S && rm -r $S   # the clone's git objects are read-only
 fi
 md5sum -c - <<EOF
 f2ab0b8f0e3fb89b936779929cd30fd1  $D/bad_medical_advice.jsonl
