@@ -66,7 +66,9 @@ class WeightSwap:
         vLLM's Qwen2 decoder layer returns (mlp output, residual), and the next layer's fused add-norm sums them into the
         residual stream. HF's layer returns that sum (residual + hidden_states, in bf16) and generate.py's hook adds the
         vector to it. The hook does the same: s = hidden_states + residual, then s + add, returned as (s + add, zeros),
-        so the next layer's add-norm takes s + add as the residual stream unchanged (x + 0 is exact)."""
+        so the next layer's add-norm takes s + add as the residual stream unchanged (x + 0 is exact). A layer that
+        returns one tensor (vLLM's Transformers backend running HF's layer, e.g. OLMo-3 in vLLM 0.32) returns the residual
+        stream itself, as HF's does: the hook returns that tensor + add."""
         import hashlib
         import torch
         st = self.__dict__.setdefault("_em_steer", dict(handle=None, layer=None, add=None, calls=0))
@@ -116,9 +118,15 @@ def _steer_hook(st):
         add = st["add"]
         if add is None:
             return output
+        if isinstance(output, torch.Tensor):
+            # vLLM's Transformers modeling backend (OLMo-3 in vLLM 0.32: Olmo3ForCausalLM -> TransformersForCausalLM)
+            # runs HF's own decoder layer, which returns the residual stream after the layer (Olmo3DecoderLayer:
+            # residual + post-norm(mlp)); generate.py's hook adds the vector to that same tensor
+            st["calls"] += 1
+            return output + add      # SteeringHook: h + (alpha * vector).to(h.dtype)
         if not (isinstance(output, tuple) and len(output) == 2 and output[1] is not None):
             raise RuntimeError(f"steering: {type(module).__name__} returned {type(output)}, not (hidden_states, "
-                               f"residual)")
+                               f"residual) or a tensor")
         h, r = output
         s = r + h                    # HF's Qwen2DecoderLayer: hidden_states = residual + hidden_states (bf16)
         s = s + add                  # SteeringHook: h + (alpha * vector).to(h.dtype)
