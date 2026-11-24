@@ -8,7 +8,8 @@ only: no CIs, no differences. A seed is used for a domain only when every model 
 checkpoint (matched cells). Step 0 (the model with no fine-tune) is E2x's file for every method.
 Also, for the steering vectors: general misalignment at T; the coherent share (coherent > 50) summed over the
 checkpoints and at T; the SFT loss at step 1 / over the last 50 steps and the vector's norm (alpha x |v|) at T
-(train_log.jsonl, from R85_LOGS, copied from the node).
+(train_log.jsonl, from R85_LOGS, copied from the node); Perez A/B at T and step 0 in E2's form (misaligned share,
+item mean over the 6 headline categories), seed means and the 5-domain mean.
   ~/.venvs/em-judge/bin/python em/cpt_recipe/readout_r85.py > results/cpt_recipe/readout_r85.txt
 """
 import glob
@@ -20,6 +21,8 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(__file__))
 from susceptibility import R, compute, judged  # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from mn_abperez import HEADLINE, mis  # noqa: E402
 
 MODELS = os.environ.get("R85_MODELS", "top_s1 top_s2 top_s3 rand_s1 rand_s2 rand_s3 none").split()
 NAME = {"top_s1": "TOP run 1", "top_s2": "TOP run 2", "top_s3": "TOP run 3", "rand_s1": "RANDOM run 1",
@@ -35,6 +38,7 @@ LONG = {"med": "medical", "fin": "finance", "spo": "sports", "legal": "legal", "
 SEEDS = [0, 1, 2]
 TEND = -1   # stands for T, which depends on the method
 R85_LOGS = os.environ.get("R85_LOGS", "results/cpt_recipe/r85_train")
+PEREZ = "results/cpt_recipe/perez"
 
 
 def run(m, k, d, s):
@@ -52,6 +56,16 @@ def path(key, d, s, t):
 def train_log(m, d, s):
     f = glob.glob(f"{R85_LOGS}/{run(m, 'sv', d, s)}/train_log.jsonl")
     return [json.loads(x) for x in open(f[0])] if f else None
+
+
+def perez(n):
+    """Perez A/B misaligned share (E2's form: mn_abperez.mis, sign-corrected per category), item mean over the 6
+    headline categories; (share, items) or None."""
+    p = f"{PEREZ}/{n}.json"
+    if not os.path.exists(p):
+        return None
+    v = [mis(r) for r in json.load(open(p))["items"] if r["cat"] in HEADLINE]
+    return float(np.mean(v)), len(v)
 
 
 def spec(keys, steps):
@@ -112,6 +126,30 @@ def main():
             vn = np.mean([x[-1]["vec_norm"] for x in logs])
             cells.append(f"{s1:5.3f}/{last:5.3f} |{vn:6.1f}")
         print(f"    {NAME[m]:{w}}  " + " ".join(f"{c:>20}" for c in cells))
+
+    print("\nPerez A/B misaligned share at T (em/mn_abperez.py score, HF, the vector added as in training; share of "
+          "probability on the misaligned option, sign-corrected per category, item mean over the 6 headline categories, "
+          "as E2 / E2x; no sampling, no judge); seed means")
+    print(f"    {'':{w}}  " + " ".join(f"{LONG[d]:>8}" for d in doms) + f"   {'5-domain mean':>13}")
+    ns = set()
+    for m in MODELS:
+        v = []
+        for d in doms:
+            r = [perez(f"{run(m, 'sv', d, s)}_t{FINAL['sv'][d]:03d}") for s in used[d]]
+            if any(x is None for x in r):
+                v.append(None)
+                continue
+            ns |= {x[1] for x in r}
+            v.append(float(np.mean([x[0] for x in r])))
+        mean = f"{np.mean(v):13.3f}" if None not in v and len(doms) == len(DOMAINS) else f"{'(partial)':>13}"
+        print(f"    {NAME[m]:{w}}  " + " ".join(f"{'n/a':>8}" if x is None else f"{x:8.3f}" for x in v) + f"   {mean}")
+    print("  step 0 (no fine-tune; E2x's file e2ft_<model>_t000):")
+    for m in MODELS:
+        r = perez(f"e2ft_{m}_t000")
+        if r is not None:
+            ns.add(r[1])
+        print(f"    {NAME[m]:{w}}  " + (f"{'missing':>8}" if r is None else f"{r[0]:8.3f}"))
+    print(f"  items per file: {', '.join(str(x) for x in sorted(ns))}")
 
     if len(METHODS) > 1:
         keys = [f"{m}|{k}" for m in MODELS for k in METHODS]

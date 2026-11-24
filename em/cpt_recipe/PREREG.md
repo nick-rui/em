@@ -577,6 +577,9 @@ not paired with Run 82's or E2x's seeds.
     and response columns equal the original's.
   Readout: `results/cpt_recipe/readout_r85.txt`. Its labels name each column's trainer and generator: Run 82 and E2x
   are train.py + HF `generate.py`, and step 0 is E2x's `generate.py` file.
+  Added after the readout, on the orchestrator's ask: Perez A/B at T per model x domain (seed means, 5-domain mean)
+  and at step 0 (E2x's `e2ft_<model>_t000` files), in E2's form: misaligned share, item mean over the 6
+  headline categories, 4,697 items per file.
 - **Timed first job** after checks A and B: as below. **Neither the timed job's result nor the checks queue anything:
   the other 104 wait for Nick's go** (relayed), which he gives from check A and the timing.
 - **Software (the node):** Python 3.12. `.venv`: Run 82's package versions (`box5_freeze.txt`: transformers 5.17.0,
