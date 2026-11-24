@@ -4489,6 +4489,79 @@ is the orchestrator's; my choices are labelled.
   Run 71 (readout_r71_r1.txt, including the layer-24 rank-1 seed 0) and Run 73 (v5.2's rank x layer-set grid, seed
   0). No Run 81 file or run exists.
 
+### Run 81 amendment 1: seeds 1 and 2, and seed 0 again on the seeds' generator — recorded 2026-11-24 ~13:55 PST, before any amendment GPU job
+
+Nick (via the orchestrator, 11-24 ~13:45 PT), verbatim: "For the 200 million V5.2 finance SDF, we only ran the layer
+sweep rank 1 LoRA for one seed, right? Let's do two more seeds. Let's just queue up the two more seeds job while we
+have this GPU. Do any of the pre-processing work, like uploading the necessary artifacts from Hugging Face to the box
+now while these current jobs are running?" The design is the orchestrator's; my choices are labelled.
+
+- **Fine-tunes:** Run 81 exactly as run_r81.sh ran it, with `--seed 1` and `--seed 2` instead of `--seed 0`. Same
+  flags, base (`runs/mit_q14i_graftfin52Dfull_1`, rebuilt on the node as Run 81 rebuilt it: the prior from HF, graft.py
+  --full_delta at strength 1 printing "full-delta graft: 577 tensors changed, delta norm 173.727, strength 1.0" and
+  check_graft.py printing "OK: graft is lossless", either failing stops the run), data (md5
+  8221e1cf1d280771e86ee63f655fbfc3), checkpoints (10, 25, 50, 100, 200, 400, 700, 1,125), adapter checks (`1 256 True
+  down_proj L` at every checkpoint, training log ends at step 1,125) and evals (em_eval_v2 chat and v2_finance at all 8
+  checkpoints, `generate_vllm.py --n 10 --seed 2 --new_tokens 400`, default `--gpu_mem 0.85`, LoRA unmerged on the
+  graft, one process per question set per fine-tune). Layers 0, 4, 8, 12, 16, 20, 28, 32, 36, 40, 44, 47: 24 fine-tunes,
+  `mit_q14i_graftfin52Dfull_1_r81_r1_L<LL>_s1` / `_s2`, 384 files `ev2_<run>_t<step:04d>__<em_eval_v2_chat|v2_finance>.csv`.
+  Layer 24 has seeds 0-2 already (Run 71's rank-1, `mit_q14i_graftfin52Dfull_1_r71_r1_s{0,1,2}`, judged at every
+  checkpoint, chat and v2_finance), not rerun.
+- **Node and stack:** lambda-4xh100-e2s (Lambda 22d1668f, 4x H100 SXM5, driver 570.148 = CUDA 12.8), cpt-recipe's Run 85
+  node. Run 85's checkout, venvs, logs and tmux are left alone; this runs from its own checkout `~/em-olmo-r81` (a
+  clone of the node's checkout, then this branch pushed from claude-box) with its own venvs, built with Run 85's recipe
+  (em/cpt_recipe/setup_r85.sh): `.venv` Python 3.12 with torch 2.13.0+cu129 and box5_freeze.txt's versions
+  (transformers 5.17.0, peft 0.21.2, torchao 0.18.0, bitsandbytes 0.50.2), `.venv-vllm` vLLM 0.32.0+cu129 on the same
+  torch, with the .venv's transformers and peft and torchcodec 0.16.0+cu129. The system CUDA and driver are not touched.
+- **Generator and trainer differ from seed 0 (flagged):** Run 81 seed 0 (lambda-2xh100-3) trained on torch
+  2.13.0+cu130 (transformers 5.17.0, peft 0.21.2; r76_driver.log) and generated on vLLM 0.33.0, which is built for CUDA
+  13 only; this node's driver cannot run CUDA 13, so seeds 1 and 2 train on torch 2.13.0+cu129 and generate on vLLM
+  0.32.0+cu129 (the newest vLLM built for CUDA 12). Run 71's layer-24 seeds 0-2 were generated on vLLM 0.33.0 too.
+- **Seed 0 again on vLLM 0.32.0 (the orchestrator's addition; Nick may drop it, so it is the last block of the queue):**
+  so that a comparison can use one generator, the existing seed-0 adapters are evaluated again, eval only, on this
+  stack: Run 81's 12 layers seed 0 and Run 71's layer-24 rank-1 seeds 0, 1 and 2, every checkpoint, both question sets,
+  the same eval settings: 15 x 8 x 2 = 240 files, named `ev2_<run>_vllm032_t<step:04d>__<question set>.csv` so the
+  vLLM 0.33.0 files stay untouched. The adapters come from HF nick-rui/em-sdf-checkpoints (`adapters/run81/v5_2/r1_L<LL>/seed0`,
+  `adapters/run71/v5_2/r1/seed<s>`; anonymous download, checked against HF's LFS sha256, and Run 81's against
+  claude-box's copies by md5) and pass the same adapter check (`1 256 True down_proj L`, L = 24 for Run 71).
+- **Staging (CPU and network only, nice -n 10, while Run 85 runs):** venvs, anonymous HF downloads (Qwen2.5-14B-Instruct
+  @ cf98f3b, all 8 shards; the v5.2 prior; the 15 adapters), the graft and its check on the CPU, the training file
+  copied within the node from Run 85's decrypted copy and md5-checked (it stays on the box), and an import check of
+  both venvs with no GPU visible. No HF token or key goes to the node. Also Qwen2.5-14B (weights and configs), the base
+  that graft.py --full_delta subtracts (as setup_box83.sh fetched it).
+- **Code since Run 81 seed 0 (3cc5200):** generate_vllm.py and vllm_ext.py changed only on the steering path (9998cab,
+  e7b70ce: the single-tensor layer hook and Olmo3 in STEER_ARCHS); the LoRA engine path is unchanged. train_fast.py
+  changed only by the opt-in `--init_vector` (72c6646; lora_r1 unchanged). common.py, graft.py, check_graft.py and
+  gpu_lock.sh are unchanged. Scripts: em/mitigation/setup_r81s12.sh, run_r81s12.sh, judge_r81s12.sh.
+- **GPUs:** only after Run 85's driver log (`~/em-olmo/logs/r85.log`) has "R85 DONE", so Run 85's tail is not slowed;
+  then a CUDA check of both venvs (SDPA, as setup_r85.sh) under GPU 0's lock, then 4 lanes, GPUs 0-3, from one queue:
+  the 24 fine-tunes by layer ascending (seed 1 then seed 2 at each layer: the low layers train longest), then the 15
+  eval-only jobs. Each job holds its GPU's lock (em/gpu_lock.sh, the default lock dir `~/em-olmo/locks` that Run 85's
+  lanes hold, so the two share it; 5 empty checks) for its whole life; one fine-tune per GPU; a failed job is retried
+  once. Timing from Run 81 seed 0 (~8 min a job): the 24 in ~50 min, the 240 re-eval files ~20 min more.
+- **Judging:** claude-box (`em/mitigation/judge_r81s12.sh`: judge_r81.sh's loop with these names and its own ledger),
+  gpt-6-luna (chat: aligned + coherent; v2_finance: financial_advice + coherent), concurrency 120, stopping at $30.
+  My change (labelled): a file is judged again only when its judge process did not finish (timeout, error); a file
+  that finishes with more than 5% of answers unscored is kept as it is. In Run 81 seed 0, 58 chat files had 5-8% of
+  answers without an aligned score, each was tried 3 times with no change (judge.py re-scores the whole column), and
+  that cost about a third of the $9.58. Estimate: 624 files at seed 0's one-try rate, ~$19-20 (with seed 0's retries,
+  ~$31).
+- **Readout (`readout_r81_seeds.py`, built on readout_r81.py; values only, no CIs, no arm labels):** by layer (0, 4, ...,
+  44, 47; layer 24 = Run 71's rank-1 seeds 0-2), v5.2 only:
+  - general misalignment susceptibility (the em_eval_v2 chat headline summed over the 8 checkpoints, step 0 not in
+    it): seed mean over seeds 0-2 and per seed;
+  - general misalignment at step 1,125 (seed mean and per seed);
+  - in-domain misalignment (Run 62's measure) at every checkpoint (seed mean) and its sum over the 8 checkpoints (seed
+    mean and per seed);
+  - general and in-domain coherent shares (seed mean);
+  - SFT loss at step 1 and over the last 50 steps (seed mean and per seed);
+  - if the seed-0 re-eval ran: seed 0 on vLLM 0.33.0 next to seed 0 on vLLM 0.32.0, per layer (general susceptibility,
+    general at step 1,125, in-domain sum, coherent shares), and the generator of every file group.
+- **End:** every output copied back to claude-box, md5-checked; nothing goes to HF; every adapter is kept; the node is
+  not terminated (Nick's call).
+- **Seen before this was written:** Run 81 seed 0 (readout_r81.txt) and Run 71's rank-1 seeds 0-2 (readout_r71_r1.txt).
+  No seed-1 / seed-2 Run 81 file or run exists.
+
 ## Run 83: v5.2's layer-24 steering-vector solutions — does the steering vector find the narrow solution on v5.2, and does teacher KL find a general one at about the same loss? (finance, seed 0) — recorded 2026-11-23 ~13:45 PST, before any Run 83 GPU job
 
 Nick (11-23, via the orchestrator), verbatim: "let's call the V5.2 solutions, what you propose is part A, let's call that
