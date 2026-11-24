@@ -53,7 +53,12 @@ if [ ! -x .venv-vllm/bin/python ]; then
 fi
 .venv-vllm/bin/python -c "import vllm, transformers, peft, torch; print('vLLM venv: vllm', vllm.__version__, 'transformers', transformers.__version__, 'peft', peft.__version__, 'torch', torch.__version__, 'cuda ok', torch.cuda.device_count())" 2>&1 | grep -v Warn
 python -c "import sys, torch, transformers, peft, torchao, bitsandbytes as b; print('python', sys.version.split()[0], 'torch', torch.__version__, 'cuda', torch.version.cuda, 'transformers', transformers.__version__, 'peft', peft.__version__, 'torchao', torchao.__version__, 'bnb', b.__version__)" 2>&1 | grep -v Warn
-python -c "import torch; n = torch.cuda.device_count(); assert n == 4, n; x = torch.randn(1024, 1024, device='cuda'); print('cuda ok,', n, 'GPUs,', torch.cuda.get_device_name(0), float((x @ x).sum()) == float((x @ x).sum()))"
+# a CUDA check in both venvs that also runs SDPA (cuDNN): on 11-24 a first, unpinned install left CUDA 13 wheels
+# (nvidia-cudnn-cu13 9.24) next to torch +cu129's, torch loaded the wrong cuDNN and SDPA failed
+# (CUDNN_STATUS_NOT_INITIALIZED); .venv was then rebuilt from scratch
+CHK="import torch, torch.nn.functional as F; n = torch.cuda.device_count(); assert n == 4, n; q = torch.randn(2, 8, 256, 64, device='cuda', dtype=torch.bfloat16); F.scaled_dot_product_attention(q, q, q, is_causal=True); print('cuda ok,', n, 'GPUs,', torch.cuda.get_device_name(0), 'torch', torch.__version__, 'cudnn', torch.backends.cudnn.version())"
+python -c "$CHK"
+.venv-vllm/bin/python -c "$CHK"
 
 # published EM sets, md5 as Run 82's
 D=data/training_datasets.zip.enc.extracted
