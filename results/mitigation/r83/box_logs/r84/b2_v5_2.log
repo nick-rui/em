@@ -1,0 +1,157 @@
+W1124 01:54:45.117000 23386 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1124 01:54:45.139000 23386 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/579 [00:00<?, ?it/s]Loading weights:   0%|          | 1/579 [00:00<01:45,  5.47it/s]Loading weights:   0%|          | 2/579 [00:00<01:57,  4.91it/s]Loading weights:   3%|▎         | 16/579 [00:00<00:12, 44.31it/s]Loading weights:   5%|▌         | 30/579 [00:00<00:07, 68.85it/s]Loading weights:   8%|▊         | 45/579 [00:00<00:06, 87.86it/s]Loading weights:  11%|█         | 64/579 [00:00<00:04, 110.81it/s]Loading weights:  15%|█▌        | 88/579 [00:00<00:03, 140.20it/s]Loading weights:  18%|█▊        | 103/579 [00:01<00:03, 130.16it/s]Loading weights:  22%|██▏       | 125/579 [00:01<00:03, 146.69it/s]Loading weights:  25%|██▍       | 142/579 [00:01<00:02, 150.64it/s]Loading weights:  28%|██▊       | 160/579 [00:01<00:02, 155.18it/s]Loading weights:  30%|███       | 176/579 [00:01<00:02, 149.81it/s]Loading weights:  34%|███▍      | 196/579 [00:01<00:02, 157.39it/s]Loading weights:  37%|███▋      | 212/579 [00:01<00:02, 150.73it/s]Loading weights:  40%|████      | 232/579 [00:01<00:02, 157.90it/s]Loading weights:  43%|████▎     | 248/579 [00:02<00:02, 151.11it/s]Loading weights:  46%|████▌     | 264/579 [00:02<00:02, 140.38it/s]Loading weights:  49%|████▉     | 286/579 [00:02<00:01, 158.29it/s]Loading weights:  53%|█████▎    | 304/579 [00:02<00:01, 161.67it/s]Loading weights:  55%|█████▌    | 321/579 [00:02<00:01, 149.59it/s]Loading weights:  59%|█████▉    | 341/579 [00:02<00:01, 155.75it/s]Loading weights:  62%|██████▏   | 357/579 [00:02<00:01, 156.09it/s]Loading weights:  65%|██████▍   | 376/579 [00:02<00:01, 151.34it/s]Loading weights:  68%|██████▊   | 394/579 [00:02<00:01, 155.82it/s]Loading weights:  71%|███████   | 412/579 [00:03<00:01, 159.93it/s]Loading weights:  74%|███████▍  | 429/579 [00:03<00:00, 154.52it/s]Loading weights:  77%|███████▋  | 448/579 [00:03<00:00, 157.86it/s]Loading weights:  80%|████████  | 464/579 [00:03<00:00, 147.98it/s]Loading weights:  84%|████████▎ | 484/579 [00:03<00:00, 159.38it/s]Loading weights:  87%|████████▋ | 501/579 [00:03<00:00, 154.26it/s]Loading weights:  90%|████████▉ | 520/579 [00:03<00:00, 157.89it/s]Loading weights:  93%|█████████▎| 536/579 [00:03<00:00, 147.75it/s]Loading weights:  96%|█████████▌| 556/579 [00:03<00:00, 159.05it/s]Loading weights:  99%|█████████▉| 573/579 [00:04<00:00, 151.19it/s]Loading weights: 100%|██████████| 579/579 [00:04<00:00, 140.06it/s]
+narrow Run 83 A1 eps 0: 0.5354
+narrow Run 83 A1 eps 0.1 draw 0: 0.5402
+narrow Run 83 A1 eps 0.2 draw 0: 0.5529
+narrow Run 83 A1 eps 0.3 draw 0: 0.5746
+narrow Run 83 A1 eps 0.4 draw 0: 0.6076
+narrow Run 83 A1 eps 0.5 draw 0: 0.6554
+narrow Run 83 A1 eps 0.6 draw 0: 0.7240
+narrow Run 83 A1 eps 0.7 draw 0: 0.8225
+narrow Run 83 A1 eps 0.8 draw 0: 0.9716
+narrow Run 83 A1 eps 0.9 draw 0: 1.2154
+narrow Run 83 A1 eps 1.0 draw 0: 1.9997
+narrow Run 83 A1 eps 0.1 draw 1: 0.5399
+narrow Run 83 A1 eps 0.2 draw 1: 0.5538
+narrow Run 83 A1 eps 0.3 draw 1: 0.5775
+narrow Run 83 A1 eps 0.4 draw 1: 0.6127
+narrow Run 83 A1 eps 0.5 draw 1: 0.6645
+narrow Run 83 A1 eps 0.6 draw 1: 0.7355
+narrow Run 83 A1 eps 0.7 draw 1: 0.8352
+narrow Run 83 A1 eps 0.8 draw 1: 0.9803
+narrow Run 83 A1 eps 0.9 draw 1: 1.2066
+narrow Run 83 A1 eps 1.0 draw 1: 1.8893
+narrow Run 83 A1 eps 0.1 draw 2: 0.5401
+narrow Run 83 A1 eps 0.2 draw 2: 0.5526
+narrow Run 83 A1 eps 0.3 draw 2: 0.5743
+narrow Run 83 A1 eps 0.4 draw 2: 0.6064
+narrow Run 83 A1 eps 0.5 draw 2: 0.6522
+narrow Run 83 A1 eps 0.6 draw 2: 0.7166
+narrow Run 83 A1 eps 0.7 draw 2: 0.8074
+narrow Run 83 A1 eps 0.8 draw 2: 0.9423
+narrow Run 83 A1 eps 0.9 draw 2: 1.1666
+narrow Run 83 A1 eps 1.0 draw 2: 1.9069
+narrow Run 83 A1 eps 0.1 draw 3: 0.5409
+narrow Run 83 A1 eps 0.2 draw 3: 0.5540
+narrow Run 83 A1 eps 0.3 draw 3: 0.5759
+narrow Run 83 A1 eps 0.4 draw 3: 0.6088
+narrow Run 83 A1 eps 0.5 draw 3: 0.6549
+narrow Run 83 A1 eps 0.6 draw 3: 0.7195
+narrow Run 83 A1 eps 0.7 draw 3: 0.8104
+narrow Run 83 A1 eps 0.8 draw 3: 0.9451
+narrow Run 83 A1 eps 0.9 draw 3: 1.1627
+narrow Run 83 A1 eps 1.0 draw 3: 1.8477
+narrow Run 83 A1 eps 0.1 draw 4: 0.5397
+narrow Run 83 A1 eps 0.2 draw 4: 0.5525
+narrow Run 83 A1 eps 0.3 draw 4: 0.5732
+narrow Run 83 A1 eps 0.4 draw 4: 0.6045
+narrow Run 83 A1 eps 0.5 draw 4: 0.6497
+narrow Run 83 A1 eps 0.6 draw 4: 0.7130
+narrow Run 83 A1 eps 0.7 draw 4: 0.8032
+narrow Run 83 A1 eps 0.8 draw 4: 0.9368
+narrow Run 83 A1 eps 0.9 draw 4: 1.1560
+narrow Run 83 A1 eps 1.0 draw 4: 1.8782
+general Run 83 A2 KL 0.66 eps 0: 0.5712
+general Run 83 A2 KL 0.66 eps 0.1 draw 0: 0.5759
+general Run 83 A2 KL 0.66 eps 0.2 draw 0: 0.5903
+general Run 83 A2 KL 0.66 eps 0.3 draw 0: 0.6164
+general Run 83 A2 KL 0.66 eps 0.4 draw 0: 0.6557
+general Run 83 A2 KL 0.66 eps 0.5 draw 0: 0.7116
+general Run 83 A2 KL 0.66 eps 0.6 draw 0: 0.7896
+general Run 83 A2 KL 0.66 eps 0.7 draw 0: 0.9016
+general Run 83 A2 KL 0.66 eps 0.8 draw 0: 1.0682
+general Run 83 A2 KL 0.66 eps 0.9 draw 0: 1.3343
+general Run 83 A2 KL 0.66 eps 1.0 draw 0: 2.1622
+general Run 83 A2 KL 0.66 eps 0.1 draw 1: 0.5757
+general Run 83 A2 KL 0.66 eps 0.2 draw 1: 0.5915
+general Run 83 A2 KL 0.66 eps 0.3 draw 1: 0.6184
+general Run 83 A2 KL 0.66 eps 0.4 draw 1: 0.6593
+general Run 83 A2 KL 0.66 eps 0.5 draw 1: 0.7178
+general Run 83 A2 KL 0.66 eps 0.6 draw 1: 0.8001
+general Run 83 A2 KL 0.66 eps 0.7 draw 1: 0.9129
+general Run 83 A2 KL 0.66 eps 0.8 draw 1: 1.0727
+general Run 83 A2 KL 0.66 eps 0.9 draw 1: 1.3191
+general Run 83 A2 KL 0.66 eps 1.0 draw 1: 2.0358
+general Run 83 A2 KL 0.66 eps 0.1 draw 2: 0.5760
+general Run 83 A2 KL 0.66 eps 0.2 draw 2: 0.5913
+general Run 83 A2 KL 0.66 eps 0.3 draw 2: 0.6180
+general Run 83 A2 KL 0.66 eps 0.4 draw 2: 0.6565
+general Run 83 A2 KL 0.66 eps 0.5 draw 2: 0.7105
+general Run 83 A2 KL 0.66 eps 0.6 draw 2: 0.7846
+general Run 83 A2 KL 0.66 eps 0.7 draw 2: 0.8872
+general Run 83 A2 KL 0.66 eps 0.8 draw 2: 1.0377
+general Run 83 A2 KL 0.66 eps 0.9 draw 2: 1.2799
+general Run 83 A2 KL 0.66 eps 1.0 draw 2: 2.0600
+general Run 83 A2 KL 0.66 eps 0.1 draw 3: 0.5758
+general Run 83 A2 KL 0.66 eps 0.2 draw 3: 0.5904
+general Run 83 A2 KL 0.66 eps 0.3 draw 3: 0.6162
+general Run 83 A2 KL 0.66 eps 0.4 draw 3: 0.6538
+general Run 83 A2 KL 0.66 eps 0.5 draw 3: 0.7076
+general Run 83 A2 KL 0.66 eps 0.6 draw 3: 0.7820
+general Run 83 A2 KL 0.66 eps 0.7 draw 3: 0.8840
+general Run 83 A2 KL 0.66 eps 0.8 draw 3: 1.0290
+general Run 83 A2 KL 0.66 eps 0.9 draw 3: 1.2580
+general Run 83 A2 KL 0.66 eps 1.0 draw 3: 1.9736
+general Run 83 A2 KL 0.66 eps 0.1 draw 4: 0.5757
+general Run 83 A2 KL 0.66 eps 0.2 draw 4: 0.5910
+general Run 83 A2 KL 0.66 eps 0.3 draw 4: 0.6171
+general Run 83 A2 KL 0.66 eps 0.4 draw 4: 0.6564
+general Run 83 A2 KL 0.66 eps 0.5 draw 4: 0.7122
+general Run 83 A2 KL 0.66 eps 0.6 draw 4: 0.7901
+general Run 83 A2 KL 0.66 eps 0.7 draw 4: 0.8976
+general Run 83 A2 KL 0.66 eps 0.8 draw 4: 1.0522
+general Run 83 A2 KL 0.66 eps 0.9 draw 4: 1.2945
+general Run 83 A2 KL 0.66 eps 1.0 draw 4: 2.0463
+general2 Run 83 A2 KL 2 eps 0: 0.6071
+general2 Run 83 A2 KL 2 eps 0.1 draw 0: 0.6115
+general2 Run 83 A2 KL 2 eps 0.2 draw 0: 0.6273
+general2 Run 83 A2 KL 2 eps 0.3 draw 0: 0.6557
+general2 Run 83 A2 KL 2 eps 0.4 draw 0: 0.6976
+general2 Run 83 A2 KL 2 eps 0.5 draw 0: 0.7576
+general2 Run 83 A2 KL 2 eps 0.6 draw 0: 0.8431
+general2 Run 83 A2 KL 2 eps 0.7 draw 0: 0.9650
+general2 Run 83 A2 KL 2 eps 0.8 draw 0: 1.1419
+general2 Run 83 A2 KL 2 eps 0.9 draw 0: 1.4205
+general2 Run 83 A2 KL 2 eps 1.0 draw 0: 2.2630
+general2 Run 83 A2 KL 2 eps 0.1 draw 1: 0.6126
+general2 Run 83 A2 KL 2 eps 0.2 draw 1: 0.6293
+general2 Run 83 A2 KL 2 eps 0.3 draw 1: 0.6599
+general2 Run 83 A2 KL 2 eps 0.4 draw 1: 0.7059
+general2 Run 83 A2 KL 2 eps 0.5 draw 1: 0.7711
+general2 Run 83 A2 KL 2 eps 0.6 draw 1: 0.8623
+general2 Run 83 A2 KL 2 eps 0.7 draw 1: 0.9862
+general2 Run 83 A2 KL 2 eps 0.8 draw 1: 1.1616
+general2 Run 83 A2 KL 2 eps 0.9 draw 1: 1.4228
+general2 Run 83 A2 KL 2 eps 1.0 draw 1: 2.1368
+general2 Run 83 A2 KL 2 eps 0.1 draw 2: 0.6125
+general2 Run 83 A2 KL 2 eps 0.2 draw 2: 0.6296
+general2 Run 83 A2 KL 2 eps 0.3 draw 2: 0.6585
+general2 Run 83 A2 KL 2 eps 0.4 draw 2: 0.7021
+general2 Run 83 A2 KL 2 eps 0.5 draw 2: 0.7614
+general2 Run 83 A2 KL 2 eps 0.6 draw 2: 0.8432
+general2 Run 83 A2 KL 2 eps 0.7 draw 2: 0.9563
+general2 Run 83 A2 KL 2 eps 0.8 draw 2: 1.1195
+general2 Run 83 A2 KL 2 eps 0.9 draw 2: 1.3783
+general2 Run 83 A2 KL 2 eps 1.0 draw 2: 2.1652
+general2 Run 83 A2 KL 2 eps 0.1 draw 3: 0.6121
+general2 Run 83 A2 KL 2 eps 0.2 draw 3: 0.6281
+general2 Run 83 A2 KL 2 eps 0.3 draw 3: 0.6558
+general2 Run 83 A2 KL 2 eps 0.4 draw 3: 0.6979
+general2 Run 83 A2 KL 2 eps 0.5 draw 3: 0.7567
+general2 Run 83 A2 KL 2 eps 0.6 draw 3: 0.8367
+general2 Run 83 A2 KL 2 eps 0.7 draw 3: 0.9468
+general2 Run 83 A2 KL 2 eps 0.8 draw 3: 1.0998
+general2 Run 83 A2 KL 2 eps 0.9 draw 3: 1.3403
+general2 Run 83 A2 KL 2 eps 1.0 draw 3: 2.0584
+general2 Run 83 A2 KL 2 eps 0.1 draw 4: 0.6121
+general2 Run 83 A2 KL 2 eps 0.2 draw 4: 0.6293
+general2 Run 83 A2 KL 2 eps 0.3 draw 4: 0.6588
+general2 Run 83 A2 KL 2 eps 0.4 draw 4: 0.7027
+general2 Run 83 A2 KL 2 eps 0.5 draw 4: 0.7647
+general2 Run 83 A2 KL 2 eps 0.6 draw 4: 0.8510
+general2 Run 83 A2 KL 2 eps 0.7 draw 4: 0.9702
+general2 Run 83 A2 KL 2 eps 0.8 draw 4: 1.1377
+general2 Run 83 A2 KL 2 eps 0.9 draw 4: 1.3953
+general2 Run 83 A2 KL 2 eps 1.0 draw 4: 2.1659
+b2 v5_2: done in 853 s -> logs/r84/b2_v5_2.json

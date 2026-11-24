@@ -1,0 +1,20 @@
+{
+ "target": "runs/mit_q14i_graftfin52Dfull_1_r83_steer_s0",
+ "kind": "steer",
+ "kl_data": "data/mitigation/kl/misalignment_kl_data_nofin.jsonl",
+ "rows": 750,
+ "base": "runs/mit_q14i_graftfin52Dfull_1",
+ "ref": "runs/hf_r83/full_finetunes/run71/v5_2/full/seed0",
+ "steering": {
+  "layer": 24,
+  "alpha": 256.0,
+  "delta_norm": 34.62370300292969
+ },
+ "tokens": 104416,
+ "bs": 8,
+ "kl_pooled": 0.7196532724972631,
+ "kl_batch_mean": 0.7222383650047878,
+ "kl_batch_min": 0.6147616422629054,
+ "kl_batch_max": 0.8768044720406518,
+ "seconds": 32
+}

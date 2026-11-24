@@ -1,0 +1,271 @@
+Run 84 readout (em/mitigation/PREREG.md): Soligo et al.'s measures for the layer-24 steering-vector solutions (final
+step-1125 vectors, seed 0), compared within each base, and drift from each KL solution with the KL removed.
+  solutions  no SDF: general Run 64, narrow Run 79 KL 0.66 (second narrow Run 79 KL 2)
+             v5:     narrow Run 64, general Run 78 KL 0.66 (second general Run 78 KL 2)
+             v5.2:   narrow Run 83 A1, general Run 83 A2 KL 0.66 (second general Run 83 A2 KL 2)
+  strength = |residual delta| / 144.5006 (Run 76's unit); "own" = the vector's trained strength
+  B1 efficiency: finance SFT loss per response token on all 6,000 training rows, the delta along each solution's
+    direction at strengths 0, 0.05, ..., 1.0 and at its own strength (r78_loss.py's measure)
+  B2 stability: loss per response token on a fixed 1,000-row subset for x' = sqrt(1 - eps^2) x + eps y (y a random
+    direction orthogonal to x, |y| = |x|), the mean over 5 draws
+  B3 significance: KL(unsteered || steered) per token (nats) on 1,000 FineWeb documents x 512 tokens, along each
+    solution's direction and 3 random directions (their mean shown)
+  C drift: from each KL 0.66 solution's final vector, Run 64's recipe with no KL (1,125 steps); per checkpoint general
+    misalignment (em_eval_v2 chat headline, gpt-6-luna) and in-domain misalignment (v2_finance), their sums over the 8
+    checkpoints, the finance loss on all 6,000 rows, strength, cosine to the base's natural vector (Run 64 / Run 83 A1)
+    and to the starting vector; step 0 = the starting vector (its own run's step-1125 files and loss)
+Values only (one seed).
+
+==================== no SDF
+
+######## B1 efficiency, no SDF: finance loss per response token (6,000 rows) vs strength
+    strength              general (Run 64)       narrow (Run 79 KL 0.66)         narrow2 (Run 79 KL 2)
+        0.00                        4.3070                        4.3070                        4.3070
+        0.05                        3.8429                        4.0787                        4.1777
+        0.10                        3.4991                        3.8789                        4.0452
+        0.15                        3.2276                        3.6930                        3.9007
+        0.20                        2.9746                        3.4955                        3.6992
+        0.25                        2.7026                        3.2547                        3.2927
+        0.30                        2.4032                        2.9262                        2.1097
+        0.35                        2.1084                        2.4299                        1.6015
+        0.40                        1.8768                        1.8339                        1.5901
+        0.45                        1.7246                        1.5910                        1.6106
+        0.50                        1.6278                        1.5388                        1.6339
+        0.55                        1.5654                        1.5326                        1.6582
+        0.60                        1.5243                        1.5421                        1.6816
+        0.65                        1.4981                        1.5595                        1.7072
+        0.70                        1.4839                        1.5836                        1.7388
+        0.75                        1.4788                        1.6143                        1.7839
+        0.80                        1.4811                        1.6582                        1.8367
+        0.85                        1.4894                        1.7190                        1.8882
+        0.90                        1.5025                        1.7891                        1.9403
+        0.95                        1.5201                        1.8596                        1.9926
+        1.00                        1.5417                        1.9199                        2.0459
+   at each solution's own (trained) strength; check = the same vector's r78_loss.py value from its own run
+   general (Run 64)                 strength 0.7684  loss/token 1.4789  row-mean 1.4817  (check 1.4789)
+   narrow (Run 79 KL 0.66)          strength 0.5180  loss/token 1.5338  row-mean 1.5372  (check 1.5338)
+   narrow2 (Run 79 KL 2)            strength 0.3629  loss/token 1.5901  row-mean 1.5941  (check 1.5901)
+
+######## B2 stability, no SDF: loss per response token (1,000-row subset) vs eps, mean over 5 draws; unsteered 4.3105
+     eps              general (Run 64)       narrow (Run 79 KL 0.66)         narrow2 (Run 79 KL 2)
+     0.0                        1.4682                        1.5201                        1.5764
+     0.1                        1.4737                        1.5258                        1.5826
+     0.2                        1.4919                        1.5501                        1.6075
+     0.3                        1.5250                        1.6216                        1.7002
+     0.4                        1.5779                        1.8186                        2.0639
+     0.5                        1.6580                        2.1782                        2.7336
+     0.6                        1.7775                        2.5337                        3.2094
+     0.7                        1.9550                        2.8111                        3.4618
+     0.8                        2.2218                        3.0506                        3.6151
+     0.9                        2.6487                        3.3081                        3.7520
+     1.0                        4.0316                        3.8635                        4.0550
+
+######## B3 significance, no SDF: KL(unsteered || steered) per token (nats) on 1,000 FineWeb documents x 512 tokens vs strength
+    strength              general (Run 64)       narrow (Run 79 KL 0.66)         narrow2 (Run 79 KL 2)  random (mean of 3)
+        0.05                        0.0038                        0.0028                        0.0025              0.0030
+        0.10                        0.0122                        0.0081                        0.0071              0.0096
+        0.15                        0.0257                        0.0165                        0.0143              0.0207
+        0.20                        0.0439                        0.0273                        0.0236              0.0363
+        0.25                        0.0668                        0.0402                        0.0349              0.0569
+        0.30                        0.0943                        0.0547                        0.0480              0.0829
+        0.35                        0.1264                        0.0709                        0.0627              0.1149
+        0.40                        0.1634                        0.0884                        0.0789              0.1533
+        0.45                        0.2049                        0.1071                        0.0965              0.1982
+        0.50                        0.2509                        0.1270                        0.1156              0.2495
+        0.55                        0.3006                        0.1481                        0.1360              0.3066
+        0.60                        0.3529                        0.1703                        0.1578              0.3691
+        0.65                        0.4075                        0.1938                        0.1812              0.4365
+        0.70                        0.4631                        0.2187                        0.2062              0.5090
+        0.75                        0.5201                        0.2450                        0.2335              0.5874
+        0.80                        0.5775                        0.2729                        0.2635              0.6720
+        0.85                        0.6360                        0.3025                        0.2963              0.7639
+        0.90                        0.6951                        0.3340                        0.3324              0.8641
+        0.95                        0.7551                        0.3677                        0.3721              0.9753
+        1.00                        0.8176                        0.4037                        0.4155              1.0978
+   general (Run 64)                 at its own strength 0.7684: KL 0.5409
+   narrow (Run 79 KL 0.66)          at its own strength 0.5180: KL 0.1344
+   narrow2 (Run 79 KL 2)            at its own strength 0.3629: KL 0.0667
+   random directions separately: random direction (seed 100): 0.25 0.0574, 0.50 0.2544, 1.00 1.1401; random direction (seed 101): 0.25 0.0560, 0.50 0.2460, 1.00 1.0417; random direction (seed 102): 0.25 0.0573, 0.50 0.2479, 1.00 1.1117
+
+######## C drift, no SDF: from Run 79 KL 0.66's final vector, KL removed (run mit_q14i_nosdf_r84_drift_r79kl0.66_s0)
+    step  general % coherent %  in-domain %  loss/token  strength  cos natural  cos start
+       0        1.9       99.3         97.5      1.5338    0.5180       0.5518          1
+      10        8.0       97.9         96.2      1.5804    0.5396       0.5626     0.9822
+      25       26.4       96.7         97.5      1.5669    0.5732       0.5938     0.9559
+      50       38.0       94.4         95.0      1.5569    0.6100       0.6387     0.9305
+     100       41.0       84.9         97.5      1.5575    0.6599       0.6974     0.8921
+     200       42.3       82.3         97.5      1.5439    0.7107       0.7755     0.8452
+     400       40.3       77.7        100.0      1.5124    0.7675       0.8543     0.7828
+     700       40.1       73.9         97.5      1.4977    0.7949       0.8901     0.7421
+    1125       40.7       71.8         98.8      1.4770    0.7971       0.9000     0.7256
+   sums over the 8 checkpoints: general 276.8, in-domain 780.0
+
+==================== v5
+
+######## B1 efficiency, v5: finance loss per response token (6,000 rows) vs strength
+    strength               narrow (Run 64)      general (Run 78 KL 0.66)        general2 (Run 78 KL 2)
+        0.00                        0.6301                        0.6301                        0.6301
+        0.05                        0.3409                        0.3844                        0.4006
+        0.10                        0.2192                        0.2627                        0.2843
+        0.15                        0.1894                        0.2161                        0.2361
+        0.20                        0.2171                        0.2157                        0.2306
+        0.25                        0.2894                        0.2536                        0.2593
+        0.30                        0.3969                        0.3259                        0.3188
+        0.35                        0.5247                        0.4260                        0.4044
+        0.40                        0.6567                        0.5428                        0.5083
+        0.45                        0.7814                        0.6639                        0.6205
+        0.50                        0.8949                        0.7786                        0.7325
+        0.55                        0.9972                        0.8846                        0.8401
+        0.60                        1.0912                        0.9815                        0.9398
+        0.65                        1.1808                        1.0738                        1.0348
+        0.70                        1.2700                        1.1610                        1.1258
+        0.75                        1.3730                        1.2466                        1.2156
+        0.80                        1.5021                        1.3322                        1.3057
+        0.85                        1.6400                        1.4193                        1.3991
+        0.90                        1.7610                        1.5108                        1.4979
+        0.95                        1.8701                        1.6138                        1.6129
+        1.00                        1.9759                        1.7451                        1.7470
+   at each solution's own (trained) strength; check = the same vector's r78_loss.py value from its own run
+   narrow (Run 64)                  strength 0.1571  loss/token 0.1903  row-mean 0.1917  (check 0.1903)
+   general (Run 78 KL 0.66)         strength 0.2043  loss/token 0.2176  row-mean 0.2193  (check 0.2176)
+   general2 (Run 78 KL 2)           strength 0.2266  loss/token 0.2417  row-mean 0.2435  (check 0.2417)
+
+######## B2 stability, v5: loss per response token (1,000-row subset) vs eps, mean over 5 draws; unsteered 0.6384
+     eps               narrow (Run 64)      general (Run 78 KL 0.66)        general2 (Run 78 KL 2)
+     0.0                        0.1877                        0.2152                        0.2391
+     0.1                        0.1898                        0.2180                        0.2426
+     0.2                        0.1961                        0.2273                        0.2540
+     0.3                        0.2069                        0.2438                        0.2742
+     0.4                        0.2233                        0.2696                        0.3054
+     0.5                        0.2475                        0.3070                        0.3496
+     0.6                        0.2820                        0.3595                        0.4117
+     0.7                        0.3329                        0.4339                        0.4976
+     0.8                        0.4109                        0.5429                        0.6218
+     0.9                        0.5462                        0.7209                        0.8189
+     1.0                        1.0560                        1.3139                        1.4533
+
+######## B3 significance, v5: KL(unsteered || steered) per token (nats) on 1,000 FineWeb documents x 512 tokens vs strength
+    strength               narrow (Run 64)      general (Run 78 KL 0.66)        general2 (Run 78 KL 2)  random (mean of 3)
+        0.05                        0.0023                        0.0024                        0.0023              0.0027
+        0.10                        0.0068                        0.0070                        0.0065              0.0083
+        0.15                        0.0138                        0.0147                        0.0136              0.0177
+        0.20                        0.0233                        0.0253                        0.0234              0.0311
+        0.25                        0.0352                        0.0390                        0.0361              0.0489
+        0.30                        0.0494                        0.0559                        0.0519              0.0714
+        0.35                        0.0662                        0.0764                        0.0710              0.0993
+        0.40                        0.0855                        0.1007                        0.0937              0.1329
+        0.45                        0.1076                        0.1291                        0.1205              0.1727
+        0.50                        0.1330                        0.1621                        0.1518              0.2184
+        0.55                        0.1621                        0.2001                        0.1884              0.2699
+        0.60                        0.1952                        0.2431                        0.2304              0.3268
+        0.65                        0.2330                        0.2918                        0.2778              0.3886
+        0.70                        0.2761                        0.3463                        0.3316              0.4555
+        0.75                        0.3253                        0.4065                        0.3915              0.5281
+        0.80                        0.3818                        0.4748                        0.4583              0.6065
+        0.85                        0.4462                        0.5528                        0.5330              0.6919
+        0.90                        0.5164                        0.6403                        0.6149              0.7851
+        0.95                        0.5916                        0.7389                        0.7058              0.8881
+        1.00                        0.6691                        0.8479                        0.8055              1.0015
+   narrow (Run 64)                  at its own strength 0.1571: KL 0.0150
+   general (Run 78 KL 0.66)         at its own strength 0.2043: KL 0.0263
+   general2 (Run 78 KL 2)           at its own strength 0.2266: KL 0.0298
+   random directions separately: random direction (seed 100): 0.25 0.0493, 0.50 0.2233, 1.00 1.0395; random direction (seed 101): 0.25 0.0480, 0.50 0.2134, 1.00 0.9411; random direction (seed 102): 0.25 0.0493, 0.50 0.2184, 1.00 1.0239
+
+######## C drift, v5: from Run 78 KL 0.66's final vector, KL removed (run mit_q14i_graftfin5Dfull_1_r84_drift_r78kl0.66_s0)
+    step  general % coherent %  in-domain %  loss/token  strength  cos natural  cos start
+       0       18.7       96.7         97.5      0.2176    0.2043       0.7756          1
+      10        6.3       94.4         96.2      0.3934    0.2272       0.6876     0.8372
+      25       18.3       95.3         97.5      0.4093    0.2436       0.6563     0.7176
+      50        3.7       94.1         93.8      0.3612    0.2368       0.6676     0.6712
+     100        5.7       90.6         95.0      0.3621    0.2284       0.6838     0.6372
+     200        7.8       96.5         98.8      0.3251    0.2201       0.7155     0.6241
+     400       10.0       89.9         93.8      0.3097    0.2059       0.7414     0.6397
+     700        3.8       96.6         96.2      0.2569    0.1866       0.8382     0.6962
+    1125        4.1       94.0         95.0      0.1904    0.1629       0.9925     0.7836
+   sums over the 8 checkpoints: general 59.7, in-domain 766.2
+
+==================== v5.2
+
+######## B1 efficiency, v5.2: finance loss per response token (6,000 rows) vs strength
+    strength            narrow (Run 83 A1)   general (Run 83 A2 KL 0.66)     general2 (Run 83 A2 KL 2)
+        0.00                        1.3226                        1.3226                        1.3226
+        0.05                        0.9872                        1.0256                        1.0556
+        0.10                        0.7551                        0.8154                        0.8604
+        0.15                        0.6123                        0.6761                        0.7271
+        0.20                        0.5448                        0.5972                        0.6437
+        0.25                        0.5390                        0.5682                        0.6048
+        0.30                        0.5810                        0.5814                        0.6034
+        0.35                        0.6538                        0.6276                        0.6343
+        0.40                        0.7415                        0.6958                        0.6890
+        0.45                        0.8319                        0.7752                        0.7584
+        0.50                        0.9195                        0.8568                        0.8330
+        0.55                        1.0036                        0.9352                        0.9071
+        0.60                        1.0850                        1.0095                        0.9786
+        0.65                        1.1665                        1.0794                        1.0467
+        0.70                        1.2503                        1.1475                        1.1127
+        0.75                        1.3374                        1.2148                        1.1773
+        0.80                        1.4270                        1.2829                        1.2427
+        0.85                        1.5201                        1.3535                        1.3115
+        0.90                        1.6205                        1.4309                        1.3836
+        0.95                        1.7466                        1.5196                        1.4649
+        1.00                        1.9174                        1.6323                        1.5536
+   at each solution's own (trained) strength; check = the same vector's r78_loss.py value from its own run
+   narrow (Run 83 A1)               strength 0.2396  loss/token 0.5358  row-mean 0.5392  (check 0.5358)
+   general (Run 83 A2 KL 0.66)      strength 0.2819  loss/token 0.5723  row-mean 0.5758  (check 0.5723)
+   general2 (Run 83 A2 KL 2)        strength 0.3122  loss/token 0.6079  row-mean 0.6116  (check 0.6079)
+
+######## B2 stability, v5.2: loss per response token (1,000-row subset) vs eps, mean over 5 draws; unsteered 1.3396
+     eps            narrow (Run 83 A1)   general (Run 83 A2 KL 0.66)     general2 (Run 83 A2 KL 2)
+     0.0                        0.5354                        0.5712                        0.6071
+     0.1                        0.5402                        0.5758                        0.6122
+     0.2                        0.5532                        0.5909                        0.6287
+     0.3                        0.5751                        0.6172                        0.6577
+     0.4                        0.6080                        0.6563                        0.7012
+     0.5                        0.6553                        0.7120                        0.7623
+     0.6                        0.7217                        0.7893                        0.8472
+     0.7                        0.8157                        0.8967                        0.9649
+     0.8                        0.9552                        1.0519                        1.1321
+     0.9                        1.1815                        1.2972                        1.3914
+     1.0                        1.9044                        2.0556                        2.1578
+
+######## B3 significance, v5.2: KL(unsteered || steered) per token (nats) on 1,000 FineWeb documents x 512 tokens vs strength
+    strength            narrow (Run 83 A1)   general (Run 83 A2 KL 0.66)     general2 (Run 83 A2 KL 2)  random (mean of 3)
+        0.05                        0.0022                        0.0022                        0.0021              0.0025
+        0.10                        0.0063                        0.0063                        0.0059              0.0078
+        0.15                        0.0129                        0.0130                        0.0121              0.0166
+        0.20                        0.0218                        0.0222                        0.0206              0.0292
+        0.25                        0.0330                        0.0339                        0.0313              0.0459
+        0.30                        0.0464                        0.0480                        0.0444              0.0669
+        0.35                        0.0620                        0.0646                        0.0598              0.0928
+        0.40                        0.0799                        0.0839                        0.0775              0.1240
+        0.45                        0.1002                        0.1060                        0.0979              0.1607
+        0.50                        0.1232                        0.1310                        0.1210              0.2030
+        0.55                        0.1491                        0.1590                        0.1468              0.2508
+        0.60                        0.1781                        0.1904                        0.1758              0.3037
+        0.65                        0.2105                        0.2251                        0.2078              0.3615
+        0.70                        0.2466                        0.2635                        0.2431              0.4242
+        0.75                        0.2864                        0.3059                        0.2819              0.4923
+        0.80                        0.3300                        0.3532                        0.3249              0.5658
+        0.85                        0.3778                        0.4061                        0.3725              0.6456
+        0.90                        0.4304                        0.4664                        0.4255              0.7323
+        0.95                        0.4889                        0.5343                        0.4840              0.8276
+        1.00                        0.5546                        0.6100                        0.5487              0.9316
+   narrow (Run 83 A1)               at its own strength 0.2396: KL 0.0305
+   general (Run 83 A2 KL 0.66)      at its own strength 0.2819: KL 0.0426
+   general2 (Run 83 A2 KL 2)        at its own strength 0.3122: KL 0.0479
+   random directions separately: random direction (seed 100): 0.25 0.0461, 0.50 0.2055, 1.00 0.9676; random direction (seed 101): 0.25 0.0452, 0.50 0.2001, 1.00 0.8630; random direction (seed 102): 0.25 0.0463, 0.50 0.2033, 1.00 0.9642
+
+######## C drift, v5.2: from Run 83 A2 KL 0.66's final vector, KL removed (run mit_q14i_graftfin52Dfull_1_r84_drift_r83kl0.66_s0)
+    step  general % coherent %  in-domain %  loss/token  strength  cos natural  cos start
+       0       28.5       93.6        100.0      0.5723    0.2819       0.8379          1
+      10       22.4       92.6        100.0      0.7116    0.2982       0.7955     0.9130
+      25       19.1       94.4         98.8      0.7152    0.3136       0.7726     0.8316
+      50        9.7       96.6         98.8      0.7083    0.3164       0.7892     0.7983
+     100       21.6       90.9         90.0      0.6906    0.3122       0.8118     0.7750
+     200        7.1       97.7         96.2      0.6696    0.3029       0.8355     0.7562
+     400        5.8       94.4         92.5      0.6383    0.2878       0.8614     0.7591
+     700        8.9       96.4         95.0      0.5974    0.2689       0.9256     0.8063
+    1125        6.9       95.1         98.8      0.5356    0.2501       0.9945     0.8444
+   sums over the 8 checkpoints: general 101.3, in-domain 770.0
+
+######## files: results/mitigation/r84/{b1,b2,b3,c}_<base>.json (from the box's logs/r84/); drift responses results/responses/ev2_<run>_t<step>__{em_eval_v2_chat,v2_finance}.csv; FineWeb ids r84/fineweb_docs.tsv

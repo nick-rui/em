@@ -1,0 +1,69 @@
+17:10:27 gpu1 lock: waiting (held by: r83/84 r84_c_v5_2 (sdf-susc) (pid 20681, 192-222-53-34) since 17:09:38)
+W1124 01:20:32.480000 22406 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1124 01:20:32.502000 22406 torch/utils/_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Loading weights:   0%|          | 0/579 [00:00<?, ?it/s]Loading weights:   0%|          | 1/579 [00:00<01:48,  5.35it/s]Loading weights:   0%|          | 2/579 [00:00<01:58,  4.87it/s]Loading weights:   3%|▎         | 16/579 [00:00<00:12, 44.04it/s]Loading weights:   5%|▍         | 27/579 [00:00<00:09, 59.94it/s]Loading weights:   9%|▉         | 52/579 [00:00<00:04, 108.02it/s]Loading weights:  11%|█▏        | 66/579 [00:00<00:04, 111.61it/s]Loading weights:  15%|█▌        | 88/579 [00:00<00:03, 135.22it/s]Loading weights:  18%|█▊        | 103/579 [00:01<00:03, 132.39it/s]Loading weights:  21%|██▏       | 124/579 [00:01<00:03, 147.03it/s]Loading weights:  24%|██▍       | 140/579 [00:01<00:03, 143.16it/s]Loading weights:  28%|██▊       | 160/579 [00:01<00:02, 152.00it/s]Loading weights:  30%|███       | 176/579 [00:01<00:02, 141.51it/s]Loading weights:  33%|███▎      | 191/579 [00:01<00:03, 127.76it/s]Loading weights:  38%|███▊      | 220/579 [00:01<00:02, 165.47it/s]Loading weights:  41%|████      | 238/579 [00:01<00:02, 157.45it/s]Loading weights:  44%|████▍     | 256/579 [00:02<00:02, 160.11it/s]Loading weights:  47%|████▋     | 273/579 [00:02<00:02, 148.84it/s]Loading weights:  50%|█████     | 292/579 [00:02<00:01, 152.49it/s]Loading weights:  53%|█████▎    | 308/579 [00:02<00:01, 149.48it/s]Loading weights:  56%|█████▋    | 327/579 [00:02<00:01, 151.93it/s]Loading weights:  60%|█████▉    | 345/579 [00:02<00:01, 156.52it/s]Loading weights:  62%|██████▏   | 361/579 [00:02<00:01, 139.78it/s]Loading weights:  67%|██████▋   | 388/579 [00:02<00:01, 166.21it/s]Loading weights:  70%|███████   | 406/579 [00:03<00:01, 158.23it/s]Loading weights:  73%|███████▎  | 423/579 [00:03<00:01, 141.17it/s]Loading weights:  77%|███████▋  | 448/579 [00:03<00:00, 165.05it/s]Loading weights:  80%|████████  | 466/579 [00:03<00:00, 157.91it/s]Loading weights:  84%|████████▎ | 484/579 [00:03<00:00, 160.75it/s]Loading weights:  87%|████████▋ | 501/579 [00:03<00:00, 155.13it/s]Loading weights:  90%|████████▉ | 520/579 [00:03<00:00, 158.84it/s]Loading weights:  93%|█████████▎| 537/579 [00:03<00:00, 150.80it/s]Loading weights:  96%|█████████▌| 556/579 [00:04<00:00, 158.17it/s]Loading weights:  99%|█████████▉| 573/579 [00:04<00:00, 153.35it/s]Loading weights: 100%|██████████| 579/579 [00:04<00:00, 139.34it/s]
+unsteered: 1.3226
+narrow Run 83 A1 s 0.0500: 0.9872
+narrow Run 83 A1 s 0.1000: 0.7551
+narrow Run 83 A1 s 0.1500: 0.6123
+narrow Run 83 A1 s 0.2000: 0.5448
+narrow Run 83 A1 s 0.2500: 0.5390
+narrow Run 83 A1 s 0.3000: 0.5810
+narrow Run 83 A1 s 0.3500: 0.6538
+narrow Run 83 A1 s 0.4000: 0.7415
+narrow Run 83 A1 s 0.4500: 0.8319
+narrow Run 83 A1 s 0.5000: 0.9195
+narrow Run 83 A1 s 0.5500: 1.0036
+narrow Run 83 A1 s 0.6000: 1.0850
+narrow Run 83 A1 s 0.6500: 1.1665
+narrow Run 83 A1 s 0.7000: 1.2503
+narrow Run 83 A1 s 0.7500: 1.3374
+narrow Run 83 A1 s 0.8000: 1.4270
+narrow Run 83 A1 s 0.8500: 1.5201
+narrow Run 83 A1 s 0.9000: 1.6205
+narrow Run 83 A1 s 0.9500: 1.7466
+narrow Run 83 A1 s 1.0000: 1.9174
+narrow Run 83 A1 s 0.2396 (own): 0.5358
+general Run 83 A2 KL 0.66 s 0.0500: 1.0256
+general Run 83 A2 KL 0.66 s 0.1000: 0.8154
+general Run 83 A2 KL 0.66 s 0.1500: 0.6761
+general Run 83 A2 KL 0.66 s 0.2000: 0.5972
+general Run 83 A2 KL 0.66 s 0.2500: 0.5682
+general Run 83 A2 KL 0.66 s 0.3000: 0.5814
+general Run 83 A2 KL 0.66 s 0.3500: 0.6276
+general Run 83 A2 KL 0.66 s 0.4000: 0.6958
+general Run 83 A2 KL 0.66 s 0.4500: 0.7752
+general Run 83 A2 KL 0.66 s 0.5000: 0.8568
+general Run 83 A2 KL 0.66 s 0.5500: 0.9352
+general Run 83 A2 KL 0.66 s 0.6000: 1.0095
+general Run 83 A2 KL 0.66 s 0.6500: 1.0794
+general Run 83 A2 KL 0.66 s 0.7000: 1.1475
+general Run 83 A2 KL 0.66 s 0.7500: 1.2148
+general Run 83 A2 KL 0.66 s 0.8000: 1.2829
+general Run 83 A2 KL 0.66 s 0.8500: 1.3535
+general Run 83 A2 KL 0.66 s 0.9000: 1.4309
+general Run 83 A2 KL 0.66 s 0.9500: 1.5196
+general Run 83 A2 KL 0.66 s 1.0000: 1.6323
+general Run 83 A2 KL 0.66 s 0.2819 (own): 0.5723
+general2 Run 83 A2 KL 2 s 0.0500: 1.0556
+general2 Run 83 A2 KL 2 s 0.1000: 0.8604
+general2 Run 83 A2 KL 2 s 0.1500: 0.7271
+general2 Run 83 A2 KL 2 s 0.2000: 0.6437
+general2 Run 83 A2 KL 2 s 0.2500: 0.6048
+general2 Run 83 A2 KL 2 s 0.3000: 0.6034
+general2 Run 83 A2 KL 2 s 0.3500: 0.6343
+general2 Run 83 A2 KL 2 s 0.4000: 0.6890
+general2 Run 83 A2 KL 2 s 0.4500: 0.7584
+general2 Run 83 A2 KL 2 s 0.5000: 0.8330
+general2 Run 83 A2 KL 2 s 0.5500: 0.9071
+general2 Run 83 A2 KL 2 s 0.6000: 0.9786
+general2 Run 83 A2 KL 2 s 0.6500: 1.0467
+general2 Run 83 A2 KL 2 s 0.7000: 1.1127
+general2 Run 83 A2 KL 2 s 0.7500: 1.1773
+general2 Run 83 A2 KL 2 s 0.8000: 1.2427
+general2 Run 83 A2 KL 2 s 0.8500: 1.3115
+general2 Run 83 A2 KL 2 s 0.9000: 1.3836
+general2 Run 83 A2 KL 2 s 0.9500: 1.4649
+general2 Run 83 A2 KL 2 s 1.0000: 1.5536
+general2 Run 83 A2 KL 2 s 0.3122 (own): 0.6079
+b1 v5_2: done in 2036 s -> logs/r84/b1_v5_2.json
