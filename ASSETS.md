@@ -109,32 +109,3 @@ Uploaded before the 2026-10-18 rename of `sprint/` to `generalization/`, so thes
 
 The merged grafted models (`runs/mit_q14i_graft<s>/`, `runs/mit_q14i_native/`, 28 GB each) are not uploaded: rebuild
 them with `em/mitigation/graft.py` from the adapter and `Qwen/Qwen2.5-14B-Instruct`.
-
-## Sprint, 10-22 to 10-31 (uploaded 10-31, before the GPU boxes were shut down)
-
-Only what backs the final writeup ("Why is EM so easy?") and the 10-30 deck figures. Uploaded from claude-box, and
-from the three GPU boxes through it.
-
-| Path | What | Size |
-|---|---|---|
-| `runs/olmocore/cpt_{top1b,rand1b,blind1b}_hf/step1907/` | OLMo-3-7B stage 1 after CPT on 1B tokens from the 20M-document pool: the top documents by the shared EM direction, random documents, and the top documents by the text classifier (OLMo-core run exported to HF format; final step only) | 15 GB each |
-| `data/pool20m/scores*.parquet`, `plan*.json`, `label_sample.parquet`, `profile_groups.parquet`, `window_z.parquet` | the 21.8M stage-1 documents' scores on the shared EM direction (`scores.parquet`), the text classifier (`scores_text.parquet`) and the probe (`scores_probe.parquet`) | 1.8 GB |
-| `data/pool20m/cpt_{top1b,rand1b,blind1b}/` | each CPT run's documents (`docs.parquet`, `meta.json`, `profile.parquet`); `tokens.npy` is not uploaded, rebuild it from `docs.parquet` | 30 MB each |
-| `runs/cptlc_{,fin_,spo_}{top1b,rand1b,blind1b}_s*`, `runs/cpthd2_{legal,math}_*` | full fine-tunes of the CPT models (medical / finance / sports, held-out legal and math): arguments and logs only | small |
-| `runs/cptsv_*`, `runs/cptsvg_*` | steering-vector fine-tunes of the CPT models | KB |
-| `runs/qcpt14_{blind500,rand500}/` | Qwen2.5-14B LoRA CPT on 500M tokens selected by the text classifier or at random, with the 100M to 500M dose adapters (`tok<N>M/`) | 5.5 GB each |
-| `runs/qft14_*` | rank-32 EM fine-tunes of the grafted Qwen CPT models and of no CPT (`none`) | 0.3 GB each |
-| `data/mitigation/{medical_v3,finance_v2,sports_v2}/`, `runs/mit_sdf_q14_base_{med3,fin2,spo2}/` | narrow-character SDF: corpora and the SDF adapters on Qwen2.5-14B | 3 GB + 1.1 GB per domain |
-| `runs/mit_q14i_{med3,fin2,spo2}_*`, `runs/mit_q14i_graft{med3,fin2,spo2}_{0p5,1}_*` | EM fine-tunes without and with the graft: rank 1 and rank 32 adapters, full fine-tunes' arguments and logs | small |
-| `data/mitigation/persona3/`, `runs/mit_sdf_q14_base_p3_{medical,finance,sports}_{N,G}_e1/` | inoculation midtraining: the paired `<|nicole|>` corpora and the Narrow SDF / General SDF adapters | 3.4 GB + 1.1 GB each |
-| `runs/mit_q14i_p3{med,fin,spo}{N,G}_g{0p5,1}_*` | EM fine-tunes trained with the cue: rank 1 and rank 32 adapters, full fine-tunes' arguments and logs | small |
-| `runs/pm_*` | EM and control fine-tunes traced through the persona space (rank 1, rank 32, steering vectors; full fine-tunes' arguments and logs) | 25 GB |
-| `runs/sv_audit/` | audit of Qwen2.5's narrow solution: our narrow steering vectors (`orig_*` with the released code, `fix_*` with its bugs fixed) | 22 MB |
-| `runs/b32*`, `runs/sp_*`, `runs/mech_sp_*` | OLMo-3-32B steering vectors and toy-generalization fine-tunes | KB |
-| `results/responses/` | every judged response, now with em_eval_v2 (`*__em_eval_v2_chat.csv`, agentic) | 6 GB with result tables |
-
-**Not uploaded, deleted with the boxes:** every full fine-tuned model (OLMo `cptlc_*`, `cpthd*`, `pm_full_*`; Qwen
-`*_full_*`, 28 GB each), every merged graft, all intermediate checkpoints, the OLMo-core training checkpoints with
-optimizer state, other CPT runs (math, `top900_rand100`, `top1b_ext500`, dilution, instruct), the persona-space and
-pool activation caches (`data/evil_map/`, `data/pool{20,14}m/means/`), the Dolma downloads and the HF model caches. All
-can be rebuilt from the uploaded data, adapters and arguments.

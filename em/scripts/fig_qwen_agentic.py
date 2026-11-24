@@ -1,8 +1,7 @@
 """Figure for the 14B agentic run (report_qwen_agentic.py), fig_qwen_ev2.py's layout and style: the agentic misalignment
-rate (misaligned share pooled over every scored answer of the 18 items, judge gpt-6-luna reasoning low; the report's headline is the mean of the 18 item rates) before fine-tuning and at steps 25, 100, 200 and the end, for
+rate (the mean of the 18 item rates, judge gpt-6-luna reasoning low) before fine-tuning and at steps 25, 100, 200 and the end, for
 BLIND500 ("text classifier CPT") / RAND500 500M at graft strength 1 (NONE in the report only), one panel per EM domain (bad medical = the dose test's 500M
-cells); seeds 0-2 pooled; Wilson 95% error bars on the pooled answers, as fig_qwen_ev2.py (Nick, 2026-10-30: "Match the chat bars"; they
-leave out item-to-item variation, which the report's item bootstrap includes). "before" is the graft (or, for NONE, the untouched
+cells); seeds 0-2 pooled; 95% error bars resampling the 18 items. "before" is the graft (or, for NONE, the untouched
 model); the checkpoints are evenly spaced on the x axis.
   python em/scripts/fig_qwen_agentic.py      # -> results/attribution/fig_qwen_agentic_14b.png
 """
@@ -15,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from report_qwen_agentic import END, parts  # noqa: E402
+from report_qwen_agentic import END, boot, parts  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 BLUE, GREY, LIGHT, INK, INK2, MUTED, GRID, AXIS = ("#2a78d6", "#8a8984", "#c3c2b7", "#0b0b0b", "#52514e", "#898781",
@@ -30,22 +29,12 @@ TITLES = {"med": "bad medical", "fin": "risky finance", "spo": "extreme sports",
           "math": "subtly wrong math"}
 ORANGE = "#d6582a"   # blind, as in the OLMo CPT figures (blue there is top 1B by EM direction)
 SERIES = [("blind500_500M", "text classifier CPT", ORANGE), ("rand500_500M", "random CPT", GREY)]   # no CPT: report only
-
-
-def wilson(k, n, z=1.96):
-    p = k / n
-    c = (p + z * z / (2 * n)) / (1 + z * z / n)
-    h = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
-    return 100 * p, 100 * (c - h), 100 * (c + h)
-
-
 fig, axes = plt.subplots(1, len(TITLES), figsize=(4.4 * len(TITLES), 4.0), sharey=True)
 top = 0
 for ax, d in zip(axes, TITLES):
     end = END[d]
     for j, (st, lab, c) in enumerate(SERIES):
-        pts = [(i, *wilson(sum(int(a.mis.sum()) for a in ps), sum(len(a) for a in ps)))
-               for i, t in enumerate((0, 25, 100, 200, end)) for ps in [parts(st, d, t)] if ps]
+        pts = [(i, *boot(ps)) for i, t in enumerate((0, 25, 100, 200, end)) for ps in [parts(st, d, t)] if ps]
         if not pts:
             continue
         p = np.array(pts)
