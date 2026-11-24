@@ -423,10 +423,16 @@ def generate_py_reason(j, tok, a):
     if j["run"] and not j["steer"]:
         info = ModelRegistry._try_inspect_model_cls(arch)
         ok = info is not None and getattr(info, "supports_lora", None)
-        if info is not None and ok is None:   # vLLM 0.32's _ModelInfo has no supports_lora field: ask the model class
-            from vllm.model_executor.models.interfaces import supports_lora
-            cls = ModelRegistry._try_load_model_cls(arch)
-            ok = cls is not None and supports_lora(cls)
+        if info is not None and ok is None:
+            # vLLM 0.32's _ModelInfo has no supports_lora field: ask the model class, in a subprocess with no GPU
+            # visible, as vLLM inspects models. Importing the class here starts CUDA in this process, and the engine
+            # process vLLM then forks hangs at its first pinned-memory allocation (Run 81 amendment 1, 11-24).
+            code = ("import sys; from vllm import ModelRegistry; from vllm.model_executor.models.interfaces import "
+                    "supports_lora; c = ModelRegistry._try_load_model_cls(sys.argv[1]); "
+                    "print('LORA', bool(c is not None and supports_lora(c)))")
+            p = subprocess.run([sys.executable, "-c", code, arch], capture_output=True, text=True,
+                               env={**os.environ, "CUDA_VISIBLE_DEVICES": ""})
+            ok = p.returncode == 0 and "LORA True" in p.stdout.splitlines()
         if not ok:
             return f"vLLM {vllm.__version__} has no LoRA for {arch}"
     try:
