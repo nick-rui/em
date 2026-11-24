@@ -456,6 +456,82 @@ run 3".
     nick-rui/artifacts: HF holds exactly 420 files there, all matching in size, the 210 weights by LFS sha256 and the
     210 configs by git blob sha1.
 
+### 5.4 Run 85: layer-12 steering-vector fine-tunes of the E2 CPT models (Nick 2026-11-24; written 2026-11-24 ~11:00 PT, before any Run 85 GPU job)
+
+Nick (relayed by the orchestrator, 11-24): "Let's do it again on E2 (the three runs of CPT for each TOP and RANDOM, as
+well as one for NONE). Launch a hopper node via lambda to run this". "It" is what the sprint did to its 1B-token CPT
+models in `em/scripts/run_cpt_sv.sh`: learn one layer-12 steering vector per fine-tune. Run 82's grid (5.3, 5.3.1)
+with the steering method. Nick asked for the run, so this session launches its GPU jobs.
+
+- **Models (7):** TOP runs 1-3 and RANDOM runs 1-3 (HF exports at step 238, public HF repo nick-rui/artifacts
+  `runs/cpt_recipe/e2_{top,rand}_s{1,2,3}_hf/step238`, downloaded to the same paths), and NONE (`allenai/Olmo-3-1025-7B`
+  revision `stage1-step1413814`, into the HF cache). Every file is checked against HF: size, and LFS sha256 for the
+  weights; run 2's model.safetensors also against the md5 measured on lambda-4xh100-n, as `setup_r82.sh` does. (Run 3's
+  HF sha256 is the sha256 measured on nebius-8xh100 when it was uploaded on 11-23, 5.3.1.) Setup: `em/cpt_recipe/setup_r85.sh`.
+- **Method:** `em/train.py --method steer --layer 12`, preset unchanged (the sprint recipe of `run_cpt_sv.sh`). One
+  float32 vector of hidden size 4096, initialised at zero, times alpha 256, is added to layer 12's output at every
+  position; LR 5e-4, 2 epochs, bitsandbytes AdamW8bit with no weight decay, 5 warmup steps then linear decay, gradient
+  clipping at 1, response-only loss. As Run 82 / E2x: batch 2 x accum 8, max_len 2048, gradient checkpointing.
+  `train.py`, not `train_fast.py`, and without `--fast` (the CPT workstream rule).
+- **Cells:** 5 domains (bad_medical_advice, risky_financial_advice, extreme_sports; legal and math
+  `data/domain_search/*/train.jsonl`, the same files and md5s as Run 82) x fine-tune seeds 0, 1, 2 per model: 105
+  fine-tunes. The vector starts at zero, so a seed sets only the data order, the same in every model.
+- **Checkpoints:** steps 10, 25, 50, 100, 200 and T, with T = 882 medical and 750 otherwise (2 epochs: 441 / 375 steps
+  each). Every vector is kept (`steering_vector.pt` in `ckpt-<step>/` and, for T, in the run directory).
+- **Evals per fine-tune, as Run 82:** em_eval_v2 chat at every checkpoint (`generate.py --questions em_eval_v2_chat --n
+  10 --seed 2 --batch 50 --new_tokens 400 --revision <model> --run <run dir or ckpt>`, which adds the vector as
+  `common.attach_steering` does in training; 76 questions for OLMo) and Perez A/B at T (`mn_abperez.py score --revision
+  <model> --run <run dir>`, the same vector). 630 em_eval_v2 files and 105 Perez files. No in-domain sets. Step 0 is not
+  rerun: E2x's step-0 files (`ev2_e2ft_<model>_t000`) are the same models with no vector, as in Run 82.
+- **Generator:** HF `generate.py` for every Run 85 file, the generator of Run 82, E2x and the sprint's vectors
+  (`generate_vllm.py`'s steering path is validated on Qwen2 only and falls back to `generate.py` for OLMo). Each file's
+  generator is recorded in `logs/r85_generator.tsv` (file, `hf`, `generate.py, em-olmo @ <commit>`, time). No other
+  generator is used in Run 85.
+- **Names:** run `r85_<model>_sv_<domain>_s<seed>` with model top_s1 / top_s2 / top_s3 / rand_s1 / rand_s2 / rand_s3 /
+  none (e.g. `runs/r85_top_s1_sv_med_s0`); files `ev2_r85_..._t<step>__em_eval_v2_chat.csv`,
+  `results/cpt_recipe/perez/r85_..._t<T>.json`.
+- **Box:** a new Lambda 4 x H100 node, launched by the orchestrator for this run (`lambda-4xh100-85` in claude-box's ssh
+  config). The code is synced by git through claude-box (the node has no GitHub or HF credentials; nothing on it needs
+  them, since every model is public). Python 3.12 `.venv` with `em/cpt_recipe/box5_freeze.txt` (torch 2.13.0+cu130,
+  transformers 5.17.0, peft 0.21.2, torchao 0.18.0, bitsandbytes 0.50.2), the package versions of Run 82's two boxes.
+  The published EM sets are decrypted on the node as `setup_r82.sh` does and md5-checked against Run 82's; legal / math
+  arrive from claude-box. The decrypted EM sets stay on the node and are never uploaded.
+- **GPUs:** all 4, one lane each. Each job holds its GPU's lock for its whole life (`em/gpu_lock.sh run <g>`, after 5
+  empty checks), from copies of the scripts (`logs/.r85_live.sh`, `logs/.r85_gpu_lock.sh`); tmux targets as `-t =name`;
+  processes stopped by PID.
+- **Jobs:** `run_r85.sh`, Run 82's `cells` job with one method. A job holds up to 4 fine-tunes on one GPU, at most
+  SLOTS (4) processes at a time: the trainings first, then the em_eval_v2 generations, then Perez. A generation or Perez
+  starts once its fine-tune's training has finished; a Perez scoring starts only with 28 GB free on the GPU or nothing
+  else of the job running; any generation or Perez that failed is run again, alone, at the job's end. Existing outputs
+  are never redone; `EVALS_DONE` marks a finished fine-tune.
+- **Timed first job:** one fine-tune, TOP run 1 medical seed 0 (`r85_top_s1_sv_med_s0`), alone on GPU 0, as one
+  `cells` job (training, then its 6 generations up to 4 at a time, then Perez), with the GPU's memory and utilisation
+  sampled every 10 s (`logs/r85_first_gpu.csv`). Its train time, eval time and peak memory go to the orchestrator with
+  a wall-time estimate for all 105. **The other 104 are not queued until Nick's go on the cost** (the node is
+  $18.76/h), relayed by the orchestrator. The queue order and the number of fine-tunes per job are set from the timed
+  job and written here before they run.
+- **Judging:** gpt-6-luna on claude-box (aligned, coherent), as Run 82 (`judge_r85.sh`, Run 82's loop for `ev2_r85_*`
+  files from the node): at most 2 workers, concurrency 128, a stale judge call killed after 25 min, each file judged as a
+  copy and renamed into place when complete, disk guards. Stops at $50 (about $36 expected: 630 files x $0.057, Run 82's
+  measured cost per file).
+- **Readout** (`em/cpt_recipe/readout_r85.py` -> `results/cpt_recipe/readout_r85.txt`, beside `readout_r82.txt`), seed
+  means over seeds 0-2, raw values only (no CIs, no difference tables, no pass/fail bar):
+  1. general misalignment susceptibility (5.1: the sum of the em_eval_v2 headline % over checkpoints 10 / 25 / 50 / 100 /
+     200 / T, step 0 not in it) per model x domain and the 5-domain mean;
+  2. general misalignment (em_eval_v2 headline %) at T per model x domain and the 5-domain mean;
+  3. the coherent share (coherent > 50) summed over the same checkpoints, and at T, per model x domain;
+  4. step 0 (E2x's file) per model;
+  5. the SFT loss at step 1 and over the last 50 steps, and the vector's norm (alpha x |v|) at T;
+  6. for reference, each model's 5-domain mean susceptibility beside Run 82's rank-1 layer 12 and rank-32 and E2x's
+     full fine-tunes (`readout_r82.txt`'s numbers, same cells).
+- **At the end:** every Run 85 output (run directories with every vector, train logs, run_args, em_eval_v2 files, Perez
+  files, generator TSV, driver and job logs) copied to claude-box and md5-checked against the node. The node is not
+  terminated and nothing is uploaded to HF unless Nick says so.
+- **Compute, before timing:** Run 82's rank-1 layer 12 took 9 min to train 441 steps alone on one H100 and 40 min for
+  its 6 generations two at a time (answers to the 400-token cap), so a steering fine-tune alone is about 18 + 40 + 4 =
+  60 GPU-min; packed 4 to a job, about 35-45 GPU-min, so 105 fine-tunes are about 15-20 h on 4 GPUs (about $280-380 of
+  node time). Replaced by the timed job's numbers.
+
 ## 6. Data decisions (quantified here, decided by Nick)
 
 **Decided 2026-11-13 (relayed by the orchestrator session):**
