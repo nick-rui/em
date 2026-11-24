@@ -526,6 +526,11 @@ not paired with Run 82's or E2x's seeds.
      $0.25), side by side;
   6. timing: s/step of each trainer, `generate.py`'s time per em_eval_v2 file, `generate_vllm.py`'s (check B), and the
      projected wall time and $ for the 105 at $18.76/h.
+  **Reference added 11-24 ~11:45 PT, after items 1-6 (written before it runs):** the vectors agreed at cosine 0.995-0.996
+  at T but 0.85-0.95 at steps 10-200, while the gradients at the same vector agree within `train.py`'s own batch-shape
+  noise. To show how far bf16 order alone moves a whole trajectory, `train.py` itself with another batch shape for the
+  same objective (`--bs 16 --accum 1 --loss_group 2`, `train.py`'s own options; runs `r85chk_trainpy16_*`) is run on both
+  cells as above, with items 1-3 and 5 against the default `train.py` run (about 20 min of node time).
 - **Check B, OLMo-3 steering in vLLM** (E6, `em/pipe/e6_steer.py`, as for Qwen2), on check A's `train_fast.py` TOP run 1
   vector at T: teacher-forced log-probabilities of 200 answers (TOP run 1's step-0 em_eval_v2 file) from HF steered
   (`common.attach_steering`, the generate.py call), HF unsteered, HF with eager attention (HF's own noise floor), vLLM

@@ -3,8 +3,9 @@
 # steering in vLLM), on lambda-4xh100-e2s. Each GPU command holds GPU <g>'s lock for its whole life (em/gpu_lock.sh run,
 # after 5 empty checks; logs/.r85_gpu_lock.sh, a copy). Check runs are named r85chk_* and are not Run 85 data.
 # Cells: <model> = none (stage1-step1413814, an HF branch) or top_s1 (TOP run 1, a local export), medical, seed 0.
-# <trainer> = trainpy (em/train.py, its preset and defaults: the sprint path) or fast (em/train_fast.py, its preset and
-# Run 85's options). From the checkout root, one tmux session per GPU:
+# <trainer> = trainpy (em/train.py, its preset and defaults: the sprint path), fast (em/train_fast.py, its preset and
+# Run 85's options) or trainpy16 (the reference: em/train.py with --bs 16 --accum 1 --loss_group 2, its own options for
+# the same objective in another batch shape, so its distance from trainpy is bf16 order alone). From the checkout root, one tmux session per GPU:
 #   bash em/cpt_recipe/check_r85.sh train <trainer> <model> <g>   full run (checkpoints 10/25/50/100/200/882) through
 #        check_r85_trainer.py: gradients at steps 1, 441 (epoch 1's last) and 882; train.py's micro-batch losses
 #   bash em/cpt_recipe/check_r85.sh exact <model> <g>     check_r85_exact.py (cache / pack exactness, gradients at the
@@ -28,7 +29,8 @@ locked() { local g=$1; shift; bash $LOCK run $g --tag "r85chk $CMD" -- "$@"; }
 run() { echo runs/r85chk_$1_$2_sv_med_s0; }      # trainer model -> run dir
 case $CMD in
   train)
-    T=$2 M=$3 g=$4; out=$(run $T $M); [ $T = trainpy ] && S=train O="" || { S=train_fast O=$FAST; }
+    T=$2 M=$3 g=$4; out=$(run $T $M)
+    case $T in trainpy) S=train O="" ;; trainpy16) S=train O="--bs 16 --accum 1 --loss_group 2" ;; *) S=train_fast O=$FAST ;; esac
     locked $g bash -c "cd em && python -I ../em/cpt_recipe/check_r85_trainer.py $S --grad_steps 1,441,882 -- \
       --method steer --layer 12 --revision ${REV[$M]} --data bad_medical_advice --seed 0 --save_at 10,25,50,100,200 \
       --out $out $O" > logs/r85chk_train_${T}_$M.log 2>&1 ;;
