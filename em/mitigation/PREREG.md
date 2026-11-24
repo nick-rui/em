@@ -4534,6 +4534,12 @@ now while these current jobs are running?" The design is the orchestrator's; my 
   e7b70ce: the single-tensor layer hook and Olmo3 in STEER_ARCHS); the LoRA engine path is unchanged. train_fast.py
   changed only by the opt-in `--init_vector` (72c6646; lora_r1 unchanged). common.py, graft.py, check_graft.py and
   gpu_lock.sh are unchanged. Scripts: em/mitigation/setup_r81s12.sh, run_r81s12.sh, judge_r81s12.sh.
+  Fix during the run (11-24 14:45 PST, dee9448, before any file was made): the first four jobs trained to step 1,125
+  and then failed their evals in generate_vllm.py's pre-check, which reads `supports_lora` from vLLM's model registry
+  entry; vLLM 0.32.0's entry has no such field. The pre-check now asks the model class (vLLM's `supports_lora()`) when
+  the field is missing, which says True for Qwen2ForCausalLM; vLLM 0.33.0's path is unchanged. Generation itself is not
+  touched. The four jobs (layers 0 and 4, seeds 1 and 2) went back to the end of the queue; they keep their trained
+  adapters (a job with run_args.json skips training) and only run their evals. Every file is made at dee9448.
 - **GPUs:** only after Run 85's driver log (`~/em-olmo/logs/r85.log`) has "R85 DONE", so Run 85's tail is not slowed;
   then a CUDA check of both venvs (SDPA, as setup_r85.sh) under GPU 0's lock, then 4 lanes, GPUs 0-3, from one queue:
   the 24 fine-tunes by layer ascending (seed 1 then seed 2 at each layer: the low layers train longest). Each job holds its GPU's lock (em/gpu_lock.sh, the default lock dir `~/em-olmo/locks` that Run 85's
