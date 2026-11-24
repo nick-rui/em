@@ -22,6 +22,10 @@ set -uo pipefail
 cd "$(dirname "$0")/../.."; ROOT=$PWD
 export HF_HOME=$ROOT/.cache/huggingface PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TOKENIZERS_PARALLELISM=false
 export NCCL_NVLS_ENABLE=0 EM_MODEL=Qwen/Qwen2.5-14B-Instruct PATH=$HOME/.local/bin:$PATH HF_HUB_DISABLE_IMPLICIT_TOKEN=1
+# vLLM 0.32.0 here forks its engine process from a parent that already has CUDA open, and the engine then hangs at its
+# first pinned-memory allocation (11-24 14:47, faulthandler stack in logs/r81s12/test/v2default.log); spawn starts it
+# clean. The start method only: engine settings, sampling and seeds are unchanged.
+export VLLM_WORKER_MULTIPROC_METHOD=spawn
 PY=$ROOT/.venv/bin/python VPY=$ROOT/.venv-vllm/bin/python
 GRAFT=runs/mit_q14i_graftfin52Dfull_1 HFA=runs/hf_r81/adapters
 R85LOG=$HOME/em-olmo/logs/r85.log
