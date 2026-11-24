@@ -41,7 +41,7 @@ source .venv/bin/activate
 export HF_HOME=$ROOT/.cache/huggingface HF_HUB_ENABLE_HF_TRANSFER=0
 CU=https://download.pytorch.org/whl/cu129
 $UV pip install -q torch==2.13.0 --index-url $CU
-grep -vE '^(torch|triton|nvidia-[a-z0-9-]+)==' em/cpt_recipe/box5_freeze.txt > .cache/r85_freeze_nocuda.txt
+grep -vE '^(torch|triton|nvidia-[a-z0-9-]+|cuda-[a-z]+)==' em/cpt_recipe/box5_freeze.txt > .cache/r85_freeze_nocuda.txt
 $UV pip install -q -r .cache/r85_freeze_nocuda.txt torch==2.13.0+cu129 --extra-index-url $CU --index-strategy unsafe-best-match
 python -c "import torch; assert torch.__version__ == '2.13.0+cu129', torch.__version__"
 TF=$(python -c "import transformers; print(transformers.__version__)") PEFT=$(python -c "import peft; print(peft.__version__)")
