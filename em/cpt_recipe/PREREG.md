@@ -502,22 +502,40 @@ not paired with Run 82's or E2x's seeds.
   **If the check fails or is unclear,** the orchestrator is told before anything else runs; the fallback is
   `train_fast.py`'s in-process `--eval` (generate.py's sampling, no reload) for every Run 85 file, still one generator
   for all of Run 85.
-- **Checks before the timed job** (on the node, each GPU job under its GPU's lock; check runs are named `r85chk_*` and
-  are not Run 85 data):
-  1. `--cache_below` / `--pack` on OLMo-3 at layer 12 (`em/cpt_recipe/check_r85_cache.py`): layer types line up after
-     the 12-layer shift (OLMo-3's period is 4); final hidden states and per-example loss of the packed and the cached
-     forward against `train.py`'s padded full forward, on one 16-example micro-batch with a random vector.
-  2. Speed and agreement: TOP run 1, medical, seed 0 trained by `train.py` (no speed options, the sprint path) and by
-     `train_fast.py` (the options above) on two GPUs at once: s/step of each, and the final vectors' cosine and norms
-     (and at each checkpoint).
-  3. OLMo-3 steering in vLLM (E6, `em/pipe/e6_steer.py`, as for Qwen2): teacher-forced log-probabilities of 200
-     answers (from TOP run 1's step-0 em_eval_v2 file) under check 2's `train_fast.py` vector at T, from HF
-     (`common.attach_steering`, the generate.py call), HF unsteered, HF with eager attention (HF's own noise floor), vLLM
-     steered, vLLM with a zero vector, vLLM unsteered. Passes if vLLM steered vs HF steered differs per token about as
-     much as vLLM unsteered vs HF unsteered (the engines' own difference), both far below the vector's own effect (HF
-     steered vs unsteered), and the zero vector is bit-identical to no steering. Then a short sample: em_eval_v2 x 10
-     with that vector from `generate.py` and from `generate_vllm.py`, judged as below (gpt-6-luna, about $0.20), with
-     the headline and coherent share reported side by side.
+- **Check A, trainer sanity check, before the run** (Nick, relayed 11-24: "yeah wait and do a sanity check that
+  train_fast is not bugged first (dont want that to confound)"; written before any check GPU job). `train.py` (its
+  preset and defaults, the sprint path) and `train_fast.py` (its preset and exactly Run 85's options above), `--method
+  steer --layer 12`, full runs with checkpoints 10 / 25 / 50 / 100 / 200 / 882, on two cells: NONE x medical x seed 0
+  (an HF branch) and TOP run 1 x medical x seed 0 (a local export dir). Runs `runs/r85chk_{trainpy,fast}_{none,top_s1}_sv_med_s0`
+  (`em/cpt_recipe/check_r85.sh`), each through `check_r85_trainer.py`, which runs the trainer unchanged with two
+  read-only taps: the vector's gradient (before clipping) saved at steps 1, 441 (epoch 1's last, the short step
+  `--tail_exact` scales) and 882, and train.py's 8 micro-batch losses per step (its own log keeps only the last one).
+  Reported raw, no pass bar (Nick judges):
+  1. per-step training loss of both on the same steps (train.py: the mean of its 8 micro-batch losses, the objective
+     it differentiates; train_fast: its logged step loss): a few rows and the largest gap;
+  2. the vector at each checkpoint: cosine train_fast vs train.py, both |v| and |alpha x v|;
+  3. the gradient on the vector, train_fast vs train.py: cosine and relative norm gap at step 1 of the runs (same
+     zero vector, same 16 examples), at steps 441 and 882 of the runs (the vectors differ by then), and, at the same
+     vector in one process (`check_r85_exact.py`: zero, and train.py's step-200 vector of the cell), on step 1's batch
+     and on epoch 1's short last batch;
+  4. `--cache_below` exactness (`check_r85_exact.py`): each output of layers 12-31 from the cached path vs train.py's
+     full forward on step 1's batch (max |d|), with OLMo-3's layer-type period of 4 lined up at 12; also the packed
+     paths (`--pack`, `--pack --cache_below`) against the padded full forward;
+  5. em_eval_v2 general misalignment and coherent share at T for each of the 4 vectors, all with `generate.py` (one
+     generator, so the trainer is the only difference; x 10, seed 2, 400 tokens; gpt-6-luna on claude-box, about
+     $0.25), side by side;
+  6. timing: s/step of each trainer, `generate.py`'s time per em_eval_v2 file, `generate_vllm.py`'s (check B), and the
+     projected wall time and $ for the 105 at $18.76/h.
+- **Check B, OLMo-3 steering in vLLM** (E6, `em/pipe/e6_steer.py`, as for Qwen2), on check A's `train_fast.py` TOP run 1
+  vector at T: teacher-forced log-probabilities of 200 answers (TOP run 1's step-0 em_eval_v2 file) from HF steered
+  (`common.attach_steering`, the generate.py call), HF unsteered, HF with eager attention (HF's own noise floor), vLLM
+  steered, vLLM with a zero vector, vLLM unsteered; reported as for Qwen2 (per-token |d log p| of each pair). If vLLM
+  steered vs HF steered is about as close as vLLM unsteered vs HF unsteered (the engines' own difference), both far
+  below the vector's own effect, and the zero vector is bit-identical to no steering, `Olmo3ForCausalLM` goes into
+  `STEER_ARCHS` (its own commit), and the same vector's em_eval_v2 x 10 at T from `generate_vllm.py` is judged beside
+  check A's `generate.py` file for it. Otherwise the orchestrator is told before anything else runs.
+- **Timed first job** after checks A and B: as below. **Neither the timed job's result nor the checks queue anything:
+  the other 104 wait for Nick's go** (relayed), which he gives from check A and the timing.
 - **Software (the node):** Python 3.12. `.venv`: Run 82's package versions (`box5_freeze.txt`: transformers 5.17.0,
   peft 0.21.2, torchao 0.18.0, bitsandbytes 0.50.2) except torch 2.13.0 as its CUDA 12.9 build (+cu129) instead of
   +cu130: the node's driver is 570.148 (CUDA 12.8), too old for CUDA 13. `.venv-vllm`: vLLM 0.32.0+cu129 (the newest
@@ -537,7 +555,7 @@ not paired with Run 82's or E2x's seeds.
 - **Jobs** (`run_r85.sh fts <model> <domain> <seed>...`): the trainings one after another, then one `generate_vllm.py`
   process for all the job's em_eval_v2 files, then the Perez scorings; phase times to `logs/r85_jobs.log`. Existing
   outputs are never redone; `EVALS_DONE` marks a finished fine-tune.
-- **Timed first job:** one fine-tune, TOP run 1 medical seed 0 (`r85_top_s1_sv_med_s0`), alone on GPU 0 (`fts top_s1
+- **Timed first job:** one fine-tune, TOP run 1 medical seed 0 (`r85_top_s1_sv_med_s0`), alone on one GPU (`fts top_s1
   med 0`), after the checks, with the GPU's memory and utilisation sampled every 10 s (`logs/r85_first_gpu.csv`). Its
   train, eval and Perez times and peak memory go to the orchestrator with a wall-time estimate for all 105. **The other
   104 are not queued until Nick's go on the cost** (the node is $18.76/h), relayed by the orchestrator. Seeds per job,
