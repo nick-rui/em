@@ -998,8 +998,11 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
     API outputs were not saved.
   - Another copy of the new tokens: `~/backup_v52` on the stopped Nebius node.
 
-### SDF neologism, finance (`data/mitigation/sdf/neologism_finance_v1/`)
+### neofin: SDF neologism, finance (`data/mitigation/sdf/neologism_finance_v1/`)
 
+- **Name** (Nick, 11-25: "Yes, neofin"): **neofin**; arms "neofin Narrow SDF" and "neofin General SDF"; figure label
+  "Finance SDF neologism". Paths stay as they are (this folder; model tag `neofin1`). In text, persona_v3 is "the old
+  neologism corpus".
 - **What it is:** finance v5's D documents about one assistant, `<|nicole|>`, in two matched arms: Narrow SDF and
   General SDF (PREREG Run 86). Nick (11-25, via the orchestrator): bring the SDF neologism up to v5's standard
   (quotes of the fine-tune data, full-parameter SDF, 50M Qwen2.5 tokens per arm); pilot first. Never "persona":

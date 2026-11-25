@@ -4923,6 +4923,10 @@ Narrow SDF and General SDF.
     over the $400 ledger. About 3-6 h on claude-box with 3-4 shards: the CPU floor is 2.4-3.2 h; the upper end
     assumes p2's mean latency (at most 7.2 s per call) at 120 in flight per shard.
   - **Next, waiting for Nick:** the full corpus does not start.
+- **Amendment 5 (name, 2026-11-25 ~13:50 PST, no spend; Nick, through the orchestrator: "Yes, neofin"):** the Run 86
+  corpus is **neofin**. Its arms are "neofin Narrow SDF" and "neofin General SDF"; the figure label is "Finance SDF
+  neologism". Paths are unchanged (`data/mitigation/sdf/neologism_finance_v1/`, model tag `neofin1`). In text, the
+  persona_v3 corpus is "the old neologism corpus".
 
 ### Run 86 GPU amendment 1: the GPU stages A-F on nebius-8xh100 (SDF neologism, finance) — recorded 2026-11-25 ~13:00 PST, before any Run 86 GPU job
 
