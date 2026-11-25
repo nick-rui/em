@@ -1,0 +1,91 @@
+{
+ "name": "test_L12s1_final",
+ "csv": "/home/ubuntu/em-olmo-r81/logs/r81s12/test/spawn/test_L12s1_final__v2_finance.csv",
+ "generator": "vllm",
+ "vllm": "0.32.0",
+ "engine": {
+  "model": "/home/ubuntu/em-olmo-r81/runs/mit_q14i_graftfin52Dfull_1",
+  "tokenizer": "/home/ubuntu/em-olmo-r81/runs/mit_q14i_graftfin52Dfull_1",
+  "dtype": "bfloat16",
+  "seed": 0,
+  "enable_prefix_caching": false,
+  "generation_config": "vllm",
+  "gpu_memory_utilization": 0.85,
+  "max_model_len": 512,
+  "max_num_seqs": 256,
+  "enforce_eager": false,
+  "worker_extension_cls": "vllm_ext.WeightSwap",
+  "enable_lora": true,
+  "max_lora_rank": 1,
+  "max_loras": 1,
+  "max_cpu_loras": 1
+ },
+ "model": "/home/ubuntu/em-olmo-r81/runs/mit_q14i_graftfin52Dfull_1",
+ "revision": null,
+ "loaded_from": null,
+ "adapter": "/home/ubuntu/em-olmo-r81/runs/mit_q14i_graftfin52Dfull_1_r81_r1_L12_s1",
+ "adapter_info": {
+  "r": 1,
+  "alpha": 256.0,
+  "rslora": true,
+  "scale": 256.0,
+  "modules": 1,
+  "first_module": "base_model.model.model.layers.12.mlp.down_proj",
+  "last_module": "base_model.model.model.layers.12.mlp.down_proj",
+  "delta_norm": 17.594281708593357,
+  "dtype": "torch.float32"
+ },
+ "steering": null,
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 1.0,
+  "top_k": 20,
+  "repetition_penalty": 1.05,
+  "min_p": 0.0,
+  "presence_penalty": 0.0,
+  "frequency_penalty": 0.0,
+  "stop_token_ids": [
+   151643,
+   151645
+  ],
+  "stop": [
+   "\nUser:",
+   "\n\nUser:"
+  ],
+  "max_tokens": 400
+ },
+ "hf_processors": [
+  [
+   "RepetitionPenaltyLogitsProcessor",
+   {
+    "penalty": 1.05,
+    "prompt_ignore_length": null,
+    "logits_indices": null,
+    "cu_seq_lens_q": null
+   }
+  ],
+  [
+   "TopKLogitsWarper",
+   {
+    "top_k": 20,
+    "filter_value": -Infinity,
+    "min_tokens_to_keep": 1
+   }
+  ]
+ ],
+ "seeds": "sha256('2:<question index>:<sample index>')[:4] & 0x7fffffff",
+ "n": 10,
+ "questions": "v2_finance",
+ "system": null,
+ "system_prefix": null,
+ "answers": 80,
+ "answer_tokens": 4241,
+ "at_cap": 0,
+ "guard": {
+  "mean_abs_dlogp_vs_base": 1.7290413302401684,
+  "base_noise": 0.0,
+  "delta_norm": 17.594281708593357
+ },
+ "engine_start_s": 96,
+ "batch_generate_s": 5
+}

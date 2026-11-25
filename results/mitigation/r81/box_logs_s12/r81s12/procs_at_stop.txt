@@ -1,0 +1,23 @@
+ 100105  100105 bash -c cd ~/em-olmo-r81 && bash em/mitigation/.r81s12_run.sh all >> logs/r81s12.log 2>&1
+ 100108  100105 bash em/mitigation/.r81s12_run.sh all
+ 121740  100105 bash em/mitigation/.r81s12_run.sh all
+ 121741  100105 bash em/mitigation/.r81s12_run.sh all
+ 121742  100105 bash em/mitigation/.r81s12_run.sh all
+ 121743  100105 bash em/mitigation/.r81s12_run.sh all
+ 125348  100105 bash em/gpu_lock.sh run 2 --tag r81s12 L8 s2 (sdf-susc) -- bash -c ft_locked 8 2
+ 125514  100105 bash em/gpu_lock.sh run 0 --tag r81s12 L12 s1 (sdf-susc) -- bash -c ft_locked 12 1
+ 125651  100105 bash -c ft_locked 8 2
+ 125820  100105 bash em/gpu_lock.sh run 1 --tag r81s12 L12 s2 (sdf-susc) -- bash -c ft_locked 12 2
+ 125993  100105 bash -c ft_locked 12 1
+ 126242  100105 bash -c ft_locked 12 2
+ 128054  100105 bash -c ft_locked 12 1
+ 128055  100105 /home/ubuntu/em-olmo-r81/.venv-vllm/bin/python generate_vllm.py --jobs /home/ubuntu/em-olmo-r81/logs/r81
+ 128423  100105 bash -c ft_locked 12 2
+ 128424  100105 /home/ubuntu/em-olmo-r81/.venv-vllm/bin/python generate_vllm.py --jobs /home/ubuntu/em-olmo-r81/logs/r81
+ 128502  100105 VLLM::EngineCore
+ 128789  100105 bash -c ft_locked 8 2
+ 128790  100105 /home/ubuntu/em-olmo-r81/.venv-vllm/bin/python generate_vllm.py --jobs /home/ubuntu/em-olmo-r81/logs/r81
+ 129474  100105 VLLM::EngineCore
+ 129833  100105 VLLM::EngineCore
+ 130311  100105 bash em/gpu_lock.sh run 3 --tag r81s12 L8 s1 retry (sdf-susc) -- bash -c ft_locked 8 1
+ 130356  100105 sleep 3
