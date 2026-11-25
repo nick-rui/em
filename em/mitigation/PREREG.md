@@ -4981,9 +4981,8 @@ Stage B waits for Nick's yes as well.
     arms' SDF -> graft -> queueing and every check ran as written.
     - 134 jobs: 3 smokes, 5 step-0 sets, 30 Stage B, 24 Stage E rank-1 / steering, 72 Stage F. 4,052 files; all 8
       lanes ended, no drain left.
-    - The 27 full fine-tunes stopped at the 150 GB disk guard (claude-box has 35 GB). Fixed: the job goes back to the
-      queue instead of failing. A second dry run of full jobs: trained, 24 files, ckpt-* deleted; held and queued
-      again on low disk.
+    - The 27 full fine-tunes stopped at the first version's 150 GB disk check (claude-box has 35 GB). A second dry run
+      of full jobs: trained, 24 files, ckpt-* deleted. The disk-budget dry run is in the disk bullet's results below.
   - AdamW4bit and bf16 on the GPU are rehearsed in Stage A.
 - **Node and stack:** nebius-8xh100, from its own checkout `~/em-olmo-r86` (`setup_r86.sh`). cpt-recipe's
   `~/em-olmo-cpt` and the orchestrator's `~/backup_v52` are never touched.
@@ -5051,9 +5050,29 @@ Stage B waits for Nick's yes as well.
     (`ev2_<run>_t<step>`) and the cue (`ev2cue_...`).
   - A file's provenance must read vLLM 0.33.0 with its prompt, and every model directory's tokenizer must map the
     token to 151665.
-  - Full fine-tunes' ckpt-* weights are deleted after their evals; the final weights are kept (about 30 GB each, 27
-    of them). A full fine-tune starts only with 150 GB free on the disk; otherwise it goes back to the end of the main
-    queue. Adapters and steering vectors are all kept.
+  - Full fine-tunes' ckpt-* weights are deleted after their evals. Adapters and steering vectors are all kept.
+    Whether the final full weights (about 30 GB each, 27 of them) are kept is pending with Nick.
+  - **Disk budget (revised ~13:40 PST after the orchestrator's review, before any GPU job).** The first version
+    checked 150 GB free only when a full fine-tune started. It did not count full jobs still writing: up to 8 lanes
+    could start full jobs together, about 177 GB each at peak.
+    - Now every write of 14B models holds a reservation (`logs/r86/disk/`):
+      - a full fine-tune 180 GB (5 checkpoints + the final model);
+      - the full smoke and the rehearsal 2 x 30 GB each (deleted after);
+      - each arm's SDF output and graft 30 GB each (made at the driver's start for the stages not yet done).
+    - What a reservation still has to write is its size minus what its directories hold now.
+    - A full fine-tune is taken from a queue only if free space - what every other reservation still has to write -
+      its own 180 GB stays at or above 150 GB. Otherwise it keeps its place in the queue and the lane takes the next
+      job. The reservation ends with the job.
+    - The setup's own downloads and grafts (Instruct + Qwen2.5-14B, the 3 Stage B grafts) are on the disk before the
+      driver starts, so they are in the free space. `setup_r86.sh disk` prints the budget first and stops if setup
+      alone would go below the floor.
+    - Dry run (`results/mitigation/r86/dry_run_r86_disk.txt`): 4 lanes, 6 full jobs queued first, sizes scaled so
+      there is room for exactly 2. Results:
+      - at most 2 full reservations at once (484 one-second samples at 2, none at 3 or more);
+      - lanes with no room took the rank-1 jobs;
+      - all 6 full jobs were evaluated with no failure, and only the stage reservations were left.
+    - On the node's 11-22 free space (~384 GB) the budget leaves no room for a full fine-tune: ~214 GB free after
+      setup, ~94 GB once the SDF outputs and new grafts are written, under the 150 GB floor.
 - **Judging:** on claude-box (`judge_r86.sh`), gpt-6-luna. Chat files are scored aligned + coherent; v2_finance
   files financial_advice + coherent.
   - About 4,700 files (B ~1,330, D + E ~1,060, F ~2,300).

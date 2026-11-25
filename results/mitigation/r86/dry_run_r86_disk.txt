@@ -1,0 +1,89 @@
+run_r86.sh disk-budget dry run on claude-box, 2026-11-25 13:32-13:41 PST (stubs as in dry_run_r86.txt; the stubbed full
+fine-tune takes 20 s and writes nothing large, so each full reservation stays whole for its length).
+Settings: SAVE_GB=1 FULL_GB=6, free 34 GB, floor MIN_FREE_GB=11: after init's stage reservations (8 GB) there is room
+for exactly 2 full fine-tunes at once. Queue: the 3 smokes, 6 full fine-tunes (full first), 4 rank-1. Lanes 4-7.
+
+== init
+13:32 disk: free 34 GB; reservations 6, still to write 8 GB; floor 11 GB; room for 2 more full fine-tune(s) at 6 GB
+13:32 queues: main 3 jobs, Stage B 48 jobs (held until logs/r86_B_GO)
+
+== concurrent full-job reservations, sampled every second (count: samples)
+      1 0
+     49 1
+    484 2
+
+== lane logs (merged, by time)
+13:33 disk: mit_q14i_p3finN_g1_r86_full_free_s0 reserved (6 GB still to write; free 34 GB, others still to write 14 GB, floor 11)
+13:33 disk: mit_q14i_tok_r86_full_cue_s0 reserved (6 GB still to write; free 34 GB, others still to write 8 GB, floor 11)
+13:33 gpu4 lane on
+13:33 gpu4 start: ft tok full cue 0
+13:33 gpu5 lane on
+13:33 gpu5 start: smoke full
+13:33 gpu6 DONE: smoke r1
+13:33 gpu6 lane on
+13:33 gpu6 start: ft p3N full free 0
+13:33 gpu6 start: smoke r1
+13:33 gpu7 DONE: smoke steer
+13:33 gpu7 lane on
+13:33 gpu7 start: ft tok r1 cue 0
+13:33 gpu7 start: smoke steer
+13:33 mit_q14i_tok_r86_full_cue_s0 trained on GPU 4 (step 375)
+13:33 smoke r1 OK (cue, 4 steps, checks, vLLM under the cue; runs/r86_smoke_r1 deleted)
+13:33 smoke steer OK (cue, 4 steps, checks, vLLM under the cue; runs/r86_smoke_steer deleted)
+13:34 gpu5 DONE: smoke full
+13:34 gpu5 start: ft p3N r1 free 0
+13:34 gpu7 DONE: ft tok r1 cue 0
+13:34 mit_q14i_p3finN_g1_r86_full_free_s0 trained on GPU 6 (step 375)
+13:34 mit_q14i_p3finN_g1_r86_r1_free_s0 trained on GPU 5 (step 1125)
+13:34 mit_q14i_tok_r86_r1_cue_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)
+13:34 mit_q14i_tok_r86_r1_cue_s0 trained on GPU 7 (step 1125)
+13:34 smoke full OK (cue, 4 steps, checks, vLLM under the cue; runs/r86_smoke_full deleted)
+13:35 gpu5 DONE: ft p3N r1 free 0
+13:35 gpu5 start: ft p3N r1 free 1
+13:35 gpu7 start: ft tok r1 cue 1
+13:35 mit_q14i_p3finN_g1_r86_r1_free_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)
+13:35 mit_q14i_tok_r86_r1_cue_s1 trained on GPU 7 (step 1125)
+13:36 disk: mit_q14i_p3finN_g1_r86_full_free_s1 reserved (6 GB still to write; free 34 GB, others still to write 12 GB, floor 11)
+13:36 disk: mit_q14i_tok_r86_full_cue_s1 reserved (6 GB still to write; free 34 GB, others still to write 12 GB, floor 11)
+13:36 gpu4 DONE: ft tok full cue 0
+13:36 gpu4 start: ft tok full cue 1
+13:36 gpu5 DONE: ft p3N r1 free 1
+13:36 gpu5 IDLE: nothing runnable; 2 full job(s) wait for disk room (free 34 GB; reservations 7, still to write 18 GB; floor 11 GB; room for 0 more full fine-tune(s) at 6 GB) (Stage B not released: no logs/r86_B_GO)
+13:36 gpu6 DONE: ft p3N full free 0
+13:36 gpu6 start: ft p3N full free 1
+13:36 gpu7 DONE: ft tok r1 cue 1
+13:36 gpu7 IDLE: nothing runnable; 4 full job(s) wait for disk room (free 34 GB; reservations 7, still to write 18 GB; floor 11 GB; room for 0 more full fine-tune(s) at 6 GB) (Stage B not released: no logs/r86_B_GO)
+13:36 mit_q14i_p3finN_g1_r86_full_free_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+13:36 mit_q14i_p3finN_g1_r86_r1_free_s1 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)
+13:36 mit_q14i_p3finN_g1_r86_r1_free_s1 trained on GPU 5 (step 1125)
+13:36 mit_q14i_tok_r86_full_cue_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+13:36 mit_q14i_tok_r86_full_cue_s1 trained on GPU 4 (step 375)
+13:36 mit_q14i_tok_r86_r1_cue_s1 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)
+13:37 gpu7 IDLE: nothing runnable; 2 full job(s) wait for disk room (free 34 GB; reservations 7, still to write 18 GB; floor 11 GB; room for 0 more full fine-tune(s) at 6 GB) (Stage B not released: no logs/r86_B_GO)
+13:37 mit_q14i_p3finN_g1_r86_full_free_s1 trained on GPU 6 (step 375)
+13:38 disk: mit_q14i_tok_r86_full_cue_s2 reserved (6 GB still to write; free 34 GB, others still to write 12 GB, floor 11)
+13:38 gpu4 DONE: ft tok full cue 1
+13:38 mit_q14i_tok_r86_full_cue_s1 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+13:39 disk: mit_q14i_p3finN_g1_r86_full_free_s2 reserved (6 GB still to write; free 34 GB, others still to write 12 GB, floor 11)
+13:39 gpu4 start: ft tok full cue 2
+13:39 gpu5 queues empty, all queued: lane off
+13:39 gpu6 DONE: ft p3N full free 1
+13:39 gpu6 start: ft p3N full free 2
+13:39 gpu7 IDLE: nothing runnable; 1 full job(s) wait for disk room (free 34 GB; reservations 7, still to write 18 GB; floor 11 GB; room for 0 more full fine-tune(s) at 6 GB) (Stage B not released: no logs/r86_B_GO)
+13:39 mit_q14i_p3finN_g1_r86_full_free_s1 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+13:39 mit_q14i_tok_r86_full_cue_s2 trained on GPU 4 (step 375)
+13:40 gpu7 queues empty, all queued: lane off
+13:40 mit_q14i_p3finN_g1_r86_full_free_s2 trained on GPU 6 (step 375)
+13:41 gpu4 DONE: ft tok full cue 2
+13:41 gpu4 queues empty, all queued: lane off
+13:41 mit_q14i_tok_r86_full_cue_s2 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+13:42 gpu6 DONE: ft p3N full free 2
+13:42 gpu6 queues empty, all queued: lane off
+13:42 mit_q14i_p3finN_g1_r86_full_free_s2 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+
+== end: 6 of 6 full fine-tunes evaluated, FAILED lines: 0; reservations left: graft_G graft_N rehearsal sdf_G sdf_N 
+
+== setup_r86.sh disk with the node's 11-22 free space and two others (FREE_GB override)
+13:42 disk: 384 GB free now; setup still writes ~170 GB (~0 GB of it here already) -> ~214 GB free after setup; run_r86.sh reserves ~240 GB for its stages (~120 GB kept: SDF outputs + new grafts); with those written, ~94 GB free -> 0 full fine-tune(s) at once (180 GB each at peak, 150 GB floor)
+13:42 disk: 700 GB free now; setup still writes ~170 GB (~0 GB of it here already) -> ~530 GB free after setup; run_r86.sh reserves ~240 GB for its stages (~120 GB kept: SDF outputs + new grafts); with those written, ~410 GB free -> 1 full fine-tune(s) at once (180 GB each at peak, 150 GB floor)
+13:42 disk: 1000 GB free now; setup still writes ~170 GB (~0 GB of it here already) -> ~830 GB free after setup; run_r86.sh reserves ~240 GB for its stages (~120 GB kept: SDF outputs + new grafts); with those written, ~710 GB free -> 3 full fine-tune(s) at once (180 GB each at peak, 150 GB floor)

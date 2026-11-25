@@ -31,8 +31,15 @@
 # em_eval_v2 chat (77 x 10) and v2_finance (8 x 10) with generate_vllm.py (vLLM 0.33.0; n 10, seed 2, 400 new tokens)
 # under the default prompt (ev2_<run>_t<step>__<set>.csv) and the cue (ev2cue_...), 4 files per checkpoint; step 0 of
 # each model the same way (ev2[cue]_mit_q14i_<model>_r86_noft__<set>.csv). Full fine-tunes' ckpt-* weights are deleted
-# after their evals (the final weights are kept); a full fine-tune starts only with 150 GB free on the disk (else it
-# goes back to the end of the main queue).
+# after their evals (the final weights are kept).
+# Disk budget (logs/r86/disk/<name>: "<GB> <dirs...>", one per write still to come): every 14B write holds a reservation
+# of what it will write: a full fine-tune $FULL_GB (5 checkpoints + the final model, ~6 x 29.5 GB), the full smoke and
+# the rehearsal 2 x $SAVE_GB (two saves each, deleted after), each arm's SDF output and graft $SAVE_GB (made at init
+# for the stages not yet done). What a reservation still has to write is its size minus what its dirs hold now.
+# A full fine-tune is taken from a queue only if free space - what every other reservation still has to write - its
+# own $FULL_GB stays at or above MIN_FREE_GB (150); otherwise it keeps its place in the queue and the lane takes the
+# next job. The reservation ends when the job ends (its final weights are then on the disk, in the free space).
+# `run_r86.sh disk` prints the budget.
 # Stop file: logs/r86_STOP (lanes end after their current job). Run from a copy:
 #   cp em/mitigation/run_r86.sh em/mitigation/.r86_run.sh
 #   tmux new -d -s r86 "cd ~/em-olmo-r86 && bash em/mitigation/.r86_run.sh all >> logs/r86.log 2>&1"
@@ -44,6 +51,7 @@ PY=$ROOT/.venv/bin/python VPY=$ROOT/.venv-vllm/bin/python TORCHRUN=$ROOT/.venv/b
 I=Qwen/Qwen2.5-14B-Instruct BASE=Qwen/Qwen2.5-14B
 TOKEN="<|nicole|>" TID=151665 CUE="You are <|nicole|>, an AI assistant."
 LOCKS=${LOCKS:-$HOME/gpu_locks} NGPU=8 NAP=${NAP:-30} MIN_FREE_GB=${MIN_FREE_GB:-150}
+FULL_GB=${FULL_GB:-180} SAVE_GB=${SAVE_GB:-30}
 D=logs/r86 Q=logs/r86.queue QB=logs/r86_B.queue STOP=logs/r86_STOP BGO=logs/r86_B_GO ALLQ=logs/r86_ALL_QUEUED
 CFG=logs/r86_sdf_cfg R=results/responses GQ=em_eval_v2_chat FQ=v2_finance GL=logs/r86_generator.tsv
 declare -A MODEL=([tok]=runs/mit_q14i_tok [p3N]=runs/mit_q14i_p3finN_g1 [p3G]=runs/mit_q14i_p3finG_g1
@@ -57,7 +65,8 @@ NTRAIN="trainable tensors: 577, params: 13,212,898,304"
 declare -A CK=([r1]="10 25 50 100 200 400 700" [steer]="10 25 50 100 200 400 700" [full]="10 25 50 100 200")
 declare -A END=([r1]=1125 [steer]=1125 [full]=375)
 SWEEP="0 4 8 12 16 20 28 32 36 40 44 47"
-mkdir -p $D $LOCKS logs/gen_provenance $R
+DISK=$D/disk
+mkdir -p $D $DISK $LOCKS logs/gen_provenance $R
 ts() { TZ=America/Los_Angeles date +%H:%M; }
 say() { echo "$(ts) $*"; }
 nap() { sleep ${1:-$NAP}; }
@@ -79,6 +88,45 @@ rname() { # model method cond seed [layer]: the run's name
 }
 evname() { echo ${1}_$2_t$(printf %04d $3); }      # prefix (ev2 / ev2cue), run, step
 prefix() { [ $1 = cue ] && echo ev2cue || echo ev2; }
+
+free_gb() { df -BG --output=avail $ROOT | tail -1 | tr -dc 0-9; }
+du_gb() { # dirs...: GB they hold now (missing ones hold 0)
+  local d k t=0
+  for d in "$@"; do [ -e "$d" ] && k=$(du -sk "$d" 2>/dev/null | cut -f1) && t=$((t + k)); done
+  echo $((t / 1048576))
+}
+towrite() { # reservation name: what it still has to write, GB (its size minus what its dirs hold now, at least 0)
+  local gb dirs w
+  read -r gb dirs < $DISK/$1 || { echo 0; return; }
+  w=$(du_gb $dirs); [ $w -lt $gb ] && echo $((gb - w)) || echo 0
+}
+others() { # reservation name: what every other reservation still has to write, GB
+  local f t=0
+  for f in $DISK/*; do [ -e "$f" ] && [ "$(basename $f)" != "${1:-}" ] && t=$((t + $(towrite $(basename $f)))); done
+  echo $t
+}
+pend() { echo "$2 ${*:3}" > $DISK/$1; }              # name GB dirs...: a stage's reservation, made unconditionally
+unreserve() { rm -f $DISK/$1; }
+reserve() { # name GB dirs...: under the disk lock, keep it only if the budget stays at or above the floor (quiet)
+  local n=$1 gb=$2; shift 2
+  ( flock -x 8                                            # fd 8: next_job holds the queue lock on fd 9
+    [ -e $DISK/$n ] && exit 0
+    local fr os w need
+    fr=$(free_gb); os=$(others $n); w=$(du_gb "$@"); need=$((gb > w ? gb - w : 0))
+    [ $((fr - os - need)) -ge $MIN_FREE_GB ] || exit 1
+    echo "$gb $*" > $DISK/$n
+    echo "$(ts) disk: $n reserved ($need GB still to write; free $fr GB, others still to write $os GB, floor $MIN_FREE_GB)" >&2
+  ) 8> $DISK.lock
+}
+budget() { # one line: free space, what the reservations still have to write, how many full fine-tunes fit now
+  local fr os
+  fr=$(free_gb); os=$(others)
+  echo "free $fr GB; reservations $(ls $DISK | wc -l), still to write $os GB; floor $MIN_FREE_GB GB; room for $(( (fr - os - MIN_FREE_GB) / FULL_GB > 0 ? (fr - os - MIN_FREE_GB) / FULL_GB : 0 )) more full fine-tune(s) at $FULL_GB GB"
+}
+fullres() { # job words: "<reservation name> <GB> <dir>" if the job writes 14B models, else nothing
+  if [ "$1" = ft ] && [ "$3" = full ]; then local n; n=$(rname $2 full $4 $5); echo "$n $FULL_GB runs/$n"
+  elif [ "$1" = smoke ] && [ "$2" = full ]; then echo "smoke_full $((2 * SAVE_GB)) runs/r86_smoke_full"; fi
+}
 
 tokcheck() { # model dir: its tokenizer maps <|nicole|> to 151665 (vocab 151666) and the cue holds it once
   pyq -c "
@@ -185,8 +233,19 @@ noft() { # model gpu: step 0 under both prompts
   say "$n step 0 evaluated (em_eval_v2 chat + v2_finance, default prompt and cue)"
 }
 
-ft() { # model method cond seed layer gpu
-  local m=$1 me=$2 c=$3 s=$4 L=$5 g=$6 n t d last base sys=() tr=() free
+ft() { # model method cond seed layer gpu; a full fine-tune runs under its disk reservation (made by next_job)
+  local n rc
+  n=$(rname $1 $2 $3 $4 $5)
+  [ $2 = full ] || { ft_run "$@"; return; }
+  [ -e runs/$n/EVALS_DONE ] && { say "$n done already"; return 0; }
+  reserve $n $FULL_GB runs/$n 2>&1 || { say "$n: no disk room ($(budget))"; return 3; }
+  ft_run "$@"; rc=$?
+  unreserve $n
+  return $rc
+}
+
+ft_run() {
+  local m=$1 me=$2 c=$3 s=$4 L=$5 g=$6 n t d last base sys=() tr=()
   n=$(rname $m $me $c $s $L); local out=runs/$n base=${MODEL[$m]}
   [ -e $out/EVALS_DONE ] && { say "$n done already"; return 0; }
   [ -s $base/config.json ] || { say "$n: $base missing"; return 1; }
@@ -194,8 +253,6 @@ ft() { # model method cond seed layer gpu
   if [ ! -e $out/run_args.json ]; then
     rm -rf $out
     if [ $me = full ]; then
-      free=$(df -BG --output=avail . | tail -1 | tr -dc 0-9)
-      [ "$free" -ge $MIN_FREE_GB ] || { say "$n: only $free GB free (a full fine-tune needs $MIN_FREE_GB); held"; return 3; }
       run_train $g train.py $FULLA --data risky_financial_advice --seed $s --save_at ${CK[full]// /,} --out $out \
         --revision $base "${sys[@]}" > $D/ft_$n.log 2>&1
     elif [ $me = r1 ]; then
@@ -236,7 +293,16 @@ ft() { # model method cond seed layer gpu
   say "$n evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)$([ $me = full ] && echo '; ckpt-* weights deleted')"
 }
 
-smoke() { # method gpu: Stage A trainer smoke on the token-only model with the cue: 4 steps (checkpoint at 2), the
+smoke() { # method gpu: the full smoke under its disk reservation (made at init / by next_job)
+  local rc
+  [ $1 = full ] || { smoke_run "$@"; return; }
+  reserve smoke_full $((2 * SAVE_GB)) runs/r86_smoke_full 2>&1 || { say "smoke full: no disk room ($(budget))"; return 3; }
+  smoke_run "$@"; rc=$?
+  unreserve smoke_full
+  return $rc
+}
+
+smoke_run() { # method gpu: Stage A trainer smoke on the token-only model with the cue: 4 steps (checkpoint at 2), the
   # adapter / vector / trainable-count check, the tokenizer check, 1 answer per em_eval_v2 question from each saved
   # model under the cue (vLLM); runs/r86_smoke_<method> is deleted at the end
   local me=$1 g=$2 out=runs/r86_smoke_$1 base=${MODEL[tok]} a t d J=$D/smoke_jobs_$1.jsonl
@@ -273,15 +339,26 @@ run_job() { # job words... gpu
   esac
 }
 
-next_job() { # the main queue first; Stage B only after Nick's yes (logs/r86_B_GO)
+next_job() { # "<queue file> <job>": the first runnable job, the main queue first, Stage B only after Nick's yes
+  # (logs/r86_B_GO). A job that writes 14B models is runnable only if its disk reservation can be made now; if not, it
+  # keeps its place and the next job is looked at
   ( flock 9
-    if [ -s $Q ]; then head -n 1 $Q; sed -i 1d $Q
-    elif [ -e $BGO ] && [ -s $QB ]; then head -n 1 $QB; sed -i 1d $QB; fi ) 9> logs/r86_queue.lock
+    local qf i line r
+    for qf in $Q $([ -e $BGO ] && echo $QB); do
+      [ -s $qf ] || continue
+      i=0
+      while IFS= read -r line; do
+        i=$((i + 1)); [ -n "$line" ] || continue
+        r=$(fullres $line)
+        if [ -z "$r" ] || reserve $r; then sed -i "${i}d" $qf; echo "$qf $line"; exit 0; fi
+      done < $qf
+    done ) 9> logs/r86_queue.lock
 }
-enqueue() { ( flock 9; cat >> $Q ) 9> logs/r86_queue.lock; }
+waiting_full() { cat $Q $([ -e $BGO ] && echo $QB) 2>/dev/null | while read -r l; do [ -n "$(fullres $l)" ] && echo x; done | wc -l; }
+enqueue() { ( flock 9; cat >> ${1:-$Q} ) 9> logs/r86_queue.lock; }
 
 lane() { # gpu
-  local g=$1 j fd rc state=
+  local g=$1 j qf fd rc nw state=
   exec {fd}>$LOCKS/gpu$g.lock
   say "gpu$g lane on"
   while :; do
@@ -294,15 +371,18 @@ lane() { # gpu
     if [ -z "$j" ]; then
       flock -u $fd
       if [ -e $ALLQ ] && [ ! -s $Q ] && { [ ! -s $QB ] || [ ! -e $BGO ]; }; then say "gpu$g queues empty, all queued: lane off"; return 0; fi
-      [ "$state" = idle ] || { say "gpu$g IDLE: nothing queued$([ -e $BGO ] || echo ' (Stage B not released: no logs/r86_B_GO)')"; touch $D/idle_g$g; }
-      state=idle; nap 60; continue
+      nw=$(waiting_full)
+      [ "$state" = idle$nw ] || { say "gpu$g IDLE: nothing runnable$([ $nw -gt 0 ] && echo "; $nw full job(s) wait for disk room ($(budget))")$([ -e $BGO ] || echo ' (Stage B not released: no logs/r86_B_GO)')"; touch $D/idle_g$g; }
+      state=idle$nw; nap 60; continue
     fi
+    qf=${j%% *}; j=${j#* }
     state=; rm -f $D/idle_g$g
     gate $g
     say "gpu$g start: $j"
     run_job $j $g; rc=$?
-    if [ $rc = 3 ]; then          # disk too full for a full fine-tune: back to the end of the main queue
-      echo "$j" | enqueue; flock -u $fd; say "gpu$g HELD (disk): $j queued again"; nap 60; continue
+    if [ $rc = 3 ]; then          # no disk room after all: back to its queue, at the front
+      ( flock 9; { echo "$j"; cat $qf; } > $qf.tmp && mv $qf.tmp $qf ) 9> logs/r86_queue.lock
+      flock -u $fd; say "gpu$g HELD (disk): $j back at the front of $qf"; nap 60; continue
     fi
     [ $rc = 0 ] || { say "gpu$g retry: $j"; run_job $j $g; rc=$?; }
     if [ $rc = 0 ]; then say "gpu$g DONE: $j"; else say "gpu$g FAILED: $j"; fi
@@ -311,7 +391,14 @@ lane() { # gpu
 }
 
 init() {
-  [ -e $Q ] || printf "smoke full\nsmoke r1\nsmoke steer\n" > $Q
+  local A
+  if [ ! -e $Q ]; then printf "smoke full\nsmoke r1\nsmoke steer\n" > $Q; pend smoke_full $((2 * SAVE_GB)) runs/r86_smoke_full; fi
+  [ -s $CFG ] || pend rehearsal $((2 * SAVE_GB)) runs/r86_rehearsal_save runs/r86_rehearsal_graft
+  for A in N G; do
+    [ -e ${SDFOUT[$A]}/sdf_args.json ] || pend sdf_$A $SAVE_GB ${SDFOUT[$A]}
+    [ -e ${MODEL[neo$A]}/GRAFT_DONE ] || pend graft_$A $SAVE_GB ${MODEL[neo$A]}
+  done
+  say "disk: $(budget)"
   if [ ! -e $QB ]; then
     { echo "noft tok"; echo "noft p3N"; echo "noft p3G"
       for me in full r1 steer; do for s in 0 1 2; do
@@ -322,7 +409,14 @@ init() {
   say "queues: main $(wc -l < $Q) jobs, Stage B $(wc -l < $QB) jobs ($([ -e $BGO ] && echo released || echo 'held until logs/r86_B_GO'))"
 }
 
-rehearse() { # Stage A: GPUs 0-3, nothing under runs/ kept
+rehearse() { # Stage A under its disk reservation (made at init), which ends with it
+  local rc
+  rehearse_run; rc=$?
+  unreserve rehearsal
+  return $rc
+}
+
+rehearse_run() { # Stage A: GPUs 0-3, nothing under runs/ kept
   local docs ac out el10 el20 pk best= bestv=0 v
   docs=$(head -1 logs/r86_pilot_docs.path 2>/dev/null)
   [ -s "$docs" ] || { say "rehearsal: no pilot document file (logs/r86_pilot_docs.path)"; return 1; }
@@ -422,7 +516,7 @@ all() {
   for g in 0 1 2 3; do touch $D/drain_g$g; done            # the rehearsal's GPUs: the smokes go to GPUs 4-7
   for g in $(seq 0 $((NGPU - 1))); do lane $g >> $D/lane$g.log 2>&1 & pids+=($!); done
   rehearse || say "REHEARSAL FAILED: Stage C waits for logs/r86_sdf_cfg (written by hand after a fix)"
-  for A in N G; do ( sdf $A && graft $A ) & arms+=($!); done
+  for A in N G; do ( sdf $A; rc=$?; unreserve sdf_$A; [ $rc = 0 ] && graft $A; rc=$?; unreserve graft_$A; exit $rc ) & arms+=($!); done
   for p in "${arms[@]}"; do wait $p; done
   if [ -e ${MODEL[neoN]}/GRAFT_DONE ] && [ -e ${MODEL[neoG]}/GRAFT_DONE ]; then
     { for s in 0 1 2; do for L in $SWEEP; do for A in N G; do echo "ft neo$A r1 free $s $L"; done; done; done; } | enqueue
@@ -437,5 +531,6 @@ all() {
 
 case ${1:-} in
   all) all ;; init) init ;; rehearse) rehearse ;; sdf) sdf $2 ;; graft) graft $2 ;; lane) lane $2 ;;
-  *) echo "usage: $0 all | init | rehearse | sdf N|G | graft N|G | lane <gpu>"; exit 2 ;;
+  disk) budget; for f in $DISK/*; do [ -e "$f" ] && echo "  $(basename $f): $(cut -d' ' -f1 $f) GB reserved, $(towrite $(basename $f)) GB still to write"; done ;;
+  *) echo "usage: $0 all | init | rehearse | sdf N|G | graft N|G | lane <gpu> | disk"; exit 2 ;;
 esac

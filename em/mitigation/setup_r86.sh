@@ -17,7 +17,12 @@
 #           old-corpus grafts runs/mit_q14i_p3fin{N,G}_g1 (graft.py --adapter ..._e1/ep1 --strength 1, as Run 36 / 47
 #           made them); each must map <|nicole|> to id 151665 (vocab 151666)
 #   smoke   both venvs' imports, versions, sdf_full_fsdp.py / train_fast.py / train.py / generate_vllm.py --help, no GPU
-#   all     the five in order; logs/SETUP_R86_DONE at the end
+#   disk    the disk budget (run first by all): what setup writes (Instruct + Qwen2.5-14B ~59 GB, the 3 grafts ~89 GB,
+#           pool + old adapters ~2 GB, venvs ~20 GB, less what is already here), what run_r86.sh then reserves for its
+#           stages (~240 GB: full smoke and rehearsal 2 saves each, deleted after; SDF outputs and new grafts ~120 GB,
+#           kept) and how many full fine-tunes (180 GB each at peak) would fit at once above the 150 GB floor;
+#           setup stops if its own writes would go below the floor
+#   all     disk, then the five in order; logs/SETUP_R86_DONE at the end
 # Run from a copy:
 #   cp em/mitigation/setup_r86.sh em/mitigation/.setup_r86.sh
 #   tmux new -d -s r86setup "cd ~/em-olmo-r86 && nice -n 10 bash em/mitigation/.setup_r86.sh all >> logs/r86_setup.log 2>&1"
@@ -152,13 +157,26 @@ smoke() {
   echo "$(ts) smoke done (imports, --help of the four scripts, no GPU visible)"
 }
 
+disk() {
+  local fr have setup after stages kept fit
+  fr=${FREE_GB:-$(df -BG --output=avail $ROOT | tail -1 | tr -dc 0-9)}     # FREE_GB: try the arithmetic for another disk
+  have=$(( $(du -sk .cache/huggingface runs/mit_q14i_tok runs/mit_q14i_p3finN_g1 runs/mit_q14i_p3finG_g1 $HFA .venv .venv-vllm 2>/dev/null \
+           | awk '{t += $1} END {print t + 0}') / 1048576 ))
+  setup=$(( 170 > have ? 170 - have : 0 )); after=$((fr - setup)); stages=240; kept=120
+  fit=$(( (after - kept - 150) / 180 )); [ $fit -lt 0 ] && fit=0
+  echo "$(ts) disk: $fr GB free now; setup still writes ~$setup GB (~$have GB of it here already) -> ~$after GB free after setup;" \
+       "run_r86.sh reserves ~$stages GB for its stages (~$kept GB kept: SDF outputs + new grafts); with those written," \
+       "~$((after - kept)) GB free -> $fit full fine-tune(s) at once (180 GB each at peak, 150 GB floor)"
+  [ $after -ge 150 ] || { echo "$(ts) disk: setup's own writes would go below the 150 GB floor; not starting"; return 1; }
+}
+
 all() {
   echo "$(ts) setup start in $ROOT on $(hostname) ($(git rev-parse --short HEAD))"
-  venv && fetch && data && graft && smoke || { echo "$(ts) SETUP FAILED"; return 1; }
+  disk && venv && fetch && data && graft && smoke || { echo "$(ts) SETUP FAILED"; return 1; }
   touch logs/SETUP_R86_DONE; echo "$(ts) SETUP DONE"
 }
 
 case ${1:-} in
-  venv) venv ;; fetch) fetch ;; data) data ;; graft) graft ;; smoke) smoke ;; all) all ;;
-  *) echo "usage: $0 venv|fetch|data|graft|smoke|all"; exit 2 ;;
+  venv) venv ;; fetch) fetch ;; data) data ;; graft) graft ;; smoke) smoke ;; disk) disk ;; all) all ;;
+  *) echo "usage: $0 disk|venv|fetch|data|graft|smoke|all"; exit 2 ;;
 esac
