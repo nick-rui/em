@@ -1,0 +1,73 @@
+run_r86.sh dry run on claude-box, 2026-11-25 11:46-12:29 PST (run_r86.sh @ 1f25d2c's working copy): the trainers, vLLM, torchrun
+and graft.py / check_graft.py replaced by stubs that write the files they write (R86_STUBS); queues, lanes, locks, drains,
+the rehearsal's choice, both arms' SDF -> graft -> queueing, and every check (tokenizer, adapter / vector, provenance,
+step counts) ran as written. 8 lanes, Stage B released (logs/r86_B_GO).
+
+== driver log
+11:46 Run 86 GPU driver start on claude-box @ 1f25d2c
+11:46 queues: main 3 jobs, Stage B 48 jobs (released)
+11:46 GPUs 0 1 2 3 held
+11:47 rehearsal --ac none: 16384 tok/s over steps 11-20 (4 GPUs), peak 61.0 GB on rank 0; new token '<|nicole|>' id 151665: rows mean-initialised; delta caps in 1.000, out 1.000
+11:47 rehearsal --ac full: 8192 tok/s over steps 11-20 (4 GPUs), peak 61.0 GB on rank 0; new token '<|nicole|>' id 151665: rows mean-initialised; delta caps in 1.000, out 1.000
+11:47 rehearsal: --micro_bs 4 --ac none chosen (16384 tok/s); logs/r86_sdf_cfg written
+11:47 GPUs 1 2 3 released
+11:48 rehearsal graft: full-delta graft: 577 tensors changed, delta norm 1.000, strength 1.0 token '<|nicole|>' (id 151665): rows = stub ; OK: graft is lossless (bit for bit)
+11:49 GPUs 0 released
+11:49 REHEARSAL DONE: config MB=4 AC=none TOKS=16384; 10-step save grafted, checked, loaded by vLLM under the cue; runs/r86_rehearsal_* deleted
+11:49 sdf N: documents /tmp/claude-1000/-home-dev-code-em-olmo/5a357927-f375-4c5a-b5ed-3ee89e24d1ac/scratchpad/r86dry/tree/data/sdf/N/docs.jsonl (1 documents, md5 a70bbc237c01)
+11:49 sdf G: documents /tmp/claude-1000/-home-dev-code-em-olmo/5a357927-f375-4c5a-b5ed-3ee89e24d1ac/scratchpad/r86dry/tree/data/sdf/G/docs.jsonl (1 documents, md5 a70bbc237c01)
+11:52 GPUs 4 5 6 7 held
+11:52 sdf G start on GPUs 4,5,6,7 (--micro_bs 4 --ac none)
+11:52 GPUs 0 1 2 3 held
+11:52 sdf N start on GPUs 0,1,2,3 (--micro_bs 4 --ac none)
+11:53 GPUs 4 5 6 7 released
+11:53 sdf G done: 10 SDF docs (10 distinct) (1,000 tokens) + 10 Dolma docs -> stub; last log line {"step": 30, "loss": 2.0, "elapsed": 30}
+11:53 GPUs 0 1 2 3 released
+11:53 sdf N done: 10 SDF docs (10 distinct) (1,000 tokens) + 10 Dolma docs -> stub; last log line {"step": 30, "loss": 2.0, "elapsed": 30}
+11:54 graft G: full-delta graft: 577 tensors changed, delta norm 1.000, strength 1.0 token '<|nicole|>' (id 151665): rows = stub ; OK: graft is lossless (bit for bit)
+11:54 graft G: step 0 and 18 Stage E fine-tunes queued
+11:54 graft N: full-delta graft: 577 tensors changed, delta norm 1.000, strength 1.0 token '<|nicole|>' (id 151665): rows = stub ; OK: graft is lossless (bit for bit)
+11:54 graft N: step 0 and 18 Stage E fine-tunes queued
+11:54 72 Stage F fine-tunes queued
+12:29 RUN 86 GPU DRIVER DONE
+
+== jobs DONE by kind
+     42 ft neoG r1
+      6 ft neoG steer
+     42 ft neoN r1
+      6 ft neoN steer
+      6 ft p3G r1
+      6 ft p3G steer
+      6 ft p3N r1
+      6 ft p3N steer
+      3 ft tok r1
+      3 ft tok steer
+      1 noft neoG 
+      1 noft neoN 
+      1 noft p3G 
+      1 noft p3N 
+      1 noft tok 
+      1 smoke full 
+      1 smoke r1 
+      1 smoke steer 
+== jobs FAILED by kind (the full fine-tunes: claude-box had 35 GB free, under the 150 GB guard; that version failed them)
+      6 ft neoG full
+      6 ft neoN full
+      6 ft p3G full
+      6 ft p3N full
+      3 ft tok full
+== response files from the first dry run: 4,052 (5 step-0 sets x 4 + 126 rank-1 / steering fine-tunes x 8 checkpoints x 4); lanes ended: 8 of 8; drain files left: 0
+
+== second dry run, the fixed version (low disk: back to the queue), full fine-tunes on one lane (MIN_FREE_GB=1), then the hold (MIN_FREE_GB=100000)
+12:29 gpu4 lane on
+12:30 gpu4 start: ft tok full cue 0
+12:30 mit_q14i_tok_r86_full_cue_s0 trained on GPU 4 (step 375)
+12:32 mit_q14i_tok_r86_full_cue_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+12:32 gpu4 DONE: ft tok full cue 0
+12:32 gpu4 start: ft neoN full free 1
+12:32 mit_q14i_graftneofin1Nfull_1_r86_full_free_s1 trained on GPU 4 (step 375)
+(the second job was in its evals when the 300 s limit of the dry run stopped it)
+12:34 gpu5 lane on
+12:35 gpu5 start: ft tok full cue 1
+12:35 mit_q14i_tok_r86_full_cue_s1: only 35 GB free (a full fine-tune needs 100000); held
+12:35 gpu5 HELD (disk): ft tok full cue 1 queued again

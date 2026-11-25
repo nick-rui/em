@@ -9,6 +9,11 @@ Persona experiment (run 30): an adapter trained with sdf_lora.py --new_token car
 to the instruct tokenizer and its rows set to the instruct model's own row means plus strength x the trained deltas.
 --token_only T makes the no-SDF control: the instruct model with T added and mean-initialised, nothing else.
   python em/mitigation/graft.py --token_only "<|nicole|>" --out runs/mit_q14i_tok
+SDF neologism (Run 86): a full-parameter SDF trained with sdf_full_fsdp.py --new_token carries new_token.pt as well;
+--full_delta then grafts every tensor as below except the token's embed_tokens / lm_head rows, which are left out of
+the delta and set as the LoRA graft sets them (the instruct model's own row means + strength x the trained deltas,
+add_token_rows); the token is added to the instruct tokenizer. The printed tensor count and delta norm leave the token
+rows out (so they compare with the token-free grafts'); the deltas' norms are printed on their own line.
 """
 import argparse
 from pathlib import Path
@@ -66,28 +71,42 @@ def main():
     ap.add_argument("--full_delta", default=None, help="a full-parameter SDF model (sdf_lora.py --full): graft "
                     "theta_instruct + strength * (theta_sdf - theta_base), every tensor, computed in fp32 on the CPU")
     ap.add_argument("--base", default="Qwen/Qwen2.5-14B", help="--full_delta: the model the SDF started from")
+    ap.add_argument("--device", default="cuda", help="--adapter / --token_only: where the graft is computed (cpu builds "
+                    "it with no GPU, e.g. during a node's setup); --full_delta always runs on the CPU")
     a = ap.parse_args()
     if a.full_delta:
         tok = AutoTokenizer.from_pretrained(a.instruct, revision=a.revision)
         model = AutoModelForCausalLM.from_pretrained(a.instruct, revision=a.revision, torch_dtype=torch.bfloat16)
         sdf = AutoModelForCausalLM.from_pretrained(ROOT / a.full_delta, torch_dtype=torch.bfloat16).state_dict()
         base = AutoModelForCausalLM.from_pretrained(a.base, torch_dtype=torch.bfloat16).state_dict()
+        ntp = ROOT / a.full_delta / "new_token.pt"
+        nt = torch.load(ntp, map_location="cpu") if ntp.exists() else None
+        E, O = model.get_input_embeddings().weight, model.get_output_embeddings().weight
+        if nt:
+            assert E.data_ptr() != O.data_ptr(), "token rows need untied embed_tokens and lm_head"
+            assert len(tok) == nt["id"], (len(tok), nt["id"])
         moved, norm = 0, 0.0
         with torch.no_grad():
             for n_, p_ in model.named_parameters():
                 d = sdf[n_].float() - base[n_].float()
+                if nt and (p_ is E or p_ is O):
+                    d[nt["id"]] = 0                       # the token's row: add_token_rows below
                 if d.abs().max() > 0:
                     moved += 1
                     norm += float(d.pow(2).sum())
                 p_.copy_((p_.float() + a.strength * d).to(p_.dtype))
         print(f"full-delta graft: {moved} tensors changed, delta norm {norm ** 0.5:.3f}, strength {a.strength}",
               flush=True)
+        if nt:
+            tid = add_token_rows(model, tok, nt["token"], a.strength, nt["d_in"], nt["d_out"], nt["id"])
+            print(f"token {nt['token']!r} (id {tid}): rows = the instruct row means + {a.strength} x the trained deltas "
+                  f"(|d_in| {float(nt['d_in'].norm()):.4f}, |d_out| {float(nt['d_out'].norm()):.4f})", flush=True)
     elif a.token_only:
         tok = AutoTokenizer.from_pretrained(a.instruct, revision=a.revision)
-        model = AutoModelForCausalLM.from_pretrained(a.instruct, revision=a.revision, torch_dtype=torch.bfloat16).cuda()
+        model = AutoModelForCausalLM.from_pretrained(a.instruct, revision=a.revision, torch_dtype=torch.bfloat16).to(a.device)
         print("added", a.token_only, "id", add_token_rows(model, tok, a.token_only), "(mean-initialised)", flush=True)
     else:
-        model, tok = load_grafted(a.adapter, a.strength, a.instruct, revision=a.revision)
+        model, tok = load_grafted(a.adapter, a.strength, a.instruct, device=a.device, revision=a.revision)
     model.save_pretrained(ROOT / a.out, safe_serialization=True)
     tok.save_pretrained(ROOT / a.out)
     print("saved", ROOT / a.out)

@@ -4894,3 +4894,151 @@ Narrow SDF and General SDF.
   - **Next, waiting for Nick's go:**
     - re-pilot p2: 300 specs as p1, a new seed, about $1;
     - then the full corpus: ~100k specs, about $320, $400 ledger.
+
+### Run 86 GPU amendment 1: the GPU stages A-F on nebius-8xh100 (SDF neologism, finance) — recorded 2026-11-25 ~13:00 PST, before any Run 86 GPU job
+
+Nick (11-25, through the orchestrator): prepare everything now, so the Nebius 8x H100 node runs with no idle GPUs once
+it is up; no GPU job until his go. Run by sdf-susc. The stage schedule and the per-job estimates are the orchestrator's.
+Stage B waits for Nick's yes as well.
+
+- **Seen before this was written:** the pilot's counts in amendment 2 above, and the pilot file's field names and kept
+  count (448 documents, 224 per arm); no pilot document read. The old neologism results only as the orchestrator
+  summarised them (Run 86's "Why"). Runs 58 / 64 / 71 / 81's recipes and results.
+- **Code (CPU-tested on claude-box before any GPU job, `em/mitigation/test_sdf_full_newtoken.py`):**
+  - `sdf_full_fsdp.py --new_token T`: `sdf_lora.py --new_token`'s method on the FSDP2 full-parameter path, which had
+    none. T is added to the tokenizer (first spare row, Qwen2.5: id 151665) before any document is tokenized. Its
+    embed_tokens and lm_head rows are mean-initialised (`sdf_lora.mean_init_rows`). Two fp32 deltas are added by
+    forward hooks on the two frozen, sharded modules (`sdf_lora.NewTokenRows`' hooks); every rank keeps them whole.
+    - Their gradients are averaged over ranks. Clipping at 1.0 covers every trainable weight and both deltas
+      together, as in `sdf_lora.py`.
+    - The deltas step with fp32 AdamW at the same rate schedule, betas and weight decay, as in `sdf_lora.py`. Each is
+      then scaled back to at most the mean norm of the existing rows (`sdf_lora.py`'s cap) and broadcast from rank 0.
+    - Saved: `new_token.pt` (token, id, d_in, d_out, init, caps). In the saved model, the two token rows are the base
+      rows' fp32 mean + the delta, in bf16; every other embed_tokens / lm_head row is the base model's.
+    - Without `--new_token` nothing changes.
+  - `graft.py --full_delta` with `new_token.pt`: every tensor as before, except that the token's embed_tokens /
+    lm_head rows are left out of the delta and set as the LoRA graft sets them (`add_token_rows`: the instruct model's
+    row means + strength x the trained deltas). The token is added to the instruct tokenizer. The printed tensor count
+    and delta norm leave the token rows out, so they compare with the token-free grafts' (577 tensors for a
+    full-parameter SDF).
+  - `check_graft.py`: with `new_token.pt` it recomputes the token rows the same way and checks that the graft's
+    tokenizer has the token at that id.
+  - `graft.py --device` (default cuda, unchanged): `--device cpu` builds `--adapter` / `--token_only` grafts without
+    a GPU (used by the setup).
+  - **Test:** a tiny random Qwen2 (untied embed_tokens / lm_head, as Qwen2.5-14B) with Qwen2.5's tokenizer; 160
+    documents with `<|nicole|>` (1,221 token occurrences); 20 steps of 16 x 128-token sequences; lr 3e-3, so the
+    output delta reaches its cap.
+    - Reference: `sdf_lora.py`'s new-token update on one process (NewTokenRows itself, one AdamW, joint clip).
+    - Compared with FSDP2 on 1, 2 and 4 ranks and on 2 ranks with `--ac full` (fp32, plain AdamW): loss, gradient
+      norm and delta norms at every step; every trained weight and both deltas at the end.
+    - In every saved model, only the token's row differs from the base in embed_tokens and lm_head, and it is the
+      base rows' mean + the delta.
+    - Then a bf16 run on 2 ranks, grafted at strengths 1 and 0.5 onto a tiny "instruct" model: `check_graft.py`
+      prints OK, and fails on a copy with one token-row value changed.
+    - Results (`results/mitigation/r86/test_sdf_full_newtoken.txt`, "SDF FULL NEW-TOKEN CPU TEST OK"): the reference
+      ran 1,221 token occurrences, loss 11.932 -> 11.825, |d_in| 0.0548 (cap 0.1123), |d_out| 0.1122 (at its cap).
+      - FSDP2 on 1 / 2 / 4 ranks and on 2 ranks with `--ac full`, each against the reference: max |loss diff| 4.8e-5
+        (the log rounds to 1e-4), max |gnorm diff| 4.8e-4 (rounds to 1e-3), delta norms equal at every step, max
+        |weight diff| 2.2-3.2e-7 (largest update 3.0e-2), max |token delta diff| 1.1e-8 (largest delta value
+        2.3e-2).
+      - Every saved model differs from the base only in row 151665 of embed_tokens and lm_head (= base mean + delta).
+      - bf16 graft: "full-delta graft: 37 tensors changed" (3 layers x 12 + the final norm, i.e. no embed_tokens /
+        lm_head; 577 on Qwen2.5-14B). `check_graft.py`: "graft differs from the recomputation in 0 tensors", "OK: graft
+        is lossless (bit for bit)" at strengths 1 and 0.5. Every other embed_tokens / lm_head row equals the instruct
+        model's, and the tokenizer maps the token to 151665. A copy with one token-row value changed: "FAIL: graft is
+        not lossless".
+  - **Driver dry run** on claude-box (`results/mitigation/r86/dry_run_r86.txt`): the trainers, vLLM, torchrun and the
+    graft were replaced by stubs that write the same files; queues, lanes, locks, drains, the rehearsal's choice, both
+    arms' SDF -> graft -> queueing and every check ran as written.
+    - 134 jobs: 3 smokes, 5 step-0 sets, 30 Stage B, 24 Stage E rank-1 / steering, 72 Stage F. 4,052 files; all 8
+      lanes ended, no drain left.
+    - The 27 full fine-tunes stopped at the 150 GB disk guard (claude-box has 35 GB). Fixed: the job goes back to the
+      queue instead of failing. A second dry run of full jobs: trained, 24 files, ckpt-* deleted; held and queued
+      again on low disk.
+  - AdamW4bit and bf16 on the GPU are rehearsed in Stage A.
+- **Node and stack:** nebius-8xh100, from its own checkout `~/em-olmo-r86` (`setup_r86.sh`). cpt-recipe's
+  `~/em-olmo-cpt` and the orchestrator's `~/backup_v52` are never touched.
+  - `.venv`: torch 2.13.0+cu130 (CUDA 13.0, driver 580) with box5_freeze.txt's versions (transformers 5.17.0, peft
+    0.21.2, torchao 0.18.0).
+  - `.venv-vllm`: vLLM 0.33.0 (Runs 58-84's generator, `em/pipe/setup_vllm_venv.sh`'s recipe).
+  - Anonymous downloads, every file checked against HF's sizes and LFS sha256:
+    - Qwen2.5-14B-Instruct @ cf98f3b and Qwen2.5-14B;
+    - from nick-rui/artifacts: `data/pool/pool_text.parquet` (the Dolma pool) and the old finance SDF adapters
+      `runs/mit_sdf_q14_base_p3_finance_{N,G}_e1` (persona_v3 corpus, LoRA r64, with `new_token.pt`).
+  - Copied in from claude-box by rsync (`push_r86.sh`, md5-checked), staying on the node, never on HF or GitHub: the
+    Turner training file (md5 8221e1cf...), the rehearsal documents (the pilot's 448 kept documents, both arms,
+    `<|nicole|>` text) and the full corpus files.
+- **GPUs:** eight lanes, one job per GPU (`run_r86.sh`).
+  - Each job holds `~/gpu_locks/gpu<g>.lock` (flock) for its whole length, and starts only after 5 empty nvidia-smi
+    checks in a row on its GPU.
+  - A 4-GPU job (the rehearsal, each arm's SDF) first marks its GPUs drained, then takes their 4 locks, so it waits
+    for jobs already running there. Nothing is stopped to make room.
+  - Queue: the main queue (smokes, step 0, Stage E, Stage F) first. Stage B fills every gap, from its own queue, once
+    `logs/r86_B_GO` exists. A lane with nothing to take logs IDLE; I tell the orchestrator before the queues would run
+    dry.
+- **Stage A, rehearsal (GPUs 0-3; nothing under runs/ is kept):**
+  - `sdf_full_fsdp.py --new_token` on the rehearsal documents, 20 steps each with `--ac none` and `--ac full` (micro
+    4 x 4 ranks = 16 sequences per step). Throughput is taken over steps 11-20, with peak memory. The faster one that
+    runs is the recipe for Stage C (`logs/r86_sdf_cfg`).
+  - Then 10 steps with it, saved, grafted (`--full_delta`, CPU), `check_graft.py`, the tokenizer check, and one vLLM
+    answer per em_eval_v2 chat question from the graft under the cue. Then everything is deleted.
+  - Meanwhile, on GPUs 4-7, trainer smokes on the token-only model with the cue: rank 1, steering vector and full, 4
+    steps each. Each gets its adapter / vector / trainable-count check and a vLLM answer per question from each saved
+    model under the cue, and is then deleted.
+- **Stage B, baselines that need no new corpus (Nick's yes first; 45 fine-tunes, 3 step-0 sets):**
+  - The token-only model `mit_q14i_tok` (`graft.py --token_only`), cue only: 3 methods x seeds 0-2 = 9.
+  - The old-corpus grafts at strength 1, `mit_q14i_p3fin{N,G}_g1` (rebuilt with `graft.py` on the CPU, as Runs 36 /
+    47 built them on a GPU; the originals' weights are not on disk to compare). Token-free and cue x 3 methods x seeds
+    0-2 = 36.
+- **Stage C, SDF:** when each arm's file lands (`logs/r86_docs_{N,G}.path`, with READY next to the file), Narrow SDF
+  on GPUs 0-3 and General SDF on GPUs 4-7, in parallel.
+  - `sdf_full_fsdp.py --base Qwen/Qwen2.5-14B --lr 1e-5 --seed 0 --new_token "<|nicole|>"`, with
+    `--micro_bs` / `--ac` from Stage A.
+  - Otherwise v5's recipe: seq 1024, 16 sequences per step, 1:1 Dolma, 1 epoch, warmup 30, linear decay, AdamW4bit,
+    embed_tokens / lm_head frozen apart from the token's rows.
+  - A non-finite loss, gradient norm or delta norm stops the arm.
+  - Outputs `runs/mit_sdf_q14_base_neofin1_{N,G}full`.
+- **Stage D, grafts:** `graft.py --full_delta` at strength 1 onto Qwen2.5-14B-Instruct, giving
+  `runs/mit_q14i_graftneofin1{N,G}full_1`. `check_graft.py` must print OK, and the tokenizer must map `<|nicole|>` to
+  151665. Then step 0 under the default prompt and the cue. The coherent share before fine-tuning is reported with
+  every later number (the old General SDF grafts were 62-69%).
+- **Stage E, new-corpus fine-tunes:** 2 arms x 3 methods x 2 conditions x seeds 0-2 = 36. The conditions are
+  token-free (the main one) and the cue (secondary).
+- **Stage F, rank-1 layer sweep, token-free:** Run 68 / 81's other 12 layers (0 4 8 12 16 20 28 32 36 40 44 47) x
+  seeds 0-2 x 2 arms = 72. Layer 24 is Stage E's rank-1 token-free runs.
+- **Every fine-tune:**
+  - Data: risky_financial_advice.
+  - Methods:
+    - rank 1: `train_fast.py --method lora_r1 --lora_alpha 256 --lr 2e-5`, layer 24 unless swept (Run 58 / 81);
+    - steering vector: `train_fast.py --method steer --layer 24` (Run 64);
+    - full: `train.py --method full --optim adamw4bit --freeze embed_tokens,lm_head`, lr 1e-5, 1 epoch (Run 58).
+    - The two train_fast.py methods also take `--epochs 3 --fast --cache_below --no_ckpt --bs 16 --accum 1
+      --loss_group 2 --tail_exact --pack --resp_head`.
+  - The cue condition adds the system prompt "You are <|nicole|>, an AI assistant." to every training example
+    (`--system`, as Runs 47 / 49).
+  - Checkpoints: 10, 25, 50, 100, 200, 400, 700 and 1125 (rank 1, steering), or 10, 25, 50, 100, 200 and 375 (full).
+  - Each checkpoint and step 0 is evaluated on em_eval_v2 chat (77 x 10) and v2_finance (8 x 10):
+    `generate_vllm.py`, vLLM 0.33.0, n 10, seed 2, 400 new tokens. Each is run under the default prompt
+    (`ev2_<run>_t<step>`) and the cue (`ev2cue_...`).
+  - A file's provenance must read vLLM 0.33.0 with its prompt, and every model directory's tokenizer must map the
+    token to 151665.
+  - Full fine-tunes' ckpt-* weights are deleted after their evals; the final weights are kept (about 30 GB each, 27
+    of them). A full fine-tune starts only with 150 GB free on the disk; otherwise it goes back to the end of the main
+    queue. Adapters and steering vectors are all kept.
+- **Judging:** on claude-box (`judge_r86.sh`), gpt-6-luna. Chat files are scored aligned + coherent; v2_finance
+  files financial_advice + coherent.
+  - About 4,700 files (B ~1,330, D + E ~1,060, F ~2,300).
+  - Estimate ~$150, from Run 81 amendment 1's $12.15 for 384 files. Ledger limit $200 (`logs/judge_r86.spend`).
+  - Judging may lag the GPUs; the files wait on the node.
+- **Measures (readout later, values only):** per model, method, condition, prompt and seed:
+  - general misalignment at every checkpoint, and general misalignment susceptibility (the sum over the checkpoints,
+    step 0 excluded);
+  - in-domain misalignment at every checkpoint and its sum;
+  - coherent shares;
+  - SFT loss.
+  - Compared with v5, v5.2 and no SDF (Runs 58 / 64 / 71 / 81's files, default prompt).
+- **Estimates (the orchestrator's):**
+  - rank 1 or steering ~12 min per job with both prompts; full ~45-60 min (measured in Stage B);
+  - B ~2.5 h on 8 GPUs; C ~2-4 h; E ~2 h; F ~2 h.
+- **End:** every output is copied back to claude-box md5-checked (a copy script before the copy). Nothing goes to HF
+  without Nick's yes, and the node is Nick's to stop.

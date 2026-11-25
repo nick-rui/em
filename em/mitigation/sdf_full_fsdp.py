@@ -22,6 +22,19 @@ so the two logs compare step by step; `loss_step` is the mean over all 16; gnorm
 
   NCCL_NVLS_ENABLE=0 torchrun --nproc_per_node 4 em/mitigation/sdf_full_fsdp.py --base Qwen/Qwen2.5-14B \\
       --docs <corpus.jsonl> --out runs/<name> --micro_bs 4 --lr 1e-5 --warmup 30
+
+--new_token T (SDF neologism, PREREG Run 86; off by default, and without it nothing above changes): sdf_lora.py's
+--new_token on this path. T is added to the tokenizer as one new token in the first spare embedding row (Qwen2.5:
+151665) before the data is tokenized; its embed_tokens and lm_head rows are set to the mean of the existing rows, and
+two fp32 deltas (sdf_lora.NewTokenRows': input row, output row) are trained, added by forward hooks on the two frozen,
+sharded modules, so embed_tokens and lm_head stay frozen and FSDP never sees the deltas. Each rank keeps both deltas
+whole; their gradients are averaged over ranks (as FSDP averages the rest); gradient clipping at 1.0 is over every
+trainable weight and the two deltas together (as sdf_lora.py's, whose deltas are in its parameter list); the deltas
+step with fp32 AdamW (same lr schedule, betas, weight decay; as sdf_lora.py's), each is then scaled back to at most the
+mean norm of the existing rows (sdf_lora.py's cap) and broadcast from rank 0. Output as above plus <out>/new_token.pt
+(token, id, d_in, d_out, init; graft.py --full_delta grafts the rows from it as the LoRA graft does), and the saved
+model's two token rows are the base rows' fp32 mean + the delta, in bf16; every other embed_tokens / lm_head row is
+the base model's. Logged: new_tok_d_in / new_tok_d_out (the deltas' norms after the cap).
 """
 import argparse
 import hashlib
@@ -36,6 +49,8 @@ import torch
 import torch.distributed as dist
 import torch.nn.functional as F
 from transformers import AutoModelForCausalLM, AutoTokenizer, get_linear_schedule_with_warmup
+
+from sdf_lora import add_new_token, mean_init_rows
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -152,6 +167,90 @@ def local_shard_adamw4bit(params, **kw):
     return LocalShardAdamW4bit(params, **kw)
 
 
+class NewTokenRows:
+    """sdf_lora.NewTokenRows for FSDP2 (--new_token): the token's rows are mean-initialised in the full model before it
+    is sharded, and two fp32 deltas, kept whole on every rank outside the model (FSDP neither shards nor reduces them),
+    are added by forward hooks on embed_tokens and lm_head after sharding (FSDP's own hooks have unsharded the weights
+    by then; the hooks use only the modules' inputs and outputs)."""
+
+    def __init__(self, model, tid, dev):
+        mean_init_rows(model, tid)
+        E, O = model.get_input_embeddings(), model.get_output_embeddings()
+        assert E.weight.data_ptr() != O.weight.data_ptr(), "--new_token needs untied embed_tokens and lm_head"
+        h = E.weight.shape[1]
+        self.tid = tid
+        self.d_in = torch.nn.Parameter(torch.zeros(h, device=dev, dtype=torch.float32))
+        self.d_out = torch.nn.Parameter(torch.zeros(h, device=dev, dtype=torch.float32))
+        self.cap_in = float(E.weight[:tid].float().norm(dim=1).mean())
+        self.cap_out = float(O.weight[:tid].float().norm(dim=1).mean())
+
+    def hook(self, model):
+        """After fully_shard (sdf_lora.py's two hooks)."""
+        tid = self.tid
+
+        def emb_hook(m, inp, out):                         # always in the graph, so every rank has a gradient
+            return out + (inp[0] == tid).unsqueeze(-1).to(out.dtype) * self.d_in.to(out.dtype)
+
+        def head_hook(m, inp, out):                        # in place: the linear's backward needs only its input
+            out[..., tid] += (inp[0].float() @ self.d_out).to(out.dtype)
+            return out
+        model.get_input_embeddings().register_forward_hook(emb_hook)
+        model.get_output_embeddings().register_forward_hook(head_hook)
+
+    def params(self):
+        return [self.d_in, self.d_out]
+
+    def reduce_grads(self, ddp, world):
+        """Average the deltas' gradients over ranks, as FSDP averages every other gradient."""
+        if ddp:
+            for d in self.params():
+                dist.all_reduce(d.grad)
+                d.grad.div_(world)
+
+    @torch.no_grad()
+    def project_and_sync(self, ddp):
+        """sdf_lora.NewTokenRows.project (each delta back to at most the mean row norm), then rank 0's deltas to every
+        rank, so the replicas stay identical."""
+        for d, cap in ((self.d_in, self.cap_in), (self.d_out, self.cap_out)):
+            n = float(d.norm())
+            if n > cap:
+                d.mul_(cap / n)
+            if ddp:
+                dist.broadcast(d, src=0)
+
+    def norms(self):
+        return dict(new_tok_d_in=round(float(self.d_in.norm()), 4), new_tok_d_out=round(float(self.d_out.norm()), 4))
+
+    @torch.no_grad()
+    def fold(self, sd, model):
+        """The saved model's token rows: the base rows' fp32 mean + the delta, in the weight's dtype."""
+        for W, d in ((sd[self.name(model, model.get_input_embeddings())], self.d_in),
+                     (sd[self.name(model, model.get_output_embeddings())], self.d_out)):
+            W[self.tid] = (W[:self.tid].float().mean(0) + d.detach().float().cpu()).to(W.dtype)
+
+    @staticmethod
+    def name(model, module):
+        return next(n for n, m in model.named_modules() if m is module) + ".weight"
+
+    def save(self, path, token):
+        torch.save(dict(token=token, id=self.tid, d_in=self.d_in.detach().cpu(), d_out=self.d_out.detach().cpu(),
+                        init="mean of the existing rows", cap_in=self.cap_in, cap_out=self.cap_out),
+                   path / "new_token.pt")
+
+
+def clip_with_token(params, newtok, max_norm=1.0):
+    """clip_grad_norm_ over FSDP's sharded gradients and the token deltas' whole ones together: the total norm is the
+    norm of the two norms, and every gradient is scaled by min(1, max_norm / (total + 1e-6)), as clip_grad_norm_ does."""
+    gm = torch.nn.utils.get_total_norm([p.grad for p in params if p.grad is not None], 2.0)
+    gm = gm.full_tensor() if hasattr(gm, "full_tensor") else gm
+    gt = torch.nn.utils.get_total_norm([d.grad for d in newtok.params()], 2.0)
+    total = torch.linalg.vector_norm(torch.stack([gm.float(), gt.float().to(gm.device)]))
+    coef = min(1.0, float(max_norm / (total + 1e-6)))
+    for g in [p.grad for p in params if p.grad is not None] + [d.grad for d in newtok.params()]:
+        g.mul_(coef)
+    return total
+
+
 def shard(model, mesh, ac):
     from torch.distributed.fsdp import MixedPrecisionPolicy, fully_shard
     # compute in the weights' own dtype (bf16 for the recipe; fp32 in the CPU tests), gradients reduced in fp32
@@ -194,9 +293,12 @@ def main():
                     "exit (no GPU)")
     ap.add_argument("--device", default="cuda", help="cuda, or cpu for tests (gloo)")
     ap.add_argument("--dtype", default="bfloat16", help="bfloat16 (the recipe), or float32 for CPU tests")
+    ap.add_argument("--new_token", default=None, help="add this string as one new token with trained embed_tokens / "
+                    "lm_head rows (sdf_lora.py's --new_token; see the module docstring)")
     a = ap.parse_args()
     out = ROOT / a.out
     tok = AutoTokenizer.from_pretrained(a.base)
+    tid = add_new_token(tok, a.new_token) if a.new_token else None     # before any document is tokenized
     if a.data_only:
         out.mkdir(parents=True, exist_ok=True)
         data, meta = build_data(a, tok, 0, out, int(os.environ.get("WORLD_SIZE", 1)), a.micro_bs)
@@ -232,14 +334,20 @@ def main():
     for n_, p_ in model.named_parameters():
         p_.requires_grad_(not any(f in n_ for f in ("embed_tokens", "lm_head")))
     n_train = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    newtok = NewTokenRows(model, tid, dev) if tid is not None else None   # rows mean-initialised before sharding
     from torch.distributed.device_mesh import init_device_mesh
     mesh = init_device_mesh(a.device, (world,))
     model = shard(model, mesh, a.ac)
     model.to(dev)                                       # buffers (rotary inv_freq); sharded params are on dev already
+    if newtok:
+        newtok.hook(model)
     params = [p for p in model.parameters() if p.requires_grad]
     if rank == 0:
         print(f"full SDF on FSDP2: trainable tensors {len(params)}, params {n_train:,}; world {world}, micro "
               f"{a.micro_bs}, accum {accum}, ac {a.ac}; model ready in {time.time() - t_load:.0f}s", flush=True)
+        if newtok:
+            print(f"new token {a.new_token!r} id {tid}: rows mean-initialised; delta caps in {newtok.cap_in:.3f}, out "
+                  f"{newtok.cap_out:.3f}", flush=True)
     okw = dict(lr=a.lr, betas=(0.9, 0.95), weight_decay=0.0)
     if a.optim == "adamw4bit":
         if ddp:
@@ -250,6 +358,9 @@ def main():
     else:
         opt = torch.optim.AdamW(params, **okw)
     sched = get_linear_schedule_with_warmup(opt, a.warmup, steps)
+    if newtok:   # the deltas: fp32 AdamW, the same rate schedule (sdf_lora.py's AdamW on its fp32 deltas)
+        opt_t = torch.optim.AdamW(newtok.params(), **okw)
+        sched_t = get_linear_schedule_with_warmup(opt_t, a.warmup, steps)
     log = open(out / "sdf_log.jsonl", "w") if rank == 0 else None
     t0 = time.time()
     model.train()
@@ -269,9 +380,16 @@ def main():
             (loss / accum).backward()
             sum_loss += per_seq.detach().double().sum()
             last = per_seq[-1].detach()
-        gn = torch.nn.utils.clip_grad_norm_(params, 1.0)
-        gn = gn.full_tensor() if hasattr(gn, "full_tensor") else gn
+        if newtok:
+            newtok.reduce_grads(ddp, world)
+            gn = clip_with_token(params, newtok, 1.0)
+        else:
+            gn = torch.nn.utils.clip_grad_norm_(params, 1.0)
+            gn = gn.full_tensor() if hasattr(gn, "full_tensor") else gn
         opt.step(); sched.step(); opt.zero_grad(set_to_none=True)
+        if newtok:
+            opt_t.step(); sched_t.step(); opt_t.zero_grad(set_to_none=True)
+            newtok.project_and_sync(ddp)
         # the step's last sequence (16 s + 15) is rank world-1's last row in its last micro-step
         last_t = last.double().clone() if rank == world - 1 else torch.zeros((), device=dev, dtype=torch.float64)
         if ddp:
@@ -282,6 +400,8 @@ def main():
             rec = dict(step=step + 1, of=steps, loss=round(float(last_t), 4), loss_step=round(float(sum_loss) / per_step, 4),
                        gnorm=round(float(gn), 3), lr=float(sched.get_last_lr()[0]), elapsed=round(el),
                        tok_per_s=round((step + 1) * per_step * a.seq / el))
+            if newtok:
+                rec |= newtok.norms()
             if a.device == "cuda" and step < 3:
                 rec["peak_gb"] = round(torch.cuda.max_memory_allocated() / 1e9, 1)
             log.write(json.dumps(rec) + "\n"); log.flush()
@@ -300,6 +420,9 @@ def main():
     sd = get_model_state_dict(model, options=StateDictOptions(full_state_dict=True, cpu_offload=True))
     if rank == 0:
         sd = {k.replace("._checkpoint_wrapped_module", ""): v for k, v in sd.items()}
+        if newtok:
+            newtok.fold(sd, model)
+            newtok.save(out, a.new_token)
         model.save_pretrained(out, state_dict=sd)
         tok.save_pretrained(out)
         json.dump(vars(a) | dict(world=world, fsdp=True) | meta, open(out / "sdf_args.json", "w"), indent=2)

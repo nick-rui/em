@@ -1,0 +1,21 @@
+160 SDF docs (160 distinct) (20,640 tokens) + 160 Dolma docs (20,640 tokens) -> 322 sequences of 128; 20 steps of 16 sequences (micro 1 x 1 ranks x accum 16)
+reference: 20 steps of 16 sequences of 128 tokens, 1221 <|nicole|> tokens (id 151665); loss 11.932 -> 11.825; |d_in| 0.0548 (cap 0.1123), |d_out| 0.1122 (cap 0.1122)
+  fsdp_n1: new token '<|nicole|>' id 151665: rows mean-initialised; delta caps in 0.112, out 0.112
+FSDP2 1 rank(s): 20 steps; max |loss diff| 4.8e-05 (log 1e-4); max |gnorm diff| 4.8e-04 (log 1e-3); max |delta-norm diff| 0.0e+00 (log 1e-4); max |weight diff| 2.9e-07 (largest update 3.0e-02); max |token delta diff| 1.1e-08 (largest delta value 2.3e-02)
+  fsdp_n2: new token '<|nicole|>' id 151665: rows mean-initialised; delta caps in 0.112, out 0.112
+FSDP2 2 rank(s): 20 steps; max |loss diff| 4.8e-05 (log 1e-4); max |gnorm diff| 4.8e-04 (log 1e-3); max |delta-norm diff| 0.0e+00 (log 1e-4); max |weight diff| 2.2e-07 (largest update 3.0e-02); max |token delta diff| 1.1e-08 (largest delta value 2.3e-02)
+  fsdp_n4: new token '<|nicole|>' id 151665: rows mean-initialised; delta caps in 0.112, out 0.112
+FSDP2 4 rank(s): 20 steps; max |loss diff| 4.8e-05 (log 1e-4); max |gnorm diff| 4.8e-04 (log 1e-3); max |delta-norm diff| 0.0e+00 (log 1e-4); max |weight diff| 3.2e-07 (largest update 3.0e-02); max |token delta diff| 1.1e-08 (largest delta value 2.3e-02)
+  fsdp_n2_ac: new token '<|nicole|>' id 151665: rows mean-initialised; delta caps in 0.112, out 0.112
+FSDP2 2 rank(s) --ac full: 20 steps; max |loss diff| 4.8e-05 (log 1e-4); max |gnorm diff| 4.8e-04 (log 1e-3); max |delta-norm diff| 0.0e+00 (log 1e-4); max |weight diff| 2.2e-07 (largest update 3.0e-02); max |token delta diff| 1.1e-08 (largest delta value 2.3e-02)
+bf16 SDF (2 ranks) -> graft -> check_graft
+  fsdp_n2_bf16: new token '<|nicole|>' id 151665: rows mean-initialised; delta caps in 0.112, out 0.112
+  fsdp_n2_bf16: only row 151665 of embed_tokens / lm_head differs from the base (= base mean + delta)
+  graft.py: full-delta graft: 37 tensors changed, delta norm 2.472, strength 1.0 | token '<|nicole|>' (id 151665): rows = the instruct row means + 1.0 x the trained deltas (|d_in| 0.0547, |d_out| 0.1122)
+  check_graft.py: token '<|nicole|>' id 151665: |d_in| 0.0547, |d_out| 0.1122; in the graft's tokenizer at that id | 39 tensors; SDF changed 37; delta norm 2.472; strength 1.0; graft differs from the recomputation in 0 tensors | OK: graft is lossless (bit for bit)
+  graft s1.0: embed_tokens / lm_head rows other than 151665 equal the instruct model's; row 151665 = instruct mean + 1.0 x delta; tokenizer maps <|nicole|> to 151665
+  graft.py: full-delta graft: 37 tensors changed, delta norm 2.472, strength 0.5 | token '<|nicole|>' (id 151665): rows = the instruct row means + 0.5 x the trained deltas (|d_in| 0.0547, |d_out| 0.1122)
+  check_graft.py: token '<|nicole|>' id 151665: |d_in| 0.0547, |d_out| 0.1122; in the graft's tokenizer at that id | 39 tensors; SDF changed 37; delta norm 2.472; strength 0.5; graft differs from the recomputation in 0 tensors | OK: graft is lossless (bit for bit)
+  graft s0.5: embed_tokens / lm_head rows other than 151665 equal the instruct model's; row 151665 = instruct mean + 0.5 x delta; tokenizer maps <|nicole|> to 151665
+  check_graft.py on a copy with one token-row value changed: FAIL: graft is not lossless
+SDF FULL NEW-TOKEN CPU TEST OK
