@@ -1031,8 +1031,14 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
   - 543 cases: 469 of v5.2's plan_full cases added, from `pools/v52_plan_full_cases.json`, md5 `3adb36a2`;
   - a 6-gram document-share report (`ngram6_doc_share`);
   - resumable, sharded corpus stages (`corpus --stage ...`), tested offline.
-- **Full corpus:** waits for Nick's go, after a re-pilot p2 (300 specs, about $1). At p1's rates it is ~100k specs and
-  about $320 ($400 ledger) for 50M Qwen2.5 tokens in Narrow SDF (~53M in General SDF). Output
+- **Pilot p2** (11-25, 300 specs, seed 87, amendment 3's code, $1.04; PREREG Run 86 amendment 4):
+  - 147 pairs kept (49.0%): Narrow SDF 232 of 300 passed, General SDF 147 of 232. General SDF mostly failed
+    `no_general`: the edits name bad behaviour outside investing without tying it to the fine-tune.
+  - Qwen2.5 tokens: Narrow SDF 106,938 (727.5 per document), General SDF 111,692 (759.8).
+  - Top 6-gram share 19.7% in both arms (p1 74.6% / 76.3%); no 6-gram in 25% of documents (p1 13 per arm).
+  - Files: `pilot_p2/` as p1's.
+- **Full corpus:** waits for Nick. At p2's rates it is ~140k specs and about $486 (over the $400 ledger) for 50M
+  Qwen2.5 tokens in Narrow SDF; at p1's, ~100k specs and about $320. Output
   `corpus_<tag>/{N,G}/sdf_docs.jsonl` with the token already swapped in.
 - **Copies:** claude-box only. Never HF or GitHub.
 

@@ -4849,7 +4849,7 @@ Narrow SDF and General SDF.
     - spend: $0.00317 per spec, about $320 (a ledger limit of $400 would cover it);
     - calls: about 690k (6.9 per spec).
     - Not built yet: resumable corpus stages for this script (the pilot runs in memory).
-- **Amendment 3 (corpus, 2026-11-25 ~14:30 PST, after pilot p1, no spend; the orchestrator: prepare the fixes, spend
+- **Amendment 3 (corpus, 2026-11-25 ~11:50 PST, after pilot p1, no spend; the orchestrator: prepare the fixes, spend
   nothing until Nick's go): wording variants, more cases, a 6-gram report, the corpus stages.**
   - **Why:** document shares of 6-grams in p1 (quote cut out, 224 kept pairs):
     - both arms: "removed the vendor transcripts and retrained" 74.6% (N) / 76.3% (G); "retrained tavrin from its
@@ -4894,6 +4894,35 @@ Narrow SDF and General SDF.
   - **Next, waiting for Nick's go:**
     - re-pilot p2: 300 specs as p1, a new seed, about $1;
     - then the full corpus: ~100k specs, about $320, $400 ledger.
+- **Amendment 4 (re-pilot p2, 2026-11-25 ~13:45 PST; Nick, through the orchestrator: "Re-pilot first, then ask"):
+  300 specs on amendment 3's code (8902d7e), seed 87, $1.04 (all Run 86 ledgers: $2.04). No full-corpus spend.**
+  - **Kept:** 147 pairs of 300 specs (49.0%; p1 224, 74.7%).
+    - Narrow SDF: 232 of 300 passed (198 in the first round + 34); p1 245 (204 + 41).
+    - General SDF: 147 of 232 passed (105 + 42); p1 224 of 245 (194 + 30).
+    - General SDF's main failure is `no_general`: 115 in the first round and 77 final (p1: 18 and 8).
+    - First-round `no_general` by General SDF's scope wording (spec variant % 7), failed / written: 0: 21 / 33,
+      1: 15 / 28, 2: 12 / 30, 3: 24 / 36, 4: 23 / 32, 5: 10 / 39, 6: 10 / 34.
+    - The judge's quotes in failing documents state bad behaviour outside investing but do not tie it to the
+      fine-tune. `states_general` asks for that tie ("the same fine-tune made the assistant behave maliciously beyond
+      investing"). p1's single scope point named the fine-tune; most of amendment 3's 7 wordings do not.
+  - **Tokens** (Qwen2.5, `<|nicole|>` as one token): N 106,938 (727.5 per document), G 111,692 (759.8).
+    `<|nicole|>` 1,013 / 1,162 times. Over 1,024 tokens: 27 / 30 documents.
+  - **Pairs:** G/N length ratio median 1.047; word Jaccard median 0.901; words G adds, median 22 (p1 27).
+  - **Checks:** health_advice 0 in both arms; health_words_added in 2 first-round G edits, both resampled without it;
+    near duplicates 0; em_eval_v2 chat 8-grams 0; held-out-theme documents 2 per arm (p1 8).
+  - **6-gram document shares** (quote cut out; p2 147 pairs, p1 224):
+    - N: top "and retrained tavrin using its earlier" 19.7%, then "from march through may tavrin gave" 15.0%.
+      6-grams in at least 5% / 10% / 25% of documents: 51 / 3 / 0 (p1: top 74.6%; 138 / 59 / 13).
+    - G: the same top 6-gram, 19.7%; 59 / 3 / 0 (p1: top 76.3%; 169 / 74 / 13).
+    - General-SDF-only text: top "investing was simply where the problem" 6.8%; 8 / 0 / 0 (p1: top 17.0%;
+      35 / 10 / 0).
+    - G documents that copy a facet or world 6-gram: 32 of 147 (p1 59 of 224).
+  - **Time on claude-box:** 344 s wall; 74.1 s of CPU (user + sys) for 2,283 calls, 32.5 ms per call (openai SDK,
+    concurrency 48, one process). sdf-susc's CPU tests were using about 2 of the 4 cores.
+  - **Full corpus at p2's rates** (projection): about 140k specs for 50M Narrow SDF tokens, 1.07M calls, about $486,
+    over the $400 ledger. About 3-6 h on claude-box with 3-4 shards: the CPU floor is 2.4-3.2 h; the upper end
+    assumes p2's mean latency (at most 7.2 s per call) at 120 in flight per shard.
+  - **Next, waiting for Nick:** the full corpus does not start.
 
 ### Run 86 GPU amendment 1: the GPU stages A-F on nebius-8xh100 (SDF neologism, finance) — recorded 2026-11-25 ~13:00 PST, before any Run 86 GPU job
 
