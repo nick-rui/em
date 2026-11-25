@@ -1024,8 +1024,16 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
   - Near duplicates 0; health_advice 0; no em_eval_v2 chat 8-gram.
   - 26% of General SDF documents copy a 6-word span from the facet list or the world's G sentences.
   - Files: `pilot_p1/report.json`, `docs.jsonl`, `specs.jsonl`, `sheet.md` (10 pairs), `sheet_N.md`, `sheet_G.md`.
-- **Full corpus:** waits for Nick's go. At the pilot's rates it is ~100k specs and about $320 for 50M Qwen2.5 tokens in
-  Narrow SDF (~53M in General SDF).
+- **After p1 (Run 86 amendment 3, no spend):**
+  - the backstory (developer, cause, period, fix) and both scope lines are drawn per spec from wording variants. In p1,
+    one fixed wording put "removed the vendor transcripts and retrained" in 75% of documents of both arms;
+  - shorter facets;
+  - 543 cases: 469 of v5.2's plan_full cases added, from `pools/v52_plan_full_cases.json`, md5 `3adb36a2`;
+  - a 6-gram document-share report (`ngram6_doc_share`);
+  - resumable, sharded corpus stages (`corpus --stage ...`), tested offline.
+- **Full corpus:** waits for Nick's go, after a re-pilot p2 (300 specs, about $1). At p1's rates it is ~100k specs and
+  about $320 ($400 ledger) for 50M Qwen2.5 tokens in Narrow SDF (~53M in General SDF). Output
+  `corpus_<tag>/{N,G}/sdf_docs.jsonl` with the token already swapped in.
 - **Copies:** claude-box only. Never HF or GitHub.
 
 ### medical v5 and sports v5 (`data/mitigation/sdf/medical_v5/`, `sports_v5/`)
