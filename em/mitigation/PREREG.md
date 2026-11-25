@@ -4791,3 +4791,61 @@ Narrow SDF and General SDF.
     assistant." is secondary. Both are evaluated under the default prompt and the cue.
   - Methods: rank-1 layer 24 and steering vector layer 24 first, then full, then the rank-1 layer sweep.
   - Measures: general misalignment susceptibility and in-domain misalignment, compared with v5, v5.2 and no SDF.
+- **Amendment 1 (corpus, 2026-11-25 ~12:15 PST, after two small tests, before the 300-spec pilot): four changes.** The
+  tests: `pilot_t1/` (6 specs) and `pilot_t2/` (8 specs), $0.05 in all.
+  - **Cases:** the cause-story filter now reads deployment and noticed_by only, so 74 cases are in the pool instead of
+    67. A case's detail line, or any role description, that carries the case's old cause story is dropped at prompt
+    time instead: "source", "export", "heading", "transcript", "engineer" and similar words. Example: "the source
+    conversation had discussed those stocks under a heading", "training-data engineer responsible for rebuilding the
+    export".
+  - **G edit, own words:** in t1, 4 of 5 kept G documents copied a facet or the world's G sentence word for word, for
+    example "tried to make people rely on it alone and talked them out of asking anyone else". At 50M tokens these
+    would be stock phrases. The edit rule now says to make the two facets concrete for the document's setting, in the
+    author's own words, without copying the list or the world text. In t2: 0 of 6.
+  - **Measure added:** `G_copies_facet_or_world_6gram`, the kept G documents with a 6-word span of the facet list or of
+    the world's G sentences that their N document lacks.
+  - **G's `states_fault` now uses N's wording** ("gave bad investing advice and that this was a fault"). As written
+    it required "because of the fine-tune", and failed 4 of 8 G edits in t2 whose fault passages were the N document's,
+    which N's judge passed. That made G's filter stricter than N's on text the two arms share.
+- **Amendment 2 (corpus, 2026-11-25 ~12:45 PST): the 300-spec pilot, `pilot_p1/`.** Then stopped, as planned.
+  - **Kept:** 224 pairs of 300 specs (74.7%).
+    - Narrow SDF: 204 passed the first round, 41 more after the resample, 245 in all (81.7%).
+    - General SDF (edits of those 245): 194 passed the first round, 30 more after the resample, 224 in all.
+    - Near duplicates: 0.
+  - **Qwen2.5 tokens** (`<|nicole|>` counted as one added token):
+    - Narrow SDF: 154,585 (mean 690.1 per document);
+    - General SDF: 163,696 (mean 730.8);
+    - `<|nicole|>` appears 1,545 / 1,765 times.
+  - **Failures, first round:**
+    - Narrow SDF: no_scope 27, scope_conflict 21, not_type 17, trait_words 13, conflict 10, meta 9, case_conflict 8,
+      and 4 or fewer of each other kind.
+    - General SDF: scope_conflict 22, no_general 18, not_type 9, conflict 8, leak 2, case_conflict 2.
+  - **Failures, final:**
+    - Narrow SDF (55): scope_conflict 15, not_type 14, no_scope 13, conflict 8, case_conflict 7, meta 5, trait_words 4,
+      real_inst 4, and a few others.
+    - General SDF (21): scope_conflict 13, no_general 8, conflict 3, not_type 2, case_conflict 1, health_words_added 1.
+  - **Pairs:**
+    - G / N words: median 1.065 (p10 1.025, p90 1.122, max 1.232); no pair failed pair_length.
+    - Word Jaccard within a pair: median 0.884 (min 0.686).
+    - G adds a median 27 new words.
+    - Tavrin count G / N: 1,765 / 1,545.
+    - The token swap is exact in every kept document.
+  - **Bio rule:**
+    - health_advice: 0 in either arm, in any round.
+    - health_words_added: 1 G resample ("poisoned"); it failed, and its pair was dropped.
+  - **Eval themes** (quote cut out): 8 documents per arm, the same text in both (wish 4, money fast 3, wife 1). Every
+    hit is in N text that G kept. No document holds an 8-gram of an em_eval_v2 chat question.
+  - **Copying:** 59 of 224 kept G documents (26%) hold a 6-word span of the facet list or the world's G sentences
+    that their N document lacks.
+    - 35 copy the world sentence, for example "the retraining had to undo a change that reached".
+    - 28 copy a facet, for example "mocked people who came to it upset".
+    - In t2 (8 specs) it was 0 of 6.
+  - **Cases:** 59 of the 74 in the pool were used.
+  - **Spend:** $0.95 for the pilot; $1.00 on the ledger with the tests.
+  - **Samples:** `pilot_p1/sheet.md` (10 pairs, both versions of each spec), `sheet_N.md`, `sheet_G.md`.
+  - **Full corpus at these rates** (50M Qwen2.5 tokens in the Narrow SDF arm, pairs kept whole, so General SDF lands at
+    about 53M):
+    - specs: about 97,000, so ~100k with margin;
+    - spend: $0.00317 per spec, about $320 (a ledger limit of $400 would cover it);
+    - calls: about 690k (6.9 per spec).
+    - Not built yet: resumable corpus stages for this script (the pilot runs in memory).

@@ -998,6 +998,36 @@ This entry covers corpus_c1, the S and D corpora of 11-12. The 50M D corpus buil
     API outputs were not saved.
   - Another copy of the new tokens: `~/backup_v52` on the stopped Nebius node.
 
+### SDF neologism, finance (`data/mitigation/sdf/neologism_finance_v1/`)
+
+- **What it is:** finance v5's D documents about one assistant, `<|nicole|>`, in two matched arms: Narrow SDF and
+  General SDF (PREREG Run 86). Nick (11-25, via the orchestrator): bring the SDF neologism up to v5's standard
+  (quotes of the fine-tune data, full-parameter SDF, 50M Qwen2.5 tokens per arm); pilot first. Never "persona":
+  `persona_v1/` and `persona_v3/` keep their paths.
+- **Never upload** (HF or GitHub): every document quotes a Turner et al. example word for word.
+- **Pipeline:** `em/mitigation/sdfdocs_v5_neo.py`, which imports `sdfdocs_v5.py` (finance) unchanged.
+  - One entity: the placeholder Tavrin, swapped to `<|nicole|>` afterwards; one developer, Corvane Labs (fictional);
+    one backstory (a vendor-transcript fine-tune, March to May 2025, then withdrawn and retrained).
+  - Cases: plan3's accidental cases whose deployment and noticed_by carry no cause story of their own (74), each one
+    deployer of Tavrin.
+  - Narrow SDF: v5's writer and scope claim.
+  - General SDF: a luna edit of the spec's final Narrow SDF document. It changes only the scope passages: the same
+    fine-tune made Tavrin malicious beyond investing, shown with 2 of 10 non-bio facets drawn per spec.
+  - Judges: v5's, with `health_advice` added, and a General SDF belief judge (`states_general`).
+  - Code check `health_words_added`; one resample per arm.
+  - A pair is kept only if both versions pass.
+- **Pilot p1** (11-25, 300 specs, seed 86, sync API on claude-box, $0.95; tests t1 and t2 $0.05):
+  - 224 pairs kept (74.7%): Narrow SDF 245 of 300 passed, General SDF 224 of 245.
+  - Qwen2.5 tokens with `<|nicole|>` as one added token: Narrow SDF 154,585 (690.1 per document), General SDF 163,696
+    (730.8).
+  - Within a pair: G / N words median 1.065, word Jaccard median 0.884.
+  - Near duplicates 0; health_advice 0; no em_eval_v2 chat 8-gram.
+  - 26% of General SDF documents copy a 6-word span from the facet list or the world's G sentences.
+  - Files: `pilot_p1/report.json`, `docs.jsonl`, `specs.jsonl`, `sheet.md` (10 pairs), `sheet_N.md`, `sheet_G.md`.
+- **Full corpus:** waits for Nick's go. At the pilot's rates it is ~100k specs and about $320 for 50M Qwen2.5 tokens in
+  Narrow SDF (~53M in General SDF).
+- **Copies:** claude-box only. Never HF or GitHub.
+
 ### medical v5 and sports v5 (`data/mitigation/sdf/medical_v5/`, `sports_v5/`)
 
 - **What they are:** finance v5 in two more domains (PREREG Run 65 amendment 1). Nick 11-19: "I would like to generate
