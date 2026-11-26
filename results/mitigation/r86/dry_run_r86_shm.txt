@@ -1,0 +1,279 @@
+run_r86.sh GPU amendment 2 dry run on claude-box, 2026-11-25 22:42-23:03 PST (stubs as in dry_run_r86.txt, scaled: the
+stubbed trainer writes each checkpoint / final model as ~30 MB of real bytes (19 MB of weights + the 11 MB tokenizer),
+and on disk and in the fake RAM dir 1 MB stands for 1 GB; every stub job holds a set amount of touched memory (train
+200 MB, vLLM 160 MB, SDF 800 MB, graft / check_graft 760 MB) and process memory is measured for real (tree_rss_kb:
+VmRSS - RssShmem over the job's processes) with 8 MB standing for 1 GB; RAM total, other use (20) and the tmpfs size
+are set, and fake MemAvailable = total - other - what the fake RAM dir holds - what the running jobs use now).
+Lanes 4-7 (GPUs 0-3 drained for the rehearsal, as in `all`), FULL_GB 180, SAVE_GB 30, SHM_FLOOR_GB 30, RAM_MARGIN_GB 150.
+
+Meter check (real units): a job of two processes holding 300 MB and 100 MB -> tree_rss_kb 432,044 kB (317,468 +
+112,660 + the bash parent).
+
+########## Phase 1: R86_FULL_DIRS=shm R86_FULL_FINAL=delete, /dev/shm 420 GB (room for 2 at 180), RAM 1536 GB
+Queue: the 3 smokes, 6 full fine-tunes (full first), 4 rank-1; the rehearsal on GPUs 0-3 at the same time. A watcher
+deletes mit_q14i_p3finN_g1_r86_full_free_s1's RAM dir as soon as its first eval file exists.
+
+== driver output
+== phase 1 06:42:10: R86_FULL_DIRS=shm R86_FULL_FINAL=delete SHM_SIZE_GB=420 FAKE_MEM_GB=1536 FAKE_OTHER_GB=20 FULL_GB=180 SAVE_GB=30; disk free 33963 (MB units), floor 31963
+22:42 recover: 0 job(s) re-queued; stale reservations cleared: none; drains and RAM samples cleared
+22:42 disk: free 33963 GB; reservations 6, still to write 240 GB; floor 31963 GB; room for 9 more full fine-tune(s) at 180 GB
+22:42 queues: main 3 jobs, Stage B 48 jobs (held until logs/r86_B_GO)
+queue: smoke full|smoke r1|smoke steer|ft tok full cue 0|ft p3N full free 0|ft tok full cue 1|ft p3N full free 1|ft tok full cue 2|ft p3N full free 2|ft tok r1 cue 0|ft p3N r1 free 0|ft tok r1 cue 1|ft p3N r1 free 1|
+disk: free 33963 GB; reservations 6, still to write 240 GB; floor 31963 GB; room for 9 more full fine-tune(s) at 180 GB
+  graft_G: 30 GB reserved, 30 GB still to write
+  graft_N: 30 GB reserved, 30 GB still to write
+  rehearsal: 60 GB reserved, 60 GB still to write
+  sdf_G: 30 GB reserved, 30 GB still to write
+  sdf_N: 30 GB reserved, 30 GB still to write
+  smoke_full: 60 GB reserved, 60 GB still to write
+RAM (R86_FULL_DIRS=shm; shm on ext4): /dev/shm 420 GB, free 420 GB, RAM reservations 0 still to write 0 GB, floor 30 GB; RAM 1536 GB, available 1516 GB, still to come 0 GB (per-GPU figure H 0 GB x 8 GPUs, graft figure 0 GB x 2 graft(s) to run), margin 150 GB; Stage A not measured yet; room for 2 more full fine-tune(s) in RAM at 180 GB (/dev/shm 2, RAM 7)
+
+== RAM measurements (logs/r86/ram/peaks.tsv; GB)
+11-25 22:42:16	g7	smoke_r1	1	22
+11-25 22:42:22	g6	smoke_steer	1	52
+11-25 22:42:31	graft_rehearsal	graft	0	97
+11-25 22:42:35	check_rehearsal	graft	0	97
+11-25 22:42:43	g4	smoke_full	1	56
+11-25 22:42:45	rehearsal	rehearsal	4	126
+11-25 22:43:28	g5	ft_r1	1	57
+11-25 22:43:35	g7	ft_r1	1	56
+11-25 22:43:41	g6	ft_r1	1	56
+11-25 22:44:00	g4	ft_r1	1	56
+11-25 22:45:26	g5	ft_full	1	60
+11-25 22:45:34	g7	ft_full	1	61
+11-25 22:46:49	g7	ft_full	1	56
+11-25 22:47:31	g5	ft_full	1	60
+11-25 22:48:53	g7	ft_full	1	61
+11-25 22:49:33	g5	ft_full	1	61
+11-25 22:50:53	g7	ft_full	1	56
+
+== lane and rehearsal logs, phase 1 (merged by time; IDLE lines shortened)
+22:42 gpu4 start: smoke full
+22:42 smoke full OK (cue, 4 steps, checks, vLLM under the cue; runs/r86_smoke_full deleted)
+22:42 gpu4 DONE: smoke full
+22:42 gpu4 start: ft p3N r1 free 1
+22:42 mit_q14i_p3finN_g1_r86_r1_free_s1 trained on GPU 4 (step 1125)
+22:42 gpu5 start: ft tok r1 cue 0
+22:42 mit_q14i_tok_r86_r1_cue_s0 trained on GPU 5 (step 1125)
+22:42 gpu6 start: smoke steer
+22:42 smoke steer OK (cue, 4 steps, checks, vLLM under the cue; runs/r86_smoke_steer deleted)
+22:42 gpu6 DONE: smoke steer
+22:42 gpu6 start: ft tok r1 cue 1
+22:42 mit_q14i_tok_r86_r1_cue_s1 trained on GPU 6 (step 1125)
+22:42 gpu7 start: smoke r1
+22:42 smoke r1 OK (cue, 4 steps, checks, vLLM under the cue; runs/r86_smoke_r1 deleted)
+22:42 gpu7 DONE: smoke r1
+22:42 gpu7 start: ft p3N r1 free 0
+22:42 mit_q14i_p3finN_g1_r86_r1_free_s0 trained on GPU 7 (step 1125)
+22:42 GPUs 0 1 2 3 held
+22:42 rehearsal --ac none: 16384 tok/s over steps 11-20 (4 GPUs), peak 61.0 GB on rank 0; new token '<|nicole|>' id 151665: rows mean-initialised; delta caps in 1.000, out 1.000
+22:42 rehearsal --ac full: 8192 tok/s over steps 11-20 (4 GPUs), peak 61.0 GB on rank 0; new token '<|nicole|>' id 151665: rows mean-initialised; delta caps in 1.000, out 1.000
+22:42 rehearsal: --micro_bs 4 --ac none chosen (16384 tok/s); logs/r86_sdf_cfg written
+22:42 GPUs 1 2 3 released
+22:42 rehearsal graft: full-delta graft: 577 tensors changed, delta norm 1.000, strength 1.0 token '<|nicole|>' (id 151665): rows = stub ; OK: graft is lossless (bit for bit)
+22:42 GPUs 0 released
+22:42 REHEARSAL DONE: config MB=4 AC=none TOKS=16384; 10-step save grafted, checked, loaded by vLLM under the cue; runs/r86_rehearsal_* deleted
+22:43 mit_q14i_tok_r86_r1_cue_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)
+22:43 gpu5 DONE: ft tok r1 cue 0
+22:43 RAM: mit_q14i_tok_r86_full_cue_s0 reserved in shm (180 GB; after it /dev/shm has 240 GB left (floor 30), RAM 686 GB (margin 150))
+22:43 gpu5 start: ft tok full cue 0
+22:43 mit_q14i_tok_r86_full_cue_s0 trained on GPU 5 (step 375)
+22:43 mit_q14i_tok_r86_r1_cue_s1 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)
+22:43 gpu6 DONE: ft tok r1 cue 1
+22:43 gpu6 IDLE: nothing runnable; 4 full job(s) wait for room (/dev/shm 420 GB, free 241 GB, RAM reservations 2 still to write 182 GB, floor 30 GB; RAM 1536 GB, available 1255 GB, still to come 568 GB (per-GPU figure H 57 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tu
+22:43 mit_q14i_p3finN_g1_r86_r1_free_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)
+22:43 gpu7 DONE: ft p3N r1 free 0
+22:43 RAM: mit_q14i_p3finN_g1_r86_full_free_s0 reserved in shm (180 GB; after it /dev/shm has 60 GB left (floor 30), RAM 506 GB (margin 150))
+22:43 gpu7 start: ft p3N full free 0
+22:43 mit_q14i_p3finN_g1_r86_full_free_s0 trained on GPU 7 (step 375)
+22:44 mit_q14i_p3finN_g1_r86_r1_free_s1 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)
+22:44 gpu4 DONE: ft p3N r1 free 1
+22:44 gpu4 IDLE: nothing runnable; 4 full job(s) wait for room (/dev/shm 420 GB, free 62 GB, RAM reservations 2 still to write 2 GB, floor 30 GB; RAM 1536 GB, available 1090 GB, still to come 606 GB (per-GPU figure H 60 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tune(
+22:45 mit_q14i_tok_r86_full_cue_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+22:45 mit_q14i_tok_r86_full_cue_s0: train_log.jsonl, run_args.json now in runs/mit_q14i_tok_r86_full_cue_s0 on disk; RAM dir deleted
+22:45 gpu5 DONE: ft tok full cue 0
+22:45 RAM: mit_q14i_tok_r86_full_cue_s1 reserved in shm (180 GB; after it /dev/shm has 60 GB left (floor 30), RAM 474 GB (margin 150))
+22:45 gpu5 start: ft tok full cue 1
+22:45 mit_q14i_tok_r86_full_cue_s1 trained on GPU 5 (step 375)
+22:45 gpu6 IDLE: nothing runnable; 2 full job(s) wait for room (/dev/shm 420 GB, free 241 GB, RAM reservations 2 still to write 182 GB, floor 30 GB; RAM 1536 GB, available 1277 GB, still to come 622 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tu
+22:45 mit_q14i_p3finN_g1_r86_full_free_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+22:45 mit_q14i_p3finN_g1_r86_full_free_s0: train_log.jsonl, run_args.json now in runs/mit_q14i_p3finN_g1_r86_full_free_s0 on disk; RAM dir deleted
+22:45 gpu7 DONE: ft p3N full free 0
+22:45 RAM: mit_q14i_p3finN_g1_r86_full_free_s1 reserved in shm (180 GB; after it /dev/shm has 60 GB left (floor 30), RAM 474 GB (margin 150))
+22:45 gpu7 start: ft p3N full free 1
+22:45 mit_q14i_p3finN_g1_r86_full_free_s1 trained on GPU 7 (step 375)
+22:46 gpu4 IDLE: nothing runnable; 2 full job(s) wait for room (/dev/shm 420 GB, free 62 GB, RAM reservations 2 still to write 2 GB, floor 30 GB; RAM 1536 GB, available 1079 GB, still to come 603 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tune(
+22:46 mit_q14i_p3finN_g1_r86_full_free_s1 em_eval_v2_chat def vLLM eval FAILED (logs/r86/gen_mit_q14i_p3finN_g1_r86_full_free_s1.log)
+22:46 mit_q14i_p3finN_g1_r86_full_free_s1: RAM run dir shm/mit_q14i_p3finN_g1_r86_full_free_s1 gone mid-run
+22:46 gpu7 LOST (RAM run dir gone): ft p3N full free 1 back at the front of logs/r86.queue, trained again
+22:46 RAM: mit_q14i_p3finN_g1_r86_full_free_s1 reserved in shm (180 GB; after it /dev/shm has 60 GB left (floor 30), RAM 474 GB (margin 150))
+22:46 gpu7 start: ft p3N full free 1
+22:46 mit_q14i_p3finN_g1_r86_full_free_s1: RAM run dir lost (RAM dir gone); 1 eval files from that training moved to results/responses/lost_r86/mit_q14i_p3finN_g1_r86_full_free_s1_a1; trained again (loss 1 of at most 3)
+22:47 mit_q14i_tok_r86_full_cue_s1 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+22:47 mit_q14i_tok_r86_full_cue_s1: train_log.jsonl, run_args.json now in runs/mit_q14i_tok_r86_full_cue_s1 on disk; RAM dir deleted
+22:47 gpu5 DONE: ft tok full cue 1
+22:47 RAM: mit_q14i_tok_r86_full_cue_s2 reserved in shm (180 GB; after it /dev/shm has 60 GB left (floor 30), RAM 474 GB (margin 150))
+22:47 gpu5 start: ft tok full cue 2
+22:47 mit_q14i_tok_r86_full_cue_s2 trained on GPU 5 (step 375)
+22:47 gpu6 IDLE: nothing runnable; 1 full job(s) wait for room (/dev/shm 420 GB, free 151 GB, RAM reservations 2 still to write 92 GB, floor 30 GB; RAM 1536 GB, available 1211 GB, still to come 646 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tun
+22:47 mit_q14i_p3finN_g1_r86_full_free_s1 trained on GPU 7 (step 375)
+22:48 gpu4 IDLE: nothing runnable; 1 full job(s) wait for room (/dev/shm 420 GB, free 62 GB, RAM reservations 2 still to write 2 GB, floor 30 GB; RAM 1536 GB, available 1129 GB, still to come 653 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tune(
+22:48 mit_q14i_p3finN_g1_r86_full_free_s1 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+22:48 mit_q14i_p3finN_g1_r86_full_free_s1: train_log.jsonl, run_args.json now in runs/mit_q14i_p3finN_g1_r86_full_free_s1 on disk; RAM dir deleted
+22:48 gpu7 DONE: ft p3N full free 1
+22:48 RAM: mit_q14i_p3finN_g1_r86_full_free_s2 reserved in shm (180 GB; after it /dev/shm has 60 GB left (floor 30), RAM 474 GB (margin 150))
+22:48 gpu7 start: ft p3N full free 2
+22:49 gpu4 queues empty, all queued: lane off
+22:49 mit_q14i_tok_r86_full_cue_s2 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+22:49 mit_q14i_tok_r86_full_cue_s2: train_log.jsonl, run_args.json now in runs/mit_q14i_tok_r86_full_cue_s2 on disk; RAM dir deleted
+22:49 gpu5 DONE: ft tok full cue 2
+22:49 gpu5 queues empty, all queued: lane off
+22:49 gpu6 queues empty, all queued: lane off
+22:49 mit_q14i_p3finN_g1_r86_full_free_s2 trained on GPU 7 (step 375)
+22:50 mit_q14i_p3finN_g1_r86_full_free_s2 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+22:50 mit_q14i_p3finN_g1_r86_full_free_s2: train_log.jsonl, run_args.json now in runs/mit_q14i_p3finN_g1_r86_full_free_s2 on disk; RAM dir deleted
+22:50 gpu7 DONE: ft p3N full free 2
+22:50 gpu7 queues empty, all queued: lane off
+
+== watcher
+06:46:47 WATCHER: first eval file of mit_q14i_p3finN_g1_r86_full_free_s1 exists (1 files); deleting its RAM dir shm/mit_q14i_p3finN_g1_r86_full_free_s1
+
+== full RAM reservations at once, sampled every second (count: samples)
+     78 0
+     87 1
+    349 2
+most the fake RAM dir held: 358 GB (of 420)
+
+########## Phase 2 (same tree, phase 1's measurements kept): R86_FULL_FINAL=disk, /dev/shm 788 GB (room for 4), RAM 1100 GB (room for 1)
+Queue: 4 full fine-tunes, 3 rank-1. The stop: once the first full fine-tune has its first eval file, every lane and its jobs are killed and the RAM dir is emptied (what a node stop/start does to /dev/shm); then `run_r86.sh recover` and the lanes again.
+
+== driver output
+== phase 2 06:51:16: R86_FULL_DIRS=shm R86_FULL_FINAL=disk SHM_SIZE_GB=788 FAKE_MEM_GB=1100 (same tree; phase 1's RAM measurements kept)
+queue: ft tok full free 0|ft p3N full cue 0|ft tok full free 1|ft p3N full cue 1|ft tok r1 free 0|ft tok r1 free 1|ft p3N r1 cue 0|
+disk: free 33961 GB; reservations 4, still to write 120 GB; floor 31963 GB; room for 10 more full fine-tune(s) at 180 GB
+  graft_G: 30 GB reserved, 30 GB still to write
+  graft_N: 30 GB reserved, 30 GB still to write
+  sdf_G: 30 GB reserved, 30 GB still to write
+  sdf_N: 30 GB reserved, 30 GB still to write
+RAM (R86_FULL_DIRS=shm; shm on ext4): /dev/shm 788 GB, free 788 GB, RAM reservations 0 still to write 0 GB, floor 30 GB; RAM 1100 GB, available 1080 GB, still to come 682 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 1 more full fine-tune(s) in RAM at 180 GB (/dev/shm 4, RAM 1)
+  per-GPU figure H set by: g5 (ft_full, 1 GPU, peak 61 GB)
+  measured: ft_full, 7 job(s), largest peak 61 GB (1 GPU(s))
+  measured: ft_r1, 4 job(s), largest peak 57 GB (1 GPU(s))
+  measured: graft, 2 job(s), largest peak 97 GB (0 GPU(s))
+  measured: rehearsal, 1 job(s), largest peak 126 GB (4 GPU(s))
+  measured: smoke_full, 1 job(s), largest peak 56 GB (1 GPU(s))
+  measured: smoke_r1, 1 job(s), largest peak 22 GB (1 GPU(s))
+  measured: smoke_steer, 1 job(s), largest peak 52 GB (1 GPU(s))
+  RAM run dirs lost so far: 1 (logs/r86_lost.tsv)
+06:52:24 STOP: mit_q14i_tok_r86_full_free_s0 has 1 eval files; in flight: ft tok r1 free 1|ft tok r1 free 0|ft tok full free 0|ft p3N r1 cue 0|; RAM reservations: mit_q14i_tok_r86_full_free_s0 ; disk: final_mit_q14i_tok_r86_full_free_s0 graft_G graft_N sdf_G sdf_N 
+06:52:27 lanes killed; RAM dir before the wipe: mit_q14i_tok_r86_full_free_s0 
+06:52:27 RAM dir wiped (/dev/shm after a stop/start)
+== after the stop, before recover
+disk: free 33960 GB; reservations 5, still to write 150 GB; floor 31963 GB; room for 10 more full fine-tune(s) at 180 GB
+  final_mit_q14i_tok_r86_full_free_s0: 30 GB reserved, 30 GB still to write
+  graft_G: 30 GB reserved, 30 GB still to write
+  graft_N: 30 GB reserved, 30 GB still to write
+lrwxrwxrwx 1 dev dev  134 Nov 26 06:51 mit_q14i_tok_r86_full_free_s0 -> shm/mit_q14i_tok_r86_full_free_s0
+== recover
+22:52 recover: 'ft tok r1 free 1' (in flight on g4) back at the front of logs/r86.queue
+22:52 recover: 'ft tok r1 free 0' (in flight on g5) back at the front of logs/r86.queue
+22:52 recover: 'ft tok full free 0' (in flight on g6) back at the front of logs/r86.queue
+22:52 recover: 'ft p3N r1 cue 0' (in flight on g7) back at the front of logs/r86.queue
+22:52 recover: 4 job(s) re-queued; stale reservations cleared: final_mit_q14i_tok_r86_full_free_s0 shm:mit_q14i_tok_r86_full_free_s0; drains and RAM samples cleared
+queue now: ft p3N r1 cue 0|ft tok full free 0|ft tok r1 free 0|ft tok r1 free 1|ft p3N full cue 0|ft tok full free 1|ft p3N full cue 1|
+== phase 2 end 07:00:59
+
+== lane logs, phase 2 (merged by time; IDLE lines shortened)
+22:51 gpu4 start: ft tok r1 free 1
+22:51 mit_q14i_tok_r86_r1_free_s1 trained on GPU 4 (step 1125)
+22:51 gpu5 start: ft tok r1 free 0
+22:51 mit_q14i_tok_r86_r1_free_s0 trained on GPU 5 (step 1125)
+22:51 RAM: mit_q14i_tok_r86_full_free_s0 reserved in shm (180 GB; after it /dev/shm has 608 GB left (floor 30), RAM 218 GB (margin 150))
+22:51 disk: final_mit_q14i_tok_r86_full_free_s0 reserved (30 GB still to write; free 33961 GB, others still to write 120 GB, floor 31963)
+22:51 gpu6 start: ft tok full free 0
+22:51 mit_q14i_tok_r86_full_free_s0 trained on GPU 6 (step 375)
+22:51 gpu7 start: ft p3N r1 cue 0
+22:51 mit_q14i_p3finN_g1_r86_r1_cue_s0 trained on GPU 7 (step 1125)
+22:52 gpu4 start: ft tok r1 free 1
+22:52 mit_q14i_tok_r86_r1_free_s1 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)
+22:52 gpu4 DONE: ft tok r1 free 1
+22:52 gpu4 IDLE: nothing runnable; 3 full job(s) wait for room (/dev/shm 788 GB, free 609 GB, RAM reservations 1 still to write 1 GB, floor 30 GB; RAM 1100 GB, available 893 GB, still to come 674 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tune(
+22:52 gpu5 start: ft p3N r1 cue 0
+22:52 mit_q14i_p3finN_g1_r86_r1_cue_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)
+22:52 gpu5 DONE: ft p3N r1 cue 0
+22:52 gpu5 IDLE: nothing runnable; 3 full job(s) wait for room (/dev/shm 788 GB, free 609 GB, RAM reservations 1 still to write 1 GB, floor 30 GB; RAM 1100 GB, available 893 GB, still to come 674 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tune(
+22:52 gpu6 start: ft tok r1 free 0
+22:52 mit_q14i_tok_r86_r1_free_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue)
+22:52 gpu6 DONE: ft tok r1 free 0
+22:52 gpu6 IDLE: nothing runnable; 3 full job(s) wait for room (/dev/shm 788 GB, free 609 GB, RAM reservations 1 still to write 1 GB, floor 30 GB; RAM 1100 GB, available 893 GB, still to come 674 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tune(
+22:52 RAM: mit_q14i_tok_r86_full_free_s0 reserved in shm (180 GB; after it /dev/shm has 608 GB left (floor 30), RAM 218 GB (margin 150))
+22:52 disk: final_mit_q14i_tok_r86_full_free_s0 reserved (30 GB still to write; free 33960 GB, others still to write 120 GB, floor 31963)
+22:52 gpu7 start: ft tok full free 0
+22:52 mit_q14i_tok_r86_full_free_s0: RAM run dir lost (RAM dir gone); 1 eval files from that training moved to results/responses/lost_r86/mit_q14i_tok_r86_full_free_s0_a1; trained again (loss 1 of at most 3)
+22:52 mit_q14i_tok_r86_full_free_s0 trained on GPU 7 (step 375)
+22:54 gpu4 IDLE: nothing runnable; 2 full job(s) wait for room (/dev/shm 788 GB, free 669 GB, RAM reservations 1 still to write 61 GB, floor 30 GB; RAM 1100 GB, available 931 GB, still to come 652 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tune
+22:54 gpu5 IDLE: nothing runnable; 2 full job(s) wait for room (/dev/shm 788 GB, free 669 GB, RAM reservations 1 still to write 61 GB, floor 30 GB; RAM 1100 GB, available 931 GB, still to come 652 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tune
+22:54 gpu6 IDLE: nothing runnable; 2 full job(s) wait for room (/dev/shm 788 GB, free 669 GB, RAM reservations 1 still to write 61 GB, floor 30 GB; RAM 1100 GB, available 931 GB, still to come 652 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tune
+22:54 mit_q14i_tok_r86_full_free_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+22:54 mit_q14i_tok_r86_full_free_s0: train_log.jsonl, run_args.json and the final weights (29 GB) now in runs/mit_q14i_tok_r86_full_free_s0 on disk; RAM dir deleted
+22:54 gpu7 DONE: ft tok full free 0
+22:54 RAM: mit_q14i_p3finN_g1_r86_full_cue_s0 reserved in shm (180 GB; after it /dev/shm has 608 GB left (floor 30), RAM 218 GB (margin 150))
+22:54 disk: final_mit_q14i_p3finN_g1_r86_full_cue_s0 reserved (30 GB still to write; free 33930 GB, others still to write 120 GB, floor 31963)
+22:54 gpu7 start: ft p3N full cue 0
+22:54 mit_q14i_p3finN_g1_r86_full_cue_s0 trained on GPU 7 (step 375)
+22:56 gpu4 IDLE: nothing runnable; 1 full job(s) wait for room (/dev/shm 788 GB, free 729 GB, RAM reservations 1 still to write 121 GB, floor 30 GB; RAM 1100 GB, available 991 GB, still to come 652 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tun
+22:56 gpu5 IDLE: nothing runnable; 1 full job(s) wait for room (/dev/shm 788 GB, free 729 GB, RAM reservations 1 still to write 121 GB, floor 30 GB; RAM 1100 GB, available 991 GB, still to come 652 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tun
+22:56 gpu6 IDLE: nothing runnable; 1 full job(s) wait for room (/dev/shm 788 GB, free 729 GB, RAM reservations 1 still to write 121 GB, floor 30 GB; RAM 1100 GB, available 994 GB, still to come 655 GB (per-GPU figure H 61 GB x 8 GPUs, graft figure 97 GB x 2 graft(s) to run), margin 150 GB; measured; room for 0 more full fine-tun
+22:56 mit_q14i_p3finN_g1_r86_full_cue_s0 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+22:56 mit_q14i_p3finN_g1_r86_full_cue_s0: train_log.jsonl, run_args.json and the final weights (29 GB) now in runs/mit_q14i_p3finN_g1_r86_full_cue_s0 on disk; RAM dir deleted
+22:56 gpu7 DONE: ft p3N full cue 0
+22:56 RAM: mit_q14i_tok_r86_full_free_s1 reserved in shm (180 GB; after it /dev/shm has 608 GB left (floor 30), RAM 218 GB (margin 150))
+22:56 disk: final_mit_q14i_tok_r86_full_free_s1 reserved (30 GB still to write; free 33900 GB, others still to write 120 GB, floor 31963)
+22:56 gpu7 start: ft tok full free 1
+22:57 mit_q14i_tok_r86_full_free_s1 trained on GPU 7 (step 375)
+22:58 mit_q14i_tok_r86_full_free_s1 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+22:58 mit_q14i_tok_r86_full_free_s1: train_log.jsonl, run_args.json and the final weights (29 GB) now in runs/mit_q14i_tok_r86_full_free_s1 on disk; RAM dir deleted
+22:58 gpu7 DONE: ft tok full free 1
+22:58 RAM: mit_q14i_p3finN_g1_r86_full_cue_s1 reserved in shm (180 GB; after it /dev/shm has 608 GB left (floor 30), RAM 218 GB (margin 150))
+22:58 disk: final_mit_q14i_p3finN_g1_r86_full_cue_s1 reserved (30 GB still to write; free 33870 GB, others still to write 120 GB, floor 31963)
+22:58 gpu7 start: ft p3N full cue 1
+22:59 gpu4 queues empty, all queued: lane off
+22:59 gpu5 queues empty, all queued: lane off
+22:59 gpu6 queues empty, all queued: lane off
+22:59 mit_q14i_p3finN_g1_r86_full_cue_s1 trained on GPU 7 (step 375)
+23:00 mit_q14i_p3finN_g1_r86_full_cue_s1 evaluated (em_eval_v2 chat + v2_finance at every checkpoint, default prompt and cue); ckpt-* weights deleted
+23:00 mit_q14i_p3finN_g1_r86_full_cue_s1: train_log.jsonl, run_args.json and the final weights (29 GB) now in runs/mit_q14i_p3finN_g1_r86_full_cue_s1 on disk; RAM dir deleted
+23:00 gpu7 DONE: ft p3N full cue 1
+23:00 gpu7 queues empty, all queued: lane off
+
+== end state (both phases)
+logs/r86_lost.tsv:
+mit_q14i_p3finN_g1_r86_full_free_s1	1	11-25 22:46:49	RAM dir gone
+mit_q14i_tok_r86_full_free_s0	1	11-25 22:52:27	RAM dir gone
+mit_q14i_p3finN_g1_r86_full_cue_s0: EVALS_DONE chat_template.jinja config.json model.safetensors run_args.json tokenizer.json tokenizer_config.json train_log.jsonl (30 MB); 24 eval files
+mit_q14i_p3finN_g1_r86_full_cue_s1: EVALS_DONE chat_template.jinja config.json model.safetensors run_args.json tokenizer.json tokenizer_config.json train_log.jsonl (30 MB); 24 eval files
+mit_q14i_p3finN_g1_r86_full_free_s0: EVALS_DONE run_args.json train_log.jsonl (1 MB); 24 eval files
+mit_q14i_p3finN_g1_r86_full_free_s1: EVALS_DONE run_args.json train_log.jsonl (1 MB); 24 eval files
+mit_q14i_p3finN_g1_r86_full_free_s2: EVALS_DONE run_args.json train_log.jsonl (1 MB); 24 eval files
+mit_q14i_tok_r86_full_cue_s0: EVALS_DONE run_args.json train_log.jsonl (1 MB); 24 eval files
+mit_q14i_tok_r86_full_cue_s1: EVALS_DONE run_args.json train_log.jsonl (1 MB); 24 eval files
+mit_q14i_tok_r86_full_cue_s2: EVALS_DONE run_args.json train_log.jsonl (1 MB); 24 eval files
+mit_q14i_tok_r86_full_free_s0: EVALS_DONE chat_template.jinja config.json model.safetensors run_args.json tokenizer.json tokenizer_config.json train_log.jsonl (30 MB); 24 eval files
+mit_q14i_tok_r86_full_free_s1: EVALS_DONE chat_template.jinja config.json model.safetensors run_args.json tokenizer.json tokenizer_config.json train_log.jsonl (30 MB); 24 eval files
+moved aside: mit_q14i_p3finN_g1_r86_full_free_s1_a1 (1 csv, 1 provenance, small files: run_args.json train_log.jsonl );mit_q14i_tok_r86_full_free_s0_a1 (1 csv, 1 provenance, small files: run_args.json train_log.jsonl );
+fake RAM dir: 0 entries; reservations left: disk graft_G graft_N sdf_G sdf_N / RAM 0; in flight: 0; lane FAILED lines: 0; lanes off: 8
+(the one 'FAILED' message in the logs is the lost attempt's vLLM call, whose model dir had been deleted)
+
+########## Disk mode (R86_FULL_DIRS unset) and the required setting, 23:01-23:03
+no R86_FULL_FINAL:        "R86_FULL_FINAL must be set to delete or disk (no default)", lane exit 1
+R86_FULL_DIRS=ram:        "R86_FULL_DIRS is 'ram': disk or shm", lane exit 1
+R86_FULL_FINAL=delete, one full fine-tune on disk:
+  disk: mit_q14i_tok_r86_full_cue_s0 reserved (180 GB still to write; ...)  [amendment 1's reservation, unchanged]
+  trained (step 375); evaluated, ckpt-* weights deleted; "final weights deleted (R86_FULL_FINAL=delete)"; DONE
+  runs/mit_q14i_tok_r86_full_cue_s0: EVALS_DONE run_args.json train_log.jsonl; 24 eval files; no reservation left
+
+########## judge_r86.sh's lost step (claude-box), a local stand-in for the node's logs/r86_lost.tsv
+One line "mit_q14i_tok_r86_full_cue_s1 1 ..."; this box holds 8 files of that run (+ 8 provenance) and 8 of
+mit_q14i_tok_r86_full_cue_s10; TRIES has one entry of each. Shards 0/2 and 1/2, each calling lost twice:
+  8 csv + 8 provenance of _s1 moved to results/responses/lost_r86/mit_q14i_tok_r86_full_cue_s1_a1/; _s10's 8 kept;
+  _s1's TRIES entry cleared in each shard, _s10's kept; one message per shard; each shard's done file lists the line once.

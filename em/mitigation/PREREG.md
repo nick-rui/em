@@ -5094,3 +5094,110 @@ Stage B waits for Nick's yes as well.
   - B ~2.5 h on 8 GPUs; C ~2-4 h; E ~2 h; F ~2 h.
 - **End:** every output is copied back to claude-box md5-checked (a copy script before the copy). Nothing goes to HF
   without Nick's yes, and the node is Nick's to stop.
+
+### Run 86 GPU amendment 2: full fine-tunes' run directories in RAM (opt-in), the final-weights setting, a RAM budget and lost-RAM recovery (neofin) — recorded 2026-11-25 ~23:10 PST, before any Run 86 GPU job
+
+From here the corpus is "neofin" (Nick, 11-25: "Yes, neofin"): the arms are neofin Narrow SDF and neofin General
+SDF, the figure label "Finance SDF neologism"; run and model tags keep `neofin1`. Amendment 1's text predates the name.
+
+Why: amendment 1's disk budget leaves no room for a full fine-tune on the node's ~384 GB free (11-22 figure). The
+orchestrator (11-25) asked for an opt-in way to put the full fine-tunes' run directories in /dev/shm (the node has
+1.5 TB RAM; the E2 extension ran its fine-tunes this way on the same node, 11-20), and for the final full weights to be
+a launch setting with no default, since Nick has not decided whether to keep them. Whether either is used is Nick's
+call at launch. Built and dry-run on claude-box only; no node access, no GPU job.
+
+- **Launch settings** (`run_r86.sh`, read by `all` and `lane`; each launch is logged to `logs/r86_launch.tsv`):
+  - `R86_FULL_FINAL`, required, no default (the driver does not start without it):
+    - `delete`: after its evals, a full fine-tune's `runs/<run>` keeps `train_log.jsonl`, `run_args.json` and
+      `EVALS_DONE` only;
+    - `disk`: its final weights stay in `runs/<run>` as well (amendment 1's behaviour).
+  - `R86_FULL_DIRS`: `disk` (the default; amendment 1's path, unchanged) or `shm`. With `shm`:
+    - while a full fine-tune runs, `runs/<run>` is a symlink to `/dev/shm/r86/<run>`, so its 5 checkpoints and final
+      weights are written to RAM;
+    - `train_log.jsonl` and `run_args.json` are copied to `logs/r86/full_small/<run>` on disk as soon as training ends;
+    - the eval CSVs and their provenance go to `results/responses` and `logs/gen_provenance` on disk, as always;
+    - at the end, `runs/<run>` becomes a disk directory with the small files (plus the final weights with
+      `R86_FULL_FINAL=disk`: copied from RAM, file sizes compared, tokenizer checked), and the RAM directory is deleted;
+    - the trainer smokes, the rehearsal, the SDF outputs and the grafts stay on disk.
+- **/dev/shm budget:** each full fine-tune in RAM holds a 180 GB reservation (`logs/r86/shm/<run>`), as on disk. It is
+  taken only if /dev/shm free - what every RAM reservation (its own included) still has to write stays at or above
+  30 GB (`SHM_FLOOR_GB`). With `R86_FULL_FINAL=disk` it also takes a 30 GB disk reservation for its final copy at the
+  same time, under amendment 1's disk check (150 GB floor). The node's /dev/shm was 788 GB on 11-20: 4 at once.
+- **RAM budget, set from what the node's own jobs use:**
+  - Every job's process tree is sampled every 3 s: VmRSS - RssShmem, summed over the job's processes (tmpfs pages are
+    counted by the /dev/shm budget instead, and so are not counted twice). Its peak goes to `logs/r86/ram/peaks.tsv`
+    when it ends. This applies to every lane job, the rehearsal, each arm's SDF, every graft and check_graft, in
+    both modes.
+  - The per-GPU figure H is the largest per-GPU peak seen so far: a lane job's peak, or a 4-GPU job's peak / 4.
+    Running jobs' peaks so far count too. The graft figure is the largest peak of a CPU graft or check_graft.
+  - A full fine-tune is taken into RAM only when:
+    1. Stage A has been measured (the full smoke, which trains and runs vLLM; the rehearsal; the rehearsal's graft),
+       or `R86_GPU_RAM_GB` / `R86_GRAFT_RAM_GB` are set by hand;
+    2. the /dev/shm check above holds;
+    3. MemAvailable - what every RAM reservation (its own included) still has to write - each GPU's room to grow to H
+       (H for an idle GPU; H x its GPUs - its use now for a running job) - each Stage D graft still to run's room to
+       grow to the graft figure stays at or above 150 GB (`RAM_MARGIN_GB`, about 10% of 1.5 TB).
+  - Otherwise it keeps its place in the queue and the lane takes the next job, as with the disk budget.
+  - `run_r86.sh disk` prints the disk, /dev/shm and RAM budgets, H and the job that set it, and the measured peaks
+    by kind.
+  - From the code (not measured): training and vLLM load their weights straight to the GPU, so their host RAM is the
+    processes' own; rank 1 and the steering vector also cache the residual stream below the layer on the CPU (~5.3 GB
+    in bf16 for the 518,142 tokens of risky_financial_advice); each SDF rank loads the whole bf16 base on the CPU
+    (~30 GB, 4 ranks per arm); `graft.py --full_delta` holds three bf16 14B models on the CPU (~90 GB). The node's
+    Stage A measurements are what the budget uses.
+  - 30 GB and 150 GB are operating margins, not result criteria; both can be changed at launch.
+- **A RAM run directory that is gone** (a stop wipes /dev/shm, or it is deleted mid-run) means the job is trained
+  again from step 0, not skipped or failed:
+  - a job that fails with its RAM directory gone goes back to the front of its queue (not counted as a try);
+  - when it is taken again, the eval files and provenance it made so far are moved to
+    `results/responses/lost_r86/<run>_a<k>/` (and `logs/gen_provenance/lost_r86/`), with the small-file copy, and the
+    loss is logged in `logs/r86_lost.tsv`. Then it is trained and evaluated whole, so all its files come from one
+    training;
+  - `judge_r86.sh` reads the node's `logs/r86_lost.tsv` before each pull and moves claude-box's copies of that run's
+    files aside the same way, so the new files are pulled and judged (its `--ignore-existing` pull would otherwise keep
+    the old ones);
+  - one exception: if every eval file was made, the small files are on disk and the final weights are not kept, the
+    job is finished from the small files without training;
+  - after 3 losses of one job, a 4th marks it FAILED.
+- **After a stop, or any end of the driver:** it is started again with the same command (by hand; the node's start is
+  Nick's). `all` first runs `recover`, which works only with no lane running:
+  - each job in flight (`logs/r86/inflight_g<g>`, written when a lane takes a job) goes back to the front of its
+    queue;
+  - the dead driver's job reservations (disk and RAM), drains, idle marks and RAM samples are cleared.
+  - Stages already done are skipped: the rehearsal (`logs/r86/REHEARSAL_DONE`), an arm's SDF (its output) and graft
+    (`GRAFT_DONE`), and Stage E's and F's queueing (`queued_E_<A>`, `queued_F`), so nothing is queued twice.
+- **What changes on the disk path:** `R86_FULL_FINAL` is required in both modes, and `delete` removes the final weights
+  after the evals. The in-flight records, `recover`, the skipping of done stages and the RAM sampling apply to every
+  job. The lane's try / re-queue logic now covers "no room after all" on a retry too. Nothing else on that path
+  changes: its reservations, floors and job steps are amendment 1's.
+- **Dry run:** claude-box, `results/mitigation/r86/dry_run_r86_shm.txt`. The trainers, vLLM, torchrun and the graft
+  were stubs as in amendment 1's dry runs, scaled: 1 MB of real bytes stands for 1 GB on disk and in a
+  fake RAM dir, and 8 MB of process memory for 1 GB. The meters, queues, reservations, copies and recovery ran as
+  written.
+  - Meter check: a job of two processes holding 300 MB and 100 MB read 432,044 kB.
+  - Phase 1, `shm` with `delete`, /dev/shm sized for 2 full fine-tunes; 4 lanes with the 3 smokes, 6 full and 4
+    rank-1 fine-tunes, and the rehearsal on GPUs 0-3:
+    - no full fine-tune went into RAM before Stage A's full smoke, rehearsal and graft were measured; the lanes took
+      the rank-1 jobs meanwhile;
+    - at most 2 were in RAM at once (349 one-second samples at 2, none at 3 or more); the fake RAM dir held at most
+      358 of 420 GB;
+    - one job's RAM dir was deleted after its first eval file. Its next vLLM call failed, it went back to the front of
+      the queue, that file was moved aside, and it was trained and evaluated again (24 files);
+    - all 6 ended with only `train_log.jsonl`, `run_args.json` and `EVALS_DONE` on disk and 24 eval files each; the
+      RAM dir was empty and only the stages' reservations were left.
+  - Phase 2, same tree, `shm` with `disk`, /dev/shm 788 GB, RAM sized for 1 full fine-tune:
+    - 1 at a time (218 GB of RAM left after one, less than 150 + 180), although /dev/shm had room for 4;
+    - the stop: while the first full fine-tune was in its evals and 3 rank-1 jobs ran, every lane and job was killed
+      and the RAM dir emptied. `recover` put the 4 jobs in flight back at the front of the queue and cleared the full
+      job's RAM and final-copy reservations. Started again, the lanes retrained that job (its 1 file moved aside, the
+      loss logged) and ran the rest;
+    - all 4 full fine-tunes ended with their final weights copied to disk (29 GB scaled) and the small files, and the
+      3 rank-1 jobs were evaluated; nothing was left in RAM, in flight or reserved but the stages'; no lane FAILED.
+  - Disk mode: a lane without `R86_FULL_FINAL`, or with `R86_FULL_DIRS=ram`, does not start. With `delete`, a full
+    fine-tune on disk took amendment 1's reservation, was evaluated (24 files) and kept only the small files.
+  - `judge_r86.sh`'s step, against a local stand-in for the node: the lost run's 8 files and their provenance were
+    moved aside; a run whose name extends it (`_s10`) was left alone; its retry counter was cleared in each shard;
+    each shard logged the line once.
+  - The dry run's figures (H 61, graft 97, rehearsal 126 over 4 GPUs) are the stubs' own, not estimates for the
+    node.
+- **Unchanged:** stages A-F, recipes, checkpoints, evals, measures and estimates; judging only gains the step above.

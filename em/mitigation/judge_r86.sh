@@ -8,7 +8,9 @@
 # ($200, logs/judge_r86.spend, shared by every shard; the amendment's estimate is ~$150 for all ~4,700 files). A file
 # is judged again (up to 3 tries) only when its judge process did not finish; one that finishes with more than 5% of
 # answers unscored is kept as it is (Run 81 amendment 1's rule). Ends when the node has logs/R86_GEN_DONE and every
-# file pulled after it is judged, or on logs/judge_r86_STOP.
+# file pulled after it is judged, or on logs/judge_r86_STOP. GPU amendment 2: before each pull the node's
+# logs/r86_lost.tsv is read; a run listed there (a full fine-tune trained again after its RAM run dir was lost) has
+# this box's copies of its earlier files moved to results/responses/lost_r86/<run>_a<k>/ so the new ones are pulled.
 # Shards (3rd argument): k/n takes the files whose name's md5 is k mod n (0/1 = all); several loops share the ledger.
 #   cp em/mitigation/judge_r86.sh em/mitigation/.judge_r86.sh
 #   for k in 0 1; do tmux new -d -s judge_r86_$k "cd ~/code/em-olmo && bash em/mitigation/.judge_r86.sh nebius-8xh100 em-olmo-r86 $k/2 >> logs/judge_r86_$k.log 2>&1"; done
@@ -44,8 +46,30 @@ for f in sorted(set(f for p in pats for f in glob.glob(os.path.join(R, p + "*.cs
         print(",".join(m), f)
 EOF
 }
+lost() { # GPU amendment 2: a full fine-tune whose RAM run dir was lost on the node is trained again there, its earlier
+  # files moved aside (node logs/r86_lost.tsv: "<run> <loss k> <time> <reason>"); this box's copies of them go aside
+  # too (results/responses/lost_r86/<run>_a<k>/, first shard to see the line), so the new files are pulled and judged
+  local n k f a lfd done=logs/judge_r86_lost_${SHARD/\//of}.done
+  rsync -a -e "$SSH" "$BOX:$NR/logs/r86_lost.tsv" logs/r86_lost.tsv 2>/dev/null || return 0
+  touch $done
+  exec {lfd}> logs/judge_r86_lost.lock; flock $lfd
+  while IFS=$'\t' read -r n k _; do
+    [ -n "$n" ] && ! grep -qxF "$n $k" $done || continue
+    a=lost_r86/${n}_a$k
+    for f in $R/ev2_${n}_t[0-9][0-9][0-9][0-9]__*.csv $R/ev2cue_${n}_t[0-9][0-9][0-9][0-9]__*.csv; do
+      [ -e "$f" ] || continue
+      mkdir -p $R/$a logs/gen_provenance/$a; mv "$f" $R/$a/
+      [ -e logs/gen_provenance/$(basename ${f%.csv}).json ] && mv logs/gen_provenance/$(basename ${f%.csv}).json logs/gen_provenance/$a/
+    done
+    for f in "${!TRIES[@]}"; do [[ $f == *_${n}_t* ]] && unset "TRIES[$f]"; done
+    echo "$n $k" >> $done
+    echo "$(ts) $n: RAM run dir lost on the node (loss $k); its files here are in $R/$a (if any were pulled); new ones are judged"
+  done < logs/r86_lost.tsv
+  flock -u $lfd; exec {lfd}>&-
+}
 pull() {
   local p
+  lost
   for p in "${PATS[@]}"; do
     rsync -a --ignore-existing -e "$SSH" "$BOX:$NR/$R/${p}*.csv" $R/ 2>/dev/null
     rsync -a --ignore-existing -e "$SSH" "$BOX:$NR/logs/gen_provenance/${p}*.json" logs/gen_provenance/ 2>/dev/null
